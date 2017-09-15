@@ -18,13 +18,15 @@
 #define CANTIDAD_PUERTOS 2
 
 typedef struct {
+	char ipPropio[50];
+	char puertoMaster[50];
 	char ipFileSystem[50];
 	char puertoFileSystem[50];
 	int retardoPlanificacion;
 	char algoritmoBalanceo[50];
 } Configuracion;
 
-String campos[4];
+String campos[6];
 Configuracion* configuracion;
 ArchivoLog archivoLog;
 int estado;

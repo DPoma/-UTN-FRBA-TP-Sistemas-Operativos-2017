@@ -105,7 +105,6 @@ Socket socketCrearListener(String ip, String puerto) {
 	socketRedireccionar(listener);
 	socketBindear(&conexion, listener);
 	socketEscuchar(listener, 10);
-	printf("Escuchando en IP: %s | Puerto: %s\n",ip, puerto);
 	return listener;
 }
 

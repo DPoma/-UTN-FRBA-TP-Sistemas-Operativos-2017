@@ -12,20 +12,27 @@
 
 int main(void) {
 	system("clear");
+	int estado = 1;
 	imprimirMensajeProceso("# PROCESO YAMA");
 	cargarCampos();
 	configuracion = configuracionCrear(RUTA_CONFIG, (void*)configuracionLeerArchivoConfig, campos);
-	printf("IP: %s | Puerto %s\n", configuracion->ipFileSystem, configuracion->puertoFileSystem);
-	Socket unSocket = socketCrearCliente(configuracion->ipFileSystem, configuracion->puertoFileSystem);
+	Socket socketFileSystem = socketCrearCliente(configuracion->ipFileSystem, configuracion->puertoFileSystem);
+	printf("Conectado a File System en IP: %s | Puerto %s\n", configuracion->ipFileSystem, configuracion->puertoFileSystem);
 	estado = 1;
-	char message[1000];
-	senialAsignarFuncion(SIGINT, funcionSenial);
-	while(estado){
-		fgets(message, 1024, stdin);
-			if (estado)
-				mensajeEnviar(unSocket, 4, message, strlen(message)+1);
+	Socket socketListenerMaster = socketCrearListener(configuracion->ipPropio,configuracion->puertoMaster);
+	printf("Esperando Master en IP: %s | Puerto %s\n", configuracion->ipPropio, configuracion->puertoMaster);
+	Conexion conexion;
+	conexion.tamanioAddress = sizeof(conexion.address);
+	Socket socketMaster = socketAceptar(&conexion, socketListenerMaster);
+	printf("Master aceptado en IP: %s | Puerto %s\n", configuracion->ipPropio, configuracion->puertoMaster);
+	while(estado) {
+	Mensaje* mensaje = mensajeRecibir(socketMaster);
+	if(mensajeOperacionErronea(mensaje))
+			socketCerrar(socketMaster);
+		else
+			printf("Nuevo mensaje de Master %i: %s", socketMaster, (char*)(mensaje->dato));
 	}
-	close(unSocket);
+	close(socketMaster);
 	return 0;
 
 }
@@ -33,6 +40,8 @@ int main(void) {
 
 Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig) {
 	Configuracion* configuracion = malloc(sizeof(Configuracion));
+	strcpy(configuracion->ipPropio, archivoConfigStringDe(archivoConfig, "IP_PROPIO"));
+	strcpy(configuracion->puertoMaster, archivoConfigStringDe(archivoConfig, "PUERTO_MASTER"));
 	strcpy(configuracion->ipFileSystem, archivoConfigStringDe(archivoConfig, "IP_FILESYSTEM"));
 	strcpy(configuracion->puertoFileSystem, archivoConfigStringDe(archivoConfig, "PUERTO_FILESYSTEM"));
 	configuracion->retardoPlanificacion = archivoConfigEnteroDe(archivoConfig, "RETARDO_PLANIFICACION");
@@ -44,6 +53,8 @@ Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig) {
 void archivoConfigImprimir(Configuracion* configuracion) {
 	puts("DATOS DE CONFIGURACION");
 	puts("----------------------------------------------------------------");
+	printf("IP Propio: %s\n", configuracion->ipPropio);
+	printf("Puerto Master: %s\n", configuracion->puertoMaster);
 	printf("IP File System: %s\n", configuracion->ipFileSystem);
 	printf("Puerto File System: %s\n", configuracion->puertoFileSystem);
 	printf("Retardo de planificacion: %i\n", configuracion->retardoPlanificacion);
@@ -52,10 +63,12 @@ void archivoConfigImprimir(Configuracion* configuracion) {
 }
 
 void cargarCampos() {
-	campos[0] = "IP_FILESYSTEM";
-	campos[1] = "PUERTO_FILESYSTEM";
-	campos[2] = "RETARDO_PLANIFICACION";
-	campos[3] = "ALGORITMO_BALANCEO";
+	campos[0] = "IP_PROPIO";
+	campos[1] = "PUERTO_MASTER";
+	campos[2] = "IP_FILESYSTEM";
+	campos[3] = "PUERTO_FILESYSTEM";
+	campos[4] = "RETARDO_PLANIFICACION";
+	campos[5] = "ALGORITMO_BALANCEO";
 }
 
 
@@ -65,4 +78,40 @@ void funcionSenial(int senial) {
 	imprimirMensajeProceso("# PROCESO YAMA FINALIZADO");
 	puts("Aprete enter para salir");
 	puts("----------------------------------------------------------------");
+}
+
+
+
+void notificadorInformar(Socket unSocket) {
+	char buffer[BUF_LEN];
+	int length = read(unSocket, buffer, BUF_LEN);
+	int offset = 0;
+	while (offset < length) {
+		struct inotify_event *event = (struct inotify_event *) &buffer[offset];
+		if (event->len) {
+		if (event->mask & IN_MODIFY) {
+		if (!(event->mask & IN_ISDIR)) {
+		if(strcmp(event->name, "ArchivoConfig.conf"))
+			break;
+		ArchivoConfig archivoConfig = config_create(RUTA_CONFIG);
+		if(archivoConfigTieneCampo(archivoConfig, "RETARDO_PLANIFICACION")){
+			int retardo = archivoConfigEnteroDe(archivoConfig, "RETARDO_PLANIFICACION");
+				if(retardo != configuracion->retardoPlanificacion){
+					puts("");
+					log_warning(archivoLog, "[CONFIG]: SE MODIFICO EL ARCHIVO DE CONFIGURACION");
+					configuracion->retardoPlanificacion = retardo;
+					log_warning(archivoLog, "[CONFIG]: NUEVA RUTA METADATA: %s\n", configuracion->retardoPlanificacion);
+				}
+				archivoConfigDestruir(archivoConfig);
+		}
+		}
+		}
+		}
+		offset += sizeof (struct inotify_event) + event->len;
+		}
+
+	//Esto se haria en otro lado
+
+	//inotify_rm_watch(file_descriptor, watch_descriptor);
+		//close(file_descriptor);
 }

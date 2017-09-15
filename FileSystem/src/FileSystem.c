@@ -20,9 +20,9 @@ int main(void) {
 	senialAsignarFuncion(SIGINT, funcionSenial);
 	archivoConfigImprimir(configuracion);
 	archivoLog = archivoLogCrear(RUTA_LOG, "Worker");
-	log_info(archivoLog, "Probando imprimir mensaje en log...");
-	log_warning(archivoLog, "Probando imprimir advertencia en log...");
-	log_error(archivoLog, "Probando imprimir error en log...");
+	log_info(archivoLog, "Probando mensaje en log...");
+	log_warning(archivoLog, "Probando advertencia en log...");
+	log_error(archivoLog, "Probando error en log...");
 	puts("----------------------------------------------------------------");
 	cargarDatos();
 	Servidor servidor = servidorCrear(puertos, CANTIDAD_PUERTOS);
@@ -70,7 +70,7 @@ void notificadorInformar(Socket unSocket) {
 		if (event->len) {
 		if (event->mask & IN_MODIFY) {
 		if (!(event->mask & IN_ISDIR)) {
-		if(strcmp(event->name, "ArchivoConfig.conf"))
+		if(strcmp(event->name, "FileSystemConfig.conf"))
 			break;
 		ArchivoConfig archivoConfig = config_create(RUTA_CONFIG);
 		if(archivoConfigTieneCampo(archivoConfig, "RUTA_METADATA")){
@@ -100,6 +100,7 @@ void notificadorInformar(Socket unSocket) {
 
 void puertoActivarListener(Puerto* puerto, Conexion* conexion) {
 	puerto->listener = socketCrearListener(conexion->ip, conexion->puerto);
+	printf("Esperando conexiones en IP: %s | Puerto: %s\n", conexion->ip, conexion->puerto);
 }
 
 void puertoFinalizarConexionCon(Servidor* servidor, Socket unSocket) {
@@ -127,7 +128,7 @@ void puertoAceptarCliente(Socket unSocket, Servidor* servidor) {
 			listaSocketsAgregar(nuevoSocket, &servidor->listaPuertos[indice].clientesConectados);
 		listaSocketsAgregar(nuevoSocket, &servidor->controlServidor.listaSocketsMaster);
 		controlServidorActualizarMaximoSocket(&servidor->controlServidor, nuevoSocket);
-		puts("Un cliente se ha conectado");
+		puts("Un proceso se ha conectado");
 	}
 }
 

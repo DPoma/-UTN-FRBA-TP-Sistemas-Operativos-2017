@@ -36,6 +36,7 @@ Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig) {
 	strcpy(configuracion->ipFileSystem, archivoConfigStringDe(archivoConfig, "IP_FILESYSTEM"));
 	strcpy(configuracion->puertoFileSystem, archivoConfigStringDe(archivoConfig, "PUERTO_FILESYSTEM"));
 	strcpy(configuracion->nombreNodo, archivoConfigStringDe(archivoConfig, "NOMBRE_NODO"));
+	strcpy(configuracion->ipPropio, archivoConfigStringDe(archivoConfig, "IP_PROPIO"));
 	strcpy(configuracion->puertoWorker, archivoConfigStringDe(archivoConfig, "PUERTO_WORKER"));
 	strcpy(configuracion->rutaDataBin, archivoConfigStringDe(archivoConfig, "RUTA_DATABIN"));
 	archivoConfigDestruir(archivoConfig);
@@ -45,6 +46,7 @@ Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig) {
 void archivoConfigImprimir(Configuracion* configuracion) {
 	puts("DATOS DE CONFIGURACION");
 	puts("----------------------------------------------------------------");
+	printf("IP Propio: %s\n", configuracion->ipPropio);
 	printf("IP File System: %s\n", configuracion->ipFileSystem);
 	printf("Puerto File System: %s\n", configuracion->puertoFileSystem);
 	printf("Nombre Nodo: %s\n", configuracion->nombreNodo);
@@ -59,6 +61,7 @@ void cargarCampos() {
 	campos[2] = "NOMBRE_NODO";
 	campos[3] = "PUERTO_WORKER";
 	campos[4] = "RUTA_DATABIN";
+	campos[5] = "IP_PROPIO";
 }
 
 void funcionSenial(int senial) {

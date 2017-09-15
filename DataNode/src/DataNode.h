@@ -21,9 +21,10 @@ typedef struct {
 	char nombreNodo[50];
 	char puertoWorker[50];
 	char rutaDataBin[100];
+	char ipPropio[50];
 } Configuracion;
 
-String campos[4];
+String campos[6];
 Configuracion* configuracion;
 ArchivoLog archivoLog;
 int estado;
