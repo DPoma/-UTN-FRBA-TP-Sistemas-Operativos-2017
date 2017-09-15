@@ -7,14 +7,17 @@
 
 #include "src/Biblioteca.h"
 
+#define blockSize 10
+
 int main(){
-	char line[40];
+	char buffer[blockSize+1];
 	Socket emisor = socketCrearCliente(NULL,"3000");
 	printf("recibiendo\n");
-	while(socketRecibir(emisor,line,39)){
-		line[39]='\0';
-		printf("%s",line);
+	while(socketRecibir(emisor,buffer,blockSize)){
+		buffer[blockSize]='\0';
+		printf("%s--\n",buffer);
 	}
-	printf("fin\n");
+	socketCerrar(emisor);
+	printf("\nfin\n");
 	return 0;
 }
