@@ -137,11 +137,11 @@ Header headerCrear(int operacion, int tamanio);
 
 ArchivoConfig archivoConfigCrear(String path, String* campos);
 bool archivoConfigTieneCampo(ArchivoConfig archivoConfig, String campo);
-String archivoConfigObtenerStringDe(ArchivoConfig archivoConfig, String campo);
-int archivoConfigObtenerEnteroDe(ArchivoConfig archivoConfig, String campo);
-long archivoConfigObtenerLongDe(ArchivoConfig archivoConfig, String campo);
-double archivoConfigObtenerDoubleDe(ArchivoConfig archivoConfig, String campo);
-String* archivoConfigObtenerArrayDe(ArchivoConfig archivoConfig, String campo);
+String archivoConfigStringDe(ArchivoConfig archivoConfig, String campo);
+int archivoConfigEnteroDe(ArchivoConfig archivoConfig, String campo);
+long archivoConfigLongDe(ArchivoConfig archivoConfig, String campo);
+double archivoConfigDoubleDe(ArchivoConfig archivoConfig, String campo);
+String* archivoConfigArrayDe(ArchivoConfig archivoConfig, String campo);
 int archivoConfigCantidadCampos(ArchivoConfig archivoConfig);
 void archivoConfigDestruir(ArchivoConfig archivoConfig);
 void archivoConfigSetearCampo(ArchivoConfig archivoConfig, String campo, String valor);
@@ -242,30 +242,8 @@ String stringTomarDesdeInicio(String string, int cantidad);
 
 //--------------------------------------- Funciones para señales -------------------------------------
 
-void definirSenial(int unaSenial, void(*funcion)(int));
+void funcionSenial(int senial);
 
-//--------------------------------------- Funciones para ControlServidor -------------------------------------
-void infoServidorInicializar(ControlServidor* infoServidor);
-int infoServidorCantidadSockets(Servidor* servidor);
-void infoServidorSetearListaSelect(Servidor* servidor);
-void infoServidorActualizarMaximoSocket(Servidor* servidor, Socket unSocket);
-void infoServidorEjecutarSelect(Servidor* servidor);
 
-void puertoActivarListener(Puerto* puerto, Conexion* conexion);
-void puertoFinalizarConexionCon(Servidor* servidor, Socket unSocket);
-void puertoAceptarCliente(Socket unSocket, Servidor* servidor);
-void puertoRecibirMensajeCliente(Servidor* servidor, Socket unSocket);
-void puertoActualizarSocket(Servidor* servidor, Socket unSocket);
-
-void servidorActivarPuertos(Servidor* servidor, String* ips, String* puertos);
-void servidorSetearEstado(Servidor* servidor, int estado);
-Servidor servidorCrear(String* ips, String* puertos, int cantidadPuertos);
-void servidorFinalizar();
-bool servidorEstaActivo(Servidor servidor);
-void servidorAtenderClientes(Servidor* servidor);
-void servidorActualizarPuertos(Servidor* servidor);
-
-//void notificadorInformar(Socket unSocket, ControlProceso* controlServidor);
-void notificadorInicializar(ControlServidor* controlServidor);
 
 

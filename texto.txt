@@ -17,3 +17,7 @@ worker porque quiero solucionarlo
 con uno primero. 
 Probablemente haga cosas malas porque
 el padre termina mientras el hijo esta corriendo
+
+
+Dudas
+Como hacer para cerrar "bien" los procesos servidores ya que tiene funciones bloqueantes

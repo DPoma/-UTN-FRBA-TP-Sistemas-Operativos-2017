@@ -560,6 +560,16 @@ String stringTomarDesdeInicio(String string, int cantidad) {
 
 //--------------------------------------- Funciones para señales -------------------------------------
 
-void definirSenial(int unaSenial, void(*funcion)(int)) {
+void senialAsignarFuncion(int unaSenial, void(*funcion)(int)) {
 	signal(unaSenial, funcion);
 }
+
+void imprimirMensajeProceso(char* mensaje) {
+	puts("----------------------------------------------------------------");
+	puts(mensaje);
+	puts("----------------------------------------------------------------");
+}
+
+
+
+
