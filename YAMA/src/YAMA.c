@@ -26,11 +26,13 @@ int main(void) {
 	Socket socketMaster = socketAceptar(&conexion, socketListenerMaster);
 	printf("Master aceptado en IP: %s | Puerto %s\n", configuracion->ipPropio, configuracion->puertoMaster);
 	while(estado) {
-	Mensaje* mensaje = mensajeRecibir(socketMaster);
-	if(mensajeOperacionErronea(mensaje))
+		Mensaje* mensaje = mensajeRecibir(socketMaster);
+		if(mensajeOperacionErronea(mensaje))
 			socketCerrar(socketMaster);
-		else
+		else {
 			printf("Nuevo mensaje de Master %i: %s", socketMaster, (char*)(mensaje->dato));
+			mensajeEnviar(socketFileSystem, 4, mensaje->dato, strlen(mensaje->dato)+1);
+		}
 	}
 	close(socketMaster);
 	return 0;

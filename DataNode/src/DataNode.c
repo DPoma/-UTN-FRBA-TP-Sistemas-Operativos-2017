@@ -18,15 +18,16 @@ int main(void) {
 	printf("IP: %s | Puerto %s\n", configuracion->ipFileSystem, configuracion->puertoFileSystem);
 	Socket unSocket = socketCrearCliente(configuracion->ipFileSystem, configuracion->puertoFileSystem);
 	estado = 1;
-	char message[1000];
-	senialAsignarFuncion(SIGINT, funcionSenial);
+	//senialAsignarFuncion(SIGINT, funcionSenial);
 	while(estado){
-		fgets(message, 1024, stdin);
-		if (estado)
-			mensajeEnviar(unSocket, 4, message, strlen(message)+1);
+		Mensaje* mensaje = mensajeRecibir(unSocket);
+		if(mensajeOperacionErronea(mensaje))
+			socketCerrar(unSocket);
+		else
+			printf("Nuevo mensaje de Master %i: %s", unSocket, (char*)(mensaje->dato));
+		mensajeDestruir(mensaje);
 	}
-
-	close(unSocket);
+	socketCerrar(unSocket);
 	return 0;
 
 }

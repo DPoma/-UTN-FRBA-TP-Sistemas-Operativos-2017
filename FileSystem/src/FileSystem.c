@@ -10,6 +10,124 @@
 
 #include "FileSystem.h"
 
+//Identificador de cada comando
+#define FORMAT 1
+#define RM 2
+#define RMB 3
+#define RMD 14
+#define RENAME 4
+#define MV 5
+#define CAT 6
+#define MKDIR 7
+#define PFROM 8
+#define CPTO 9
+#define CPTBLOCK 10
+#define MD5 11
+#define LS 12
+#define INFO 13
+
+#define C_FORMAT "format"
+#define C_RM "rm"
+#define C_RMB "rm -b"
+#define C_RMD "rm -d"
+#define C_RENAME "rename"
+#define C_MV "mv"
+#define C_CAT "cat"
+#define C_MKDIR "mkdir"
+#define C_PFROM "pfrom"
+#define C_CPTO "cpto"
+#define C_CPTBLOCK "cptblock"
+#define C_MD5 "md5"
+#define C_LS "ls"
+#define C_INFO "info"
+
+int sonIguales(char* s1, char* s2) {
+	if (strcmp(s1, s2) == 0)
+		return 1;
+	else
+		return 0;
+}
+
+int identificarComando(char* comando) {
+	if(sonIguales(comando, C_FORMAT))
+		return FORMAT;
+	if(sonIguales(comando, C_INFO))
+		return INFO;
+	else if(sonIguales(comando, C_RM))
+		return RM;
+	else if(sonIguales(comando, C_RMB))
+		return RMB;
+	else if(sonIguales(comando, C_RMD))
+		return RMD;
+	else if(sonIguales(comando, C_RENAME))
+		return RENAME;
+	else if(sonIguales(comando, C_MV))
+		return MV;
+	else if(sonIguales(comando, C_CAT))
+		return CAT;
+	else if(sonIguales(comando, C_MKDIR))
+		return MKDIR;
+	else if(sonIguales(comando, C_PFROM))
+		return PFROM;
+	else if(sonIguales(comando, C_CPTO))
+		return CPTO;
+	else if(sonIguales(comando, C_CPTBLOCK))
+		return CPTBLOCK;
+	else if(sonIguales(comando, C_MD5))
+		return MD5;
+	else if(sonIguales(comando, C_LS))
+		return LS;
+	else if(sonIguales(comando, C_INFO))
+		return INFO;
+	else if(sonIguales(comando, C_RENAME))
+		return RENAME;
+	else
+		return -1;
+}
+
+char* leerCaracteresEntrantes() {
+	int i, caracterLeido;
+	char* cadena = malloc(1000);
+	for(i = 0; (caracterLeido= getchar()) != '\n'; i++)
+		cadena[i] = caracterLeido;
+	cadena[i] = '\0';
+	return cadena;
+}
+
+
+Instruccion obtenerInstruccion() {
+	Instruccion instruccion;
+	char* mensaje = leerCaracteresEntrantes();
+	instruccion.comando = identificarComando(mensaje);
+	free(mensaje);
+	return instruccion;
+}
+
+
+void atenderInstrucciones() {
+	Instruccion instruccion;
+	while(1) {
+		printf("Ingrese un comando: ");
+		instruccion = obtenerInstruccion();
+		switch(instruccion.comando) {
+			case FORMAT: puts("COMANDO FORMAT"); break;
+			case RM: puts("COMANDO RM"); break;
+			case RMB: puts("COMANDO RM -B"); break;
+			case RMD: puts("COMANDO RM -D"); break;
+			case RENAME: puts("COMANDO RENAME"); break;
+			case MV: puts("COMANDO  MV"); break;
+			case CAT: puts("COMANDO CAT"); break;
+			case MKDIR: puts("COMANDO MKDIR"); break;
+			case PFROM: puts("COMANDO PFROM"); break;
+			case CPTO: puts("COMANDO CPTO"); break;
+			case CPTBLOCK:puts("COMANDO CPTBLOCK"); break;
+			case MD5: puts("COMANDO MD5"); break;
+			case LS: puts("COMANDO LS"); break;
+			case INFO: puts("COMANDO INFO"); break;
+			default: puts("COMANDO INVALIDO"); break;
+		}
+	}
+}
 
 int main(void) {
 	system("clear");
@@ -24,12 +142,16 @@ int main(void) {
 	log_warning(archivoLog, "Probando advertencia en log...");
 	log_error(archivoLog, "Probando error en log...");
 	puts("----------------------------------------------------------------");
+	Hilo hilo;
+	hiloCrear(&hilo, (void*)atenderInstrucciones, NULL);
 	cargarDatos();
 	Servidor servidor = servidorCrear(puertos, CANTIDAD_PUERTOS);
 	while(estado)
 		servidorAtenderClientes(&servidor);
 	servidorFinalizar(&servidor);
 	imprimirMensajeProceso("Proceso File Sytstem finalizado finalizado");
+
+
 	return 0;
 }
 
@@ -139,8 +261,11 @@ void puertoRecibirMensajeCliente(Servidor* servidor, Socket unSocket) {
 	else {
 		if(!strcmp(mensaje->dato,"quit\n"))
 			servidor->controlServidor.estado = 0;
-		else
+		else {
 			printf("Nuevo mensaje en socket %i: %s", unSocket, (char*)(mensaje->dato));
+			mensajeEnviar(8, 4, mensaje->dato, stringLongitud(mensaje->dato)+1);
+		}
+
 	}
 	mensajeDestruir(mensaje);
 }
@@ -156,8 +281,6 @@ void puertoActualizarSocket(Servidor* servidor, Socket unSocket) {
 					printf("Puerto 0: ");
 				else if(listaSocketsContiene(unSocket, &servidor->listaPuertos[1].clientesConectados))
 					printf("Puerto 1: ");
-					else
-						printf("Puerto 2: ");
 				puertoRecibirMensajeCliente(servidor, unSocket);
 			}
 			else

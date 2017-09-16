@@ -25,6 +25,8 @@ typedef struct {
 String campos[2];
 Configuracion* configuracion;
 ArchivoLog archivoLog;
+Socket socketYAMA;
+Socket socketWorker;
 int estado;
 
 Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig);

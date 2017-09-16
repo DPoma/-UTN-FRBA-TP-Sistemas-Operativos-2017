@@ -75,6 +75,7 @@ void funcionSenial(int senial) {
 
 void atenderConexion(Socket unSocket) {
 	puts("Conexion con Master realizada. Esperando mensajes...");
+
 	while(1) {
 	Mensaje* mensaje = mensajeRecibir(unSocket);
 	if(mensajeOperacionErronea(mensaje))
@@ -110,12 +111,4 @@ int main(void) {
 		if(pid == 0)
 			atenderConexion(otroSocket);
 	}
-
-	Mensaje* mensaje = mensajeRecibir(otroSocket);
-	if(mensajeOperacionErronea(mensaje))
-		socketCerrar(otroSocket);
-	else
-		printf("Nuevo mensaje de Master %i: %s", otroSocket, (char*)(mensaje->dato));
-	mensajeDestruir(mensaje);
-	return 0;
 }

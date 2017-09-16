@@ -19,6 +19,13 @@
 #define CANTIDAD_PUERTOS 2
 
 typedef struct {
+	int comando;
+	char argumento[1000];
+} Instruccion;
+
+
+
+typedef struct {
 	char ipFileSystem[50];
 	char puertoYAMA[50];
 	char puertoDataNode[50];

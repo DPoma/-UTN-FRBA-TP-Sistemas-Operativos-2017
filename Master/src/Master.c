@@ -10,27 +10,77 @@
 
 #include "Master.h"
 
+char* leerArchivo(FILE* archivo) {
+	fseek(archivo, 0, SEEK_END);
+	long posicion = ftell(archivo);
+	fseek(archivo, 0, SEEK_SET);
+	char *texto = malloc(posicion + 1);
+	fread(texto, posicion, 1, archivo);
+	texto[posicion] = '\0';
+	return texto;
+}
+
+FILE* archivoAbrir(char* path) {
+	FILE* archivo = fopen(path, "r");
+	return archivo;
+}
+
+int archivoValido(FILE* archivo) {
+	return archivo != NULL;
+}
+
+void archivoCerrar(FILE* archivo) {
+	fclose(archivo);
+}
+
+bool esUnArchivo(char* c) {
+	return string_contains(c, ".");
+}
+
+
+void enviarArchivo(FILE* archivo) {
+	char* texto = leerArchivo(archivo);
+	archivoCerrar(archivo);
+	mensajeEnviar(socketYAMA, 4, texto, strlen(texto)+1);
+	mensajeEnviar(socketWorker, 4, texto, strlen(texto)+1);
+	free(texto);
+}
+
+
+char* leerCaracteresEntrantes() {
+	int i, caracterLeido;
+	char* cadena = malloc(1000);
+	for(i = 0; (caracterLeido= getchar()) != '\n'; i++)
+		cadena[i] = caracterLeido;
+	cadena[i] = '\0';
+	return cadena;
+}
+
+
 int main(void) {
 	system("clear");
 	imprimirMensajeProceso("# PROCESO MASTER");
 	cargarCampos();
 	configuracion = configuracionCrear(RUTA_CONFIG, (void*)configuracionLeerArchivoConfig, campos);
-	Socket unSocket = socketCrearCliente(configuracion->ipYAMA, configuracion->puertoYAMA);
+	socketYAMA = socketCrearCliente(configuracion->ipYAMA, configuracion->puertoYAMA);
 	printf("Conectado a YAMA en IP: %s | Puerto %s\n", configuracion->ipYAMA, configuracion->puertoYAMA);
-	Socket otroSocket = socketCrearCliente("127.0.0.1", "5050");
+	socketWorker = socketCrearCliente("127.0.0.1", "5050");
 	printf("Conectado a Master en IP: 127.0.0.1 | Puerto: 5050\n");
 	estado = 1;
-	char message[1000];
 	senialAsignarFuncion(SIGINT, funcionSenial);
 	while(estado){
-		fgets(message, 1024, stdin);
-			if (estado) {
-				mensajeEnviar(unSocket, 4, message, strlen(message)+1);
-				mensajeEnviar(otroSocket, 4, message, strlen(message)+1);
-			}
-
+		printf("Ingrese la ruta de un archivo: ");
+		char* ruta = leerCaracteresEntrantes();
+		FILE* archivo = archivoAbrir(ruta);
+		if(archivoValido(archivo)) {
+			if(estado)
+				enviarArchivo(archivo);
+		}
+		else
+		imprimirMensajeProceso("ERROR: Archivo invalido");
 	}
-	close(unSocket);
+	socketCerrar(socketYAMA);
+	socketCerrar(socketWorker);
 	return 0;
 
 }
