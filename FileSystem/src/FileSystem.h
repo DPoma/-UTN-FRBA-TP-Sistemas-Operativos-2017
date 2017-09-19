@@ -9,7 +9,6 @@
 #include "../../Biblioteca/src/Biblioteca.c"
 
 #define RUTA_CONFIG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/FileSystem/FileSystemConfig.conf"
-#define RUTA_NOTIFY "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/FileSystem"
 #define RUTA_LOG "/home/utnso/Escritorio/FileSystem.log"
 
 //Identificador de cada comando
@@ -66,12 +65,9 @@ typedef struct {
 } Configuracion;
 
 String campos[3];
-String ipFileSystem;
-String puertos[2];
 Configuracion* configuracion;
 ArchivoLog archivoLog;
 int estadoFileSystem;
-Servidor servidorFileSystem;
 
 //--------------------------------------- Funciones de File System -------------------------------------
 

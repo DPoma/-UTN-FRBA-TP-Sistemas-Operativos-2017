@@ -35,8 +35,8 @@ int main(void) {
 
 	Socket socketMaster = socketAceptar(socketListenerMaster, ID_MASTER);
 
-	printf("[CONEXION] Conexion exitosa con Master\n");
-	log_info(archivoLog, "[CONEXION] Conexion exitosa con Master\n");
+	printf("[CONEXION] El proceso Master se ha conectado\n");
+	log_info(archivoLog, "[CONEXION] El proceso Master se ha conectado\n");
 
 	while(estado) {
 		Mensaje* mensaje = mensajeRecibir(socketMaster);

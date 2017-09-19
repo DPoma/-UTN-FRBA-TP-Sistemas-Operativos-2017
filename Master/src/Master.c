@@ -58,33 +58,31 @@ char* leerCaracteresEntrantes() {
 
 
 int main(void) {
-	system("clear");
+	pantallaLimpiar("clear");
 	imprimirMensajeProceso("# PROCESO MASTER");
+	archivoLog = archivoLogCrear(RUTA_LOG, "Master");
 	archivoConfigObtenerCampos();
 	configuracion = configuracionCrear(RUTA_CONFIG, (void*)configuracionLeerArchivoConfig, campos);
-	socketYAMA = socketCrearCliente(configuracion->ipYAMA, configuracion->puertoYAMA);
-	printf("Conectado a YAMA en IP: %s | Puerto %s\n", configuracion->ipYAMA, configuracion->puertoYAMA);
-	socketWorker = socketCrearCliente("127.0.0.1", "5050");
-	printf("Conectado a Master en IP: 127.0.0.1 | Puerto: 5050\n");
-	estado = 1;
+	strcpy(configuracion->ipWorker, IP_LOCAL);
+	strcpy(configuracion->puertoWorker, "5050");
+	printf("[CONEXION] Estableciendo Conexion con YAMA (IP: %s | Puerto %s)\n", configuracion->ipYAMA, configuracion->puertoYAMA);
+	log_info(archivoLog, "[CONEXION] Estableciendo Conexion con YAMA (IP: %s | Puerto %s)\n", configuracion->ipYAMA, configuracion->puertoYAMA);
+	socketYAMA = socketCrearCliente(configuracion->ipYAMA, configuracion->puertoYAMA, ID_MASTER);
+	printf("[CONEXION] Conexion existosa con YAMA\n");
+	log_info(archivoLog, "[CONEXION] Conexion exitosa con YAMA\n");
+	printf("[CONEXION] Estableciendo Conexion con Worker (IP: %s | Puerto: %s)\n", configuracion->ipWorker, configuracion->puertoWorker);
+	log_info(archivoLog, "[CONEXION] Estableciendo Conexion con Worker (IP: %s | Puerto: %s)\n", configuracion->ipWorker, configuracion->puertoWorker);
+	socketWorker = socketCrearCliente(configuracion->ipWorker, configuracion->puertoWorker, ID_MASTER);
+	printf("[CONEXION] Estableciendo Conexion con Worker\n");
+	log_info(archivoLog, "[CONEXION] Conexion exitosa con Worker\n");
+	estadoMaster = 1;
 	senialAsignarFuncion(SIGINT, funcionSenial);
-	while(estado){
-		printf("Ingrese la ruta de un archivo: ");
-		char* ruta = leerCaracteresEntrantes();
-		FILE* archivo = archivoAbrir(ruta);
-		if(archivoValido(archivo)) {
-			if(estado)
-				enviarArchivo(archivo);
-		}
-		else
-		imprimirMensajeProceso("ERROR: Archivo invalido");
-	}
+	while(estadoMaster);
 	socketCerrar(socketYAMA);
 	socketCerrar(socketWorker);
-	return 0;
+	return EXIT_SUCCESS;
 
 }
-
 
 Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig) {
 	Configuracion* configuracion = malloc(sizeof(Configuracion));
@@ -94,23 +92,12 @@ Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig) {
 	return configuracion;
 }
 
-void archivoConfigImprimir(Configuracion* configuracion) {
-	puts("DATOS DE CONFIGURACION");
-	puts("----------------------------------------------------------------");
-	printf("IP YAMA: %s\n", configuracion->ipYAMA);
-	printf("Puerto YAMA: %s\n", configuracion->puertoYAMA);
-	puts("----------------------------------------------------------------");
-}
-
 void archivoConfigObtenerCampos() {
 	campos[0] = "IP_YAMA";
 	campos[1] = "PUERTO_YAMA";
 }
 
 void funcionSenial(int senial) {
-	estado = 0;
+	estadoMaster = 0;
 	puts("");
-	imprimirMensajeProceso("# PROCESO MASTER FINALIZADO");
-	puts("Aprete enter para salir");
-	puts("----------------------------------------------------------------");
 }

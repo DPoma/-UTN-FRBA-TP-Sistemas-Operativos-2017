@@ -8,14 +8,11 @@
 
 #include "../../Biblioteca/src/Biblioteca.c"
 
-#define TAMANIO_DATO_MAXIMO 1024
-#define CLIENTES_ESPERANDO 5
 #define EVENT_SIZE (sizeof(struct inotify_event)+24)
 #define BUF_LEN (1024*EVENT_SIZE)
 #define RUTA_CONFIG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/YAMA/YAMAConfig.conf"
 #define RUTA_NOTIFY "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/YAMA"
 #define RUTA_LOG "/home/utnso/Escritorio/YAMALog.log"
-#define CANTIDAD_PUERTOS 2
 
 typedef struct {
 	char puertoMaster[50];

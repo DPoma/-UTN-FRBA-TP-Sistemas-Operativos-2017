@@ -310,8 +310,8 @@ void configuracionImprimir(Configuracion* configuracion) {
 	log_info(archivoLog, "[CONEXION] Esperando conexion de YAMA (Puerto: %s)\n", configuracion->puertoYAMA);
 	printf("[CONEXION] Esperando conexiones de Data Nodes (Puerto: %s)\n", configuracion->puertoDataNode);
 	log_info(archivoLog, "[CONEXION] Esperando conexiones de Data Nodes (Puerto: %s)\n", configuracion->puertoDataNode);
-	printf("[CONFIGURACION] Ruta Metadata: %s.\n", configuracion->rutaMetadata);
-	log_info(archivoLog, "[CONFIGURACION] Ruta Metadata: %s.\n", configuracion->rutaMetadata);
+	printf("[CONFIGURACION] Ruta Metadata: %s\n", configuracion->rutaMetadata);
+	log_info(archivoLog, "[CONFIGURACION] Ruta Metadata: %s\n", configuracion->rutaMetadata);
 }
 
 void archivoConfigObtenerCampos() {
@@ -323,7 +323,7 @@ void archivoConfigObtenerCampos() {
 void funcionSenial(int senial) {
 	estadoFileSystem = 0;
 	puts("");
-	puts("[EJECUCION] Proceso File System finalizado.");
-	log_info(archivoLog, "[EJECUCION] Proceso File System finalizado.");
+	puts("[EJECUCION] Proceso File System finalizado");
+	log_info(archivoLog, "[EJECUCION] Proceso File System finalizado");
 }
 
