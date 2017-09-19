@@ -12,31 +12,51 @@
 
 int main(void) {
 	workerIniciar();
-	Socket unSocket = socketCrearListener(configuracion->puertoWorker);
-	printf("[CONEXION] Esperando conexiones de Master (Puerto: %s)\n", configuracion->puertoWorker);
-	log_info(archivoLog, "[CONEXION] Esperando conexiones de Master (Puerto: %s)\n", configuracion->puertoWorker);
-	while(estadoWorker);
-	puts("[EJECUCION] Proceso Worker finalizado");
-	log_info(archivoLog, "[EJECUCION] Proceso Worker finalizado");
+	socketListenerWorker = socketCrearListener(configuracion->puertoWorker);
+	imprimirMensajeUno(archivoLog, "[CONEXION] Esperando conexiones de Master (Puerto: %s)", configuracion->puertoWorker);
+	while(estadoWorker)
+		socketAceptarConexion();
+	imprimirMensaje(archivoLog, "[EJECUCION] Proceso Worker finalizado");
 	return EXIT_SUCCESS;
 }
 
+
+void workerCrearHijo(Socket unSocket) {
+	int pid = fork();
+	if(pid == 0) {
+	imprimirMensaje(archivoLog, "[CONEXION] Esperando mensajes de Master");
+	mensajeRecibir(unSocket);
+	}
+	else if(pid > 0)
+		puts("PADRE ACEPTO UNA CONEXION");
+	else
+		puts("ERROR");
+}
+
+void socketAceptarConexion() {
+	Socket nuevoSocket;
+	nuevoSocket = socketAceptar(socketListenerWorker, ID_MASTER);
+	if(nuevoSocket != ERROR) {
+		imprimirMensaje(archivoLog, "[CONEXION] Proceso Master conectado exitosamente");
+		workerCrearHijo(nuevoSocket);
+	}
+}
+
 Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig) {
-	Configuracion* configuracion = malloc(sizeof(Configuracion));
-	strcpy(configuracion->ipFileSytem, archivoConfigStringDe(archivoConfig, "IP_FILESYSTEM"));
-	strcpy(configuracion->puertoFileSystem, archivoConfigStringDe(archivoConfig, "PUERTO_FILESYSTEM"));
-	strcpy(configuracion->nombreNodo, archivoConfigStringDe(archivoConfig, "NOMBRE_NODO"));
-	strcpy(configuracion->puertoWorker, archivoConfigStringDe(archivoConfig, "PUERTO_WORKER"));
-	strcpy(configuracion->rutaDataBin, archivoConfigStringDe(archivoConfig, "RUTA_DATABIN"));
+	Configuracion* configuracion = memoriaAlocar(sizeof(Configuracion));
+	stringCopiar(configuracion->ipFileSytem, archivoConfigStringDe(archivoConfig, "IP_FILESYSTEM"));
+	stringCopiar(configuracion->puertoFileSystem, archivoConfigStringDe(archivoConfig, "PUERTO_FILESYSTEM"));
+	stringCopiar(configuracion->nombreNodo, archivoConfigStringDe(archivoConfig, "NOMBRE_NODO"));
+	stringCopiar(configuracion->puertoWorker, archivoConfigStringDe(archivoConfig, "PUERTO_WORKER"));
+	stringCopiar(configuracion->rutaDataBin, archivoConfigStringDe(archivoConfig, "RUTA_DATABIN"));
 	archivoConfigDestruir(archivoConfig);
 	return configuracion;
 }
 
 void configuracionImprimir(Configuracion* configuracion) {
-	printf("[CONFIGURACION] Nombre Nodo: %s\n", configuracion->nombreNodo);
-	log_info(archivoLog, "[CONFIGURACION] Nombre Nodo: %s\n", configuracion->nombreNodo);
-	printf("[CONFIGURACION] Ruta archivo data.bin: %s\n", configuracion->rutaDataBin);
-	log_info(archivoLog, "[CONFIGURACION] Ruta archivo data.bin: %s\n", configuracion->rutaDataBin);
+	imprimirMensajeUno(archivoLog, "[CONFIGURACION] Nombre Nodo: %s", configuracion->nombreNodo);
+	imprimirMensajeUno(archivoLog, "[CONFIGURACION] Ruta archivo data.bin: %s", configuracion->rutaDataBin);
+
 }
 
 void archivoConfigObtenerCampos() {
@@ -50,8 +70,7 @@ void archivoConfigObtenerCampos() {
 
 void funcionSenial(int senial) {
 	puts("");
-	puts("[EJECUCION] Proceso Worker finalizado");
-	log_info(archivoLog, "[EJECUCION] Proceso Worker finalizado");
+	imprimirMensaje(archivoLog, "[EJECUCION] Proceso Worker finalizado");
 	exit(0);
 }
 

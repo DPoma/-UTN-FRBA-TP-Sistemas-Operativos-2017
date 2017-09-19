@@ -18,7 +18,7 @@ int main(void) {
 }
 
 void YAMAAtenderMasters() {
-	Servidor* servidor = malloc(sizeof(Servidor));
+	Servidor* servidor = memoriaAlocar(sizeof(Servidor));
 	servidorInicializar(servidor);
 	while(estadoYAMA)
 		servidorAtenderPedidos(servidor);
@@ -26,11 +26,9 @@ void YAMAAtenderMasters() {
 }
 
 void YAMAConectarAFileSystem() {
-	printf("[CONEXION] Estableciendo conexion con File System (IP: %s | Puerto %s)\n", configuracion->ipFileSystem, configuracion->puertoFileSystem);
-	log_info(archivoLog, "[CONEXION] Realizando conexion con File System (IP: %s | Puerto %s)\n", configuracion->ipFileSystem, configuracion->puertoFileSystem);
+	imprimirMensajeDos(archivoLog, "[CONEXION] Realizando conexion con File System (IP: %s | Puerto %s)", configuracion->ipFileSystem, configuracion->puertoFileSystem);
 	socketFileSystem = socketCrearCliente(configuracion->ipFileSystem, configuracion->puertoFileSystem, ID_YAMA);
-	log_info(archivoLog, "[CONEXION] Conexion exitosa con File System (IP: %s | Puerto %s)\n", configuracion->ipFileSystem, configuracion->puertoFileSystem);
-	printf("[CONEXION] Conexion exitosa con File System (IP: %s | Puerto %s)\n", configuracion->ipFileSystem, configuracion->puertoFileSystem);
+	imprimirMensaje(archivoLog, "[CONEXION] Conexion exitosa con File System");
 }
 
 void YAMAIniciar() {
@@ -39,30 +37,19 @@ void YAMAIniciar() {
 	imprimirMensajeProceso("# PROCESO YAMA");
 	archivoLog = archivoLogCrear(RUTA_LOG, "YAMA");
 	archivoConfigObtenerCampos();
-	configuracion = configuracionCrear(RUTA_CONFIG, (void*)configuracionLeerArchivoConfig, campos);
+	configuracion = configuracionCrear(RUTA_CONFIG, (Puntero)configuracionLeerArchivoConfig, campos);
 
 }
 
 Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig) {
-	Configuracion* configuracion = malloc(sizeof(Configuracion));
-	strcpy(configuracion->puertoMaster, archivoConfigStringDe(archivoConfig, "PUERTO_MASTER"));
-	strcpy(configuracion->ipFileSystem, archivoConfigStringDe(archivoConfig, "IP_FILESYSTEM"));
-	strcpy(configuracion->puertoFileSystem, archivoConfigStringDe(archivoConfig, "PUERTO_FILESYSTEM"));
+	Configuracion* configuracion = memoriaAlocar(sizeof(Configuracion));
+	stringCopiar(configuracion->puertoMaster, archivoConfigStringDe(archivoConfig, "PUERTO_MASTER"));
+	stringCopiar(configuracion->ipFileSystem, archivoConfigStringDe(archivoConfig, "IP_FILESYSTEM"));
+	stringCopiar(configuracion->puertoFileSystem, archivoConfigStringDe(archivoConfig, "PUERTO_FILESYSTEM"));
 	configuracion->retardoPlanificacion = archivoConfigEnteroDe(archivoConfig, "RETARDO_PLANIFICACION");
-	strcpy(configuracion->algoritmoBalanceo, archivoConfigStringDe(archivoConfig, "ALGORITMO_BALANCEO"));
+	stringCopiar(configuracion->algoritmoBalanceo, archivoConfigStringDe(archivoConfig, "ALGORITMO_BALANCEO"));
 	archivoConfigDestruir(archivoConfig);
 	return configuracion;
-}
-
-void configuracionImprimir(Configuracion* configuracion) {
-	puts("DATOS DE CONFIGURACION");
-	puts("----------------------------------------------------------------");
-	printf("Puerto Master: %s\n", configuracion->puertoMaster);
-	printf("IP File System: %s\n", configuracion->ipFileSystem);
-	printf("Puerto File System: %s\n", configuracion->puertoFileSystem);
-	printf("Retardo de planificacion: %i\n", configuracion->retardoPlanificacion);
-	printf("Algoritmo de balanceo: %s\n", configuracion->algoritmoBalanceo);
-	puts("----------------------------------------------------------------");
 }
 
 void archivoConfigObtenerCampos() {
@@ -79,8 +66,6 @@ void funcionSenial(int senial) {
 	estadoYAMA = 0;
 	puts("");
 	imprimirMensajeProceso("# PROCESO YAMA FINALIZADO");
-	puts("Aprete enter para salir");
-	puts("----------------------------------------------------------------");
 }
 
 
@@ -141,18 +126,16 @@ void servidorEsperarSolicitud(Servidor* servidor) {
 void servidorFinalizarConexion(Servidor* servidor, Socket unSocket) {
 	listaSocketsEliminar(unSocket, &servidor->listaMaster);
 	socketCerrar(unSocket);
-	puts("[CONEXION] Un proceso Master se ha desconectado");
-	log_info(archivoLog, "[CONEXION] Un proceso Master se ha desconectado");
+	imprimirMensaje(archivoLog, "[CONEXION] Un proceso Master se ha desconectado");
 }
 
-void servidorAceptarConexion(Servidor* servidor, Socket unSocket) {
+void servidorAceptarConexion(Servidor* servidor, Socket socketListener) {
 	Socket nuevoSocket;
-	nuevoSocket = socketAceptar(unSocket, ID_MASTER);
+	nuevoSocket = socketAceptar(socketListener, ID_MASTER);
 	if(nuevoSocket != ERROR) {
-		puts("[CONEXION] Proceso Master conectado exitosamente");
-		log_info(archivoLog, "[CONEXION] Proceso Master conectado exitosamente");
+		imprimirMensaje(archivoLog, "[CONEXION] Proceso Master conectado exitosamente");
 		listaSocketsAgregar(nuevoSocket, &servidor->listaMaster);
-		servidorControlarMaximoSocket(servidor, unSocket);
+		servidorControlarMaximoSocket(servidor, nuevoSocket);
 	}
 }
 
@@ -184,8 +167,7 @@ void servidorControlarSocket(Servidor* servidor, Socket unSocket) {
 
 void servidorActivarListenerMaster(Servidor* servidor) {
 	servidor->listenerMaster = socketCrearListener(configuracion->puertoMaster);
-	printf("[CONEXION] Esperando conexiones de Master (Puerto %s)\n", configuracion->puertoMaster);
-	log_info(archivoLog, "[CONEXION] Esperando conexiones de Master (Puerto %s)\n", configuracion->puertoMaster);
+	imprimirMensajeUno(archivoLog, "[CONEXION] Esperando conexiones de Master (Puerto %s)", configuracion->puertoMaster);
 	listaSocketsAgregar(servidor->listenerMaster, &servidor->listaMaster);
 	servidorControlarMaximoSocket(servidor, servidor->listenerMaster);
 }
@@ -200,12 +182,12 @@ void servidorInicializar(Servidor* servidor) {
 
 void servidorFinalizar(Servidor* servidor) {
 	archivoLogDestruir(archivoLog);
-	free(configuracion);
+	memoriaLiberar(configuracion);
 }
 
 void servidorAtenderSolicitud(Servidor* servidor) {
 	Socket unSocket;
-	int maximoSocket = servidor->maximoSocket;
+	Socket maximoSocket = servidor->maximoSocket;
 	for(unSocket = 0; unSocket <= maximoSocket; unSocket++)
 		servidorControlarSocket(servidor, unSocket);
 }

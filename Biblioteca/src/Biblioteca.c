@@ -103,13 +103,13 @@ void socketSelect(int cantidadSockets, ListaSockets* listaSockets) {
 	socketError(estado, "select");
 }
 
-int socketRecibir(Socket socketEmisor, Dato buffer, int tamanioBuffer) {
+int socketRecibir(Socket socketEmisor, Puntero buffer, int tamanioBuffer) {
 	int estado = recv(socketEmisor, buffer, tamanioBuffer, MSG_WAITALL);
 	socketError(estado, "recv");
 	return estado;
 }
 
-int socketEnviar(Socket socketReceptor, Dato mensaje, int tamanioMensaje) {
+int socketEnviar(Socket socketReceptor, Puntero mensaje, int tamanioMensaje) {
 	int estado = send(socketReceptor, mensaje, tamanioMensaje, 0);
 	socketError(estado, "send");
 	return estado;
@@ -603,18 +603,46 @@ String stringTomarDesdeInicio(String string, int cantidad) {
 	return string_substring_until(string, cantidad);
 }
 
-int stringSonIguales(char* s1, char* s2) {
+bool stringSonIguales(String s1, String s2) {
 	if (strcmp(s1, s2) == 0)
 		return 1;
 	else
 		return 0;
 }
 
-//--------------------------------------- Funciones para señales -------------------------------------
-
-void senialAsignarFuncion(int unaSenial, void(*funcion)(int)) {
-	signal(unaSenial, funcion);
+bool stringSonDistintos(String unString, String otroString) {
+	return !stringSonIguales(unString, otroString);
 }
+
+String stringCopiar(String stringReceptor, const String stringACopiar) {
+	return strcpy(stringReceptor, stringACopiar);
+}
+
+//--------------------------------------- Funciones de Impresion -------------------------------------
+
+void imprimirMensaje(ArchivoLog archivoLog, String mensaje) {
+	puts(mensaje);
+	log_info(archivoLog, mensaje);
+}
+
+void imprimirMensajeUno(ArchivoLog archivoLog, String mensaje, void* algo1) {
+	printf(mensaje, algo1 );
+	puts("");
+	log_info(archivoLog, mensaje, algo1);
+}
+
+void imprimirMensajeDos(ArchivoLog archivoLog, String mensaje, void* algo1, void* algo2) {
+	printf(mensaje, algo1, algo2);
+	puts("");
+	log_info(archivoLog, mensaje, algo1, algo2);
+}
+
+void imprimirMensajeTres(ArchivoLog archivoLog, String mensaje, void* algo1, void* algo2, void* algo3) {
+	printf(mensaje, algo1, algo2, algo3);
+	puts("");
+	log_info(archivoLog, mensaje, algo1, algo2, algo3);
+}
+
 
 void imprimirMensajeProceso(String mensaje) {
 	puts("----------------------------------------------------------------");
@@ -622,8 +650,24 @@ void imprimirMensajeProceso(String mensaje) {
 	puts("----------------------------------------------------------------");
 }
 
+//--------------------------------------- Funciones de Senial -------------------------------------
+
+void senialAsignarFuncion(int unaSenial, void(*funcion)(int)) {
+	signal(unaSenial, funcion);
+}
+
+//--------------------------------------- Funciones de Memoria -------------------------------------
+
+Puntero memoriaAlocar(size_t dato) {
+	return malloc(dato);
+}
+
+void memoriaLiberar(Puntero puntero) {
+	free(puntero);
+}
+
+//--------------------------------------- Funciones varias -------------------------------------
+
 void pantallaLimpiar() {
 	system("clear");
 }
-
-

@@ -24,22 +24,21 @@ void fileSystemIniciar() {
 	pantallaLimpiar();
 	imprimirMensajeProceso("# PROCESO FILE SYSTEM");
 	archivoLog = archivoLogCrear(RUTA_LOG, "FileSystem");
-	puts("[EJECUCION] Proceso File System inicializado");
-	log_info(archivoLog, "[EJECUCION] Proceso File System inicializado");
+	imprimirMensaje(archivoLog, "[EJECUCION] Proceso File System inicializado");
 	estadoFileSystem = 1;
 	archivoConfigObtenerCampos();
 	senialAsignarFuncion(SIGINT, funcionSenial);
-	configuracion = configuracionCrear(RUTA_CONFIG, (void*)configuracionLeerArchivoConfig, campos);
+	configuracion = configuracionCrear(RUTA_CONFIG, (Puntero)configuracionLeerArchivoConfig, campos);
 	configuracionImprimir(configuracion);
 }
 
 void fileSystemCrearConsola() {
 	Hilo hilo;
-	hiloCrear(&hilo, (void*)consolaAtenderComandos, NULL);
+	hiloCrear(&hilo, (Puntero)consolaAtenderComandos, NULL);
 }
 
 void fileSystemAtenderProcesos() {
-	Servidor* servidor = malloc(sizeof(Servidor));
+	Servidor* servidor = memoriaAlocar(sizeof(Servidor));
 	servidorInicializar(servidor);
 	while(estadoFileSystem)
 		servidorAtenderPedidos(servidor);
@@ -47,8 +46,7 @@ void fileSystemAtenderProcesos() {
 }
 
 void fileSystemFinalizar() {
-	puts("[EJECUCION] Proceso File System finalizado");
-	log_info(archivoLog, "[EJECUCION] Proceso File System finalizado");
+	imprimirMensaje(archivoLog, "[EJECUCION] Proceso File System finalizado");
 }
 
 //--------------------------------------- Funciones de Consola -------------------------------------
@@ -105,7 +103,7 @@ Comando consolaObtenerComando() {
 	Comando comando;
 	char* mensaje = consolaLeerCaracteresEntrantes();
 	comando.identificador = consolaIdentificarComando(mensaje);
-	free(mensaje);
+	memoriaLiberar(mensaje);
 	return comando;
 }
 
@@ -165,12 +163,10 @@ void servidorFinalizarConexion(Servidor* servidor, Socket unSocket) {
 	listaSocketsEliminar(unSocket, &servidor->listaMaster);
 	if(socketEsDataNode(servidor, unSocket)) {
 		listaSocketsEliminar(unSocket, &servidor->listaDataNodes);
-		puts("[CONEXION] Un proceso Data Node se ha desconectado");
-		log_info(archivoLog, "[CONEXION] Un proceso Data Node se ha desconectado");
+		imprimirMensaje(archivoLog, "[CONEXION] Un proceso Data Node se ha desconectado");
 	}
 	else {
-		puts("[CONEXION] El proceso YAMA se ha desconectado");
-		log_info(archivoLog, "[CONEXION] El proceso YAMA se ha desconectado");
+		imprimirMensaje(archivoLog, "[CONEXION] El proceso YAMA se ha desconectado");
 	}
 
 	socketCerrar(unSocket);
@@ -186,8 +182,7 @@ Socket servidorAceptarDataNode(Servidor* servidor, Socket unSocket) {
 	nuevoSocket = socketAceptar(unSocket, ID_DATANODE);
 	if(nuevoSocket != ERROR) {
 		listaSocketsAgregar(nuevoSocket, &servidor->listaDataNodes);
-		puts("[CONEXION] Proceso Data Node conectado exitosamente.");
-		log_info(archivoLog, "[CONEXION] Proceso Data Node conectado exitosamente");
+		imprimirMensaje(archivoLog, "[CONEXION] Proceso Data Node conectado exitosamente");
 	}
 	return nuevoSocket;
 }
@@ -197,8 +192,7 @@ Socket servidorAceptarYAMA(Servidor* servidor, Socket unSocket) {
 	nuevoSocket = socketAceptar(unSocket, ID_YAMA);
 	if(nuevoSocket != ERROR) {
 		servidor->procesoYAMA = nuevoSocket;
-		puts("[CONEXION] Proceso YAMA conectado exitosamente.");
-		log_info(archivoLog, "[CONEXION] Proceso YAMA conectado exitosamente");
+		imprimirMensaje(archivoLog, "[CONEXION] Proceso YAMA conectado exitosamente");
 	}
 	return nuevoSocket;
 }
@@ -276,7 +270,7 @@ void servidorInicializar(Servidor* servidor) {
 
 void servidorFinalizar(Servidor* servidor) {
 	archivoLogDestruir(archivoLog);
-	free(configuracion);
+	memoriaLiberar(configuracion);
 }
 
 void servidorAtenderSolicitud(Servidor* servidor) {
@@ -297,21 +291,18 @@ void servidorAtenderPedidos(Servidor* servidor) {
 //--------------------------------------- Funciones de Configuracion -------------------------------------
 
 Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig) {
-	Configuracion* configuracion = malloc(sizeof(Configuracion));
-	strcpy(configuracion->puertoYAMA, archivoConfigStringDe(archivoConfig, "PUERTO_YAMA"));
-	strcpy(configuracion->puertoDataNode, archivoConfigStringDe(archivoConfig, "PUERTO_DATANODE"));
-	strcpy(configuracion->rutaMetadata, archivoConfigStringDe(archivoConfig, "RUTA_METADATA"));
+	Configuracion* configuracion = memoriaAlocar(sizeof(Configuracion));
+	stringCopiar(configuracion->puertoYAMA, archivoConfigStringDe(archivoConfig, "PUERTO_YAMA"));
+	stringCopiar(configuracion->puertoDataNode, archivoConfigStringDe(archivoConfig, "PUERTO_DATANODE"));
+	stringCopiar(configuracion->rutaMetadata, archivoConfigStringDe(archivoConfig, "RUTA_METADATA"));
 	archivoConfigDestruir(archivoConfig);
 	return configuracion;
 }
 
 void configuracionImprimir(Configuracion* configuracion) {
-	printf("[CONEXION] Esperando conexion de YAMA (Puerto: %s)\n", configuracion->puertoYAMA);
-	log_info(archivoLog, "[CONEXION] Esperando conexion de YAMA (Puerto: %s)\n", configuracion->puertoYAMA);
-	printf("[CONEXION] Esperando conexiones de Data Nodes (Puerto: %s)\n", configuracion->puertoDataNode);
-	log_info(archivoLog, "[CONEXION] Esperando conexiones de Data Nodes (Puerto: %s)\n", configuracion->puertoDataNode);
-	printf("[CONFIGURACION] Ruta Metadata: %s\n", configuracion->rutaMetadata);
-	log_info(archivoLog, "[CONFIGURACION] Ruta Metadata: %s\n", configuracion->rutaMetadata);
+	imprimirMensajeUno(archivoLog, "[CONEXION] Esperando conexion de YAMA (Puerto: %s)", configuracion->puertoYAMA);
+	imprimirMensajeUno(archivoLog, "[CONEXION] Esperando conexiones de Data Nodes (Puerto: %s)", configuracion->puertoDataNode);
+	imprimirMensajeUno(archivoLog, "[CONFIGURACION] Ruta Metadata: %s", configuracion->rutaMetadata);
 }
 
 void archivoConfigObtenerCampos() {
@@ -323,7 +314,6 @@ void archivoConfigObtenerCampos() {
 void funcionSenial(int senial) {
 	estadoFileSystem = 0;
 	puts("");
-	puts("[EJECUCION] Proceso File System finalizado");
-	log_info(archivoLog, "[EJECUCION] Proceso File System finalizado");
+	imprimirMensaje(archivoLog, "[EJECUCION] Proceso File System finalizado");
 }
 

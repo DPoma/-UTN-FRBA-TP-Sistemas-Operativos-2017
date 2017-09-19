@@ -12,8 +12,7 @@
 
 int main(void) {
 	dataNodeIniciar();
-	printf("[CONEXION] Estableciendo conexion con File System (IP: %s | Puerto %s)\n", configuracion->ipFileSystem, configuracion->puertoFileSystem);
-	log_info(archivoLog, "[CONEXION] Estableciendo conexion con File System (IP: %s | Puerto %s)\n", configuracion->ipFileSystem, configuracion->puertoFileSystem);
+	imprimirMensajeDos(archivoLog, "[CONEXION] Estableciendo conexion con File System (IP: %s | Puerto %s)", configuracion->ipFileSystem, configuracion->puertoFileSystem);
 	Socket unSocket = socketCrearCliente(configuracion->ipFileSystem, configuracion->puertoFileSystem, ID_DATANODE);
 	estadoDataNode = 1;
 	while(estadoDataNode);
@@ -23,21 +22,19 @@ int main(void) {
 }
 
 Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig) {
-	Configuracion* configuracion = malloc(sizeof(Configuracion));
-	strcpy(configuracion->ipFileSystem, archivoConfigStringDe(archivoConfig, "IP_FILESYSTEM"));
-	strcpy(configuracion->puertoFileSystem, archivoConfigStringDe(archivoConfig, "PUERTO_FILESYSTEM"));
-	strcpy(configuracion->nombreNodo, archivoConfigStringDe(archivoConfig, "NOMBRE_NODO"));
-	strcpy(configuracion->puertoWorker, archivoConfigStringDe(archivoConfig, "PUERTO_WORKER"));
-	strcpy(configuracion->rutaDataBin, archivoConfigStringDe(archivoConfig, "RUTA_DATABIN"));
+	Configuracion* configuracion = memoriaAlocar(sizeof(Configuracion));
+	stringCopiar(configuracion->ipFileSystem, archivoConfigStringDe(archivoConfig, "IP_FILESYSTEM"));
+	stringCopiar(configuracion->puertoFileSystem, archivoConfigStringDe(archivoConfig, "PUERTO_FILESYSTEM"));
+	stringCopiar(configuracion->nombreNodo, archivoConfigStringDe(archivoConfig, "NOMBRE_NODO"));
+	stringCopiar(configuracion->puertoWorker, archivoConfigStringDe(archivoConfig, "PUERTO_WORKER"));
+	stringCopiar(configuracion->rutaDataBin, archivoConfigStringDe(archivoConfig, "RUTA_DATABIN"));
 	archivoConfigDestruir(archivoConfig);
 	return configuracion;
 }
 
 void configuracionImprimir(Configuracion* configuracion) {
-	printf("[CONFIGURACION] Nombre Nodo: %s\n", configuracion->nombreNodo);
-	log_info(archivoLog, "[CONFIGURACION] Nombre Nodo: %s\n", configuracion->nombreNodo);
-	printf("[CONFIGURACION] Ruta archivo data.bin: %s\n", configuracion->rutaDataBin);
-	log_info(archivoLog, "[CONFIGURACION] Ruta archivo data.bin: %s\n", configuracion->rutaDataBin);
+	imprimirMensajeUno(archivoLog, "[CONFIGURACION] Nombre Nodo: %s", configuracion->nombreNodo);
+	imprimirMensajeUno(archivoLog, "[CONFIGURACION] Ruta archivo data.bin: %s", configuracion->rutaDataBin);
 }
 
 void archivoConfigObtenerCampos() {
@@ -52,8 +49,7 @@ void archivoConfigObtenerCampos() {
 void funcionSenial(int senial) {
 	estadoDataNode = 0;
 	puts("");
-	puts("[EJECUCION] Proceso Data Node finalizado");
-	log_info(archivoLog, "[EJECUCION] Proceso Data Node finalizado");
+	imprimirMensaje(archivoLog, "[EJECUCION] Proceso Data Node finalizado");
 }
 
 void dataNodeIniciar() {
@@ -61,7 +57,7 @@ void dataNodeIniciar() {
 	imprimirMensajeProceso("# PROCESO DATA NODE");
 	archivoLog = archivoLogCrear(RUTA_LOG, "DataNode");
 	archivoConfigObtenerCampos();
-	configuracion = configuracionCrear(RUTA_CONFIG, (void*)configuracionLeerArchivoConfig, campos);
+	configuracion = configuracionCrear(RUTA_CONFIG, (Puntero)configuracionLeerArchivoConfig, campos);
 	configuracionImprimir(configuracion);
 	senialAsignarFuncion(SIGINT, funcionSenial);
 }

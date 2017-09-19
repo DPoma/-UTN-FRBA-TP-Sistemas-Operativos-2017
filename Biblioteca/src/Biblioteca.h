@@ -42,7 +42,7 @@
 
 typedef int Socket;
 typedef fd_set ListaSockets;
-typedef void* Dato;
+typedef void* Puntero;
 typedef char* String;
 typedef socklen_t Socklen;
 typedef struct addrinfo* AddrInfo;
@@ -64,7 +64,7 @@ typedef struct {
 
 typedef struct {
 	Header header;
-	Dato dato;
+	Puntero dato;
 } Mensaje;
 
 typedef struct {
@@ -86,8 +86,8 @@ void socketEscuchar(Socket unSocket, int ClientesEnEspera);
 int socketAceptar(Socket unSocket, int idEsperada);
 void socketRedireccionar(Socket unSocket);
 void socketSelect(Socket cantidadSockets, ListaSockets* listaSockets);
-int socketRecibir(Socket socketEmisor, Dato buffer, int tamanioBuffer);
-int socketEnviar(Socket socketReceptor, Dato mensaje, int tamanioMensaje);
+int socketRecibir(Socket socketEmisor, Puntero buffer, int tamanioBuffer);
+int socketEnviar(Socket socketReceptor, Puntero mensaje, int tamanioMensaje);
 void socketCerrar(Socket unSocket);
 bool socketSonIguales(Socket unSocket, Socket otroSocket);
 bool socketSonDistintos(Socket unSocket, Socket otroSocket);
@@ -105,8 +105,8 @@ void listaSocketsLimpiar(ListaSockets* listaSockets);
 
 //--------------------------------------- Funciones para Mensaje -------------------------------------
 
-void* mensajeCrear(int operacion, Dato dato, int tamanioDato);
-void mensajeEnviar(Socket socketReceptor, int operacion, Dato dato, int tamanioDato);
+void* mensajeCrear(int operacion, Puntero dato, int tamanioDato);
+void mensajeEnviar(Socket socketReceptor, int operacion, Puntero dato, int tamanioDato);
 void mensajeSetearError(Mensaje* mensaje, int idError);
 void mensajeVerificarEstado(Mensaje* mensaje, int bytes);
 bool mensajeOperacionIgualA(Mensaje* mensaje, int operacion);

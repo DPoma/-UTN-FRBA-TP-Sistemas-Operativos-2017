@@ -58,24 +58,19 @@ char* leerCaracteresEntrantes() {
 
 
 int main(void) {
-	pantallaLimpiar("clear");
+	pantallaLimpiar();
 	imprimirMensajeProceso("# PROCESO MASTER");
 	archivoLog = archivoLogCrear(RUTA_LOG, "Master");
 	archivoConfigObtenerCampos();
-	configuracion = configuracionCrear(RUTA_CONFIG, (void*)configuracionLeerArchivoConfig, campos);
-	strcpy(configuracion->ipWorker, IP_LOCAL);
-	strcpy(configuracion->puertoWorker, "5050");
-	printf("[CONEXION] Estableciendo Conexion con YAMA (IP: %s | Puerto %s)\n", configuracion->ipYAMA, configuracion->puertoYAMA);
-	log_info(archivoLog, "[CONEXION] Estableciendo Conexion con YAMA (IP: %s | Puerto %s)\n", configuracion->ipYAMA, configuracion->puertoYAMA);
+	configuracion = configuracionCrear(RUTA_CONFIG, (Puntero)configuracionLeerArchivoConfig, campos);
+	stringCopiar(configuracion->ipWorker, IP_LOCAL);
+	stringCopiar(configuracion->puertoWorker, "5050");
+	imprimirMensajeDos(archivoLog,"[CONEXION] Estableciendo Conexion con YAMA (IP: %s | Puerto %s)", configuracion->ipYAMA, configuracion->puertoYAMA);
 	socketYAMA = socketCrearCliente(configuracion->ipYAMA, configuracion->puertoYAMA, ID_MASTER);
-	printf("[CONEXION] Conexion existosa con YAMA\n");
-	log_info(archivoLog, "[CONEXION] Conexion exitosa con YAMA\n");
-
-	printf("[CONEXION] Estableciendo Conexion con Worker (IP: %s | Puerto: %s)\n", configuracion->ipWorker, configuracion->puertoWorker);
-	log_info(archivoLog, "[CONEXION] Estableciendo Conexion con Worker (IP: %s | Puerto: %s)\n", configuracion->ipWorker, configuracion->puertoWorker);
-	//socketWorker = socketCrearCliente(configuracion->ipWorker, configuracion->puertoWorker, ID_MASTER);
-	printf("[CONEXION] Estableciendo Conexion con Worker\n");
-	log_info(archivoLog, "[CONEXION] Conexion exitosa con Worker\n");
+	imprimirMensaje(archivoLog, "[CONEXION] Conexion existosa con YAMA");
+	imprimirMensajeDos(archivoLog, "[CONEXION] Estableciendo Conexion con Worker (IP: %s | Puerto: %s)", configuracion->ipWorker, configuracion->puertoWorker);
+	socketWorker = socketCrearCliente(configuracion->ipWorker, configuracion->puertoWorker, ID_MASTER);
+	imprimirMensaje(archivoLog, "[CONEXION] Estableciendo Conexion con Worker");
 	estadoMaster = 1;
 	senialAsignarFuncion(SIGINT, funcionSenial);
 	while(estadoMaster);
@@ -86,9 +81,9 @@ int main(void) {
 }
 
 Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig) {
-	Configuracion* configuracion = malloc(sizeof(Configuracion));
-	strcpy(configuracion->ipYAMA, archivoConfigStringDe(archivoConfig, "IP_YAMA"));
-	strcpy(configuracion->puertoYAMA, archivoConfigStringDe(archivoConfig, "PUERTO_YAMA"));
+	Configuracion* configuracion = memoriaAlocar(sizeof(Configuracion));
+	stringCopiar(configuracion->ipYAMA, archivoConfigStringDe(archivoConfig, "IP_YAMA"));
+	stringCopiar(configuracion->puertoYAMA, archivoConfigStringDe(archivoConfig, "PUERTO_YAMA"));
 	archivoConfigDestruir(archivoConfig);
 	return configuracion;
 }
