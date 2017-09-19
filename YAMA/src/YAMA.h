@@ -22,11 +22,27 @@ typedef struct {
 	char algoritmoBalanceo[50];
 } Configuracion;
 
-String campos[6];
+
+typedef struct {
+	ListaSockets listaSelect;
+	ListaSockets listaMaster;
+	Socket maximoSocket;
+	Socket listenerMaster;
+} Servidor;
+
+
+String campos[5];
 Configuracion* configuracion;
 ArchivoLog archivoLog;
-int estado;
+Socket socketFileSystem;
+int estadoYAMA;
 
 Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig);
 void archivoConfigObtenerCampos();
 void pantallaLimpiar();
+void YAMAIniciar();
+void YAMAAtenderMasters();
+void YAMAConectarAFileSystem();
+void servidorInicializar(Servidor* servidor);
+void servidorFinalizar(Servidor* servidor);
+void servidorAtenderPedidos(Servidor* servidor);

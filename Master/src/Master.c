@@ -70,9 +70,10 @@ int main(void) {
 	socketYAMA = socketCrearCliente(configuracion->ipYAMA, configuracion->puertoYAMA, ID_MASTER);
 	printf("[CONEXION] Conexion existosa con YAMA\n");
 	log_info(archivoLog, "[CONEXION] Conexion exitosa con YAMA\n");
+
 	printf("[CONEXION] Estableciendo Conexion con Worker (IP: %s | Puerto: %s)\n", configuracion->ipWorker, configuracion->puertoWorker);
 	log_info(archivoLog, "[CONEXION] Estableciendo Conexion con Worker (IP: %s | Puerto: %s)\n", configuracion->ipWorker, configuracion->puertoWorker);
-	socketWorker = socketCrearCliente(configuracion->ipWorker, configuracion->puertoWorker, ID_MASTER);
+	//socketWorker = socketCrearCliente(configuracion->ipWorker, configuracion->puertoWorker, ID_MASTER);
 	printf("[CONEXION] Estableciendo Conexion con Worker\n");
 	log_info(archivoLog, "[CONEXION] Conexion exitosa con Worker\n");
 	estadoMaster = 1;

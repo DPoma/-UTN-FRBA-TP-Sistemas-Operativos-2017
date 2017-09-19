@@ -11,44 +11,36 @@
 #include "YAMA.h"
 
 int main(void) {
+	YAMAIniciar();
+	YAMAConectarAFileSystem();
+	YAMAAtenderMasters();
+	return EXIT_SUCCESS;
+}
 
-	pantallaLimpiar();
-	int estado = 1;
-	imprimirMensajeProceso("# PROCESO YAMA");
-	archivoConfigObtenerCampos();
-	configuracion = configuracionCrear(RUTA_CONFIG, (void*)configuracionLeerArchivoConfig, campos);
-	archivoLog = archivoLogCrear(RUTA_LOG, "YAMA");
+void YAMAAtenderMasters() {
+	Servidor* servidor = malloc(sizeof(Servidor));
+	servidorInicializar(servidor);
+	while(estadoYAMA)
+		servidorAtenderPedidos(servidor);
+	servidorFinalizar(servidor);
+}
 
+void YAMAConectarAFileSystem() {
 	printf("[CONEXION] Estableciendo conexion con File System (IP: %s | Puerto %s)\n", configuracion->ipFileSystem, configuracion->puertoFileSystem);
 	log_info(archivoLog, "[CONEXION] Realizando conexion con File System (IP: %s | Puerto %s)\n", configuracion->ipFileSystem, configuracion->puertoFileSystem);
-
-	Socket socketFileSystem = socketCrearCliente(configuracion->ipFileSystem, configuracion->puertoFileSystem, ID_YAMA);
-
+	socketFileSystem = socketCrearCliente(configuracion->ipFileSystem, configuracion->puertoFileSystem, ID_YAMA);
 	log_info(archivoLog, "[CONEXION] Conexion exitosa con File System (IP: %s | Puerto %s)\n", configuracion->ipFileSystem, configuracion->puertoFileSystem);
 	printf("[CONEXION] Conexion exitosa con File System (IP: %s | Puerto %s)\n", configuracion->ipFileSystem, configuracion->puertoFileSystem);
+}
 
-	estado = 1;
-	Socket socketListenerMaster = socketCrearListener(configuracion->puertoMaster);
+void YAMAIniciar() {
+	pantallaLimpiar();
+	estadoYAMA = 1;
+	imprimirMensajeProceso("# PROCESO YAMA");
+	archivoLog = archivoLogCrear(RUTA_LOG, "YAMA");
+	archivoConfigObtenerCampos();
+	configuracion = configuracionCrear(RUTA_CONFIG, (void*)configuracionLeerArchivoConfig, campos);
 
-	printf("[CONEXION] Esperando conexiones de Master (Puerto %s)\n", configuracion->puertoMaster);
-	log_info(archivoLog, "[CONEXION] Esperando conexiones de Master (Puerto %s)\n", configuracion->puertoMaster);
-
-	Socket socketMaster = socketAceptar(socketListenerMaster, ID_MASTER);
-
-	printf("[CONEXION] El proceso Master se ha conectado\n");
-	log_info(archivoLog, "[CONEXION] El proceso Master se ha conectado\n");
-
-	while(estado) {
-		Mensaje* mensaje = mensajeRecibir(socketMaster);
-		if(mensajeOperacionErronea(mensaje))
-			socketCerrar(socketMaster);
-		else {
-			printf("Nuevo mensaje de Master %i: %s", socketMaster, (char*)(mensaje->dato));
-			mensajeEnviar(socketFileSystem, 4, mensaje->dato, strlen(mensaje->dato)+1);
-		}
-	}
-	close(socketMaster);
-	return 0;
 }
 
 Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig) {
@@ -84,7 +76,7 @@ void archivoConfigObtenerCampos() {
 
 
 void funcionSenial(int senial) {
-	estado = 0;
+	estadoYAMA = 0;
 	puts("");
 	imprimirMensajeProceso("# PROCESO YAMA FINALIZADO");
 	puts("Aprete enter para salir");
@@ -126,3 +118,102 @@ void notificadorInformar(Socket unSocket) {
 	//inotify_rm_watch(file_descriptor, watch_descriptor);
 		//close(file_descriptor);
 }
+
+
+
+bool servidorObtenerMaximoSocket(Servidor* servidor) {
+	return servidor->maximoSocket;
+}
+
+void servidorSetearListaSelect(Servidor* servidor) {
+	servidor->listaSelect = servidor->listaMaster;
+}
+
+void servidorControlarMaximoSocket(Servidor* servidor, Socket unSocket) {
+	if(socketEsMayor(unSocket, servidor->maximoSocket))
+		servidor->maximoSocket = unSocket;
+}
+
+void servidorEsperarSolicitud(Servidor* servidor) {
+	socketSelect(servidor->maximoSocket, &servidor->listaSelect);
+}
+
+void servidorFinalizarConexion(Servidor* servidor, Socket unSocket) {
+	listaSocketsEliminar(unSocket, &servidor->listaMaster);
+	socketCerrar(unSocket);
+	puts("[CONEXION] Un proceso Master se ha desconectado");
+	log_info(archivoLog, "[CONEXION] Un proceso Master se ha desconectado");
+}
+
+void servidorAceptarConexion(Servidor* servidor, Socket unSocket) {
+	Socket nuevoSocket;
+	nuevoSocket = socketAceptar(unSocket, ID_MASTER);
+	if(nuevoSocket != ERROR) {
+		puts("[CONEXION] Proceso Master conectado exitosamente");
+		log_info(archivoLog, "[CONEXION] Proceso Master conectado exitosamente");
+		listaSocketsAgregar(nuevoSocket, &servidor->listaMaster);
+		servidorControlarMaximoSocket(servidor, unSocket);
+	}
+}
+
+void servidorRecibirMensaje(Servidor* servidor, Socket unSocket) {
+	Mensaje* mensaje = mensajeRecibir(unSocket);
+	if(mensajeOperacionErronea(mensaje))
+		servidorFinalizarConexion(servidor, unSocket);
+	else
+		puts("[MENSAJE]");
+	mensajeDestruir(mensaje);
+}
+
+bool socketRealizoSolicitud(Servidor* servidor, Socket unSocket) {
+	return listaSocketsContiene(unSocket, &servidor->listaSelect);
+}
+
+bool socketEsListener(Servidor* servidor, Socket unSocket) {
+	return socketSonIguales(servidor->listenerMaster, unSocket);
+}
+
+void servidorControlarSocket(Servidor* servidor, Socket unSocket) {
+	if (socketRealizoSolicitud(servidor, unSocket)) {
+		if(socketEsListener(servidor, unSocket))
+			servidorAceptarConexion(servidor, unSocket);
+		else
+			servidorRecibirMensaje(servidor, unSocket);
+	}
+}
+
+void servidorActivarListenerMaster(Servidor* servidor) {
+	servidor->listenerMaster = socketCrearListener(configuracion->puertoMaster);
+	printf("[CONEXION] Esperando conexiones de Master (Puerto %s)\n", configuracion->puertoMaster);
+	log_info(archivoLog, "[CONEXION] Esperando conexiones de Master (Puerto %s)\n", configuracion->puertoMaster);
+	listaSocketsAgregar(servidor->listenerMaster, &servidor->listaMaster);
+	servidorControlarMaximoSocket(servidor, servidor->listenerMaster);
+}
+
+
+void servidorInicializar(Servidor* servidor) {
+	servidor->maximoSocket = 0;
+	listaSocketsLimpiar(&servidor->listaMaster);
+	listaSocketsLimpiar(&servidor->listaSelect);
+	servidorActivarListenerMaster(servidor);
+}
+
+void servidorFinalizar(Servidor* servidor) {
+	archivoLogDestruir(archivoLog);
+	free(configuracion);
+}
+
+void servidorAtenderSolicitud(Servidor* servidor) {
+	Socket unSocket;
+	int maximoSocket = servidor->maximoSocket;
+	for(unSocket = 0; unSocket <= maximoSocket; unSocket++)
+		servidorControlarSocket(servidor, unSocket);
+}
+
+void servidorAtenderPedidos(Servidor* servidor) {
+	servidorSetearListaSelect(servidor);
+	servidorEsperarSolicitud(servidor);
+	servidorAtenderSolicitud(servidor);
+}
+
+
