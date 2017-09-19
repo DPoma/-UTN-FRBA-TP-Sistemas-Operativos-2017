@@ -615,19 +615,23 @@ String stringTomarDesdeInicio(String string, int cantidad) {
 	return string_substring_until(string, cantidad);
 }
 
-bool stringSonIguales(String s1, String s2) {
+bool stringIguales(String s1, String s2) {
 	if (strcmp(s1, s2) == NULO)
 		return true;
 	else
 		return false;
 }
 
-bool stringSonDistintos(String unString, String otroString) {
-	return !stringSonIguales(unString, otroString);
+bool stringDistintos(String unString, String otroString) {
+	return !stringIguales(unString, otroString);
 }
 
 String stringCopiar(String stringReceptor, const String stringACopiar) {
 	return strcpy(stringReceptor, stringACopiar);
+}
+
+String* stringSeparar(String unString, String separador) {
+	return string_split(unString, separador);
 }
 
 //--------------------------------------- Funciones de Impresion -------------------------------------
@@ -682,4 +686,8 @@ void memoriaLiberar(Puntero puntero) {
 
 void pantallaLimpiar() {
 	system("clear");
+}
+
+int caracterObtener() {
+	return getchar();
 }

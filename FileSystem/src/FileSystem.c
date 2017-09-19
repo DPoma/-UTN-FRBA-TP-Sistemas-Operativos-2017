@@ -52,61 +52,176 @@ void fileSystemFinalizar() {
 //--------------------------------------- Funciones de Consola -------------------------------------
 
 
-int consolaIdentificarComando(char* comando) {
-	if(stringSonIguales(comando, C_FORMAT))
+int consolaIdentificarComando(String comando) {
+	if(stringIguales(comando, C_FORMAT))
 		return FORMAT;
-	if(stringSonIguales(comando, C_INFO))
+	if(stringIguales(comando, C_INFO))
 		return INFO;
-	else if(stringSonIguales(comando, C_RM))
+	else if(stringIguales(comando, C_RM))
 		return RM;
-	else if(stringSonIguales(comando, C_RMB))
+	else if(stringIguales(comando, C_RMB))
 		return RMB;
-	else if(stringSonIguales(comando, C_RMD))
+	else if(stringIguales(comando, C_RMD))
 		return RMD;
-	else if(stringSonIguales(comando, C_RENAME))
+	else if(stringIguales(comando, C_RENAME))
 		return RENAME;
-	else if(stringSonIguales(comando, C_MV))
+	else if(stringIguales(comando, C_MV))
 		return MV;
-	else if(stringSonIguales(comando, C_CAT))
+	else if(stringIguales(comando, C_CAT))
 		return CAT;
-	else if(stringSonIguales(comando, C_MKDIR))
+	else if(stringIguales(comando, C_MKDIR))
 		return MKDIR;
-	else if(stringSonIguales(comando, C_PFROM))
-		return PFROM;
-	else if(stringSonIguales(comando, C_CPTO))
+	else if(stringIguales(comando, C_CPFROM))
+		return CPFROM;
+	else if(stringIguales(comando, C_CPTO))
 		return CPTO;
-	else if(stringSonIguales(comando, C_CPTBLOCK))
-		return CPTBLOCK;
-	else if(stringSonIguales(comando, C_MD5))
+	else if(stringIguales(comando, C_CPBLOCK))
+		return CPBLOCK;
+	else if(stringIguales(comando, C_MD5))
 		return MD5;
-	else if(stringSonIguales(comando, C_LS))
+	else if(stringIguales(comando, C_LS))
 		return LS;
-	else if(stringSonIguales(comando, C_INFO))
+	else if(stringIguales(comando, C_INFO))
 		return INFO;
-	else if(stringSonIguales(comando, C_RENAME))
+	else if(stringIguales(comando, C_RENAME))
 		return RENAME;
 	else
-		return -1;
+		return ERROR;
 }
 
-char* consolaLeerCaracteresEntrantes() {
-	int i, caracterLeido;
-	char* cadena = malloc(1000);
-	for(i = 0; (caracterLeido= getchar()) != '\n'; i++)
-		cadena[i] = caracterLeido;
-	cadena[i] = '\0';
+String consolaLeerEntrada() {
+	int indice;
+	int caracterLeido;
+	String cadena = memoriaAlocar(MAX);
+	for(indice = 0; (caracterLeido= caracterObtener()) != ENTER; indice++)
+		cadena[indice] = caracterLeido;
+	cadena[indice] = FIN;
 	return cadena;
 }
 
 
-Comando consolaObtenerComando() {
-	Comando comando;
-	char* mensaje = consolaLeerCaracteresEntrantes();
-	comando.identificador = consolaIdentificarComando(mensaje);
-	memoriaLiberar(mensaje);
-	return comando;
+bool consolaComandoTipoUno(String comando) {
+	return stringIguales(comando, C_RM) || stringIguales(comando, C_CAT) ||
+		   stringIguales(comando, C_MKDIR) || stringIguales(comando, C_MD5) ||
+		   stringIguales(comando, C_LS) || stringIguales(comando, C_INFO) ||
+		   stringIguales(comando, C_RMD);
 }
 
+bool consolaComandoTipoDos(String comando) {
+	return stringIguales(comando, C_RENAME) || stringIguales(comando, C_MV) ||
+		   stringIguales(comando, C_CPFROM) || stringIguales(comando, C_CPTO);
+}
+
+bool consolaComandoTipoTres(String comando) {
+	return stringIguales(comando, C_CPBLOCK) || stringIguales(comando, C_RMB);
+}
+
+
+int consolaComandoCantidadArgumentos(String comando) {
+	if(consolaComandoTipoUno(comando))
+		return 1;
+	else if(consolaComandoTipoDos(comando))
+		return 2;
+	else if(consolaComandoTipoTres(comando))
+		return 3;
+	else
+		return 0;
+}
+
+void consolaProcesarComandoSinTipo(Comando* comando, String* subcadenas) {
+	comando->argumento1 = NULL;
+	comando->argumento2 = NULL;
+	comando->argumento3 = NULL;
+}
+
+
+void consolaProcesarComandoTipoUno(Comando* comando, String* subcadenas) {
+	comando->argumento1 = subcadenas[1];
+	comando->argumento2 = NULL;
+	comando->argumento3 = NULL;
+}
+
+void consolaProcesarComandoTipoDos(Comando* comando, String* subcadenas) {
+	comando->argumento1 = subcadenas[1];
+	comando->argumento2 = subcadenas[2];
+	comando->argumento3 = NULL;
+}
+
+void consolaProcesarComandoTipoTres(Comando* comando, String* subcadenas) {
+	comando->argumento1 = subcadenas[1];
+	comando->argumento2 = subcadenas[2];
+	comando->argumento3 = subcadenas[3];
+}
+
+void consolaProcesarComando(Comando* comando, String* subcadenas) {
+	int cantidadArgumentos = consolaComandoCantidadArgumentos(subcadenas[0]);
+	switch(cantidadArgumentos) {
+		case 1: consolaProcesarComandoTipoUno(comando, subcadenas); break;
+		case 2: consolaProcesarComandoTipoDos(comando, subcadenas); break;
+		case 3: consolaProcesarComandoTipoTres(comando, subcadenas); break;
+		default: consolaProcesarComandoSinTipo(comando, subcadenas);
+	}
+}
+
+bool enterosIguales(int a, int b) {
+	return a == b;
+}
+
+
+void consolaNormalizarComando(String* subcadenas) {
+	if(stringIguales(subcadenas[1],"-b")) {
+		subcadenas[0] = "rm -b";
+		subcadenas[1] = subcadenas[2];
+		subcadenas[2] = subcadenas[3];
+		subcadenas[3] = subcadenas[4];
+	}
+	else {
+		subcadenas[0] = "rm -d";
+		subcadenas[1] = subcadenas[2];
+	}
+}
+
+bool consolaValidarComandoSinTipo(String* subcadenas) {
+	return stringIguales(subcadenas[1], NULL);
+}
+
+bool consolaValidarComandoTipo1(String* subcadenas) {
+	return stringDistintos(subcadenas[1], NULL) && stringIguales(subcadenas[2],NULL);
+}
+
+bool consolaValidarComandoTipo2(String* subcadenas) {
+	return stringDistintos(subcadenas[1], NULL) && stringDistintos(subcadenas[2],NULL) &&
+		   stringIguales(subcadenas[3], NULL);
+}
+
+bool consolaValidarComandoTipo3(String* subcadenas) {
+	return stringDistintos(subcadenas[1], NULL) && stringDistintos(subcadenas[2],NULL) &&
+		   stringDistintos(subcadenas[3], NULL) && stringIguales(subcadenas[4], NULL);
+}
+
+//Con esto valido no acepta comandos que empiecen con cualquier cosa
+bool consolaComandoInvalido(String* subcadenas) {
+	return consolaIdentificarComando(subcadenas[0]) == ERROR || subcadenas == NULL;
+}
+
+Comando consolaObtenerComando() {
+	Comando comando;
+	String cadena = consolaLeerEntrada();
+	String* subcadenas = stringSeparar(cadena, " ");
+	if(consolaComandoInvalido(subcadenas)) {
+		comando.identificador = ERROR;
+		return comando;
+	}
+	if(stringIguales(subcadenas[0], "rm") && (stringIguales(subcadenas[1], "-b") || stringIguales(subcadenas[1], "-d")))
+		consolaNormalizarComando(subcadenas);
+	comando.identificador = consolaIdentificarComando(subcadenas[0]);
+	consolaProcesarComando(&comando, subcadenas);
+	printf("arg 1 %s\n", comando.argumento1);
+	printf("arg 2 %s\n", comando.argumento2);
+	printf("arg 3 %s\n", comando.argumento3);
+	memoriaLiberar(cadena);
+	return comando;
+}
 
 void consolaAtenderComandos() {
 	Comando comando;
@@ -121,9 +236,9 @@ void consolaAtenderComandos() {
 			case MV: puts("COMANDO  MV"); break;
 			case CAT: puts("COMANDO CAT"); break;
 			case MKDIR: puts("COMANDO MKDIR"); break;
-			case PFROM: puts("COMANDO PFROM"); break;
+			case CPFROM: puts("COMANDO CPFROM"); break;
 			case CPTO: puts("COMANDO CPTO"); break;
-			case CPTBLOCK:puts("COMANDO CPTBLOCK"); break;
+			case CPBLOCK:puts("COMANDO CPBLOCK"); break;
 			case MD5: puts("COMANDO MD5"); break;
 			case LS: puts("COMANDO LS"); break;
 			case INFO: puts("COMANDO INFO"); break;

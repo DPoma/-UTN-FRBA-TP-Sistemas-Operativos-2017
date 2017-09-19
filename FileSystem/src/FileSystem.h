@@ -15,17 +15,17 @@
 #define FORMAT 1
 #define RM 2
 #define RMB 3
-#define RMD 14
-#define RENAME 4
-#define MV 5
-#define CAT 6
-#define MKDIR 7
-#define PFROM 8
-#define CPTO 9
-#define CPTBLOCK 10
-#define MD5 11
-#define LS 12
-#define INFO 13
+#define RMD 4
+#define RENAME 5
+#define MV 6
+#define CAT 7
+#define MKDIR 8
+#define CPFROM 9
+#define CPTO 10
+#define CPBLOCK 11
+#define MD5 12
+#define LS 13
+#define INFO 14
 
 #define C_FORMAT "format"
 #define C_RM "rm"
@@ -35,16 +35,20 @@
 #define C_MV "mv"
 #define C_CAT "cat"
 #define C_MKDIR "mkdir"
-#define C_PFROM "pfrom"
+#define C_CPFROM "cpfrom"
 #define C_CPTO "cpto"
-#define C_CPTBLOCK "cptblock"
+#define C_CPBLOCK "cpblock"
 #define C_MD5 "md5"
 #define C_LS "ls"
 #define C_INFO "info"
 
 typedef struct {
 	int identificador;
-	char argumento[1000];
+	String flag;
+	String argumento1;
+	String argumento2;
+	String argumento3;
+
 } Comando;
 
 typedef struct {
