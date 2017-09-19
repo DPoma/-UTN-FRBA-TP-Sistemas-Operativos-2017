@@ -45,11 +45,50 @@ void socketEscuchar(Socket unSocket, int clientesEsperando) {
 	socketError(estado, "listen");
 }
 
-int socketAceptar(Conexion* conexion, Socket unSocket) {
-	conexion->tamanioAddress = sizeof(SockAddrIn);
-	int estado = accept(unSocket, (struct sockaddr*)&conexion->address, &conexion->tamanioAddress);
-	if(estado == -1)
+
+bool mensajeDatoFalso(Mensaje* mensaje) {
+	return *((int*)mensaje->dato) == false;
+}
+
+bool mensajeDatoVerdadero(Mensaje* mensaje) {
+	return !mensajeDatoFalso(mensaje);
+}
+
+bool mensajeOperacionValida(Mensaje* mensaje) {
+	return !mensajeOperacionErronea(mensaje);
+}
+
+int handShakeEnvioExitoso(Socket unSocket, int idProceso) {
+	int id = idProceso;
+	mensajeEnviar(unSocket, HANDSHAKE, &id, sizeof(int));
+	Mensaje* mensaje = mensajeRecibir(unSocket);
+	int estado = mensajeOperacionValida(mensaje) && mensajeDatoVerdadero(mensaje);
+	mensajeDestruir(mensaje);
+	return estado;
+}
+
+int handShakeRecepcionExitosa(Socket unSocket, int idEsperada) {
+	Mensaje* mensaje = mensajeRecibir(unSocket);
+	int idProceso = (*(int*)mensaje->dato);
+	mensajeDestruir(mensaje);
+	int estado = idProceso == idEsperada;
+	mensajeEnviar(unSocket, HANDSHAKE, &estado, sizeof(int));
+	return estado;
+}
+
+
+Socket socketAceptar(Socket unSocket, int idEsperada) {
+	Conexion conexion;
+	conexion.tamanioAddress = sizeof(SockAddrIn);
+	int estado = accept(unSocket, (struct sockaddr*)&conexion.address, &conexion.tamanioAddress);
+	if(estado == ERROR)
 		perror("accept");
+	if(!handShakeRecepcionExitosa(estado, idEsperada)) {
+		socketCerrar(estado);
+		estado = ERROR;
+		imprimirMensajeProceso("ERROR: No esta permitido aceptar conexiones de este proceso");
+		exit(1);
+	}
 	return estado;
 }
 
@@ -99,19 +138,26 @@ void socketError(int estado, String error) {
 	}
 }
 
-Socket socketCrearListener(String ip, String puerto) {
+Socket socketCrearListener(String puerto) {
 	Conexion conexion;
-	Socket listener = socketCrear(&conexion, ip, puerto);
+	conexion.tamanioAddress = sizeof(conexion.address);
+	Socket listener = socketCrear(&conexion, IP_LOCAL, puerto);
 	socketRedireccionar(listener);
 	socketBindear(&conexion, listener);
 	socketEscuchar(listener, 10);
 	return listener;
 }
 
-Socket socketCrearCliente(String ip, String puerto) {
+Socket socketCrearCliente(String ip, String puerto, int idProceso) {
 	Conexion conexion;
 	Socket cliente = socketCrear(&conexion, ip, puerto);
 	socketConectar(&conexion, cliente);
+	if(!handShakeEnvioExitoso(cliente, idProceso)) {
+		socketCerrar(cliente);
+		cliente = ERROR;
+		imprimirMensajeProceso("ERROR: No esta permitido conectarse a este proceso");
+		exit(1);
+	}
 	return cliente;
 }
 
@@ -276,7 +322,7 @@ bool archivoConfigIncompleto(ArchivoConfig archivoConfig, String* campos) {
 
 ArchivoLog archivoLogCrear(String rutaArchivo, String nombrePrograma) {
 	archivoLogValidar(rutaArchivo);
-	ArchivoLog archivoLog = log_create(rutaArchivo, nombrePrograma, 1, 1);
+	ArchivoLog archivoLog = log_create(rutaArchivo, nombrePrograma, false, 1);
 	return archivoLog;
 }
 
@@ -557,18 +603,27 @@ String stringTomarDesdeInicio(String string, int cantidad) {
 	return string_substring_until(string, cantidad);
 }
 
+int stringSonIguales(char* s1, char* s2) {
+	if (strcmp(s1, s2) == 0)
+		return 1;
+	else
+		return 0;
+}
+
 //--------------------------------------- Funciones para señales -------------------------------------
 
 void senialAsignarFuncion(int unaSenial, void(*funcion)(int)) {
 	signal(unaSenial, funcion);
 }
 
-void imprimirMensajeProceso(char* mensaje) {
+void imprimirMensajeProceso(String mensaje) {
 	puts("----------------------------------------------------------------");
 	puts(mensaje);
 	puts("----------------------------------------------------------------");
 }
 
-
+void pantallaLimpiar() {
+	system("clear");
+}
 
 

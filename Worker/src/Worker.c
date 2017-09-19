@@ -56,7 +56,7 @@ void archivoConfigImprimir(Configuracion* configuracion) {
 	puts("----------------------------------------------------------------");
 }
 
-void cargarCampos() {
+void archivoConfigObtenerCampos() {
 	campos[0] = "IP_FILESYSTEM";
 	campos[1] = "PUERTO_FILESYSTEM";
 	campos[2] = "NOMBRE_NODO";
@@ -89,7 +89,7 @@ int main(void) {
 	system("clear");
 	int estado = 1;
 	imprimirMensajeProceso("# PROCESO WORKER");
-	cargarCampos();
+	archivoConfigObtenerCampos();
 	configuracion = configuracionCrear(RUTA_CONFIG, (void*)configuracionLeerArchivoConfig, campos);
 	senialAsignarFuncion(SIGINT, funcionSenial);
 	archivoConfigImprimir(configuracion);

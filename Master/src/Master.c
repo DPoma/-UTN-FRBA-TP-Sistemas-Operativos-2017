@@ -60,7 +60,7 @@ char* leerCaracteresEntrantes() {
 int main(void) {
 	system("clear");
 	imprimirMensajeProceso("# PROCESO MASTER");
-	cargarCampos();
+	archivoConfigObtenerCampos();
 	configuracion = configuracionCrear(RUTA_CONFIG, (void*)configuracionLeerArchivoConfig, campos);
 	socketYAMA = socketCrearCliente(configuracion->ipYAMA, configuracion->puertoYAMA);
 	printf("Conectado a YAMA en IP: %s | Puerto %s\n", configuracion->ipYAMA, configuracion->puertoYAMA);
@@ -102,7 +102,7 @@ void archivoConfigImprimir(Configuracion* configuracion) {
 	puts("----------------------------------------------------------------");
 }
 
-void cargarCampos() {
+void archivoConfigObtenerCampos() {
 	campos[0] = "IP_YAMA";
 	campos[1] = "PUERTO_YAMA";
 }

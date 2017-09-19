@@ -30,4 +30,4 @@ Socket socketWorker;
 int estado;
 
 Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig);
-void cargarCampos();
+void archivoConfigObtenerCampos();

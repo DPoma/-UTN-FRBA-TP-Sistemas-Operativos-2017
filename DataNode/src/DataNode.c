@@ -11,12 +11,12 @@
 #include "DataNode.h"
 
 int main(void) {
-	system("clear");
+	pantallaLimpiar();
 	imprimirMensajeProceso("# PROCESO DATA NODE");
-	cargarCampos();
+	archivoConfigObtenerCampos();
 	configuracion = configuracionCrear(RUTA_CONFIG, (void*)configuracionLeerArchivoConfig, campos);
 	printf("IP: %s | Puerto %s\n", configuracion->ipFileSystem, configuracion->puertoFileSystem);
-	Socket unSocket = socketCrearCliente(configuracion->ipFileSystem, configuracion->puertoFileSystem);
+	Socket unSocket = socketCrearCliente(configuracion->ipFileSystem, configuracion->puertoFileSystem, ID_DATANODE);
 	estado = 1;
 	//senialAsignarFuncion(SIGINT, funcionSenial);
 	while(estado){
@@ -56,7 +56,7 @@ void archivoConfigImprimir(Configuracion* configuracion) {
 	puts("----------------------------------------------------------------");
 }
 
-void cargarCampos() {
+void archivoConfigObtenerCampos() {
 	campos[0] = "IP_FILESYSTEM";
 	campos[1] = "PUERTO_FILESYSTEM";
 	campos[2] = "NOMBRE_NODO";

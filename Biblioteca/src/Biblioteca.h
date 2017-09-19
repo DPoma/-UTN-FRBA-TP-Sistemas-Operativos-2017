@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
@@ -24,6 +25,18 @@
 #include "commons/log.h"
 #include "commons/string.h"
 #include "commons/collections/list.h"
+
+//--------------------------------------- Constantes -------------------------------------
+
+#define IP_LOCAL "127.0.0.1"
+#define MAX 1024
+#define ERROR -1
+#define HANDSHAKE 0
+#define ID_FILESYSTEM 1
+#define ID_YAMA 2
+#define ID_MASTER 3
+#define ID_WORKER 4
+#define ID_DATANODE 5
 
 //--------------------------------------- Definiciones -------------------------------------
 
@@ -62,33 +75,6 @@ typedef struct {
 	String ip;
 } Conexion;
 
-typedef struct {
-	Conexion conexion;
-	Socket listener;
-	Socket cliente;
-} ServidorSimple;
-
-typedef struct {
-	Socket listener;
-	ListaSockets clientesConectados;
-} Puerto;
-
-typedef struct {
-	Conexion conexion;
-	ListaSockets listaSocketsSelect;
-	ListaSockets listaSocketsMaster;
-	Socket maximoSocket;
-	Socket notificador;
-	Socket observadorNotifcador;
-	int estado;
-	int cantidadPuertos;
-} ControlServidor;
-
-typedef struct {
-	ControlServidor controlServidor;
-	Puerto* listaPuertos;
-} Servidor;
-
 
 //--------------------------------------- Funciones para Socket -------------------------------------
 
@@ -97,7 +83,7 @@ int socketCrear(Conexion* conexion, String ip, String puerto);
 void socketConectar(Conexion* conexion, Socket unSocket);
 void socketBindear(Conexion* conexion, Socket unSocket);
 void socketEscuchar(Socket unSocket, int ClientesEnEspera);
-int socketAceptar(Conexion* conexion, Socket unSocket);
+int socketAceptar(Socket unSocket, int idEsperada);
 void socketRedireccionar(Socket unSocket);
 void socketSelect(Socket cantidadSockets, ListaSockets* listaSockets);
 int socketRecibir(Socket socketEmisor, Dato buffer, int tamanioBuffer);
@@ -107,10 +93,8 @@ bool socketSonIguales(Socket unSocket, Socket otroSocket);
 bool socketSonDistintos(Socket unSocket, Socket otroSocket);
 bool socketEsMayor(Socket unSocket, Socket otroSocket);
 void socketError(int estado, String error);
-Socket socketCrearListener(String ip, String puerto);
-Socket socketCrearCliente(String ip, String puerto);
-bool socketEsListenerDe(Servidor* servidor, Socket unSocket);
-bool socketEsNotificador(Servidor* servidor, Socket unSocket);
+Socket socketCrearListener(String puerto);
+Socket socketCrearCliente(String ip, String puerto, int idProceso);
 
 //--------------------------------------- Funciones para ListaSocket -------------------------------------
 
@@ -243,6 +227,7 @@ String stringTomarDesdeInicio(String string, int cantidad);
 //--------------------------------------- Funciones para señales -------------------------------------
 
 void funcionSenial(int senial);
+void imprimirMensajeProceso(String mensaje);
 
 
 

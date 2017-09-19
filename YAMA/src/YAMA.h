@@ -18,7 +18,6 @@
 #define CANTIDAD_PUERTOS 2
 
 typedef struct {
-	char ipPropio[50];
 	char puertoMaster[50];
 	char ipFileSystem[50];
 	char puertoFileSystem[50];
@@ -32,4 +31,5 @@ ArchivoLog archivoLog;
 int estado;
 
 Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig);
-void cargarCampos();
+void archivoConfigObtenerCampos();
+void pantallaLimpiar();

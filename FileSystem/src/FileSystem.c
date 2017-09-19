@@ -10,82 +10,88 @@
 
 #include "FileSystem.h"
 
-//Identificador de cada comando
-#define FORMAT 1
-#define RM 2
-#define RMB 3
-#define RMD 14
-#define RENAME 4
-#define MV 5
-#define CAT 6
-#define MKDIR 7
-#define PFROM 8
-#define CPTO 9
-#define CPTBLOCK 10
-#define MD5 11
-#define LS 12
-#define INFO 13
-
-#define C_FORMAT "format"
-#define C_RM "rm"
-#define C_RMB "rm -b"
-#define C_RMD "rm -d"
-#define C_RENAME "rename"
-#define C_MV "mv"
-#define C_CAT "cat"
-#define C_MKDIR "mkdir"
-#define C_PFROM "pfrom"
-#define C_CPTO "cpto"
-#define C_CPTBLOCK "cptblock"
-#define C_MD5 "md5"
-#define C_LS "ls"
-#define C_INFO "info"
-
-int sonIguales(char* s1, char* s2) {
-	if (strcmp(s1, s2) == 0)
-		return 1;
-	else
-		return 0;
+int main(void) {
+	fileSystemIniciar();
+	fileSystemCrearConsola();
+	fileSystemAtenderProcesos();
+	fileSystemFinalizar();
+	return EXIT_SUCCESS;
 }
 
-int identificarComando(char* comando) {
-	if(sonIguales(comando, C_FORMAT))
+//--------------------------------------- Funciones de File System -------------------------------------
+
+void fileSystemIniciar() {
+	pantallaLimpiar();
+	imprimirMensajeProceso("# PROCESO FILE SYSTEM");
+	archivoLog = archivoLogCrear(RUTA_LOG, "FileSystem");
+	puts("[EJECUCION] Proceso File System inicializado");
+	log_info(archivoLog, "[EJECUCION] Proceso File System inicializado");
+	estadoFileSystem = 1;
+	archivoConfigObtenerCampos();
+	senialAsignarFuncion(SIGINT, funcionSenial);
+	configuracion = configuracionCrear(RUTA_CONFIG, (void*)configuracionLeerArchivoConfig, campos);
+	configuracionImprimir(configuracion);
+}
+
+void fileSystemCrearConsola() {
+	Hilo hilo;
+	hiloCrear(&hilo, (void*)consolaAtenderComandos, NULL);
+}
+
+void fileSystemAtenderProcesos() {
+	Servidor* servidor = malloc(sizeof(Servidor));
+	servidorInicializar(servidor);
+	while(estadoFileSystem)
+		servidorAtenderPedidos(servidor);
+	servidorFinalizar(servidor);
+}
+
+void fileSystemFinalizar() {
+	puts("[EJECUCION] Proceso File System finalizado");
+	log_info(archivoLog, "[EJECUCION] Proceso File System finalizado");
+}
+
+//--------------------------------------- Funciones de Consola -------------------------------------
+
+
+int consolaIdentificarComando(char* comando) {
+	if(stringSonIguales(comando, C_FORMAT))
 		return FORMAT;
-	if(sonIguales(comando, C_INFO))
+	if(stringSonIguales(comando, C_INFO))
 		return INFO;
-	else if(sonIguales(comando, C_RM))
+	else if(stringSonIguales(comando, C_RM))
 		return RM;
-	else if(sonIguales(comando, C_RMB))
+	else if(stringSonIguales(comando, C_RMB))
 		return RMB;
-	else if(sonIguales(comando, C_RMD))
+	else if(stringSonIguales(comando, C_RMD))
 		return RMD;
-	else if(sonIguales(comando, C_RENAME))
+	else if(stringSonIguales(comando, C_RENAME))
 		return RENAME;
-	else if(sonIguales(comando, C_MV))
+	else if(stringSonIguales(comando, C_MV))
 		return MV;
-	else if(sonIguales(comando, C_CAT))
+	else if(stringSonIguales(comando, C_CAT))
 		return CAT;
-	else if(sonIguales(comando, C_MKDIR))
+	else if(stringSonIguales(comando, C_MKDIR))
 		return MKDIR;
-	else if(sonIguales(comando, C_PFROM))
+	else if(stringSonIguales(comando, C_PFROM))
 		return PFROM;
-	else if(sonIguales(comando, C_CPTO))
+	else if(stringSonIguales(comando, C_CPTO))
 		return CPTO;
-	else if(sonIguales(comando, C_CPTBLOCK))
+	else if(stringSonIguales(comando, C_CPTBLOCK))
 		return CPTBLOCK;
-	else if(sonIguales(comando, C_MD5))
+	else if(stringSonIguales(comando, C_MD5))
 		return MD5;
-	else if(sonIguales(comando, C_LS))
+	else if(stringSonIguales(comando, C_LS))
 		return LS;
-	else if(sonIguales(comando, C_INFO))
+	else if(stringSonIguales(comando, C_INFO))
 		return INFO;
-	else if(sonIguales(comando, C_RENAME))
+	else if(stringSonIguales(comando, C_RENAME))
 		return RENAME;
 	else
 		return -1;
 }
 
-char* leerCaracteresEntrantes() {
+char* consolaLeerCaracteresEntrantes() {
 	int i, caracterLeido;
 	char* cadena = malloc(1000);
 	for(i = 0; (caracterLeido= getchar()) != '\n'; i++)
@@ -95,21 +101,20 @@ char* leerCaracteresEntrantes() {
 }
 
 
-Instruccion obtenerInstruccion() {
-	Instruccion instruccion;
-	char* mensaje = leerCaracteresEntrantes();
-	instruccion.comando = identificarComando(mensaje);
+Comando consolaObtenerComando() {
+	Comando comando;
+	char* mensaje = consolaLeerCaracteresEntrantes();
+	comando.identificador = consolaIdentificarComando(mensaje);
 	free(mensaje);
-	return instruccion;
+	return comando;
 }
 
 
-void atenderInstrucciones() {
-	Instruccion instruccion;
-	while(1) {
-		printf("Ingrese un comando: ");
-		instruccion = obtenerInstruccion();
-		switch(instruccion.comando) {
+void consolaAtenderComandos() {
+	Comando comando;
+	while(estadoFileSystem) {
+		comando = consolaObtenerComando();
+		switch(comando.identificador) {
 			case FORMAT: puts("COMANDO FORMAT"); break;
 			case RM: puts("COMANDO RM"); break;
 			case RMB: puts("COMANDO RM -B"); break;
@@ -129,240 +134,170 @@ void atenderInstrucciones() {
 	}
 }
 
-int main(void) {
-	system("clear");
-	imprimirMensajeProceso("# PROCESO FILE SYSTEM");
-	estado = 1;
-	cargarCampos();
-	configuracion = configuracionCrear(RUTA_CONFIG, (void*)configuracionLeerArchivoConfig, campos);
-	senialAsignarFuncion(SIGINT, funcionSenial);
-	archivoConfigImprimir(configuracion);
-	archivoLog = archivoLogCrear(RUTA_LOG, "Worker");
-	log_info(archivoLog, "Probando mensaje en log...");
-	log_warning(archivoLog, "Probando advertencia en log...");
-	log_error(archivoLog, "Probando error en log...");
-	puts("----------------------------------------------------------------");
-	Hilo hilo;
-	hiloCrear(&hilo, (void*)atenderInstrucciones, NULL);
-	cargarDatos();
-	Servidor servidor = servidorCrear(puertos, CANTIDAD_PUERTOS);
-	while(estado)
-		servidorAtenderClientes(&servidor);
-	servidorFinalizar(&servidor);
-	imprimirMensajeProceso("Proceso File Sytstem finalizado finalizado");
+//--------------------------------------- Funciones de Servidor -------------------------------------
 
-
-	return 0;
+bool servidorObtenerMaximoSocket(Servidor* servidor) {
+	return servidor->maximoSocket;
 }
 
-//--------------------------------------- Funciones para ControlServidor -------------------------------------
-
-void controlServidorInicializar(ControlServidor* controlServidor) {
-	controlServidor->conexion.tamanioAddress = sizeof(controlServidor->conexion.address);
-	controlServidor->maximoSocket = 0;
-	listaSocketsLimpiar(&controlServidor->listaSocketsMaster);
-	listaSocketsLimpiar(&controlServidor->listaSocketsSelect);
-	notificadorInicializar(controlServidor);
+void servidorSetearListaSelect(Servidor* servidor) {
+	servidor->listaSelect = servidor->listaMaster;
 }
 
-int controlServidorCantidadSockets(ControlServidor* controlServidor) {
-	return controlServidor->maximoSocket;
+void servidorControlarMaximoSocket(Servidor* servidor, Socket unSocket) {
+	if(socketEsMayor(unSocket, servidor->maximoSocket))
+		servidor->maximoSocket = unSocket;
 }
 
-void controlServidorSetearListaSelect(ControlServidor* controlServidor) {
-	controlServidor->listaSocketsSelect = controlServidor->listaSocketsMaster;
+void servidorEsperarSolicitud(Servidor* servidor) {
+	socketSelect(servidor->maximoSocket, &servidor->listaSelect);
 }
 
-void controlServidorActualizarMaximoSocket(ControlServidor* controlServidor, Socket unSocket) {
-	if(socketEsMayor(unSocket, controlServidor->maximoSocket))
-		controlServidor->maximoSocket = unSocket;
+bool socketEsDataNode(Servidor* servidor, Socket unSocket) {
+	return listaSocketsContiene(unSocket, &servidor->listaDataNodes);
 }
 
-void controlServidorEjecutarSelect(ControlServidor* controlServidor) {
-	socketSelect(controlServidor->maximoSocket, &controlServidor->listaSocketsSelect);
+bool socketEsYAMA(Servidor* servidor, Socket unSocket) {
+	return socketSonIguales(servidor->procesoYAMA, unSocket);
 }
 
-
-void notificadorInformar(Socket unSocket) {
-	char buffer[BUF_LEN];
-	int length = read(unSocket, buffer, BUF_LEN);
-	int offset = 0;
-	while (offset < length) {
-		struct inotify_event *event = (struct inotify_event *) &buffer[offset];
-		if (event->len) {
-		if (event->mask & IN_MODIFY) {
-		if (!(event->mask & IN_ISDIR)) {
-		if(strcmp(event->name, "FileSystemConfig.conf"))
-			break;
-		ArchivoConfig archivoConfig = config_create(RUTA_CONFIG);
-		if(archivoConfigTieneCampo(archivoConfig, "RUTA_METADATA")){
-			char* ruta = archivoConfigStringDe(archivoConfig, "RUTA_METADATA");
-				if(ruta != configuracion->rutaMetadata){
-					puts("");
-					log_warning(archivoLog, "[CONFIG]: SE MODIFICO EL ARCHIVO DE CONFIGURACION");
-					strcpy(configuracion->rutaMetadata,ruta);
-					log_warning(archivoLog, "[CONFIG]: NUEVA RUTA METADATA: %s\n", configuracion->rutaMetadata);
-				}
-				archivoConfigDestruir(archivoConfig);
-		}
-		}
-		}
-		}
-		offset += sizeof (struct inotify_event) + event->len;
-		}
-
-	//Esto se haria en otro lado
-
-	//inotify_rm_watch(file_descriptor, watch_descriptor);
-		//close(file_descriptor);
-}
-
-
-//--------------------------------------- Funciones para Puerto -------------------------------------
-
-void puertoActivarListener(Puerto* puerto, Conexion* conexion) {
-	puerto->listener = socketCrearListener(conexion->ip, conexion->puerto);
-	printf("Esperando conexiones en IP: %s | Puerto: %s\n", conexion->ip, conexion->puerto);
-}
-
-void puertoFinalizarConexionCon(Servidor* servidor, Socket unSocket) {
-	socketCerrar(unSocket);
-	listaSocketsEliminar(unSocket, &servidor->controlServidor.listaSocketsMaster);
-	int indice;
-	for(indice = 0; !listaSocketsContiene(unSocket,&servidor->listaPuertos[indice].clientesConectados); indice++);
-	listaSocketsEliminar(unSocket, &servidor->listaPuertos[indice].clientesConectados);
-	printf("El socket %d finalizo la conexion\n", unSocket);
-}
-
-int puertoBuscarListener(Servidor* servidor, Socket unSocket) {
-	int indice;
-	for(indice = 0; socketSonDistintos(unSocket, servidor->listaPuertos[indice].listener) && indice < CANTIDAD_PUERTOS; indice++);
-	if(indice >= CANTIDAD_PUERTOS)
-		indice = -1;
-	return indice;
-}
-
-void puertoAceptarCliente(Socket unSocket, Servidor* servidor) {
-	int nuevoSocket = socketAceptar(&servidor->controlServidor.conexion, unSocket);
-	if(nuevoSocket != -1) {
-		int indice =  puertoBuscarListener(servidor, unSocket);
-		if(indice != -1)
-			listaSocketsAgregar(nuevoSocket, &servidor->listaPuertos[indice].clientesConectados);
-		listaSocketsAgregar(nuevoSocket, &servidor->controlServidor.listaSocketsMaster);
-		controlServidorActualizarMaximoSocket(&servidor->controlServidor, nuevoSocket);
-		puts("Un proceso se ha conectado");
+void servidorFinalizarConexion(Servidor* servidor, Socket unSocket) {
+	listaSocketsEliminar(unSocket, &servidor->listaMaster);
+	if(socketEsDataNode(servidor, unSocket)) {
+		listaSocketsEliminar(unSocket, &servidor->listaDataNodes);
+		puts("[CONEXION] Un proceso Data Node se ha desconectado");
+		log_info(archivoLog, "[CONEXION] Un proceso Data Node se ha desconectado");
 	}
+	else {
+		puts("[CONEXION] El proceso YAMA se ha desconectado");
+		log_info(archivoLog, "[CONEXION] El proceso YAMA se ha desconectado");
+	}
+
+	socketCerrar(unSocket);
 }
 
-void puertoRecibirMensajeCliente(Servidor* servidor, Socket unSocket) {
+void servidorEstablecerConexion(Servidor* servidor, Socket unSocket) {
+	listaSocketsAgregar(unSocket, &servidor->listaMaster);
+	servidorControlarMaximoSocket(servidor, unSocket);
+}
+
+Socket servidorAceptarDataNode(Servidor* servidor, Socket unSocket) {
+	Socket nuevoSocket;
+	nuevoSocket = socketAceptar(unSocket, ID_DATANODE);
+	if(nuevoSocket != ERROR) {
+		listaSocketsAgregar(nuevoSocket, &servidor->listaDataNodes);
+		puts("[CONEXION] Proceso Data Node conectado exitosamente.");
+		log_info(archivoLog, "[CONEXION] Proceso Data Node conectado exitosamente");
+	}
+	return nuevoSocket;
+}
+
+Socket servidorAceptarYAMA(Servidor* servidor, Socket unSocket) {
+	Socket nuevoSocket;
+	nuevoSocket = socketAceptar(unSocket, ID_YAMA);
+	if(nuevoSocket != ERROR) {
+		servidor->procesoYAMA = nuevoSocket;
+		puts("[CONEXION] Proceso YAMA conectado exitosamente.");
+		log_info(archivoLog, "[CONEXION] Proceso YAMA conectado exitosamente");
+	}
+	return nuevoSocket;
+}
+
+bool socketEsListenerDataNode(Servidor* servidor, Socket unSocket) {
+	return socketSonIguales(servidor->listenerDataNode, unSocket);
+}
+
+
+void servidorAceptarConexion(Servidor* servidor, Socket unSocket) {
+	Socket nuevoSocket;
+	if(socketEsListenerDataNode(servidor, unSocket))
+		nuevoSocket = servidorAceptarDataNode(servidor, unSocket);
+	else
+		nuevoSocket = servidorAceptarYAMA(servidor, unSocket);
+	if(nuevoSocket != ERROR)
+		servidorEstablecerConexion(servidor, nuevoSocket);
+}
+
+void servidorRecibirMensaje(Servidor* servidor, Socket unSocket) {
 	Mensaje* mensaje = mensajeRecibir(unSocket);
 	if(mensajeOperacionErronea(mensaje))
-		puertoFinalizarConexionCon(servidor, unSocket);
-	else {
-		if(!strcmp(mensaje->dato,"quit\n"))
-			servidor->controlServidor.estado = 0;
-		else {
-			printf("Nuevo mensaje en socket %i: %s", unSocket, (char*)(mensaje->dato));
-			mensajeEnviar(8, 4, mensaje->dato, stringLongitud(mensaje->dato)+1);
-		}
-
-	}
+		servidorFinalizarConexion(servidor, unSocket);
+	else
+		puts("[MENSAJE]");
 	mensajeDestruir(mensaje);
 }
 
 
-void puertoActualizarSocket(Servidor* servidor, Socket unSocket) {
-	if (listaSocketsContiene(unSocket, &servidor->controlServidor.listaSocketsSelect)) {
-		if (socketEsListenerDe(servidor, unSocket))
-			puertoAceptarCliente(unSocket, servidor);
+bool socketEsListenerYAMA(Servidor* servidor, Socket unSocket) {
+	return socketSonIguales(servidor->listenerYAMA, unSocket);
+}
+
+bool socketEsListener(Servidor* servidor, Socket unSocket) {
+	return socketEsListenerDataNode(servidor, unSocket) || socketEsListenerYAMA(servidor, unSocket);
+}
+
+bool socketRealizoSolicitud(Servidor* servidor, Socket unSocket) {
+	return listaSocketsContiene(unSocket, &servidor->listaSelect);
+}
+
+void servidorControlarSocket(Servidor* servidor, Socket unSocket) {
+	if (socketRealizoSolicitud(servidor, unSocket)) {
+		if(socketEsListener(servidor, unSocket))
+			servidorAceptarConexion(servidor, unSocket);
 		else
-			if(!socketEsNotificador(servidor, unSocket)) {
-				if(listaSocketsContiene(unSocket, &servidor->listaPuertos[0].clientesConectados))
-					printf("Puerto 0: ");
-				else if(listaSocketsContiene(unSocket, &servidor->listaPuertos[1].clientesConectados))
-					printf("Puerto 1: ");
-				puertoRecibirMensajeCliente(servidor, unSocket);
-			}
-			else
-				notificadorInformar(unSocket);
-
+			servidorRecibirMensaje(servidor, unSocket);
 	}
 }
 
-//--------------------------------------- Funciones para Servidor -------------------------------------
-void notificadorInicializar(ControlServidor* controlServidor) {
-	controlServidor->notificador = inotify_init();
-	controlServidor->observadorNotifcador= inotify_add_watch(controlServidor->notificador, RUTA_NOTIFY, IN_MODIFY);
-	listaSocketsAgregar(controlServidor->notificador, &controlServidor->listaSocketsMaster);
-	controlServidorActualizarMaximoSocket(controlServidor, controlServidor->notificador);
+void servidorActivarListenerYAMA(Servidor* servidor) {
+	servidor->listenerYAMA = socketCrearListener(configuracion->puertoYAMA);
+	listaSocketsAgregar(servidor->listenerYAMA, &servidor->listaMaster);
+	servidorControlarMaximoSocket(servidor, servidor->listenerYAMA);
 }
 
-
-void servidorActivarPuertos(Servidor* servidor, String* puertos) {
-	controlServidorInicializar(&servidor->controlServidor);
-	servidor->listaPuertos = malloc(sizeof(Puerto) *  servidor->controlServidor.cantidadPuertos);
-	int indice;
-	for(indice = 0; indice < servidor->controlServidor.cantidadPuertos; indice++) {
-		servidor->controlServidor.conexion.ip = ipFileSystem;
-		servidor->controlServidor.conexion.puerto = puertos[indice];
-		puertoActivarListener(&servidor->listaPuertos[indice], &servidor->controlServidor.conexion);
-		listaSocketsAgregar(servidor->listaPuertos[indice].listener, &servidor->controlServidor.listaSocketsMaster);
-		controlServidorActualizarMaximoSocket(&servidor->controlServidor, servidor->listaPuertos[indice].listener);
-	}
+void servidorActivarListenerDataNode(Servidor* servidor) {
+	servidor->listenerDataNode = socketCrearListener(configuracion->puertoDataNode);
+	listaSocketsAgregar(servidor->listenerDataNode, &servidor->listaMaster);
+	servidorControlarMaximoSocket(servidor, servidor->listenerDataNode);
 }
 
-void servidorSetearEstado(Servidor* servidor, int estado) {
-	servidor->controlServidor.estado = estado;
+void servidorActivarListeners(Servidor* servidor) {
+	servidorActivarListenerDataNode(servidor);
+	servidorActivarListenerYAMA(servidor);
 }
 
-Servidor servidorCrear(String* puertos, int cantidadPuertos) {
-	Servidor servidor;
-	servidor.controlServidor.estado = 1;
-	servidor.controlServidor.cantidadPuertos = cantidadPuertos;
-	servidorActivarPuertos(&servidor, puertos);
-	return servidor;
+void servidorInicializar(Servidor* servidor) {
+	servidor->maximoSocket = 0;
+	listaSocketsLimpiar(&servidor->listaMaster);
+	listaSocketsLimpiar(&servidor->listaSelect);
+	listaSocketsLimpiar(&servidor->listaDataNodes);
+	servidorActivarListeners(servidor);
 }
 
 void servidorFinalizar(Servidor* servidor) {
 	archivoLogDestruir(archivoLog);
-	free(servidor->listaPuertos);
 	free(configuracion);
 }
 
-bool servidorEstaActivo(Servidor servidor) {
-	return servidor.controlServidor.estado == 1;
-}
-
-void servidorAtenderClientes(Servidor* servidor) {
-	controlServidorSetearListaSelect(&servidor->controlServidor);
-	controlServidorEjecutarSelect(&servidor->controlServidor);
-	servidorActualizarPuertos(servidor);
-}
-
-void servidorActualizarPuertos(Servidor* servidor) {
+void servidorAtenderSolicitud(Servidor* servidor) {
 	Socket unSocket;
-	int maximoSocket = servidor->controlServidor.maximoSocket;
+	int maximoSocket = servidor->maximoSocket;
 	for(unSocket = 0; unSocket <= maximoSocket; unSocket++)
-		puertoActualizarSocket(servidor, unSocket);
+		servidorControlarSocket(servidor, unSocket);
 }
 
-bool socketEsListenerDe(Servidor* servidor, Socket unSocket) {
-	int indice;
-	for(indice = 0; indice < servidor->controlServidor.cantidadPuertos; indice++)
-		if(socketSonIguales(unSocket, servidor->listaPuertos[indice].listener))
-			return 1;
-	return 0;
+void servidorAtenderPedidos(Servidor* servidor) {
+	servidorSetearListaSelect(servidor);
+	servidorEsperarSolicitud(servidor);
+	servidorAtenderSolicitud(servidor);
 }
 
 
-bool socketEsNotificador(Servidor* servidor, Socket unSocket) {
-	return servidor->controlServidor.notificador == unSocket;
-}
 
+//--------------------------------------- Funciones de Configuracion -------------------------------------
 
 Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig) {
 	Configuracion* configuracion = malloc(sizeof(Configuracion));
-	strcpy(configuracion->ipFileSystem, archivoConfigStringDe(archivoConfig, "IP_FILESYSTEM"));
 	strcpy(configuracion->puertoYAMA, archivoConfigStringDe(archivoConfig, "PUERTO_YAMA"));
 	strcpy(configuracion->puertoDataNode, archivoConfigStringDe(archivoConfig, "PUERTO_DATANODE"));
 	strcpy(configuracion->rutaMetadata, archivoConfigStringDe(archivoConfig, "RUTA_METADATA"));
@@ -370,35 +305,25 @@ Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig) {
 	return configuracion;
 }
 
-void archivoConfigImprimir(Configuracion* configuracion) {
-	puts("DATOS DE CONFIGURACION");
-	puts("----------------------------------------------------------------");
-	printf("IP File System: %s\n", configuracion->ipFileSystem);
-	printf("Puerto YAMA: %s\n", configuracion->puertoYAMA);
-	printf("Puerto Data Node: %s\n", configuracion->puertoDataNode);
-	printf("Ruta Metadata: %s\n", configuracion->rutaMetadata);
-	puts("----------------------------------------------------------------");
+void configuracionImprimir(Configuracion* configuracion) {
+	printf("[CONEXION] Esperando conexion de YAMA (Puerto: %s)\n", configuracion->puertoYAMA);
+	log_info(archivoLog, "[CONEXION] Esperando conexion de YAMA (Puerto: %s)\n", configuracion->puertoYAMA);
+	printf("[CONEXION] Esperando conexiones de Data Nodes (Puerto: %s)\n", configuracion->puertoDataNode);
+	log_info(archivoLog, "[CONEXION] Esperando conexiones de Data Nodes (Puerto: %s)\n", configuracion->puertoDataNode);
+	printf("[CONFIGURACION] Ruta Metadata: %s.\n", configuracion->rutaMetadata);
+	log_info(archivoLog, "[CONFIGURACION] Ruta Metadata: %s.\n", configuracion->rutaMetadata);
 }
 
-void cargarCampos() {
-	campos[0] = "IP_FILESYSTEM";
-	campos[1] = "PUERTO_YAMA";
-	campos[2] = "PUERTO_DATANODE";
-	campos[3] = "RUTA_METADATA";
-}
-
-void cargarDatos() {
-	ipFileSystem = configuracion->ipFileSystem;
-	puertos[0] = configuracion->puertoYAMA;
-	puertos[1] = configuracion->puertoDataNode;
+void archivoConfigObtenerCampos() {
+	campos[0] = "PUERTO_YAMA";
+	campos[1] = "PUERTO_DATANODE";
+	campos[2] = "RUTA_METADATA";
 }
 
 void funcionSenial(int senial) {
-	estado = 0;
+	estadoFileSystem = 0;
 	puts("");
-	imprimirMensajeProceso("PROCESO FILE SYSTEM FINALIZADO");
+	puts("[EJECUCION] Proceso File System finalizado.");
+	log_info(archivoLog, "[EJECUCION] Proceso File System finalizado.");
 }
-
-
-
 

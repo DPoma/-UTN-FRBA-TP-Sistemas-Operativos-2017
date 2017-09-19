@@ -11,20 +11,33 @@
 #include "YAMA.h"
 
 int main(void) {
-	system("clear");
+
+	pantallaLimpiar();
 	int estado = 1;
 	imprimirMensajeProceso("# PROCESO YAMA");
-	cargarCampos();
+	archivoConfigObtenerCampos();
 	configuracion = configuracionCrear(RUTA_CONFIG, (void*)configuracionLeerArchivoConfig, campos);
-	Socket socketFileSystem = socketCrearCliente(configuracion->ipFileSystem, configuracion->puertoFileSystem);
-	printf("Conectado a File System en IP: %s | Puerto %s\n", configuracion->ipFileSystem, configuracion->puertoFileSystem);
+	archivoLog = archivoLogCrear(RUTA_LOG, "YAMA");
+
+	printf("[CONEXION] Estableciendo conexion con File System (IP: %s | Puerto %s)\n", configuracion->ipFileSystem, configuracion->puertoFileSystem);
+	log_info(archivoLog, "[CONEXION] Realizando conexion con File System (IP: %s | Puerto %s)\n", configuracion->ipFileSystem, configuracion->puertoFileSystem);
+
+	Socket socketFileSystem = socketCrearCliente(configuracion->ipFileSystem, configuracion->puertoFileSystem, ID_YAMA);
+
+	log_info(archivoLog, "[CONEXION] Conexion exitosa con File System (IP: %s | Puerto %s)\n", configuracion->ipFileSystem, configuracion->puertoFileSystem);
+	printf("[CONEXION] Conexion exitosa con File System (IP: %s | Puerto %s)\n", configuracion->ipFileSystem, configuracion->puertoFileSystem);
+
 	estado = 1;
-	Socket socketListenerMaster = socketCrearListener(configuracion->ipPropio,configuracion->puertoMaster);
-	printf("Esperando Master en IP: %s | Puerto %s\n", configuracion->ipPropio, configuracion->puertoMaster);
-	Conexion conexion;
-	conexion.tamanioAddress = sizeof(conexion.address);
-	Socket socketMaster = socketAceptar(&conexion, socketListenerMaster);
-	printf("Master aceptado en IP: %s | Puerto %s\n", configuracion->ipPropio, configuracion->puertoMaster);
+	Socket socketListenerMaster = socketCrearListener(configuracion->puertoMaster);
+
+	printf("[CONEXION] Esperando conexiones de Master (Puerto %s)\n", configuracion->puertoMaster);
+	log_info(archivoLog, "[CONEXION] Esperando conexiones de Master (Puerto %s)\n", configuracion->puertoMaster);
+
+	Socket socketMaster = socketAceptar(socketListenerMaster, ID_MASTER);
+
+	printf("[CONEXION] Conexion exitosa con Master\n");
+	log_info(archivoLog, "[CONEXION] Conexion exitosa con Master\n");
+
 	while(estado) {
 		Mensaje* mensaje = mensajeRecibir(socketMaster);
 		if(mensajeOperacionErronea(mensaje))
@@ -36,13 +49,10 @@ int main(void) {
 	}
 	close(socketMaster);
 	return 0;
-
 }
-
 
 Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig) {
 	Configuracion* configuracion = malloc(sizeof(Configuracion));
-	strcpy(configuracion->ipPropio, archivoConfigStringDe(archivoConfig, "IP_PROPIO"));
 	strcpy(configuracion->puertoMaster, archivoConfigStringDe(archivoConfig, "PUERTO_MASTER"));
 	strcpy(configuracion->ipFileSystem, archivoConfigStringDe(archivoConfig, "IP_FILESYSTEM"));
 	strcpy(configuracion->puertoFileSystem, archivoConfigStringDe(archivoConfig, "PUERTO_FILESYSTEM"));
@@ -52,10 +62,9 @@ Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig) {
 	return configuracion;
 }
 
-void archivoConfigImprimir(Configuracion* configuracion) {
+void configuracionImprimir(Configuracion* configuracion) {
 	puts("DATOS DE CONFIGURACION");
 	puts("----------------------------------------------------------------");
-	printf("IP Propio: %s\n", configuracion->ipPropio);
 	printf("Puerto Master: %s\n", configuracion->puertoMaster);
 	printf("IP File System: %s\n", configuracion->ipFileSystem);
 	printf("Puerto File System: %s\n", configuracion->puertoFileSystem);
@@ -64,7 +73,7 @@ void archivoConfigImprimir(Configuracion* configuracion) {
 	puts("----------------------------------------------------------------");
 }
 
-void cargarCampos() {
+void archivoConfigObtenerCampos() {
 	campos[0] = "IP_PROPIO";
 	campos[1] = "PUERTO_MASTER";
 	campos[2] = "IP_FILESYSTEM";

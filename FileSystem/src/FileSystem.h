@@ -6,65 +6,125 @@
  *      Author: Dario Poma
  */
 
-#include <stdbool.h>
 #include "../../Biblioteca/src/Biblioteca.c"
 
-#define TAMANIO_DATO_MAXIMO 1024
-#define CLIENTES_ESPERANDO 5
-#define EVENT_SIZE (sizeof(struct inotify_event)+24)
-#define BUF_LEN (1024*EVENT_SIZE)
 #define RUTA_CONFIG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/FileSystem/FileSystemConfig.conf"
 #define RUTA_NOTIFY "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/FileSystem"
 #define RUTA_LOG "/home/utnso/Escritorio/FileSystem.log"
-#define CANTIDAD_PUERTOS 2
+
+//Identificador de cada comando
+#define FORMAT 1
+#define RM 2
+#define RMB 3
+#define RMD 14
+#define RENAME 4
+#define MV 5
+#define CAT 6
+#define MKDIR 7
+#define PFROM 8
+#define CPTO 9
+#define CPTBLOCK 10
+#define MD5 11
+#define LS 12
+#define INFO 13
+
+#define C_FORMAT "format"
+#define C_RM "rm"
+#define C_RMB "rm -b"
+#define C_RMD "rm -d"
+#define C_RENAME "rename"
+#define C_MV "mv"
+#define C_CAT "cat"
+#define C_MKDIR "mkdir"
+#define C_PFROM "pfrom"
+#define C_CPTO "cpto"
+#define C_CPTBLOCK "cptblock"
+#define C_MD5 "md5"
+#define C_LS "ls"
+#define C_INFO "info"
 
 typedef struct {
-	int comando;
+	int identificador;
 	char argumento[1000];
-} Instruccion;
+} Comando;
 
+typedef struct {
+	ListaSockets listaSelect;
+	ListaSockets listaMaster;
+	ListaSockets listaDataNodes;
+	Socket maximoSocket;
+	Socket listenerYAMA;
+	Socket listenerDataNode;
+	Socket procesoYAMA;
+} Servidor;
 
 
 typedef struct {
-	char ipFileSystem[50];
 	char puertoYAMA[50];
 	char puertoDataNode[50];
 	char rutaMetadata[100];
 } Configuracion;
 
-String campos[5];
+String campos[3];
 String ipFileSystem;
 String puertos[2];
 Configuracion* configuracion;
 ArchivoLog archivoLog;
-int estado;
+int estadoFileSystem;
+Servidor servidorFileSystem;
 
-//--------------------------------------- Funciones para Servidor -------------------------------------
+//--------------------------------------- Funciones de File System -------------------------------------
 
-void controlServidorInicializar(ControlServidor* controlServidor);
-int controlServidorCantidadSockets(ControlServidor* servidor);
-void controlServidorSetearListaSelect(ControlServidor* servidor);
-void controlServidorActualizarMaximoSocket(ControlServidor* servidor, Socket unSocket);
-void controlServidorEjecutarSelect(ControlServidor* servidor);
+void fileSystemIniciar();
+void fileSystemCrearConsola();
+void fileSystemAtenderProcesos();
+void fileSystemFinalizar();
 
-void puertoActivarListener(Puerto* puerto, Conexion* conexion);
-void puertoFinalizarConexionCon(Servidor* servidor, Socket unSocket);
-void puertoAceptarCliente(Socket unSocket, Servidor* servidor);
-void puertoRecibirMensajeCliente(Servidor* servidor, Socket unSocket);
-void puertoActualizarSocket(Servidor* servidor, Socket unSocket);
+//--------------------------------------- Funciones de Socket-------------------------------------
 
-void servidorActivarPuertos(Servidor* servidor, String* puertos);
-void servidorSetearEstado(Servidor* servidor, int estado);
-Servidor servidorCrear(String* puertos, int cantidadPuertos);
-void servidorFinalizar();
-bool servidorEstaActivo(Servidor servidor);
-void servidorAtenderClientes(Servidor* servidor);
-void servidorActualizarPuertos(Servidor* servidor);
+bool socketEsListenerYAMA(Servidor* servidor, Socket unSocket);
+bool socketEsListener(Servidor* servidor, Socket unSocket);
+bool socketRealizoSolicitud(Servidor* servidor, Socket unSocket);
+bool socketEsDataNode(Servidor* servidor, Socket unSocket);
+bool socketEsYAMA(Servidor* servidor, Socket unSocket);
+bool socketEsListenerDataNode(Servidor* servidor, Socket unSocket);
 
-void notificadorInformar(Socket unSocket);
-void notificadorInicializar(ControlServidor* controlServidor);
+//--------------------------------------- Funciones de Servidor -------------------------------------
+
+bool servidorObtenerMaximoSocket(Servidor* servidor);
+void servidorSetearListaSelect(Servidor* servidor);
+void servidorControlarMaximoSocket(Servidor* servidor, Socket unSocket);
+void servidorEsperarSolicitud(Servidor* servidor);
+void servidorFinalizarConexion(Servidor* servidor, Socket unSocket);
+void servidorEstablecerConexion(Servidor* servidor, Socket unSocket);
+Socket servidorAceptarDataNode(Servidor* servidor, Socket unSocket);
+Socket servidorAceptarYAMA(Servidor* servidor, Socket unSocket);
+void servidorAceptarConexion(Servidor* servidor, Socket unSocket);
+void servidorRecibirMensaje(Servidor* servidor, Socket unSocket);
+void servidorControlarSocket(Servidor* servidor, Socket unSocket);
+void servidorActivarListenerYAMA(Servidor* servidor);
+void servidorActivarListenerDataNode(Servidor* servidor);
+void servidorActivarListeners(Servidor* servidor);
+void servidorInicializar(Servidor* servidor);
+void servidorFinalizar(Servidor* servidor);
+void servidorAtenderSolicitud(Servidor* servidor);
+void servidorAtenderPedidos(Servidor* servidor);
+
+//--------------------------------------- Funciones de Consola -------------------------------------
+
+void consolaAtenderComandos();
+int consolaIdentificarComando(char* comando);
+char* consolaLeerCaracteresEntrantes();
+Comando consolaObtenerComando();
+
+//--------------------------------------- Funciones de Configuracion -------------------------------------
+
+void configuracionImprimir(Configuracion* configuracion);
 Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig);
-void cargarCampos();
-void cargarDatos();
-void archivoConfigImprimir(Configuracion* configuracion);
+
+
+void archivoConfigObtenerCampos();
 void funcionSenial(int senial);
+
+
+
