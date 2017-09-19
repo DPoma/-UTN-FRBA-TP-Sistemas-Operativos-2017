@@ -89,6 +89,7 @@ void notificadorInformar(Socket unSocket) {
 					log_warning(archivoLog, "[CONFIG]: SE MODIFICO EL ARCHIVO DE CONFIGURACION");
 					configuracion->retardoPlanificacion = retardo;
 					log_warning(archivoLog, "[CONFIG]: NUEVA RUTA METADATA: %s\n", configuracion->retardoPlanificacion);
+
 				}
 				archivoConfigDestruir(archivoConfig);
 		}
@@ -141,7 +142,7 @@ void servidorAceptarConexion(Servidor* servidor, Socket socketListener) {
 
 void servidorRecibirMensaje(Servidor* servidor, Socket unSocket) {
 	Mensaje* mensaje = mensajeRecibir(unSocket);
-	if(mensajeOperacionErronea(mensaje))
+	if(mensajeDesconexion(mensaje))
 		servidorFinalizarConexion(servidor, unSocket);
 	else
 		puts("[MENSAJE]");

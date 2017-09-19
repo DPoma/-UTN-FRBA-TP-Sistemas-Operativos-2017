@@ -30,8 +30,11 @@
 
 #define IP_LOCAL "127.0.0.1"
 #define MAX 1024
+#define LISTEN 10
 #define ERROR -1
-#define HANDSHAKE 0
+#define NULO 0
+#define DESCONEXION 0
+#define HANDSHAKE 1
 #define ID_FILESYSTEM 1
 #define ID_YAMA 2
 #define ID_MASTER 3
@@ -47,6 +50,7 @@ typedef char* String;
 typedef socklen_t Socklen;
 typedef struct addrinfo* AddrInfo;
 typedef struct sockaddr_in SockAddrIn;
+typedef struct sockaddr* SockAddr;
 typedef t_config* ArchivoConfig;
 typedef t_log* ArchivoLog;
 typedef t_log_level NivelLog;
@@ -64,7 +68,7 @@ typedef struct {
 
 typedef struct {
 	Header header;
-	Puntero dato;
+	Puntero datos;
 } Mensaje;
 
 typedef struct {
@@ -113,6 +117,12 @@ bool mensajeOperacionIgualA(Mensaje* mensaje, int operacion);
 Mensaje* mensajeRecibir(Socket socketEmisor);
 bool mensajeOperacionErronea(Mensaje* mensaje);
 void mensajeDestruir(Mensaje* mensaje);
+void mensajeAvisarDesconexion(Mensaje* mensaje);
+bool mensajeConexionFinalizada(int bytes);
+void mensajeRevisarConexion(Mensaje* mensaje, Socket socketReceptor, int bytes);
+void mensajeObtenerDatos(Mensaje* mensaje, Socket socketReceptor);
+bool mensajeDesconexion(Mensaje* mensaje) ;
+
 //--------------------------------------- Funciones para Header -------------------------------------
 
 Header headerCrear(int operacion, int tamanio);
@@ -121,6 +131,7 @@ Header headerCrear(int operacion, int tamanio);
 
 ArchivoConfig archivoConfigCrear(String path, String* campos);
 bool archivoConfigTieneCampo(ArchivoConfig archivoConfig, String campo);
+bool archivoConfigFaltaCampo(ArchivoConfig archivoConfig, String campo);
 String archivoConfigStringDe(ArchivoConfig archivoConfig, String campo);
 int archivoConfigEnteroDe(ArchivoConfig archivoConfig, String campo);
 long archivoConfigLongDe(ArchivoConfig archivoConfig, String campo);
@@ -146,8 +157,6 @@ String archivoLogNivelLogAString(NivelLog nivelLog);
 NivelLog archivoLogStingANivelLog(String stringNivelLog);
 void archivoLogValidar(String rutaArchivo);
 
-
-void* configuracionProcesoCrear(String rutaArchivo, void*(*configProcesoCrear)(ArchivoConfig archivoConfiguracion), String* campos);
 //--------------------------------------- Funciones para Semaforo -------------------------------------
 
 
@@ -224,11 +233,21 @@ String stringTomarCantidad(String string, int desde, int cantidad);
 String stringTomarDesdePosicion(String string, int posicion);
 String stringTomarDesdeInicio(String string, int cantidad);
 
-//--------------------------------------- Funciones para señales -------------------------------------
+//--------------------------------------- Funciones de HandShake-------------------------------------
+
+int handShakeRecepcionExitosa(Socket unSocket, int idEsperada);
+int handShakeEnvioExitoso(Socket unSocket, int idProceso);
+void handShakeError(Socket unSocket);
+int handShakeRecepcionFallida(Socket unSocket, int idEsperada);
+int handShakeEnvioFallido(Socket unSocket, int idProceso);
+bool handShakeRealizado(Mensaje* mensaje);
+bool handShakeAceptado(Mensaje* mensaje);
+bool handShakeIdsIguales(int idEnviada, int idEsperada);
+
+//--------------------------------------- Funciones varias -------------------------------------
 
 void funcionSenial(int senial);
 void imprimirMensajeProceso(String mensaje);
-
 
 
 

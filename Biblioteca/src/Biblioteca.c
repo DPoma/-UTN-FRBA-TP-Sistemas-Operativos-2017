@@ -14,14 +14,14 @@
 
 void socketConfigurar(Conexion* conexion, String ip, String puerto) {
 	struct addrinfo hints;
-	memset(&hints, 0, sizeof(hints));
+	memset(&hints, NULO, sizeof(hints));
 	hints.ai_family = AF_UNSPEC;		// No importa si uso IPv4 o IPv6
 	hints.ai_flags = AI_PASSIVE;		// Asigna el address del localhost: 127.0.0.1
 	hints.ai_socktype = SOCK_STREAM;	// Indica que usaremos el protocolo TCP
-	getaddrinfo(ip, puerto, &hints, &conexion->informacion);// Carga en serverInfo los datos de la conexion
+	getaddrinfo(ip, puerto, &hints, &conexion->informacion); // Carga en serverInfo los datos de la conexion
 }
 
-int socketCrear(Conexion* conexion, String ip, String puerto) {
+Socket socketCrear(Conexion* conexion, String ip, String puerto) {
 	socketConfigurar(conexion, ip, puerto);
 	Socket unSocket = socket(conexion->informacion->ai_family, conexion->informacion->ai_socktype, conexion->informacion->ai_protocol);
 	socketError(unSocket, "socket");
@@ -46,50 +46,14 @@ void socketEscuchar(Socket unSocket, int clientesEsperando) {
 }
 
 
-bool mensajeDatoFalso(Mensaje* mensaje) {
-	return *((int*)mensaje->dato) == false;
-}
-
-bool mensajeDatoVerdadero(Mensaje* mensaje) {
-	return !mensajeDatoFalso(mensaje);
-}
-
-bool mensajeOperacionValida(Mensaje* mensaje) {
-	return !mensajeOperacionErronea(mensaje);
-}
-
-int handShakeEnvioExitoso(Socket unSocket, int idProceso) {
-	int id = idProceso;
-	mensajeEnviar(unSocket, HANDSHAKE, &id, sizeof(int));
-	Mensaje* mensaje = mensajeRecibir(unSocket);
-	int estado = mensajeOperacionValida(mensaje) && mensajeDatoVerdadero(mensaje);
-	mensajeDestruir(mensaje);
-	return estado;
-}
-
-int handShakeRecepcionExitosa(Socket unSocket, int idEsperada) {
-	Mensaje* mensaje = mensajeRecibir(unSocket);
-	int idProceso = (*(int*)mensaje->dato);
-	mensajeDestruir(mensaje);
-	int estado = idProceso == idEsperada;
-	mensajeEnviar(unSocket, HANDSHAKE, &estado, sizeof(int));
-	return estado;
-}
-
-
 Socket socketAceptar(Socket unSocket, int idEsperada) {
 	Conexion conexion;
 	conexion.tamanioAddress = sizeof(SockAddrIn);
-	int estado = accept(unSocket, (struct sockaddr*)&conexion.address, &conexion.tamanioAddress);
-	if(estado == ERROR)
-		perror("accept");
-	if(!handShakeRecepcionExitosa(estado, idEsperada)) {
-		socketCerrar(estado);
-		estado = ERROR;
-		imprimirMensajeProceso("ERROR: No esta permitido aceptar conexiones de este proceso");
-		exit(1);
-	}
-	return estado;
+	Socket nuevoSocket = accept(unSocket, (SockAddr)&conexion.address, &conexion.tamanioAddress);
+	socketError(nuevoSocket, "accept");
+	if(handShakeRecepcionFallida(nuevoSocket, idEsperada))
+		handShakeError(nuevoSocket);
+	return nuevoSocket;
 }
 
 void socketRedireccionar(Socket unSocket) {
@@ -110,7 +74,7 @@ int socketRecibir(Socket socketEmisor, Puntero buffer, int tamanioBuffer) {
 }
 
 int socketEnviar(Socket socketReceptor, Puntero mensaje, int tamanioMensaje) {
-	int estado = send(socketReceptor, mensaje, tamanioMensaje, 0);
+	int estado = send(socketReceptor, mensaje, tamanioMensaje, NULO);
 	socketError(estado, "send");
 	return estado;
 }
@@ -132,9 +96,9 @@ bool socketEsMayor(Socket unSocket, Socket otroSocket) {
 }
 
 void socketError(int estado, String error) {
-	if(estado == -1) {
+	if(estado == ERROR) {
 		perror(error);
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 }
 
@@ -144,21 +108,17 @@ Socket socketCrearListener(String puerto) {
 	Socket listener = socketCrear(&conexion, IP_LOCAL, puerto);
 	socketRedireccionar(listener);
 	socketBindear(&conexion, listener);
-	socketEscuchar(listener, 10);
+	socketEscuchar(listener, LISTEN);
 	return listener;
 }
 
 Socket socketCrearCliente(String ip, String puerto, int idProceso) {
 	Conexion conexion;
-	Socket cliente = socketCrear(&conexion, ip, puerto);
-	socketConectar(&conexion, cliente);
-	if(!handShakeEnvioExitoso(cliente, idProceso)) {
-		socketCerrar(cliente);
-		cliente = ERROR;
-		imprimirMensajeProceso("ERROR: No esta permitido conectarse a este proceso");
-		exit(1);
-	}
-	return cliente;
+	Socket unSocket = socketCrear(&conexion, ip, puerto);
+	socketConectar(&conexion, unSocket);
+	if(handShakeEnvioFallido(unSocket, idProceso))
+		handShakeError(unSocket);
+	return unSocket;
 }
 
 //--------------------------------------- Funciones para ListaSockets-------------------------------------
@@ -194,37 +154,41 @@ void mensajeEnviar(int socketReceptor, int operacion, void* dato, int tamanioDat
 	socketEnviar(socketReceptor, buffer, sizeof(Header)+tamanioDato);
 }
 
-void mensajeSetearError(Mensaje* mensaje, int operacion) {
-	mensaje->header.operacion = operacion;
-	mensaje->header.tamanio = -1;
-	mensaje->dato = NULL;
+void mensajeAvisarDesconexion(Mensaje* mensaje) {
+	mensaje->header.operacion = DESCONEXION;
+	mensaje->header.tamanio = NULO;
+	mensaje->datos = NULL;
 }
 
-//Si los bytes da 0 es porque se cerro la conexion manualmente y da -1 si se cerro por algun error
-void mensajeVerificarEstado(Mensaje* mensaje, int bytes) {
-	if(bytes == 0) {
-		mensajeSetearError(mensaje, -1);
-	}
+bool mensajeConexionFinalizada(int bytes) {
+	return bytes == NULO;
 }
 
-//Bytes mayor a 0 quiere decir que llegaron datos
+void mensajeRevisarConexion(Mensaje* mensaje, Socket socketReceptor, int bytes) {
+	if(mensajeConexionFinalizada(bytes))
+		mensajeAvisarDesconexion(mensaje);
+	else
+		mensajeObtenerDatos(mensaje, socketReceptor);
+}
+
+void mensajeObtenerDatos(Mensaje* mensaje, Socket socketReceptor) {
+	int tamanioDato = mensaje->header.tamanio;
+	mensaje->datos = malloc(tamanioDato);
+	int bytes = socketRecibir(socketReceptor, mensaje->datos, tamanioDato);
+	if(mensajeConexionFinalizada(bytes))
+		mensajeAvisarDesconexion(mensaje);
+}
+
 Mensaje* mensajeRecibir(int socketReceptor) {
 	Mensaje* mensaje = malloc(sizeof(Mensaje));
 	int bytes = socketRecibir(socketReceptor, &mensaje->header, sizeof(Header));
-	if(bytes > 0) {
-		int tamanioDato = mensaje->header.tamanio;
-		mensaje->dato = malloc(tamanioDato);
-		bytes = socketRecibir(socketReceptor, mensaje->dato, tamanioDato);
-		mensajeVerificarEstado(mensaje, bytes);
-	} else {
-		mensajeVerificarEstado(mensaje, bytes);
-	}
+	mensajeRevisarConexion(mensaje, socketReceptor, bytes);
 	return mensaje;
 }
 
 void mensajeDestruir(Mensaje* mensaje) {
-	if(mensaje->dato != NULL)
-		free(mensaje->dato);
+	if(mensaje->datos != NULL)
+		free(mensaje->datos);
 	free(mensaje);
 }
 
@@ -232,8 +196,54 @@ bool mensajeOperacionIgualA(Mensaje* mensaje, int operacion) {
 	return mensaje->header.operacion == operacion;
 }
 
-bool mensajeOperacionErronea(Mensaje* mensaje) {
-	return mensaje->header.operacion < 0;
+bool mensajeDesconexion(Mensaje* mensaje) {
+	return mensajeOperacionIgualA(mensaje, DESCONEXION);
+}
+
+//--------------------------------------- Funciones de HandShake-------------------------------------
+
+int handShakeEnvioExitoso(Socket unSocket, int idProceso) {
+	int id = idProceso;
+	mensajeEnviar(unSocket, HANDSHAKE, &id, sizeof(int));
+	Mensaje* mensaje = mensajeRecibir(unSocket);
+	int estado = handShakeRealizado(mensaje) && handShakeAceptado(mensaje);
+	mensajeDestruir(mensaje);
+	return estado;
+}
+
+int handShakeRecepcionExitosa(Socket unSocket, int idEsperada) {
+	Mensaje* mensaje = mensajeRecibir(unSocket);
+	int idProceso = (*(int*)mensaje->datos);
+	mensajeDestruir(mensaje);
+	int estado = handShakeIdsIguales(idProceso, idEsperada);
+	mensajeEnviar(unSocket, HANDSHAKE, &estado, sizeof(int));
+	return estado;
+}
+
+bool handShakeIdsIguales(int idEnviada, int idEsperada) {
+	return idEnviada == idEsperada;
+}
+
+bool handShakeRealizado(Mensaje* mensaje) {
+	return mensaje->header.operacion != DESCONEXION;
+}
+
+bool handShakeAceptado(Mensaje* mensaje) {
+	return *((int*)mensaje->datos) == true;
+}
+
+int handShakeEnvioFallido(Socket unSocket, int idProceso) {
+	return !handShakeEnvioExitoso(unSocket, idProceso);
+}
+
+int handShakeRecepcionFallida(Socket unSocket, int idEsperada) {
+	return !handShakeRecepcionExitosa(unSocket, idEsperada);
+}
+
+void handShakeError(Socket unSocket) {
+	socketCerrar(unSocket);
+	imprimirMensajeProceso("ERROR: No se pueden realizar conexiones con este proceso en este puerto");
+	exit(EXIT_FAILURE);
 }
 
 //--------------------------------------- Funciones para Header -------------------------------------
@@ -256,8 +266,6 @@ void* configuracionCrear(String rutaArchivo, void*(*configProcesoCrear)(ArchivoC
 
 ArchivoConfig archivoConfigCrear(String path, String* campos) {
 	ArchivoConfig archivoConfig = config_create(path);
-	//ArchivoConfig archivoConfig = malloc(sizeof(ArchivoConfig));
-	//archivoConfig= config_create(path);
 	if(archivoConfigInvalido(archivoConfig, campos)) {
 		puts("Archivo de configuracion invalido");
 		exit(EXIT_FAILURE);
@@ -265,8 +273,13 @@ ArchivoConfig archivoConfigCrear(String path, String* campos) {
 	return archivoConfig;
 }
 
+
 bool archivoConfigTieneCampo(ArchivoConfig archivoConfig, String campo) {
 	return config_has_property(archivoConfig, campo);
+}
+
+bool archivoConfigFaltaCampo(ArchivoConfig archivoConfig, String campo) {
+	return !archivoConfigTieneCampo(archivoConfig, campo);
 }
 
 String archivoConfigStringDe(ArchivoConfig archivoConfig, String campo) {
@@ -311,11 +324,10 @@ bool archivoConfigInexistente(ArchivoConfig archivoConfig) {
 
 bool archivoConfigIncompleto(ArchivoConfig archivoConfig, String* campos) {
 	int indice;
-	for(indice = 0; indice<archivoConfigCantidadCampos(archivoConfig); indice++) {
-		if(!archivoConfigTieneCampo(archivoConfig, campos[indice]))
-			return 1;
-	}
-	return 0;
+	for(indice = 0; indice<archivoConfigCantidadCampos(archivoConfig); indice++)
+		if(archivoConfigFaltaCampo(archivoConfig, campos[indice]))
+			return true;
+	return false;
 }
 
 //--------------------------------------- Funciones para ArchivoLog -------------------------------------
@@ -370,7 +382,7 @@ void archivoLogValidar(String rutaArchivo) {
 //--------------------------------------- Funciones para Semaforo -------------------------------------
 
 void semaforoCrear(Semaforo* semaforo, unsigned int valor) {
-	sem_init(semaforo, 0, valor);
+	sem_init(semaforo, NULO, valor);
 }
 
 void semaforoWait(Semaforo* semaforo) {
@@ -604,10 +616,10 @@ String stringTomarDesdeInicio(String string, int cantidad) {
 }
 
 bool stringSonIguales(String s1, String s2) {
-	if (strcmp(s1, s2) == 0)
-		return 1;
+	if (strcmp(s1, s2) == NULO)
+		return true;
 	else
-		return 0;
+		return false;
 }
 
 bool stringSonDistintos(String unString, String otroString) {
@@ -645,9 +657,9 @@ void imprimirMensajeTres(ArchivoLog archivoLog, String mensaje, void* algo1, voi
 
 
 void imprimirMensajeProceso(String mensaje) {
-	puts("----------------------------------------------------------------");
+	puts("-------------------------------------------------------------------------");
 	puts(mensaje);
-	puts("----------------------------------------------------------------");
+	puts("-------------------------------------------------------------------------");
 }
 
 //--------------------------------------- Funciones de Senial -------------------------------------

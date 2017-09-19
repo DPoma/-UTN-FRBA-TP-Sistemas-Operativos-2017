@@ -214,7 +214,7 @@ void servidorAceptarConexion(Servidor* servidor, Socket unSocket) {
 
 void servidorRecibirMensaje(Servidor* servidor, Socket unSocket) {
 	Mensaje* mensaje = mensajeRecibir(unSocket);
-	if(mensajeOperacionErronea(mensaje))
+	if(mensajeDesconexion(mensaje))
 		servidorFinalizarConexion(servidor, unSocket);
 	else
 		puts("[MENSAJE]");

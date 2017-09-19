@@ -56,7 +56,6 @@ char* leerCaracteresEntrantes() {
 	return cadena;
 }
 
-
 int main(void) {
 	pantallaLimpiar();
 	imprimirMensajeProceso("# PROCESO MASTER");

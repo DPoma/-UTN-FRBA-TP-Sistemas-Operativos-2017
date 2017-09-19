@@ -20,7 +20,6 @@ int main(void) {
 	return EXIT_SUCCESS;
 }
 
-
 void workerCrearHijo(Socket unSocket) {
 	int pid = fork();
 	if(pid == 0) {
