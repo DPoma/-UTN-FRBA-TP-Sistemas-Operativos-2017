@@ -52,6 +52,62 @@ void fileSystemFinalizar() {
 //--------------------------------------- Funciones de Consola -------------------------------------
 
 
+bool consolaEntradaRespetaLimiteEspacios(String entrada) {
+	int indice;
+	int contador = 0;
+	for(indice = 0; caracterDistintos(entrada[indice], FIN); indice++)
+		if(caracterIguales(entrada[indice],ESPACIO))
+			contador++;
+	return contador <=  4;
+}
+
+bool consolaEntradaSinEspacioEnExtremos(String entrada) {
+	if(stringDistintos(entrada, VACIO))
+		return caracterDistintos(entrada[0], ESPACIO) &&
+				caracterDistintos(entrada[stringLongitud(entrada)-1],ESPACIO);
+	else
+		return false;
+}
+
+bool consolaEntradaEspaciosSeparados(String entrada) {
+ 	int indice;
+	for(indice = 0; caracterDistintos(entrada[indice],FIN); indice++)
+		if(caracterIguales(entrada[indice],ESPACIO) && (caracterIguales(entrada[indice-1],ESPACIO) ||
+			caracterIguales(entrada[indice+1],ESPACIO)))
+			return false;
+	return true;
+}
+
+
+bool consolaEntradaEspaciosBienUtilizados(String entrada) {
+	return consolaEntradaSinEspacioEnExtremos(entrada) &&
+			consolaEntradaEspaciosSeparados(entrada);
+
+}
+
+bool consolaEntradaSinTabs(String entrada) {
+	int indice;
+	for(indice = 0; caracterDistintos(entrada[indice], FIN); indice++)
+		if(caracterIguales(entrada[indice],TAB))
+			return 0;
+	return 1;
+}
+
+bool consolaEntradaTieneEspaciosNecesarios(String entrada) {
+	return consolaEntradaRespetaLimiteEspacios(entrada) &&
+			consolaEntradaSinTabs(entrada);
+}
+
+bool consolaEntradaLlena(String entrada) {
+	return stringDistintos(entrada, VACIO);
+}
+
+bool consolaEntradaDecente(String entrada) {
+	return consolaEntradaTieneEspaciosNecesarios(entrada) &&
+			consolaEntradaEspaciosBienUtilizados(entrada) &&
+			consolaEntradaLlena(entrada);
+}
+
 int consolaIdentificarComando(String comando) {
 	if(stringNulo(comando))
 		return ERROR;
@@ -91,31 +147,24 @@ int consolaIdentificarComando(String comando) {
 		return ERROR;
 }
 
-String consolaLeerEntrada() {
-	int indice;
-	int caracterLeido;
-	String cadena = memoriaAlocar(MAX);
-	for(indice = 0; (caracterLeido= caracterObtener()) != ENTER; indice++)
-		cadena[indice] = caracterLeido;
-	cadena[indice] = FIN;
-	return cadena;
-}
-
 bool consolaComandoTipoUno(String comando) {
-	return stringIguales(comando, C_RM) || stringIguales(comando, C_CAT) ||
-			stringIguales(comando, C_MKDIR) || stringIguales(comando, C_MD5) ||
-			stringIguales(comando, C_LS) || stringIguales(comando, C_INFO) ||
-			stringIguales(comando, C_RMD);
+	return stringIguales(comando, C_RM) ||
+			stringIguales(comando, C_CAT) ||
+			stringIguales(comando, C_MKDIR) ||
+			stringIguales(comando, C_MD5) ||
+			stringIguales(comando, C_LS) ||
+			stringIguales(comando, C_INFO);
 }
 
 bool consolaComandoTipoDos(String comando) {
 	return stringIguales(comando, C_RENAME) ||
-			stringIguales(comando, C_MV) || stringIguales(comando, C_CPFROM) ||
+			stringIguales(comando, C_MV) ||
+			stringIguales(comando, C_CPFROM) ||
 			stringIguales(comando, C_CPTO);
 }
 
 bool consolaComandoTipoTres(String comando) {
-	return stringIguales(comando, C_CPBLOCK) || stringIguales(comando, C_RMB);
+	return stringIguales(comando, C_CPBLOCK);
 }
 
 
@@ -130,88 +179,73 @@ int consolaComandoCantidadArgumentos(String comando) {
 		return 0;
 }
 
-void consolaProcesarComandoSinTipo(Comando* comando, String* subcadenas) {
-	comando->argumento1 = NULL;
-	comando->argumento2 = NULL;
-	comando->argumento3 = NULL;
-}
-
-void consolaProcesarComandoTipoUno(Comando* comando, String* subcadenas) {
-	comando->argumento1 = subcadenas[1];
-	comando->argumento2 = NULL;
-	comando->argumento3 = NULL;
-}
-
-void consolaProcesarComandoTipoDos(Comando* comando, String* subcadenas) {
-	comando->argumento1 = subcadenas[1];
-	comando->argumento2 = subcadenas[2];
-	comando->argumento3 = NULL;
-}
-
-void consolaProcesarComandoTipoTres(Comando* comando, String* subcadenas) {
-	comando->argumento1 = subcadenas[1];
-	comando->argumento2 = subcadenas[2];
-	comando->argumento3 = subcadenas[3];
-}
-
-void consolaProcesarComando(Comando* comando, String* subcadenas) {
-	int cantidadArgumentos = consolaComandoCantidadArgumentos(subcadenas[0]);
-	switch(cantidadArgumentos) {
-		case 1: consolaProcesarComandoTipoUno(comando, subcadenas); break;
-		case 2: consolaProcesarComandoTipoDos(comando, subcadenas); break;
-		case 3: consolaProcesarComandoTipoTres(comando, subcadenas); break;
-		default: consolaProcesarComandoSinTipo(comando, subcadenas);
-	}
-}
-
 bool consolaComandoExiste(String comando) {
 	return consolaComandoTipoUno(comando) || consolaComandoTipoDos(comando) ||
 			consolaComandoTipoTres(comando) || stringIguales(comando, C_FORMAT);
 }
 
-void consolaNormalizarFlagB(String* subcadenas) {
-	subcadenas[0] = C_RMB;
-	subcadenas[1] = subcadenas[2];
-	subcadenas[2] = subcadenas[3];
-	subcadenas[3] = subcadenas[4];
-	subcadenas[4] = NULL;
-}
-
-void consolaNormalizarFlagD(String* subcadenas) {
-	subcadenas[0] = C_RMD;
-	subcadenas[1] = subcadenas[2];
-	subcadenas[2] = NULL;
-}
-
-void consolaNormalizarComando(String* subcadenas) {
-	if(stringIguales(subcadenas[1], FLAG_B))
-		consolaNormalizarFlagB(subcadenas);
-	else
-		consolaNormalizarFlagD(subcadenas);
-}
 
 bool consolaValidarComandoSinTipo(String* subcadenas) {
 	return stringNulo(subcadenas[1]);
 }
 
 bool consolaValidarComandoTipoUno(String* subcadenas) {
-	return stringNoNulo(subcadenas[1]) && stringNulo(subcadenas[2]);
+	return stringNoNulo(subcadenas[1]) &&
+			stringNulo(subcadenas[2]);
 }
 
 bool consolaValidarComandoTipoDos(String* subcadenas) {
-	return stringNoNulo(subcadenas[1]) && stringNoNulo(subcadenas[2]) &&
+	return stringNoNulo(subcadenas[1]) &&
+			stringNoNulo(subcadenas[2]) &&
 		   stringNulo(subcadenas[3]);
 }
 
 bool consolaValidarComandoTipoTres(String* subcadenas) {
-	return stringNoNulo(subcadenas[1]) && stringNoNulo(subcadenas[2]) &&
-		   stringNoNulo(subcadenas[3]) && stringNulo(subcadenas[4]);
+	return stringNoNulo(subcadenas[1]) &&
+		   stringNoNulo(subcadenas[2]) &&
+		   stringNoNulo(subcadenas[3]) &&
+		   stringNulo(subcadenas[4]);
 }
 
-bool consolaComandoConArgumentosValidos(String* subcadenas) {
-	if(consolaComandoTipoUno(subcadenas[0]))
+
+bool consolaComandoEsRemoverFlag(String buffer) {
+	return stringIguales(buffer, FLAG_B) ||
+			stringIguales(buffer, FLAG_D);
+}
+
+
+bool consolaComandoRemoverFlagB(String* subcadenas) {
+	return stringIguales(subcadenas[0], C_RM) &&
+			stringIguales(subcadenas[1], FLAG_B);
+}
+
+bool consolaComandoRemoverFlagD(String* subcadenas) {
+	return stringIguales(subcadenas[0], C_RM) &&
+			stringIguales(subcadenas[1], FLAG_D);
+}
+
+bool consolaValidarComandoFlagB(String* subcadenas) {
+	return stringNoNulo(subcadenas[1]) &&
+			   stringNoNulo(subcadenas[2]) &&
+			   stringNoNulo(subcadenas[3]) &&
+			   stringNoNulo(subcadenas[4]);
+}
+
+bool consolaValidarComandoFlagD(String* subcadenas) {
+	return stringNoNulo(subcadenas[1]) &&
+			   stringNoNulo(subcadenas[2]) &&
+			   stringNulo(subcadenas[3]) &&
+			   stringNulo(subcadenas[4]);
+}
+
+bool consolaComandoControlarArgumentos(String* subcadenas) {
+	if(consolaComandoRemoverFlagB(subcadenas))
+		return consolaValidarComandoFlagB(subcadenas);
+	else if(consolaComandoRemoverFlagD(subcadenas))
+		return consolaValidarComandoFlagD(subcadenas);
+	else if(consolaComandoTipoUno(subcadenas[0]))
 		return consolaValidarComandoTipoUno(subcadenas);
-	else if(consolaComandoTipoDos(subcadenas[0]))
+	else if(consolaComandoTipoDos(subcadenas[0]) )
 		return consolaValidarComandoTipoDos(subcadenas);
 	else if(consolaComandoTipoTres(subcadenas[0]))
 		return consolaValidarComandoTipoTres(subcadenas);
@@ -219,98 +253,137 @@ bool consolaComandoConArgumentosValidos(String* subcadenas) {
 		return consolaValidarComandoSinTipo(subcadenas);
 }
 
-bool consolaComandoConArgumentosInvalidos(String* subcadenas) {
-	return !consolaComandoConArgumentosValidos(subcadenas);
+
+void consolaNormalizarRemoverFlagB(String* buffer) {
+	buffer[0] = stringDuplicar(C_RMB);
+	buffer[1] = buffer[2];
+	buffer[2] = buffer[3];
+	buffer[3] = buffer[4];
+	buffer[4] = NULL;
 }
 
-bool consolaComandoInexistente(String* subcadenas) {
-	return !consolaComandoExiste(subcadenas[0]);
+void consolaNormalizarRemoverFlagD(String* buffer) {
+	buffer[0] = stringDuplicar(C_RMD);
+	buffer[1] = buffer[2];
+	buffer[2] = buffer[3];
+	buffer[3] = buffer[4];
+	buffer[4] = NULL;
 }
 
-bool consolaComandoInvalido(String* subcadenas) {
-	return consolaComandoInexistente(subcadenas) || consolaComandoConArgumentosInvalidos(subcadenas);
-}
-
-void consolaAtenderComando(Comando* comando, String* subcadenas) {
-	comando->identificador = consolaIdentificarComando(subcadenas[0]);
-	consolaProcesarComando(comando, subcadenas);
-	printf("Argumento 1 %s\n", comando->argumento1);
-	printf("Argumento 2 %s\n", comando->argumento2);
-	printf("Argumento 3 %s\n", comando->argumento3);
-}
-
-
-void consolaTrabajarComando(Comando* comando, String* subcadenas) {
-	if(consolaComandoInvalido(subcadenas))
-		comando->identificador = ERROR;
+void consolaNormalizarComando(String* buffer) {
+	if(stringIguales(buffer[1], FLAG_B))
+		consolaNormalizarRemoverFlagB(buffer);
 	else
-		consolaAtenderComando(comando, subcadenas);
+		consolaNormalizarRemoverFlagD(buffer);
 }
 
-String* consolaDespedazarComando() {
-	char* cadena = consolaLeerEntrada();
-	String* subcadenas = stringSeparar(cadena, ESPACIO);
-	memoriaLiberar(cadena);
-	return subcadenas;
+bool consolaValidarComando(String* buffer) {
+	if(consolaComandoExiste(buffer[0]))
+		return consolaComandoControlarArgumentos(buffer);
+	else
+		return false;
 }
 
-bool consolaComandoRemoverCorrecto(String subcadena) {
-	return stringIguales(subcadena, C_RM);
+String consolaLeerEntrada() {
+	int indice;
+	int caracterLeido;
+	char* cadena = memoriaAlocar(MAX);
+	for(indice = 0; caracterDistintos((caracterLeido= caracterObtener()),ENTER); indice++)
+		cadena[indice] = caracterLeido;
+	cadena[indice] = FIN;
+	return cadena;
 }
 
-bool consolaComandoRemoverTieneFlag(String* subcadenas) {
-	return consolaComandoRemoverCorrecto(subcadenas[0]) && stringNoNulo(subcadenas[1]);
+
+void consolaIniciarArgumentos(String* argumentos) {
+	argumentos[0] = NULL;
+	argumentos[1] = NULL;
+	argumentos[2] = NULL;
+	argumentos[3] = NULL;
+	argumentos[4] = NULL;
 }
 
-bool consolaComandoRemoverFlagBValido(String* subcadenas) {
-	return stringIguales(subcadenas[1], FLAG_B) && stringNulo(subcadenas[5]);
+void consolaLiberarArgumentos(String* argumentos) {
+	memoriaLiberar(argumentos[0]);
+	memoriaLiberar(argumentos[1]);
+	memoriaLiberar(argumentos[2]);
+	memoriaLiberar(argumentos[3]);
+	memoriaLiberar(argumentos[4]);
 }
 
-bool consolaComandoRemoverFlagDValido(String* subcadenas) {
-	return stringIguales(subcadenas[1], FLAG_D) && stringNulo(subcadenas[3]);
-}
-
-bool consolaComandoRemoverFlagValido(String* subcadenas) {
-	return consolaComandoRemoverFlagBValido(subcadenas) || consolaComandoRemoverFlagDValido(subcadenas);
-}
-
-bool consolaComandoEsRemover(String* subcadenas) {
-	return consolaComandoRemoverTieneFlag(subcadenas) && consolaComandoRemoverFlagValido(subcadenas);
-}
-
-Comando consolaObtenerComando() {
-	Comando comando;
-	String* subcadenas = consolaDespedazarComando();
-	if(consolaComandoEsRemover(subcadenas))
-		consolaNormalizarComando(subcadenas);
-	consolaTrabajarComando(&comando, subcadenas);
-	return comando;
-}
-
-void consolaAtenderComandos() {
-	Comando comando;
-	while(estadoFileSystem) {
-		comando = consolaObtenerComando();
-		switch(comando.identificador) {
-			case FORMAT: puts("COMANDO FORMAT"); break;
-			case RM: puts("COMANDO RM"); break;
-			case RMB: puts("COMANDO RM -B"); break;
-			case RMD: puts("COMANDO RM -D"); break;
-			case RENAME: puts("COMANDO RENAME"); break;
-			case MV: puts("COMANDO  MV"); break;
-			case CAT: puts("COMANDO CAT"); break;
-			case MKDIR: puts("COMANDO MKDIR"); break;
-			case CPFROM: puts("COMANDO CPFROM"); break;
-			case CPTO: puts("COMANDO CPTO"); break;
-			case CPBLOCK:puts("COMANDO CPBLOCK"); break;
-			case MD5: puts("COMANDO MD5"); break;
-			case LS: puts("COMANDO LS"); break;
-			case INFO: puts("COMANDO INFO"); break;
-			default: puts("COMANDO INVALIDO"); break;
+void consolaObtenerArgumentos(String* buffer, String entrada) {
+	int indice;
+	int indiceBuffer = 0;
+	int ultimoEspacio = -1;
+	for(indice = 0; caracterDistintos(entrada[indice], FIN); indice++)
+		if(caracterIguales(entrada[indice],ESPACIO)) {
+			buffer[indiceBuffer] = stringTomarCantidad(entrada, ultimoEspacio+1, indice-ultimoEspacio-1);
+			ultimoEspacio = indice;
+			indiceBuffer++;
 		}
+	buffer[indiceBuffer] = stringTomarCantidad(entrada, ultimoEspacio+1, indice-ultimoEspacio-1);
+}
+
+
+void consolaSetearArgumentos(String* argumentos, String* buffer) {
+	(argumentos[0]=buffer[1]);
+	(argumentos[1]=buffer[2]);
+	(argumentos[2]=buffer[3]);
+}
+
+void consolaCrearComando(Comando* comando, String entrada) {
+	consolaIniciarArgumentos(comando->argumentos);
+	if(consolaEntradaDecente(entrada)) {
+		consolaObtenerArgumentos(comando->argumentos, entrada);
+	if(consolaValidarComando(comando->argumentos))
+		comando->identificador = consolaIdentificarComando(comando->argumentos[0]);
+	else
+		comando->identificador = ERROR;
+	} else {
+		comando->identificador = ERROR;
 	}
 }
 
+void consolaRealizarAccion(Comando* comando) {
+	switch(comando->identificador) {
+		case FORMAT: puts("COMANDO FORMAT"); break;
+		case RM: puts("COMANDO RM"); break;
+		case RMB: puts("COMANDO RM -B"); break;
+		case RMD: puts("COMANDO RM -D"); break;
+		case RENAME: puts("COMANDO RENAME"); break;
+		case MV: puts("COMANDO  MV"); break;
+		case CAT: puts("COMANDO CAT"); break;
+		case MKDIR: puts("COMANDO MKDIR"); break;
+		case CPFROM: puts("COMANDO CPFROM"); break;
+		case CPTO: puts("COMANDO CPTO"); break;
+		case CPBLOCK:puts("COMANDO CPBLOCK"); break;
+		case MD5: puts("COMANDO MD5"); break;
+		case LS: puts("COMANDO LS"); break;
+		case INFO: puts("COMANDO INFO"); break;
+		default: puts("COMANDO INVALIDO"); break;
+	}
+}
+
+void consolaAtenderComandos() {
+	while(estadoFileSystem) {
+		char* entrada = consolaLeerEntrada();
+		if(estadoFileSystem) {
+			Comando comando;
+			consolaCrearComando(&comando, entrada);
+			consolaRealizarAccion(&comando);
+			if(comando.identificador != ERROR) {
+			printf("arg 0: %s\n", comando.argumentos[0]);
+			printf("arg 1: %s\n", comando.argumentos[1]);
+			printf("arg 2: %s\n", comando.argumentos[2]);
+			printf("arg 3: %s\n", comando.argumentos[3]);
+			printf("arg 4: %s\n", comando.argumentos[4]);
+			}
+			consolaLiberarArgumentos(comando.argumentos);
+		}
+		memoriaLiberar(entrada);
+
+	}
+}
 //--------------------------------------- Funciones de Servidor -------------------------------------
 
 bool servidorObtenerMaximoSocket(Servidor* servidor) {

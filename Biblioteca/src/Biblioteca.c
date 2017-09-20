@@ -615,16 +615,6 @@ String stringTomarDesdeInicio(String string, int cantidad) {
 	return string_substring_until(string, cantidad);
 }
 
-bool stringIguales(String s1, String s2) {
-	if (strcmp(s1, s2) == NULO)
-		return true;
-	else
-		return false;
-}
-
-bool stringDistintos(String unString, String otroString) {
-	return !stringIguales(unString, otroString);
-}
 
 String stringCopiar(String stringReceptor, const String stringACopiar) {
 	return strcpy(stringReceptor, stringACopiar);
@@ -642,6 +632,18 @@ bool stringNoNulo(String unString) {
 	return !stringNulo(unString);
 }
 
+bool stringIguales(String s1, String s2) {
+	if(stringNulo(s1) || stringNulo(s2))
+		return false;
+	if (strcmp(s1, s2) == NULO)
+		return true;
+	else
+		return false;
+}
+
+bool stringDistintos(String unString, String otroString) {
+	return !stringIguales(unString, otroString);
+}
 //--------------------------------------- Funciones de Impresion -------------------------------------
 
 void imprimirMensaje(ArchivoLog archivoLog, String mensaje) {
@@ -687,7 +689,8 @@ Puntero memoriaAlocar(size_t dato) {
 }
 
 void memoriaLiberar(Puntero puntero) {
-	free(puntero);
+	if(puntero != NULL)
+		free(puntero);
 }
 
 //--------------------------------------- Funciones varias -------------------------------------
@@ -698,4 +701,13 @@ void pantallaLimpiar() {
 
 int caracterObtener() {
 	return getchar();
+}
+
+
+bool caracterDistintos(char unCaracter, char otroCaracter) {
+	return unCaracter != otroCaracter;
+}
+
+bool caracterIguales(char unCaracter, char otroCaracter) {
+	return unCaracter == otroCaracter;
 }

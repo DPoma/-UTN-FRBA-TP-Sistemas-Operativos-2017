@@ -30,10 +30,11 @@
 
 #define IP_LOCAL "127.0.0.1"
 #define VACIO ""
-#define ESPACIO " "
 #define MAX 1024
 #define FIN '\0'
 #define ENTER '\n'
+#define ESPACIO ' '
+#define TAB '\t'
 #define LISTEN 10
 #define ERROR -1
 #define NULO 0

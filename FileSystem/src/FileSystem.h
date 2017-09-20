@@ -47,11 +47,7 @@
 
 typedef struct {
 	int identificador;
-	String flag;
-	String argumento1;
-	String argumento2;
-	String argumento3;
-
+	String argumentos[5];
 } Comando;
 
 typedef struct {
