@@ -53,7 +53,7 @@ void fileSystemFinalizar() {
 
 
 int consolaIdentificarComando(String comando) {
-	if(comando == NULL)
+	if(stringNulo(comando))
 		return ERROR;
 	if(stringIguales(comando, C_FORMAT))
 		return FORMAT;
@@ -112,15 +112,11 @@ String leerCaracteresEntrantes() {
 }
 
 bool consolaComandoTipoUno(String comando) {
-	return stringIguales(comando, C_RM) || stringIguales(comando, C_CAT) ||
-		   stringIguales(comando, C_MKDIR) || stringIguales(comando, C_MD5) ||
-		   stringIguales(comando, C_LS) || stringIguales(comando, C_INFO) ||
-		   stringIguales(comando, C_RMD);
+	return stringIguales(comando, C_RM) || stringIguales(comando, C_CAT) || stringIguales(comando, C_MKDIR) || stringIguales(comando, C_MD5) || stringIguales(comando, C_LS) || stringIguales(comando, C_INFO) || stringIguales(comando, C_RMD);
 }
 
 bool consolaComandoTipoDos(String comando) {
-	return stringIguales(comando, C_RENAME) || stringIguales(comando, C_MV) ||
-		   stringIguales(comando, C_CPFROM) || stringIguales(comando, C_CPTO);
+	return stringIguales(comando, C_RENAME) || stringIguales(comando, C_MV) || stringIguales(comando, C_CPFROM) || stringIguales(comando, C_CPTO);
 }
 
 bool consolaComandoTipoTres(String comando) {
@@ -174,8 +170,8 @@ void consolaProcesarComando(Comando* comando, String* subcadenas) {
 	}
 }
 
-bool enterosIguales(int a, int b) {
-	return a == b;
+bool consolaComandoExiste(String comando) {
+	return consolaComandoTipoUno(comando) || consolaComandoTipoDos(comando) || consolaComandoTipoTres(comando) || stringIguales(comando, C_FORMAT);
 }
 
 
@@ -193,38 +189,54 @@ void consolaNormalizarComando(String* subcadenas) {
 }
 
 bool consolaValidarComandoSinTipo(String* subcadenas) {
-	return stringIguales(subcadenas[1], NULL);
+	return stringNulo(subcadenas[1]);
 }
 
 bool consolaValidarComandoTipo1(String* subcadenas) {
-	return stringDistintos(subcadenas[1], NULL) && stringIguales(subcadenas[2],NULL);
+	return stringNoNulo(subcadenas[1]) && stringNulo(subcadenas[2]);
 }
 
 bool consolaValidarComandoTipo2(String* subcadenas) {
-	return stringDistintos(subcadenas[1], NULL) && stringDistintos(subcadenas[2],NULL) &&
-		   stringIguales(subcadenas[3], NULL);
+	return stringNoNulo(subcadenas[1]) && stringNoNulo(subcadenas[2]) &&
+		   stringNulo(subcadenas[3]);
 }
 
 bool consolaValidarComandoTipo3(String* subcadenas) {
-	return stringDistintos(subcadenas[1], NULL) && stringDistintos(subcadenas[2],NULL) &&
-		   stringDistintos(subcadenas[3], NULL) && stringIguales(subcadenas[4], NULL);
+	return stringNoNulo(subcadenas[1]) && stringNoNulo(subcadenas[2]) &&
+		   stringNoNulo(subcadenas[3]) && stringNulo(subcadenas[4]);
 }
 
-//Con esto valido no acepta comandos que empiecen con cualquier cosa
+bool consolaComandoConArgumentosValidos(String* subcadenas) {
+	if(consolaComandoTipoUno(subcadenas[0]))
+		return consolaValidarComandoTipo1(subcadenas);
+	else if(consolaComandoTipoDos(subcadenas[0]))
+		return consolaValidarComandoTipo2(subcadenas);
+	else if(consolaComandoTipoTres(subcadenas[0]))
+		return consolaValidarComandoTipo3(subcadenas);
+	else
+		return consolaValidarComandoSinTipo(subcadenas);
+}
+
 bool consolaComandoInvalido(String* subcadenas) {
-	return consolaIdentificarComando(subcadenas[0]) == ERROR;
+	return consolaComandoExiste(subcadenas[0]) == false;
 }
 
 Comando consolaObtenerComando() {
 	Comando comando;
 	char* cadena = consolaLeerEntrada();
+
 	String* subcadenas = stringSeparar(cadena, " ");
+	if(stringIguales(subcadenas[0], "rm") && (stringIguales(subcadenas[1], "-b") || stringIguales(subcadenas[1], "-d")))
+		consolaNormalizarComando(subcadenas);
 	if(consolaComandoInvalido(subcadenas)) {
 		comando.identificador = ERROR;
 		return comando;
 	}
-	if(stringIguales(subcadenas[0], "rm") && (stringIguales(subcadenas[1], "-b") || stringIguales(subcadenas[1], "-d")))
-		consolaNormalizarComando(subcadenas);
+
+	if(!consolaComandoConArgumentosValidos(subcadenas)) {
+		comando.identificador = ERROR;
+		return comando;
+	}
 	comando.identificador = consolaIdentificarComando(subcadenas[0]);
 	consolaProcesarComando(&comando, subcadenas);
 	printf("arg 1 %s\n", comando.argumento1);

@@ -634,6 +634,14 @@ String* stringSeparar(String unString, String separador) {
 	return string_split(unString, separador);
 }
 
+bool stringNulo(String unString) {
+	return unString == NULL;
+}
+
+bool stringNoNulo(String unString) {
+	return !stringNulo(unString);
+}
+
 //--------------------------------------- Funciones de Impresion -------------------------------------
 
 void imprimirMensaje(ArchivoLog archivoLog, String mensaje) {
