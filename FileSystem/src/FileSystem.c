@@ -169,19 +169,25 @@ bool consolaComandoExiste(String comando) {
 			consolaComandoTipoTres(comando) || stringIguales(comando, C_FORMAT);
 }
 
+void consolaNormalizarFlagB(String* subcadenas) {
+	subcadenas[0] = C_RMB;
+	subcadenas[1] = subcadenas[2];
+	subcadenas[2] = subcadenas[3];
+	subcadenas[3] = subcadenas[4];
+	subcadenas[4] = NULL;
+}
+
+void consolaNormalizarFlagD(String* subcadenas) {
+	subcadenas[0] = C_RMD;
+	subcadenas[1] = subcadenas[2];
+	subcadenas[2] = NULL;
+}
+
 void consolaNormalizarComando(String* subcadenas) {
-	if(stringIguales(subcadenas[1], FLAG_B)) {
-		subcadenas[0] = C_RMB;
-		subcadenas[1] = subcadenas[2];
-		subcadenas[2] = subcadenas[3];
-		subcadenas[3] = subcadenas[4];
-		subcadenas[4] = NULL;
-	}
-	else {
-		subcadenas[0] = C_RMD;
-		subcadenas[1] = subcadenas[2];
-		subcadenas[2] = NULL;
-	}
+	if(stringIguales(subcadenas[1], FLAG_B))
+		consolaNormalizarFlagB(subcadenas);
+	else
+		consolaNormalizarFlagD(subcadenas);
 }
 
 bool consolaValidarComandoSinTipo(String* subcadenas) {
@@ -213,32 +219,71 @@ bool consolaComandoConArgumentosValidos(String* subcadenas) {
 		return consolaValidarComandoSinTipo(subcadenas);
 }
 
+bool consolaComandoConArgumentosInvalidos(String* subcadenas) {
+	return !consolaComandoConArgumentosValidos(subcadenas);
+}
+
+bool consolaComandoInexistente(String* subcadenas) {
+	return !consolaComandoExiste(subcadenas[0]);
+}
+
 bool consolaComandoInvalido(String* subcadenas) {
-	return consolaComandoExiste(subcadenas[0]) == false;
+	return consolaComandoInexistente(subcadenas) || consolaComandoConArgumentosInvalidos(subcadenas);
+}
+
+void consolaAtenderComando(Comando* comando, String* subcadenas) {
+	comando->identificador = consolaIdentificarComando(subcadenas[0]);
+	consolaProcesarComando(comando, subcadenas);
+	printf("Argumento 1 %s\n", comando->argumento1);
+	printf("Argumento 2 %s\n", comando->argumento2);
+	printf("Argumento 3 %s\n", comando->argumento3);
+}
+
+
+void consolaTrabajarComando(Comando* comando, String* subcadenas) {
+	if(consolaComandoInvalido(subcadenas))
+		comando->identificador = ERROR;
+	else
+		consolaAtenderComando(comando, subcadenas);
+}
+
+String* consolaDespedazarComando() {
+	char* cadena = consolaLeerEntrada();
+	String* subcadenas = stringSeparar(cadena, ESPACIO);
+	memoriaLiberar(cadena);
+	return subcadenas;
+}
+
+bool consolaComandoRemoverCorrecto(String subcadena) {
+	return stringIguales(subcadena, C_RM);
+}
+
+bool consolaComandoRemoverTieneFlag(String* subcadenas) {
+	return consolaComandoRemoverCorrecto(subcadenas[0]) && stringNoNulo(subcadenas[1]);
+}
+
+bool consolaComandoRemoverFlagBValido(String* subcadenas) {
+	return stringIguales(subcadenas[1], FLAG_B) && stringNulo(subcadenas[5]);
+}
+
+bool consolaComandoRemoverFlagDValido(String* subcadenas) {
+	return stringIguales(subcadenas[1], FLAG_D) && stringNulo(subcadenas[3]);
+}
+
+bool consolaComandoRemoverFlagValido(String* subcadenas) {
+	return consolaComandoRemoverFlagBValido(subcadenas) || consolaComandoRemoverFlagDValido(subcadenas);
+}
+
+bool consolaComandoEsRemover(String* subcadenas) {
+	return consolaComandoRemoverTieneFlag(subcadenas) && consolaComandoRemoverFlagValido(subcadenas);
 }
 
 Comando consolaObtenerComando() {
 	Comando comando;
-	char* cadena = consolaLeerEntrada();
-
-	String* subcadenas = stringSeparar(cadena, ESPACIO);
-	if(stringIguales(subcadenas[0], C_RM) && stringNoNulo(subcadenas[1]) && ((stringIguales(subcadenas[1], FLAG_B) && stringNulo(subcadenas[5])) || ((stringIguales(subcadenas[1], FLAG_D) && stringNulo(subcadenas[3])))))
+	String* subcadenas = consolaDespedazarComando();
+	if(consolaComandoEsRemover(subcadenas))
 		consolaNormalizarComando(subcadenas);
-	if(consolaComandoInvalido(subcadenas)) {
-		comando.identificador = ERROR;
-		return comando;
-	}
-
-	if(!consolaComandoConArgumentosValidos(subcadenas)) {
-		comando.identificador = ERROR;
-		return comando;
-	}
-	comando.identificador = consolaIdentificarComando(subcadenas[0]);
-	consolaProcesarComando(&comando, subcadenas);
-	printf("arg 1 %s\n", comando.argumento1);
-	printf("arg 2 %s\n", comando.argumento2);
-	printf("arg 3 %s\n", comando.argumento3);
-	memoriaLiberar(cadena);
+	consolaTrabajarComando(&comando, subcadenas);
 	return comando;
 }
 
