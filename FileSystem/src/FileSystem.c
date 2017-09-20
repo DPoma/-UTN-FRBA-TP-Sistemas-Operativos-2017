@@ -53,6 +53,8 @@ void fileSystemFinalizar() {
 
 
 int consolaIdentificarComando(String comando) {
+	if(comando == NULL)
+		return ERROR;
 	if(stringIguales(comando, C_FORMAT))
 		return FORMAT;
 	if(stringIguales(comando, C_INFO))
@@ -99,6 +101,15 @@ String consolaLeerEntrada() {
 	return cadena;
 }
 
+
+String leerCaracteresEntrantes() {
+	int i, caracterLeido;
+	String cadena = malloc(MAX);
+	for(i = 0; (caracterLeido= getchar()) != '\n'; i++)
+		cadena[i] = caracterLeido;
+	cadena[i] = '\0';
+	return cadena;
+}
 
 bool consolaComandoTipoUno(String comando) {
 	return stringIguales(comando, C_RM) || stringIguales(comando, C_CAT) ||
@@ -201,12 +212,12 @@ bool consolaValidarComandoTipo3(String* subcadenas) {
 
 //Con esto valido no acepta comandos que empiecen con cualquier cosa
 bool consolaComandoInvalido(String* subcadenas) {
-	return consolaIdentificarComando(subcadenas[0]) == ERROR || subcadenas == NULL;
+	return consolaIdentificarComando(subcadenas[0]) == ERROR;
 }
 
 Comando consolaObtenerComando() {
 	Comando comando;
-	String cadena = consolaLeerEntrada();
+	char* cadena = consolaLeerEntrada();
 	String* subcadenas = stringSeparar(cadena, " ");
 	if(consolaComandoInvalido(subcadenas)) {
 		comando.identificador = ERROR;
