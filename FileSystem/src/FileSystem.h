@@ -42,6 +42,9 @@
 #define C_LS "ls"
 #define C_INFO "info"
 
+#define FLAG_B "-b"
+#define FLAG_D "-d"
+
 typedef struct {
 	int identificador;
 	String flag;

@@ -101,22 +101,17 @@ String consolaLeerEntrada() {
 	return cadena;
 }
 
-
-String leerCaracteresEntrantes() {
-	int i, caracterLeido;
-	String cadena = malloc(MAX);
-	for(i = 0; (caracterLeido= getchar()) != '\n'; i++)
-		cadena[i] = caracterLeido;
-	cadena[i] = '\0';
-	return cadena;
-}
-
 bool consolaComandoTipoUno(String comando) {
-	return stringIguales(comando, C_RM) || stringIguales(comando, C_CAT) || stringIguales(comando, C_MKDIR) || stringIguales(comando, C_MD5) || stringIguales(comando, C_LS) || stringIguales(comando, C_INFO) || stringIguales(comando, C_RMD);
+	return stringIguales(comando, C_RM) || stringIguales(comando, C_CAT) ||
+			stringIguales(comando, C_MKDIR) || stringIguales(comando, C_MD5) ||
+			stringIguales(comando, C_LS) || stringIguales(comando, C_INFO) ||
+			stringIguales(comando, C_RMD);
 }
 
 bool consolaComandoTipoDos(String comando) {
-	return stringIguales(comando, C_RENAME) || stringIguales(comando, C_MV) || stringIguales(comando, C_CPFROM) || stringIguales(comando, C_CPTO);
+	return stringIguales(comando, C_RENAME) ||
+			stringIguales(comando, C_MV) || stringIguales(comando, C_CPFROM) ||
+			stringIguales(comando, C_CPTO);
 }
 
 bool consolaComandoTipoTres(String comando) {
@@ -140,7 +135,6 @@ void consolaProcesarComandoSinTipo(Comando* comando, String* subcadenas) {
 	comando->argumento2 = NULL;
 	comando->argumento3 = NULL;
 }
-
 
 void consolaProcesarComandoTipoUno(Comando* comando, String* subcadenas) {
 	comando->argumento1 = subcadenas[1];
@@ -171,20 +165,22 @@ void consolaProcesarComando(Comando* comando, String* subcadenas) {
 }
 
 bool consolaComandoExiste(String comando) {
-	return consolaComandoTipoUno(comando) || consolaComandoTipoDos(comando) || consolaComandoTipoTres(comando) || stringIguales(comando, C_FORMAT);
+	return consolaComandoTipoUno(comando) || consolaComandoTipoDos(comando) ||
+			consolaComandoTipoTres(comando) || stringIguales(comando, C_FORMAT);
 }
 
-
 void consolaNormalizarComando(String* subcadenas) {
-	if(stringIguales(subcadenas[1],"-b")) {
-		subcadenas[0] = "rm -b";
+	if(stringIguales(subcadenas[1], FLAG_B)) {
+		subcadenas[0] = C_RMB;
 		subcadenas[1] = subcadenas[2];
 		subcadenas[2] = subcadenas[3];
 		subcadenas[3] = subcadenas[4];
+		subcadenas[4] = NULL;
 	}
 	else {
-		subcadenas[0] = "rm -d";
+		subcadenas[0] = C_RMD;
 		subcadenas[1] = subcadenas[2];
+		subcadenas[2] = NULL;
 	}
 }
 
@@ -192,27 +188,27 @@ bool consolaValidarComandoSinTipo(String* subcadenas) {
 	return stringNulo(subcadenas[1]);
 }
 
-bool consolaValidarComandoTipo1(String* subcadenas) {
+bool consolaValidarComandoTipoUno(String* subcadenas) {
 	return stringNoNulo(subcadenas[1]) && stringNulo(subcadenas[2]);
 }
 
-bool consolaValidarComandoTipo2(String* subcadenas) {
+bool consolaValidarComandoTipoDos(String* subcadenas) {
 	return stringNoNulo(subcadenas[1]) && stringNoNulo(subcadenas[2]) &&
 		   stringNulo(subcadenas[3]);
 }
 
-bool consolaValidarComandoTipo3(String* subcadenas) {
+bool consolaValidarComandoTipoTres(String* subcadenas) {
 	return stringNoNulo(subcadenas[1]) && stringNoNulo(subcadenas[2]) &&
 		   stringNoNulo(subcadenas[3]) && stringNulo(subcadenas[4]);
 }
 
 bool consolaComandoConArgumentosValidos(String* subcadenas) {
 	if(consolaComandoTipoUno(subcadenas[0]))
-		return consolaValidarComandoTipo1(subcadenas);
+		return consolaValidarComandoTipoUno(subcadenas);
 	else if(consolaComandoTipoDos(subcadenas[0]))
-		return consolaValidarComandoTipo2(subcadenas);
+		return consolaValidarComandoTipoDos(subcadenas);
 	else if(consolaComandoTipoTres(subcadenas[0]))
-		return consolaValidarComandoTipo3(subcadenas);
+		return consolaValidarComandoTipoTres(subcadenas);
 	else
 		return consolaValidarComandoSinTipo(subcadenas);
 }
@@ -225,8 +221,8 @@ Comando consolaObtenerComando() {
 	Comando comando;
 	char* cadena = consolaLeerEntrada();
 
-	String* subcadenas = stringSeparar(cadena, " ");
-	if(stringIguales(subcadenas[0], "rm") && (stringIguales(subcadenas[1], "-b") || stringIguales(subcadenas[1], "-d")))
+	String* subcadenas = stringSeparar(cadena, ESPACIO);
+	if(stringIguales(subcadenas[0], C_RM) && stringNoNulo(subcadenas[1]) && ((stringIguales(subcadenas[1], FLAG_B) && stringNulo(subcadenas[5])) || ((stringIguales(subcadenas[1], FLAG_D) && stringNulo(subcadenas[3])))))
 		consolaNormalizarComando(subcadenas);
 	if(consolaComandoInvalido(subcadenas)) {
 		comando.identificador = ERROR;
