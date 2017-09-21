@@ -27,14 +27,13 @@ void fileSystemIniciar() {
 	imprimirMensaje(archivoLog, "[EJECUCION] Proceso File System inicializado");
 	estadoFileSystem = 1;
 	archivoConfigObtenerCampos();
-	senialAsignarFuncion(SIGINT, funcionSenial);
+	//senialAsignarFuncion(SIGPIPE, SIG_IGN);
 	configuracion = configuracionCrear(RUTA_CONFIG, (Puntero)configuracionLeerArchivoConfig, campos);
 	configuracionImprimir(configuracion);
 }
 
 void fileSystemCrearConsola() {
-	Hilo hilo;
-	hiloCrear(&hilo, (Puntero)consolaAtenderComandos, NULL);
+	hiloCrear(&hiloConsola, (Puntero)consolaAtenderComandos, NULL);
 }
 
 void fileSystemAtenderProcesos() {
@@ -47,6 +46,10 @@ void fileSystemAtenderProcesos() {
 
 void fileSystemFinalizar() {
 	imprimirMensaje(archivoLog, "[EJECUCION] Proceso File System finalizado");
+	//hiloEsperar(hiloConsola);
+	archivoLogDestruir(archivoLog);
+	memoriaLiberar(configuracion);
+	sleep(1.5);
 }
 
 //--------------------------------------- Funciones de Consola -------------------------------------
@@ -143,6 +146,8 @@ int consolaIdentificarComando(String comando) {
 		return INFO;
 	else if(stringIguales(comando, C_RENAME))
 		return RENAME;
+	else if(stringIguales(comando, C_EXIT))
+		return EXIT;
 	else
 		return ERROR;
 }
@@ -180,8 +185,11 @@ int consolaComandoCantidadArgumentos(String comando) {
 }
 
 bool consolaComandoExiste(String comando) {
-	return consolaComandoTipoUno(comando) || consolaComandoTipoDos(comando) ||
-			consolaComandoTipoTres(comando) || stringIguales(comando, C_FORMAT);
+	return consolaComandoTipoUno(comando) ||
+			consolaComandoTipoDos(comando) ||
+			consolaComandoTipoTres(comando) ||
+			stringIguales(comando, C_FORMAT) ||
+			stringIguales(comando, C_EXIT);
 }
 
 
@@ -344,6 +352,11 @@ void consolaCrearComando(Comando* comando, String entrada) {
 	}
 }
 
+void consolaFinalizar() {
+	 estadoFileSystem = 0;
+	 socketCrearCliente(IP_LOCAL, configuracion->puertoDataNode, ID_DATANODE);
+}
+
 void consolaRealizarAccion(Comando* comando) {
 	switch(comando->identificador) {
 		case FORMAT: puts("COMANDO FORMAT"); break;
@@ -360,11 +373,13 @@ void consolaRealizarAccion(Comando* comando) {
 		case MD5: puts("COMANDO MD5"); break;
 		case LS: puts("COMANDO LS"); break;
 		case INFO: puts("COMANDO INFO"); break;
+		case EXIT: consolaFinalizar(); break;
 		default: puts("COMANDO INVALIDO"); break;
 	}
 }
 
 void consolaAtenderComandos() {
+	hiloDetach(pthread_self());
 	while(estadoFileSystem) {
 		char* entrada = consolaLeerEntrada();
 		if(estadoFileSystem) {
@@ -429,16 +444,6 @@ void servidorEstablecerConexion(Servidor* servidor, Socket unSocket) {
 	servidorControlarMaximoSocket(servidor, unSocket);
 }
 
-Socket servidorAceptarDataNode(Servidor* servidor, Socket unSocket) {
-	Socket nuevoSocket;
-	nuevoSocket = socketAceptar(unSocket, ID_DATANODE);
-	if(nuevoSocket != ERROR) {
-		listaSocketsAgregar(nuevoSocket, &servidor->listaDataNodes);
-		imprimirMensaje(archivoLog, "[CONEXION] Proceso Data Node conectado exitosamente");
-	}
-	return nuevoSocket;
-}
-
 Socket servidorAceptarYAMA(Servidor* servidor, Socket unSocket) {
 	Socket nuevoSocket;
 	nuevoSocket = socketAceptar(unSocket, ID_YAMA);
@@ -455,13 +460,7 @@ bool socketEsListenerDataNode(Servidor* servidor, Socket unSocket) {
 
 
 void servidorAceptarConexion(Servidor* servidor, Socket unSocket) {
-	Socket nuevoSocket;
-	if(socketEsListenerDataNode(servidor, unSocket))
-		nuevoSocket = servidorAceptarDataNode(servidor, unSocket);
-	else
-		nuevoSocket = servidorAceptarYAMA(servidor, unSocket);
-	if(nuevoSocket != ERROR)
-		servidorEstablecerConexion(servidor, nuevoSocket);
+
 }
 
 void servidorRecibirMensaje(Servidor* servidor, Socket unSocket) {
@@ -487,12 +486,7 @@ bool socketRealizoSolicitud(Servidor* servidor, Socket unSocket) {
 }
 
 void servidorControlarSocket(Servidor* servidor, Socket unSocket) {
-	if (socketRealizoSolicitud(servidor, unSocket)) {
-		if(socketEsListener(servidor, unSocket))
-			servidorAceptarConexion(servidor, unSocket);
-		else
-			servidorRecibirMensaje(servidor, unSocket);
-	}
+
 }
 
 void servidorActivarListenerYAMA(Servidor* servidor) {
@@ -521,24 +515,44 @@ void servidorInicializar(Servidor* servidor) {
 }
 
 void servidorFinalizar(Servidor* servidor) {
-	archivoLogDestruir(archivoLog);
-	memoriaLiberar(configuracion);
+	memoriaLiberar(servidor);
 }
 
 void servidorAtenderSolicitud(Servidor* servidor) {
-	Socket unSocket;
-	int maximoSocket = servidor->maximoSocket;
-	for(unSocket = 0; unSocket <= maximoSocket; unSocket++)
-		servidorControlarSocket(servidor, unSocket);
+
 }
 
 void servidorAtenderPedidos(Servidor* servidor) {
 	servidorSetearListaSelect(servidor);
 	servidorEsperarSolicitud(servidor);
-	servidorAtenderSolicitud(servidor);
+	Socket unSocket;
+	int maximoSocket = servidor->maximoSocket;
+	for(unSocket = 0; unSocket <= maximoSocket; unSocket++)
+		if (socketRealizoSolicitud(servidor, unSocket)) {
+			if(socketEsListener(servidor, unSocket))
+			{
+				Socket nuevoSocket;
+				if(socketEsListenerDataNode(servidor, unSocket))
+				{
+					nuevoSocket = socketAceptar(unSocket, ID_DATANODE);
+					if(estadoFileSystem == 0)
+						break;
+					if(nuevoSocket != ERROR) {
+						listaSocketsAgregar(nuevoSocket, &servidor->listaDataNodes);
+						imprimirMensaje(archivoLog, "[CONEXION] Proceso Data Node conectado exitosamente");
+					}
+				}
+				else
+					nuevoSocket = servidorAceptarYAMA(servidor, unSocket);
+
+				if(nuevoSocket != ERROR)
+					servidorEstablecerConexion(servidor, nuevoSocket);
+			}
+
+			else
+				servidorRecibirMensaje(servidor, unSocket);
+		}
 }
-
-
 
 //--------------------------------------- Funciones de Configuracion -------------------------------------
 
@@ -562,10 +576,3 @@ void archivoConfigObtenerCampos() {
 	campos[1] = "PUERTO_DATANODE";
 	campos[2] = "RUTA_METADATA";
 }
-
-void funcionSenial(int senial) {
-	estadoFileSystem = 0;
-	puts("");
-	imprimirMensaje(archivoLog, "[EJECUCION] Proceso File System finalizado");
-}
-

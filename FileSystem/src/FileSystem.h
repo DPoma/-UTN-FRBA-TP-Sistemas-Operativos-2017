@@ -26,6 +26,7 @@
 #define MD5 12
 #define LS 13
 #define INFO 14
+#define EXIT 15
 
 #define C_FORMAT "format"
 #define C_RM "rm"
@@ -41,6 +42,7 @@
 #define C_MD5 "md5"
 #define C_LS "ls"
 #define C_INFO "info"
+#define C_EXIT "exit"
 
 #define FLAG_B "-b"
 #define FLAG_D "-d"
@@ -71,6 +73,7 @@ String campos[3];
 Configuracion* configuracion;
 ArchivoLog archivoLog;
 int estadoFileSystem;
+Hilo hiloConsola;
 
 //--------------------------------------- Funciones de File System -------------------------------------
 

@@ -152,6 +152,7 @@ void* mensajeCrear(int operacion, void* dato, int tamanioDato) {
 void mensajeEnviar(int socketReceptor, int operacion, void* dato, int tamanioDato) {
 	void* buffer = mensajeCrear(operacion, dato, tamanioDato);
 	socketEnviar(socketReceptor, buffer, sizeof(Header)+tamanioDato);
+	free(buffer);
 }
 
 void mensajeAvisarDesconexion(Mensaje* mensaje) {
