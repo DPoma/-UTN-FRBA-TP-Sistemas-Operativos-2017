@@ -27,3 +27,8 @@ int estadoMaster;
 
 Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig);
 void archivoConfigObtenerCampos();
+
+bool masterActivado();
+bool masterDesactivado();
+void masterActivar();
+void masterDesactivar();

@@ -35,14 +35,22 @@ String campos[5];
 Configuracion* configuracion;
 ArchivoLog archivoLog;
 Socket socketFileSystem;
-int estadoYAMA;
+int estadoYama;
 
 Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig);
 void archivoConfigObtenerCampos();
 void pantallaLimpiar();
-void YAMAIniciar();
-void YAMAAtenderMasters();
-void YAMAConectarAFileSystem();
+void yamaIniciar();
+void yamaConectarAFileSystem();
+void yamaAtenderMasters();
 void servidorInicializar(Servidor* servidor);
 void servidorFinalizar(Servidor* servidor);
 void servidorAtenderPedidos(Servidor* servidor);
+
+bool yamaActivado();
+bool yamaDesactivado();
+void yamaActivar();
+void yamaDesactivar();
+void yamaFinalizar();
+
+

@@ -27,3 +27,7 @@ int estadoDataNode;
 Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig);
 void archivoConfigObtenerCampos();
 void dataNodeIniciar();
+bool dataNodeActivado();
+bool dataNodeDesactivado();
+void dataNodeActivar();
+void dataNodeDesactivar();

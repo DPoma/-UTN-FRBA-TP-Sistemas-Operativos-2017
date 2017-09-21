@@ -24,7 +24,8 @@ void workerCrearHijo(Socket unSocket) {
 	int pid = fork();
 	if(pid == 0) {
 	imprimirMensaje(archivoLog, "[CONEXION] Esperando mensajes de Master");
-	mensajeRecibir(unSocket);
+	Mensaje* mensaje = mensajeRecibir(unSocket);
+	printf("Mensaje: %s\n", (String)mensaje->datos);
 	}
 	else if(pid > 0)
 		puts("PADRE ACEPTO UNA CONEXION");

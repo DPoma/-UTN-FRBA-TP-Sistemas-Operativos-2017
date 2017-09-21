@@ -69,12 +69,17 @@ int main(void) {
 	imprimirMensaje(archivoLog, "[CONEXION] Conexion existosa con YAMA");
 	imprimirMensajeDos(archivoLog, "[CONEXION] Estableciendo Conexion con Worker (IP: %s | Puerto: %s)", configuracion->ipWorker, configuracion->puertoWorker);
 	socketWorker = socketCrearCliente(configuracion->ipWorker, configuracion->puertoWorker, ID_MASTER);
-	imprimirMensaje(archivoLog, "[CONEXION] Estableciendo Conexion con Worker");
-	estadoMaster = 1;
+	imprimirMensaje(archivoLog, "[CONEXION] Conexion existosa con Worker");
+	masterActivar();
 	senialAsignarFuncion(SIGINT, funcionSenial);
-	while(estadoMaster);
+	mensajeEnviar(socketYAMA, HANDSHAKE, "HOLIII", 7);
+	mensajeEnviar(socketWorker, HANDSHAKE, "HOLIII", 7);
+	imprimirMensaje(archivoLog, "[MENSAJE] Mensaje enviado");
+	while(masterActivado());
 	socketCerrar(socketYAMA);
 	socketCerrar(socketWorker);
+	archivoLogDestruir(archivoLog);
+	memoriaLiberar(configuracion);
 	return EXIT_SUCCESS;
 
 }
@@ -93,6 +98,25 @@ void archivoConfigObtenerCampos() {
 }
 
 void funcionSenial(int senial) {
-	estadoMaster = 0;
+	masterDesactivar();
 	puts("");
 }
+
+
+
+bool masterActivado() {
+	return estadoMaster == ACTIVADO;
+}
+
+bool masterDesactivado() {
+	return estadoMaster == DESACTIVADO;
+}
+
+void masterActivar() {
+	estadoMaster= ACTIVADO;
+}
+
+void masterDesactivar() {
+	estadoMaster = DESACTIVADO;
+}
+

@@ -11,29 +11,36 @@
 #include "YAMA.h"
 
 int main(void) {
-	YAMAIniciar();
-	YAMAConectarAFileSystem();
-	YAMAAtenderMasters();
+	yamaIniciar();
+	yamaConectarAFileSystem();
+	yamaAtenderMasters();
+	yamaFinalizar();
 	return EXIT_SUCCESS;
 }
 
-void YAMAAtenderMasters() {
-	Servidor* servidor = memoriaAlocar(sizeof(Servidor));
-	servidorInicializar(servidor);
-	while(estadoYAMA)
-		servidorAtenderPedidos(servidor);
-	servidorFinalizar(servidor);
+void yamaFinalizar() {
+	imprimirMensaje(archivoLog, "[EJECUCION] Proceso YAMA finalizado");
+	archivoLogDestruir(archivoLog);
+	memoriaLiberar(configuracion);
 }
 
-void YAMAConectarAFileSystem() {
+void yamaAtenderMasters() {
+	Servidor* servidor = memoriaAlocar(sizeof(Servidor));
+	servidorInicializar(servidor);
+	while(yamaActivado())
+		servidorAtenderPedidos(servidor);
+	memoriaLiberar(servidor);
+}
+
+void yamaConectarAFileSystem() {
 	imprimirMensajeDos(archivoLog, "[CONEXION] Realizando conexion con File System (IP: %s | Puerto %s)", configuracion->ipFileSystem, configuracion->puertoFileSystem);
 	socketFileSystem = socketCrearCliente(configuracion->ipFileSystem, configuracion->puertoFileSystem, ID_YAMA);
 	imprimirMensaje(archivoLog, "[CONEXION] Conexion exitosa con File System");
 }
 
-void YAMAIniciar() {
+void yamaIniciar() {
 	pantallaLimpiar();
-	estadoYAMA = 1;
+	yamaActivar();
 	imprimirMensajeProceso("# PROCESO YAMA");
 	archivoLog = archivoLogCrear(RUTA_LOG, "YAMA");
 	archivoConfigObtenerCampos();
@@ -60,14 +67,6 @@ void archivoConfigObtenerCampos() {
 	campos[4] = "RETARDO_PLANIFICACION";
 	campos[5] = "ALGORITMO_BALANCEO";
 }
-
-
-void funcionSenial(int senial) {
-	estadoYAMA = 0;
-	puts("");
-	imprimirMensajeProceso("# PROCESO YAMA FINALIZADO");
-}
-
 
 
 void notificadorInformar(Socket unSocket) {
@@ -145,7 +144,7 @@ void servidorRecibirMensaje(Servidor* servidor, Socket unSocket) {
 	if(mensajeDesconexion(mensaje))
 		servidorFinalizarConexion(servidor, unSocket);
 	else
-		puts("[MENSAJE]");
+		printf("Mensaje: %s\n", (String)mensaje->datos);
 	mensajeDestruir(mensaje);
 }
 
@@ -181,11 +180,6 @@ void servidorInicializar(Servidor* servidor) {
 	servidorActivarListenerMaster(servidor);
 }
 
-void servidorFinalizar(Servidor* servidor) {
-	archivoLogDestruir(archivoLog);
-	memoriaLiberar(configuracion);
-}
-
 void servidorAtenderSolicitud(Servidor* servidor) {
 	Socket unSocket;
 	Socket maximoSocket = servidor->maximoSocket;
@@ -198,5 +192,24 @@ void servidorAtenderPedidos(Servidor* servidor) {
 	servidorEsperarSolicitud(servidor);
 	servidorAtenderSolicitud(servidor);
 }
+
+
+bool yamaActivado() {
+	return estadoYama == ACTIVADO;
+}
+
+bool yamaDesactivado() {
+	return estadoYama == DESACTIVADO;
+}
+
+void yamaActivar() {
+	estadoYama = ACTIVADO;
+}
+
+void yamaDesactivar() {
+	estadoYama = DESACTIVADO;
+}
+
+
 
 

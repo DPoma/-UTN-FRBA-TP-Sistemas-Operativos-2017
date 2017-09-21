@@ -14,8 +14,10 @@ int main(void) {
 	dataNodeIniciar();
 	imprimirMensajeDos(archivoLog, "[CONEXION] Estableciendo conexion con File System (IP: %s | Puerto %s)", configuracion->ipFileSystem, configuracion->puertoFileSystem);
 	Socket unSocket = socketCrearCliente(configuracion->ipFileSystem, configuracion->puertoFileSystem, ID_DATANODE);
-	estadoDataNode = 1;
-	while(estadoDataNode);
+	while(dataNodeActivado());
+	imprimirMensaje(archivoLog, "[EJECUCION] Proceso Data Node finalizado");
+	archivoLogDestruir(archivoLog);
+	memoriaLiberar(configuracion);
 	socketCerrar(unSocket);
 	return EXIT_SUCCESS;
 
@@ -47,9 +49,8 @@ void archivoConfigObtenerCampos() {
 }
 
 void funcionSenial(int senial) {
-	estadoDataNode = 0;
+	dataNodeDesactivar();
 	puts("");
-	imprimirMensaje(archivoLog, "[EJECUCION] Proceso Data Node finalizado");
 }
 
 void dataNodeIniciar() {
@@ -60,4 +61,23 @@ void dataNodeIniciar() {
 	configuracion = configuracionCrear(RUTA_CONFIG, (Puntero)configuracionLeerArchivoConfig, campos);
 	configuracionImprimir(configuracion);
 	senialAsignarFuncion(SIGINT, funcionSenial);
+	dataNodeActivar();
 }
+
+
+bool dataNodeActivado() {
+	return estadoDataNode == ACTIVADO;
+}
+
+bool dataNodeDesactivado() {
+	return estadoDataNode == DESACTIVADO;
+}
+
+void dataNodeActivar() {
+	estadoDataNode = ACTIVADO;
+}
+
+void dataNodeDesactivar() {
+	estadoDataNode = DESACTIVADO;
+}
+
