@@ -25,7 +25,7 @@ void fileSystemIniciar() {
 	imprimirMensajeProceso("# PROCESO FILE SYSTEM");
 	archivoLog = archivoLogCrear(RUTA_LOG, "FileSystem");
 	imprimirMensaje(archivoLog, "[EJECUCION] Proceso File System inicializado");
-	estadoFileSystem = 1;
+	fileSystemActivar();
 	archivoConfigObtenerCampos();
 	//senialAsignarFuncion(SIGPIPE, SIG_IGN);
 	configuracion = configuracionCrear(RUTA_CONFIG, (Puntero)configuracionLeerArchivoConfig, campos);
@@ -39,7 +39,7 @@ void fileSystemCrearConsola() {
 void fileSystemAtenderProcesos() {
 	Servidor* servidor = memoriaAlocar(sizeof(Servidor));
 	servidorInicializar(servidor);
-	while(estadoFileSystem)
+	while(fileSystemActivado())
 		servidorAtenderPedidos(servidor);
 	servidorFinalizar(servidor);
 }
@@ -380,7 +380,7 @@ void consolaRealizarAccion(Comando* comando) {
 
 void consolaAtenderComandos() {
 	hiloDetach(pthread_self());
-	while(estadoFileSystem) {
+	while(fileSystemActivado()) {
 		char* entrada = consolaLeerEntrada();
 		if(estadoFileSystem) {
 			Comando comando;
@@ -439,9 +439,12 @@ void servidorFinalizarConexion(Servidor* servidor, Socket unSocket) {
 	socketCerrar(unSocket);
 }
 
-void servidorEstablecerConexion(Servidor* servidor, Socket unSocket) {
-	listaSocketsAgregar(unSocket, &servidor->listaMaster);
-	servidorControlarMaximoSocket(servidor, unSocket);
+void servidorRegistrarConexion(Servidor* servidor, Socket unSocket) {
+	if(unSocket != ERROR) {
+		listaSocketsAgregar(unSocket, &servidor->listaMaster);
+		servidorControlarMaximoSocket(servidor, unSocket);
+	}
+
 }
 
 Socket servidorAceptarYAMA(Servidor* servidor, Socket unSocket) {
@@ -518,37 +521,33 @@ void servidorFinalizar(Servidor* servidor) {
 	memoriaLiberar(servidor);
 }
 
-void servidorAtenderSolicitud(Servidor* servidor) {
-
+void servidorRegistrarDataNode(Servidor* servidor, Socket nuevoSocket) {
+	if(nuevoSocket != ERROR) {
+		listaSocketsAgregar(nuevoSocket, &servidor->listaDataNodes);
+		imprimirMensaje(archivoLog, "[CONEXION] Proceso Data Node conectado exitosamente");
+	}
 }
 
 void servidorAtenderPedidos(Servidor* servidor) {
 	servidorSetearListaSelect(servidor);
 	servidorEsperarSolicitud(servidor);
 	Socket unSocket;
-	int maximoSocket = servidor->maximoSocket;
+	Socket maximoSocket = servidor->maximoSocket;
 	for(unSocket = 0; unSocket <= maximoSocket; unSocket++)
 		if (socketRealizoSolicitud(servidor, unSocket)) {
-			if(socketEsListener(servidor, unSocket))
-			{
+			if(socketEsListener(servidor, unSocket)) {
 				Socket nuevoSocket;
-				if(socketEsListenerDataNode(servidor, unSocket))
-				{
+				if(socketEsListenerDataNode(servidor, unSocket)) {
 					nuevoSocket = socketAceptar(unSocket, ID_DATANODE);
-					if(estadoFileSystem == 0)
+					if(fileSystemDesactivado())
 						break;
-					if(nuevoSocket != ERROR) {
-						listaSocketsAgregar(nuevoSocket, &servidor->listaDataNodes);
-						imprimirMensaje(archivoLog, "[CONEXION] Proceso Data Node conectado exitosamente");
-					}
+					servidorRegistrarDataNode(servidor, nuevoSocket);
 				}
 				else
 					nuevoSocket = servidorAceptarYAMA(servidor, unSocket);
 
-				if(nuevoSocket != ERROR)
-					servidorEstablecerConexion(servidor, nuevoSocket);
+				servidorRegistrarConexion(servidor, nuevoSocket);
 			}
-
 			else
 				servidorRecibirMensaje(servidor, unSocket);
 		}
@@ -575,4 +574,20 @@ void archivoConfigObtenerCampos() {
 	campos[0] = "PUERTO_YAMA";
 	campos[1] = "PUERTO_DATANODE";
 	campos[2] = "RUTA_METADATA";
+}
+
+bool fileSystemActivado() {
+	return estadoFileSystem == ACTIVADO;
+}
+
+bool fileSystemDesactivado() {
+	return estadoFileSystem == DESACTIVADO;
+}
+
+void fileSystemActivar() {
+	estadoFileSystem = ACTIVADO;
+}
+
+void fileSystemDesactivar() {
+	estadoFileSystem = DESACTIVADO;
 }

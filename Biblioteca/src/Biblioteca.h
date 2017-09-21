@@ -39,6 +39,8 @@
 #define ERROR -1
 #define NULO 0
 #define DESCONEXION 0
+#define ACTIVADO 1
+#define DESACTIVADO 0
 #define HANDSHAKE 1
 #define ID_FILESYSTEM 1
 #define ID_YAMA 2

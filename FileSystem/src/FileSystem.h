@@ -127,6 +127,9 @@ Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig);
 
 void archivoConfigObtenerCampos();
 void funcionSenial(int senial);
-
+bool fileSystemActivado();
+bool fileSystemDesactivado();
+void fileSystemActivar();
+void fileSystemDesactivar();
 
 
