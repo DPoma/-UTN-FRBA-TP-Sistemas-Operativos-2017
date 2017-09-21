@@ -69,6 +69,13 @@ typedef struct {
 	char rutaMetadata[100];
 } Configuracion;
 
+
+typedef struct {
+	int indice;
+	int padre;
+	char nombre[255];
+} Directorio;
+
 String campos[3];
 Configuracion* configuracion;
 ArchivoLog archivoLog;
@@ -132,4 +139,10 @@ bool fileSystemDesactivado();
 void fileSystemActivar();
 void fileSystemDesactivar();
 
+Directorio directorioCrear(int indice, int padre, String nombre);
+void directorioGuardarEnArchivo(Archivo unArchivo, Directorio unDirectorio);
+Directorio directorioLeerDeArchivo(Archivo unArchivo);
+void directorioPosicionarEnRegistro(Archivo archivo, int posicion);
+long directorioCantidadRegistros(Archivo archivo);
+long directorioObtenerPosicionActualArchivo(Archivo archivo);
 

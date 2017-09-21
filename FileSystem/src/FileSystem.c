@@ -358,6 +358,9 @@ void consolaFinalizar() {
 }
 
 void consolaRealizarAccion(Comando* comando) {
+	Archivo archivo = archivoCrear("/home/utnso/Escritorio/test.dat", "w");
+	//directorioPosicionarEnRegistro(archivo, 0);
+	Directorio directorio = directorioCrear(14, 99, "GG");
 	switch(comando->identificador) {
 		case FORMAT: puts("COMANDO FORMAT"); break;
 		case RM: puts("COMANDO RM"); break;
@@ -366,7 +369,7 @@ void consolaRealizarAccion(Comando* comando) {
 		case RENAME: puts("COMANDO RENAME"); break;
 		case MV: puts("COMANDO  MV"); break;
 		case CAT: puts("COMANDO CAT"); break;
-		case MKDIR: puts("COMANDO MKDIR"); break;
+		case MKDIR: puts("COMANDO MKDIR CREANDO DIRECTORIO");directorioGuardarEnArchivo(archivo, directorio);break;
 		case CPFROM: puts("COMANDO CPFROM"); break;
 		case CPTO: puts("COMANDO CPTO"); break;
 		case CPBLOCK:puts("COMANDO CPBLOCK"); break;
@@ -591,3 +594,42 @@ void fileSystemActivar() {
 void fileSystemDesactivar() {
 	estadoFileSystem = DESACTIVADO;
 }
+
+
+//--------------------------------------- Funciones de Directorio -------------------------------------
+
+Directorio directorioCrear(int indice, int padre, String nombre) {
+	Directorio directorio;
+	directorio.indice = indice;
+	directorio.padre = padre;
+	stringCopiar(directorio.nombre, nombre);
+	return directorio;
+}
+
+Directorio directorioLeerDeArchivo(Archivo unArchivo) {
+   Directorio directorio;
+   fread(&directorio,sizeof(Directorio),1,unArchivo);
+   return directorio;
+}
+
+void directorioGuardarEnArchivo(Archivo unArchivo, Directorio unDirectorio) {
+   fwrite(&unDirectorio,sizeof(Directorio),1,unArchivo);
+}
+
+
+void directorioPosicionarEnRegistro(Archivo archivo, int posicion) {
+   fseek(archivo, posicion*sizeof(Directorio),SEEK_SET);
+}
+
+long directorioCantidadRegistros(Archivo archivo) {
+   long curr=ftell(archivo);
+   fseek(archivo,0,SEEK_END);
+   long ultimo=ftell(archivo);
+   fseek(archivo,curr,SEEK_SET);
+   return ultimo/sizeof(Directorio);
+}
+
+long directorioObtenerPosicionActualArchivo(Archivo archivo) {
+   return ftell(archivo)/sizeof(Directorio);
+}
+

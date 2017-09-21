@@ -65,6 +65,7 @@ typedef sem_t Semaforo;
 typedef pthread_mutex_t Mutex;
 typedef pthread_t Hilo;
 typedef t_list* Lista;
+typedef FILE* Archivo;
 
 //--------------------------------------- Estructuras -------------------------------------
 

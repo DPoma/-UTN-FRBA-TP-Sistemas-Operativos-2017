@@ -712,3 +712,9 @@ bool caracterDistintos(char unCaracter, char otroCaracter) {
 bool caracterIguales(char unCaracter, char otroCaracter) {
 	return unCaracter == otroCaracter;
 }
+
+
+Archivo archivoCrear(String rutaArchivo, String modoApertura) {
+	Archivo archivo = fopen(rutaArchivo, modoApertura);
+	return archivo;
+}
