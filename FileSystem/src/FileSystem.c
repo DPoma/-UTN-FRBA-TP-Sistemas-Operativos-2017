@@ -118,35 +118,35 @@ int consolaIdentificarComando(String comando) {
 		return FORMAT;
 	if(stringIguales(comando, C_INFO))
 		return INFO;
-	else if(stringIguales(comando, C_RM))
+	if(stringIguales(comando, C_RM))
 		return RM;
-	else if(stringIguales(comando, C_RMB))
+	if(stringIguales(comando, C_RMB))
 		return RMB;
-	else if(stringIguales(comando, C_RMD))
+	if(stringIguales(comando, C_RMD))
 		return RMD;
-	else if(stringIguales(comando, C_RENAME))
+	if(stringIguales(comando, C_RENAME))
 		return RENAME;
-	else if(stringIguales(comando, C_MV))
+	if(stringIguales(comando, C_MV))
 		return MV;
-	else if(stringIguales(comando, C_CAT))
+	if(stringIguales(comando, C_CAT))
 		return CAT;
-	else if(stringIguales(comando, C_MKDIR))
+	if(stringIguales(comando, C_MKDIR))
 		return MKDIR;
-	else if(stringIguales(comando, C_CPFROM))
+	if(stringIguales(comando, C_CPFROM))
 		return CPFROM;
-	else if(stringIguales(comando, C_CPTO))
+	if(stringIguales(comando, C_CPTO))
 		return CPTO;
-	else if(stringIguales(comando, C_CPBLOCK))
+	if(stringIguales(comando, C_CPBLOCK))
 		return CPBLOCK;
-	else if(stringIguales(comando, C_MD5))
+	if(stringIguales(comando, C_MD5))
 		return MD5;
-	else if(stringIguales(comando, C_LS))
+	if(stringIguales(comando, C_LS))
 		return LS;
-	else if(stringIguales(comando, C_INFO))
+	if(stringIguales(comando, C_INFO))
 		return INFO;
-	else if(stringIguales(comando, C_RENAME))
+	if(stringIguales(comando, C_RENAME))
 		return RENAME;
-	else if(stringIguales(comando, C_EXIT))
+	if(stringIguales(comando, C_EXIT))
 		return EXIT;
 	else
 		return ERROR;
@@ -176,9 +176,9 @@ bool consolaComandoTipoTres(String comando) {
 int consolaComandoCantidadArgumentos(String comando) {
 	if(consolaComandoTipoUno(comando))
 		return 1;
-	else if(consolaComandoTipoDos(comando))
+	if(consolaComandoTipoDos(comando))
 		return 2;
-	else if(consolaComandoTipoTres(comando))
+	if(consolaComandoTipoTres(comando))
 		return 3;
 	else
 		return 0;
@@ -249,13 +249,13 @@ bool consolaValidarComandoFlagD(String* subcadenas) {
 bool consolaComandoControlarArgumentos(String* subcadenas) {
 	if(consolaComandoRemoverFlagB(subcadenas))
 		return consolaValidarComandoFlagB(subcadenas);
-	else if(consolaComandoRemoverFlagD(subcadenas))
+	if(consolaComandoRemoverFlagD(subcadenas))
 		return consolaValidarComandoFlagD(subcadenas);
-	else if(consolaComandoTipoUno(subcadenas[0]))
+	if(consolaComandoTipoUno(subcadenas[0]))
 		return consolaValidarComandoTipoUno(subcadenas);
-	else if(consolaComandoTipoDos(subcadenas[0]) )
+	if(consolaComandoTipoDos(subcadenas[0]) )
 		return consolaValidarComandoTipoDos(subcadenas);
-	else if(consolaComandoTipoTres(subcadenas[0]))
+	if(consolaComandoTipoTres(subcadenas[0]))
 		return consolaValidarComandoTipoTres(subcadenas);
 	else
 		return consolaValidarComandoSinTipo(subcadenas);
