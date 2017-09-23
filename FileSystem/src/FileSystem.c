@@ -49,7 +49,7 @@ void fileSystemFinalizar() {
 	//hiloEsperar(hiloConsola);
 	archivoLogDestruir(archivoLog);
 	memoriaLiberar(configuracion);
-	sleep(1.5);
+	//sleep(1.5);
 }
 
 //--------------------------------------- Funciones de Consola -------------------------------------
@@ -358,9 +358,9 @@ void consolaFinalizar() {
 }
 
 void consolaRealizarAccion(Comando* comando) {
-	Archivo archivo = archivoCrear("/home/utnso/Escritorio/test.dat", "r+b");
-	directorioPosicionarEnRegistro(archivo, 1);
-	Directorio directorio = directorioCrear(201, 1, "ggwp");
+	//Archivo archivo = archivoCrear("../../../test.dat", "r+b");
+	//directorioPosicionarEnRegistro(archivo, 1);
+	//Directorio directorio = directorioCrear(201, 1, "ggwp");
 	switch(comando->identificador) {
 		case FORMAT: puts("COMANDO FORMAT"); break;
 		case RM: puts("COMANDO RM"); break;
@@ -370,12 +370,13 @@ void consolaRealizarAccion(Comando* comando) {
 		case MV: puts("COMANDO  MV"); break;
 		case CAT: puts("COMANDO CAT"); break;
 		case MKDIR: puts("COMANDO MKDIR CREANDO DIRECTORIO");
-		directorioCrear(0, -1, "root");
-		directorioGuardarEnArchivo(archivo, directorio);
-		directorio = directorioLeerDeArchivo(archivo);
-		printf("el nombre es %s\n", directorio.nombre);
-		printf("el index es %i\n", directorio.indice);
-		printf("el padre es %i\n", directorio.padre);
+
+		//directorioCrear(0, -1, "root");
+		//directorioGuardarEnArchivo(archivo, directorio);
+		//directorio = directorioLeerDeArchivo(archivo);
+		//printf("el nombre es %s\n", directorio.nombre);
+		//printf("el index es %i\n", directorio.indice);
+		//printf("el padre es %i\n", directorio.padre);
 		break;
 		case CPFROM: puts("COMANDO CPFROM"); break;
 		case CPTO: puts("COMANDO CPTO"); break;
@@ -383,7 +384,9 @@ void consolaRealizarAccion(Comando* comando) {
 		case MD5: puts("COMANDO MD5"); break;
 		case LS: puts("COMANDO LS"); break;
 		case INFO: puts("COMANDO INFO"); break;
-		case EXIT: consolaFinalizar(); fclose(archivo); break;
+		case EXIT: consolaFinalizar();
+		//fclose(archivo);
+		break;
 		default: puts("COMANDO INVALIDO"); break;
 	}
 }

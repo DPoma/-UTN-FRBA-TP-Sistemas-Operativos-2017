@@ -35,7 +35,7 @@ Worker: $(OBJS) $(USER_OBJS)
 
 # Other Targets
 clean:
-	-$(RM) $(OBJS)$(C_DEPS)$(EXECUTABLES) Worker
+	-$(RM) $(EXECUTABLES)$(OBJS)$(C_DEPS) Worker
 	-@echo ' '
 
 .PHONY: all clean dependents

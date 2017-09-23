@@ -8,8 +8,8 @@
 
 #include "../../Biblioteca/src/Biblioteca.c"
 
-#define RUTA_CONFIG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Worker/NodoConfig.conf"
-#define RUTA_LOG "/home/utnso/Escritorio/WorkerLog.log"
+#define RUTA_CONFIG "../NodoConfig.conf"
+#define RUTA_LOG "../../../WorkerLog.log"
 
 typedef struct {
 	char ipFileSytem[50];
