@@ -358,9 +358,9 @@ void consolaFinalizar() {
 }
 
 void consolaRealizarAccion(Comando* comando) {
-	Archivo archivo = archivoCrear("/home/utnso/Escritorio/test.dat", "w");
-	//directorioPosicionarEnRegistro(archivo, 0);
-	Directorio directorio = directorioCrear(14, 99, "GG");
+	Archivo archivo = archivoCrear("/home/utnso/Escritorio/test.dat", "r+b");
+	directorioPosicionarEnRegistro(archivo, 1);
+	Directorio directorio = directorioCrear(201, 1, "ggwp");
 	switch(comando->identificador) {
 		case FORMAT: puts("COMANDO FORMAT"); break;
 		case RM: puts("COMANDO RM"); break;
@@ -369,14 +369,21 @@ void consolaRealizarAccion(Comando* comando) {
 		case RENAME: puts("COMANDO RENAME"); break;
 		case MV: puts("COMANDO  MV"); break;
 		case CAT: puts("COMANDO CAT"); break;
-		case MKDIR: puts("COMANDO MKDIR CREANDO DIRECTORIO");directorioGuardarEnArchivo(archivo, directorio);break;
+		case MKDIR: puts("COMANDO MKDIR CREANDO DIRECTORIO");
+		directorioCrear(0, -1, "root");
+		directorioGuardarEnArchivo(archivo, directorio);
+		directorio = directorioLeerDeArchivo(archivo);
+		printf("el nombre es %s\n", directorio.nombre);
+		printf("el index es %i\n", directorio.indice);
+		printf("el padre es %i\n", directorio.padre);
+		break;
 		case CPFROM: puts("COMANDO CPFROM"); break;
 		case CPTO: puts("COMANDO CPTO"); break;
 		case CPBLOCK:puts("COMANDO CPBLOCK"); break;
 		case MD5: puts("COMANDO MD5"); break;
 		case LS: puts("COMANDO LS"); break;
 		case INFO: puts("COMANDO INFO"); break;
-		case EXIT: consolaFinalizar(); break;
+		case EXIT: consolaFinalizar(); fclose(archivo); break;
 		default: puts("COMANDO INVALIDO"); break;
 	}
 }
@@ -608,12 +615,16 @@ Directorio directorioCrear(int indice, int padre, String nombre) {
 
 Directorio directorioLeerDeArchivo(Archivo unArchivo) {
    Directorio directorio;
-   fread(&directorio,sizeof(Directorio),1,unArchivo);
+   fread(&directorio, 1, sizeof(Directorio), unArchivo);
    return directorio;
 }
 
+void listaDirectorioAgregar(Directorio* directorio) {
+	listaAgregarElemento(listaDirectorios, directorio);
+}
+
 void directorioGuardarEnArchivo(Archivo unArchivo, Directorio unDirectorio) {
-   fwrite(&unDirectorio,sizeof(Directorio),1,unArchivo);
+   fwrite(&unDirectorio, 1, sizeof(Directorio), unArchivo);
 }
 
 

@@ -81,6 +81,7 @@ Configuracion* configuracion;
 ArchivoLog archivoLog;
 int estadoFileSystem;
 Hilo hiloConsola;
+Lista listaDirectorios;
 
 //--------------------------------------- Funciones de File System -------------------------------------
 
