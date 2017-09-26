@@ -8,8 +8,8 @@
 
 #include "../../Biblioteca/src/Biblioteca.c"
 
-#define RUTA_CONFIG "../MasterConfig.conf"
-#define RUTA_LOG "../../../MasterLog.log"
+#define RUTA_CONFIG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Master/MasterConfig.conf"
+#define RUTA_LOG "/home/utnso/Escritorio/MasterLog.log"
 
 typedef struct {
 	char ipYAMA[50];

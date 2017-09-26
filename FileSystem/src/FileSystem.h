@@ -8,8 +8,8 @@
 
 #include "../../Biblioteca/src/Biblioteca.c"
 
-#define RUTA_CONFIG "../FileSystemConfig.conf"
-#define RUTA_LOG "../../../FileSystem.log"
+#define RUTA_CONFIG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/FileSystem/FileSystemConfig.conf"
+#define RUTA_LOG "/home/utnso/Escritorio/FileSystemLog.log"
 
 //Identificador de cada comando
 #define FORMAT 1

@@ -10,9 +10,9 @@
 
 #define EVENT_SIZE (sizeof(struct inotify_event)+24)
 #define BUF_LEN (1024*EVENT_SIZE)
-#define RUTA_CONFIG "../YAMAConfig.conf"
-#define RUTA_NOTIFY "../../";
-#define RUTA_LOG "../../../YAMALog.log"
+#define RUTA_NOTIFY "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/YAMA";
+#define RUTA_CONFIG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/YAMA/YAMAConfig.conf"
+#define RUTA_LOG "/home/utnso/Escritorio/YAMALog.log"
 
 typedef struct {
 	char puertoMaster[50];
