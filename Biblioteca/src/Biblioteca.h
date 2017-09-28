@@ -25,6 +25,7 @@
 #include "commons/log.h"
 #include "commons/string.h"
 #include "commons/collections/list.h"
+#include <stdint.h>
 
 //--------------------------------------- Constantes -------------------------------------
 
@@ -70,8 +71,8 @@ typedef FILE* Archivo;
 //--------------------------------------- Estructuras -------------------------------------
 
 typedef struct {
-	int operacion;
-	int tamanio;
+	int32_t operacion;
+	int32_t tamanio;
 } Header;
 
 typedef struct {

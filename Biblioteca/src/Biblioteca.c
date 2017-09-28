@@ -141,7 +141,7 @@ void listaSocketsLimpiar(ListaSockets* listaSockets) {
 
 //--------------------------------------- Funciones para Mensaje -------------------------------------
 
-void* mensajeCrear(int operacion, void* dato, int tamanioDato){ //por ahi habría que usar los int que no dependen de arquitectura aca?
+void* mensajeCrear(int32_t operacion, void* dato, int32_t tamanioDato){
 	Header header = headerCrear(operacion, tamanioDato);
 	void* buffer = malloc(sizeof(Header)+tamanioDato);
 	memcpy(buffer, &header, sizeof(Header));
@@ -149,7 +149,7 @@ void* mensajeCrear(int operacion, void* dato, int tamanioDato){ //por ahi habrí
 	return buffer;
 }
 
-void mensajeEnviar(int socketReceptor, int operacion, void* dato, int tamanioDato) {
+void mensajeEnviar(int socketReceptor, int32_t operacion, void* dato, int32_t tamanioDato) {
 	void* buffer = mensajeCrear(operacion, dato, tamanioDato);
 	socketEnviar(socketReceptor, buffer, sizeof(Header)+tamanioDato);
 	free(buffer);
@@ -203,9 +203,9 @@ bool mensajeDesconexion(Mensaje* mensaje) {
 
 //--------------------------------------- Funciones de HandShake-------------------------------------
 
-int handShakeEnvioExitoso(Socket unSocket, int idProceso) {
-	int id = idProceso;
-	mensajeEnviar(unSocket, HANDSHAKE, &id, sizeof(int));
+int handShakeEnvioExitoso(Socket unSocket, int32_t idProceso) {
+	int32_t id = idProceso;
+	mensajeEnviar(unSocket, HANDSHAKE, &id, sizeof(int32_t));
 	Mensaje* mensaje = mensajeRecibir(unSocket);
 	int estado = handShakeRealizado(mensaje) && handShakeAceptado(mensaje);
 	mensajeDestruir(mensaje);
@@ -214,10 +214,10 @@ int handShakeEnvioExitoso(Socket unSocket, int idProceso) {
 
 int handShakeRecepcionExitosa(Socket unSocket, int idEsperada) {
 	Mensaje* mensaje = mensajeRecibir(unSocket);
-	int idProceso = (*(int*)mensaje->datos);
+	int idProceso = (*(int32_t*)mensaje->datos);
 	mensajeDestruir(mensaje);
-	int estado = handShakeIdsIguales(idProceso, idEsperada);
-	mensajeEnviar(unSocket, HANDSHAKE, &estado, sizeof(int));
+	int32_t estado = handShakeIdsIguales(idProceso, idEsperada);
+	mensajeEnviar(unSocket, HANDSHAKE, &estado, sizeof(int32_t));
 	return estado;
 }
 
@@ -249,7 +249,7 @@ void handShakeError(Socket unSocket) {
 
 //--------------------------------------- Funciones para Header -------------------------------------
 
-Header headerCrear(int operacion, int tamanio) {
+Header headerCrear(int32_t operacion, int32_t tamanio) {
 	Header header;
 	header.operacion = operacion;
 	header.tamanio = tamanio;
