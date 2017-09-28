@@ -141,7 +141,7 @@ void listaSocketsLimpiar(ListaSockets* listaSockets) {
 
 //--------------------------------------- Funciones para Mensaje -------------------------------------
 
-void* mensajeCrear(int operacion, void* dato, int tamanioDato) {
+void* mensajeCrear(int operacion, void* dato, int tamanioDato){ //por ahi habría que usar los int que no dependen de arquitectura aca?
 	Header header = headerCrear(operacion, tamanioDato);
 	void* buffer = malloc(sizeof(Header)+tamanioDato);
 	memcpy(buffer, &header, sizeof(Header));

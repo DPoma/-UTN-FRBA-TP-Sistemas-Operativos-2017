@@ -44,13 +44,9 @@ void yamaIniciar();
 void yamaConectarAFileSystem();
 void yamaAtenderMasters();
 void servidorInicializar(Servidor* servidor);
-void servidorFinalizar(Servidor* servidor);
 void servidorAtenderPedidos(Servidor* servidor);
+void servidorControlarMaximoSocket(Servidor* servidor, Socket unSocket);
 
-bool yamaActivado();
-bool yamaDesactivado();
-void yamaActivar();
-void yamaDesactivar();
 void yamaFinalizar();
 
 
