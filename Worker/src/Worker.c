@@ -25,7 +25,119 @@ void workerCrearHijo(Socket unSocket) {
 	if(pid == 0) {
 	imprimirMensaje(archivoLog, "[CONEXION] Esperando mensajes de Master");
 	Mensaje* mensaje = mensajeRecibir(unSocket);
-	printf("Mensaje: %s\n", (String)mensaje->datos);
+	char* codigo;
+	int sizeCodigo;
+	char* origen;
+	int sizeOrigen;
+	char* destino;
+	int sizeDestino;
+	switch(mensaje->header.operacion){
+			case -1:
+				imprimirMensaje(archivoLog, "[EJECUCION] Murio el Master"); //revisar si deve morir por este caso
+				estadoWorker=0;
+				break;
+			case 1: //Etapa Transformacion
+			{
+				int Origenb; //si el origen es un numero de bloque esto lo facilitaria, revisar
+				memcpy(&sizeCodigo, mensaje->datos, sizeof(int));
+				memcpy(&codigo,mensaje->datos + sizeof(int), sizeCodigo);
+				memcpy(&origen,mensaje->datos + sizeof(int)+sizeCodigo, sizeof(int));
+				memcpy(&sizeDestino, mensaje->datos + sizeof(int)*2 + sizeCodigo , sizeof(int));
+				memcpy(&destino,mensaje->datos + sizeof(int)*3+sizeCodigo, sizeDestino);
+				//transformar();
+				/*char* buffer = leerArchivo(path,offset,size);
+				log_info(logFile, "[FILE SYSTEM] EL KERNEL PIDE LEER: %s | OFFSET: %i | SIZE: %i", path, offset, size);
+				if(buffer=="-1"){
+					lSend(conexion, NULL, -4, 0);
+					log_error(logFile, "[LEER]: HUBO UN ERROR AL LEER");
+					break;
+				}
+				//enviar el buffer
+				lSend(conexion, buffer, 2, sizeof(char)*size);
+				free(buffer);
+				free(path);*/
+				free(codigo);
+				free(origen);
+				free(destino);
+				break;
+			}
+			case 2:{ //Etapa Reduccion Local
+
+				memcpy(&sizeCodigo, mensaje->datos, sizeof(int));
+				memcpy(&codigo,mensaje->datos + sizeof(int), sizeCodigo);
+				memcpy(&sizeOrigen, mensaje->datos+ sizeof(int) +sizeCodigo, sizeof(int));
+				memcpy(&origen,mensaje->datos + sizeof(int)*2+sizeCodigo, sizeOrigen);
+				memcpy(&sizeDestino, mensaje->datos + sizeof(int)*2 + sizeCodigo + sizeOrigen, sizeof(int));
+				memcpy(&destino,mensaje->datos + sizeof(int)*3+sizeCodigo+ sizeOrigen, sizeDestino);
+				//reduccionLocal();
+				/*char* buffer = leerArchivo(path,offset,size);
+				log_info(logFile, "[FILE SYSTEM] EL KERNEL PIDE LEER: %s | OFFSET: %i | SIZE: %i", path, offset, size);
+				if(buffer=="-1"){
+					lSend(conexion, NULL, -4, 0);
+					log_error(logFile, "[LEER]: HUBO UN ERROR AL LEER");
+					break;
+				}
+				//enviar el buffer
+				lSend(conexion, buffer, 2, sizeof(char)*size);
+				free(buffer);
+				free(path);*/
+				free(codigo);
+				free(origen);
+				free(destino);
+				break;
+			}
+			case 3:{ //Etapa Reduccion Global
+
+				memcpy(&sizeCodigo, mensaje->datos, sizeof(int));
+				memcpy(&codigo,mensaje->datos + sizeof(int), sizeCodigo);
+				memcpy(&sizeOrigen, mensaje->datos+ sizeof(int) +sizeCodigo, sizeof(int));
+				memcpy(&origen,mensaje->datos + sizeof(int)*2+sizeCodigo, sizeOrigen);
+				memcpy(&sizeDestino, mensaje->datos + sizeof(int)*2 + sizeCodigo + sizeOrigen, sizeof(int));
+				memcpy(&destino,mensaje->datos + sizeof(int)*3+sizeCodigo+ sizeOrigen, sizeDestino);
+				//reduccionGlobal();
+				/*char* buffer = leerArchivo(path,offset,size);
+				log_info(logFile, "[FILE SYSTEM] EL KERNEL PIDE LEER: %s | OFFSET: %i | SIZE: %i", path, offset, size);
+				if(buffer=="-1"){
+					lSend(conexion, NULL, -4, 0);
+					log_error(logFile, "[LEER]: HUBO UN ERROR AL LEER");
+					break;
+				}
+				//enviar el buffer
+				lSend(conexion, buffer, 2, sizeof(char)*size);
+				free(buffer);
+				free(path);*/
+				free(codigo);
+				free(origen);
+				free(destino);
+				break;
+			}
+			case 4:{ //Almacenamiento Definitivo
+
+				memcpy(&sizeCodigo, mensaje->datos, sizeof(int));
+				memcpy(&codigo,mensaje->datos + sizeof(int), sizeCodigo);
+				memcpy(&sizeOrigen, mensaje->datos+ sizeof(int) +sizeCodigo, sizeof(int));
+				memcpy(&origen,mensaje->datos + sizeof(int)*2+sizeCodigo, sizeOrigen);
+				memcpy(&sizeDestino, mensaje->datos + sizeof(int)*2 + sizeCodigo + sizeOrigen, sizeof(int));
+				memcpy(&destino,mensaje->datos + sizeof(int)*3+sizeCodigo+ sizeOrigen, sizeDestino);
+				//almacenar();
+				/*char* buffer = leerArchivo(path,offset,size);
+				log_info(logFile, "[FILE SYSTEM] EL KERNEL PIDE LEER: %s | OFFSET: %i | SIZE: %i", path, offset, size);
+				if(buffer=="-1"){
+					lSend(conexion, NULL, -4, 0);
+					log_error(logFile, "[LEER]: HUBO UN ERROR AL LEER");
+					break;
+				}
+				//enviar el buffer
+				lSend(conexion, buffer, 2, sizeof(char)*size);
+				free(buffer);
+				free(path);*/
+				free(codigo);
+				free(origen);
+				free(destino);
+				break;
+			}
+		}
+	//printf("Mensaje: %s\n", (String)mensaje->datos);
 	}
 	else if(pid > 0)
 		puts("PADRE ACEPTO UNA CONEXION");
@@ -51,6 +163,14 @@ Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig) {
 	stringCopiar(configuracion->rutaDataBin, archivoConfigStringDe(archivoConfig, "RUTA_DATABIN"));
 	archivoConfigDestruir(archivoConfig);
 	return configuracion;
+}
+
+char* agregarBarraCero(char* data, int tamanio)
+{
+	char* path = malloc(tamanio+1);
+	memcpy(path, data, tamanio);
+	path[tamanio] = '\0';
+	return path;
 }
 
 void configuracionImprimir(Configuracion* configuracion) {
