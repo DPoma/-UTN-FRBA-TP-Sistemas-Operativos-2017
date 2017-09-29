@@ -28,13 +28,24 @@ void yamaIniciar() {
 }
 
 void yamaConectarAFileSystem() {
+	servidor = memoriaAlocar(sizeof(Servidor));
 	imprimirMensajeDos(archivoLog, "[CONEXION] Realizando conexion con File System (IP: %s | Puerto %s)", configuracion->ipFileSystem, configuracion->puertoFileSystem);
-	socketFileSystem = socketCrearCliente(configuracion->ipFileSystem, configuracion->puertoFileSystem, ID_YAMA);
+	servidor->fileSystem = socketCrearCliente(configuracion->ipFileSystem, configuracion->puertoFileSystem, ID_YAMA);
 	imprimirMensaje(archivoLog, "[CONEXION] Conexion exitosa con File System");
+
+	Mensaje* cantNodos=mensajeRecibir(servidor->fileSystem);
+	mensajeObtenerDatos(cantNodos,servidor->fileSystem); //medio al pedo para un int pero bueno
+	int i=0;
+	while(i<(*(int32_t*)cantNodos->datos)){
+		Nodo nodo;
+		nodo.conectado=true;
+//		nodo.disponibilidad=###;
+		nodo.numero=i;
+		listaAgregarElemento(nodos,&nodo);
+	}
 }
 
 void yamaAtenderMasters() {
-	Servidor* servidor = memoriaAlocar(sizeof(Servidor));
 	servidorInicializar(servidor);
 	while(estadoYama==ACTIVADO)
 		servidorAtenderPedidos(servidor);
@@ -44,7 +55,8 @@ void yamaAtenderMasters() {
 void yamaFinalizar() {
 	imprimirMensaje(archivoLog, "[EJECUCION] Proceso YAMA finalizado");
 	archivoLogDestruir(archivoLog);
-	memoriaLiberar(configuracion);
+	memoriaLiberar(servidor); //no es al pedo liberar memoria si el
+	memoriaLiberar(configuracion);//programa esta a punto de terminar?
 }
 
 Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig) {
@@ -54,6 +66,7 @@ Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig) {
 	stringCopiar(configuracion->puertoFileSystem, archivoConfigStringDe(archivoConfig, "PUERTO_FILESYSTEM"));
 	configuracion->retardoPlanificacion = archivoConfigEnteroDe(archivoConfig, "RETARDO_PLANIFICACION");
 	stringCopiar(configuracion->algoritmoBalanceo, archivoConfigStringDe(archivoConfig, "ALGORITMO_BALANCEO"));
+	stringCopiar(configuracion->disponibilidadBase, archivoConfigStringDe(archivoConfig, "DISPONIBILIDAD_BASE"));
 	archivoConfigDestruir(archivoConfig);
 	return configuracion;
 }
@@ -64,10 +77,11 @@ void archivoConfigObtenerCampos() {
 	campos[3] = "PUERTO_FILESYSTEM";
 	campos[4] = "RETARDO_PLANIFICACION";
 	campos[5] = "ALGORITMO_BALANCEO";
-}
+	campos[6] = "DISPONIBILIDAD_BASE";
+}//donde se usan los campos estos?
 
 
-void servidorInicializar(Servidor* servidor) {
+void servidorInicializar() {
 	servidor->maximoSocket = 0;
 	listaSocketsLimpiar(&servidor->listaMaster);
 	listaSocketsLimpiar(&servidor->listaSelect);
@@ -75,12 +89,11 @@ void servidorInicializar(Servidor* servidor) {
 	servidor->listenerMaster = socketCrearListener(configuracion->puertoMaster);
 	imprimirMensajeUno(archivoLog, "[CONEXION] Esperando conexiones de un Master (Puerto %s)", configuracion->puertoMaster);
 	listaSocketsAgregar(servidor->listenerMaster, &servidor->listaMaster);
-	listaSocketsAgregar(socketFileSystem,&servidor->listaMaster);
-	servidorControlarMaximoSocket(servidor, socketFileSystem);
-	servidorControlarMaximoSocket(servidor, servidor->listenerMaster);
+	servidorControlarMaximoSocket(servidor->fileSystem);
+	servidorControlarMaximoSocket(servidor->listenerMaster);
 }
 
-void servidorAtenderPedidos(Servidor* servidor) {
+void servidorAtenderPedidos() {
 	servidor->listaSelect = servidor->listaMaster;
 	socketSelect(servidor->maximoSocket, &servidor->listaSelect);
 
@@ -89,27 +102,33 @@ void servidorAtenderPedidos(Servidor* servidor) {
 	Socket maximoSocket = servidor->maximoSocket;
 	for(socketI = 0; socketI <= maximoSocket; socketI++){
 		if (listaSocketsContiene(socketI, &servidor->listaSelect)){ //hay solicitud
+			//podría disparar el thread aca sino
 			if(socketI==servidor->listenerMaster){
 				Socket nuevoSocket;
 				nuevoSocket = socketAceptar(socketI, ID_MASTER);
 				if(nuevoSocket != ERROR) {
 					imprimirMensaje(archivoLog, "[CONEXION] Proceso Master conectado exitosamente");
 					listaSocketsAgregar(nuevoSocket, &servidor->listaMaster);
-					servidorControlarMaximoSocket(servidor, nuevoSocket);
+					servidorControlarMaximoSocket(nuevoSocket);
 				}
-			}else if(socketI==socketFileSystem){
+			}else if(socketI==servidor->fileSystem){
 				Mensaje* mensaje = mensajeRecibir(socketI);
+				mensajeObtenerDatos(mensaje,socketI);
+				//aca debería estar el caso de que el mensaje sea
+				//para avisar que se desconectó un nodo
+				//y otro para avisar que se reconectó. (si pueden hacer eso)
+				//podría hacer switch(mensaje->header.operacion)
+
 				Socket masterid;
-				memcpy(&masterid,mensaje->datos,sizeof(Socket));
-				imprimirMensajeUno(archivoLog, "[RECEPCION] lista de bloques para master #%d recivida",&masterid);
-				if(listaSocketsContiene(masterid,&servidor->listaMaster)){ //por si el master se desconecto
-					//agarro la lista de bloques
-					//segun el algoritmo hago lo que tenga que hacer
-					//armo la tabla
-					//le mando al master
-				}
+				memcpy(&masterid,mensaje->datos,INTSIZE);
+				imprimirMensajeUno(archivoLog, "[RECEPCION] lista de bloques para master #%d recibida",&masterid);
+				void* listaBloques=malloc(mensaje->header.tamanio-INTSIZE);
+				memcpy(listaBloques,mensaje->datos+INTSIZE,mensaje->header.tamanio-INTSIZE);
+				if(listaSocketsContiene(masterid,&servidor->listaMaster)) //por si el master se desconecto
+					yamaPlanificar(masterid,listaBloques,mensaje->header.tamanio-INTSIZE);
+				//por ahi meto yamaPlanificar en un thread asi puedo seguir usando select
 				mensajeDestruir(mensaje);
-			}else{
+			}else{ //master
 				Mensaje* mensaje = mensajeRecibir(socketI);
 				if(mensajeDesconexion(mensaje)){
 					listaSocketsEliminar(socketI, &servidor->listaMaster);
@@ -120,25 +139,46 @@ void servidorAtenderPedidos(Servidor* servidor) {
 				}
 				else{//se recibio solicitud de master #socketI
 					//el mensaje es el path del archivo, aca le acoplo el numero de master y se lo mando al fileSystem
-					mensaje=realloc(mensaje,mensaje->header.tamanio+sizeof(Socket));
-					memmove(mensaje+sizeof(Socket),mensaje,mensaje->header.tamanio);
-					memcpy(mensaje,&socketI,sizeof(Socket));
-					mensajeEnviar(socketFileSystem,1,mensaje->datos,mensaje->header.tamanio+sizeof(Socket));
+					int32_t masterid = socketI;
+					mensaje=realloc(mensaje,mensaje->header.tamanio+sizeof(int32_t));
+					memmove(mensaje+sizeof(int32_t),mensaje,mensaje->header.tamanio);
+					memcpy(mensaje,&masterid,sizeof(int32_t));
+					mensajeEnviar(socketFileSystem,1,mensaje->datos,mensaje->header.tamanio+sizeof(int32_t));
 					imprimirMensajeUno(archivoLog, "[ENVIO] path de master #%d enviado al fileSystem",&socketI);
 				}
 				//aca va a haber un bloque mas para el caso de que el master
-				//me avise que termino algun proceso o tuvo errores
+				//me avise que termino algun proceso o tuvo errores. Otro switch
 				mensajeDestruir(mensaje);
 			}
 		}
 	}
 }
 
-void servidorControlarMaximoSocket(Servidor* servidor, Socket unSocket) {
+void servidorControlarMaximoSocket(Socket unSocket) {
 	if(socketEsMayor(unSocket, servidor->maximoSocket))
 		servidor->maximoSocket = unSocket;
 }
 
+void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
+	int i=0;
+	Lista bloques=listaCrear();
+	while(sizeof(Bloque)*i<tamanio){
+		listaAgregarElemento(bloques,(Bloque*)(listaBloques+sizeof(Bloque)*i));
+		i++;
+	}//por ahi esto es al pedo y me puedo manejar con la lista de void*
+
+
+	if(!strcmp(configuracion->algoritmoBalanceo,"Clock")){
+
+	}else if(!strcmp(configuracion->algoritmoBalanceo,"W-Clock")){
+
+	}else{
+		imprimirMensaje(archivoLog,"[] no se reconoce el algoritmo");
+		abort();
+	}
+
+
+}
 
 
 
