@@ -56,81 +56,30 @@ char* leerCaracteresEntrantes() {
 	return cadena;
 }
 
-void establecerConexiones(){
+int main(void) {
+	pantallaLimpiar();
+	imprimirMensajeProceso("# PROCESO MASTER");
+	archivoLog = archivoLogCrear(RUTA_LOG, "Master");
+	archivoConfigObtenerCampos();
+	configuracion = configuracionCrear(RUTA_CONFIG, (Puntero)configuracionLeerArchivoConfig, campos);
+	stringCopiar(configuracion->ipWorker, IP_LOCAL);
+	stringCopiar(configuracion->puertoWorker, "5050");
 	imprimirMensajeDos(archivoLog,"[CONEXION] Estableciendo Conexion con YAMA (IP: %s | Puerto %s)", configuracion->ipYAMA, configuracion->puertoYAMA);
 	socketYAMA = socketCrearCliente(configuracion->ipYAMA, configuracion->puertoYAMA, ID_MASTER);
 	imprimirMensaje(archivoLog, "[CONEXION] Conexion existosa con YAMA");
 	imprimirMensajeDos(archivoLog, "[CONEXION] Estableciendo Conexion con Worker (IP: %s | Puerto: %s)", configuracion->ipWorker, configuracion->puertoWorker);
 	socketWorker = socketCrearCliente(configuracion->ipWorker, configuracion->puertoWorker, ID_MASTER);
 	imprimirMensaje(archivoLog, "[CONEXION] Conexion existosa con Worker");
-
-}
-
-void leerArchivoConfig(){
-	archivoConfigObtenerCampos();
-	configuracion = configuracionCrear(RUTA_CONFIG, (Puntero)configuracionLeerArchivoConfig, campos);
-	stringCopiar(configuracion->ipWorker, IP_LOCAL);
-	stringCopiar(configuracion->puertoWorker, "5050");
-	imprimirMensajeDos(archivoLog,"[CONEXION] Estableciendo Conexion con YAMA (IP: %s | Puerto %s)", configuracion->ipYAMA, configuracion->puertoYAMA);
-}
-
-Lista workersAConectar(){
-	Lista workers = list_create();
-	int pos=0;
-	Mensaje* mens;
-	while(hayWorkersParaConectar()){
-		mens=mensajeRecibir(socketYama);
-		listaAgregarEnPosicion(workers,(char*)mens->datos, pos);
-		pos++;
-
-	}
-
-	return workers;
-}
-
-int hayWorkersParaConectar(){
-	Mensaje* m = mensajeRecibir(socketYama);
-	if(*(int*)m->datos==-1){
-		archivoLogInformarMensaje(archivoLog,"No hay mas workers por conectar");
-		printf("No hay mas workers para conectar");
-		return -1;
-		}
-	else{
-		return 1;
-		}
-
-}
-
-
-char* nombreArchivoTemp(){
-	Mensaje* m= mensajeRecibir(socketYama);
-	char* nombre =(char*) m->datos;
-	return nombre;
-}
-
-
-
-
-
-int main(void) {
-	pantallaLimpiar();
-	leerArchivoConfig();
-	establecerConexiones();
-
 	masterActivar();
-
 	senialAsignarFuncion(SIGINT, funcionSenial);
 	mensajeEnviar(socketYAMA, HANDSHAKE, "HOLIII", 7);
 	mensajeEnviar(socketWorker, HANDSHAKE, "HOLIII", 7);
 	imprimirMensaje(archivoLog, "[MENSAJE] Mensaje enviado");
-
-	while(masterActivado()){
-		socketCerrar(socketYAMA);
-		socketCerrar(socketWorker);
-		archivoLogDestruir(archivoLog);
-		memoriaLiberar(configuracion);
-		}
-
+	while(masterActivado());
+	socketCerrar(socketYAMA);
+	socketCerrar(socketWorker);
+	archivoLogDestruir(archivoLog);
+	memoriaLiberar(configuracion);
 	return EXIT_SUCCESS;
 
 }
