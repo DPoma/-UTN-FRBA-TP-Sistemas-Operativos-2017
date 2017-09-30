@@ -6,6 +6,7 @@
  *      Author: Dario Poma
  */
 
+
 #include "../../Biblioteca/src/Biblioteca.c"
 
 #define EVENT_SIZE (sizeof(struct inotify_event)+24)
@@ -15,6 +16,10 @@
 #define RUTA_LOG "/home/utnso/Escritorio/YAMALog.log"
 
 #define INTSIZE sizeof(int32_t)
+#define nullptr NULL
+
+#define TERMINADO 1 //tambien estan en la biblioteca, pero por alguna razon
+#define SOLICITUD 2 //no me los toma
 
 typedef struct {
 	char puertoMaster[50];
@@ -22,7 +27,7 @@ typedef struct {
 	char puertoFileSystem[50];
 	int retardoPlanificacion;
 	char algoritmoBalanceo[50];
-	char disponibilidadBase[50];
+	int disponibilidadBase;
 } Configuracion;
 
 
@@ -36,21 +41,40 @@ typedef struct {
 Servidor* servidor;
 
 typedef struct {
-	int nodo;
-	int bloque;
+	int32_t nodo;
+	int32_t bloque;
+	int32_t bytesOcupados; //en bloques gemelos esta dos veces esto.
+	//otra forma de plantearlo sería que me mande los bloques de a par,
+	//asi este int esta una vez sola. No cambiaría mucho el codigo que los usa
 } Bloque;
 
 typedef struct{
-	int numero;
 	bool conectado;
-	int disponibilidad;
-} Nodo;
-Lista nodos;
+	uint32_t carga; //son uint32_t porque lo pide el tp, yo usaria ints
+	uint32_t tareasRealizadas;
+	uint32_t disponibilidad;
+	uint32_t nodo; //para comparar con los bloques que reciba
+	char ipYPuerto[10]; //para que master sepa quien es quien
+} Worker;
+Lista workers;
+
+typedef enum {Transformacion,ReduccionLocal,ReduccionGlobal} Etapa;
+typedef enum {EnProceso,Finalizado,Error} Estado;
+int job=-1;
+typedef struct{
+	int job;
+	Socket masterid;
+	int32_t nodo;
+	int32_t bloque;
+	Etapa etapa;
+	char pathArchivoTemporal[50];
+	Estado estado;
+} Entrada;
+Lista tablaEstados;
 
 String campos[6];
 Configuracion* configuracion;
 ArchivoLog archivoLog;
-Socket socketFileSystem;
 int estadoYama;
 
 Configuracion* configuracionLeerArchivoConfig(ArchivoConfig);
@@ -64,6 +88,7 @@ void servidorAtenderPedidos();
 void servidorControlarMaximoSocket(Socket);
 
 void yamaPlanificar(Socket,void*,int);
+void actualizarTablaEstados(int,int,int);
 
 void yamaFinalizar();
 

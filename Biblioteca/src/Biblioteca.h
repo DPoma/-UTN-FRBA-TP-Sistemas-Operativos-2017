@@ -37,9 +37,11 @@
 #define ESPACIO ' '
 #define TAB '\t'
 #define LISTEN 10
-#define ERROR -1
 #define NULO 0
 #define DESCONEXION 0
+#define TERMINADO 1
+#define SOLICITUD 2
+#define ERROR -1
 #define ACTIVADO 1
 #define DESACTIVADO 0
 #define HANDSHAKE 1

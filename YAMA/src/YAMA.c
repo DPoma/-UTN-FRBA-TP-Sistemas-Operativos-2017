@@ -33,15 +33,19 @@ void yamaConectarAFileSystem() {
 	servidor->fileSystem = socketCrearCliente(configuracion->ipFileSystem, configuracion->puertoFileSystem, ID_YAMA);
 	imprimirMensaje(archivoLog, "[CONEXION] Conexion exitosa con File System");
 
-	Mensaje* cantNodos=mensajeRecibir(servidor->fileSystem);
-	mensajeObtenerDatos(cantNodos,servidor->fileSystem); //medio al pedo para un int pero bueno
+	//infoNodos es una lista de ips y puertos
+	Mensaje* infoNodos=mensajeRecibir(servidor->fileSystem);
+	mensajeObtenerDatos(infoNodos,servidor->fileSystem);
 	int i=0;
-	while(i<(*(int32_t*)cantNodos->datos)){
-		Nodo nodo;
-		nodo.conectado=true;
-//		nodo.disponibilidad=###;
-		nodo.numero=i;
-		listaAgregarElemento(nodos,&nodo);
+	while(i<infoNodos->header.tamanio){ // dividido el tamaño del ip y puerto
+		Worker worker;
+		worker.conectado=true;
+		worker.carga=0;
+		worker.tareasRealizadas=0;
+		worker.nodo=i; //suponiendo que el filesystem los enumere segun
+		//le lleguen y me los mande asi
+		memcpy(worker.ipYPuerto,infoNodos->datos+10*i,10);
+		list_add(workers,&worker); //por ahi va sin &
 	}
 }
 
@@ -66,7 +70,7 @@ Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig) {
 	stringCopiar(configuracion->puertoFileSystem, archivoConfigStringDe(archivoConfig, "PUERTO_FILESYSTEM"));
 	configuracion->retardoPlanificacion = archivoConfigEnteroDe(archivoConfig, "RETARDO_PLANIFICACION");
 	stringCopiar(configuracion->algoritmoBalanceo, archivoConfigStringDe(archivoConfig, "ALGORITMO_BALANCEO"));
-	stringCopiar(configuracion->disponibilidadBase, archivoConfigStringDe(archivoConfig, "DISPONIBILIDAD_BASE"));
+	configuracion->disponibilidadBase = archivoConfigEnteroDe(archivoConfig, "DISPONIBILIDAD_BASE");
 	archivoConfigDestruir(archivoConfig);
 	return configuracion;
 }
@@ -91,9 +95,13 @@ void servidorInicializar() {
 	listaSocketsAgregar(servidor->listenerMaster, &servidor->listaMaster);
 	servidorControlarMaximoSocket(servidor->fileSystem);
 	servidorControlarMaximoSocket(servidor->listenerMaster);
+
+	tablaEstados=list_create();
 }
 
 void servidorAtenderPedidos() {
+	//funcion que dibuje la tabla de estados
+
 	servidor->listaSelect = servidor->listaMaster;
 	socketSelect(servidor->maximoSocket, &servidor->listaSelect);
 
@@ -101,7 +109,7 @@ void servidorAtenderPedidos() {
 	Socket socketI;
 	Socket maximoSocket = servidor->maximoSocket;
 	for(socketI = 0; socketI <= maximoSocket; socketI++){
-		if (listaSocketsContiene(socketI, &servidor->listaSelect)){ //hay solicitud
+		if (listaSocketsContiene(socketI, &servidor->listaSelect)){ //se recibio algo
 			//podría disparar el thread aca sino
 			if(socketI==servidor->listenerMaster){
 				Socket nuevoSocket;
@@ -130,24 +138,28 @@ void servidorAtenderPedidos() {
 				mensajeDestruir(mensaje);
 			}else{ //master
 				Mensaje* mensaje = mensajeRecibir(socketI);
-				if(mensajeDesconexion(mensaje)){
+				mensajeObtenerDatos(mensaje,socketI);
+				switch(mensaje->header.operacion){
+				case SOLICITUD:{//se recibio solicitud de master #socketI
+					int32_t masterid = socketI;
+					//el mensaje es el path del archivo
+					//aca le acoplo el numero de master y se lo mando al fileSystem
+					mensaje=realloc(mensaje->datos,mensaje->header.tamanio+INTSIZE);
+					memmove(mensaje->datos+INTSIZE,mensaje,mensaje->header.tamanio);
+					memcpy(mensaje->datos,&masterid,INTSIZE);
+					mensajeEnviar(servidor->fileSystem,SOLICITUD,mensaje->datos,mensaje->header.tamanio+INTSIZE);
+					imprimirMensajeUno(archivoLog, "[ENVIO] path de master #%d enviado al fileSystem",&socketI);
+				}break;case TERMINADO:case ERROR:{
+					int32_t nodo = *((int32_t*)mensaje->datos);
+					int32_t bloque = *((int32_t*)(mensaje->datos+INTSIZE));
+					actualizarTablaEstados(nodo,bloque,mensaje->header.operacion);
+				}break;case DESCONEXION:
 					listaSocketsEliminar(socketI, &servidor->listaMaster);
 					socketCerrar(socketI);
 					if(socketI==servidor->maximoSocket)
 						servidor->maximoSocket--; //no debería romper nada
 					imprimirMensaje(archivoLog, "[CONEXION] Un proceso Master se ha desconectado");
 				}
-				else{//se recibio solicitud de master #socketI
-					//el mensaje es el path del archivo, aca le acoplo el numero de master y se lo mando al fileSystem
-					int32_t masterid = socketI;
-					mensaje=realloc(mensaje,mensaje->header.tamanio+sizeof(int32_t));
-					memmove(mensaje+sizeof(int32_t),mensaje,mensaje->header.tamanio);
-					memcpy(mensaje,&masterid,sizeof(int32_t));
-					mensajeEnviar(socketFileSystem,1,mensaje->datos,mensaje->header.tamanio+sizeof(int32_t));
-					imprimirMensajeUno(archivoLog, "[ENVIO] path de master #%d enviado al fileSystem",&socketI);
-				}
-				//aca va a haber un bloque mas para el caso de que el master
-				//me avise que termino algun proceso o tuvo errores. Otro switch
 				mensajeDestruir(mensaje);
 			}
 		}
@@ -161,28 +173,135 @@ void servidorControlarMaximoSocket(Socket unSocket) {
 
 void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 	int i=0;
-	Lista bloques=listaCrear();
+	Lista bloques=list_create();
 	while(sizeof(Bloque)*i<tamanio){
-		listaAgregarElemento(bloques,(Bloque*)(listaBloques+sizeof(Bloque)*i));
+		list_add(bloques,(Bloque*)(listaBloques+sizeof(Bloque)*i));
 		i++;
-	}//por ahi esto es al pedo y me puedo manejar con la lista de void*
+	}
 
+	Lista tablaEstadosJob;
+	job++;//mutex (supongo que las variables globales se comparten entre hilos)
+	for(i=0;i<bloques->elements_count/2;i++){
+		Entrada entrada;
+		entrada.job=job;
+		entrada.masterid=master;
+//		entrada.pathArchivoTemporal ?
+		list_add(tablaEstadosJob,&entrada);
+	}
 
-	if(!strcmp(configuracion->algoritmoBalanceo,"Clock")){
-
-	}else if(!strcmp(configuracion->algoritmoBalanceo,"W-Clock")){
-
+	if(stringIguales(configuracion->algoritmoBalanceo,"Clock")){
+		void setearDisponibilidad(Worker* worker){
+			worker->disponibilidad=configuracion->disponibilidadBase;
+		}
+		list_iterate(workers,setearDisponibilidad);
+	}else if(stringIguales(configuracion->algoritmoBalanceo,"W-Clock")){
+		int cargaMaxima=0;
+		void obtenerCargaMaxima(Worker* worker){
+			if(worker->carga>cargaMaxima)
+				cargaMaxima=worker->carga;
+		}
+		void setearDisponibilidad(Worker* worker){
+			worker->disponibilidad=configuracion->disponibilidadBase
+					+cargaMaxima-worker->carga;
+		}
+		list_iterate(workers,obtenerCargaMaxima);
+		list_iterate(workers,setearDisponibilidad);
 	}else{
 		imprimirMensaje(archivoLog,"[] no se reconoce el algoritmo");
 		abort();
 	}
 
+	int clock=0;
+	{
+		int mayorDisponibilidad=0;
+		void setearClock(Worker* worker){
+			if(worker->disponibilidad>mayorDisponibilidad){
+				mayorDisponibilidad=worker->disponibilidad;
+				clock=worker->nodo;
+			}
+		}
+		list_iterate(workers,setearClock);
+	}
+	Worker* workerClock=list_get(workers,clock); //alguna forma de no tener que hacer esto?
+	for(i=0;i<bloques->elements_count;i+=2){
+		void asignarBloque(Worker* worker,Bloque* bloque){
+			worker->carga++; //y habría que usar mutex aca
+			worker->disponibilidad--;
+			worker->tareasRealizadas++;
+			Entrada* entrada=list_get(tablaEstadosJob,i/2);
+			entrada->nodo=worker->nodo;
+			entrada->bloque=bloque->bloque;
+			entrada->etapa=Transformacion;
+			entrada->estado=EnProceso;
+		}
 
+		Bloque* bloque0 = list_get(bloques,i);
+		Bloque* bloque1 = list_get(bloques,i+1);
+		bool encontrado=false;
+
+		if(workerClock->nodo==bloque0->nodo){
+			asignarBloque(workerClock,bloque0);
+			encontrado=true;
+		}else if(workerClock->nodo==bloque1->nodo){
+			asignarBloque(workerClock,bloque1);
+			encontrado=true;
+		}
+		if(encontrado){
+			clock=(clock+1)%workers->elements_count;
+			Worker* workerTest=list_get(workers,clock);
+			if(workerTest->disponibilidad==0)
+				workerTest->disponibilidad=configuracion->disponibilidadBase;
+			continue;
+		}
+		int clockAdv=clock;
+		while(1){
+			clockAdv=(clockAdv+1)%workers->elements_count;
+			if(clockAdv==clock){
+				void sumarDisponibilidadBase(Worker* worker){
+					worker->disponibilidad+=configuracion->disponibilidadBase;
+				}
+				list_iterate(workers,sumarDisponibilidadBase);
+			}
+			Worker* workerAdv=list_get(workers,clockAdv);
+			if(workerAdv->disponibilidad>0){
+				if(workerAdv->nodo==bloque0->nodo){
+					asignarBloque(workerAdv,bloque0);
+					break;
+				}else if(workerClock->nodo==bloque1->nodo){
+					asignarBloque(workerAdv,bloque1);
+					break;
+				}
+			}
+		}
+	}//termina la planificacion
+
+	int32_t tamanioDato=INTSIZE*2*tablaEstadosJob->elements_count;
+	void* dato=malloc(tamanioDato);
+	for(i=0;i<tablaEstadosJob->elements_count;i++){
+		Entrada* entrada=list_get(tablaEstadosJob,i);
+		memcpy(dato+INTSIZE*i*2,&entrada->nodo,INTSIZE);
+		memcpy(dato+INTSIZE*i*2+1,&entrada->bloque,INTSIZE);
+	}
+	mensajeEnviar(master,1,dato,tamanioDato);
+
+	list_add_all(tablaEstados,tablaEstadosJob); //mutex
 }
 
+void actualizarTablaEstados(int nodo,int bloque,int actualizando){
+	bool buscarEntrada(Entrada* entrada){ //ver si anda sin hacer el casteo
+		return entrada->nodo==nodo&&entrada->bloque==bloque;
+	}
+	Entrada* entrada=list_find(tablaEstados,buscarEntrada);
+	entrada->estado=actualizando;
 
+	//si todos los nodos de un job de un worker estan, avisarle
+	//que arranque la reduccion local
 
+	//si todas las reducciones locales estan, hacer todo lo de
+	//reduccion global
 
+	//si hay error replanificar
+}
 
 
 
