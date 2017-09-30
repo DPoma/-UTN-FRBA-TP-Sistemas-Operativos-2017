@@ -1,0 +1,24 @@
+19:49:11 **** Clean-only build of configuration Debug for project Master ****
+make clean 
+rm -rf  ./src/Master.o  ./src/Master.d  Master
+ 
+19:49:12 **** Build of configuration Debug for project Master ****
+make all 
+Building file: ../src/Master.c
+Invoking: GCC C Compiler
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"src/Master.d" -MT"src/Master.d" -o "src/Master.o" "../src/Master.c"
+In file included from ../src/Master.h:9:0,
+                 from ../src/Master.c:11:
+../src/../../Biblioteca/src/Biblioteca.c: In function ‘archivoConfigSetearCampo’:
+../src/../../Biblioteca/src/Biblioteca.c:315:2: warning: implicit declaration of function ‘config_set_value’ [-Wimplicit-function-declaration]
+  config_set_value(archivoConfig, campo, valor);
+  ^
+Finished building: ../src/Master.c
+ 
+Building target: Master
+Invoking: GCC C Linker
+gcc  -o "Master"  ./src/Master.o   -lcommons -lpthread
+./src/Master.o: En la función `archivoConfigSetearCampo':
+/home/utnso/projects/tp-2017-2c-El-legado-del-Esqui/Master/Debug/../src/../../Biblioteca/src/Biblioteca.c:315: referencia a `config_set_value' sin definir
+collect2: error: ld returned 1 exit status
+make: *** [Master] Error 1

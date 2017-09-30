@@ -1,0 +1,26 @@
+19:38:05 **** Build of configuration Debug for project Biblioteca ****
+make all 
+Building file: ../src/Biblioteca.c
+Invoking: GCC C Compiler
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"src/Biblioteca.d" -MT"src/Biblioteca.d" -o "src/Biblioteca.o" "../src/Biblioteca.c"
+../src/Biblioteca.c: In function ‘archivoConfigSetearCampo’:
+../src/Biblioteca.c:315:2: warning: implicit declaration of function ‘config_set_value’ [-Wimplicit-function-declaration]
+  config_set_value(archivoConfig, campo, valor);
+  ^
+Finished building: ../src/Biblioteca.c
+ 
+Building file: ../src/BibliotecaMain.c
+Invoking: GCC C Compiler
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"src/BibliotecaMain.d" -MT"src/BibliotecaMain.d" -o "src/BibliotecaMain.o" "../src/BibliotecaMain.c"
+Finished building: ../src/BibliotecaMain.c
+ 
+Building target: Biblioteca
+Invoking: GCC C Linker
+gcc  -o "Biblioteca"  ./src/Biblioteca.o ./src/BibliotecaMain.o   -lcommons -lpthread
+./src/Biblioteca.o: En la función `archivoConfigSetearCampo':
+/home/utnso/projects/tp-2017-2c-El-legado-del-Esqui/Biblioteca/Debug/../src/Biblioteca.c:315: referencia a `config_set_value' sin definir
+collect2: error: ld returned 1 exit status
+make: *** [Biblioteca] Error 1
+
+19:38:06 Build Finished (took 1s.344ms)
+

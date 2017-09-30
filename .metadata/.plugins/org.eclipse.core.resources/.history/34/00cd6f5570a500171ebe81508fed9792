@@ -74,43 +74,6 @@ void leerArchivoConfig(){
 	imprimirMensajeDos(archivoLog,"[CONEXION] Estableciendo Conexion con YAMA (IP: %s | Puerto %s)", configuracion->ipYAMA, configuracion->puertoYAMA);
 }
 
-Lista workersAConectar(){
-	Lista workers = list_create();
-	int pos=0;
-	Mensaje* mens;
-	while(hayWorkersParaConectar()){
-		mens=mensajeRecibir(socketYama);
-		listaAgregarEnPosicion(workers,(char*)mens->datos, pos);
-		pos++;
-
-	}
-
-	return workers;
-}
-
-int hayWorkersParaConectar(){
-	Mensaje* m = mensajeRecibir(socketYama);
-	if(*(int*)m->datos==-1){
-		archivoLogInformarMensaje(archivoLog,"No hay mas workers por conectar");
-		printf("No hay mas workers para conectar");
-		return -1;
-		}
-	else{
-		return 1;
-		}
-
-}
-
-
-char* nombreArchivoTemp(){
-	Mensaje* m= mensajeRecibir(socketYama);
-	char* nombre =(char*) m->datos;
-	return nombre;
-}
-
-
-
-
 
 int main(void) {
 	pantallaLimpiar();

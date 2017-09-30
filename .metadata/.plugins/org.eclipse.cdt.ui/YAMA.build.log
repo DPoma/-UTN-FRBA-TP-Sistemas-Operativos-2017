@@ -1,0 +1,12 @@
+20:19:33 **** Incremental Build of configuration Debug for project YAMA ****
+make all 
+Building target: YAMA
+Invoking: GCC C Linker
+gcc  -o "YAMA"  ./src/YAMA.o   -lcommons -lpthread
+./src/YAMA.o: En la función `archivoConfigSetearCampo':
+/home/utnso/projects/tp-2017-2c-El-legado-del-Esqui/YAMA/Debug/../src/../../Biblioteca/src/Biblioteca.c:255: referencia a `config_set_value' sin definir
+collect2: error: ld returned 1 exit status
+make: *** [YAMA] Error 1
+
+20:19:33 Build Finished (took 63ms)
+
