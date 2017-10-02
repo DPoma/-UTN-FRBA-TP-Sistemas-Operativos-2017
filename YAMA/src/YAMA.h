@@ -18,8 +18,12 @@
 #define INTSIZE sizeof(int32_t)
 #define nullptr NULL
 
-#define TERMINADO 1 //tambien estan en la biblioteca, pero por alguna razon
+#define TRANSFORMACION 1 //tambien estan en la biblioteca, pero por alguna razon
 #define SOLICITUD 2 //no me los toma
+#define REDUCLOCAL 3
+#define REDUCGLOBAL 4
+#define TERMINADO 5
+
 
 typedef struct {
 	char puertoMaster[50];
@@ -59,7 +63,7 @@ typedef struct{
 Lista workers;
 
 typedef enum {Transformacion,ReduccionLocal,ReduccionGlobal} Etapa;
-typedef enum {EnProceso,Finalizado,Error} Estado;
+typedef enum {EnProceso,Finalizado,Error,Abortado} Estado;
 int job=-1;
 typedef struct{
 	int job;
@@ -71,6 +75,8 @@ typedef struct{
 	Estado estado;
 } Entrada;
 Lista tablaEstados;
+Lista tablaUsados; //entradas Abortadas, Error, o Terminadas que ya
+//no se necesitan procesar, solo se dibujan
 
 String campos[6];
 Configuracion* configuracion;
@@ -81,15 +87,10 @@ Configuracion* configuracionLeerArchivoConfig(ArchivoConfig);
 void archivoConfigObtenerCampos();
 void pantallaLimpiar();
 void yamaIniciar();
-void yamaConectarAFileSystem();
-void yamaAtenderMasters();
-void servidorInicializar();
-void servidorAtenderPedidos();
-void servidorControlarMaximoSocket(Socket);
-
+void yamaAtender();
 void yamaPlanificar(Socket,void*,int);
 void actualizarTablaEstados(int,int,int);
-
+void dibujarTablaEstados();
 void yamaFinalizar();
 
 
