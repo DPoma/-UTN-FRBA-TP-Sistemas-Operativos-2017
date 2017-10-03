@@ -38,13 +38,13 @@ void workerCrearHijo(Socket unSocket) {
 				break;
 			case 1: //Etapa Transformacion
 			{
-				int Origenb; //si el origen es un numero de bloque esto lo facilitaria, revisar
-				memcpy(&sizeCodigo, mensaje->datos, sizeof(int));
-				memcpy(&codigo,mensaje->datos + sizeof(int), sizeCodigo);
-				memcpy(&origen,mensaje->datos + sizeof(int)+sizeCodigo, sizeof(int));
-				memcpy(&sizeDestino, mensaje->datos + sizeof(int)*2 + sizeCodigo , sizeof(int));
-				memcpy(&destino,mensaje->datos + sizeof(int)*3+sizeCodigo, sizeDestino);
-				//transformar();
+				int origenB; //si el origen es un numero de bloque esto lo facilitaria, revisar
+				memcpy(&sizeCodigo, mensaje->datos, sizeof(int32_t));
+				memcpy(&codigo,mensaje->datos + sizeof(int32_t), sizeCodigo);
+				memcpy(&origen,mensaje->datos + sizeof(int32_t)+sizeCodigo, sizeof(int32_t));
+				memcpy(&sizeDestino, mensaje->datos + sizeof(int32_t)*2 + sizeCodigo , sizeof(int32_t));
+				memcpy(&destino,mensaje->datos + sizeof(int32_t)*3+sizeCodigo, sizeDestino);
+				transformar(codigo,origenB,destino);
 				/*char* buffer = leerArchivo(path,offset,size);
 				log_info(logFile, "[FILE SYSTEM] EL KERNEL PIDE LEER: %s | OFFSET: %i | SIZE: %i", path, offset, size);
 				if(buffer=="-1"){
@@ -63,12 +63,12 @@ void workerCrearHijo(Socket unSocket) {
 			}
 			case 2:{ //Etapa Reduccion Local
 
-				memcpy(&sizeCodigo, mensaje->datos, sizeof(int));
-				memcpy(&codigo,mensaje->datos + sizeof(int), sizeCodigo);
-				memcpy(&sizeOrigen, mensaje->datos+ sizeof(int) +sizeCodigo, sizeof(int));
-				memcpy(&origen,mensaje->datos + sizeof(int)*2+sizeCodigo, sizeOrigen);
-				memcpy(&sizeDestino, mensaje->datos + sizeof(int)*2 + sizeCodigo + sizeOrigen, sizeof(int));
-				memcpy(&destino,mensaje->datos + sizeof(int)*3+sizeCodigo+ sizeOrigen, sizeDestino);
+				memcpy(&sizeCodigo, mensaje->datos, sizeof(int32_t));
+				memcpy(&codigo,mensaje->datos + sizeof(int32_t), sizeCodigo);
+				memcpy(&sizeOrigen, mensaje->datos+ sizeof(int32_t) +sizeCodigo, sizeof(int32_t));
+				memcpy(&origen,mensaje->datos + sizeof(int32_t)*2+sizeCodigo, sizeOrigen);
+				memcpy(&sizeDestino, mensaje->datos + sizeof(int32_t)*2 + sizeCodigo + sizeOrigen, sizeof(int32_t));
+				memcpy(&destino,mensaje->datos + sizeof(int32_t)*3+sizeCodigo+ sizeOrigen, sizeDestino);
 				//reduccionLocal();
 				/*char* buffer = leerArchivo(path,offset,size);
 				log_info(logFile, "[FILE SYSTEM] EL KERNEL PIDE LEER: %s | OFFSET: %i | SIZE: %i", path, offset, size);
@@ -88,19 +88,19 @@ void workerCrearHijo(Socket unSocket) {
 			}
 			case 3:{ //Etapa Reduccion Global
 
-				memcpy(&sizeCodigo, mensaje->datos, sizeof(int));
-				memcpy(&codigo,mensaje->datos + sizeof(int), sizeCodigo);
-				memcpy(&sizeOrigen, mensaje->datos+ sizeof(int) +sizeCodigo, sizeof(int));
-				memcpy(&origen,mensaje->datos + sizeof(int)*2+sizeCodigo, sizeOrigen);
-				memcpy(&sizeDestino, mensaje->datos + sizeof(int)*2 + sizeCodigo + sizeOrigen, sizeof(int));
-				memcpy(&destino,mensaje->datos + sizeof(int)*3+sizeCodigo+ sizeOrigen, sizeDestino);
+				memcpy(&sizeCodigo, mensaje->datos, sizeof(int32_t));
+				memcpy(&codigo,mensaje->datos + sizeof(int32_t), sizeCodigo);
+				memcpy(&sizeOrigen, mensaje->datos+ sizeof(int32_t) +sizeCodigo, sizeof(int32_t));
+				memcpy(&origen,mensaje->datos + sizeof(int32_t)*2+sizeCodigo, sizeOrigen);
+				memcpy(&sizeDestino, mensaje->datos + sizeof(int32_t)*2 + sizeCodigo + sizeOrigen, sizeof(int32_t));
+				memcpy(&destino,mensaje->datos + sizeof(int32_t)*3+sizeCodigo+ sizeOrigen, sizeDestino);
 				//reduccionGlobal();
 				/*char* buffer = leerArchivo(path,offset,size);
 				log_info(logFile, "[FILE SYSTEM] EL KERNEL PIDE LEER: %s | OFFSET: %i | SIZE: %i", path, offset, size);
 				if(buffer=="-1"){
 					lSend(conexion, NULL, -4, 0);
 					log_error(logFile, "[LEER]: HUBO UN ERROR AL LEER");
-					break;
+					break;32_t
 				}
 				//enviar el buffer
 				lSend(conexion, buffer, 2, sizeof(char)*size);
@@ -113,12 +113,12 @@ void workerCrearHijo(Socket unSocket) {
 			}
 			case 4:{ //Almacenamiento Definitivo
 
-				memcpy(&sizeCodigo, mensaje->datos, sizeof(int));
-				memcpy(&codigo,mensaje->datos + sizeof(int), sizeCodigo);
-				memcpy(&sizeOrigen, mensaje->datos+ sizeof(int) +sizeCodigo, sizeof(int));
-				memcpy(&origen,mensaje->datos + sizeof(int)*2+sizeCodigo, sizeOrigen);
-				memcpy(&sizeDestino, mensaje->datos + sizeof(int)*2 + sizeCodigo + sizeOrigen, sizeof(int));
-				memcpy(&destino,mensaje->datos + sizeof(int)*3+sizeCodigo+ sizeOrigen, sizeDestino);
+				memcpy(&sizeCodigo, mensaje->datos, sizeof(int32_t));
+				memcpy(&codigo,mensaje->datos + sizeof(int32_t), sizeCodigo);
+				memcpy(&sizeOrigen, mensaje->datos+ sizeof(int32_t) +sizeCodigo, sizeof(int32_t));
+				memcpy(&origen,mensaje->datos + sizeof(int32_t)*2+sizeCodigo, sizeOrigen);
+				memcpy(&sizeDestino, mensaje->datos + sizeof(int32_t)*2 + sizeCodigo + sizeOrigen, sizeof(int32_t));
+				memcpy(&destino,mensaje->datos + sizeof(int32_t)*3+sizeCodigo+ sizeOrigen, sizeDestino);
 				//almacenar();
 				/*char* buffer = leerArchivo(path,offset,size);
 				log_info(logFile, "[FILE SYSTEM] EL KERNEL PIDE LEER: %s | OFFSET: %i | SIZE: %i", path, offset, size);
@@ -143,6 +143,45 @@ void workerCrearHijo(Socket unSocket) {
 		puts("PADRE ACEPTO UNA CONEXION");
 	else
 		puts("ERROR");
+}
+
+//1er etapa
+int transformar(char* codigo,int origen,char* destino){
+	if (origen>tamanioArchData){
+		return -1;
+	}
+	char* buffer=NULL;
+	FILE* arch;
+	arch = fopen(configuracion->rutaDataBin,"r");
+	fseek(arch,MB*origen,SEEK_SET);
+	int i;
+	char c;
+	int cc = 0;
+	for(i=0;cc<=MB;i++){
+		c = fgetc(arch);
+			buffer = realloc(buffer,sizeof(char)*(cc+1));
+			buffer[cc]=c;
+			cc++;
+	}
+	/*int j;
+	for(j=0;j<=size;j++){
+		c = fgetc(arch);
+		srtcat(buffer,c);
+	}*/
+	fclose(arch);
+	//doy privilegios a script
+	char*commando=NULL;
+	strcat(commando,"chmod 0755");
+	strcat(commando,codigo);
+	system(commando);
+	//paso buffer a script y resultado script a sort
+	char*command=NULL;
+	strcat(command,codigo);
+	strcat(command,buffer);//suponiendo que el script requiere un buffer como parametro
+	strcat(command,"| sort >");
+	strcat(command,destino);
+	system(command);
+	return 0;
 }
 
 void socketAceptarConexion() {
@@ -176,6 +215,7 @@ char* agregarBarraCero(char* data, int tamanio)
 void configuracionImprimir(Configuracion* configuracion) {
 	imprimirMensajeUno(archivoLog, "[CONFIGURACION] Nombre Nodo: %s", configuracion->nombreNodo);
 	imprimirMensajeUno(archivoLog, "[CONFIGURACION] Ruta archivo data.bin: %s", configuracion->rutaDataBin);
+	imprimirMensajeUno(archivoLog, "[CONFIGURACION] tamanio data.bin: %dMB", tamanioArchData);
 
 }
 
@@ -201,6 +241,11 @@ void workerIniciar() {
 	archivoConfigObtenerCampos();
 	senialAsignarFuncion(SIGINT, funcionSenial);
 	configuracion = configuracionCrear(RUTA_CONFIG, (void*)configuracionLeerArchivoConfig, campos);
+	char* texto;
+	strcat(texto,"stat -c%s ");
+	strcat(texto, configuracion->rutaDataBin);
+	tamanioArchData = system(texto)/MB;
 	configuracionImprimir(configuracion);
 	estadoWorker = 1;
+	free(texto);
 }

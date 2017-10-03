@@ -10,6 +10,7 @@
 
 #define RUTA_CONFIG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Worker/NodoConfig.conf"
 #define RUTA_LOG "/home/utnso/Escritorio/WorkerLog.log"
+#define RUTA_ARCHDATA ""
 
 typedef struct {
 	char ipFileSytem[50];
@@ -19,12 +20,15 @@ typedef struct {
 	char rutaDataBin[100];
 } Configuracion;
 
+const MB = 1048576;
 String campos[5];
 Configuracion* configuracion;
 ArchivoLog archivoLog;
 int estadoWorker;
+int tamanioArchData;
 Socket socketListenerWorker;
 void socketAceptarConexion();
 
 
 void workerIniciar();
+int transformar(char*,int,char*);
