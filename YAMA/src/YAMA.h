@@ -16,6 +16,7 @@
 #define RUTA_LOG "/home/utnso/Escritorio/YAMALog.log"
 
 #define INTSIZE sizeof(int32_t)
+#define TEMPSIZE 12
 #define nullptr NULL
 
 #define TRANSFORMACION 1 //tambien estan en la biblioteca, pero por alguna razon
@@ -47,9 +48,8 @@ Servidor* servidor;
 typedef struct {
 	int32_t nodo;
 	int32_t bloque;
-	int32_t bytesOcupados; //en bloques gemelos esta dos veces esto.
-	//otra forma de plantearlo sería que me mande los bloques de a par,
-	//asi este int esta una vez sola. No cambiaría mucho el codigo que los usa
+	//no pongo los bytes aca porque estan dos veces en bloques gemelos,
+	//los manejo aparte
 } Bloque;
 
 typedef struct{
@@ -70,8 +70,11 @@ typedef struct{
 	Socket masterid;
 	int32_t nodo;
 	int32_t bloque;
+	int32_t bytes;
+	int32_t nodoAlt;
+	int32_t bloqueAlt;
 	Etapa etapa;
-	char pathArchivoTemporal[50];
+	char* pathTemporal; //podría usar char[12] y no usar memoria dinamica, despues ver
 	Estado estado;
 } Entrada;
 Lista tablaEstados;
@@ -83,6 +86,7 @@ Configuracion* configuracion;
 ArchivoLog archivoLog;
 int estadoYama;
 
+void darPathTemporal(char**,char);
 Configuracion* configuracionLeerArchivoConfig(ArchivoConfig);
 void archivoConfigObtenerCampos();
 void pantallaLimpiar();

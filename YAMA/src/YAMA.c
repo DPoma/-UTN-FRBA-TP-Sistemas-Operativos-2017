@@ -10,6 +10,7 @@
 
 #include "YAMA.h"
 
+
 int main(void) {
 	yamaIniciar();
 	yamaAtender();
@@ -54,7 +55,7 @@ void yamaIniciar() {
 		worker.nodo=i; //suponiendo que el filesystem los enumere segun
 		//le lleguen y me los mande asi
 		memcpy(worker.ipYPuerto,infoNodos->datos+10*i,10);
-		list_add(workers,&worker); //por ahi va sin &
+		list_add(workers,&worker);
 	}
 }
 
@@ -67,9 +68,10 @@ void yamaAtender() {
 		if(socketEsMayor(unSocket, servidor->maximoSocket))
 			servidor->maximoSocket = unSocket;
 	}
+	imprimirMensajeUno(archivoLog, "[CONEXION] Esperando conexiones de un Master (Puerto %s)", configuracion->puertoMaster);
 	servidor->listenerMaster = socketCrearListener(configuracion->puertoMaster);
-	log_info(archivoLog, "[CONEXION] Esperando conexiones de un Master (Puerto %s)", configuracion->puertoMaster);
 	listaSocketsAgregar(servidor->listenerMaster, &servidor->listaMaster);
+	imprimirMensaje(archivoLog, "[CONEXION] Conexion exitosa con Master");
 	servidorControlarMaximoSocket(servidor->fileSystem);
 	servidorControlarMaximoSocket(servidor->listenerMaster);
 
@@ -163,18 +165,21 @@ void archivoConfigObtenerCampos() {
 void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 	int i=0;
 	Lista bloques=list_create();
-	while(sizeof(Bloque)*i<tamanio){
-		list_add(bloques,(Bloque*)(listaBloques+sizeof(Bloque)*i));
+	Lista byteses=list_create();
+	while((sizeof(Bloque)*2+INTSIZE)*i<=tamanio){
+		list_add(bloques,(Bloque*)(listaBloques+(sizeof(Bloque)*2+INTSIZE)*i));
+		list_add(bloques,(Bloque*)(listaBloques+(sizeof(Bloque)*2+INTSIZE)*i+sizeof(Bloque)));
+		list_add(byteses,(int32_t*)(listaBloques+(sizeof(Bloque)*2+INTSIZE)*i+sizeof(Bloque)*2));
 		i++;
 	}
-
+	free(listaBloques);
 	Lista tablaEstadosJob;
 	job++;//mutex (supongo que las variables globales se comparten entre hilos)
 	for(i=0;i<bloques->elements_count/2;i++){
 		Entrada entrada;
 		entrada.job=job;
 		entrada.masterid=master;
-//		entrada.pathArchivoTemporal ?
+		darPathTemporal(&entrada.pathTemporal,'t');
 		list_add(tablaEstadosJob,&entrada);
 	}
 
@@ -213,26 +218,29 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 	}
 	Worker* workerClock=list_get(workers,clock); //alguna forma de no tener que hacer esto?
 	for(i=0;i<bloques->elements_count;i+=2){
-		void asignarBloque(Worker* worker,Bloque* bloque){
+		Bloque* bloque0 = list_get(bloques,i);
+		Bloque* bloque1 = list_get(bloques,i+1);
+		int* bytes=list_get(byteses,i/2);
+		void asignarBloque(Worker* worker,Bloque* bloque,Bloque* alt){
 			worker->carga++; //y habría que usar mutex aca
 			worker->disponibilidad--;
 			worker->tareasRealizadas++;
 			Entrada* entrada=list_get(tablaEstadosJob,i/2);
 			entrada->nodo=worker->nodo;
 			entrada->bloque=bloque->bloque;
+			entrada->bytes=*bytes;
+			entrada->nodoAlt=alt->nodo;
+			entrada->bloqueAlt=alt->bloque;
 			entrada->etapa=Transformacion;
 			entrada->estado=EnProceso;
 		}
 
-		Bloque* bloque0 = list_get(bloques,i);
-		Bloque* bloque1 = list_get(bloques,i+1);
 		bool encontrado=false;
-
 		if(workerClock->nodo==bloque0->nodo){
-			asignarBloque(workerClock,bloque0);
+			asignarBloque(workerClock,bloque0,bloque1);
 			encontrado=true;
 		}else if(workerClock->nodo==bloque1->nodo){
-			asignarBloque(workerClock,bloque1);
+			asignarBloque(workerClock,bloque1,bloque0);
 			encontrado=true;
 		}
 		if(encontrado){
@@ -254,22 +262,24 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 			Worker* workerAdv=list_get(workers,clockAdv);
 			if(workerAdv->disponibilidad>0){
 				if(workerAdv->nodo==bloque0->nodo){
-					asignarBloque(workerAdv,bloque0);
+					asignarBloque(workerAdv,bloque0,bloque1);
 					break;
 				}else if(workerClock->nodo==bloque1->nodo){
-					asignarBloque(workerAdv,bloque1);
+					asignarBloque(workerAdv,bloque1,bloque0);
 					break;
 				}
 			}
 		}
-	}//termina la planificacion
+	}
 
-	int32_t tamanioDato=INTSIZE*2*tablaEstadosJob->elements_count;
+	int tamanioEslabon=INTSIZE*2+TEMPSIZE;
+	int32_t tamanioDato=tamanioEslabon*tablaEstadosJob->elements_count;
 	void* dato=malloc(tamanioDato);
 	for(i=0;i<tablaEstadosJob->elements_count;i++){
 		Entrada* entrada=list_get(tablaEstadosJob,i);
-		memcpy(dato+INTSIZE*i*2,&entrada->nodo,INTSIZE);
-		memcpy(dato+INTSIZE*i*2+1,&entrada->bloque,INTSIZE);
+		memcpy(dato+tamanioEslabon*i,&entrada->nodo,INTSIZE);
+		memcpy(dato+tamanioEslabon*i+INTSIZE,&entrada->bloque,INTSIZE);
+		memcpy(dato+tamanioEslabon*i+INTSIZE*2,entrada->pathTemporal,TEMPSIZE);
 	}
 	mensajeEnviar(master,TRANSFORMACION,dato,tamanioDato);
 	free(dato);
@@ -279,66 +289,92 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 }
 
 void actualizarTablaEstados(int nodo,int bloque,int actualizando){
-	bool buscarEntrada(Entrada* entrada){
-		return entrada->nodo==nodo&&entrada->bloque==bloque;
-	}
-	Entrada* entradaA=list_find(tablaEstados,buscarEntrada);
-	entradaA->estado=actualizando;//actualizando es ERROR o TERMINADO
-	if(actualizando==ERROR){
-		if(entradaA->etapa==Transformacion){
-			//mover entrada a la lista usados
-			//replanificar
-		}else{
-			//abortar job, mover todas las entradas a la lista mala
-		}
-		return;
-	}
-	void darDatosEntrada(Entrada* entradaTo,Entrada* entradaFrom){
-		entradaTo->nodo=entradaFrom->nodo;
-		entradaTo->job=entradaFrom->job;
-		entradaTo->masterid=entradaFrom->masterid;
-		entradaTo->estado=EnProceso;
-		//y habría que darle un nuevo path temporal
-	}
-	bool trabajoTerminadoB=true;
-	void trabajoTerminado(bool(*cond)(void*)){
-		void aux(Entrada* entrada){
-			if(cond(entrada))
-				trabajoTerminadoB=false;
-		}
-		list_iterate(tablaEstados,aux);
-	}
 	void moverAUsados(bool(*cond)(void*)){
+		//mutex
 		Entrada* entrada;
 		while((entrada=list_remove_by_condition(tablaEstados,cond))){
 			list_add(tablaUsados,entrada);
 		}
 	}
-	if(entradaA->etapa==Transformacion){
-		bool condicion(Entrada* entrada){
-			if(entrada->nodo==entradaA->nodo&&entrada->job==entradaA->job)
-				return true;
-			return false;
+	bool buscarEntrada(Entrada* entrada){
+		return entrada->nodo==nodo&&entrada->bloque==bloque;
+	}
+	Entrada* entradaA=list_find(tablaEstados,buscarEntrada);
+	void darDatosEntrada(Entrada* entrada){
+		entrada->nodo=entradaA->nodo;
+		entrada->job=entradaA->job;
+		entrada->masterid=entradaA->masterid;
+		entrada->estado=EnProceso;
+		entrada->bloque=-1;
+	}
+	entradaA->estado=actualizando;//actualizando es ERROR o TERMINADO
+	if(actualizando==ERROR){
+		void abortarJob(){
+			bool abortarEntrada(Entrada* entrada){
+				if(entrada->job==entradaA->job){
+					entrada->estado=Abortado;
+					return true;
+				}
+				return false;
+			}
+			moverAUsados(abortarJob);
 		}
-		trabajoTerminado(condicion);
+		if(entradaA->etapa==Transformacion){
+			bool buscarError(Entrada* entrada){
+				return entrada->estado==ERROR;
+			}
+			list_add(tablaUsados,list_remove(tablaEstados,buscarError));//mutex
+			if(entradaA->nodo==entradaA->nodoAlt){
+				abortarJob();
+			}
+			Entrada alternativa;
+			darDatosEntrada(&alternativa);
+			alternativa.nodo=entradaA->nodoAlt;
+			alternativa.bloque=entradaA->bloqueAlt;
+			list_add(tablaEstados,&alternativa);
+		}else{
+			abortarJob();
+		}
+		return;
+	}
+	bool trabajoTerminadoB=true;
+	void trabajoTerminado(bool(*cond)(void*)){
+		void aux(Entrada* entrada){
+			if(cond(entrada)&&entrada->estado!=TERMINADO)
+				trabajoTerminadoB=false;
+		}
+		list_iterate(tablaEstados,aux);
+	}
+	bool mismoJob(Entrada* entrada){
+		return entrada->job==entradaA->job;
+	}
+	bool mismoNodo(Entrada* entrada){
+		return mismoJob(entrada)&&entrada->nodo==entradaA->nodo;
+	}
+	if(entradaA->etapa==Transformacion){
+		trabajoTerminado(mismoNodo);
 		if(trabajoTerminadoB){
-			moverAUsados(condicion);
+			moverAUsados(mismoNodo);
 			Entrada reducLocal;
-			darDatosEntrada(&reducLocal,entradaA);
+			darDatosEntrada(&reducLocal);
+			darPathTemporal(&reducLocal.pathTemporal,'l');
 			reducLocal.etapa=ReduccionLocal;
-			mensajeEnviar(reducLocal.masterid,REDUCLOCAL,&reducLocal.nodo,INTSIZE);
+			struct dato{
+				int32_t nodo;
+				char* temp;
+			}dato;
+			dato.nodo=reducLocal.nodo;
+			dato.temp=reducLocal.pathTemporal;
+			mensajeEnviar(reducLocal.masterid,REDUCLOCAL,&dato,sizeof dato);
+			list_add(tablaEstados,&reducLocal);//mutex
 		}
 	}else if(entradaA->etapa==ReduccionLocal){
-		bool condicion(Entrada* entrada){
-			if(entrada->job==entradaA->job)
-				return true;
-			return false;
-		}
-		trabajoTerminado(condicion);
+		trabajoTerminado(mismoJob);
 		if(trabajoTerminadoB){
-			moverAUsados(condicion);
+			moverAUsados(mismoJob);
 			Entrada reducGlobal;
-			darDatosEntrada(&reducGlobal,entradaA);
+			darDatosEntrada(&reducGlobal);
+			darPathTemporal(&reducGlobal.pathTemporal,'g');
 			reducGlobal.etapa=ReduccionGlobal;
 			int32_t nodoMenorCarga=entradaA->nodo;
 			int menorCargaI=100; //
@@ -348,19 +384,27 @@ void actualizarTablaEstados(int nodo,int bloque,int actualizando){
 					menorCargaI=worker->carga;
 			}
 			list_iterate(workers,menorCarga);
-			mensajeEnviar(reducGlobal.masterid,REDUCGLOBAL,&nodoMenorCarga,INTSIZE);
+			struct{
+				int32_t nodo;
+				char* temp;
+			}dato;
+			dato.nodo=reducGlobal.nodo;
+			dato.temp=reducGlobal.pathTemporal;
+			mensajeEnviar(reducGlobal.masterid,REDUCGLOBAL,&dato,sizeof dato);
+			list_add(tablaEstados,&reducGlobal);//mutex
 		}
 	}else{
-		bool condicion(Entrada* entrada){
-			if(entrada->job==entradaA->job)
-				return true;
-			return false;
-		}
-		list_add(tablaUsados,list_remove_by_condition(tablaEstados,condicion));
+		list_add(tablaUsados,list_remove_by_condition(tablaEstados,mismoJob));
+		char* temp;
+		darPathTemporal(&temp,'f');
+		mensajeEnviar(entradaA->masterid,TERMINADO,temp,TEMPSIZE);
+		free(temp);
 	}
 }
 
 void dibujarTablaEstados(){
+	if(list_is_empty(tablaEstados))
+		return;
 	pantallaLimpiar();
 	puts("Job    Master    Nodo    Bloque    Etapa    Temporal    Estado");
 	void dibujarEntrada(Entrada* entrada){
@@ -377,19 +421,38 @@ void dibujarTablaEstados(){
 		}
 		printf("%d     %d     %d     %d     %s     %s    %s",
 				entrada->job,entrada->masterid,entrada->nodo,entrada->bloque,
-				etapa,entrada->pathArchivoTemporal,estado);
+				etapa,entrada->pathTemporal,estado);
 	}
 	list_iterate(tablaUsados,dibujarEntrada);
 	list_iterate(tablaEstados,dibujarEntrada);
 }
 
+void darPathTemporal(char** ret,char pre){
+	//mutex
+	static char* anterior;
+	static char agregado;
+	char* temp=temporal_get_string_time();
+	*ret=malloc(TEMPSIZE); //12
+	int i,j=1;
+	*ret[0]=pre; //creo que la precedencia esta bien
+	for(i=0;i<12;i++){
+		if(temp[i]==':')
+			continue;
+		*ret[j]=temp[i];
+		j++;
+	}
+	*ret[10]='0';
+	*ret[11]='\0';
+	if(stringIguales(*ret,anterior))
+		agregado++;
+	else
+		agregado='0';
+	*ret[10]=agregado;
+	anterior=string_duplicate(*ret);
+}
 
 //faltaría hacer seguros por si el master se desconecta en
 //cada etapa
-
-//mover las entradas terminadas y con error a otro lado,
-//asi no las recorro al pedo. No las voy a usar nunca mas
-//y algunas busquedas andarian mal si consideran las entradas con error
 
 //wat is dis
 //void notificadorInformar(Socket unSocket) {
