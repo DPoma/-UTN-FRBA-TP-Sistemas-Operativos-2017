@@ -33,6 +33,7 @@ typedef struct {
 	int retardoPlanificacion;
 	char algoritmoBalanceo[50];
 	int disponibilidadBase;
+	bool reconfigurar;
 } Configuracion;
 
 
@@ -81,13 +82,12 @@ Lista tablaEstados;
 Lista tablaUsados; //entradas Abortadas, Error, o Terminadas que ya
 //no se necesitan procesar, solo se dibujan
 
-String campos[6];
-Configuracion* configuracion;
+Configuracion* configuracion; //es un puntero por algun motivo?
 ArchivoLog archivoLog;
 int estadoYama;
 
 void darPathTemporal(char**,char);
-Configuracion* configuracionLeerArchivoConfig(ArchivoConfig);
+void configurar();
 void archivoConfigObtenerCampos();
 void pantallaLimpiar();
 void yamaIniciar();

@@ -22,23 +22,15 @@ void yamaIniciar() {
 	pantallaLimpiar();
 	estadoYama=ACTIVADO;
 	imprimirMensajeProceso("# PROCESO YAMA");
-	archivoLog = archivoLogCrear(RUTA_LOG, "YAMA");
-	archivoConfigObtenerCampos();
-
-	Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig) {
-		Configuracion* configuracion = memoriaAlocar(sizeof(Configuracion));
-		stringCopiar(configuracion->puertoMaster, archivoConfigStringDe(archivoConfig, "PUERTO_MASTER"));
-		stringCopiar(configuracion->ipFileSystem, archivoConfigStringDe(archivoConfig, "IP_FILESYSTEM"));
-		stringCopiar(configuracion->puertoFileSystem, archivoConfigStringDe(archivoConfig, "PUERTO_FILESYSTEM"));
-		configuracion->retardoPlanificacion = archivoConfigEnteroDe(archivoConfig, "RETARDO_PLANIFICACION");
-		stringCopiar(configuracion->algoritmoBalanceo, archivoConfigStringDe(archivoConfig, "ALGORITMO_BALANCEO"));
-		configuracion->disponibilidadBase = archivoConfigEnteroDe(archivoConfig, "DISPONIBILIDAD_BASE");
-		archivoConfigDestruir(archivoConfig);
-		return configuracion;
+	archivoLog=archivoLogCrear(RUTA_LOG, "YAMA");
+	configuracion=malloc(sizeof(Configuracion));
+	configurar();
+	void sighandler(){ //como no maneja variables locales no importa que se vaya de scope
+		configuracion->reconfigurar=true;
 	}
-	configuracion = configuracionCrear(RUTA_CONFIG, (Puntero)configuracionLeerArchivoConfig, campos);
+	signal(SIGUSR1,sighandler);
 
-	servidor = memoriaAlocar(sizeof(Servidor));
+	servidor = malloc(sizeof(Servidor));
 	imprimirMensajeDos(archivoLog, "[CONEXION] Realizando conexion con File System (IP: %s | Puerto %s)", configuracion->ipFileSystem, configuracion->puertoFileSystem);
 	servidor->fileSystem = socketCrearCliente(configuracion->ipFileSystem, configuracion->puertoFileSystem, ID_YAMA);
 	imprimirMensaje(archivoLog, "[CONEXION] Conexion exitosa con File System");
@@ -46,17 +38,30 @@ void yamaIniciar() {
 	//infoNodos es una lista de ips y puertos
 	Mensaje* infoNodos=mensajeRecibir(servidor->fileSystem);
 	mensajeObtenerDatos(infoNodos,servidor->fileSystem);
-	int i=0;
-	while(i<infoNodos->header.tamanio){ // dividido el tamaño del ip y puerto
+	int i=0,ipPortSize=10;
+	while(i<infoNodos->header.tamanio/ipPortSize){
 		Worker worker;
 		worker.conectado=true;
 		worker.carga=0;
 		worker.tareasRealizadas=0;
 		worker.nodo=i; //suponiendo que el filesystem los enumere segun
 		//le lleguen y me los mande asi
-		memcpy(worker.ipYPuerto,infoNodos->datos+10*i,10);
+		memcpy(worker.ipYPuerto,infoNodos->datos+ipPortSize*i,ipPortSize);
 		list_add(workers,&worker);
 	}
+}
+
+void configurar(){
+	char* campos[7] = {"IP_PROPIO","PUERTO_MASTER","IP_FILESYSTEM","PUERTO_FILESYSTEM","RETARDO_PLANIFICACION","ALGORITMO_BALANCEO","DISPONIBILIDAD_BASE"};
+	ArchivoConfig archivoConfig = archivoConfigCrear(RUTA_CONFIG, campos);
+	stringCopiar(configuracion->puertoMaster, archivoConfigStringDe(archivoConfig, "PUERTO_MASTER"));
+	stringCopiar(configuracion->ipFileSystem, archivoConfigStringDe(archivoConfig, "IP_FILESYSTEM"));
+	stringCopiar(configuracion->puertoFileSystem, archivoConfigStringDe(archivoConfig, "PUERTO_FILESYSTEM"));
+	configuracion->retardoPlanificacion = archivoConfigEnteroDe(archivoConfig, "RETARDO_PLANIFICACION");
+	stringCopiar(configuracion->algoritmoBalanceo, archivoConfigStringDe(archivoConfig, "ALGORITMO_BALANCEO"));
+	configuracion->disponibilidadBase = archivoConfigEnteroDe(archivoConfig, "DISPONIBILIDAD_BASE");
+	configuracion->reconfigurar=false;
+	archivoConfigDestruir(archivoConfig);
 }
 
 void yamaAtender() {
@@ -79,6 +84,9 @@ void yamaAtender() {
 	tablaUsados=list_create();
 
 	while(estadoYama==ACTIVADO){
+		if(configuracion->reconfigurar)
+			configurar();
+
 		dibujarTablaEstados();
 
 		servidor->listaSelect = servidor->listaMaster;
@@ -149,17 +157,6 @@ void yamaFinalizar() {
 	memoriaLiberar(servidor); //no es al pedo liberar memoria si el
 	memoriaLiberar(configuracion);//programa esta a punto de terminar?
 }
-
-
-void archivoConfigObtenerCampos() {
-	campos[0] = "IP_PROPIO";
-	campos[1] = "PUERTO_MASTER";
-	campos[2] = "IP_FILESYSTEM";
-	campos[3] = "PUERTO_FILESYSTEM";
-	campos[4] = "RETARDO_PLANIFICACION";
-	campos[5] = "ALGORITMO_BALANCEO";
-	campos[6] = "DISPONIBILIDAD_BASE";
-}//donde se usan los campos estos?
 
 
 void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
@@ -359,7 +356,7 @@ void actualizarTablaEstados(int nodo,int bloque,int actualizando){
 			darDatosEntrada(&reducLocal);
 			darPathTemporal(&reducLocal.pathTemporal,'l');
 			reducLocal.etapa=ReduccionLocal;
-			struct dato{
+			struct __attribute__((__packed__)){//para que no use relleno
 				int32_t nodo;
 				char* temp;
 			}dato;
@@ -384,7 +381,7 @@ void actualizarTablaEstados(int nodo,int bloque,int actualizando){
 					menorCargaI=worker->carga;
 			}
 			list_iterate(workers,menorCarga);
-			struct{
+			struct __attribute__((__packed__)){
 				int32_t nodo;
 				char* temp;
 			}dato;
@@ -451,8 +448,9 @@ void darPathTemporal(char** ret,char pre){
 	anterior=string_duplicate(*ret);
 }
 
-//faltaría hacer seguros por si el master se desconecta en
-//cada etapa
+
+
+
 
 //wat is dis
 //void notificadorInformar(Socket unSocket) {
