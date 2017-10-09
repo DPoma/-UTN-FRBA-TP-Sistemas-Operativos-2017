@@ -10,6 +10,7 @@
 
 #define RUTA_CONFIG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/FileSystem/FileSystemConfig.conf"
 #define RUTA_LOG "/home/utnso/Escritorio/FileSystemLog.log"
+#define RUTA_DIRECTORIO "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/FileSystem/Directorios.dat"
 
 //Identificador de cada comando
 #define FORMAT 1
@@ -82,7 +83,7 @@ ArchivoLog archivoLog;
 int estadoFileSystem;
 Hilo hiloConsola;
 Lista listaDirectorios;
-char indiceDirectorios[100];
+char bitmapDirectorios[100];
 int directoriosDisponibles;
 
 //--------------------------------------- Funciones de File System -------------------------------------

@@ -727,3 +727,7 @@ Archivo archivoAbrir(String rutaArchivo, String modoApertura) {
 void archivoCerrar(Archivo unArchivo) {
 	fclose(unArchivo);
 }
+
+void archivoPersistirEntrada(Archivo archivo, String entrada) {
+	fprintf(archivo, "%s", entrada);
+}

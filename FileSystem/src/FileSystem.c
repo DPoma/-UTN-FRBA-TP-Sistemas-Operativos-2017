@@ -597,198 +597,138 @@ void fileSystemDesactivar() {
 
 
 //--------------------------------------- Funciones de Directorio -------------------------------------
-/*
-Directorio directorioCrear(int indice, int padre, String nombre) {
-	Directorio directorio;
-	directorio.indice = indice;
-	directorio.padre = padre;
-	stringCopiar(directorio.nombre, nombre);
-	return directorio;
-}
-*/
-
-Directorio directorioLeerDeArchivo(Archivo unArchivo) {
-   Directorio directorio;
-   fread(&directorio, 1, sizeof(Directorio), unArchivo);
-   return directorio;
-}
 
 void listaDirectorioAgregar(Directorio* directorio) {
 	listaAgregarElemento(listaDirectorios, directorio);
 }
 
-/*
-void directorioGuardarEnArchivo(Archivo unArchivo, Directorio unDirectorio) {
-   fwrite(&unDirectorio, 1, sizeof(Directorio), unArchivo);
-}
-*/
-
-void directorioPosicionarEnRegistro(Archivo archivo, int posicion) {
-   fseek(archivo, posicion*sizeof(Directorio),SEEK_SET);
+bool directorioIndiceOcupado(int indice) {
+	return bitmapDirectorios[indice] == 1;
 }
 
-long directorioCantidadRegistros(Archivo archivo) {
-   long curr=ftell(archivo);
-   fseek(archivo,0,SEEK_END);
-   long ultimo=ftell(archivo);
-   fseek(archivo,curr,SEEK_SET);
-   return ultimo/sizeof(Directorio);
+bool directorioIndiceRespetaLimite(int indice) {
+	return indice < 100;
 }
 
-long directorioObtenerPosicionActualArchivo(Archivo archivo) {
-   return ftell(archivo)/sizeof(Directorio);
+bool directorioIndiceEstaOcupado(int indice) {
+	return directorioIndiceRespetaLimite(indice) && directorioIndiceOcupado(indice);
 }
+
+bool directorioExisteIndice(int indice) {
+	return indice != ERROR;
+}
+
+bool directorioIndicesIguales(int unIndice, int otroIndice) {
+	return unIndice == otroIndice;
+}
+
+bool directorioSonIguales(Directorio* directorio, String nombreDirectorio, int idPadre) {
+	return stringIguales(directorio->nombre, nombreDirectorio) && directorioIndicesIguales(directorio->padre, idPadre);
+}
+
 
 //Bitmap cabecita, nico estaria orgulloso
 int directorioBuscarIndiceLibre() {
 	int indice;
-	for(indice = 0; indice < 100 && indiceDirectorios[indice] == 1; indice++);
-	if (indice < 100)
+	for(indice = 1; directorioIndiceEstaOcupado(indice); indice++);
+	if(indice < 100)
 		return indice;
 	else
 		return ERROR;
 }
 
-
-void directorioPersistir(Directorio directorio){
-	Archivo archivoDirectorio = archivoAbrir("Directorios.dat","a+");
-	String indice = stringConvertirEntero(directorio.indice);
-	String padre = stringConvertirEntero(directorio.padre);
+String directorioConfigurarEntradaArchivo(String indice, String nombre, String padre) {
 	String buffer = stringCrear();
 	stringConcatenar(&buffer,indice);
 	stringConcatenar(&buffer, ";");
-	stringConcatenar(&buffer,directorio.nombre);
+	stringConcatenar(&buffer, nombre);
 	stringConcatenar(&buffer,";");
 	stringConcatenar(&buffer,padre);
-	fprintf(archivoDirectorio,"%s", buffer);
+	stringConcatenar(&buffer,"\n");
+	return buffer;
+}
+
+void directorioPersistir(Directorio directorio){
+	Archivo archivoDirectorio = archivoAbrir(RUTA_DIRECTORIO,"a+");
+	String indice = stringConvertirEntero(directorio.indice);
+	String padre = stringConvertirEntero(directorio.padre);
+	String entrada = directorioConfigurarEntradaArchivo(indice, directorio.nombre, padre);
+	archivoPersistirEntrada(archivoDirectorio, entrada);
 	archivoCerrar(archivoDirectorio);
-	free(indice);
-	free(padre);
+	memoriaLiberar(entrada);
+	memoriaLiberar(indice);
+	memoriaLiberar(padre);
 }
 
-int directorioBuscarEnLista(String nombreDirectorioABuscar, int idPadre) {
+int directorioBuscarIndice(String nombreDirectorio, int idPadre) {
 	Directorio* directorio;
-	int indiceDirectorio  = ERROR;
-	int tamanioLista = listaCantidadElementos(listaDirectorios);
-	int indice = 0;
-	while (indiceDirectorio == ERROR && indice < tamanioLista) {
+	int indice;
+	for(indice = 0; indice < listaCantidadElementos(listaDirectorios); indice++) {
 		directorio = listaObtenerElemento(listaDirectorios, indice);
-		 //Busco en la lista de directorios el nombre
-		if (stringIguales(directorio->nombre, nombreDirectorioABuscar)) {
-			 //Veo si tiene el mismo padre, puede que tenga el mismo nombre pero este en otra carpeta
-			if (directorio->padre == idPadre)
-				indiceDirectorio = directorio->indice;
-		}
-		indice++;
+		if(directorioSonIguales(directorio, nombreDirectorio, idPadre))
+			return directorio->indice;
 	}
-	return indiceDirectorio;
+	return ERROR;
 }
 
 
-/*
-void listarDirectoriosCreadosRecursiva(int id, char path[200]){
-	t_list* listaHijos = list_create();
-	listaHijos = obtenerHijos(id);
-	int cantidadHijos = list_size(listaHijos);
-	int i;
-	char auxPath[200];
-	if(cantidadHijos == 0){
-		//imprimo
-		printf("%s \n" , path);
-	}
-	else{
-		//para cada hijo vuelvo a llamar a esta funcion
-		for (i = 0; i < cantidadHijos; i++){
-			memset(auxPath, '\0', 200);
-			//Genero String Auxiliar
-			strcpy(auxPath, path);
-			//obtengo directorio
-			t_dir* nodoHijo = list_get(listaHijos,i);
-			//concateno
-			strcat(auxPath,"/");
-			strcat(auxPath,nodoHijo->nombre);
-			listarDirectoriosCreadosRecursiva(nodoHijo->id, auxPath);
-		}
-	}
-}
-
-
-void listarDirectoriosCreados(){
-	int cantDirectorios;
-	cantDirectorios = list_size(directorios);
-	char path[200];
-	int i;
-	int cantidadHijosDeRaiz = 0;;
-	if (cantDirectorios > 0){
-		t_list* listaHijosDeRaiz =list_create();
-		listaHijosDeRaiz = obtenerHijos(0);
-		printf ("Listado de directorios en MDFS\n\n");
-		cantidadHijosDeRaiz = list_size(listaHijosDeRaiz);
-		for (i = 0; i < cantidadHijosDeRaiz; i++){
-			memset(path,'\0',200);
-			//Seteo la / inicial de raiz
-			strcpy(path,"/");
-			t_dir* nodoHijo = list_get(listaHijosDeRaiz,i);
-			//concateno nombre hijo
-			strcat(path,nodoHijo->nombre);
-			listarDirectoriosCreadosRecursiva(nodoHijo->id, path);
-		}
-	}
-	else printf ("No hay directorios creados\n");
-}
-*/
 
 //Hay que ponerlo lindo
 void directorioCrear(String path) {
-	int idPadre;
-	String* directorioNuevo;
+	int indicePadre;
+	String* nombresDirectorios;
+	String nombreDirectorio;
 	Directorio* directorio;
+
 	int cantDirACrear = 0;
-	int indiceEncontrado;
-	imprimirMensajeUno(archivoLog, "Creando el directorio %s",path);
+	int indice;
+	imprimirMensajeUno(archivoLog, "[DIRECTORIO] Creando el directorio %s", path);
+
 	if (stringIguales(path,"/")){
-		imprimirMensajeUno(archivoLog, "No se pudo el directorio %s",path);
+		imprimirMensaje(archivoLog, "[ERROR] El directorio raiz no puede ser creado");
 		return;
 	}
-	directorioNuevo = string_split((char*) path, "/"); //Devuelve un array del path del directorio a crear
-	int indiceVectorDirNuevo = 0; //empiezo por el primero del split
-	while (directorioNuevo[indiceVectorDirNuevo] != NULL) {
-		if (indiceVectorDirNuevo == 0) //el primero del split siempre va a ser hijo de raiz
-			idPadre = 0;
-		indiceEncontrado = directorioBuscarEnLista(directorioNuevo[indiceVectorDirNuevo], idPadre);
-		if (indiceEncontrado != ERROR) { //quiere decir que existe
-			if (directorioNuevo[indiceVectorDirNuevo + 1] == NULL) {
+
+	nombresDirectorios = stringSeparar(path, "/");
+
+	int indiceDirectorios = 0;
+	nombreDirectorio = nombresDirectorios[indiceDirectorios];
+	while (stringNoNulo(nombreDirectorio)) {
+
+		if (indiceDirectorios == 0) //el primero del split siempre va a ser hijo de raiz
+			indicePadre = 0;
+
+		indice = directorioBuscarIndice(nombreDirectorio, indicePadre);
+
+		if (directorioExisteIndice(indice)) { //quiere decir que existe
+			if (nombresDirectorios[indiceDirectorios + 1] == NULL)
 				imprimirMensaje(archivoLog, "El directorio ya existe");
-				//listarDirectoriosCreados();
-			} else
-				idPadre = indiceEncontrado;
-			indiceVectorDirNuevo++;
-		} else { //hay que crear directorio
+			else
+				indicePadre = indice;
+			indiceDirectorios++;
+		}
+		else { //hay que crear directorio
 			int indiceDirectoriosNuevos;
-			for (indiceDirectoriosNuevos = indiceVectorDirNuevo;directorioNuevo[indiceDirectoriosNuevos] != NULL;indiceDirectoriosNuevos++) {
+			for (indiceDirectoriosNuevos = indiceDirectorios;nombresDirectorios[indiceDirectoriosNuevos] != NULL;indiceDirectoriosNuevos++) {
 				cantDirACrear++;
 			}
 			if (cantDirACrear <= directoriosDisponibles) { //controlo que no supere la cantidad maxima que es 1024
-				while (directorioNuevo[indiceVectorDirNuevo] != NULL) {
+				while (nombresDirectorios[indiceDirectorios] != NULL) {
 					directorio = memoriaAlocar(sizeof(Directorio));
-					stringCopiar(directorio->nombre, directorioNuevo[indiceVectorDirNuevo]);
-					directorio->padre = idPadre;
-					int id = directorioBuscarIndiceLibre(indiceDirectorios); //el nuevo id será el menor libre del vector de indices de directorios, siempre menor a 1024
+					stringCopiar(directorio->nombre, nombresDirectorios[indiceDirectorios]);
+					directorio->padre = indicePadre;
+					int id = directorioBuscarIndiceLibre(bitmapDirectorios); //el nuevo id será el menor libre del vector de indices de nombresDirectorios, siempre menor a 1024
 					directorio->indice = id;
-					indiceDirectorios[id] = 1; //marco como ocupado el indice correspondiente
-					directoriosDisponibles--; //actualizo mi variable para saber cantidad de directorios máximos a crear
-					idPadre = directorio->indice;
+					bitmapDirectorios[id] = 1; //marco como ocupado el indice correspondiente
+					directoriosDisponibles--; //actualizo mi variable para saber cantidad de nombresDirectorios máximos a crear
+					indicePadre = directorio->indice;
 					listaAgregarElemento(listaDirectorios, directorio);
-					indiceVectorDirNuevo++;
+					indiceDirectorios++;
 					directorioPersistir(*directorio);
 				}
-				imprimirMensajeUno(archivoLog, "El directorio %s se creo correctamente", path);
-				//listarDirectoriosCreados();
-			} else {
-				imprimirMensaje(archivoLog,"No se pudo crear el directorio por superar el limite permitido");
-				//No puede pasarse de 1024 directorios
-				//listarDirectoriosCreados();
-			}
+				imprimirMensajeUno(archivoLog, "El directorio %s fue creado exitosamente", path);
+			} else
+				imprimirMensaje(archivoLog,"[ERROR] No se pudo crear el directorio por superar el limite permitido (100)");
 		}
 	}
 }
