@@ -30,6 +30,8 @@ void fileSystemIniciar() {
 	//senialAsignarFuncion(SIGPIPE, SIG_IGN);
 	configuracion = configuracionCrear(RUTA_CONFIG, (Puntero)configuracionLeerArchivoConfig, campos);
 	configuracionImprimir(configuracion);
+	listaDirectorios = listaCrear();
+	directoriosDisponibles = 100;
 }
 
 void fileSystemCrearConsola() {
@@ -358,9 +360,6 @@ void consolaFinalizar() {
 }
 
 void consolaRealizarAccion(Comando* comando) {
-	//Archivo archivo = archivoCrear("../../../test.dat", "r+b");
-	//directorioPosicionarEnRegistro(archivo, 1);
-	//Directorio directorio = directorioCrear(201, 1, "ggwp");
 	switch(comando->identificador) {
 		case FORMAT: puts("COMANDO FORMAT"); break;
 		case RM: puts("COMANDO RM"); break;
@@ -369,24 +368,14 @@ void consolaRealizarAccion(Comando* comando) {
 		case RENAME: puts("COMANDO RENAME"); break;
 		case MV: puts("COMANDO  MV"); break;
 		case CAT: puts("COMANDO CAT"); break;
-		case MKDIR: puts("COMANDO MKDIR CREANDO DIRECTORIO");
-
-		//directorioCrear(0, -1, "root");
-		//directorioGuardarEnArchivo(archivo, directorio);
-		//directorio = directorioLeerDeArchivo(archivo);
-		//printf("el nombre es %s\n", directorio.nombre);
-		//printf("el index es %i\n", directorio.indice);
-		//printf("el padre es %i\n", directorio.padre);
-		break;
+		case MKDIR: directorioCrear(comando->argumentos[1]); break;
 		case CPFROM: puts("COMANDO CPFROM"); break;
 		case CPTO: puts("COMANDO CPTO"); break;
 		case CPBLOCK:puts("COMANDO CPBLOCK"); break;
 		case MD5: puts("COMANDO MD5"); break;
 		case LS: puts("COMANDO LS"); break;
 		case INFO: puts("COMANDO INFO"); break;
-		case EXIT: consolaFinalizar();
-		//fclose(archivo);
-		break;
+		case EXIT: consolaFinalizar();break;
 		default: puts("COMANDO INVALIDO"); break;
 	}
 }
@@ -400,6 +389,7 @@ void consolaAtenderComandos() {
 			consolaCrearComando(&comando, entrada);
 			consolaRealizarAccion(&comando);
 			if(comando.identificador != ERROR) {
+
 			printf("arg 0: %s\n", comando.argumentos[0]);
 			printf("arg 1: %s\n", comando.argumentos[1]);
 			printf("arg 2: %s\n", comando.argumentos[2]);
@@ -607,7 +597,7 @@ void fileSystemDesactivar() {
 
 
 //--------------------------------------- Funciones de Directorio -------------------------------------
-
+/*
 Directorio directorioCrear(int indice, int padre, String nombre) {
 	Directorio directorio;
 	directorio.indice = indice;
@@ -615,6 +605,7 @@ Directorio directorioCrear(int indice, int padre, String nombre) {
 	stringCopiar(directorio.nombre, nombre);
 	return directorio;
 }
+*/
 
 Directorio directorioLeerDeArchivo(Archivo unArchivo) {
    Directorio directorio;
@@ -626,10 +617,11 @@ void listaDirectorioAgregar(Directorio* directorio) {
 	listaAgregarElemento(listaDirectorios, directorio);
 }
 
+/*
 void directorioGuardarEnArchivo(Archivo unArchivo, Directorio unDirectorio) {
    fwrite(&unDirectorio, 1, sizeof(Directorio), unArchivo);
 }
-
+*/
 
 void directorioPosicionarEnRegistro(Archivo archivo, int posicion) {
    fseek(archivo, posicion*sizeof(Directorio),SEEK_SET);
@@ -645,5 +637,159 @@ long directorioCantidadRegistros(Archivo archivo) {
 
 long directorioObtenerPosicionActualArchivo(Archivo archivo) {
    return ftell(archivo)/sizeof(Directorio);
+}
+
+//Bitmap cabecita, nico estaria orgulloso
+int directorioBuscarIndiceLibre() {
+	int indice;
+	for(indice = 0; indice < 100 && indiceDirectorios[indice] == 1; indice++);
+	if (indice < 100)
+		return indice;
+	else
+		return ERROR;
+}
+
+
+void directorioPersistir(Directorio directorio){
+	Archivo archivoDirectorio = archivoAbrir("Directorios.dat","a+");
+	String indice = stringConvertirEntero(directorio.indice);
+	String padre = stringConvertirEntero(directorio.padre);
+	String buffer = stringCrear();
+	stringConcatenar(&buffer,indice);
+	stringConcatenar(&buffer, ";");
+	stringConcatenar(&buffer,directorio.nombre);
+	stringConcatenar(&buffer,";");
+	stringConcatenar(&buffer,padre);
+	fprintf(archivoDirectorio,"%s", buffer);
+	archivoCerrar(archivoDirectorio);
+	free(indice);
+	free(padre);
+}
+
+int directorioBuscarEnLista(String nombreDirectorioABuscar, int idPadre) {
+	Directorio* directorio;
+	int indiceDirectorio  = ERROR;
+	int tamanioLista = listaCantidadElementos(listaDirectorios);
+	int indice = 0;
+	while (indiceDirectorio == ERROR && indice < tamanioLista) {
+		directorio = listaObtenerElemento(listaDirectorios, indice);
+		 //Busco en la lista de directorios el nombre
+		if (stringIguales(directorio->nombre, nombreDirectorioABuscar)) {
+			 //Veo si tiene el mismo padre, puede que tenga el mismo nombre pero este en otra carpeta
+			if (directorio->padre == idPadre)
+				indiceDirectorio = directorio->indice;
+		}
+		indice++;
+	}
+	return indiceDirectorio;
+}
+
+
+/*
+void listarDirectoriosCreadosRecursiva(int id, char path[200]){
+	t_list* listaHijos = list_create();
+	listaHijos = obtenerHijos(id);
+	int cantidadHijos = list_size(listaHijos);
+	int i;
+	char auxPath[200];
+	if(cantidadHijos == 0){
+		//imprimo
+		printf("%s \n" , path);
+	}
+	else{
+		//para cada hijo vuelvo a llamar a esta funcion
+		for (i = 0; i < cantidadHijos; i++){
+			memset(auxPath, '\0', 200);
+			//Genero String Auxiliar
+			strcpy(auxPath, path);
+			//obtengo directorio
+			t_dir* nodoHijo = list_get(listaHijos,i);
+			//concateno
+			strcat(auxPath,"/");
+			strcat(auxPath,nodoHijo->nombre);
+			listarDirectoriosCreadosRecursiva(nodoHijo->id, auxPath);
+		}
+	}
+}
+
+
+void listarDirectoriosCreados(){
+	int cantDirectorios;
+	cantDirectorios = list_size(directorios);
+	char path[200];
+	int i;
+	int cantidadHijosDeRaiz = 0;;
+	if (cantDirectorios > 0){
+		t_list* listaHijosDeRaiz =list_create();
+		listaHijosDeRaiz = obtenerHijos(0);
+		printf ("Listado de directorios en MDFS\n\n");
+		cantidadHijosDeRaiz = list_size(listaHijosDeRaiz);
+		for (i = 0; i < cantidadHijosDeRaiz; i++){
+			memset(path,'\0',200);
+			//Seteo la / inicial de raiz
+			strcpy(path,"/");
+			t_dir* nodoHijo = list_get(listaHijosDeRaiz,i);
+			//concateno nombre hijo
+			strcat(path,nodoHijo->nombre);
+			listarDirectoriosCreadosRecursiva(nodoHijo->id, path);
+		}
+	}
+	else printf ("No hay directorios creados\n");
+}
+*/
+
+//Hay que ponerlo lindo
+void directorioCrear(String path) {
+	int idPadre;
+	String* directorioNuevo;
+	Directorio* directorio;
+	int cantDirACrear = 0;
+	int indiceEncontrado;
+	imprimirMensajeUno(archivoLog, "Creando el directorio %s",path);
+	if (stringIguales(path,"/")){
+		imprimirMensajeUno(archivoLog, "No se pudo el directorio %s",path);
+		return;
+	}
+	directorioNuevo = string_split((char*) path, "/"); //Devuelve un array del path del directorio a crear
+	int indiceVectorDirNuevo = 0; //empiezo por el primero del split
+	while (directorioNuevo[indiceVectorDirNuevo] != NULL) {
+		if (indiceVectorDirNuevo == 0) //el primero del split siempre va a ser hijo de raiz
+			idPadre = 0;
+		indiceEncontrado = directorioBuscarEnLista(directorioNuevo[indiceVectorDirNuevo], idPadre);
+		if (indiceEncontrado != ERROR) { //quiere decir que existe
+			if (directorioNuevo[indiceVectorDirNuevo + 1] == NULL) {
+				imprimirMensaje(archivoLog, "El directorio ya existe");
+				//listarDirectoriosCreados();
+			} else
+				idPadre = indiceEncontrado;
+			indiceVectorDirNuevo++;
+		} else { //hay que crear directorio
+			int indiceDirectoriosNuevos;
+			for (indiceDirectoriosNuevos = indiceVectorDirNuevo;directorioNuevo[indiceDirectoriosNuevos] != NULL;indiceDirectoriosNuevos++) {
+				cantDirACrear++;
+			}
+			if (cantDirACrear <= directoriosDisponibles) { //controlo que no supere la cantidad maxima que es 1024
+				while (directorioNuevo[indiceVectorDirNuevo] != NULL) {
+					directorio = memoriaAlocar(sizeof(Directorio));
+					stringCopiar(directorio->nombre, directorioNuevo[indiceVectorDirNuevo]);
+					directorio->padre = idPadre;
+					int id = directorioBuscarIndiceLibre(indiceDirectorios); //el nuevo id será el menor libre del vector de indices de directorios, siempre menor a 1024
+					directorio->indice = id;
+					indiceDirectorios[id] = 1; //marco como ocupado el indice correspondiente
+					directoriosDisponibles--; //actualizo mi variable para saber cantidad de directorios máximos a crear
+					idPadre = directorio->indice;
+					listaAgregarElemento(listaDirectorios, directorio);
+					indiceVectorDirNuevo++;
+					directorioPersistir(*directorio);
+				}
+				imprimirMensajeUno(archivoLog, "El directorio %s se creo correctamente", path);
+				//listarDirectoriosCreados();
+			} else {
+				imprimirMensaje(archivoLog,"No se pudo crear el directorio por superar el limite permitido");
+				//No puede pasarse de 1024 directorios
+				//listarDirectoriosCreados();
+			}
+		}
+	}
 }
 

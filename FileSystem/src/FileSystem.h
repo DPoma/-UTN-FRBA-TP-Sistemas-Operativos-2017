@@ -82,6 +82,8 @@ ArchivoLog archivoLog;
 int estadoFileSystem;
 Hilo hiloConsola;
 Lista listaDirectorios;
+char indiceDirectorios[100];
+int directoriosDisponibles;
 
 //--------------------------------------- Funciones de File System -------------------------------------
 
@@ -140,8 +142,8 @@ bool fileSystemDesactivado();
 void fileSystemActivar();
 void fileSystemDesactivar();
 
-Directorio directorioCrear(int indice, int padre, String nombre);
-void directorioGuardarEnArchivo(Archivo unArchivo, Directorio unDirectorio);
+void directorioCrear(String ruta);
+void directorioGuardarEnArchivo(Directorio unDirectorio);
 Directorio directorioLeerDeArchivo(Archivo unArchivo);
 void directorioPosicionarEnRegistro(Archivo archivo, int posicion);
 long directorioCantidadRegistros(Archivo archivo);

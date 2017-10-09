@@ -541,6 +541,10 @@ bool listaCumplenTodos(Lista lista, bool(*funcion)(void*)) {
 
 //--------------------------------------- Funciones para String -------------------------------------
 
+String stringCrear() {
+	return string_new();
+}
+
 bool stringContiene(String unString, String otroString) {
 	return string_contains(unString, otroString);
 }
@@ -553,7 +557,7 @@ String stringRepetirCaracter(char caracter, int repeticiones) {
 	return string_repeat(caracter, repeticiones);
 }
 
-void stringAgregarString(String* unString, String otroString) {
+void stringConcatenar(String* unString, String otroString) {
 	string_append(unString, otroString);
 }
 
@@ -715,7 +719,11 @@ bool caracterIguales(char unCaracter, char otroCaracter) {
 }
 
 
-Archivo archivoCrear(String rutaArchivo, String modoApertura) {
+Archivo archivoAbrir(String rutaArchivo, String modoApertura) {
 	Archivo archivo = fopen(rutaArchivo, modoApertura);
 	return archivo;
+}
+
+void archivoCerrar(Archivo unArchivo) {
+	fclose(unArchivo);
 }
