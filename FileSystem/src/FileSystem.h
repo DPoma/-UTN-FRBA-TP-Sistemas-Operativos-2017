@@ -104,6 +104,20 @@ typedef struct {
 	int  bloqueNodo;
 } CopiaBloque;
 
+typedef struct estructura_manejo_nodos {
+	Socket socket;
+	char nombre[6];
+	int estado;
+	char ip[20];
+	char puerto[20];
+	char puertoListener[20];
+	String bloquesBitArray;
+	BitArray* bitmap;
+	int bloquesLibres;
+	int bloquesTotales;
+} Nodo;
+
+
 String campos[3];
 Configuracion* configuracion;
 ArchivoLog archivoLog;
@@ -111,6 +125,7 @@ int estadoFileSystem;
 Hilo hiloConsola;
 Lista listaDirectorios;
 Lista listaArchivos;
+Lista listaNodos;
 char bitmapDirectorios[LIMITE_DIRECTORIOS];
 int directoriosDisponibles;
 

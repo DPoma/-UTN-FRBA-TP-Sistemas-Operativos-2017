@@ -26,6 +26,7 @@
 #include "commons/string.h"
 #include "commons/collections/list.h"
 #include "commons/temporal.h"
+#include "commons/bitarray.h"
 #include <stdint.h>
 
 //--------------------------------------- Constantes -------------------------------------
@@ -70,6 +71,7 @@ typedef pthread_mutex_t Mutex;
 typedef pthread_t Hilo;
 typedef t_list* Lista;
 typedef FILE* Archivo;
+typedef t_bitarray BitArray;
 
 //--------------------------------------- Estructuras -------------------------------------
 

@@ -758,18 +758,38 @@ void consolaDirectorioCrear(String rutaDirectorio) {
 /*
 void archivoPersistirMetadata(ArchivoMetadata* metadata) {
 	Archivo archivo = archivoarchivoAbrir("/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Metadata/testMetadata.dat", "a+");
-	fprintf(archivo, "NOMBRE = %s\n", metadata->nombre);
-	fprintf(archivo, "ID_PADRE = %s\n", metadata->identificadorPadre);
-	fprintf(archivo, "TIPO = %s\n", metadata->tipo);
+	fprintf(archivo, "NOMBRE=%s\n", metadata->nombre);
+	fprintf(archivo, "ID_PADRE=%s\n", metadata->identificadorPadre);
+	fprintf(archivo, "TIPO=%s\n", metadata->tipo);
 	int indice;
 	for(indice = 0; indice < listaCantidadElementos(metadata->listaBloques); indice++) {
 		Bloque* bloque = listaObtenerElemento(metadata->listaBloques, indice);
-		fprintf(archivo, "BLOQUE%sBYTES = %d\n", bloque->bytes);
+		fprintf(archivo, "BLOQUE%sBYTES=%d\n", bloque->bytes);
 		int indiceCopia;
 		for(indiceCopia = 0; indiceCopia < listaCantidadElementos(bloque->listaCopias); indiceCopia++) {
 			CopiaBloque* copiaBloque = listaObtenerElemento(bloque->listaCopias, indiceCopia);
-			fprintf(archivo, "BLOQUE%iCopia%i = [%s, %i]\n", indice, indiceCopia, copiaBloque->nombreNodo, copiaBloque->bloqueNodo);
+			fprintf(archivo, "BLOQUE%iCopia%i=[%s, %i]\n", indice, indiceCopia, copiaBloque->nombreNodo, copiaBloque->bloqueNodo);
 		}
 	}
 }
+
+void nodoPersistir(Nodo unNodo) {
+	Archivo archivo = archivoarchivoAbrir("/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Metadata/nodos.bin", "a+");
+	int indice;
+	String nodos = stringCrear();
+	int contadorBloquesTotales = 0;
+	int contadorBloquesLibres = 0;
+	for(indice = 0; indice < listaCantidadElementos(listaNodos); indice++) {
+		Nodo unNodo = listaObtenerElemento(listaNodos, indice);
+		fprintf(archivo, "NODO_%i_BLOQUES_TOTALES=%i\n", indice, unNodo->bloquesTotales);
+		fprintf(archivo, "NODO_%i_BLOQUES_LIBRES=%i\n", indice, unNodo->bloquesLibres);
+		stringConcatenar("[");
+		contadorBloquesTotales=+unNodo->bloquesTotales;
+		contadorBloquesLibres=+unNodo->bloquesLibres;
+	}
+	fprintf(archivo, "NODOS=%s\n", nodos);
+	fprintf(archivo, "BLOQUES_LIBRES=%s\n", contadorBloquesTotales);
+	fprintf(archivo, "BLOQUES_TOTALES=%s\n", contadorBloquesLibres);
+}
 */
+
