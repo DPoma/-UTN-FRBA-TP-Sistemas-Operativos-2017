@@ -8,9 +8,9 @@
 
 #include "../../Biblioteca/src/Biblioteca.c"
 
-#define RUTA_CONFIG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/FileSystem/FileSystemConfig.conf"
-#define RUTA_LOG "/home/utnso/Escritorio/FileSystemLog.log"
-#define RUTA_DIRECTORIO "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/FileSystem/Directorios.dat"
+#define RUTA_CONFIG "/home/dario/Escritorio/tp-2017-2c-El-legado-del-Esqui/FileSystem/FileSystemConfig.conf"
+#define RUTA_LOG "/home/dario/Escritorio/FileSystemLog.log"
+#define RUTA_DIRECTORIO "/home/dario/Escritorio/tp-2017-2c-El-legado-del-Esqui/FileSystem/Directorios.dat"
 
 //Identificador de cada comando
 #define FORMAT 1
@@ -106,7 +106,7 @@ typedef struct {
 
 typedef struct estructura_manejo_nodos {
 	Socket socket;
-	char nombre[6];
+	char nombre[10];
 	int estado;
 	char ip[20];
 	char puerto[20];
@@ -193,3 +193,4 @@ void directorioPosicionarEnRegistro(Archivo archivo, int posicion);
 long directorioCantidadRegistros(Archivo archivo);
 long directorioObtenerPosicionActualArchivo(Archivo archivo);
 void consolaDirectorioCrear(String path);
+void nodoPersistir();

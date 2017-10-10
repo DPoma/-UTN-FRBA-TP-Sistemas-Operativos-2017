@@ -31,7 +31,47 @@ void fileSystemIniciar() {
 	configuracion = configuracionCrear(RUTA_CONFIG, (Puntero)configuracionLeerArchivoConfig, campos);
 	configuracionImprimir(configuracion);
 	listaDirectorios = listaCrear();
+	listaNodos = listaCrear();
+	listaArchivos = listaCrear();
 	directoriosDisponibles = 100;
+	Nodo nodo1;
+	stringCopiar(nodo1.nombre,"NODO_1");
+	nodo1.bloquesLibres = 15;
+	nodo1.bloquesTotales = 100;
+	listaAgregarElemento(listaNodos, &nodo1);
+	Nodo nodo2;
+	stringCopiar(nodo2.nombre, "NODO_2");
+	nodo2.bloquesLibres = 50;
+	nodo2.bloquesTotales = 1;
+	listaAgregarElemento(listaNodos, &nodo2);
+	nodoPersistir();
+	ArchivoMetadata metadata;
+	metadata.identificadorPadre = 10;
+	metadata.listaBloques = listaCrear();
+	stringCopiar(metadata.nombre, "Manco");
+	stringCopiar(metadata.tipo, "TEXTO");
+	Bloque bloque;
+	bloque.bytes = 1014;
+	bloque.listaCopias = listaCrear();
+	CopiaBloque copia;
+	copia.bloqueNodo = 14;
+	stringCopiar(copia.nombreNodo, "NODO1");
+	CopiaBloque copia2;
+	copia2.bloqueNodo = 15;
+	stringCopiar(copia2.nombreNodo, "NODO2");
+	Bloque bloque2;
+	bloque2.bytes = 101;
+	bloque2.listaCopias = listaCrear();
+	CopiaBloque copia3;
+	copia3.bloqueNodo = 99;
+	stringCopiar(copia3.nombreNodo, "NODO1");
+	listaAgregarElemento(bloque.listaCopias, &copia);
+	listaAgregarElemento(bloque.listaCopias, &copia2);
+	listaAgregarElemento(bloque2.listaCopias, &copia3);
+	listaAgregarElemento(metadata.listaBloques, &bloque);
+	listaAgregarElemento(metadata.listaBloques, &bloque2);
+	archivoPersistirMetadata(&metadata);
+
 }
 
 void fileSystemCrearConsola() {
@@ -48,10 +88,12 @@ void fileSystemAtenderProcesos() {
 
 void fileSystemFinalizar() {
 	imprimirMensaje(archivoLog, "[EJECUCION] Proceso File System finalizado");
-	//hiloEsperar(hiloConsola);
 	archivoLogDestruir(archivoLog);
 	memoriaLiberar(configuracion);
-	//sleep(1.5);
+	listaDestruir(listaDirectorios);
+	listaDestruir(listaArchivos);
+	listaDestruir(listaNodos);
+	sleep(2);
 }
 
 //--------------------------------------- Funciones de Consola -------------------------------------
@@ -755,41 +797,40 @@ void consolaDirectorioCrear(String rutaDirectorio) {
 		imprimirMensaje(archivoLog, "[ERROR] El directorio raiz no puede ser creado");
 }
 
-/*
 void archivoPersistirMetadata(ArchivoMetadata* metadata) {
-	Archivo archivo = archivoarchivoAbrir("/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Metadata/testMetadata.dat", "a+");
+	Archivo archivo = archivoAbrir("/home/dario/Escritorio/tp-2017-2c-El-legado-del-Esqui/Metadata/metadata.dat", "a+");
 	fprintf(archivo, "NOMBRE=%s\n", metadata->nombre);
-	fprintf(archivo, "ID_PADRE=%s\n", metadata->identificadorPadre);
+	fprintf(archivo, "ID_PADRE=%i\n", metadata->identificadorPadre);
 	fprintf(archivo, "TIPO=%s\n", metadata->tipo);
 	int indice;
 	for(indice = 0; indice < listaCantidadElementos(metadata->listaBloques); indice++) {
 		Bloque* bloque = listaObtenerElemento(metadata->listaBloques, indice);
-		fprintf(archivo, "BLOQUE%sBYTES=%d\n", bloque->bytes);
+		fprintf(archivo, "BLOQUE%i_BYTES=%i\n",indice, bloque->bytes);
 		int indiceCopia;
 		for(indiceCopia = 0; indiceCopia < listaCantidadElementos(bloque->listaCopias); indiceCopia++) {
 			CopiaBloque* copiaBloque = listaObtenerElemento(bloque->listaCopias, indiceCopia);
-			fprintf(archivo, "BLOQUE%iCopia%i=[%s, %i]\n", indice, indiceCopia, copiaBloque->nombreNodo, copiaBloque->bloqueNodo);
+			fprintf(archivo, "BLOQUE%i_COPIA%i=[%s,%i]\n", indice, indiceCopia, copiaBloque->nombreNodo, copiaBloque->bloqueNodo);
 		}
 	}
+	archivoCerrar(archivo);
 }
 
-void nodoPersistir(Nodo unNodo) {
-	Archivo archivo = archivoarchivoAbrir("/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Metadata/nodos.bin", "a+");
+void nodoPersistir() {
+	Archivo archivo = archivoAbrir("/home/dario/Escritorio/tp-2017-2c-El-legado-del-Esqui/Metadata/nodos.bin", "a+");
 	int indice;
-	String nodos = stringCrear();
 	int contadorBloquesTotales = 0;
 	int contadorBloquesLibres = 0;
 	for(indice = 0; indice < listaCantidadElementos(listaNodos); indice++) {
-		Nodo unNodo = listaObtenerElemento(listaNodos, indice);
-		fprintf(archivo, "NODO_%i_BLOQUES_TOTALES=%i\n", indice, unNodo->bloquesTotales);
-		fprintf(archivo, "NODO_%i_BLOQUES_LIBRES=%i\n", indice, unNodo->bloquesLibres);
-		stringConcatenar("[");
-		contadorBloquesTotales=+unNodo->bloquesTotales;
-		contadorBloquesLibres=+unNodo->bloquesLibres;
+		Nodo* unNodo = listaObtenerElemento(listaNodos, indice);
+		fprintf(archivo, "NODO%i_NOMBRE=%s\n",indice, unNodo->nombre);
+		fprintf(archivo, "NODO%i_BLOQUES_TOTALES=%i\n", indice, unNodo->bloquesTotales);
+		fprintf(archivo, "NODO%i_BLOQUES_LIBRES=%i\n", indice, unNodo->bloquesLibres);
+		contadorBloquesTotales+=unNodo->bloquesTotales;
+		contadorBloquesLibres+=unNodo->bloquesLibres;
 	}
-	fprintf(archivo, "NODOS=%s\n", nodos);
-	fprintf(archivo, "BLOQUES_LIBRES=%s\n", contadorBloquesTotales);
-	fprintf(archivo, "BLOQUES_TOTALES=%s\n", contadorBloquesLibres);
+	fprintf(archivo, "BLOQUES_LIBRES=%i\n", contadorBloquesTotales);
+	fprintf(archivo, "BLOQUES_TOTALES=%i\n", contadorBloquesLibres);
+	archivoCerrar(archivo);
 }
-*/
+
 
