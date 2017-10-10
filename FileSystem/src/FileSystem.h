@@ -47,6 +47,8 @@
 
 #define FLAG_B "-b"
 #define FLAG_D "-d"
+#define MAX_STRING 255
+#define LIMITE_DIRECTORIOS 100
 
 typedef struct {
 	int identificador;
@@ -74,8 +76,16 @@ typedef struct {
 typedef struct {
 	int indice;
 	int padre;
-	char nombre[255];
+	char nombre[MAX_STRING];
 } Directorio;
+
+typedef struct {
+	int indicePadre;
+	int indiceDirectorio;
+	int indiceNombresDirectorios;
+	String nombreDirectorio;
+	String* nombresDirectorios;
+} ControlDirectorio;
 
 String campos[3];
 Configuracion* configuracion;
@@ -83,7 +93,7 @@ ArchivoLog archivoLog;
 int estadoFileSystem;
 Hilo hiloConsola;
 Lista listaDirectorios;
-char bitmapDirectorios[100];
+char bitmapDirectorios[LIMITE_DIRECTORIOS];
 int directoriosDisponibles;
 
 //--------------------------------------- Funciones de File System -------------------------------------
@@ -143,10 +153,10 @@ bool fileSystemDesactivado();
 void fileSystemActivar();
 void fileSystemDesactivar();
 
-void directorioCrear(String ruta);
+Directorio* directorioCrear(int indice, String nombre, int padre);
 void directorioGuardarEnArchivo(Directorio unDirectorio);
 Directorio directorioLeerDeArchivo(Archivo unArchivo);
 void directorioPosicionarEnRegistro(Archivo archivo, int posicion);
 long directorioCantidadRegistros(Archivo archivo);
 long directorioObtenerPosicionActualArchivo(Archivo archivo);
-
+void consolaDirectorioCrear(String path);

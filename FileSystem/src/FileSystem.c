@@ -368,7 +368,7 @@ void consolaRealizarAccion(Comando* comando) {
 		case RENAME: puts("COMANDO RENAME"); break;
 		case MV: puts("COMANDO  MV"); break;
 		case CAT: puts("COMANDO CAT"); break;
-		case MKDIR: directorioCrear(comando->argumentos[1]); break;
+		case MKDIR: consolaDirectorioCrear(comando->argumentos[1]); break;
 		case CPFROM: puts("COMANDO CPFROM"); break;
 		case CPTO: puts("COMANDO CPTO"); break;
 		case CPBLOCK:puts("COMANDO CPBLOCK"); break;
@@ -626,8 +626,14 @@ bool directorioSonIguales(Directorio* directorio, String nombreDirectorio, int i
 	return stringIguales(directorio->nombre, nombreDirectorio) && directorioIndicesIguales(directorio->padre, idPadre);
 }
 
+Directorio* directorioCrear(int indice, String nombre, int padre) {
+	Directorio* directorio = memoriaAlocar(sizeof(Directorio));
+	directorio->indice = indice;
+	directorio->padre = padre;
+	stringCopiar(directorio->nombre, nombre);
+	return directorio;
+}
 
-//Bitmap cabecita, nico estaria orgulloso
 int directorioBuscarIndiceLibre() {
 	int indice;
 	for(indice = 1; directorioIndiceEstaOcupado(indice); indice++);
@@ -648,11 +654,11 @@ String directorioConfigurarEntradaArchivo(String indice, String nombre, String p
 	return buffer;
 }
 
-void directorioPersistir(Directorio directorio){
+void directorioPersistir(Directorio* directorio){
 	Archivo archivoDirectorio = archivoAbrir(RUTA_DIRECTORIO,"a+");
-	String indice = stringConvertirEntero(directorio.indice);
-	String padre = stringConvertirEntero(directorio.padre);
-	String entrada = directorioConfigurarEntradaArchivo(indice, directorio.nombre, padre);
+	String indice = stringConvertirEntero(directorio->indice);
+	String padre = stringConvertirEntero(directorio->padre);
+	String entrada = directorioConfigurarEntradaArchivo(indice, directorio->nombre, padre);
 	archivoPersistirEntrada(archivoDirectorio, entrada);
 	archivoCerrar(archivoDirectorio);
 	memoriaLiberar(entrada);
@@ -672,64 +678,76 @@ int directorioBuscarIndice(String nombreDirectorio, int idPadre) {
 }
 
 
+int directorioIndicesACrear(String* nombresDirectorios, int indiceDirectorios) {
+	int directoriosACrear = 0;
+	int indiceDirectoriosNuevos;
+	for(indiceDirectoriosNuevos = indiceDirectorios; stringNoNulo(nombresDirectorios[indiceDirectoriosNuevos]); indiceDirectoriosNuevos++)
+		directoriosACrear++;
+	return directoriosACrear;
+}
 
-//Hay que ponerlo lindo
-void directorioCrear(String path) {
-	int indicePadre;
-	String* nombresDirectorios;
-	String nombreDirectorio;
-	Directorio* directorio;
+bool directorioHaySuficientesIndices(ControlDirectorio* control) {
+	return directorioIndicesACrear(control->nombresDirectorios, control->indiceNombresDirectorios) <= directoriosDisponibles;
+}
 
-	int cantDirACrear = 0;
-	int indice;
-	imprimirMensajeUno(archivoLog, "[DIRECTORIO] Creando el directorio %s", path);
+ControlDirectorio* controlDirectorioCrear() {
+	ControlDirectorio* controlDirectorio = memoriaAlocar(sizeof(ControlDirectorio));
+	controlDirectorio->indiceNombresDirectorios = 0;
+	controlDirectorio->indiceDirectorio = 0;
+	controlDirectorio->indicePadre = 0;
+	return controlDirectorio;
+}
 
-	if (stringIguales(path,"/")){
+void directorioControlarIndices(ControlDirectorio* control) {
+	if(control->nombresDirectorios[control->indiceNombresDirectorios + 1] == NULL)
+		imprimirMensaje(archivoLog, "[ERROR] El directorio ya existe");
+	else
+		control->indicePadre = control->indiceDirectorio;
+	control->indiceNombresDirectorios++;
+}
+
+
+void directorioCrearDirectoriosRestantes(ControlDirectorio* control, String rutaDirectorio) {
+	while(stringNoNulo(control->nombresDirectorios[control->indiceNombresDirectorios])) {
+		int indice = directorioBuscarIndiceLibre();
+		Directorio* directorio = directorioCrear(indice, control->nombresDirectorios[control->indiceNombresDirectorios], control->indicePadre);
+		bitmapDirectorios[indice] = 1;
+		listaAgregarElemento(listaDirectorios, directorio);
+		control->indicePadre = indice;
+		control->indiceNombresDirectorios++;
+		directoriosDisponibles--;
+		directorioPersistir(directorio);
+	}
+	imprimirMensajeUno(archivoLog, "[DIRECTORIO] El directorio %s fue creado exitosamente", rutaDirectorio);
+}
+
+void directorioCrearIndices(ControlDirectorio* control, String rutaDirectorio) {
+	if(directorioHaySuficientesIndices(control))
+		directorioCrearDirectoriosRestantes(control, rutaDirectorio);
+	else
+		imprimirMensaje(archivoLog,"[ERROR] No se pudo crear el directorio por superar el limite permitido (100)");
+}
+
+void consolaDirectorioCrear(String rutaDirectorio) {
+	ControlDirectorio* control = controlDirectorioCrear();
+
+	if(stringIguales(rutaDirectorio,"/")){
 		imprimirMensaje(archivoLog, "[ERROR] El directorio raiz no puede ser creado");
 		return;
 	}
 
-	nombresDirectorios = stringSeparar(path, "/");
+	control->nombresDirectorios = stringSeparar(rutaDirectorio, "/");
+	control->nombreDirectorio = control->nombresDirectorios[control->indiceNombresDirectorios];
+	while(stringNoNulo(control->nombreDirectorio)) {
 
-	int indiceDirectorios = 0;
-	nombreDirectorio = nombresDirectorios[indiceDirectorios];
-	while (stringNoNulo(nombreDirectorio)) {
+		control->indiceDirectorio = directorioBuscarIndice(control->nombreDirectorio, control->indicePadre);
 
-		if (indiceDirectorios == 0) //el primero del split siempre va a ser hijo de raiz
-			indicePadre = 0;
+		if (directorioExisteIndice(control->indiceDirectorio))
+			directorioControlarIndices(control);
+		else
+			directorioCrearIndices(control, rutaDirectorio);
 
-		indice = directorioBuscarIndice(nombreDirectorio, indicePadre);
-
-		if (directorioExisteIndice(indice)) { //quiere decir que existe
-			if (nombresDirectorios[indiceDirectorios + 1] == NULL)
-				imprimirMensaje(archivoLog, "El directorio ya existe");
-			else
-				indicePadre = indice;
-			indiceDirectorios++;
-		}
-		else { //hay que crear directorio
-			int indiceDirectoriosNuevos;
-			for (indiceDirectoriosNuevos = indiceDirectorios;nombresDirectorios[indiceDirectoriosNuevos] != NULL;indiceDirectoriosNuevos++) {
-				cantDirACrear++;
-			}
-			if (cantDirACrear <= directoriosDisponibles) { //controlo que no supere la cantidad maxima que es 1024
-				while (nombresDirectorios[indiceDirectorios] != NULL) {
-					directorio = memoriaAlocar(sizeof(Directorio));
-					stringCopiar(directorio->nombre, nombresDirectorios[indiceDirectorios]);
-					directorio->padre = indicePadre;
-					int id = directorioBuscarIndiceLibre(bitmapDirectorios); //el nuevo id será el menor libre del vector de indices de nombresDirectorios, siempre menor a 1024
-					directorio->indice = id;
-					bitmapDirectorios[id] = 1; //marco como ocupado el indice correspondiente
-					directoriosDisponibles--; //actualizo mi variable para saber cantidad de nombresDirectorios máximos a crear
-					indicePadre = directorio->indice;
-					listaAgregarElemento(listaDirectorios, directorio);
-					indiceDirectorios++;
-					directorioPersistir(*directorio);
-				}
-				imprimirMensajeUno(archivoLog, "El directorio %s fue creado exitosamente", path);
-			} else
-				imprimirMensaje(archivoLog,"[ERROR] No se pudo crear el directorio por superar el limite permitido (100)");
-		}
+		control->nombreDirectorio = control->nombresDirectorios[control->indiceNombresDirectorios];
 	}
 }
 
