@@ -87,12 +87,30 @@ typedef struct {
 	String* nombresDirectorios;
 } ControlDirectorio;
 
+typedef struct {
+	int identificadorPadre;
+	char tipo[8];
+	char nombre[MAX_STRING];
+	Lista listaBloques;
+} ArchivoMetadata;
+
+typedef struct {
+	int bytes;
+	Lista listaCopias;
+} Bloque;
+
+typedef struct {
+	char nombreNodo[6];
+	int  bloqueNodo;
+} CopiaBloque;
+
 String campos[3];
 Configuracion* configuracion;
 ArchivoLog archivoLog;
 int estadoFileSystem;
 Hilo hiloConsola;
 Lista listaDirectorios;
+Lista listaArchivos;
 char bitmapDirectorios[LIMITE_DIRECTORIOS];
 int directoriosDisponibles;
 

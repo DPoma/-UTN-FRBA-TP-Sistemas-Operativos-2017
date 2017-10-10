@@ -35,7 +35,7 @@ YAMA: $(OBJS) $(USER_OBJS)
 
 # Other Targets
 clean:
-	-$(RM) $(OBJS)$(C_DEPS)$(EXECUTABLES) YAMA
+	-$(RM) $(EXECUTABLES)$(OBJS)$(C_DEPS) YAMA
 	-@echo ' '
 
 .PHONY: all clean dependents

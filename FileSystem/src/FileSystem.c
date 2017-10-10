@@ -755,3 +755,21 @@ void consolaDirectorioCrear(String rutaDirectorio) {
 		imprimirMensaje(archivoLog, "[ERROR] El directorio raiz no puede ser creado");
 }
 
+/*
+void archivoPersistirMetadata(ArchivoMetadata* metadata) {
+	Archivo archivo = archivoarchivoAbrir("/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Metadata/testMetadata.dat", "a+");
+	fprintf(archivo, "NOMBRE = %s\n", metadata->nombre);
+	fprintf(archivo, "ID_PADRE = %s\n", metadata->identificadorPadre);
+	fprintf(archivo, "TIPO = %s\n", metadata->tipo);
+	int indice;
+	for(indice = 0; indice < listaCantidadElementos(metadata->listaBloques); indice++) {
+		Bloque* bloque = listaObtenerElemento(metadata->listaBloques, indice);
+		fprintf(archivo, "BLOQUE%sBYTES = %d\n", bloque->bytes);
+		int indiceCopia;
+		for(indiceCopia = 0; indiceCopia < listaCantidadElementos(bloque->listaCopias); indiceCopia++) {
+			CopiaBloque* copiaBloque = listaObtenerElemento(bloque->listaCopias, indiceCopia);
+			fprintf(archivo, "BLOQUE%iCopia%i = [%s, %i]\n", indice, indiceCopia, copiaBloque->nombreNodo, copiaBloque->bloqueNodo);
+		}
+	}
+}
+*/

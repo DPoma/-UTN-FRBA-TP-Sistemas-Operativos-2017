@@ -35,7 +35,7 @@ Biblioteca: $(OBJS) $(USER_OBJS)
 
 # Other Targets
 clean:
-	-$(RM) $(OBJS)$(C_DEPS)$(EXECUTABLES) Biblioteca
+	-$(RM) $(EXECUTABLES)$(OBJS)$(C_DEPS) Biblioteca
 	-@echo ' '
 
 .PHONY: all clean dependents
