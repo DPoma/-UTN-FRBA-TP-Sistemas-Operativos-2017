@@ -74,14 +74,14 @@ typedef struct {
 
 
 typedef struct {
-	int indice;
-	int padre;
+	int identificador;
+	int identificadorPadre;
 	char nombre[MAX_STRING];
 } Directorio;
 
 typedef struct {
-	int indicePadre;
-	int indiceDirectorio;
+	int identificadorPadre;
+	int identificadorDirectorio;
 	int indiceNombresDirectorios;
 	String nombreDirectorio;
 	String* nombresDirectorios;

@@ -200,20 +200,20 @@ bool consolaValidarComandoSinTipo(String* subcadenas) {
 }
 
 bool consolaValidarComandoTipoUno(String* subcadenas) {
-	return stringNoNulo(subcadenas[1]) &&
+	return stringValido(subcadenas[1]) &&
 			stringNulo(subcadenas[2]);
 }
 
 bool consolaValidarComandoTipoDos(String* subcadenas) {
-	return stringNoNulo(subcadenas[1]) &&
-			stringNoNulo(subcadenas[2]) &&
+	return stringValido(subcadenas[1]) &&
+			stringValido(subcadenas[2]) &&
 		   stringNulo(subcadenas[3]);
 }
 
 bool consolaValidarComandoTipoTres(String* subcadenas) {
-	return stringNoNulo(subcadenas[1]) &&
-		   stringNoNulo(subcadenas[2]) &&
-		   stringNoNulo(subcadenas[3]) &&
+	return stringValido(subcadenas[1]) &&
+		   stringValido(subcadenas[2]) &&
+		   stringValido(subcadenas[3]) &&
 		   stringNulo(subcadenas[4]);
 }
 
@@ -235,15 +235,15 @@ bool consolaComandoRemoverFlagD(String* subcadenas) {
 }
 
 bool consolaValidarComandoFlagB(String* subcadenas) {
-	return stringNoNulo(subcadenas[1]) &&
-			   stringNoNulo(subcadenas[2]) &&
-			   stringNoNulo(subcadenas[3]) &&
-			   stringNoNulo(subcadenas[4]);
+	return stringValido(subcadenas[1]) &&
+			   stringValido(subcadenas[2]) &&
+			   stringValido(subcadenas[3]) &&
+			   stringValido(subcadenas[4]);
 }
 
 bool consolaValidarComandoFlagD(String* subcadenas) {
-	return stringNoNulo(subcadenas[1]) &&
-			   stringNoNulo(subcadenas[2]) &&
+	return stringValido(subcadenas[1]) &&
+			   stringValido(subcadenas[2]) &&
 			   stringNulo(subcadenas[3]) &&
 			   stringNulo(subcadenas[4]);
 }
@@ -614,8 +614,8 @@ bool directorioIndiceEstaOcupado(int indice) {
 	return directorioIndiceRespetaLimite(indice) && directorioIndiceOcupado(indice);
 }
 
-bool directorioExisteIndice(int indice) {
-	return indice != ERROR;
+bool directorioExisteIdentificador(int identificador) {
+	return identificador != ERROR;
 }
 
 bool directorioIndicesIguales(int unIndice, int otroIndice) {
@@ -623,13 +623,13 @@ bool directorioIndicesIguales(int unIndice, int otroIndice) {
 }
 
 bool directorioSonIguales(Directorio* directorio, String nombreDirectorio, int idPadre) {
-	return stringIguales(directorio->nombre, nombreDirectorio) && directorioIndicesIguales(directorio->padre, idPadre);
+	return stringIguales(directorio->nombre, nombreDirectorio) && directorioIndicesIguales(directorio->identificadorPadre, idPadre);
 }
 
 Directorio* directorioCrear(int indice, String nombre, int padre) {
 	Directorio* directorio = memoriaAlocar(sizeof(Directorio));
-	directorio->indice = indice;
-	directorio->padre = padre;
+	directorio->identificador = indice;
+	directorio->identificadorPadre = padre;
 	stringCopiar(directorio->nombre, nombre);
 	return directorio;
 }
@@ -656,8 +656,8 @@ String directorioConfigurarEntradaArchivo(String indice, String nombre, String p
 
 void directorioPersistir(Directorio* directorio){
 	Archivo archivoDirectorio = archivoAbrir(RUTA_DIRECTORIO,"a+");
-	String indice = stringConvertirEntero(directorio->indice);
-	String padre = stringConvertirEntero(directorio->padre);
+	String indice = stringConvertirEntero(directorio->identificador);
+	String padre = stringConvertirEntero(directorio->identificadorPadre);
 	String entrada = directorioConfigurarEntradaArchivo(indice, directorio->nombre, padre);
 	archivoPersistirEntrada(archivoDirectorio, entrada);
 	archivoCerrar(archivoDirectorio);
@@ -666,22 +666,24 @@ void directorioPersistir(Directorio* directorio){
 	memoriaLiberar(padre);
 }
 
-int directorioBuscarIndice(String nombreDirectorio, int idPadre) {
+void directorioBuscarIdentificador(ControlDirectorio* control) {
 	Directorio* directorio;
 	int indice;
 	for(indice = 0; indice < listaCantidadElementos(listaDirectorios); indice++) {
 		directorio = listaObtenerElemento(listaDirectorios, indice);
-		if(directorioSonIguales(directorio, nombreDirectorio, idPadre))
-			return directorio->indice;
+		if(directorioSonIguales(directorio, control->nombreDirectorio, control->identificadorPadre)) {
+			control->identificadorDirectorio = directorio->identificador;
+			return;
+		}
 	}
-	return ERROR;
+	control->identificadorDirectorio = ERROR;
 }
 
 
 int directorioIndicesACrear(String* nombresDirectorios, int indiceDirectorios) {
 	int directoriosACrear = 0;
 	int indiceDirectoriosNuevos;
-	for(indiceDirectoriosNuevos = indiceDirectorios; stringNoNulo(nombresDirectorios[indiceDirectoriosNuevos]); indiceDirectoriosNuevos++)
+	for(indiceDirectoriosNuevos = indiceDirectorios; stringValido(nombresDirectorios[indiceDirectoriosNuevos]); indiceDirectoriosNuevos++)
 		directoriosACrear++;
 	return directoriosACrear;
 }
@@ -690,30 +692,36 @@ bool directorioHaySuficientesIndices(ControlDirectorio* control) {
 	return directorioIndicesACrear(control->nombresDirectorios, control->indiceNombresDirectorios) <= directoriosDisponibles;
 }
 
-ControlDirectorio* controlDirectorioCrear() {
+void directorioControlSetearNombre(ControlDirectorio* control) {
+	control->nombreDirectorio = control->nombresDirectorios[control->indiceNombresDirectorios];
+}
+
+ControlDirectorio* controlDirectorioCrear(String rutaDirectorio) {
 	ControlDirectorio* controlDirectorio = memoriaAlocar(sizeof(ControlDirectorio));
+	controlDirectorio->nombresDirectorios = stringSeparar(rutaDirectorio, "/");
 	controlDirectorio->indiceNombresDirectorios = 0;
-	controlDirectorio->indiceDirectorio = 0;
-	controlDirectorio->indicePadre = 0;
+	controlDirectorio->identificadorDirectorio = 0;
+	controlDirectorio->identificadorPadre = 0;
+	directorioControlSetearNombre(controlDirectorio);
 	return controlDirectorio;
 }
 
-void directorioControlarIndices(ControlDirectorio* control) {
+void directorioControlarEntradas(ControlDirectorio* control) {
 	if(control->nombresDirectorios[control->indiceNombresDirectorios + 1] == NULL)
 		imprimirMensaje(archivoLog, "[ERROR] El directorio ya existe");
 	else
-		control->indicePadre = control->indiceDirectorio;
+		control->identificadorPadre = control->identificadorDirectorio;
 	control->indiceNombresDirectorios++;
 }
 
 
 void directorioCrearDirectoriosRestantes(ControlDirectorio* control, String rutaDirectorio) {
-	while(stringNoNulo(control->nombresDirectorios[control->indiceNombresDirectorios])) {
+	while(stringValido(control->nombresDirectorios[control->indiceNombresDirectorios])) {
 		int indice = directorioBuscarIndiceLibre();
-		Directorio* directorio = directorioCrear(indice, control->nombresDirectorios[control->indiceNombresDirectorios], control->indicePadre);
+		Directorio* directorio = directorioCrear(indice, control->nombresDirectorios[control->indiceNombresDirectorios], control->identificadorPadre);
 		bitmapDirectorios[indice] = 1;
 		listaAgregarElemento(listaDirectorios, directorio);
-		control->indicePadre = indice;
+		control->identificadorPadre = indice;
 		control->indiceNombresDirectorios++;
 		directoriosDisponibles--;
 		directorioPersistir(directorio);
@@ -721,33 +729,29 @@ void directorioCrearDirectoriosRestantes(ControlDirectorio* control, String ruta
 	imprimirMensajeUno(archivoLog, "[DIRECTORIO] El directorio %s fue creado exitosamente", rutaDirectorio);
 }
 
-void directorioCrearIndices(ControlDirectorio* control, String rutaDirectorio) {
+void directorioCrearEntradas(ControlDirectorio* control, String rutaDirectorio) {
 	if(directorioHaySuficientesIndices(control))
 		directorioCrearDirectoriosRestantes(control, rutaDirectorio);
 	else
 		imprimirMensaje(archivoLog,"[ERROR] No se pudo crear el directorio por superar el limite permitido (100)");
 }
 
+void directorioActualizar(ControlDirectorio* control, String rutaDirectorio) {
+	if (directorioExisteIdentificador(control->identificadorDirectorio))
+		directorioControlarEntradas(control);
+	else
+		directorioCrearEntradas(control, rutaDirectorio);
+}
+
 void consolaDirectorioCrear(String rutaDirectorio) {
-	ControlDirectorio* control = controlDirectorioCrear();
-
-	if(stringIguales(rutaDirectorio,"/")){
+	ControlDirectorio* control = controlDirectorioCrear(rutaDirectorio);
+	if(stringDistintos(rutaDirectorio,"/"))
+		while(stringValido(control->nombreDirectorio)) {
+			directorioBuscarIdentificador(control);
+			directorioActualizar(control, rutaDirectorio);
+			directorioControlSetearNombre(control);
+		}
+	else
 		imprimirMensaje(archivoLog, "[ERROR] El directorio raiz no puede ser creado");
-		return;
-	}
-
-	control->nombresDirectorios = stringSeparar(rutaDirectorio, "/");
-	control->nombreDirectorio = control->nombresDirectorios[control->indiceNombresDirectorios];
-	while(stringNoNulo(control->nombreDirectorio)) {
-
-		control->indiceDirectorio = directorioBuscarIndice(control->nombreDirectorio, control->indicePadre);
-
-		if (directorioExisteIndice(control->indiceDirectorio))
-			directorioControlarIndices(control);
-		else
-			directorioCrearIndices(control, rutaDirectorio);
-
-		control->nombreDirectorio = control->nombresDirectorios[control->indiceNombresDirectorios];
-	}
 }
 

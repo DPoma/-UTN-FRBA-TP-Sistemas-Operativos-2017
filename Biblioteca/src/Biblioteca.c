@@ -634,8 +634,8 @@ bool stringNulo(String unString) {
 	return unString == NULL;
 }
 
-bool stringNoNulo(String unString) {
-	return !stringNulo(unString);
+bool stringValido(String unString) {
+	return unString != NULL;
 }
 
 bool stringIguales(String s1, String s2) {
