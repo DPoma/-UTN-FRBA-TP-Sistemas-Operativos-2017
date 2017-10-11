@@ -20,6 +20,46 @@ int main(void) {
 
 //--------------------------------------- Funciones de File System -------------------------------------
 
+void testCabecita() {
+	Nodo* nodo1 = memoriaAlocar(sizeof(Nodo));
+	stringCopiar(nodo1->nombre,"NODO_1");
+	nodo1->bloquesLibres = 15;
+	nodo1->bloquesTotales = 100;
+	listaAgregarElemento(listaNodos, nodo1);
+	Nodo* nodo2 = memoriaAlocar(sizeof(Nodo));
+	stringCopiar(nodo2->nombre, "NODO_2");
+	nodo2->bloquesLibres = 50;
+	nodo2->bloquesTotales = 1;
+	listaAgregarElemento(listaNodos, nodo2);
+	nodoPersistir();
+	ArchivoMetadata* metadata = memoriaAlocar(sizeof(ArchivoMetadata));
+	metadata->identificadorPadre = 10;
+	metadata->listaBloques = listaCrear();
+	stringCopiar(metadata->nombre, "Manco");
+	stringCopiar(metadata->tipo, "TEXTO");
+	Bloque* bloque = memoriaAlocar(sizeof(Bloque));
+	bloque->bytes = 1014;
+	bloque->listaCopias = listaCrear();
+	CopiaBloque* copia = memoriaAlocar(sizeof(CopiaBloque));
+	copia->bloqueNodo = 14;
+	stringCopiar(copia->nombreNodo, "NODO1");
+	CopiaBloque* copia2 = memoriaAlocar(sizeof(CopiaBloque));;
+	copia2->bloqueNodo = 15;
+	stringCopiar(copia2->nombreNodo, "NODO2");
+	Bloque* bloque2 = memoriaAlocar(sizeof(Bloque));
+	bloque2->bytes = 101;
+	bloque2->listaCopias = listaCrear();
+	CopiaBloque* copia3 = memoriaAlocar(sizeof(CopiaBloque));;
+	copia3->bloqueNodo = 99;
+	stringCopiar(copia3->nombreNodo, "NODO1");
+	listaAgregarElemento(bloque->listaCopias, copia);
+	listaAgregarElemento(bloque->listaCopias, copia2);
+	listaAgregarElemento(bloque2->listaCopias, copia3);
+	listaAgregarElemento(metadata->listaBloques, bloque);
+	listaAgregarElemento(metadata->listaBloques, bloque2);
+	archivoPersistirMetadata(metadata);
+}
+
 void fileSystemIniciar() {
 	pantallaLimpiar();
 	imprimirMensajeProceso("# PROCESO FILE SYSTEM");
@@ -27,51 +67,14 @@ void fileSystemIniciar() {
 	imprimirMensaje(archivoLog, "[EJECUCION] Proceso File System inicializado");
 	fileSystemActivar();
 	archivoConfigObtenerCampos();
-	//senialAsignarFuncion(SIGPIPE, SIG_IGN);
 	configuracion = configuracionCrear(RUTA_CONFIG, (Puntero)configuracionLeerArchivoConfig, campos);
 	configuracionImprimir(configuracion);
 	listaDirectorios = listaCrear();
 	listaNodos = listaCrear();
 	listaArchivos = listaCrear();
 	directoriosDisponibles = 100;
-	Nodo nodo1;
-	stringCopiar(nodo1.nombre,"NODO_1");
-	nodo1.bloquesLibres = 15;
-	nodo1.bloquesTotales = 100;
-	listaAgregarElemento(listaNodos, &nodo1);
-	Nodo nodo2;
-	stringCopiar(nodo2.nombre, "NODO_2");
-	nodo2.bloquesLibres = 50;
-	nodo2.bloquesTotales = 1;
-	listaAgregarElemento(listaNodos, &nodo2);
-	nodoPersistir();
-	ArchivoMetadata metadata;
-	metadata.identificadorPadre = 10;
-	metadata.listaBloques = listaCrear();
-	stringCopiar(metadata.nombre, "Manco");
-	stringCopiar(metadata.tipo, "TEXTO");
-	Bloque bloque;
-	bloque.bytes = 1014;
-	bloque.listaCopias = listaCrear();
-	CopiaBloque copia;
-	copia.bloqueNodo = 14;
-	stringCopiar(copia.nombreNodo, "NODO1");
-	CopiaBloque copia2;
-	copia2.bloqueNodo = 15;
-	stringCopiar(copia2.nombreNodo, "NODO2");
-	Bloque bloque2;
-	bloque2.bytes = 101;
-	bloque2.listaCopias = listaCrear();
-	CopiaBloque copia3;
-	copia3.bloqueNodo = 99;
-	stringCopiar(copia3.nombreNodo, "NODO1");
-	listaAgregarElemento(bloque.listaCopias, &copia);
-	listaAgregarElemento(bloque.listaCopias, &copia2);
-	listaAgregarElemento(bloque2.listaCopias, &copia3);
-	listaAgregarElemento(metadata.listaBloques, &bloque);
-	listaAgregarElemento(metadata.listaBloques, &bloque2);
-	archivoPersistirMetadata(&metadata);
-
+	//BORRAR
+	testCabecita();
 }
 
 void fileSystemCrearConsola() {
@@ -84,6 +87,10 @@ void fileSystemAtenderProcesos() {
 	while(fileSystemActivado())
 		servidorAtenderPedidos(servidor);
 	servidorFinalizar(servidor);
+}
+
+void memoriaLiberar2(void* algo) {
+	free(algo);
 }
 
 void fileSystemFinalizar() {
@@ -383,7 +390,7 @@ void consolaSetearArgumentos(String* argumentos, String* buffer) {
 	(argumentos[2]=buffer[3]);
 }
 
-void consolaCrearComando(Comando* comando, String entrada) {
+void consolaConfigurarComando(Comando* comando, String entrada) {
 	consolaIniciarArgumentos(comando->argumentos);
 	if(consolaEntradaDecente(entrada)) {
 		consolaObtenerArgumentos(comando->argumentos, entrada);
@@ -396,52 +403,45 @@ void consolaCrearComando(Comando* comando, String entrada) {
 	}
 }
 
-void consolaFinalizar() {
-	 estadoFileSystem = 0;
-	 socketCrearCliente(IP_LOCAL, configuracion->puertoDataNode, ID_DATANODE);
+void consolaEjecutarComando(Comando* comando) {
+	if(comando->identificador != ERROR)
+		imprimirMensajeUno(archivoLog, "[COMANDO] Iniciando ejecucion de comando '%s'", comando->argumentos[0]);
+	switch(comando->identificador) {
+		case FORMAT: comandoFormatearFileSystem(comando); break;
+		case RM: comandoRemoverArchivo(comando); break;
+		case RMB: comandoRemoverBloque(comando); break;
+		case RMD: comandoRemoverDirectorio(comando); break;
+		case RENAME: comandoRenombrarArchivoDirectorio(comando); break;
+		case MV: comandoMoverArchivoDirectorio(comando); break;
+		case CAT: comandoMostrarArchivo(comando); break;
+		case MKDIR: comandoCrearDirectorio(comando); break;
+		case CPFROM: comandoCopiarArchivoDeFS(comando); break;
+		case CPTO: comandoCopiarArchivoDeYFS(comando); break;
+		case CPBLOCK: comandoCopiarBloque(comando); break;
+		case MD5: comandoObtenerMD5(comando); break;
+		case LS: comandoListarDirectorio(comando); break;
+		case INFO: comandoInformacionArchivo(comando); break;
+		case EXIT: comandoFinalizar();break;
+		default: comandoError(); break;
+	}
 }
 
-void consolaRealizarAccion(Comando* comando) {
-	switch(comando->identificador) {
-		case FORMAT: puts("COMANDO FORMAT"); break;
-		case RM: puts("COMANDO RM"); break;
-		case RMB: puts("COMANDO RM -B"); break;
-		case RMD: puts("COMANDO RM -D"); break;
-		case RENAME: puts("COMANDO RENAME"); break;
-		case MV: puts("COMANDO  MV"); break;
-		case CAT: puts("COMANDO CAT"); break;
-		case MKDIR: consolaDirectorioCrear(comando->argumentos[1]); break;
-		case CPFROM: puts("COMANDO CPFROM"); break;
-		case CPTO: puts("COMANDO CPTO"); break;
-		case CPBLOCK:puts("COMANDO CPBLOCK"); break;
-		case MD5: puts("COMANDO MD5"); break;
-		case LS: puts("COMANDO LS"); break;
-		case INFO: puts("COMANDO INFO"); break;
-		case EXIT: consolaFinalizar();break;
-		default: puts("COMANDO INVALIDO"); break;
-	}
+void consolaDestruirComando(Comando* comando, String entrada) {
+	if(comando->identificador != ERROR)
+		consolaLiberarArgumentos(comando->argumentos);
+	memoriaLiberar(entrada);
 }
 
 void consolaAtenderComandos() {
 	hiloDetach(pthread_self());
 	while(fileSystemActivado()) {
 		char* entrada = consolaLeerEntrada();
-		if(estadoFileSystem) {
+		if(fileSystemActivado()) {
 			Comando comando;
-			consolaCrearComando(&comando, entrada);
-			consolaRealizarAccion(&comando);
-			if(comando.identificador != ERROR) {
-
-			printf("arg 0: %s\n", comando.argumentos[0]);
-			printf("arg 1: %s\n", comando.argumentos[1]);
-			printf("arg 2: %s\n", comando.argumentos[2]);
-			printf("arg 3: %s\n", comando.argumentos[3]);
-			printf("arg 4: %s\n", comando.argumentos[4]);
-			}
-			consolaLiberarArgumentos(comando.argumentos);
+			consolaConfigurarComando(&comando, entrada);
+			consolaEjecutarComando(&comando);
+			consolaDestruirComando(&comando, entrada);
 		}
-		memoriaLiberar(entrada);
-
 	}
 }
 //--------------------------------------- Funciones de Servidor -------------------------------------
@@ -604,7 +604,6 @@ Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig) {
 	Configuracion* configuracion = memoriaAlocar(sizeof(Configuracion));
 	stringCopiar(configuracion->puertoYAMA, archivoConfigStringDe(archivoConfig, "PUERTO_YAMA"));
 	stringCopiar(configuracion->puertoDataNode, archivoConfigStringDe(archivoConfig, "PUERTO_DATANODE"));
-	stringCopiar(configuracion->rutaMetadata, archivoConfigStringDe(archivoConfig, "RUTA_METADATA"));
 	archivoConfigDestruir(archivoConfig);
 	return configuracion;
 }
@@ -612,13 +611,11 @@ Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig) {
 void configuracionImprimir(Configuracion* configuracion) {
 	imprimirMensajeUno(archivoLog, "[CONEXION] Esperando conexion de YAMA (Puerto: %s)", configuracion->puertoYAMA);
 	imprimirMensajeUno(archivoLog, "[CONEXION] Esperando conexiones de Data Nodes (Puerto: %s)", configuracion->puertoDataNode);
-	imprimirMensajeUno(archivoLog, "[CONFIGURACION] Ruta Metadata: %s", configuracion->rutaMetadata);
 }
 
 void archivoConfigObtenerCampos() {
 	campos[0] = "PUERTO_YAMA";
 	campos[1] = "PUERTO_DATANODE";
-	campos[2] = "RUTA_METADATA";
 }
 
 bool fileSystemActivado() {
@@ -637,6 +634,101 @@ void fileSystemDesactivar() {
 	estadoFileSystem = DESACTIVADO;
 }
 
+
+//--------------------------------------- Funciones de Comando -------------------------------------
+
+void directorioResetearArchivo() {
+	FILE* archivo = fopen(RUTA_DIRECTORIO, "r");
+	if(archivo != NULL) {
+		remove(RUTA_DIRECTORIO);
+		fclose(archivo);
+	}
+}
+
+
+void directorioResetearLista() {
+	listaLimpiarDestruyendoElementos(listaDirectorios, memoriaLiberar);
+	listaDirectorios = listaCrear();
+}
+
+void directorioIniciarControl() {
+	directorioResetearLista();
+	directorioResetearArchivo();
+}
+
+
+void comandoFormatearFileSystem(Comando* comando) {
+	directorioIniciarControl();
+	//archivoIniciarControl();
+	//nodoIniciarControl();
+	//bitmapIniciarControl();
+}
+
+void comandoRemoverArchivo(Comando* comando) {
+
+}
+
+
+void comandoRemoverBloque(Comando* comando) {
+
+}
+
+void comandoRemoverDirectorio(Comando* comando) {
+
+}
+
+void comandoRenombrarArchivoDirectorio(Comando* comando) {
+
+}
+
+void comandoMoverArchivoDirectorio(Comando* comando) {
+
+}
+
+void comandoMostrarArchivo(Comando* comando) {
+
+}
+
+void comandoCrearDirectorio(Comando* comando) {
+	ControlDirectorio* control = controlDirectorioCrear(comando->argumentos[1]);
+	if(stringDistintos(comando->argumentos[1],"/"))
+		while(stringValido(control->nombreDirectorio)) {
+			directorioBuscarIdentificador(control);
+			directorioActualizar(control, comando->argumentos[1]);
+			directorioControlSetearNombre(control);
+		}
+	else
+		imprimirMensaje(archivoLog, "[ERROR] El directorio raiz no puede ser creado");
+}
+
+void comandoCopiarArchivoDeFS(Comando* comando) {
+
+}
+
+void comandoCopiarArchivoDeYFS(Comando* comando) {
+
+}
+void comandoCopiarBloque(Comando* comando) {
+
+}
+void comandoObtenerMD5(Comando* comando) {
+
+}
+void comandoListarDirectorio(Comando* comando) {
+
+}
+void comandoInformacionArchivo(Comando* comando) {
+
+}
+
+void comandoFinalizar() {
+	 fileSystemDesactivar();
+	 socketCrearCliente(IP_LOCAL, configuracion->puertoDataNode, ID_DATANODE);
+}
+
+void comandoError() {
+	imprimirMensaje(archivoLog, "[ERROR] Comando invalido");
+}
 
 //--------------------------------------- Funciones de Directorio -------------------------------------
 
@@ -785,20 +877,36 @@ void directorioActualizar(ControlDirectorio* control, String rutaDirectorio) {
 		directorioCrearEntradas(control, rutaDirectorio);
 }
 
-void consolaDirectorioCrear(String rutaDirectorio) {
-	ControlDirectorio* control = controlDirectorioCrear(rutaDirectorio);
-	if(stringDistintos(rutaDirectorio,"/"))
-		while(stringValido(control->nombreDirectorio)) {
-			directorioBuscarIdentificador(control);
-			directorioActualizar(control, rutaDirectorio);
-			directorioControlSetearNombre(control);
-		}
-	else
-		imprimirMensaje(archivoLog, "[ERROR] El directorio raiz no puede ser creado");
+
+
+//--------------------------------------- Funciones de ArchivoMetada -------------------------------------
+
+ArchivoMetadata* archivoMetadataCrear(String nombreArchivo, int idPadre, String tipo) {
+	ArchivoMetadata* archivoMetadata = memoriaAlocar(sizeof(ArchivoMetadata));
+	stringCopiar(archivoMetadata->nombre, nombreArchivo);
+	archivoMetadata->identificadorPadre = idPadre;
+	stringCopiar(archivoMetadata->tipo, tipo);
+	archivoMetadata->listaBloques = listaCrear();
+	return archivoMetadata;
 }
 
+Bloque* bloqueCrear(int bytes) {
+	Bloque* bloque = memoriaAlocar(sizeof(Bloque));
+	bloque->bytes = bytes;
+	bloque->listaCopias = listaCrear();
+	return bloque;
+}
+
+CopiaBloque* copiaBloqueCrear(int numeroBloqueDelNodo, String nombreNodo) {
+	CopiaBloque* copiaBloque = memoriaAlocar(sizeof(CopiaBloque));
+	copiaBloque->bloqueNodo = numeroBloqueDelNodo;
+	stringCopiar(copiaBloque->nombreNodo, nombreNodo);
+	return copiaBloque;
+}
+
+
 void archivoPersistirMetadata(ArchivoMetadata* metadata) {
-	Archivo archivo = archivoAbrir("/home/dario/Escritorio/tp-2017-2c-El-legado-del-Esqui/Metadata/metadata.dat", "a+");
+	Archivo archivo = archivoAbrir("/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Metadata/metadata.dat", "a+");
 	fprintf(archivo, "NOMBRE=%s\n", metadata->nombre);
 	fprintf(archivo, "ID_PADRE=%i\n", metadata->identificadorPadre);
 	fprintf(archivo, "TIPO=%s\n", metadata->tipo);
@@ -816,7 +924,7 @@ void archivoPersistirMetadata(ArchivoMetadata* metadata) {
 }
 
 void nodoPersistir() {
-	Archivo archivo = archivoAbrir("/home/dario/Escritorio/tp-2017-2c-El-legado-del-Esqui/Metadata/nodos.bin", "a+");
+	Archivo archivo = archivoAbrir("/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Metadata/nodos.bin", "a+");
 	int indice;
 	int contadorBloquesTotales = 0;
 	int contadorBloquesLibres = 0;

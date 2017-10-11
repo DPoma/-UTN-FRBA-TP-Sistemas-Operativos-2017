@@ -215,7 +215,7 @@ void listaEliminarDestruyendoElemento(Lista lista, int posicion, void(*funcion)(
 void listaEliminarPorCondicion(Lista lista, bool(*funcion)(void*));
 void listaEliminarDestruyendoPorCondicion(Lista lista, bool(*funcion)(void*), void(*funcionDestruir)(void*));
 void listaLimpiar(Lista lista);
-void listaLimpiarDestruyendoTodo(Lista lista, void(*funcion)(void*));
+void listaLimpiarDestruyendoElementos(Lista lista, void(*funcion)(void*));
 void listaIterar(Lista lista, void(*funcion)(void*));
 void* listaEncontrar(Lista lista, bool(*funcion)(void*));
 int listaCantidadElementos(Lista lista);

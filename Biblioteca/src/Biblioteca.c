@@ -509,7 +509,7 @@ void listaLimpiar(Lista lista) {
 	list_clean(lista);
 }
 
-void listaLimpiarDestruyendoTodo(Lista lista, void(*funcion)(void*)) {
+void listaLimpiarDestruyendoElementos(Lista lista, void(*funcion)(void*)) {
 	list_clean_and_destroy_elements(lista, funcion);
 }
 void listaIterar(Lista lista, void(*funcion)(void*)) {

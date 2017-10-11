@@ -8,9 +8,9 @@
 
 #include "../../Biblioteca/src/Biblioteca.c"
 
-#define RUTA_CONFIG "/home/dario/Escritorio/tp-2017-2c-El-legado-del-Esqui/FileSystem/FileSystemConfig.conf"
-#define RUTA_LOG "/home/dario/Escritorio/FileSystemLog.log"
-#define RUTA_DIRECTORIO "/home/dario/Escritorio/tp-2017-2c-El-legado-del-Esqui/FileSystem/Directorios.dat"
+#define RUTA_CONFIG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/FileSystem/FileSystemConfig.conf"
+#define RUTA_LOG "/home/utnso/Escritorio/FileSystemLog.log"
+#define RUTA_DIRECTORIO "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/FileSystem/Directorios.dat"
 
 //Identificador de cada comando
 #define FORMAT 1
@@ -69,7 +69,6 @@ typedef struct {
 typedef struct {
 	char puertoYAMA[50];
 	char puertoDataNode[50];
-	char rutaMetadata[100];
 } Configuracion;
 
 
@@ -104,7 +103,7 @@ typedef struct {
 	int  bloqueNodo;
 } CopiaBloque;
 
-typedef struct estructura_manejo_nodos {
+typedef struct {
 	Socket socket;
 	char nombre[10];
 	int estado;
@@ -118,7 +117,7 @@ typedef struct estructura_manejo_nodos {
 } Nodo;
 
 
-String campos[3];
+String campos[2];
 Configuracion* configuracion;
 ArchivoLog archivoLog;
 int estadoFileSystem;
@@ -194,3 +193,27 @@ long directorioCantidadRegistros(Archivo archivo);
 long directorioObtenerPosicionActualArchivo(Archivo archivo);
 void consolaDirectorioCrear(String path);
 void nodoPersistir();
+
+
+void comandoFormatearFileSystem(Comando* comando);
+void comandoRemoverArchivo(Comando* comando);
+void comandoRemoverBloque(Comando* comando);
+void comandoRemoverDirectorio(Comando* comando);
+void comandoRenombrarArchivoDirectorio(Comando* comando);
+void comandoMoverArchivoDirectorio(Comando* comando);
+void comandoMostrarArchivo(Comando* comando);
+void comandoCrearDirectorio(Comando* comando);
+void comandoCopiarArchivoDeFS(Comando* comando);
+void comandoCopiarArchivoDeYFS(Comando* comando);
+void comandoCopiarBloque(Comando* comando);
+void comandoObtenerMD5(Comando* comando);
+void comandoListarDirectorio(Comando* comando);
+void comandoInformacionArchivo(Comando* comando);
+void comandoFinalizar();
+void comandoError();
+
+void archivoPersistirMetadata(ArchivoMetadata* metadata);
+void directorioControlSetearNombre(ControlDirectorio* control);
+void directorioBuscarIdentificador(ControlDirectorio* control);
+void directorioActualizar(ControlDirectorio* control, String rutaDirectorio);
+ControlDirectorio* controlDirectorioCrear(String rutaDirectorio);
