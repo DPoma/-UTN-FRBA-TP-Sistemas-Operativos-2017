@@ -20,6 +20,17 @@ int main(int argc, String* argsv) {
 
 //--------------------------------------- Funciones de File System -------------------------------------
 
+void bloqueDestruir(Bloque* bloque) {
+	listaDestruirConElementos(bloque->listaCopias, memoriaLiberar);
+	memoriaLiberar(bloque);
+}
+
+
+void archivoDestruir(Archivo* archivo) {
+	listaDestruirConElementos(archivo->listaBloques, (Puntero)bloqueDestruir);
+	memoriaLiberar(archivo);
+}
+
 void testCabecita() {
 	Nodo* nodo1 = nodoCrear("NODO1", 20, 1, 1);
 	Nodo* nodo2 = nodoCrear("NODO2", 100, 1, 1);
@@ -51,6 +62,7 @@ void testCabecita() {
 	listaAgregarElemento(metadata->listaBloques, bloque);
 	listaAgregarElemento(metadata->listaBloques, bloque2);
 	archivoPersistir(metadata);
+	archivoDestruir(metadata);
 }
 
 void fileSystemIniciar(String flag) {
@@ -117,7 +129,7 @@ void fileSystemFinalizar() {
 	memoriaLiberar(configuracion);
 	listaDestruirConElementos(listaDirectorios, memoriaLiberar);
 	nodoLimpiarLista();
-	//listaDestruir(listaArchivos);
+	listaDestruirConElementos(listaArchivos, (Puntero)archivoDestruir);
 	sleep(2);
 }
 
