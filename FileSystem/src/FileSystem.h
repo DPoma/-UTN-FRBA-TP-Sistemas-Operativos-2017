@@ -212,3 +212,4 @@ void directorioControlSetearNombre(ControlDirectorio* control);
 void directorioBuscarIdentificador(ControlDirectorio* control);
 void directorioActualizar(ControlDirectorio* control, String rutaDirectorio);
 ControlDirectorio* directorioControlCrear(String rutaDirectorio);
+Nodo* nodoCrear(String nombre, int bloquesTotales, int bloquesLibres);

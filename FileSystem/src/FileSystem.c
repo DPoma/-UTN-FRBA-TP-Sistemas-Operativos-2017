@@ -72,7 +72,7 @@ void fileSystemIniciar() {
 	configuracion = configuracionCrear(RUTA_CONFIG, (Puntero)configuracionLeerArchivoConfig, campos);
 	configuracionImprimir(configuracion);
 	listaDirectorios = NULL;
-	listaNodos = NULL;
+	listaNodos = listaCrear();
 	listaArchivos = NULL;
 	directoriosDisponibles = 100;
 }
@@ -511,8 +511,11 @@ void servidorRecibirMensaje(Servidor* servidor, Socket unSocket) {
 	Mensaje* mensaje = mensajeRecibir(unSocket);
 	if(mensajeDesconexion(mensaje))
 		servidorFinalizarConexion(servidor, unSocket);
-	else
-		puts("[MENSAJE]");
+	else {
+		puts("MENSAJE");
+	}
+
+
 	mensajeDestruir(mensaje);
 }
 
@@ -565,8 +568,10 @@ void servidorFinalizar(Servidor* servidor) {
 void servidorRegistrarDataNode(Servidor* servidor, Socket nuevoSocket) {
 	if(nuevoSocket != ERROR) {
 		listaSocketsAgregar(nuevoSocket, &servidor->listaDataNodes);
-		//Nodo* nodo = nodoCrear(nombreNodo);
-		//listaAgregarElemento(listaNodos, nodo);
+		Mensaje* mensaje = mensajeRecibir(nuevoSocket);
+		printf("El nombre del nodo es %s\n", (String)mensaje->datos);
+		Nodo* nodo = nodoCrear(mensaje->datos, 0, 0);
+		listaAgregarElemento(listaNodos, nodo);
 		imprimirMensaje(archivoLog, "[CONEXION] Proceso Data Node conectado exitosamente");
 	}
 }
@@ -940,15 +945,37 @@ void nodoPersistir() {
 	int contadorBloquesLibres = 0;
 	for(indice = 0; indice < listaCantidadElementos(listaNodos); indice++) {
 		Nodo* unNodo = listaObtenerElemento(listaNodos, indice);
-		fprintf(archivo, "NODO%i_NOMBRE=%s\n",indice, unNodo->nombre);
-		fprintf(archivo, "NODO%i_BLOQUES_TOTALES=%i\n", indice, unNodo->bloquesTotales);
-		fprintf(archivo, "NODO%i_BLOQUES_LIBRES=%i\n", indice, unNodo->bloquesLibres);
+		fprintf(archivo, "NOMBRE_NODO%i=%s\n", indice, unNodo->nombre);
+		fprintf(archivo, "%s_BLOQUES_TOTALES=%i\n", unNodo->nombre, unNodo->bloquesTotales);
+		fprintf(archivo, "%s_BLOQUES_LIBRES=%i\n",unNodo->nombre, unNodo->bloquesLibres);
 		contadorBloquesTotales+=unNodo->bloquesTotales;
 		contadorBloquesLibres+=unNodo->bloquesLibres;
 	}
+	fprintf(archivo, "NODOS_TOTALES=%i\n", indice);
 	fprintf(archivo, "BLOQUES_LIBRES=%i\n", contadorBloquesTotales);
 	fprintf(archivo, "BLOQUES_TOTALES=%i\n", contadorBloquesLibres);
 	fileCerrar(archivo);
 }
 
+/* VER PORQUE FALLA
+ #include "ZPrueba.h"
 
+void liberar(void* algo) {
+	if(algo!=NULL)
+	free(algo);
+}
+
+int main(void) {
+	char* a = "/home/utnso/jaja";
+	char** b = string_split(a, "/");
+	printf("%s\n", b[0]);
+	printf("%s\n", b[1]);
+	printf("%s\n", b[2]);
+	free(b[0]);
+	free(b[1]);
+	free(b[2]);
+	free(a);
+	return 0;
+}
+
+ */
