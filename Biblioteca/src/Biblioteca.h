@@ -38,6 +38,7 @@
 #define ENTER '\n'
 #define ESPACIO ' '
 #define TAB '\t'
+#define BARRA '/'
 #define LISTEN 10
 #define NULO 0
 #define DESCONEXION 0
@@ -217,7 +218,7 @@ void listaEliminarDestruyendoPorCondicion(Lista lista, bool(*funcion)(void*), vo
 void listaLimpiar(Lista lista);
 void listaLimpiarDestruyendoElementos(Lista lista, void(*funcion)(void*));
 void listaIterar(Lista lista, void(*funcion)(void*));
-void* listaEncontrar(Lista lista, bool(*funcion)(void*));
+void* listaBuscar(Lista lista, bool(*funcion)(void*));
 int listaCantidadElementos(Lista lista);
 bool listaEstaVacia(Lista lista);
 void listaOrdenar(Lista lista, bool(*funcion)(void*, void*));

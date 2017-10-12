@@ -8,10 +8,10 @@
 
 #include "../../Biblioteca/src/Biblioteca.c"
 
-#define RUTA_CONFIG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/FileSystem/FileSystemConfig.conf"
-#define RUTA_LOG "/home/utnso/Escritorio/FileSystemLog.log"
-#define RUTA_DIRECTORIOS "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Metadata/Directorios.dat"
-#define RUTA_NODOS "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Metadata/nodos.bin"
+#define RUTA_CONFIG "/home/dario/Escritorio/tp-2017-2c-El-legado-del-Esqui/FileSystem/FileSystemConfig.conf"
+#define RUTA_LOG "/home/dario/Escritorio/FileSystemLog.log"
+#define RUTA_DIRECTORIOS "/home/dario/Escritorio/tp-2017-2c-El-legado-del-Esqui/Metadata/Directorios.dat"
+#define RUTA_NODOS "/home/dario/Escritorio/tp-2017-2c-El-legado-del-Esqui/Metadata/nodos.bin"
 
 //Identificador de cada comando
 #define FORMAT 1
@@ -110,6 +110,7 @@ typedef struct {
 	//BitArray* bitmap;
 	int bloquesLibres;
 	int bloquesTotales;
+	Socket socket;
 } Nodo;
 
 
@@ -212,4 +213,6 @@ void directorioControlSetearNombre(ControlDirectorio* control);
 void directorioBuscarIdentificador(ControlDirectorio* control);
 void directorioActualizar(ControlDirectorio* control, String rutaDirectorio);
 ControlDirectorio* directorioControlCrear(String rutaDirectorio);
-Nodo* nodoCrear(String nombre, int bloquesTotales, int bloquesLibres);
+Nodo* nodoCrear(String nombre, int bloquesTotales, int bloquesLibres, Socket unSocket);
+void directorioLimpiarLista();
+void nodoLimpiarLista();

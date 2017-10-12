@@ -9,8 +9,8 @@
 #include "../../Biblioteca/src/Biblioteca.c"
 #include <sys/mman.h>
 
-#define RUTA_CONFIG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Worker/NodoConfig.conf"
-#define RUTA_LOG "/home/utnso/Escritorio/DataNodeLog.log"
+#define RUTA_CONFIG "/home/dario/Escritorio/tp-2017-2c-El-legado-del-Esqui/Worker/NodoConfig.conf"
+#define RUTA_LOG "/home/dario/Escritorio/DataNodeLog.log"
 
 //Defines de operaciones
 

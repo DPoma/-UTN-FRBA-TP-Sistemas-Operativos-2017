@@ -20,7 +20,7 @@ int main(void) {
 
 
 	while(dataNodeActivado()){
-		atenderFileSystem(unSocket);
+		//atenderFileSystem(unSocket);
 	}
 
 	finalizarDataNode();

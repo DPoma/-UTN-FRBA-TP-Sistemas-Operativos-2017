@@ -71,9 +71,11 @@ void fileSystemIniciar() {
 	archivoConfigObtenerCampos();
 	configuracion = configuracionCrear(RUTA_CONFIG, (Puntero)configuracionLeerArchivoConfig, campos);
 	configuracionImprimir(configuracion);
-	listaDirectorios = NULL;
+	//Inicio estructuras admin si es con --clean
+	listaDirectorios = listaCrear();
+	fileLimpiar(RUTA_DIRECTORIOS);
 	listaNodos = listaCrear();
-	listaArchivos = NULL;
+	//listaArchivos = listaCrear();
 	directoriosDisponibles = 100;
 }
 
@@ -97,9 +99,9 @@ void fileSystemFinalizar() {
 	imprimirMensaje(archivoLog, "[EJECUCION] Proceso File System finalizado");
 	archivoLogDestruir(archivoLog);
 	memoriaLiberar(configuracion);
-	listaDestruir(listaDirectorios);
+	listaDestruirConElementos(listaDirectorios, memoriaLiberar);
+	nodoLimpiarLista();
 	//listaDestruir(listaArchivos);
-	//listaDestruir(listaNodos);
 	sleep(2);
 }
 
@@ -385,20 +387,21 @@ void consolaObtenerArgumentos(String* buffer, String entrada) {
 
 
 void consolaSetearArgumentos(String* argumentos, String* buffer) {
-	(argumentos[0]=buffer[1]);
-	(argumentos[1]=buffer[2]);
-	(argumentos[2]=buffer[3]);
+	argumentos[0]=buffer[1];
+	argumentos[1]=buffer[2];
+	argumentos[2]=buffer[3];
 }
 
 void consolaConfigurarComando(Comando* comando, String entrada) {
 	consolaIniciarArgumentos(comando->argumentos);
 	if(consolaEntradaDecente(entrada)) {
 		consolaObtenerArgumentos(comando->argumentos, entrada);
-	if(consolaValidarComando(comando->argumentos))
-		comando->identificador = consolaIdentificarComando(comando->argumentos[0]);
-	else
-		comando->identificador = ERROR;
-	} else {
+		if(consolaValidarComando(comando->argumentos))
+			comando->identificador = consolaIdentificarComando(comando->argumentos[0]);
+		else
+			comando->identificador = ERROR;
+	}
+	else {
 		comando->identificador = ERROR;
 	}
 }
@@ -425,7 +428,7 @@ void consolaEjecutarComando(Comando* comando) {
 }
 
 void consolaDestruirComando(Comando* comando, String entrada) {
-	if(comando->identificador != ERROR)
+	//if(comando->identificador != ERROR)
 		consolaLiberarArgumentos(comando->argumentos);
 	memoriaLiberar(entrada);
 }
@@ -470,9 +473,16 @@ bool socketEsYAMA(Servidor* servidor, Socket unSocket) {
 }
 
 void servidorFinalizarConexion(Servidor* servidor, Socket unSocket) {
+
+	bool buscarNodoPorSocket(void* unNodo) {
+		Nodo* nodo = (Nodo*)unNodo;;
+		return nodo->socket == unSocket;
+	}
+
 	listaSocketsEliminar(unSocket, &servidor->listaMaster);
 	if(socketEsDataNode(servidor, unSocket)) {
 		listaSocketsEliminar(unSocket, &servidor->listaDataNodes);
+		listaEliminarDestruyendoPorCondicion(listaNodos, (Puntero)buscarNodoPorSocket, memoriaLiberar);
 		imprimirMensaje(archivoLog, "[CONEXION] Un proceso Data Node se ha desconectado");
 	}
 	else
@@ -569,8 +579,8 @@ void servidorRegistrarDataNode(Servidor* servidor, Socket nuevoSocket) {
 	if(nuevoSocket != ERROR) {
 		listaSocketsAgregar(nuevoSocket, &servidor->listaDataNodes);
 		Mensaje* mensaje = mensajeRecibir(nuevoSocket);
-		printf("El nombre del nodo es %s\n", (String)mensaje->datos);
-		Nodo* nodo = nodoCrear(mensaje->datos, 0, 0);
+		Nodo* nodo = nodoCrear(mensaje->datos, 0, 0, nuevoSocket);
+		mensajeDestruir(mensaje);
 		listaAgregarElemento(listaNodos, nodo);
 		imprimirMensaje(archivoLog, "[CONEXION] Proceso Data Node conectado exitosamente");
 	}
@@ -639,9 +649,6 @@ void fileSystemDesactivar() {
 
 //--------------------------------------- Funciones de Comando -------------------------------------
 
-void directorioResetearArchivo() {
-	fileLimpiar(RUTA_DIRECTORIOS);
-}
 
 void nodoIniciarControl() {
 	fileLimpiar(RUTA_NODOS);
@@ -649,21 +656,18 @@ void nodoIniciarControl() {
 }
 
 
-void directorioResetearLista() {
-	if(listaDirectorios != NULL)
-		listaDestruirConElementos(listaDirectorios, memoriaLiberar);
-	listaDirectorios = listaCrear();
-}
 
 void directorioIniciarControl() {
-	directorioResetearLista();
-	directorioResetearArchivo();
+	listaDestruirConElementos(listaDirectorios, memoriaLiberar);
+	listaDirectorios = listaCrear();
+	fileLimpiar(RUTA_DIRECTORIOS);
 }
 
 
 void comandoFormatearFileSystem(Comando* comando) {
 	directorioIniciarControl();
 	nodoIniciarControl();
+	imprimirMensaje(archivoLog, "[COMANDO] El File System ha sido formateado existosamente");
 	//archivoIniciarControl();
 	//bitmapIniciarControl();
 }
@@ -703,8 +707,10 @@ void comandoCrearDirectorio(Comando* comando) {
 		}
 	else
 		imprimirMensaje(archivoLog, "[ERROR] El directorio raiz no puede ser creado");
-	//memoriaLiberar(control->nombresDirectorios);
-	//memoriaLiberar(control->nombreDirectorio);
+	int indice;
+	for(indice=0; stringValido(control->nombresDirectorios[indice]); indice++)
+		memoriaLiberar(control->nombresDirectorios[indice]);
+	memoriaLiberar(control->nombresDirectorios);
 	memoriaLiberar(control);
 }
 
@@ -739,7 +745,7 @@ void comandoError() {
 
 //--------------------------------------- Funciones de Directorio -------------------------------------
 
-void listaDirectorioAgregar(Directorio* directorio) {
+void directorioAgregarALista(Directorio* directorio) {
 	listaAgregarElemento(listaDirectorios, directorio);
 }
 
@@ -837,9 +843,29 @@ void directorioControlSetearNombre(ControlDirectorio* control) {
 	control->nombreDirectorio = control->nombresDirectorios[control->indiceNombresDirectorios];
 }
 
+String* directorioSeparar(String ruta) {
+	int indice;
+	int contadorDirectorios = 0;
+	for(indice = 0; ruta[indice] != FIN; indice++)
+		if(caracterIguales(ruta[indice], BARRA))
+			contadorDirectorios++;
+	String* directorios = memoriaAlocar((contadorDirectorios+1)*sizeof(String));
+	int PosicionUltimaBarra = 0;
+	contadorDirectorios = 0;
+	for(indice = 0; caracterDistintos(ruta[indice], FIN); indice++)
+		if(caracterIguales(ruta[indice],BARRA) && indice != 0) {
+			directorios[contadorDirectorios] = stringTomarCantidad(ruta, PosicionUltimaBarra+1, indice-PosicionUltimaBarra-1);
+			PosicionUltimaBarra = indice;
+			contadorDirectorios++;
+		}
+	directorios[contadorDirectorios] = stringTomarCantidad(ruta, PosicionUltimaBarra+1, indice-PosicionUltimaBarra-1);
+	directorios[contadorDirectorios+1] = NULL;
+	return directorios;
+}
+
 ControlDirectorio* directorioControlCrear(String rutaDirectorio) {
 	ControlDirectorio* controlDirectorio = memoriaAlocar(sizeof(ControlDirectorio));
-	controlDirectorio->nombresDirectorios = stringSeparar(rutaDirectorio, "/");
+	controlDirectorio->nombresDirectorios = directorioSeparar(rutaDirectorio);
 	controlDirectorio->indiceNombresDirectorios = 0;
 	controlDirectorio->identificadorDirectorio = 0;
 	controlDirectorio->identificadorPadre = 0;
@@ -861,7 +887,7 @@ void directorioCrearDirectoriosRestantes(ControlDirectorio* control, String ruta
 		int indice = directorioBuscarIndiceLibre();
 		Directorio* directorio = directorioCrear(indice, control->nombresDirectorios[control->indiceNombresDirectorios], control->identificadorPadre);
 		bitmapDirectorios[indice] = 1;
-		listaAgregarElemento(listaDirectorios, directorio);
+		directorioAgregarALista(directorio);
 		control->identificadorPadre = indice;
 		control->indiceNombresDirectorios++;
 		directoriosDisponibles--;
@@ -882,6 +908,10 @@ void directorioActualizar(ControlDirectorio* control, String rutaDirectorio) {
 		directorioControlarEntradas(control);
 	else
 		directorioCrearEntradas(control, rutaDirectorio);
+}
+
+void directorioLimpiarLista() {
+	listaDestruirConElementos(listaDirectorios, memoriaLiberar);
 }
 
 
@@ -911,11 +941,16 @@ CopiaBloque* copiaBloqueCrear(int numeroBloqueDelNodo, String nombreNodo) {
 	return copiaBloque;
 }
 
-Nodo* nodoCrear(String nombre, int bloquesTotales, int bloquesLibres) {
+void nodoLimpiarLista() {
+	listaDestruirConElementos(listaNodos, memoriaLiberar);
+}
+
+Nodo* nodoCrear(String nombre, int bloquesTotales, int bloquesLibres, Socket unSocket) {
 	Nodo* nodo = memoriaAlocar(sizeof(Nodo));
 	stringCopiar(nodo->nombre, nombre);
 	nodo->bloquesTotales = bloquesTotales;
 	nodo->bloquesLibres = bloquesLibres;
+	nodo->socket = unSocket;
 	return nodo;
 }
 

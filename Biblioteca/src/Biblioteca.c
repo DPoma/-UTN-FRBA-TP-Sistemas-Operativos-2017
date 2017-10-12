@@ -445,11 +445,13 @@ Lista listaCrear() {
 }
 
 void listaDestruir(Lista lista) {
-	list_destroy(lista);
+	if(lista != NULL)
+		list_destroy(lista);
 }
 
 void listaDestruirConElementos(Lista lista, void(*funcion)(void*)) {
-	list_destroy_and_destroy_elements(lista, funcion);
+	if(lista != NULL)
+		list_destroy_and_destroy_elements(lista, funcion);
 }
 
 int listaAgregarElemento(Lista lista, void* elemento) {
@@ -511,7 +513,7 @@ void listaLimpiarDestruyendoElementos(Lista lista, void(*funcion)(void*)) {
 void listaIterar(Lista lista, void(*funcion)(void*)) {
 	list_iterate(lista, funcion);
 }
-void* listaEncontrar(Lista lista, bool(*funcion)(void*)) {
+void* listaBuscar(Lista lista, bool(*funcion)(void*)) {
 	return list_find(lista, funcion);
 }
 
