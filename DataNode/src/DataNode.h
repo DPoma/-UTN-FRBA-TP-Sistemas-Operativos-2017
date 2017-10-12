@@ -10,7 +10,7 @@
 #include <sys/mman.h>
 
 #define RUTA_CONFIG "/home/dario/Escritorio/tp-2017-2c-El-legado-del-Esqui/Worker/NodoConfig.conf"
-#define RUTA_LOG "/home/dario/Escritorio/DataNodeLog.log"
+#define RUTA_LOG "/home/dario/Escritorio/tp-2017-2c-El-legado-del-Esqui/DataNode/DataNodeLog.log"
 
 //Defines de operaciones
 

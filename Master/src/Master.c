@@ -20,28 +20,10 @@ char* leerArchivo(FILE* archivo) {
 	return texto;
 }
 
-FILE* fileAbrir(char* path) {
-	FILE* archivo = fopen(path, "r");
-	return archivo;
-}
-
-int archivoValido(FILE* archivo) {
-	return archivo != NULL;
-}
-
-void fileCerrar(FILE* archivo) {
-	fclose(archivo);
-}
-
-bool esUnArchivo(char* c) {
-	return string_contains(c, ".");
-}
-
-
 void enviarArchivo(FILE* archivo) {
 	char* texto = leerArchivo(archivo);
 	fileCerrar(archivo);
-	mensajeEnviar(socketYAMA, 4, texto, strlen(texto)+1);
+	mensajeEnviar(socketYama, 4, texto, strlen(texto)+1);
 	mensajeEnviar(socketWorker, 4, texto, strlen(texto)+1);
 	free(texto);
 }
@@ -57,8 +39,8 @@ char* leerCaracteresEntrantes() {
 }
 
 void establecerConexiones(){
-	imprimirMensajeDos(archivoLog,"[CONEXION] Estableciendo Conexion con YAMA (IP: %s | Puerto %s)", configuracion->ipYAMA, configuracion->puertoYAMA);
-	socketYAMA = socketCrearCliente(configuracion->ipYAMA, configuracion->puertoYAMA, ID_MASTER);
+	imprimirMensajeDos(archivoLog,"[CONEXION] Estableciendo Conexion con YAMA (IP: %s | Puerto %s)", configuracion->ipYama, configuracion->puertoYama);
+	socketYama = socketCrearCliente(configuracion->ipYama, configuracion->puertoYama, ID_MASTER);
 	imprimirMensaje(archivoLog, "[CONEXION] Conexion existosa con YAMA");
 	imprimirMensajeDos(archivoLog, "[CONEXION] Estableciendo Conexion con Worker (IP: %s | Puerto: %s)", configuracion->ipWorker, configuracion->puertoWorker);
 	socketWorker = socketCrearCliente(configuracion->ipWorker, configuracion->puertoWorker, ID_MASTER);
@@ -71,7 +53,20 @@ void leerArchivoConfig(){
 	configuracion = configuracionCrear(RUTA_CONFIG, (Puntero)configuracionLeerArchivoConfig, campos);
 	stringCopiar(configuracion->ipWorker, IP_LOCAL);
 	stringCopiar(configuracion->puertoWorker, "5050");
-	imprimirMensajeDos(archivoLog,"[CONEXION] Estableciendo Conexion con YAMA (IP: %s | Puerto %s)", configuracion->ipYAMA, configuracion->puertoYAMA);
+	imprimirMensajeDos(archivoLog,"[CONEXION] Estableciendo Conexion con YAMA (IP: %s | Puerto %s)", configuracion->ipYama, configuracion->puertoYama);
+}
+
+int hayWorkersParaConectar(){
+	Mensaje* m = mensajeRecibir(socketYama);
+	if(*(int*)m->datos==-1){
+		archivoLogInformarMensaje(archivoLog,"No hay mas workers por conectar");
+		printf("No hay mas workers para conectar");
+		return -1;
+		}
+	else{
+		return 1;
+		}
+
 }
 
 Lista workersAConectar(){
@@ -88,18 +83,7 @@ Lista workersAConectar(){
 	return workers;
 }
 
-int hayWorkersParaConectar(){
-	Mensaje* m = mensajeRecibir(socketYama);
-	if(*(int*)m->datos==-1){
-		archivoLogInformarMensaje(archivoLog,"No hay mas workers por conectar");
-		printf("No hay mas workers para conectar");
-		return -1;
-		}
-	else{
-		return 1;
-		}
 
-}
 
 
 char* nombreArchivoTemp(){
@@ -120,12 +104,12 @@ int main(void) {
 	masterActivar();
 
 	senialAsignarFuncion(SIGINT, funcionSenial);
-	mensajeEnviar(socketYAMA, HANDSHAKE, "HOLIII", 7);
+	mensajeEnviar(socketYama, HANDSHAKE, "HOLIII", 7);
 	mensajeEnviar(socketWorker, HANDSHAKE, "HOLIII", 7);
 	imprimirMensaje(archivoLog, "[MENSAJE] Mensaje enviado");
 
 	while(masterActivado()){
-		socketCerrar(socketYAMA);
+		socketCerrar(socketYama);
 		socketCerrar(socketWorker);
 		archivoLogDestruir(archivoLog);
 		memoriaLiberar(configuracion);
@@ -137,8 +121,8 @@ int main(void) {
 
 Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig) {
 	Configuracion* configuracion = memoriaAlocar(sizeof(Configuracion));
-	stringCopiar(configuracion->ipYAMA, archivoConfigStringDe(archivoConfig, "IP_YAMA"));
-	stringCopiar(configuracion->puertoYAMA, archivoConfigStringDe(archivoConfig, "PUERTO_YAMA"));
+	stringCopiar(configuracion->ipYama, archivoConfigStringDe(archivoConfig, "IP_YAMA"));
+	stringCopiar(configuracion->puertoYama, archivoConfigStringDe(archivoConfig, "PUERTO_YAMA"));
 	archivoConfigDestruir(archivoConfig);
 	return configuracion;
 }

@@ -13,7 +13,7 @@
 #define BUF_LEN (1024*EVENT_SIZE)
 #define RUTA_NOTIFY "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/YAMA";
 #define RUTA_CONFIG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/YAMA/YAMAConfig.conf"
-#define RUTA_LOG "/home/utnso/Escritorio/YAMALog.log"
+#define RUTA_LOG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/YAMA/YAMALog.log"
 
 #define INTSIZE sizeof(int32_t)
 #define TEMPSIZE 12

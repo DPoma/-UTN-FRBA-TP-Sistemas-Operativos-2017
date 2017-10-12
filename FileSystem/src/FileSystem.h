@@ -9,7 +9,7 @@
 #include "../../Biblioteca/src/Biblioteca.c"
 
 #define RUTA_CONFIG "/home/dario/Escritorio/tp-2017-2c-El-legado-del-Esqui/FileSystem/FileSystemConfig.conf"
-#define RUTA_LOG "/home/dario/Escritorio/FileSystemLog.log"
+#define RUTA_LOG "/home/dario/Escritorio/tp-2017-2c-El-legado-del-Esqui/FileSystem/FileSystemLog.log"
 #define RUTA_DIRECTORIOS "/home/dario/Escritorio/tp-2017-2c-El-legado-del-Esqui/Metadata/Directorios.dat"
 #define RUTA_NODOS "/home/dario/Escritorio/tp-2017-2c-El-legado-del-Esqui/Metadata/nodos.bin"
 
@@ -191,7 +191,7 @@ long directorioObtenerPosicionActualArchivo(File archivo);
 void nodoPersistir();
 
 
-void comandoFormatearFileSystem(Comando* comando);
+void comandoFormatearFileSystem();
 void comandoRemoverArchivo(Comando* comando);
 void comandoRemoverBloque(Comando* comando);
 void comandoRemoverDirectorio(Comando* comando);

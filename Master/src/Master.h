@@ -9,11 +9,11 @@
 #include "../../Biblioteca/src/Biblioteca.c"
 
 #define RUTA_CONFIG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Master/MasterConfig.conf"
-#define RUTA_LOG "/home/utnso/Escritorio/MasterLog.log"
+#define RUTA_LOG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Master/MasterLog.log"
 
 typedef struct {
-	char ipYAMA[50];
-	char puertoYAMA[50];
+	char ipYama[50];
+	char puertoYama[50];
 	char ipWorker[50];
 	char puertoWorker[50];
 } Configuracion;
@@ -21,7 +21,7 @@ typedef struct {
 String campos[2];
 Configuracion* configuracion;
 ArchivoLog archivoLog;
-Socket socketYAMA;
+Socket socketYama;
 Socket socketWorker;
 int estadoMaster;
 

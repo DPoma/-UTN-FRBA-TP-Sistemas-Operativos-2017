@@ -10,8 +10,8 @@
 
 #include "FileSystem.h"
 
-int main(void) {
-	fileSystemIniciar();
+int main(int argc, String* argsv) {
+	fileSystemIniciar(argsv[1]);
 	fileSystemCrearConsola();
 	fileSystemAtenderProcesos();
 	fileSystemFinalizar();
@@ -62,7 +62,7 @@ void testCabecita() {
 	*/
 }
 
-void fileSystemIniciar() {
+void fileSystemIniciar(String flag) {
 	pantallaLimpiar();
 	imprimirMensajeProceso("# PROCESO FILE SYSTEM");
 	archivoLog = archivoLogCrear(RUTA_LOG, "FileSystem");
@@ -71,12 +71,49 @@ void fileSystemIniciar() {
 	archivoConfigObtenerCampos();
 	configuracion = configuracionCrear(RUTA_CONFIG, (Puntero)configuracionLeerArchivoConfig, campos);
 	configuracionImprimir(configuracion);
-	//Inicio estructuras admin si es con --clean
-	listaDirectorios = listaCrear();
-	fileLimpiar(RUTA_DIRECTORIOS);
 	listaNodos = listaCrear();
-	//listaArchivos = listaCrear();
-	directoriosDisponibles = 100;
+	if(stringIguales(flag, "--clean")) {
+		comandoFormatearFileSystem();
+		directoriosDisponibles = 100;
+	}
+	else {
+		imprimirMensaje(archivoLog, "[ESTADO] Recuperando estado anterior");
+		ArchivoConfig archivoNodo = config_create(RUTA_NODOS);
+		int indice;
+		int nodosConectados = archivoConfigEnteroDe(archivoNodo, "NODOS_CONECTADOS");
+		printf("nodos conectados %i\n", nodosConectados);
+		for(indice = 0; indice < nodosConectados; indice++) {
+			String campo = memoriaAlocar(30);
+			stringCopiar(campo, "NOMBRE_NODO");
+			printf("campo nombre nodo %s\n", campo);
+			String numeroNodo = stringConvertirEntero(indice);
+			printf("numero nodo %s\n", numeroNodo);
+			stringConcatenar(&campo,numeroNodo);
+			printf("campo nombre nodo con num %s\n", campo);
+			memoriaLiberar(numeroNodo);
+			String nombreNodo = archivoConfigStringDe(archivoNodo, campo);
+			printf("nombre del nodo %s\n", nombreNodo);
+			memoriaLiberar(campo);
+			campo = memoriaAlocar(30);
+			stringCopiar(campo, nombreNodo);
+			stringConcatenar(&campo, "_BLOQUES_TOTALES");
+			printf("campo bloques tot %s\n", campo);
+			int bloquesTotales = archivoConfigEnteroDe(archivoNodo, campo);
+			printf("blques tot %i\n", bloquesTotales);
+			memoriaLiberar(campo);
+			campo = memoriaAlocar(30);
+			stringCopiar(campo, nombreNodo);
+			stringConcatenar(&campo, "_BLOQUES_LIBRES");
+			printf("campo bloques libres %s\n", campo);
+			int bloquesLibres = archivoConfigEnteroDe(archivoNodo, campo);
+			printf("blpoquies libres %i\n", bloquesLibres);
+			Nodo* nodo = nodoCrear(nombreNodo, bloquesTotales, bloquesLibres, 0);
+			memoriaLiberar(campo);
+			listaAgregarElemento(listaNodos, nodo);
+		}
+		archivoConfigDestruir(archivoNodo);
+	}
+
 }
 
 void fileSystemCrearConsola() {
@@ -408,7 +445,7 @@ void consolaConfigurarComando(Comando* comando, String entrada) {
 
 void consolaEjecutarComando(Comando* comando) {
 	switch(comando->identificador) {
-		case FORMAT: comandoFormatearFileSystem(comando); break;
+		case FORMAT: comandoFormatearFileSystem(); break;
 		case RM: comandoRemoverArchivo(comando); break;
 		case RMB: comandoRemoverBloque(comando); break;
 		case RMD: comandoRemoverDirectorio(comando); break;
@@ -664,10 +701,10 @@ void directorioIniciarControl() {
 }
 
 
-void comandoFormatearFileSystem(Comando* comando) {
+void comandoFormatearFileSystem() {
 	directorioIniciarControl();
 	nodoIniciarControl();
-	imprimirMensaje(archivoLog, "[COMANDO] El File System ha sido formateado existosamente");
+	imprimirMensaje(archivoLog, "[ESTADO] El File System ha sido formateado existosamente");
 	//archivoIniciarControl();
 	//bitmapIniciarControl();
 }
@@ -986,7 +1023,7 @@ void nodoPersistir() {
 		contadorBloquesTotales+=unNodo->bloquesTotales;
 		contadorBloquesLibres+=unNodo->bloquesLibres;
 	}
-	fprintf(archivo, "NODOS_TOTALES=%i\n", indice);
+	fprintf(archivo, "NODOS_CONECTADOS=%i\n", indice);
 	fprintf(archivo, "BLOQUES_LIBRES=%i\n", contadorBloquesTotales);
 	fprintf(archivo, "BLOQUES_TOTALES=%i\n", contadorBloquesLibres);
 	fileCerrar(archivo);
