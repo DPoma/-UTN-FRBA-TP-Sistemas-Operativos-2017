@@ -20,7 +20,7 @@ char* leerArchivo(FILE* archivo) {
 	return texto;
 }
 
-FILE* archivoAbrir(char* path) {
+FILE* fileAbrir(char* path) {
 	FILE* archivo = fopen(path, "r");
 	return archivo;
 }
@@ -29,7 +29,7 @@ int archivoValido(FILE* archivo) {
 	return archivo != NULL;
 }
 
-void archivoCerrar(FILE* archivo) {
+void fileCerrar(FILE* archivo) {
 	fclose(archivo);
 }
 
@@ -40,7 +40,7 @@ bool esUnArchivo(char* c) {
 
 void enviarArchivo(FILE* archivo) {
 	char* texto = leerArchivo(archivo);
-	archivoCerrar(archivo);
+	fileCerrar(archivo);
 	mensajeEnviar(socketYAMA, 4, texto, strlen(texto)+1);
 	mensajeEnviar(socketWorker, 4, texto, strlen(texto)+1);
 	free(texto);

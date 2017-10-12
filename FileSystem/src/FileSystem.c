@@ -21,6 +21,7 @@ int main(void) {
 //--------------------------------------- Funciones de File System -------------------------------------
 
 void testCabecita() {
+	/*
 	Nodo* nodo1 = memoriaAlocar(sizeof(Nodo));
 	stringCopiar(nodo1->nombre,"NODO_1");
 	nodo1->bloquesLibres = 15;
@@ -58,6 +59,7 @@ void testCabecita() {
 	listaAgregarElemento(metadata->listaBloques, bloque);
 	listaAgregarElemento(metadata->listaBloques, bloque2);
 	archivoPersistirMetadata(metadata);
+	*/
 }
 
 void fileSystemIniciar() {
@@ -69,12 +71,10 @@ void fileSystemIniciar() {
 	archivoConfigObtenerCampos();
 	configuracion = configuracionCrear(RUTA_CONFIG, (Puntero)configuracionLeerArchivoConfig, campos);
 	configuracionImprimir(configuracion);
-	listaDirectorios = listaCrear();
-	listaNodos = listaCrear();
-	listaArchivos = listaCrear();
+	listaDirectorios = NULL;
+	listaNodos = NULL;
+	listaArchivos = NULL;
 	directoriosDisponibles = 100;
-	//BORRAR
-	testCabecita();
 }
 
 void fileSystemCrearConsola() {
@@ -98,8 +98,8 @@ void fileSystemFinalizar() {
 	archivoLogDestruir(archivoLog);
 	memoriaLiberar(configuracion);
 	listaDestruir(listaDirectorios);
-	listaDestruir(listaArchivos);
-	listaDestruir(listaNodos);
+	//listaDestruir(listaArchivos);
+	//listaDestruir(listaNodos);
 	sleep(2);
 }
 
@@ -404,8 +404,6 @@ void consolaConfigurarComando(Comando* comando, String entrada) {
 }
 
 void consolaEjecutarComando(Comando* comando) {
-	if(comando->identificador != ERROR)
-		imprimirMensajeUno(archivoLog, "[COMANDO] Iniciando ejecucion de comando '%s'", comando->argumentos[0]);
 	switch(comando->identificador) {
 		case FORMAT: comandoFormatearFileSystem(comando); break;
 		case RM: comandoRemoverArchivo(comando); break;
@@ -477,10 +475,8 @@ void servidorFinalizarConexion(Servidor* servidor, Socket unSocket) {
 		listaSocketsEliminar(unSocket, &servidor->listaDataNodes);
 		imprimirMensaje(archivoLog, "[CONEXION] Un proceso Data Node se ha desconectado");
 	}
-	else {
+	else
 		imprimirMensaje(archivoLog, "[CONEXION] El proceso YAMA se ha desconectado");
-	}
-
 	socketCerrar(unSocket);
 }
 
@@ -569,6 +565,8 @@ void servidorFinalizar(Servidor* servidor) {
 void servidorRegistrarDataNode(Servidor* servidor, Socket nuevoSocket) {
 	if(nuevoSocket != ERROR) {
 		listaSocketsAgregar(nuevoSocket, &servidor->listaDataNodes);
+		//Nodo* nodo = nodoCrear(nombreNodo);
+		//listaAgregarElemento(listaNodos, nodo);
 		imprimirMensaje(archivoLog, "[CONEXION] Proceso Data Node conectado exitosamente");
 	}
 }
@@ -590,7 +588,6 @@ void servidorAtenderPedidos(Servidor* servidor) {
 				}
 				else
 					nuevoSocket = servidorAceptarYAMA(servidor, unSocket);
-
 				servidorRegistrarConexion(servidor, nuevoSocket);
 			}
 			else
@@ -638,16 +635,18 @@ void fileSystemDesactivar() {
 //--------------------------------------- Funciones de Comando -------------------------------------
 
 void directorioResetearArchivo() {
-	FILE* archivo = fopen(RUTA_DIRECTORIO, "r");
-	if(archivo != NULL) {
-		remove(RUTA_DIRECTORIO);
-		fclose(archivo);
-	}
+	fileLimpiar(RUTA_DIRECTORIOS);
+}
+
+void nodoIniciarControl() {
+	fileLimpiar(RUTA_NODOS);
+	nodoPersistir();
 }
 
 
 void directorioResetearLista() {
-	listaLimpiarDestruyendoElementos(listaDirectorios, memoriaLiberar);
+	if(listaDirectorios != NULL)
+		listaDestruirConElementos(listaDirectorios, memoriaLiberar);
 	listaDirectorios = listaCrear();
 }
 
@@ -659,8 +658,8 @@ void directorioIniciarControl() {
 
 void comandoFormatearFileSystem(Comando* comando) {
 	directorioIniciarControl();
+	nodoIniciarControl();
 	//archivoIniciarControl();
-	//nodoIniciarControl();
 	//bitmapIniciarControl();
 }
 
@@ -690,7 +689,7 @@ void comandoMostrarArchivo(Comando* comando) {
 }
 
 void comandoCrearDirectorio(Comando* comando) {
-	ControlDirectorio* control = controlDirectorioCrear(comando->argumentos[1]);
+	ControlDirectorio* control = directorioControlCrear(comando->argumentos[1]);
 	if(stringDistintos(comando->argumentos[1],"/"))
 		while(stringValido(control->nombreDirectorio)) {
 			directorioBuscarIdentificador(control);
@@ -699,6 +698,9 @@ void comandoCrearDirectorio(Comando* comando) {
 		}
 	else
 		imprimirMensaje(archivoLog, "[ERROR] El directorio raiz no puede ser creado");
+	//memoriaLiberar(control->nombresDirectorios);
+	//memoriaLiberar(control->nombreDirectorio);
+	memoriaLiberar(control);
 }
 
 void comandoCopiarArchivoDeFS(Comando* comando) {
@@ -789,12 +791,12 @@ String directorioConfigurarEntradaArchivo(String indice, String nombre, String p
 }
 
 void directorioPersistir(Directorio* directorio){
-	Archivo archivoDirectorio = archivoAbrir(RUTA_DIRECTORIO,"a+");
+	File archivoDirectorio = fileAbrir(RUTA_DIRECTORIOS,"a+");
 	String indice = stringConvertirEntero(directorio->identificador);
 	String padre = stringConvertirEntero(directorio->identificadorPadre);
 	String entrada = directorioConfigurarEntradaArchivo(indice, directorio->nombre, padre);
 	archivoPersistirEntrada(archivoDirectorio, entrada);
-	archivoCerrar(archivoDirectorio);
+	fileCerrar(archivoDirectorio);
 	memoriaLiberar(entrada);
 	memoriaLiberar(indice);
 	memoriaLiberar(padre);
@@ -830,7 +832,7 @@ void directorioControlSetearNombre(ControlDirectorio* control) {
 	control->nombreDirectorio = control->nombresDirectorios[control->indiceNombresDirectorios];
 }
 
-ControlDirectorio* controlDirectorioCrear(String rutaDirectorio) {
+ControlDirectorio* directorioControlCrear(String rutaDirectorio) {
 	ControlDirectorio* controlDirectorio = memoriaAlocar(sizeof(ControlDirectorio));
 	controlDirectorio->nombresDirectorios = stringSeparar(rutaDirectorio, "/");
 	controlDirectorio->indiceNombresDirectorios = 0;
@@ -879,15 +881,15 @@ void directorioActualizar(ControlDirectorio* control, String rutaDirectorio) {
 
 
 
-//--------------------------------------- Funciones de ArchivoMetada -------------------------------------
+//--------------------------------------- Funciones de Archivo -------------------------------------
 
-ArchivoMetadata* archivoMetadataCrear(String nombreArchivo, int idPadre, String tipo) {
-	ArchivoMetadata* archivoMetadata = memoriaAlocar(sizeof(ArchivoMetadata));
-	stringCopiar(archivoMetadata->nombre, nombreArchivo);
-	archivoMetadata->identificadorPadre = idPadre;
-	stringCopiar(archivoMetadata->tipo, tipo);
-	archivoMetadata->listaBloques = listaCrear();
-	return archivoMetadata;
+Archivo* archivoCrear(String nombreArchivo, int idPadre, String tipo) {
+	Archivo* archivo = memoriaAlocar(sizeof(Archivo));
+	stringCopiar(archivo->nombre, nombreArchivo);
+	archivo->identificadorPadre = idPadre;
+	stringCopiar(archivo->tipo, tipo);
+	archivo->listaBloques = listaCrear();
+	return archivo;
 }
 
 Bloque* bloqueCrear(int bytes) {
@@ -904,27 +906,35 @@ CopiaBloque* copiaBloqueCrear(int numeroBloqueDelNodo, String nombreNodo) {
 	return copiaBloque;
 }
 
+Nodo* nodoCrear(String nombre, int bloquesTotales, int bloquesLibres) {
+	Nodo* nodo = memoriaAlocar(sizeof(Nodo));
+	stringCopiar(nodo->nombre, nombre);
+	nodo->bloquesTotales = bloquesTotales;
+	nodo->bloquesLibres = bloquesLibres;
+	return nodo;
+}
 
-void archivoPersistirMetadata(ArchivoMetadata* metadata) {
-	Archivo archivo = archivoAbrir("/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Metadata/metadata.dat", "a+");
-	fprintf(archivo, "NOMBRE=%s\n", metadata->nombre);
-	fprintf(archivo, "ID_PADRE=%i\n", metadata->identificadorPadre);
-	fprintf(archivo, "TIPO=%s\n", metadata->tipo);
+
+void archivoPersistir(Archivo* archivo) {
+	File file = fileAbrir("/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Metadata/metadata.dat", "a+");
+	fprintf(file, "NOMBRE=%s\n", archivo->nombre);
+	fprintf(file, "ID_PADRE=%i\n", archivo->identificadorPadre);
+	fprintf(file, "TIPO=%s\n", archivo->tipo);
 	int indice;
-	for(indice = 0; indice < listaCantidadElementos(metadata->listaBloques); indice++) {
-		Bloque* bloque = listaObtenerElemento(metadata->listaBloques, indice);
-		fprintf(archivo, "BLOQUE%i_BYTES=%i\n",indice, bloque->bytes);
+	for(indice = 0; indice < listaCantidadElementos(archivo->listaBloques); indice++) {
+		Bloque* bloque = listaObtenerElemento(archivo->listaBloques, indice);
+		fprintf(file, "BLOQUE%i_BYTES=%i\n",indice, bloque->bytes);
 		int indiceCopia;
 		for(indiceCopia = 0; indiceCopia < listaCantidadElementos(bloque->listaCopias); indiceCopia++) {
 			CopiaBloque* copiaBloque = listaObtenerElemento(bloque->listaCopias, indiceCopia);
-			fprintf(archivo, "BLOQUE%i_COPIA%i=[%s,%i]\n", indice, indiceCopia, copiaBloque->nombreNodo, copiaBloque->bloqueNodo);
+			fprintf(file, "BLOQUE%i_COPIA%i=[%s,%i]\n", indice, indiceCopia, copiaBloque->nombreNodo, copiaBloque->bloqueNodo);
 		}
 	}
-	archivoCerrar(archivo);
+	fileCerrar(file);
 }
 
 void nodoPersistir() {
-	Archivo archivo = archivoAbrir("/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Metadata/nodos.bin", "a+");
+	File archivo = fileAbrir(RUTA_NODOS, "a+");
 	int indice;
 	int contadorBloquesTotales = 0;
 	int contadorBloquesLibres = 0;
@@ -938,7 +948,7 @@ void nodoPersistir() {
 	}
 	fprintf(archivo, "BLOQUES_LIBRES=%i\n", contadorBloquesTotales);
 	fprintf(archivo, "BLOQUES_TOTALES=%i\n", contadorBloquesLibres);
-	archivoCerrar(archivo);
+	fileCerrar(archivo);
 }
 
 

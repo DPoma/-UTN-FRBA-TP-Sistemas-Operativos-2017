@@ -10,7 +10,8 @@
 
 #define RUTA_CONFIG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/FileSystem/FileSystemConfig.conf"
 #define RUTA_LOG "/home/utnso/Escritorio/FileSystemLog.log"
-#define RUTA_DIRECTORIO "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/FileSystem/Directorios.dat"
+#define RUTA_DIRECTORIOS "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Metadata/Directorios.dat"
+#define RUTA_NODOS "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Metadata/nodos.bin"
 
 //Identificador de cada comando
 #define FORMAT 1
@@ -91,7 +92,7 @@ typedef struct {
 	char tipo[8];
 	char nombre[MAX_STRING];
 	Lista listaBloques;
-} ArchivoMetadata;
+} Archivo;
 
 typedef struct {
 	int bytes;
@@ -104,14 +105,9 @@ typedef struct {
 } CopiaBloque;
 
 typedef struct {
-	Socket socket;
+	//Socket socket;
 	char nombre[10];
-	int estado;
-	char ip[20];
-	char puerto[20];
-	char puertoListener[20];
-	String bloquesBitArray;
-	BitArray* bitmap;
+	//BitArray* bitmap;
 	int bloquesLibres;
 	int bloquesTotales;
 } Nodo;
@@ -187,11 +183,10 @@ void fileSystemDesactivar();
 
 Directorio* directorioCrear(int indice, String nombre, int padre);
 void directorioGuardarEnArchivo(Directorio unDirectorio);
-Directorio directorioLeerDeArchivo(Archivo unArchivo);
-void directorioPosicionarEnRegistro(Archivo archivo, int posicion);
-long directorioCantidadRegistros(Archivo archivo);
-long directorioObtenerPosicionActualArchivo(Archivo archivo);
-void consolaDirectorioCrear(String path);
+Directorio directorioLeerDeArchivo(File unArchivo);
+void directorioPosicionarEnRegistro(File archivo, int posicion);
+long directorioCantidadRegistros(File archivo);
+long directorioObtenerPosicionActualArchivo(File archivo);
 void nodoPersistir();
 
 
@@ -212,8 +207,8 @@ void comandoInformacionArchivo(Comando* comando);
 void comandoFinalizar();
 void comandoError();
 
-void archivoPersistirMetadata(ArchivoMetadata* metadata);
+void archivoPersistir(Archivo* metadata);
 void directorioControlSetearNombre(ControlDirectorio* control);
 void directorioBuscarIdentificador(ControlDirectorio* control);
 void directorioActualizar(ControlDirectorio* control, String rutaDirectorio);
-ControlDirectorio* controlDirectorioCrear(String rutaDirectorio);
+ControlDirectorio* directorioControlCrear(String rutaDirectorio);

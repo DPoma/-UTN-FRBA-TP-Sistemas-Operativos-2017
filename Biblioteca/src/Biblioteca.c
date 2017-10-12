@@ -373,11 +373,7 @@ NivelLog archivoLogStingANivelLog(String stringNivelLog) {
 }
 
 void archivoLogValidar(String rutaArchivo) {
-	FILE* archivoLog = fopen(rutaArchivo, "r");
-	if(archivoLog != NULL) {
-		remove(rutaArchivo);
-		fclose(archivoLog);
-	}
+	fileLimpiar(rutaArchivo);
 }
 
 //--------------------------------------- Funciones para Semaforo -------------------------------------
@@ -718,15 +714,23 @@ bool caracterIguales(char unCaracter, char otroCaracter) {
 }
 
 
-Archivo archivoAbrir(String rutaArchivo, String modoApertura) {
-	Archivo archivo = fopen(rutaArchivo, modoApertura);
+File fileAbrir(String rutaArchivo, String modoApertura) {
+	File archivo = fopen(rutaArchivo, modoApertura);
 	return archivo;
 }
 
-void archivoCerrar(Archivo unArchivo) {
+void fileCerrar(File unArchivo) {
 	fclose(unArchivo);
 }
 
-void archivoPersistirEntrada(Archivo archivo, String entrada) {
+void fileLimpiar(String ruta) {
+	File archivo = fopen(ruta, "r");
+	if(archivo != NULL) {
+		remove(ruta);
+		fclose(archivo);
+	}
+}
+
+void archivoPersistirEntrada(File archivo, String entrada) {
 	fprintf(archivo, "%s", entrada);
 }

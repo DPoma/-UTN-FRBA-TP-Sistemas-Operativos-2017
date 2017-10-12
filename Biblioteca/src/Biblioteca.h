@@ -70,7 +70,7 @@ typedef sem_t Semaforo;
 typedef pthread_mutex_t Mutex;
 typedef pthread_t Hilo;
 typedef t_list* Lista;
-typedef FILE* Archivo;
+typedef FILE* File;
 typedef t_bitarray BitArray;
 
 //--------------------------------------- Estructuras -------------------------------------
@@ -262,6 +262,6 @@ bool handShakeIdsIguales(int idEnviada, int idEsperada);
 
 void funcionSenial(int senial);
 void imprimirMensajeProceso(String mensaje);
-
+void fileLimpiar(String ruta);
 
 
