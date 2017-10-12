@@ -1,5 +1,8 @@
-[INFO] 12:46:28:515 FileSystem/(3734:3734): [EJECUCION] Proceso File System inicializado
-[INFO] 12:46:28:571 FileSystem/(3734:3734): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 12:46:28:573 FileSystem/(3734:3734): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 12:46:28:580 FileSystem/(3734:3734): [ESTADO] El File System ha sido formateado existosamente
-[INFO] 12:47:17:731 FileSystem/(3734:3734): [EJECUCION] Finalizando proceso File System...
+[INFO] 13:50:40:447 FileSystem/(4891:4891): [EJECUCION] Proceso File System inicializado
+[INFO] 13:50:40:624 FileSystem/(4891:4891): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 13:50:40:625 FileSystem/(4891:4891): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 13:50:40:651 FileSystem/(4891:4891): [ESTADO] El File System ha sido formateado existosamente
+[INFO] 13:51:02:916 FileSystem/(4891:4891): [CONEXION] Proceso Data Node conectado exitosamente
+[INFO] 13:51:06:818 FileSystem/(4891:4891): [CONEXION] Proceso Data Node conectado exitosamente
+[INFO] 13:51:10:924 FileSystem/(4891:4894): [ESTADO] El File System ha sido formateado existosamente
+[INFO] 13:51:14:429 FileSystem/(4891:4891): [EJECUCION] Finalizando proceso File System...

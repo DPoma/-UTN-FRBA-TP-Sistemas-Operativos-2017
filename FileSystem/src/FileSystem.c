@@ -21,6 +21,10 @@ int main(int argc, String* argsv) {
 //--------------------------------------- Funciones de File System -------------------------------------
 
 void testCabecita() {
+	Nodo* nodo1 = nodoCrear("NODO1", 20, 1, 1);
+	Nodo* nodo2 = nodoCrear("NODO2", 100, 1, 1);
+	listaAgregarElemento(listaNodos, nodo1);
+	listaAgregarElemento(listaNodos, nodo2);
 	Archivo* metadata = memoriaAlocar(sizeof(Archivo));
 	metadata->identificadorPadre = 99;
 	metadata->listaBloques = listaCrear();
@@ -674,13 +678,38 @@ void directorioIniciarControl() {
 	fileLimpiar(RUTA_DIRECTORIOS);
 }
 
+void bitmapPersistir(Nodo* nodo) {
+	String ruta = memoriaAlocar(MAX_STRING);
+	stringCopiar(ruta, RUTA_BITMAPS);
+	stringConcatenar(&ruta, nodo->nombre);
+	File archivo = fileAbrir(ruta, "a+");
+	memoriaLiberar(ruta);
+	int indice;
+	for(indice = 8; indice < nodo->bloquesTotales; indice+=8);
+	nodo->bitArray = memoriaAlocar(indice/8);
+	nodo->bitmap = bitarray_create_with_mode(nodo->bitArray, indice/8, LSB_FIRST);
+	for(indice = 0; indice < nodo->bloquesTotales; indice++) {
+		bitarray_clean_bit(nodo->bitmap, indice);
+		fprintf(archivo, "%i", bitarray_test_bit(nodo->bitmap, indice));
+	}
+	fprintf(archivo, "\n");
+	fileCerrar(archivo);
+}
+
+
+void bitmapIniciarControl() {
+	int indice;
+	for(indice = 0; indice < listaCantidadElementos(listaNodos); indice++)
+		bitmapPersistir(listaObtenerElemento(listaNodos, indice));
+}
+
 
 void comandoFormatearFileSystem() {
 	directorioIniciarControl();
 	nodoIniciarControl();
 	imprimirMensaje(archivoLog, "[ESTADO] El File System ha sido formateado existosamente");
 	//archivoIniciarControl();
-	//bitmapIniciarControl();
+	bitmapIniciarControl();
 }
 
 void comandoRemoverArchivo(Comando* comando) {
@@ -1011,6 +1040,8 @@ void nodoPersistir() {
 	fprintf(archivo, "BLOQUES_TOTALES=%i\n", contadorBloquesLibres);
 	fileCerrar(archivo);
 }
+
+
 
 /* VER PORQUE FALLA
  #include "ZPrueba.h"

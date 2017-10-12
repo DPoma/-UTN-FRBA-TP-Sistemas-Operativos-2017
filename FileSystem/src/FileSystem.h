@@ -13,6 +13,7 @@
 #define RUTA_DIRECTORIOS "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Metadata/Directorios.dat"
 #define RUTA_NODOS "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Metadata/nodos.bin"
 #define RUTA_ARCHIVOS "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Metadata/archivos/"
+#define RUTA_BITMAPS "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Metadata/bitmaps/"
 
 //Identificador de cada comando
 #define FORMAT 1
@@ -108,7 +109,8 @@ typedef struct {
 typedef struct {
 	//Socket socket;
 	char nombre[10];
-	//BitArray* bitmap;
+	String bitArray;
+	BitArray* bitmap;
 	int bloquesLibres;
 	int bloquesTotales;
 	Socket socket;

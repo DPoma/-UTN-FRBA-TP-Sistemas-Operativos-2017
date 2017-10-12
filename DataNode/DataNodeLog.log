@@ -1,4 +1,4 @@
-[INFO] 11:40:20:678 DataNode/(2989:2989): [CONFIGURACION] Nombre Nodo: NODO2
-[INFO] 11:40:20:678 DataNode/(2989:2989): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/data.bin
-[INFO] 11:40:20:678 DataNode/(2989:2989): [CONEXION] Estableciendo conexion con File System (IP: 127.0.0.1 | Puerto 5040)
-[INFO] 11:41:03:779 DataNode/(2989:2989): [EJECUCION] Proceso Data Node finalizado
+[INFO] 13:51:06:817 DataNode/(4926:4926): [CONFIGURACION] Nombre Nodo: NODO4
+[INFO] 13:51:06:817 DataNode/(4926:4926): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/data.bin
+[INFO] 13:51:06:817 DataNode/(4926:4926): [CONEXION] Estableciendo conexion con File System (IP: 127.0.0.1 | Puerto 5040)
+[INFO] 13:52:01:471 DataNode/(4926:4926): [EJECUCION] Proceso Data Node finalizado
