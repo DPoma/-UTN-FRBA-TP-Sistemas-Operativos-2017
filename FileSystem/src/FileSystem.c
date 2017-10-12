@@ -21,20 +21,8 @@ int main(int argc, String* argsv) {
 //--------------------------------------- Funciones de File System -------------------------------------
 
 void testCabecita() {
-	/*
-	Nodo* nodo1 = memoriaAlocar(sizeof(Nodo));
-	stringCopiar(nodo1->nombre,"NODO_1");
-	nodo1->bloquesLibres = 15;
-	nodo1->bloquesTotales = 100;
-	listaAgregarElemento(listaNodos, nodo1);
-	Nodo* nodo2 = memoriaAlocar(sizeof(Nodo));
-	stringCopiar(nodo2->nombre, "NODO_2");
-	nodo2->bloquesLibres = 50;
-	nodo2->bloquesTotales = 1;
-	listaAgregarElemento(listaNodos, nodo2);
-	nodoPersistir();
-	ArchivoMetadata* metadata = memoriaAlocar(sizeof(ArchivoMetadata));
-	metadata->identificadorPadre = 10;
+	Archivo* metadata = memoriaAlocar(sizeof(Archivo));
+	metadata->identificadorPadre = 99;
 	metadata->listaBloques = listaCrear();
 	stringCopiar(metadata->nombre, "Manco");
 	stringCopiar(metadata->tipo, "TEXTO");
@@ -58,8 +46,7 @@ void testCabecita() {
 	listaAgregarElemento(bloque2->listaCopias, copia3);
 	listaAgregarElemento(metadata->listaBloques, bloque);
 	listaAgregarElemento(metadata->listaBloques, bloque2);
-	archivoPersistirMetadata(metadata);
-	*/
+	archivoPersistir(metadata);
 }
 
 void fileSystemIniciar(String flag) {
@@ -81,39 +68,31 @@ void fileSystemIniciar(String flag) {
 		ArchivoConfig archivoNodo = config_create(RUTA_NODOS);
 		int indice;
 		int nodosConectados = archivoConfigEnteroDe(archivoNodo, "NODOS_CONECTADOS");
-		printf("nodos conectados %i\n", nodosConectados);
 		for(indice = 0; indice < nodosConectados; indice++) {
 			String campo = memoriaAlocar(30);
 			stringCopiar(campo, "NOMBRE_NODO");
-			printf("campo nombre nodo %s\n", campo);
 			String numeroNodo = stringConvertirEntero(indice);
-			printf("numero nodo %s\n", numeroNodo);
 			stringConcatenar(&campo,numeroNodo);
-			printf("campo nombre nodo con num %s\n", campo);
 			memoriaLiberar(numeroNodo);
 			String nombreNodo = archivoConfigStringDe(archivoNodo, campo);
-			printf("nombre del nodo %s\n", nombreNodo);
 			memoriaLiberar(campo);
 			campo = memoriaAlocar(30);
 			stringCopiar(campo, nombreNodo);
 			stringConcatenar(&campo, "_BLOQUES_TOTALES");
-			printf("campo bloques tot %s\n", campo);
 			int bloquesTotales = archivoConfigEnteroDe(archivoNodo, campo);
-			printf("blques tot %i\n", bloquesTotales);
 			memoriaLiberar(campo);
 			campo = memoriaAlocar(30);
 			stringCopiar(campo, nombreNodo);
 			stringConcatenar(&campo, "_BLOQUES_LIBRES");
-			printf("campo bloques libres %s\n", campo);
 			int bloquesLibres = archivoConfigEnteroDe(archivoNodo, campo);
-			printf("blpoquies libres %i\n", bloquesLibres);
 			Nodo* nodo = nodoCrear(nombreNodo, bloquesTotales, bloquesLibres, 0);
 			memoriaLiberar(campo);
 			listaAgregarElemento(listaNodos, nodo);
 		}
 		archivoConfigDestruir(archivoNodo);
 	}
-
+	listaArchivos = listaCrear();
+	testCabecita();
 }
 
 void fileSystemCrearConsola() {
@@ -128,12 +107,8 @@ void fileSystemAtenderProcesos() {
 	servidorFinalizar(servidor);
 }
 
-void memoriaLiberar2(void* algo) {
-	free(algo);
-}
-
 void fileSystemFinalizar() {
-	imprimirMensaje(archivoLog, "[EJECUCION] Proceso File System finalizado");
+	imprimirMensaje(archivoLog, "[EJECUCION] Finalizando proceso File System...");
 	archivoLogDestruir(archivoLog);
 	memoriaLiberar(configuracion);
 	listaDestruirConElementos(listaDirectorios, memoriaLiberar);
@@ -465,8 +440,7 @@ void consolaEjecutarComando(Comando* comando) {
 }
 
 void consolaDestruirComando(Comando* comando, String entrada) {
-	//if(comando->identificador != ERROR)
-		consolaLiberarArgumentos(comando->argumentos);
+	consolaLiberarArgumentos(comando->argumentos);
 	memoriaLiberar(entrada);
 }
 
@@ -993,7 +967,16 @@ Nodo* nodoCrear(String nombre, int bloquesTotales, int bloquesLibres, Socket unS
 
 
 void archivoPersistir(Archivo* archivo) {
-	File file = fileAbrir("/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Metadata/metadata.dat", "a+");
+	String idPadre = stringConvertirEntero(archivo->identificadorPadre);
+	String ruta = memoriaAlocar(MAX_STRING);
+	stringCopiar(ruta, RUTA_ARCHIVOS);
+	stringConcatenar(&ruta, idPadre);
+	mkdir(ruta, 0777);
+	stringConcatenar(&ruta, "/");
+	stringConcatenar(&ruta, archivo->nombre);
+	File file = fileAbrir(ruta, "a+");
+	memoriaLiberar(idPadre);
+	memoriaLiberar(ruta);
 	fprintf(file, "NOMBRE=%s\n", archivo->nombre);
 	fprintf(file, "ID_PADRE=%i\n", archivo->identificadorPadre);
 	fprintf(file, "TIPO=%s\n", archivo->tipo);

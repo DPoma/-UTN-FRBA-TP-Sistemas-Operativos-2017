@@ -28,6 +28,7 @@
 #include "commons/temporal.h"
 #include "commons/bitarray.h"
 #include <stdint.h>
+#include  <sys/stat.h>
 
 //--------------------------------------- Constantes -------------------------------------
 

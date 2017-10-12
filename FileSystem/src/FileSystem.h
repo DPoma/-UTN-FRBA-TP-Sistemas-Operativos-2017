@@ -8,10 +8,11 @@
 
 #include "../../Biblioteca/src/Biblioteca.c"
 
-#define RUTA_CONFIG "/home/dario/Escritorio/tp-2017-2c-El-legado-del-Esqui/FileSystem/FileSystemConfig.conf"
-#define RUTA_LOG "/home/dario/Escritorio/tp-2017-2c-El-legado-del-Esqui/FileSystem/FileSystemLog.log"
-#define RUTA_DIRECTORIOS "/home/dario/Escritorio/tp-2017-2c-El-legado-del-Esqui/Metadata/Directorios.dat"
-#define RUTA_NODOS "/home/dario/Escritorio/tp-2017-2c-El-legado-del-Esqui/Metadata/nodos.bin"
+#define RUTA_CONFIG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/FileSystem/FileSystemConfig.conf"
+#define RUTA_LOG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/FileSystem/FileSystemLog.log"
+#define RUTA_DIRECTORIOS "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Metadata/Directorios.dat"
+#define RUTA_NODOS "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Metadata/nodos.bin"
+#define RUTA_ARCHIVOS "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Metadata/archivos/"
 
 //Identificador de cada comando
 #define FORMAT 1
