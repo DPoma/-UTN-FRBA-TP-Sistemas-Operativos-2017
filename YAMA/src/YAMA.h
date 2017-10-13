@@ -93,7 +93,7 @@ void pantallaLimpiar();
 void yamaIniciar();
 void yamaAtender();
 void yamaPlanificar(Socket,void*,int);
-void actualizarTablaEstados(int,int,int);
+void actualizarTablaEstados(Entrada*,int);
 void dibujarTablaEstados();
 void yamaFinalizar();
 

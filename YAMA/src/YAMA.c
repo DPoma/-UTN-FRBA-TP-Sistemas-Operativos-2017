@@ -107,23 +107,32 @@ void yamaAtender() {
 				}else if(socketI==servidor->fileSystem){
 					Mensaje* mensaje = mensajeRecibir(socketI);
 					mensajeObtenerDatos(mensaje,socketI);
-					//aca debería estar el caso de que el mensaje sea
-					//para avisar que se desconectó un nodo
-					//y otro para avisar que se reconectó. (si pueden hacer eso)
-					//podría hacer switch(mensaje->header.operacion)
-					Socket masterid;
-					memcpy(&masterid,mensaje->datos,INTSIZE);
-					log_info(archivoLog, "[RECEPCION] lista de bloques para master #%d recibida",&masterid);
-					void* listaBloques=malloc(mensaje->header.tamanio-INTSIZE);
-					memcpy(listaBloques,mensaje->datos+INTSIZE,mensaje->header.tamanio-INTSIZE);
-					if(listaSocketsContiene(masterid,&servidor->listaMaster)) //por si el master se desconecto
-						yamaPlanificar(masterid,listaBloques,mensaje->header.tamanio-INTSIZE);
+					if(mensaje->header.operacion==DESCONEXION){//de nodo
+						//supongo que el que se entera de las desconexiones
+						//y me avisa es el filesystem, podría ser al revez
+						int nodoDesconectado=*((int32_t*)mensaje->datos);
+						void cazarEntradasDesconectadas(Entrada* entrada){
+							if(entrada->nodo==nodoDesconectado){
+								actualizarTablaEstados(entrada,ERROR);
+							}
+						}
+						list_iterate(tablaEstados,cazarEntradasDesconectadas);
+						//podría haber un mensaje de reconexion
+						//si es que los nodos pueden reconectarse
+					}else{
+						Socket masterid;
+						memcpy(&masterid,mensaje->datos,INTSIZE);
+						log_info(archivoLog, "[RECEPCION] lista de bloques para master #%d recibida",&masterid);
+						void* listaBloques=malloc(mensaje->header.tamanio-INTSIZE);
+						memcpy(listaBloques,mensaje->datos+INTSIZE,mensaje->header.tamanio-INTSIZE);
+						if(listaSocketsContiene(masterid,&servidor->listaMaster)) //por si el master se desconecto
+							yamaPlanificar(masterid,listaBloques,mensaje->header.tamanio-INTSIZE);
+					}
 					mensajeDestruir(mensaje);
 				}else{ //master
 					Mensaje* mensaje = mensajeRecibir(socketI);
 					mensajeObtenerDatos(mensaje,socketI);
-					switch(mensaje->header.operacion){
-					case SOLICITUD:{//se recibio solicitud de master #socketI
+					if(mensaje->header.operacion==SOLICITUD){
 						int32_t masterid = socketI;
 						//el mensaje es el path del archivo
 						//aca le acoplo el numero de master y se lo mando al fileSystem
@@ -132,17 +141,20 @@ void yamaAtender() {
 						memcpy(mensaje->datos,&masterid,INTSIZE);
 						mensajeEnviar(servidor->fileSystem,SOLICITUD,mensaje->datos,mensaje->header.tamanio+INTSIZE);
 						imprimirMensajeUno(archivoLog, "[ENVIO] path de master #%d enviado al fileSystem",&socketI);
-					}break;case DESCONEXION:
+					}else if(mensaje->header.operacion==DESCONEXION){
 						listaSocketsEliminar(socketI, &servidor->listaMaster);
 						socketCerrar(socketI);
 						if(socketI==servidor->maximoSocket)
 							servidor->maximoSocket--; //no debería romper nada
 						log_info(archivoLog, "[CONEXION] Proceso Master %d se ha desconectado",socketI);
-					break;default:{
-						int32_t nodo = *((int32_t*)mensaje->datos);
-						int32_t bloque = *((int32_t*)(mensaje->datos+INTSIZE));
-						actualizarTablaEstados(nodo,bloque,mensaje->header.operacion);
-					}}
+					}else{
+						int32_t nodo=*((int32_t*)mensaje->datos);
+						int32_t bloque=*((int32_t*)(mensaje->datos+INTSIZE));
+						bool buscarEntrada(Entrada* entrada){
+							return entrada->nodo==nodo&&entrada->bloque==bloque;
+						}
+						actualizarTablaEstados(list_find(tablaEstados,buscarEntrada),mensaje->header.operacion);
+					}
 					mensajeDestruir(mensaje);
 				}
 			}
@@ -157,7 +169,6 @@ void yamaFinalizar() {
 	memoriaLiberar(servidor); //no es al pedo liberar memoria si el
 	memoriaLiberar(configuracion);//programa esta a punto de terminar?
 }
-
 
 void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 	int i=0;
@@ -285,7 +296,7 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 	list_destroy(tablaEstadosJob);
 }
 
-void actualizarTablaEstados(int nodo,int bloque,int actualizando){
+void actualizarTablaEstados(Entrada* entradaA,int actualizando){
 	void moverAUsados(bool(*cond)(void*)){
 		//mutex
 		Entrada* entrada;
@@ -293,10 +304,6 @@ void actualizarTablaEstados(int nodo,int bloque,int actualizando){
 			list_add(tablaUsados,entrada);
 		}
 	}
-	bool buscarEntrada(Entrada* entrada){
-		return entrada->nodo==nodo&&entrada->bloque==bloque;
-	}
-	Entrada* entradaA=list_find(tablaEstados,buscarEntrada);
 	void darDatosEntrada(Entrada* entrada){
 		entrada->nodo=entradaA->nodo;
 		entrada->job=entradaA->job;
