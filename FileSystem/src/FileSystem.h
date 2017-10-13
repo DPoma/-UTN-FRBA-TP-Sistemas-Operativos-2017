@@ -9,7 +9,11 @@
 #include "../../Biblioteca/src/Biblioteca.c"
 
 #define RUTA_CONFIG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/FileSystem/FileSystemConfig.conf"
-#define RUTA_LOG "/home/utnso/Escritorio/FileSystemLog.log"
+#define RUTA_LOG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/FileSystem/FileSystemLog.log"
+#define RUTA_DIRECTORIOS "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Metadata/Directorios.dat"
+#define RUTA_NODOS "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Metadata/nodos.bin"
+#define RUTA_ARCHIVOS "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Metadata/archivos/"
+#define RUTA_BITMAPS "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Metadata/bitmaps/"
 
 //Identificador de cada comando
 #define FORMAT 1
@@ -46,6 +50,8 @@
 
 #define FLAG_B "-b"
 #define FLAG_D "-d"
+#define MAX_STRING 255
+#define LIMITE_DIRECTORIOS 100
 
 typedef struct {
 	int identificador;
@@ -66,22 +72,61 @@ typedef struct {
 typedef struct {
 	char puertoYAMA[50];
 	char puertoDataNode[50];
-	char rutaMetadata[100];
 } Configuracion;
 
 
 typedef struct {
-	int indice;
-	int padre;
-	char nombre[255];
+	int identificador;
+	int identificadorPadre;
+	char nombre[MAX_STRING];
 } Directorio;
 
-String campos[3];
+typedef struct {
+	int identificadorPadre;
+	int identificadorDirectorio;
+	int indiceNombresDirectorios;
+	String nombreDirectorio;
+	String* nombresDirectorios;
+} ControlDirectorio;
+
+typedef struct {
+	int identificadorPadre;
+	char tipo[8];
+	char nombre[MAX_STRING];
+	Lista listaBloques;
+} Archivo;
+
+typedef struct {
+	int bytes;
+	Lista listaCopias;
+} Bloque;
+
+typedef struct {
+	char nombreNodo[6];
+	int  bloqueNodo;
+} CopiaBloque;
+
+typedef struct {
+	//Socket socket;
+	char nombre[10];
+	String bitArray;
+	BitArray* bitmap;
+	int bloquesLibres;
+	int bloquesTotales;
+	Socket socket;
+} Nodo;
+
+
+String campos[2];
 Configuracion* configuracion;
 ArchivoLog archivoLog;
 int estadoFileSystem;
 Hilo hiloConsola;
 Lista listaDirectorios;
+Lista listaArchivos;
+Lista listaNodos;
+char bitmapDirectorios[LIMITE_DIRECTORIOS];
+int directoriosDisponibles;
 
 //--------------------------------------- Funciones de File System -------------------------------------
 
@@ -140,10 +185,37 @@ bool fileSystemDesactivado();
 void fileSystemActivar();
 void fileSystemDesactivar();
 
-Directorio directorioCrear(int indice, int padre, String nombre);
-void directorioGuardarEnArchivo(Archivo unArchivo, Directorio unDirectorio);
-Directorio directorioLeerDeArchivo(Archivo unArchivo);
-void directorioPosicionarEnRegistro(Archivo archivo, int posicion);
-long directorioCantidadRegistros(Archivo archivo);
-long directorioObtenerPosicionActualArchivo(Archivo archivo);
+Directorio* directorioCrear(int indice, String nombre, int padre);
+void directorioGuardarEnArchivo(Directorio unDirectorio);
+Directorio directorioLeerDeArchivo(File unArchivo);
+void directorioPosicionarEnRegistro(File archivo, int posicion);
+long directorioCantidadRegistros(File archivo);
+long directorioObtenerPosicionActualArchivo(File archivo);
+void nodoPersistir();
 
+
+void comandoFormatearFileSystem();
+void comandoRemoverArchivo(Comando* comando);
+void comandoRemoverBloque(Comando* comando);
+void comandoRemoverDirectorio(Comando* comando);
+void comandoRenombrarArchivoDirectorio(Comando* comando);
+void comandoMoverArchivoDirectorio(Comando* comando);
+void comandoMostrarArchivo(Comando* comando);
+void comandoCrearDirectorio(Comando* comando);
+void comandoCopiarArchivoDeFS(Comando* comando);
+void comandoCopiarArchivoDeYFS(Comando* comando);
+void comandoCopiarBloque(Comando* comando);
+void comandoObtenerMD5(Comando* comando);
+void comandoListarDirectorio(Comando* comando);
+void comandoInformacionArchivo(Comando* comando);
+void comandoFinalizar();
+void comandoError();
+
+void archivoPersistir(Archivo* metadata);
+void directorioControlSetearNombre(ControlDirectorio* control);
+void directorioBuscarIdentificador(ControlDirectorio* control);
+void directorioActualizar(ControlDirectorio* control, String rutaDirectorio);
+ControlDirectorio* directorioControlCrear(String rutaDirectorio);
+Nodo* nodoCrear(String nombre, int bloquesTotales, int bloquesLibres, Socket unSocket);
+void directorioLimpiarLista();
+void nodoLimpiarLista();

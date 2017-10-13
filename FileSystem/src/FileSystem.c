@@ -10,8 +10,8 @@
 
 #include "FileSystem.h"
 
-int main(void) {
-	fileSystemIniciar();
+int main(int argc, String* argsv) {
+	fileSystemIniciar(argsv[1]);
 	fileSystemCrearConsola();
 	fileSystemAtenderProcesos();
 	fileSystemFinalizar();
@@ -20,16 +20,95 @@ int main(void) {
 
 //--------------------------------------- Funciones de File System -------------------------------------
 
-void fileSystemIniciar() {
+void bloqueDestruir(Bloque* bloque) {
+	listaDestruirConElementos(bloque->listaCopias, memoriaLiberar);
+	memoriaLiberar(bloque);
+}
+
+
+void archivoDestruir(Archivo* archivo) {
+	listaDestruirConElementos(archivo->listaBloques, (Puntero)bloqueDestruir);
+	memoriaLiberar(archivo);
+}
+
+void testCabecita() {
+	Nodo* nodo1 = nodoCrear("NODO1", 20, 1, 1);
+	Nodo* nodo2 = nodoCrear("NODO2", 100, 1, 1);
+	listaAgregarElemento(listaNodos, nodo1);
+	listaAgregarElemento(listaNodos, nodo2);
+	Archivo* metadata = memoriaAlocar(sizeof(Archivo));
+	metadata->identificadorPadre = 99;
+	metadata->listaBloques = listaCrear();
+	stringCopiar(metadata->nombre, "Manco");
+	stringCopiar(metadata->tipo, "TEXTO");
+	Bloque* bloque = memoriaAlocar(sizeof(Bloque));
+	bloque->bytes = 1014;
+	bloque->listaCopias = listaCrear();
+	CopiaBloque* copia = memoriaAlocar(sizeof(CopiaBloque));
+	copia->bloqueNodo = 14;
+	stringCopiar(copia->nombreNodo, "NODO1");
+	CopiaBloque* copia2 = memoriaAlocar(sizeof(CopiaBloque));;
+	copia2->bloqueNodo = 15;
+	stringCopiar(copia2->nombreNodo, "NODO2");
+	Bloque* bloque2 = memoriaAlocar(sizeof(Bloque));
+	bloque2->bytes = 101;
+	bloque2->listaCopias = listaCrear();
+	CopiaBloque* copia3 = memoriaAlocar(sizeof(CopiaBloque));;
+	copia3->bloqueNodo = 99;
+	stringCopiar(copia3->nombreNodo, "NODO1");
+	listaAgregarElemento(bloque->listaCopias, copia);
+	listaAgregarElemento(bloque->listaCopias, copia2);
+	listaAgregarElemento(bloque2->listaCopias, copia3);
+	listaAgregarElemento(metadata->listaBloques, bloque);
+	listaAgregarElemento(metadata->listaBloques, bloque2);
+	archivoPersistir(metadata);
+	archivoDestruir(metadata);
+}
+
+void fileSystemIniciar(String flag) {
 	pantallaLimpiar();
 	imprimirMensajeProceso("# PROCESO FILE SYSTEM");
 	archivoLog = archivoLogCrear(RUTA_LOG, "FileSystem");
 	imprimirMensaje(archivoLog, "[EJECUCION] Proceso File System inicializado");
 	fileSystemActivar();
 	archivoConfigObtenerCampos();
-	//senialAsignarFuncion(SIGPIPE, SIG_IGN);
 	configuracion = configuracionCrear(RUTA_CONFIG, (Puntero)configuracionLeerArchivoConfig, campos);
 	configuracionImprimir(configuracion);
+	listaNodos = listaCrear();
+	if(stringIguales(flag, "--clean")) {
+		comandoFormatearFileSystem();
+		directoriosDisponibles = 100;
+	}
+	else {
+		imprimirMensaje(archivoLog, "[ESTADO] Recuperando estado anterior");
+		ArchivoConfig archivoNodo = config_create(RUTA_NODOS);
+		int indice;
+		int nodosConectados = archivoConfigEnteroDe(archivoNodo, "NODOS_CONECTADOS");
+		for(indice = 0; indice < nodosConectados; indice++) {
+			String campo = memoriaAlocar(30);
+			stringCopiar(campo, "NOMBRE_NODO");
+			String numeroNodo = stringConvertirEntero(indice);
+			stringConcatenar(&campo,numeroNodo);
+			memoriaLiberar(numeroNodo);
+			String nombreNodo = archivoConfigStringDe(archivoNodo, campo);
+			memoriaLiberar(campo);
+			campo = memoriaAlocar(30);
+			stringCopiar(campo, nombreNodo);
+			stringConcatenar(&campo, "_BLOQUES_TOTALES");
+			int bloquesTotales = archivoConfigEnteroDe(archivoNodo, campo);
+			memoriaLiberar(campo);
+			campo = memoriaAlocar(30);
+			stringCopiar(campo, nombreNodo);
+			stringConcatenar(&campo, "_BLOQUES_LIBRES");
+			int bloquesLibres = archivoConfigEnteroDe(archivoNodo, campo);
+			Nodo* nodo = nodoCrear(nombreNodo, bloquesTotales, bloquesLibres, 0);
+			memoriaLiberar(campo);
+			listaAgregarElemento(listaNodos, nodo);
+		}
+		archivoConfigDestruir(archivoNodo);
+	}
+	listaArchivos = listaCrear();
+	testCabecita();
 }
 
 void fileSystemCrearConsola() {
@@ -45,11 +124,13 @@ void fileSystemAtenderProcesos() {
 }
 
 void fileSystemFinalizar() {
-	imprimirMensaje(archivoLog, "[EJECUCION] Proceso File System finalizado");
-	//hiloEsperar(hiloConsola);
+	imprimirMensaje(archivoLog, "[EJECUCION] Finalizando proceso File System...");
 	archivoLogDestruir(archivoLog);
 	memoriaLiberar(configuracion);
-	//sleep(1.5);
+	listaDestruirConElementos(listaDirectorios, memoriaLiberar);
+	nodoLimpiarLista();
+	listaDestruirConElementos(listaArchivos, (Puntero)archivoDestruir);
+	sleep(2);
 }
 
 //--------------------------------------- Funciones de Consola -------------------------------------
@@ -198,20 +279,20 @@ bool consolaValidarComandoSinTipo(String* subcadenas) {
 }
 
 bool consolaValidarComandoTipoUno(String* subcadenas) {
-	return stringNoNulo(subcadenas[1]) &&
+	return stringValido(subcadenas[1]) &&
 			stringNulo(subcadenas[2]);
 }
 
 bool consolaValidarComandoTipoDos(String* subcadenas) {
-	return stringNoNulo(subcadenas[1]) &&
-			stringNoNulo(subcadenas[2]) &&
+	return stringValido(subcadenas[1]) &&
+			stringValido(subcadenas[2]) &&
 		   stringNulo(subcadenas[3]);
 }
 
 bool consolaValidarComandoTipoTres(String* subcadenas) {
-	return stringNoNulo(subcadenas[1]) &&
-		   stringNoNulo(subcadenas[2]) &&
-		   stringNoNulo(subcadenas[3]) &&
+	return stringValido(subcadenas[1]) &&
+		   stringValido(subcadenas[2]) &&
+		   stringValido(subcadenas[3]) &&
 		   stringNulo(subcadenas[4]);
 }
 
@@ -233,15 +314,15 @@ bool consolaComandoRemoverFlagD(String* subcadenas) {
 }
 
 bool consolaValidarComandoFlagB(String* subcadenas) {
-	return stringNoNulo(subcadenas[1]) &&
-			   stringNoNulo(subcadenas[2]) &&
-			   stringNoNulo(subcadenas[3]) &&
-			   stringNoNulo(subcadenas[4]);
+	return stringValido(subcadenas[1]) &&
+			   stringValido(subcadenas[2]) &&
+			   stringValido(subcadenas[3]) &&
+			   stringValido(subcadenas[4]);
 }
 
 bool consolaValidarComandoFlagD(String* subcadenas) {
-	return stringNoNulo(subcadenas[1]) &&
-			   stringNoNulo(subcadenas[2]) &&
+	return stringValido(subcadenas[1]) &&
+			   stringValido(subcadenas[2]) &&
 			   stringNulo(subcadenas[3]) &&
 			   stringNulo(subcadenas[4]);
 }
@@ -334,82 +415,61 @@ void consolaObtenerArgumentos(String* buffer, String entrada) {
 
 
 void consolaSetearArgumentos(String* argumentos, String* buffer) {
-	(argumentos[0]=buffer[1]);
-	(argumentos[1]=buffer[2]);
-	(argumentos[2]=buffer[3]);
+	argumentos[0]=buffer[1];
+	argumentos[1]=buffer[2];
+	argumentos[2]=buffer[3];
 }
 
-void consolaCrearComando(Comando* comando, String entrada) {
+void consolaConfigurarComando(Comando* comando, String entrada) {
 	consolaIniciarArgumentos(comando->argumentos);
 	if(consolaEntradaDecente(entrada)) {
 		consolaObtenerArgumentos(comando->argumentos, entrada);
-	if(consolaValidarComando(comando->argumentos))
-		comando->identificador = consolaIdentificarComando(comando->argumentos[0]);
-	else
-		comando->identificador = ERROR;
-	} else {
+		if(consolaValidarComando(comando->argumentos))
+			comando->identificador = consolaIdentificarComando(comando->argumentos[0]);
+		else
+			comando->identificador = ERROR;
+	}
+	else {
 		comando->identificador = ERROR;
 	}
 }
 
-void consolaFinalizar() {
-	 estadoFileSystem = 0;
-	 socketCrearCliente(IP_LOCAL, configuracion->puertoDataNode, ID_DATANODE);
-}
-
-void consolaRealizarAccion(Comando* comando) {
-	//Archivo archivo = archivoCrear("../../../test.dat", "r+b");
-	//directorioPosicionarEnRegistro(archivo, 1);
-	//Directorio directorio = directorioCrear(201, 1, "ggwp");
+void consolaEjecutarComando(Comando* comando) {
 	switch(comando->identificador) {
-		case FORMAT: puts("COMANDO FORMAT"); break;
-		case RM: puts("COMANDO RM"); break;
-		case RMB: puts("COMANDO RM -B"); break;
-		case RMD: puts("COMANDO RM -D"); break;
-		case RENAME: puts("COMANDO RENAME"); break;
-		case MV: puts("COMANDO  MV"); break;
-		case CAT: puts("COMANDO CAT"); break;
-		case MKDIR: puts("COMANDO MKDIR CREANDO DIRECTORIO");
-
-		//directorioCrear(0, -1, "root");
-		//directorioGuardarEnArchivo(archivo, directorio);
-		//directorio = directorioLeerDeArchivo(archivo);
-		//printf("el nombre es %s\n", directorio.nombre);
-		//printf("el index es %i\n", directorio.indice);
-		//printf("el padre es %i\n", directorio.padre);
-		break;
-		case CPFROM: puts("COMANDO CPFROM"); break;
-		case CPTO: puts("COMANDO CPTO"); break;
-		case CPBLOCK:puts("COMANDO CPBLOCK"); break;
-		case MD5: puts("COMANDO MD5"); break;
-		case LS: puts("COMANDO LS"); break;
-		case INFO: puts("COMANDO INFO"); break;
-		case EXIT: consolaFinalizar();
-		//fclose(archivo);
-		break;
-		default: puts("COMANDO INVALIDO"); break;
+		case FORMAT: comandoFormatearFileSystem(); break;
+		case RM: comandoRemoverArchivo(comando); break;
+		case RMB: comandoRemoverBloque(comando); break;
+		case RMD: comandoRemoverDirectorio(comando); break;
+		case RENAME: comandoRenombrarArchivoDirectorio(comando); break;
+		case MV: comandoMoverArchivoDirectorio(comando); break;
+		case CAT: comandoMostrarArchivo(comando); break;
+		case MKDIR: comandoCrearDirectorio(comando); break;
+		case CPFROM: comandoCopiarArchivoDeFS(comando); break;
+		case CPTO: comandoCopiarArchivoDeYFS(comando); break;
+		case CPBLOCK: comandoCopiarBloque(comando); break;
+		case MD5: comandoObtenerMD5(comando); break;
+		case LS: comandoListarDirectorio(comando); break;
+		case INFO: comandoInformacionArchivo(comando); break;
+		case EXIT: comandoFinalizar();break;
+		default: comandoError(); break;
 	}
+}
+
+void consolaDestruirComando(Comando* comando, String entrada) {
+	consolaLiberarArgumentos(comando->argumentos);
+	memoriaLiberar(entrada);
 }
 
 void consolaAtenderComandos() {
 	hiloDetach(pthread_self());
 	while(fileSystemActivado()) {
 		char* entrada = consolaLeerEntrada();
-		if(estadoFileSystem) {
+		if(fileSystemActivado()) {
 			Comando comando;
-			consolaCrearComando(&comando, entrada);
-			consolaRealizarAccion(&comando);
-			if(comando.identificador != ERROR) {
-			printf("arg 0: %s\n", comando.argumentos[0]);
-			printf("arg 1: %s\n", comando.argumentos[1]);
-			printf("arg 2: %s\n", comando.argumentos[2]);
-			printf("arg 3: %s\n", comando.argumentos[3]);
-			printf("arg 4: %s\n", comando.argumentos[4]);
-			}
-			consolaLiberarArgumentos(comando.argumentos);
+			consolaConfigurarComando(&comando, entrada);
+			consolaEjecutarComando(&comando);
+			consolaDestruirComando(&comando, entrada);
 		}
-		memoriaLiberar(entrada);
-
 	}
 }
 //--------------------------------------- Funciones de Servidor -------------------------------------
@@ -440,15 +500,20 @@ bool socketEsYAMA(Servidor* servidor, Socket unSocket) {
 }
 
 void servidorFinalizarConexion(Servidor* servidor, Socket unSocket) {
+
+	bool buscarNodoPorSocket(void* unNodo) {
+		Nodo* nodo = (Nodo*)unNodo;;
+		return nodo->socket == unSocket;
+	}
+
 	listaSocketsEliminar(unSocket, &servidor->listaMaster);
 	if(socketEsDataNode(servidor, unSocket)) {
 		listaSocketsEliminar(unSocket, &servidor->listaDataNodes);
+		listaEliminarDestruyendoPorCondicion(listaNodos, (Puntero)buscarNodoPorSocket, memoriaLiberar);
 		imprimirMensaje(archivoLog, "[CONEXION] Un proceso Data Node se ha desconectado");
 	}
-	else {
+	else
 		imprimirMensaje(archivoLog, "[CONEXION] El proceso YAMA se ha desconectado");
-	}
-
 	socketCerrar(unSocket);
 }
 
@@ -483,8 +548,11 @@ void servidorRecibirMensaje(Servidor* servidor, Socket unSocket) {
 	Mensaje* mensaje = mensajeRecibir(unSocket);
 	if(mensajeDesconexion(mensaje))
 		servidorFinalizarConexion(servidor, unSocket);
-	else
-		puts("[MENSAJE]");
+	else {
+		puts("MENSAJE");
+	}
+
+
 	mensajeDestruir(mensaje);
 }
 
@@ -537,6 +605,10 @@ void servidorFinalizar(Servidor* servidor) {
 void servidorRegistrarDataNode(Servidor* servidor, Socket nuevoSocket) {
 	if(nuevoSocket != ERROR) {
 		listaSocketsAgregar(nuevoSocket, &servidor->listaDataNodes);
+		Mensaje* mensaje = mensajeRecibir(nuevoSocket);
+		Nodo* nodo = nodoCrear(mensaje->datos, 0, 0, nuevoSocket);
+		mensajeDestruir(mensaje);
+		listaAgregarElemento(listaNodos, nodo);
 		imprimirMensaje(archivoLog, "[CONEXION] Proceso Data Node conectado exitosamente");
 	}
 }
@@ -558,7 +630,6 @@ void servidorAtenderPedidos(Servidor* servidor) {
 				}
 				else
 					nuevoSocket = servidorAceptarYAMA(servidor, unSocket);
-
 				servidorRegistrarConexion(servidor, nuevoSocket);
 			}
 			else
@@ -572,7 +643,6 @@ Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig) {
 	Configuracion* configuracion = memoriaAlocar(sizeof(Configuracion));
 	stringCopiar(configuracion->puertoYAMA, archivoConfigStringDe(archivoConfig, "PUERTO_YAMA"));
 	stringCopiar(configuracion->puertoDataNode, archivoConfigStringDe(archivoConfig, "PUERTO_DATANODE"));
-	stringCopiar(configuracion->rutaMetadata, archivoConfigStringDe(archivoConfig, "RUTA_METADATA"));
 	archivoConfigDestruir(archivoConfig);
 	return configuracion;
 }
@@ -580,13 +650,11 @@ Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig) {
 void configuracionImprimir(Configuracion* configuracion) {
 	imprimirMensajeUno(archivoLog, "[CONEXION] Esperando conexion de YAMA (Puerto: %s)", configuracion->puertoYAMA);
 	imprimirMensajeUno(archivoLog, "[CONEXION] Esperando conexiones de Data Nodes (Puerto: %s)", configuracion->puertoDataNode);
-	imprimirMensajeUno(archivoLog, "[CONFIGURACION] Ruta Metadata: %s", configuracion->rutaMetadata);
 }
 
 void archivoConfigObtenerCampos() {
 	campos[0] = "PUERTO_YAMA";
 	campos[1] = "PUERTO_DATANODE";
-	campos[2] = "RUTA_METADATA";
 }
 
 bool fileSystemActivado() {
@@ -606,44 +674,406 @@ void fileSystemDesactivar() {
 }
 
 
+//--------------------------------------- Funciones de Comando -------------------------------------
+
+
+void nodoIniciarControl() {
+	fileLimpiar(RUTA_NODOS);
+	nodoPersistir();
+}
+
+
+
+void directorioIniciarControl() {
+	listaDestruirConElementos(listaDirectorios, memoriaLiberar);
+	listaDirectorios = listaCrear();
+	fileLimpiar(RUTA_DIRECTORIOS);
+}
+
+void bitmapPersistir(Nodo* nodo) {
+	String ruta = memoriaAlocar(MAX_STRING);
+	stringCopiar(ruta, RUTA_BITMAPS);
+	stringConcatenar(&ruta, nodo->nombre);
+	File archivo = fileAbrir(ruta, "a+");
+	memoriaLiberar(ruta);
+	int indice;
+	for(indice = 8; indice < nodo->bloquesTotales; indice+=8);
+	nodo->bitArray = memoriaAlocar(indice/8);
+	nodo->bitmap = bitarray_create_with_mode(nodo->bitArray, indice/8, LSB_FIRST);
+	for(indice = 0; indice < nodo->bloquesTotales; indice++) {
+		bitarray_clean_bit(nodo->bitmap, indice);
+		fprintf(archivo, "%i", bitarray_test_bit(nodo->bitmap, indice));
+	}
+	fprintf(archivo, "\n");
+	fileCerrar(archivo);
+}
+
+
+void bitmapIniciarControl() {
+	int indice;
+	for(indice = 0; indice < listaCantidadElementos(listaNodos); indice++)
+		bitmapPersistir(listaObtenerElemento(listaNodos, indice));
+}
+
+
+void comandoFormatearFileSystem() {
+	directorioIniciarControl();
+	nodoIniciarControl();
+	imprimirMensaje(archivoLog, "[ESTADO] El File System ha sido formateado existosamente");
+	//archivoIniciarControl();
+	bitmapIniciarControl();
+}
+
+void comandoRemoverArchivo(Comando* comando) {
+
+}
+
+
+void comandoRemoverBloque(Comando* comando) {
+
+}
+
+void comandoRemoverDirectorio(Comando* comando) {
+
+}
+
+void comandoRenombrarArchivoDirectorio(Comando* comando) {
+
+}
+
+void comandoMoverArchivoDirectorio(Comando* comando) {
+
+}
+
+void comandoMostrarArchivo(Comando* comando) {
+
+}
+
+void comandoCrearDirectorio(Comando* comando) {
+	ControlDirectorio* control = directorioControlCrear(comando->argumentos[1]);
+	if(stringDistintos(comando->argumentos[1],"/"))
+		while(stringValido(control->nombreDirectorio)) {
+			directorioBuscarIdentificador(control);
+			directorioActualizar(control, comando->argumentos[1]);
+			directorioControlSetearNombre(control);
+		}
+	else
+		imprimirMensaje(archivoLog, "[ERROR] El directorio raiz no puede ser creado");
+	int indice;
+	for(indice=0; stringValido(control->nombresDirectorios[indice]); indice++)
+		memoriaLiberar(control->nombresDirectorios[indice]);
+	memoriaLiberar(control->nombresDirectorios);
+	memoriaLiberar(control);
+}
+
+void comandoCopiarArchivoDeFS(Comando* comando) {
+
+}
+
+void comandoCopiarArchivoDeYFS(Comando* comando) {
+
+}
+void comandoCopiarBloque(Comando* comando) {
+
+}
+void comandoObtenerMD5(Comando* comando) {
+
+}
+void comandoListarDirectorio(Comando* comando) {
+
+}
+void comandoInformacionArchivo(Comando* comando) {
+
+}
+
+void comandoFinalizar() {
+	 fileSystemDesactivar();
+	 socketCrearCliente(IP_LOCAL, configuracion->puertoDataNode, ID_DATANODE);
+}
+
+void comandoError() {
+	imprimirMensaje(archivoLog, "[ERROR] Comando invalido");
+}
+
 //--------------------------------------- Funciones de Directorio -------------------------------------
 
-Directorio directorioCrear(int indice, int padre, String nombre) {
-	Directorio directorio;
-	directorio.indice = indice;
-	directorio.padre = padre;
-	stringCopiar(directorio.nombre, nombre);
-	return directorio;
-}
-
-Directorio directorioLeerDeArchivo(Archivo unArchivo) {
-   Directorio directorio;
-   fread(&directorio, 1, sizeof(Directorio), unArchivo);
-   return directorio;
-}
-
-void listaDirectorioAgregar(Directorio* directorio) {
+void directorioAgregarALista(Directorio* directorio) {
 	listaAgregarElemento(listaDirectorios, directorio);
 }
 
-void directorioGuardarEnArchivo(Archivo unArchivo, Directorio unDirectorio) {
-   fwrite(&unDirectorio, 1, sizeof(Directorio), unArchivo);
+bool directorioIndiceOcupado(int indice) {
+	return bitmapDirectorios[indice] == 1;
+}
+
+bool directorioIndiceRespetaLimite(int indice) {
+	return indice < 100;
+}
+
+bool directorioIndiceEstaOcupado(int indice) {
+	return directorioIndiceRespetaLimite(indice) && directorioIndiceOcupado(indice);
+}
+
+bool directorioExisteIdentificador(int identificador) {
+	return identificador != ERROR;
+}
+
+bool directorioIndicesIguales(int unIndice, int otroIndice) {
+	return unIndice == otroIndice;
+}
+
+bool directorioSonIguales(Directorio* directorio, String nombreDirectorio, int idPadre) {
+	return stringIguales(directorio->nombre, nombreDirectorio) && directorioIndicesIguales(directorio->identificadorPadre, idPadre);
+}
+
+Directorio* directorioCrear(int indice, String nombre, int padre) {
+	Directorio* directorio = memoriaAlocar(sizeof(Directorio));
+	directorio->identificador = indice;
+	directorio->identificadorPadre = padre;
+	stringCopiar(directorio->nombre, nombre);
+	return directorio;
+}
+
+int directorioBuscarIndiceLibre() {
+	int indice;
+	for(indice = 1; directorioIndiceEstaOcupado(indice); indice++);
+	if(indice < 100)
+		return indice;
+	else
+		return ERROR;
+}
+
+String directorioConfigurarEntradaArchivo(String indice, String nombre, String padre) {
+	String buffer = stringCrear();
+	stringConcatenar(&buffer,indice);
+	stringConcatenar(&buffer, ";");
+	stringConcatenar(&buffer, nombre);
+	stringConcatenar(&buffer,";");
+	stringConcatenar(&buffer,padre);
+	stringConcatenar(&buffer,"\n");
+	return buffer;
+}
+
+void directorioPersistir(Directorio* directorio){
+	File archivoDirectorio = fileAbrir(RUTA_DIRECTORIOS,"a+");
+	String indice = stringConvertirEntero(directorio->identificador);
+	String padre = stringConvertirEntero(directorio->identificadorPadre);
+	String entrada = directorioConfigurarEntradaArchivo(indice, directorio->nombre, padre);
+	archivoPersistirEntrada(archivoDirectorio, entrada);
+	fileCerrar(archivoDirectorio);
+	memoriaLiberar(entrada);
+	memoriaLiberar(indice);
+	memoriaLiberar(padre);
+}
+
+void directorioBuscarIdentificador(ControlDirectorio* control) {
+	Directorio* directorio;
+	int indice;
+	for(indice = 0; indice < listaCantidadElementos(listaDirectorios); indice++) {
+		directorio = listaObtenerElemento(listaDirectorios, indice);
+		if(directorioSonIguales(directorio, control->nombreDirectorio, control->identificadorPadre)) {
+			control->identificadorDirectorio = directorio->identificador;
+			return;
+		}
+	}
+	control->identificadorDirectorio = ERROR;
 }
 
 
-void directorioPosicionarEnRegistro(Archivo archivo, int posicion) {
-   fseek(archivo, posicion*sizeof(Directorio),SEEK_SET);
+int directorioIndicesACrear(String* nombresDirectorios, int indiceDirectorios) {
+	int directoriosACrear = 0;
+	int indiceDirectoriosNuevos;
+	for(indiceDirectoriosNuevos = indiceDirectorios; stringValido(nombresDirectorios[indiceDirectoriosNuevos]); indiceDirectoriosNuevos++)
+		directoriosACrear++;
+	return directoriosACrear;
 }
 
-long directorioCantidadRegistros(Archivo archivo) {
-   long curr=ftell(archivo);
-   fseek(archivo,0,SEEK_END);
-   long ultimo=ftell(archivo);
-   fseek(archivo,curr,SEEK_SET);
-   return ultimo/sizeof(Directorio);
+bool directorioHaySuficientesIndices(ControlDirectorio* control) {
+	return directorioIndicesACrear(control->nombresDirectorios, control->indiceNombresDirectorios) <= directoriosDisponibles;
 }
 
-long directorioObtenerPosicionActualArchivo(Archivo archivo) {
-   return ftell(archivo)/sizeof(Directorio);
+void directorioControlSetearNombre(ControlDirectorio* control) {
+	control->nombreDirectorio = control->nombresDirectorios[control->indiceNombresDirectorios];
 }
 
+String* directorioSeparar(String ruta) {
+	int indice;
+	int contadorDirectorios = 0;
+	for(indice = 0; ruta[indice] != FIN; indice++)
+		if(caracterIguales(ruta[indice], BARRA))
+			contadorDirectorios++;
+	String* directorios = memoriaAlocar((contadorDirectorios+1)*sizeof(String));
+	int PosicionUltimaBarra = 0;
+	contadorDirectorios = 0;
+	for(indice = 0; caracterDistintos(ruta[indice], FIN); indice++)
+		if(caracterIguales(ruta[indice],BARRA) && indice != 0) {
+			directorios[contadorDirectorios] = stringTomarCantidad(ruta, PosicionUltimaBarra+1, indice-PosicionUltimaBarra-1);
+			PosicionUltimaBarra = indice;
+			contadorDirectorios++;
+		}
+	directorios[contadorDirectorios] = stringTomarCantidad(ruta, PosicionUltimaBarra+1, indice-PosicionUltimaBarra-1);
+	directorios[contadorDirectorios+1] = NULL;
+	return directorios;
+}
+
+ControlDirectorio* directorioControlCrear(String rutaDirectorio) {
+	ControlDirectorio* controlDirectorio = memoriaAlocar(sizeof(ControlDirectorio));
+	controlDirectorio->nombresDirectorios = directorioSeparar(rutaDirectorio);
+	controlDirectorio->indiceNombresDirectorios = 0;
+	controlDirectorio->identificadorDirectorio = 0;
+	controlDirectorio->identificadorPadre = 0;
+	directorioControlSetearNombre(controlDirectorio);
+	return controlDirectorio;
+}
+
+void directorioControlarEntradas(ControlDirectorio* control) {
+	if(control->nombresDirectorios[control->indiceNombresDirectorios + 1] == NULL)
+		imprimirMensaje(archivoLog, "[ERROR] El directorio ya existe");
+	else
+		control->identificadorPadre = control->identificadorDirectorio;
+	control->indiceNombresDirectorios++;
+}
+
+
+void directorioCrearDirectoriosRestantes(ControlDirectorio* control, String rutaDirectorio) {
+	while(stringValido(control->nombresDirectorios[control->indiceNombresDirectorios])) {
+		int indice = directorioBuscarIndiceLibre();
+		Directorio* directorio = directorioCrear(indice, control->nombresDirectorios[control->indiceNombresDirectorios], control->identificadorPadre);
+		bitmapDirectorios[indice] = 1;
+		directorioAgregarALista(directorio);
+		control->identificadorPadre = indice;
+		control->indiceNombresDirectorios++;
+		directoriosDisponibles--;
+		directorioPersistir(directorio);
+	}
+	imprimirMensajeUno(archivoLog, "[DIRECTORIO] El directorio %s fue creado exitosamente", rutaDirectorio);
+}
+
+void directorioCrearEntradas(ControlDirectorio* control, String rutaDirectorio) {
+	if(directorioHaySuficientesIndices(control))
+		directorioCrearDirectoriosRestantes(control, rutaDirectorio);
+	else
+		imprimirMensaje(archivoLog,"[ERROR] No se pudo crear el directorio por superar el limite permitido (100)");
+}
+
+void directorioActualizar(ControlDirectorio* control, String rutaDirectorio) {
+	if (directorioExisteIdentificador(control->identificadorDirectorio))
+		directorioControlarEntradas(control);
+	else
+		directorioCrearEntradas(control, rutaDirectorio);
+}
+
+void directorioLimpiarLista() {
+	listaDestruirConElementos(listaDirectorios, memoriaLiberar);
+}
+
+
+
+//--------------------------------------- Funciones de Archivo -------------------------------------
+
+Archivo* archivoCrear(String nombreArchivo, int idPadre, String tipo) {
+	Archivo* archivo = memoriaAlocar(sizeof(Archivo));
+	stringCopiar(archivo->nombre, nombreArchivo);
+	archivo->identificadorPadre = idPadre;
+	stringCopiar(archivo->tipo, tipo);
+	archivo->listaBloques = listaCrear();
+	return archivo;
+}
+
+Bloque* bloqueCrear(int bytes) {
+	Bloque* bloque = memoriaAlocar(sizeof(Bloque));
+	bloque->bytes = bytes;
+	bloque->listaCopias = listaCrear();
+	return bloque;
+}
+
+CopiaBloque* copiaBloqueCrear(int numeroBloqueDelNodo, String nombreNodo) {
+	CopiaBloque* copiaBloque = memoriaAlocar(sizeof(CopiaBloque));
+	copiaBloque->bloqueNodo = numeroBloqueDelNodo;
+	stringCopiar(copiaBloque->nombreNodo, nombreNodo);
+	return copiaBloque;
+}
+
+void nodoLimpiarLista() {
+	listaDestruirConElementos(listaNodos, memoriaLiberar);
+}
+
+Nodo* nodoCrear(String nombre, int bloquesTotales, int bloquesLibres, Socket unSocket) {
+	Nodo* nodo = memoriaAlocar(sizeof(Nodo));
+	stringCopiar(nodo->nombre, nombre);
+	nodo->bloquesTotales = bloquesTotales;
+	nodo->bloquesLibres = bloquesLibres;
+	nodo->socket = unSocket;
+	return nodo;
+}
+
+
+void archivoPersistir(Archivo* archivo) {
+	String idPadre = stringConvertirEntero(archivo->identificadorPadre);
+	String ruta = memoriaAlocar(MAX_STRING);
+	stringCopiar(ruta, RUTA_ARCHIVOS);
+	stringConcatenar(&ruta, idPadre);
+	mkdir(ruta, 0777);
+	stringConcatenar(&ruta, "/");
+	stringConcatenar(&ruta, archivo->nombre);
+	File file = fileAbrir(ruta, "a+");
+	memoriaLiberar(idPadre);
+	memoriaLiberar(ruta);
+	fprintf(file, "NOMBRE=%s\n", archivo->nombre);
+	fprintf(file, "ID_PADRE=%i\n", archivo->identificadorPadre);
+	fprintf(file, "TIPO=%s\n", archivo->tipo);
+	int indice;
+	for(indice = 0; indice < listaCantidadElementos(archivo->listaBloques); indice++) {
+		Bloque* bloque = listaObtenerElemento(archivo->listaBloques, indice);
+		fprintf(file, "BLOQUE%i_BYTES=%i\n",indice, bloque->bytes);
+		int indiceCopia;
+		for(indiceCopia = 0; indiceCopia < listaCantidadElementos(bloque->listaCopias); indiceCopia++) {
+			CopiaBloque* copiaBloque = listaObtenerElemento(bloque->listaCopias, indiceCopia);
+			fprintf(file, "BLOQUE%i_COPIA%i=[%s,%i]\n", indice, indiceCopia, copiaBloque->nombreNodo, copiaBloque->bloqueNodo);
+		}
+	}
+	fileCerrar(file);
+}
+
+void nodoPersistir() {
+	File archivo = fileAbrir(RUTA_NODOS, "a+");
+	int indice;
+	int contadorBloquesTotales = 0;
+	int contadorBloquesLibres = 0;
+	for(indice = 0; indice < listaCantidadElementos(listaNodos); indice++) {
+		Nodo* unNodo = listaObtenerElemento(listaNodos, indice);
+		fprintf(archivo, "NOMBRE_NODO%i=%s\n", indice, unNodo->nombre);
+		fprintf(archivo, "%s_BLOQUES_TOTALES=%i\n", unNodo->nombre, unNodo->bloquesTotales);
+		fprintf(archivo, "%s_BLOQUES_LIBRES=%i\n",unNodo->nombre, unNodo->bloquesLibres);
+		contadorBloquesTotales+=unNodo->bloquesTotales;
+		contadorBloquesLibres+=unNodo->bloquesLibres;
+	}
+	fprintf(archivo, "NODOS_CONECTADOS=%i\n", indice);
+	fprintf(archivo, "BLOQUES_LIBRES=%i\n", contadorBloquesTotales);
+	fprintf(archivo, "BLOQUES_TOTALES=%i\n", contadorBloquesLibres);
+	fileCerrar(archivo);
+}
+
+
+
+/* VER PORQUE FALLA
+ #include "ZPrueba.h"
+
+void liberar(void* algo) {
+	if(algo!=NULL)
+	free(algo);
+}
+
+int main(void) {
+	char* a = "/home/utnso/jaja";
+	char** b = string_split(a, "/");
+	printf("%s\n", b[0]);
+	printf("%s\n", b[1]);
+	printf("%s\n", b[2]);
+	free(b[0]);
+	free(b[1]);
+	free(b[2]);
+	free(a);
+	return 0;
+}
+
+ */

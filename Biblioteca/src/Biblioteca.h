@@ -26,7 +26,9 @@
 #include "commons/string.h"
 #include "commons/collections/list.h"
 #include "commons/temporal.h"
+#include "commons/bitarray.h"
 #include <stdint.h>
+#include  <sys/stat.h>
 
 //--------------------------------------- Constantes -------------------------------------
 
@@ -37,6 +39,7 @@
 #define ENTER '\n'
 #define ESPACIO ' '
 #define TAB '\t'
+#define BARRA '/'
 #define LISTEN 10
 #define NULO 0
 #define DESCONEXION 0
@@ -69,7 +72,8 @@ typedef sem_t Semaforo;
 typedef pthread_mutex_t Mutex;
 typedef pthread_t Hilo;
 typedef t_list* Lista;
-typedef FILE* Archivo;
+typedef FILE* File;
+typedef t_bitarray BitArray;
 
 //--------------------------------------- Estructuras -------------------------------------
 
@@ -213,9 +217,9 @@ void listaEliminarDestruyendoElemento(Lista lista, int posicion, void(*funcion)(
 void listaEliminarPorCondicion(Lista lista, bool(*funcion)(void*));
 void listaEliminarDestruyendoPorCondicion(Lista lista, bool(*funcion)(void*), void(*funcionDestruir)(void*));
 void listaLimpiar(Lista lista);
-void listaLimpiarDestruyendoTodo(Lista lista, void(*funcion)(void*));
+void listaLimpiarDestruyendoElementos(Lista lista, void(*funcion)(void*));
 void listaIterar(Lista lista, void(*funcion)(void*));
-void* listaEncontrar(Lista lista, bool(*funcion)(void*));
+void* listaBuscar(Lista lista, bool(*funcion)(void*));
 int listaCantidadElementos(Lista lista);
 bool listaEstaVacia(Lista lista);
 void listaOrdenar(Lista lista, bool(*funcion)(void*, void*));
@@ -260,6 +264,6 @@ bool handShakeIdsIguales(int idEnviada, int idEsperada);
 
 void funcionSenial(int senial);
 void imprimirMensajeProceso(String mensaje);
-
+void fileLimpiar(String ruta);
 
 

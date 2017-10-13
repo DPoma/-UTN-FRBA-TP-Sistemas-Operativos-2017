@@ -8,7 +8,6 @@
  ============================================================================
  */
 
-
 #include "Biblioteca.h"
 
 //--------------------------------------- Funciones para Socket -------------------------------------
@@ -374,11 +373,7 @@ NivelLog archivoLogStingANivelLog(String stringNivelLog) {
 }
 
 void archivoLogValidar(String rutaArchivo) {
-	FILE* archivoLog = fopen(rutaArchivo, "r");
-	if(archivoLog != NULL) {
-		remove(rutaArchivo);
-		fclose(archivoLog);
-	}
+	fileLimpiar(rutaArchivo);
 }
 
 //--------------------------------------- Funciones para Semaforo -------------------------------------
@@ -450,11 +445,13 @@ Lista listaCrear() {
 }
 
 void listaDestruir(Lista lista) {
-	list_destroy(lista);
+	if(lista != NULL)
+		list_destroy(lista);
 }
 
 void listaDestruirConElementos(Lista lista, void(*funcion)(void*)) {
-	list_destroy_and_destroy_elements(lista, funcion);
+	if(lista != NULL)
+		list_destroy_and_destroy_elements(lista, funcion);
 }
 
 int listaAgregarElemento(Lista lista, void* elemento) {
@@ -510,13 +507,13 @@ void listaLimpiar(Lista lista) {
 	list_clean(lista);
 }
 
-void listaLimpiarDestruyendoTodo(Lista lista, void(*funcion)(void*)) {
+void listaLimpiarDestruyendoElementos(Lista lista, void(*funcion)(void*)) {
 	list_clean_and_destroy_elements(lista, funcion);
 }
 void listaIterar(Lista lista, void(*funcion)(void*)) {
 	list_iterate(lista, funcion);
 }
-void* listaEncontrar(Lista lista, bool(*funcion)(void*)) {
+void* listaBuscar(Lista lista, bool(*funcion)(void*)) {
 	return list_find(lista, funcion);
 }
 
@@ -541,6 +538,10 @@ bool listaCumplenTodos(Lista lista, bool(*funcion)(void*)) {
 
 //--------------------------------------- Funciones para String -------------------------------------
 
+String stringCrear() {
+	return string_new();
+}
+
 bool stringContiene(String unString, String otroString) {
 	return string_contains(unString, otroString);
 }
@@ -553,7 +554,7 @@ String stringRepetirCaracter(char caracter, int repeticiones) {
 	return string_repeat(caracter, repeticiones);
 }
 
-void stringAgregarString(String* unString, String otroString) {
+void stringConcatenar(String* unString, String otroString) {
 	string_append(unString, otroString);
 }
 
@@ -630,8 +631,8 @@ bool stringNulo(String unString) {
 	return unString == NULL;
 }
 
-bool stringNoNulo(String unString) {
-	return !stringNulo(unString);
+bool stringValido(String unString) {
+	return unString != NULL;
 }
 
 bool stringIguales(String s1, String s2) {
@@ -715,7 +716,23 @@ bool caracterIguales(char unCaracter, char otroCaracter) {
 }
 
 
-Archivo archivoCrear(String rutaArchivo, String modoApertura) {
-	Archivo archivo = fopen(rutaArchivo, modoApertura);
+File fileAbrir(String rutaArchivo, String modoApertura) {
+	File archivo = fopen(rutaArchivo, modoApertura);
 	return archivo;
+}
+
+void fileCerrar(File unArchivo) {
+	fclose(unArchivo);
+}
+
+void fileLimpiar(String ruta) {
+	File archivo = fopen(ruta, "r");
+	if(archivo != NULL) {
+		remove(ruta);
+		fclose(archivo);
+	}
+}
+
+void archivoPersistirEntrada(File archivo, String entrada) {
+	fprintf(archivo, "%s", entrada);
 }

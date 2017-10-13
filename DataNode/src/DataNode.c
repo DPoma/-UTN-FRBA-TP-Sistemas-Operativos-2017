@@ -14,10 +14,17 @@ int main(void) {
 	dataNodeIniciar();
 	imprimirMensajeDos(archivoLog, "[CONEXION] Estableciendo conexion con File System (IP: %s | Puerto %s)", configuracion->ipFileSystem, configuracion->puertoFileSystem);
 	Socket unSocket = socketCrearCliente(configuracion->ipFileSystem, configuracion->puertoFileSystem, ID_DATANODE);
-	while(dataNodeActivado());
-	imprimirMensaje(archivoLog, "[EJECUCION] Proceso Data Node finalizado");
-	archivoLogDestruir(archivoLog);
-	memoriaLiberar(configuracion);
+	mensajeEnviar(unSocket, 14, configuracion->nombreNodo, stringLongitud(configuracion->nombreNodo)+1);
+
+	dataBin=fopen(configuracion->rutaDataBin, "r+");
+
+
+	while(dataNodeActivado()){
+		//atenderFileSystem(unSocket);
+	}
+
+	finalizarDataNode();
+
 	socketCerrar(unSocket);
 	return EXIT_SUCCESS;
 
@@ -32,6 +39,58 @@ Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig) {
 	stringCopiar(configuracion->rutaDataBin, archivoConfigStringDe(archivoConfig, "RUTA_DATABIN"));
 	archivoConfigDestruir(archivoConfig);
 	return configuracion;
+}
+
+
+
+
+void setBloque(){
+
+}
+
+void getBloque(){
+
+}
+
+
+void atenderFileSystem(Socket unSocket){
+	Mensaje* peticion = mensajeRecibir(unSocket);
+
+	switch(peticion->header.operacion){
+		case -1:
+		imprimirMensaje(archivoLog, "Error en el File System");
+		finalizarDataNode();
+		estadoDataNode = dataNodeDesactivado();
+		break;
+
+		case SETBLOQUE:
+		imprimirMensaje(archivoLog, "Grabando en el bloque n"); //desp lo cambio
+		setBloque();
+		estadoDataNode = dataNodeActivado();
+		break;
+
+		case GETBLOQUE:
+		imprimirMensaje(archivoLog, "Se Obtuvo el bloque n");
+		getBloque();
+		estadoDataNode = dataNodeActivado();
+		break;
+	}
+	 free(peticion);
+}
+
+//mandar mensaje confirmacion
+
+
+void deserializar(Mensaje* mensaje){
+
+}
+
+
+
+void finalizarDataNode(){
+	imprimirMensaje(archivoLog, "[EJECUCION] Proceso Data Node finalizado");
+	archivoLogDestruir(archivoLog);
+	memoriaLiberar(configuracion);
 }
 
 void configuracionImprimir(Configuracion* configuracion) {
@@ -79,5 +138,8 @@ void dataNodeActivar() {
 
 void dataNodeDesactivar() {
 	estadoDataNode = DESACTIVADO;
+
+
+
 }
 
