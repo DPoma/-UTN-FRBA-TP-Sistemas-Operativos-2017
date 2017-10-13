@@ -50,6 +50,7 @@
 
 #define FLAG_B "-b"
 #define FLAG_D "-d"
+#define FLAG_CLEAN "--clean"
 #define MAX_STRING 255
 #define LIMITE_DIRECTORIOS 100
 
@@ -219,3 +220,12 @@ ControlDirectorio* directorioControlCrear(String rutaDirectorio);
 Nodo* nodoCrear(String nombre, int bloquesTotales, int bloquesLibres, Socket unSocket);
 void directorioLimpiarLista();
 void nodoLimpiarLista();
+
+void archivoLogIniciar();
+void nodoDestruir(Nodo* nodo);
+void nodoRecuperarEstadoAnterior();
+void configuracionIniciar();
+void archivoDestruir(Archivo* archivo);
+void directorioReiniciarEstructura();
+void nodoReiniciarEstructura();
+void bitmapReiniciarEstructura();

@@ -20,61 +20,12 @@ int main(int argc, String* argsv) {
 
 //--------------------------------------- Funciones de File System -------------------------------------
 
-void bloqueDestruir(Bloque* bloque) {
-	listaDestruirConElementos(bloque->listaCopias, memoriaLiberar);
-	memoriaLiberar(bloque);
-}
-
-void archivoDestruir(Archivo* archivo) {
-	listaDestruirConElementos(archivo->listaBloques, (Puntero)bloqueDestruir);
-	memoriaLiberar(archivo);
-}
-
-void configuracionIniciar() {
-	archivoConfigObtenerCampos();
-	configuracion = configuracionCrear(RUTA_CONFIG, (Puntero)configuracionLeerArchivoConfig, campos);
-	configuracionImprimir(configuracion);
-}
-
-void nodoRecuperarEstadoAnterior() {
-	listaNodos = listaCrear();
-	listaArchivos = listaCrear();
-	imprimirMensaje(archivoLog, "[ESTADO] Recuperando estado anterior");
-	ArchivoConfig archivoNodo = config_create(RUTA_NODOS);
-	int indice;
-	int nodosConectados = archivoConfigEnteroDe(archivoNodo, "NODOS_CONECTADOS");
-	for(indice = 0; indice < nodosConectados; indice++) {
-		String campo = memoriaAlocar(30);
-		stringCopiar(campo, "NOMBRE_NODO");
-		String numeroNodo = stringConvertirEntero(indice);
-		stringConcatenar(&campo,numeroNodo);
-		memoriaLiberar(numeroNodo);
-		String nombreNodo = archivoConfigStringDe(archivoNodo, campo);
-		memoriaLiberar(campo);
-		campo = memoriaAlocar(30);
-		stringCopiar(campo, nombreNodo);
-		stringConcatenar(&campo, "_BLOQUES_TOTALES");
-		int bloquesTotales = archivoConfigEnteroDe(archivoNodo, campo);
-		memoriaLiberar(campo);
-		campo = memoriaAlocar(30);
-		stringCopiar(campo, nombreNodo);
-		stringConcatenar(&campo, "_BLOQUES_LIBRES");
-		int bloquesLibres = archivoConfigEnteroDe(archivoNodo, campo);
-		Nodo* nodo = nodoCrear(nombreNodo, bloquesTotales, bloquesLibres, 0);
-		memoriaLiberar(campo);
-		listaAgregarElemento(listaNodos, nodo);
-	}
-	archivoConfigDestruir(archivoNodo);
-}
-
 void fileSystemIniciar(String flag) {
 	pantallaLimpiar();
-	imprimirMensajeProceso("# PROCESO FILE SYSTEM");
-	archivoLog = archivoLogCrear(RUTA_LOG, "FileSystem");
-	imprimirMensaje(archivoLog, "[EJECUCION] Proceso File System inicializado");
+	archivoLogIniciar();
 	configuracionIniciar();
 	fileSystemActivar();
-	if(stringIguales(flag, "--clean"))
+	if(stringIguales(flag, FLAG_CLEAN))
 		comandoFormatearFileSystem();
 	else
 		nodoRecuperarEstadoAnterior();
@@ -92,25 +43,53 @@ void fileSystemAtenderProcesos() {
 	servidorFinalizar(servidor);
 }
 
-
-void nodoDestruir(Nodo* nodo) {
-	bitarray_destroy(nodo->bitmap);
-	memoriaLiberar(nodo->bitArray);
-	memoriaLiberar(nodo);
-}
-
 void fileSystemFinalizar() {
 	imprimirMensaje(archivoLog, "[EJECUCION] Finalizando proceso File System...");
-	memoriaLiberar(configuracion);
 	archivoLogDestruir(archivoLog);
+	memoriaLiberar(configuracion);
 	listaDestruirConElementos(listaNodos, (Puntero)nodoDestruir);
 	listaDestruirConElementos(listaDirectorios, memoriaLiberar);
 	listaDestruirConElementos(listaArchivos, (Puntero)archivoDestruir);
 	sleep(2);
 }
 
-//--------------------------------------- Funciones de Consola -------------------------------------
+//--------------------------------------- Funciones de Configuracion -------------------------------------
 
+Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig) {
+	Configuracion* configuracion = memoriaAlocar(sizeof(Configuracion));
+	stringCopiar(configuracion->puertoYAMA, archivoConfigStringDe(archivoConfig, "PUERTO_YAMA"));
+	stringCopiar(configuracion->puertoDataNode, archivoConfigStringDe(archivoConfig, "PUERTO_DATANODE"));
+	archivoConfigDestruir(archivoConfig);
+	return configuracion;
+}
+
+void configuracionImprimir(Configuracion* configuracion) {
+	imprimirMensajeUno(archivoLog, "[CONEXION] Esperando conexion de YAMA (Puerto: %s)", configuracion->puertoYAMA);
+	imprimirMensajeUno(archivoLog, "[CONEXION] Esperando conexiones de Data Nodes (Puerto: %s)", configuracion->puertoDataNode);
+}
+
+void archivoConfigObtenerCampos() {
+	campos[0] = "PUERTO_YAMA";
+	campos[1] = "PUERTO_DATANODE";
+}
+
+bool fileSystemActivado() {
+	return estadoFileSystem == ACTIVADO;
+}
+
+bool fileSystemDesactivado() {
+	return estadoFileSystem == DESACTIVADO;
+}
+
+void fileSystemActivar() {
+	estadoFileSystem = ACTIVADO;
+}
+
+void fileSystemDesactivar() {
+	estadoFileSystem = DESACTIVADO;
+}
+
+//--------------------------------------- Funciones de Consola -------------------------------------
 
 bool consolaEntradaRespetaLimiteEspacios(String entrada) {
 	int indice;
@@ -137,7 +116,6 @@ bool consolaEntradaEspaciosSeparados(String entrada) {
 			return false;
 	return true;
 }
-
 
 bool consolaEntradaEspaciosBienUtilizados(String entrada) {
 	return consolaEntradaSinEspacioEnExtremos(entrada) &&
@@ -229,7 +207,6 @@ bool consolaComandoTipoTres(String comando) {
 	return stringIguales(comando, C_CPBLOCK);
 }
 
-
 int consolaComandoCantidadArgumentos(String comando) {
 	if(consolaComandoTipoUno(comando))
 		return 1;
@@ -248,7 +225,6 @@ bool consolaComandoExiste(String comando) {
 			stringIguales(comando, C_FORMAT) ||
 			stringIguales(comando, C_EXIT);
 }
-
 
 bool consolaValidarComandoSinTipo(String* subcadenas) {
 	return stringNulo(subcadenas[1]);
@@ -272,12 +248,10 @@ bool consolaValidarComandoTipoTres(String* subcadenas) {
 		   stringNulo(subcadenas[4]);
 }
 
-
 bool consolaComandoEsRemoverFlag(String buffer) {
 	return stringIguales(buffer, FLAG_B) ||
 			stringIguales(buffer, FLAG_D);
 }
-
 
 bool consolaComandoRemoverFlagB(String* subcadenas) {
 	return stringIguales(subcadenas[0], C_RM) &&
@@ -317,7 +291,6 @@ bool consolaComandoControlarArgumentos(String* subcadenas) {
 	else
 		return consolaValidarComandoSinTipo(subcadenas);
 }
-
 
 void consolaNormalizarRemoverFlagB(String* buffer) {
 	buffer[0] = stringDuplicar(C_RMB);
@@ -359,7 +332,6 @@ String consolaLeerEntrada() {
 	return cadena;
 }
 
-
 void consolaIniciarArgumentos(String* argumentos) {
 	argumentos[0] = NULL;
 	argumentos[1] = NULL;
@@ -388,7 +360,6 @@ void consolaObtenerArgumentos(String* buffer, String entrada) {
 		}
 	buffer[indiceBuffer] = stringTomarCantidad(entrada, ultimoEspacio+1, indice-ultimoEspacio-1);
 }
-
 
 void consolaSetearArgumentos(String* argumentos, String* buffer) {
 	argumentos[0]=buffer[1];
@@ -448,6 +419,7 @@ void consolaAtenderComandos() {
 		}
 	}
 }
+
 //--------------------------------------- Funciones de Servidor -------------------------------------
 
 bool servidorObtenerMaximoSocket(Servidor* servidor) {
@@ -613,92 +585,45 @@ void servidorAtenderPedidos(Servidor* servidor) {
 		}
 }
 
-//--------------------------------------- Funciones de Configuracion -------------------------------------
-
-Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig) {
-	Configuracion* configuracion = memoriaAlocar(sizeof(Configuracion));
-	stringCopiar(configuracion->puertoYAMA, archivoConfigStringDe(archivoConfig, "PUERTO_YAMA"));
-	stringCopiar(configuracion->puertoDataNode, archivoConfigStringDe(archivoConfig, "PUERTO_DATANODE"));
-	archivoConfigDestruir(archivoConfig);
-	return configuracion;
-}
-
-void configuracionImprimir(Configuracion* configuracion) {
-	imprimirMensajeUno(archivoLog, "[CONEXION] Esperando conexion de YAMA (Puerto: %s)", configuracion->puertoYAMA);
-	imprimirMensajeUno(archivoLog, "[CONEXION] Esperando conexiones de Data Nodes (Puerto: %s)", configuracion->puertoDataNode);
-}
-
-void archivoConfigObtenerCampos() {
-	campos[0] = "PUERTO_YAMA";
-	campos[1] = "PUERTO_DATANODE";
-}
-
-bool fileSystemActivado() {
-	return estadoFileSystem == ACTIVADO;
-}
-
-bool fileSystemDesactivado() {
-	return estadoFileSystem == DESACTIVADO;
-}
-
-void fileSystemActivar() {
-	estadoFileSystem = ACTIVADO;
-}
-
-void fileSystemDesactivar() {
-	estadoFileSystem = DESACTIVADO;
-}
-
-
 //--------------------------------------- Funciones de Comando -------------------------------------
 
-
-void nodoIniciarControl() {
-	fileLimpiar(RUTA_NODOS);
-	nodoPersistir();
-}
-
-
-
-void directorioIniciarControl() {
-	directoriosDisponibles = 100;
-	listaDestruirConElementos(listaDirectorios, memoriaLiberar);
-	listaDirectorios = listaCrear();
-	fileLimpiar(RUTA_DIRECTORIOS);
-}
-
-void bitmapPersistir(Nodo* nodo) {
-	String ruta = memoriaAlocar(MAX_STRING);
-	stringCopiar(ruta, RUTA_BITMAPS);
-	stringConcatenar(&ruta, nodo->nombre);
-	File archivo = fileAbrir(ruta, "a+");
-	memoriaLiberar(ruta);
+void archivoReiniciarEstructura() {
+	/*
 	int indice;
-	for(indice = 8; indice < nodo->bloquesTotales; indice+=8);
-	nodo->bitArray = memoriaAlocar(indice/8);
-	nodo->bitmap = bitarray_create_with_mode(nodo->bitArray, indice/8, LSB_FIRST);
-	for(indice = 0; indice < nodo->bloquesTotales; indice++) {
-		bitarray_clean_bit(nodo->bitmap, indice);
-		fprintf(archivo, "%i", bitarray_test_bit(nodo->bitmap, indice));
+	for(indice=0; indice<listaCantidadElementos(listaArchivos); indice++) {
+		Archivo* archivo = listaObtenerElemento(listaArchivos, indice);
+		String idPadre = stringConvertirEntero(archivo->identificadorPadre);
+		String ruta = memoriaAlocar(MAX_STRING);
+		stringCopiar(ruta, RUTA_ARCHIVOS);
+		stringConcatenar(&ruta, idPadre);
+		stringConcatenar(&ruta, "/");
+		stringConcatenar(&ruta, archivo->nombre);
+		fileLimpiar(ruta);
+		memoriaLiberar(idPadre);
+		memoriaLiberar(ruta);
 	}
-	fprintf(archivo, "\n");
-	fileCerrar(archivo);
-}
-
-
-void bitmapIniciarControl() {
-	int indice;
-	for(indice = 0; indice < listaCantidadElementos(listaNodos); indice++)
-		bitmapPersistir(listaObtenerElemento(listaNodos, indice));
+	for(indice=0; indice<listaCantidadElementos(listaDirectorios); indice++) {
+		Directorio* directorio = listaObtenerElemento(listaDirectorios, indice);
+		String idPadre = stringConvertirEntero(directorio->identificador);
+		String ruta = memoriaAlocar(MAX_STRING);
+		stringCopiar(ruta, RUTA_ARCHIVOS);
+		stringConcatenar(&ruta, idPadre);
+		rmdir(ruta);
+		memoriaLiberar(idPadre);
+		memoriaLiberar(ruta);
+	}
+	nftw(RUTA_ARCHIVO, NULL, )
+	listaDestruirConElementos(listaArchivos, (Puntero)archivoDestruir);
+	*/
 }
 
 
 void comandoFormatearFileSystem() {
-	directorioIniciarControl();
-	nodoIniciarControl();
-	imprimirMensaje(archivoLog, "[ESTADO] El File System ha sido formateado existosamente");
-	//archivoIniciarControl();
-	bitmapIniciarControl();
+	archivoReiniciarEstructura();
+	directorioReiniciarEstructura();
+	nodoReiniciarEstructura();
+	bitmapReiniciarEstructura();
+	imprimirMensaje(archivoLog, "[ESTADO] El File System ha sido formateado");
 }
 
 void comandoRemoverArchivo(Comando* comando) {
@@ -773,10 +698,6 @@ void comandoError() {
 }
 
 //--------------------------------------- Funciones de Directorio -------------------------------------
-
-void directorioAgregarALista(Directorio* directorio) {
-	listaAgregarElemento(listaDirectorios, directorio);
-}
 
 bool directorioIndiceOcupado(int indice) {
 	return bitmapDirectorios[indice] == 1;
@@ -916,7 +837,7 @@ void directorioCrearDirectoriosRestantes(ControlDirectorio* control, String ruta
 		int indice = directorioBuscarIndiceLibre();
 		Directorio* directorio = directorioCrear(indice, control->nombresDirectorios[control->indiceNombresDirectorios], control->identificadorPadre);
 		bitmapDirectorios[indice] = 1;
-		directorioAgregarALista(directorio);
+		listaAgregarElemento(listaDirectorios, directorio);
 		control->identificadorPadre = indice;
 		control->indiceNombresDirectorios++;
 		directoriosDisponibles--;
@@ -946,6 +867,45 @@ void directorioLimpiarLista() {
 
 
 //--------------------------------------- Funciones de Archivo -------------------------------------
+
+
+void nodoReiniciarEstructura() {
+	fileLimpiar(RUTA_NODOS);
+	nodoPersistir();
+}
+
+
+void directorioReiniciarEstructura() {
+	directoriosDisponibles = 100;
+	listaDestruirConElementos(listaDirectorios, memoriaLiberar);
+	listaDirectorios = listaCrear();
+	fileLimpiar(RUTA_DIRECTORIOS);
+}
+
+void bitmapPersistir(Nodo* nodo) {
+	String ruta = memoriaAlocar(MAX_STRING);
+	stringCopiar(ruta, RUTA_BITMAPS);
+	stringConcatenar(&ruta, nodo->nombre);
+	File archivo = fileAbrir(ruta, "a+");
+	memoriaLiberar(ruta);
+	int indice;
+	for(indice = 8; indice < nodo->bloquesTotales; indice+=8);
+	nodo->bitArray = memoriaAlocar(indice/8);
+	nodo->bitmap = bitarray_create_with_mode(nodo->bitArray, indice/8, LSB_FIRST);
+	for(indice = 0; indice < nodo->bloquesTotales; indice++) {
+		bitarray_clean_bit(nodo->bitmap, indice);
+		fprintf(archivo, "%i", bitarray_test_bit(nodo->bitmap, indice));
+	}
+	fprintf(archivo, "\n");
+	fileCerrar(archivo);
+}
+
+
+void bitmapReiniciarEstructura() {
+	int indice;
+	for(indice = 0; indice < listaCantidadElementos(listaNodos); indice++)
+		bitmapPersistir(listaObtenerElemento(listaNodos, indice));
+}
 
 Archivo* archivoCrear(String nombreArchivo, int idPadre, String tipo) {
 	Archivo* archivo = memoriaAlocar(sizeof(Archivo));
@@ -1024,6 +984,65 @@ void nodoPersistir() {
 	fprintf(archivo, "BLOQUES_LIBRES=%i\n", contadorBloquesTotales);
 	fprintf(archivo, "BLOQUES_TOTALES=%i\n", contadorBloquesLibres);
 	fileCerrar(archivo);
+}
+
+void bloqueDestruir(Bloque* bloque) {
+	listaDestruirConElementos(bloque->listaCopias, memoriaLiberar);
+	memoriaLiberar(bloque);
+}
+
+void archivoDestruir(Archivo* archivo) {
+	listaDestruirConElementos(archivo->listaBloques, (Puntero)bloqueDestruir);
+	memoriaLiberar(archivo);
+}
+
+void configuracionIniciar() {
+	archivoConfigObtenerCampos();
+	configuracion = configuracionCrear(RUTA_CONFIG, (Puntero)configuracionLeerArchivoConfig, campos);
+	configuracionImprimir(configuracion);
+}
+
+void nodoRecuperarEstadoAnterior() {
+	listaNodos = listaCrear();
+	listaArchivos = listaCrear();
+	imprimirMensaje(archivoLog, "[ESTADO] Recuperando estado anterior");
+	ArchivoConfig archivoNodo = config_create(RUTA_NODOS);
+	int indice;
+	int nodosConectados = archivoConfigEnteroDe(archivoNodo, "NODOS_CONECTADOS");
+	for(indice = 0; indice < nodosConectados; indice++) {
+		String campo = memoriaAlocar(30);
+		stringCopiar(campo, "NOMBRE_NODO");
+		String numeroNodo = stringConvertirEntero(indice);
+		stringConcatenar(&campo,numeroNodo);
+		memoriaLiberar(numeroNodo);
+		String nombreNodo = archivoConfigStringDe(archivoNodo, campo);
+		memoriaLiberar(campo);
+		campo = memoriaAlocar(30);
+		stringCopiar(campo, nombreNodo);
+		stringConcatenar(&campo, "_BLOQUES_TOTALES");
+		int bloquesTotales = archivoConfigEnteroDe(archivoNodo, campo);
+		memoriaLiberar(campo);
+		campo = memoriaAlocar(30);
+		stringCopiar(campo, nombreNodo);
+		stringConcatenar(&campo, "_BLOQUES_LIBRES");
+		int bloquesLibres = archivoConfigEnteroDe(archivoNodo, campo);
+		Nodo* nodo = nodoCrear(nombreNodo, bloquesTotales, bloquesLibres, 0);
+		memoriaLiberar(campo);
+		listaAgregarElemento(listaNodos, nodo);
+	}
+	archivoConfigDestruir(archivoNodo);
+}
+
+void nodoDestruir(Nodo* nodo) {
+	bitarray_destroy(nodo->bitmap);
+	memoriaLiberar(nodo->bitArray);
+	memoriaLiberar(nodo);
+}
+
+void archivoLogIniciar() {
+	archivoLog = archivoLogCrear(RUTA_LOG, "FileSystem");
+	imprimirMensajeProceso("# PROCESO FILE SYSTEM");
+	imprimirMensaje(archivoLog, "[EJECUCION] Proceso File System inicializado");
 }
 
 
