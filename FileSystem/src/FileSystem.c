@@ -20,13 +20,20 @@ int main(int argc, String* argsv) {
 
 //--------------------------------------- Funciones de File System -------------------------------------
 
+void iniciar() {
+	listaNodos = listaCrear();
+	fileLimpiar(RUTA_NODOS);
+	directorioIniciarEstructura();
+	bitmapIniciarEstructura();
+}
+
 void fileSystemIniciar(String flag) {
 	pantallaLimpiar();
 	archivoLogIniciar();
 	configuracionIniciar();
 	fileSystemActivar();
 	if(stringIguales(flag, FLAG_CLEAN))
-		comandoFormatearFileSystem();
+		iniciar();
 	else
 		nodoRecuperarEstadoAnterior();
 }
@@ -587,7 +594,7 @@ void servidorAtenderPedidos(Servidor* servidor) {
 
 //--------------------------------------- Funciones de Comando -------------------------------------
 
-void archivoReiniciarEstructura() {
+void archivoIniciarEstructura() {
 	/*
 	int indice;
 	for(indice=0; indice<listaCantidadElementos(listaArchivos); indice++) {
@@ -617,12 +624,12 @@ void archivoReiniciarEstructura() {
 	*/
 }
 
-
 void comandoFormatearFileSystem() {
-	archivoReiniciarEstructura();
-	directorioReiniciarEstructura();
-	nodoReiniciarEstructura();
-	bitmapReiniciarEstructura();
+	archivoIniciarEstructura();
+	listaDestruirConElementos(listaDirectorios, memoriaLiberar);
+	directorioIniciarEstructura();
+	nodoIniciarEstructura();
+	bitmapIniciarEstructura();
 	imprimirMensaje(archivoLog, "[ESTADO] El File System ha sido formateado");
 }
 
@@ -681,8 +688,49 @@ void comandoCopiarBloque(Comando* comando) {
 void comandoObtenerMD5(Comando* comando) {
 
 }
+
+String directorioObtenerUltimoDir(String ruta) {
+	int indice;
+	int ultimaBarra;
+	for(indice=0; ruta[indice] != FIN; indice++)
+		if(caracterIguales(ruta[indice], '/'))
+			ultimaBarra = indice;
+	String directorio = stringTomarDesdePosicion(ruta+1, ultimaBarra);
+	printf("EL ULTIMO DIR ES %s\n", directorio);
+	return directorio;
+}
+
+void directorioMostrarArchivos(Directorio* directorioPadre) {
+	imprimirMensajeUno(archivoLog, "[DIRECTORIO] Listando archivos de %s", directorioPadre->nombre);
+	int indice;
+	for(indice=0; indice<listaCantidadElementos(listaDirectorios); indice++) {
+		Directorio* directorio = listaObtenerElemento(listaDirectorios, indice);
+		if(directorio->identificadorPadre == directorioPadre->identificador)
+			imprimirMensajeUno(archivoLog, "[DIRECTORIO] %s", directorio->nombre);
+	}
+	/*
+	for(indice=0; indice<listaCantidadElementos(listaArchivos); indice++) {
+		Archivo* archivo = listaObtenerElemento(listaArchivos, indice);
+		if(archivo->identificadorPadre == directorioPadre->identificadorPadre)
+			imprimirMensajeUno(archivoLog, "[DIRECTORIO] %s", archivo->nombre);
+	}
+	*/
+}
+
 void comandoListarDirectorio(Comando* comando) {
 
+	String nombreDirectorio = directorioObtenerUltimoDir(comando->argumentos[1]);
+
+	bool directorioBuscarPorNombre(Directorio* directorio) {
+		return stringIguales(nombreDirectorio, directorio->nombre);
+	}
+
+	Directorio* directorio = listaBuscar(listaDirectorios, (Puntero)directorioBuscarPorNombre);
+	if(directorio != NULL)
+		directorioMostrarArchivos(directorio);
+	else
+		imprimirMensaje(archivoLog, "[ERROR] El directorio no existe");
+	memoriaLiberar(nombreDirectorio);
 }
 void comandoInformacionArchivo(Comando* comando) {
 
@@ -776,7 +824,6 @@ void directorioBuscarIdentificador(ControlDirectorio* control) {
 	control->identificadorDirectorio = ERROR;
 }
 
-
 int directorioIndicesACrear(String* nombresDirectorios, int indiceDirectorios) {
 	int directoriosACrear = 0;
 	int indiceDirectoriosNuevos;
@@ -831,7 +878,6 @@ void directorioControlarEntradas(ControlDirectorio* control) {
 	control->indiceNombresDirectorios++;
 }
 
-
 void directorioCrearDirectoriosRestantes(ControlDirectorio* control, String rutaDirectorio) {
 	while(stringValido(control->nombresDirectorios[control->indiceNombresDirectorios])) {
 		int indice = directorioBuscarIndiceLibre();
@@ -860,26 +906,18 @@ void directorioActualizar(ControlDirectorio* control, String rutaDirectorio) {
 		directorioCrearEntradas(control, rutaDirectorio);
 }
 
-void directorioLimpiarLista() {
-	listaDestruirConElementos(listaDirectorios, memoriaLiberar);
+void directorioIniciarEstructura() {
+	directoriosDisponibles = 100;
+	listaDirectorios = listaCrear();
+	fileLimpiar(RUTA_DIRECTORIOS);
 }
-
-
 
 //--------------------------------------- Funciones de Archivo -------------------------------------
 
 
-void nodoReiniciarEstructura() {
+void nodoIniciarEstructura() {
 	fileLimpiar(RUTA_NODOS);
 	nodoPersistir();
-}
-
-
-void directorioReiniciarEstructura() {
-	directoriosDisponibles = 100;
-	listaDestruirConElementos(listaDirectorios, memoriaLiberar);
-	listaDirectorios = listaCrear();
-	fileLimpiar(RUTA_DIRECTORIOS);
 }
 
 void bitmapPersistir(Nodo* nodo) {
@@ -901,7 +939,7 @@ void bitmapPersistir(Nodo* nodo) {
 }
 
 
-void bitmapReiniciarEstructura() {
+void bitmapIniciarEstructura() {
 	int indice;
 	for(indice = 0; indice < listaCantidadElementos(listaNodos); indice++)
 		bitmapPersistir(listaObtenerElemento(listaNodos, indice));

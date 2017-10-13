@@ -1,11 +1,20 @@
-[INFO] 12:27:15:136 FileSystem/(3200:3200): [EJECUCION] Proceso File System inicializado
-[INFO] 12:27:15:196 FileSystem/(3200:3200): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 12:27:15:197 FileSystem/(3200:3200): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 12:27:15:199 FileSystem/(3200:3200): [ESTADO] Recuperando estado anterior
-[INFO] 12:27:17:281 FileSystem/(3200:3200): [CONEXION] Proceso Data Node conectado exitosamente
-[INFO] 12:27:19:243 FileSystem/(3200:3200): [CONEXION] Proceso Data Node conectado exitosamente
-[INFO] 12:27:22:228 FileSystem/(3200:3203): [ESTADO] El File System ha sido formateado existosamente
-[INFO] 12:27:27:900 FileSystem/(3200:3203): [DIRECTORIO] El directorio /home/algo fue creado exitosamente
-[INFO] 12:27:31:578 FileSystem/(3200:3203): [ERROR] El directorio ya existe
-[INFO] 12:27:34:108 FileSystem/(3200:3203): [ESTADO] El File System ha sido formateado existosamente
-[INFO] 12:27:35:828 FileSystem/(3200:3200): [EJECUCION] Finalizando proceso File System...
+[INFO] 18:46:13:620 FileSystem/(7650:7650): [EJECUCION] Proceso File System inicializado
+[INFO] 18:46:13:793 FileSystem/(7650:7650): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 18:46:13:796 FileSystem/(7650:7650): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 18:46:20:783 FileSystem/(7650:7650): [CONEXION] Proceso Data Node conectado exitosamente
+[INFO] 18:46:21:411 FileSystem/(7650:7650): [CONEXION] Proceso Data Node conectado exitosamente
+[INFO] 18:46:23:597 FileSystem/(7650:7653): [ESTADO] El File System ha sido formateado
+[INFO] 18:46:31:744 FileSystem/(7650:7653): [DIRECTORIO] El directorio /home/algo/lalalla fue creado exitosamente
+[INFO] 18:46:37:251 FileSystem/(7650:7653): [DIRECTORIO] El directorio /home/algo/nose fue creado exitosamente
+[INFO] 18:46:44:171 FileSystem/(7650:7653): [DIRECTORIO] El directorio /home/algo/gg fue creado exitosamente
+[INFO] 18:46:48:185 FileSystem/(7650:7653): [DIRECTORIO] Listando archivos de algo
+[INFO] 18:46:48:187 FileSystem/(7650:7653): [DIRECTORIO] lalalla
+[INFO] 18:46:48:187 FileSystem/(7650:7653): [DIRECTORIO] nose
+[INFO] 18:46:48:187 FileSystem/(7650:7653): [DIRECTORIO] gg
+[INFO] 18:46:50:704 FileSystem/(7650:7653): [DIRECTORIO] Listando archivos de home
+[INFO] 18:46:50:705 FileSystem/(7650:7653): [DIRECTORIO] algo
+[INFO] 18:47:04:199 FileSystem/(7650:7653): [ERROR] El directorio no existe
+[INFO] 18:47:12:425 FileSystem/(7650:7653): [ESTADO] El File System ha sido formateado
+[INFO] 18:47:18:72 FileSystem/(7650:7653): [DIRECTORIO] El directorio /home/algo fue creado exitosamente
+[INFO] 18:47:20:202 FileSystem/(7650:7653): [ESTADO] El File System ha sido formateado
+[INFO] 18:47:21:921 FileSystem/(7650:7650): [EJECUCION] Finalizando proceso File System...

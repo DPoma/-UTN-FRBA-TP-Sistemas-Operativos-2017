@@ -1,3 +1,3 @@
-[INFO] 12:27:19:242 DataNode/(3208:3208): [CONFIGURACION] Nombre Nodo: NODO4
-[INFO] 12:27:19:243 DataNode/(3208:3208): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/data.bin
-[INFO] 12:27:19:243 DataNode/(3208:3208): [CONEXION] Estableciendo conexion con File System (IP: 127.0.0.1 | Puerto 5040)
+[INFO] 18:46:21:410 DataNode/(7658:7658): [CONFIGURACION] Nombre Nodo: NODO4
+[INFO] 18:46:21:410 DataNode/(7658:7658): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/data.bin
+[INFO] 18:46:21:410 DataNode/(7658:7658): [CONEXION] Estableciendo conexion con File System (IP: 127.0.0.1 | Puerto 5040)
