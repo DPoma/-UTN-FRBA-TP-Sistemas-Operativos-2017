@@ -25,44 +25,46 @@ void bloqueDestruir(Bloque* bloque) {
 	memoriaLiberar(bloque);
 }
 
-
 void archivoDestruir(Archivo* archivo) {
 	listaDestruirConElementos(archivo->listaBloques, (Puntero)bloqueDestruir);
 	memoriaLiberar(archivo);
 }
 
-void testCabecita() {
-	Nodo* nodo1 = nodoCrear("NODO1", 20, 1, 1);
-	Nodo* nodo2 = nodoCrear("NODO2", 100, 1, 1);
-	listaAgregarElemento(listaNodos, nodo1);
-	listaAgregarElemento(listaNodos, nodo2);
-	Archivo* metadata = memoriaAlocar(sizeof(Archivo));
-	metadata->identificadorPadre = 99;
-	metadata->listaBloques = listaCrear();
-	stringCopiar(metadata->nombre, "Manco");
-	stringCopiar(metadata->tipo, "TEXTO");
-	Bloque* bloque = memoriaAlocar(sizeof(Bloque));
-	bloque->bytes = 1014;
-	bloque->listaCopias = listaCrear();
-	CopiaBloque* copia = memoriaAlocar(sizeof(CopiaBloque));
-	copia->bloqueNodo = 14;
-	stringCopiar(copia->nombreNodo, "NODO1");
-	CopiaBloque* copia2 = memoriaAlocar(sizeof(CopiaBloque));;
-	copia2->bloqueNodo = 15;
-	stringCopiar(copia2->nombreNodo, "NODO2");
-	Bloque* bloque2 = memoriaAlocar(sizeof(Bloque));
-	bloque2->bytes = 101;
-	bloque2->listaCopias = listaCrear();
-	CopiaBloque* copia3 = memoriaAlocar(sizeof(CopiaBloque));;
-	copia3->bloqueNodo = 99;
-	stringCopiar(copia3->nombreNodo, "NODO1");
-	listaAgregarElemento(bloque->listaCopias, copia);
-	listaAgregarElemento(bloque->listaCopias, copia2);
-	listaAgregarElemento(bloque2->listaCopias, copia3);
-	listaAgregarElemento(metadata->listaBloques, bloque);
-	listaAgregarElemento(metadata->listaBloques, bloque2);
-	archivoPersistir(metadata);
-	archivoDestruir(metadata);
+void configuracionIniciar() {
+	archivoConfigObtenerCampos();
+	configuracion = configuracionCrear(RUTA_CONFIG, (Puntero)configuracionLeerArchivoConfig, campos);
+	configuracionImprimir(configuracion);
+}
+
+void nodoRecuperarEstadoAnterior() {
+	listaNodos = listaCrear();
+	listaArchivos = listaCrear();
+	imprimirMensaje(archivoLog, "[ESTADO] Recuperando estado anterior");
+	ArchivoConfig archivoNodo = config_create(RUTA_NODOS);
+	int indice;
+	int nodosConectados = archivoConfigEnteroDe(archivoNodo, "NODOS_CONECTADOS");
+	for(indice = 0; indice < nodosConectados; indice++) {
+		String campo = memoriaAlocar(30);
+		stringCopiar(campo, "NOMBRE_NODO");
+		String numeroNodo = stringConvertirEntero(indice);
+		stringConcatenar(&campo,numeroNodo);
+		memoriaLiberar(numeroNodo);
+		String nombreNodo = archivoConfigStringDe(archivoNodo, campo);
+		memoriaLiberar(campo);
+		campo = memoriaAlocar(30);
+		stringCopiar(campo, nombreNodo);
+		stringConcatenar(&campo, "_BLOQUES_TOTALES");
+		int bloquesTotales = archivoConfigEnteroDe(archivoNodo, campo);
+		memoriaLiberar(campo);
+		campo = memoriaAlocar(30);
+		stringCopiar(campo, nombreNodo);
+		stringConcatenar(&campo, "_BLOQUES_LIBRES");
+		int bloquesLibres = archivoConfigEnteroDe(archivoNodo, campo);
+		Nodo* nodo = nodoCrear(nombreNodo, bloquesTotales, bloquesLibres, 0);
+		memoriaLiberar(campo);
+		listaAgregarElemento(listaNodos, nodo);
+	}
+	archivoConfigDestruir(archivoNodo);
 }
 
 void fileSystemIniciar(String flag) {
@@ -70,45 +72,12 @@ void fileSystemIniciar(String flag) {
 	imprimirMensajeProceso("# PROCESO FILE SYSTEM");
 	archivoLog = archivoLogCrear(RUTA_LOG, "FileSystem");
 	imprimirMensaje(archivoLog, "[EJECUCION] Proceso File System inicializado");
+	configuracionIniciar();
 	fileSystemActivar();
-	archivoConfigObtenerCampos();
-	configuracion = configuracionCrear(RUTA_CONFIG, (Puntero)configuracionLeerArchivoConfig, campos);
-	configuracionImprimir(configuracion);
-	listaNodos = listaCrear();
-	if(stringIguales(flag, "--clean")) {
+	if(stringIguales(flag, "--clean"))
 		comandoFormatearFileSystem();
-		directoriosDisponibles = 100;
-	}
-	else {
-		imprimirMensaje(archivoLog, "[ESTADO] Recuperando estado anterior");
-		ArchivoConfig archivoNodo = config_create(RUTA_NODOS);
-		int indice;
-		int nodosConectados = archivoConfigEnteroDe(archivoNodo, "NODOS_CONECTADOS");
-		for(indice = 0; indice < nodosConectados; indice++) {
-			String campo = memoriaAlocar(30);
-			stringCopiar(campo, "NOMBRE_NODO");
-			String numeroNodo = stringConvertirEntero(indice);
-			stringConcatenar(&campo,numeroNodo);
-			memoriaLiberar(numeroNodo);
-			String nombreNodo = archivoConfigStringDe(archivoNodo, campo);
-			memoriaLiberar(campo);
-			campo = memoriaAlocar(30);
-			stringCopiar(campo, nombreNodo);
-			stringConcatenar(&campo, "_BLOQUES_TOTALES");
-			int bloquesTotales = archivoConfigEnteroDe(archivoNodo, campo);
-			memoriaLiberar(campo);
-			campo = memoriaAlocar(30);
-			stringCopiar(campo, nombreNodo);
-			stringConcatenar(&campo, "_BLOQUES_LIBRES");
-			int bloquesLibres = archivoConfigEnteroDe(archivoNodo, campo);
-			Nodo* nodo = nodoCrear(nombreNodo, bloquesTotales, bloquesLibres, 0);
-			memoriaLiberar(campo);
-			listaAgregarElemento(listaNodos, nodo);
-		}
-		archivoConfigDestruir(archivoNodo);
-	}
-	listaArchivos = listaCrear();
-	testCabecita();
+	else
+		nodoRecuperarEstadoAnterior();
 }
 
 void fileSystemCrearConsola() {
@@ -123,12 +92,19 @@ void fileSystemAtenderProcesos() {
 	servidorFinalizar(servidor);
 }
 
+
+void nodoDestruir(Nodo* nodo) {
+	bitarray_destroy(nodo->bitmap);
+	memoriaLiberar(nodo->bitArray);
+	memoriaLiberar(nodo);
+}
+
 void fileSystemFinalizar() {
 	imprimirMensaje(archivoLog, "[EJECUCION] Finalizando proceso File System...");
-	archivoLogDestruir(archivoLog);
 	memoriaLiberar(configuracion);
+	archivoLogDestruir(archivoLog);
+	listaDestruirConElementos(listaNodos, (Puntero)nodoDestruir);
 	listaDestruirConElementos(listaDirectorios, memoriaLiberar);
-	nodoLimpiarLista();
 	listaDestruirConElementos(listaArchivos, (Puntero)archivoDestruir);
 	sleep(2);
 }
@@ -685,6 +661,7 @@ void nodoIniciarControl() {
 
 
 void directorioIniciarControl() {
+	directoriosDisponibles = 100;
 	listaDestruirConElementos(listaDirectorios, memoriaLiberar);
 	listaDirectorios = listaCrear();
 	fileLimpiar(RUTA_DIRECTORIOS);
@@ -993,10 +970,6 @@ CopiaBloque* copiaBloqueCrear(int numeroBloqueDelNodo, String nombreNodo) {
 	return copiaBloque;
 }
 
-void nodoLimpiarLista() {
-	listaDestruirConElementos(listaNodos, memoriaLiberar);
-}
-
 Nodo* nodoCrear(String nombre, int bloquesTotales, int bloquesLibres, Socket unSocket) {
 	Nodo* nodo = memoriaAlocar(sizeof(Nodo));
 	stringCopiar(nodo->nombre, nombre);
@@ -1077,3 +1050,41 @@ int main(void) {
 }
 
  */
+
+
+
+/*
+ void testCabecita() {
+	Nodo* nodo1 = nodoCrear("NODO1", 20, 1, 1);
+	Nodo* nodo2 = nodoCrear("NODO2", 100, 1, 1);
+	listaAgregarElemento(listaNodos, nodo1);
+	listaAgregarElemento(listaNodos, nodo2);
+	Archivo* metadata = memoriaAlocar(sizeof(Archivo));
+	metadata->identificadorPadre = 99;
+	metadata->listaBloques = listaCrear();
+	stringCopiar(metadata->nombre, "Manco");
+	stringCopiar(metadata->tipo, "TEXTO");
+	Bloque* bloque = memoriaAlocar(sizeof(Bloque));
+	bloque->bytes = 1014;
+	bloque->listaCopias = listaCrear();
+	CopiaBloque* copia = memoriaAlocar(sizeof(CopiaBloque));
+	copia->bloqueNodo = 14;
+	stringCopiar(copia->nombreNodo, "NODO1");
+	CopiaBloque* copia2 = memoriaAlocar(sizeof(CopiaBloque));;
+	copia2->bloqueNodo = 15;
+	stringCopiar(copia2->nombreNodo, "NODO2");
+	Bloque* bloque2 = memoriaAlocar(sizeof(Bloque));
+	bloque2->bytes = 101;
+	bloque2->listaCopias = listaCrear();
+	CopiaBloque* copia3 = memoriaAlocar(sizeof(CopiaBloque));;
+	copia3->bloqueNodo = 99;
+	stringCopiar(copia3->nombreNodo, "NODO1");
+	listaAgregarElemento(bloque->listaCopias, copia);
+	listaAgregarElemento(bloque->listaCopias, copia2);
+	listaAgregarElemento(bloque2->listaCopias, copia3);
+	listaAgregarElemento(metadata->listaBloques, bloque);
+	listaAgregarElemento(metadata->listaBloques, bloque2);
+	archivoPersistir(metadata);
+	archivoDestruir(metadata);
+}
+*/
