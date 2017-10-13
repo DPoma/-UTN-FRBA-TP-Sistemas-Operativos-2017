@@ -11,6 +11,14 @@
 #define RUTA_CONFIG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Master/MasterConfig.conf"
 #define RUTA_LOG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Master/MasterLog.log"
 
+#define TRANSFORMACION 702
+#define REDUCCION_LOCAL 703
+#define REDUCCION_GLOBAL 704
+
+#define EXITOTRANSFORMACION 801
+#define FRACASOTRANSFORMACION 802
+
+
 typedef struct {
 	char ipYama[50];
 	char puertoYama[50];
@@ -18,17 +26,48 @@ typedef struct {
 	char puertoWorker[50];
 } Configuracion;
 
+typedef struct{
+	int size_ip;
+	char* ip;
+	int size_puerto;
+	char* puerto;
+	int nroBloque;
+	int size_nombretemp;
+	char* nombretemp;
+}WorkerTransformacion;
+
+
+
 String campos[2];
 Configuracion* configuracion;
 ArchivoLog archivoLog;
-Socket socketYama;
+Socket socketYAMA;
 Socket socketWorker;
 int estadoMaster;
 
+
 Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig);
 void archivoConfigObtenerCampos();
+void establecerConexiones();
+void leerArchivoConfig();
+void archivoConfigObtenerCampos();
+void funcionSenial();
+
+int hayWorkersParaConectar();
+WorkerTransformacion* deserializar();
+Lista workersAConectar();
+ListaSockets sockets();
+void serializarYEnviar();
+
 
 bool masterActivado();
 bool masterDesactivado();
 void masterActivar();
 void masterDesactivar();
+
+char* leerArchivo(FILE* f);
+int archivoValido(FILE* f);
+bool esUnArchivo(char* c);
+void enviarArchivo(FILE* f);
+char* leerCaracteresEntrantes();
+
