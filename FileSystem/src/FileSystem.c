@@ -450,6 +450,10 @@ bool socketEsDataNode(Servidor* servidor, Socket unSocket) {
 	return listaSocketsContiene(unSocket, &servidor->listaDataNodes);
 }
 
+bool socketEsWorker(Servidor* servidor, Socket unSocket) {
+	return listaSocketsContiene(unSocket, &servidor->listaWorkers);
+}
+
 bool socketEsYAMA(Servidor* servidor, Socket unSocket) {
 	return socketSonIguales(servidor->procesoYAMA, unSocket);
 }
@@ -696,7 +700,6 @@ String directorioObtenerUltimoDir(String ruta) {
 		if(caracterIguales(ruta[indice], '/'))
 			ultimaBarra = indice;
 	String directorio = stringTomarDesdePosicion(ruta+1, ultimaBarra);
-	printf("EL ULTIMO DIR ES %s\n", directorio);
 	return directorio;
 }
 

@@ -62,6 +62,7 @@ typedef struct {
 typedef struct {
 	ListaSockets listaSelect;
 	ListaSockets listaMaster;
+	ListaSockets listaWorkers;
 	ListaSockets listaDataNodes;
 	Socket maximoSocket;
 	Socket listenerYAMA;
