@@ -25,6 +25,16 @@ typedef struct {
 } Serializado;
 */
 
+typedef struct{
+	int nroBloque;
+/*		EL tamaño de un contenido es de 1 MB = 1024 Kb (no se si esta bien esto)
+
+//Debo establecer el tamaño del contenido que se pueda guardar
+	char* contenido = malloc(sizeof(char)*1024*1024*8);
+
+	Bloque* sig;
+	La pequeña linea de arriba da error, no recuedo como debía ser la estructura para que funque*/
+}Bloque;
 
 typedef struct {
 	char ipFileSystem[50];
@@ -39,6 +49,7 @@ Configuracion* configuracion;
 ArchivoLog archivoLog;
 int estadoDataNode;
 FILE* dataBin;
+Bloque bloques;
 
 Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig);
 void archivoConfigObtenerCampos();
@@ -48,6 +59,8 @@ bool dataNodeDesactivado();
 void dataNodeActivar();
 void dataNodeDesactivar();
 void finalizarDataNode();
+void freeMemory();
 void deserizalizar(Mensaje* mensaje);
 void setBloque();
 void getBloque();
+void guardarContenido(Bloque bloqueBuscado, Mensaje* mensajeAGuardar);
