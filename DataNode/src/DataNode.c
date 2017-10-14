@@ -1,6 +1,4 @@
-/*
- ============================================================================
- Name        : DataNode.c
+Name        : DataNode.c
  Author      : Dario Poma
  Version     : 1.0
  Copyright   : Todos los derechos reservados papu
@@ -43,14 +41,54 @@ Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig) {
 
 
 
-
-void setBloque(){
-
+/*
+void setBloque(int numeroBloque, Mensaje* mensajeAGuardar){
+	Bloque bloqueBuscado = getBloque(numeroBloque);
+	guardarContenido(bloqueBuscado, mensajeAGuardar);
 }
 
-void getBloque(){
+Bloque getBloque(int numeroBloque){
+	Bloque bloqueAux = bloques;
+	Bloque aux;
+	int encontrado = false;
+	while(!encontrado && bloqueAux!=NULL){
+		if(bloqueAux->nroBloque != numeroBloque) {
+			aux = bloqueAux->sig;
+			bloqueAux = aux;
+		} else {
+			encontrado = true;
+		}
+	}
+	if(bloqueAux == NULL){
+		printf("No se encontró el bloque buscado");
+	} else {
+		return bloqueAux;
+	}
 
 }
+*/
+
+void guardarContenido(Bloque bloqueBuscado, Mensaje* mensajeAGuardar){
+	if(sizeof(mensajeAGuardar) < (8*1024*1024)){
+		//Seguramente esto este mal pero la lógica va por aqui
+//		bloqueBuscado.contenido = mensajeAGuardar;
+	} else {
+		// NO se como realizar una fragmentacion interna
+	}
+}
+
+void freeMemory() {
+	Bloque aux;
+	/*
+	while(bloques->sig != NULL){
+		free(bloques.contenido);
+		aux = bloques->sig;
+		bloques = aux;
+	}
+	free(bloques.contenido);
+	*/
+}
+
 
 
 void atenderFileSystem(Socket unSocket){
@@ -65,13 +103,16 @@ void atenderFileSystem(Socket unSocket){
 
 		case SETBLOQUE:
 		imprimirMensaje(archivoLog, "Grabando en el bloque n"); //desp lo cambio
-		setBloque();
+		int numeroBloque = mensajeRecibir(unSocket);
+
+		Mensaje* mensajeAGuardar = mensajeRecibir(unSocket);
+		setBloque(numeroBloque, mensajeAGuardar);
 		estadoDataNode = dataNodeActivado();
 		break;
 
 		case GETBLOQUE:
 		imprimirMensaje(archivoLog, "Se Obtuvo el bloque n");
-		getBloque();
+		getBloque(numeroBloque);
 		estadoDataNode = dataNodeActivado();
 		break;
 	}
