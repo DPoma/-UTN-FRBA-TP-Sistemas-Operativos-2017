@@ -17,14 +17,8 @@
 
 #define INTSIZE sizeof(int32_t)
 #define TEMPSIZE 12
+#define IPPORTSIZE 10
 #define nullptr NULL
-
-#define TRANSFORMACION 1 //tambien estan en la biblioteca, pero por alguna razon
-#define SOLICITUD 2 //no me los toma
-#define REDUCLOCAL 3
-#define REDUCGLOBAL 4
-#define TERMINADO 5
-
 
 typedef struct {
 	char puertoMaster[50];
@@ -63,8 +57,8 @@ typedef struct{
 } Worker;
 Lista workers;
 
-typedef enum {Transformacion,ReduccionLocal,ReduccionGlobal} Etapa;
-typedef enum {EnProceso,Finalizado,Error,Abortado} Estado;
+typedef enum {Solicitud,Transformacion,ReducLocal,ReducGlobal,Cierre,Aborto} Etapa;
+typedef enum {EnProceso=0,Error,Terminado,Abortado} Estado;
 int job=-1;
 typedef struct{
 	int job;
@@ -93,8 +87,7 @@ void pantallaLimpiar();
 void yamaIniciar();
 void yamaAtender();
 void yamaPlanificar(Socket,void*,int);
-void actualizarTablaEstados(Entrada*,int);
+void actualizarTablaEstados(Entrada*,Estado);
 void dibujarTablaEstados();
-void yamaFinalizar();
 
 

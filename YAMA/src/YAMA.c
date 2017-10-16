@@ -14,7 +14,7 @@
 int main(void) {
 	yamaIniciar();
 	yamaAtender();
-	yamaFinalizar();
+	imprimirMensaje(archivoLog, "[EJECUCION] Proceso YAMA finalizado");
 	return EXIT_SUCCESS;
 }
 
@@ -38,15 +38,14 @@ void yamaIniciar() {
 	//infoNodos es una lista de ips y puertos
 	Mensaje* infoNodos=mensajeRecibir(servidor->fileSystem);
 	mensajeObtenerDatos(infoNodos,servidor->fileSystem);
-	int i=0,ipPortSize=10;
-	while(i<infoNodos->header.tamanio/ipPortSize){
+	int i=0;
+	while(i<infoNodos->header.tamanio/IPPORTSIZE){
 		Worker worker;
 		worker.conectado=true;
 		worker.carga=0;
 		worker.tareasRealizadas=0;
-		worker.nodo=i; //suponiendo que el filesystem los enumere segun
-		//le lleguen y me los mande asi
-		memcpy(worker.ipYPuerto,infoNodos->datos+ipPortSize*i,ipPortSize);
+		worker.nodo=i; //pensando en borrar esto y manejarme solo con ip
+		memcpy(worker.ipYPuerto,infoNodos->datos+IPPORTSIZE*i,IPPORTSIZE);
 		list_add(workers,&worker);
 	}
 }
@@ -70,7 +69,7 @@ void yamaAtender() {
 	listaSocketsLimpiar(&servidor->listaSelect);
 
 	void servidorControlarMaximoSocket(Socket unSocket) {
-		if(socketEsMayor(unSocket, servidor->maximoSocket))
+		if(unSocket>servidor->maximoSocket)
 			servidor->maximoSocket = unSocket;
 	}
 	imprimirMensajeUno(archivoLog, "[CONEXION] Esperando conexiones de un Master (Puerto %s)", configuracion->puertoMaster);
@@ -107,13 +106,16 @@ void yamaAtender() {
 				}else if(socketI==servidor->fileSystem){
 					Mensaje* mensaje = mensajeRecibir(socketI);
 					mensajeObtenerDatos(mensaje,socketI);
-					if(mensaje->header.operacion==DESCONEXION){//de nodo
-						//supongo que el que se entera de las desconexiones
-						//y me avisa es el filesystem, podría ser al revez
+					if(mensaje->header.operacion==DESCONEXION){
 						int nodoDesconectado=*((int32_t*)mensaje->datos);
+						bool nodoDesconectadoF(Worker* worker){
+							return worker->nodo==nodoDesconectado;
+						}
+						((Worker*)list_find(workers,nodoDesconectadoF))->conectado=false;
+
 						void cazarEntradasDesconectadas(Entrada* entrada){
 							if(entrada->nodo==nodoDesconectado){
-								actualizarTablaEstados(entrada,ERROR);
+								actualizarTablaEstados(entrada,Abortado);
 							}
 						}
 						list_iterate(tablaEstados,cazarEntradasDesconectadas);
@@ -123,23 +125,21 @@ void yamaAtender() {
 						Socket masterid;
 						memcpy(&masterid,mensaje->datos,INTSIZE);
 						log_info(archivoLog, "[RECEPCION] lista de bloques para master #%d recibida",&masterid);
-						void* listaBloques=malloc(mensaje->header.tamanio-INTSIZE);
-						memcpy(listaBloques,mensaje->datos+INTSIZE,mensaje->header.tamanio-INTSIZE);
 						if(listaSocketsContiene(masterid,&servidor->listaMaster)) //por si el master se desconecto
-							yamaPlanificar(masterid,listaBloques,mensaje->header.tamanio-INTSIZE);
+							yamaPlanificar(masterid,mensaje+INTSIZE,mensaje->header.tamanio-INTSIZE);
 					}
 					mensajeDestruir(mensaje);
 				}else{ //master
 					Mensaje* mensaje = mensajeRecibir(socketI);
 					mensajeObtenerDatos(mensaje,socketI);
-					if(mensaje->header.operacion==SOLICITUD){
+					if(mensaje->header.operacion==Solicitud){
 						int32_t masterid = socketI;
 						//el mensaje es el path del archivo
 						//aca le acoplo el numero de master y se lo mando al fileSystem
 						mensaje=realloc(mensaje->datos,mensaje->header.tamanio+INTSIZE);
 						memmove(mensaje->datos+INTSIZE,mensaje,mensaje->header.tamanio);
 						memcpy(mensaje->datos,&masterid,INTSIZE);
-						mensajeEnviar(servidor->fileSystem,SOLICITUD,mensaje->datos,mensaje->header.tamanio+INTSIZE);
+						mensajeEnviar(servidor->fileSystem,Solicitud,mensaje->datos,mensaje->header.tamanio+INTSIZE);
 						imprimirMensajeUno(archivoLog, "[ENVIO] path de master #%d enviado al fileSystem",&socketI);
 					}else if(mensaje->header.operacion==DESCONEXION){
 						listaSocketsEliminar(socketI, &servidor->listaMaster);
@@ -160,14 +160,6 @@ void yamaAtender() {
 			}
 		}
 	}
-	memoriaLiberar(servidor);
-}
-
-void yamaFinalizar() {
-	imprimirMensaje(archivoLog, "[EJECUCION] Proceso YAMA finalizado");
-	archivoLogDestruir(archivoLog);
-	memoriaLiberar(servidor); //no es al pedo liberar memoria si el
-	memoriaLiberar(configuracion);//programa esta a punto de terminar?
 }
 
 void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
@@ -180,7 +172,6 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 		list_add(byteses,(int32_t*)(listaBloques+(sizeof(Bloque)*2+INTSIZE)*i+sizeof(Bloque)*2));
 		i++;
 	}
-	free(listaBloques);
 	Lista tablaEstadosJob;
 	job++;//mutex (supongo que las variables globales se comparten entre hilos)
 	for(i=0;i<bloques->elements_count/2;i++){
@@ -224,7 +215,16 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 		}
 		list_iterate(workers,setearClock);
 	}
-	Worker* workerClock=list_get(workers,clock); //alguna forma de no tener que hacer esto?
+	Worker* obtenerWorker(int* pos){
+		Worker* worker=list_get(workers,*pos);
+		if(worker->conectado)
+			return worker;
+		*pos=*pos+1%workers->elements_count;
+		return obtenerWorker(pos);
+		//bucle infinito si todos los workers se desconectan.
+		//Supongo que el control de eso debería estar en otro lado
+	}
+	Worker* workerClock=obtenerWorker(&clock);
 	for(i=0;i<bloques->elements_count;i+=2){
 		Bloque* bloque0 = list_get(bloques,i);
 		Bloque* bloque1 = list_get(bloques,i+1);
@@ -253,7 +253,7 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 		}
 		if(encontrado){
 			clock=(clock+1)%workers->elements_count;
-			Worker* workerTest=list_get(workers,clock);
+			Worker* workerTest=obtenerWorker(&clock);
 			if(workerTest->disponibilidad==0)
 				workerTest->disponibilidad=configuracion->disponibilidadBase;
 			continue;
@@ -267,7 +267,7 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 				}
 				list_iterate(workers,sumarDisponibilidadBase);
 			}
-			Worker* workerAdv=list_get(workers,clockAdv);
+			Worker* workerAdv=obtenerWorker(&clockAdv);
 			if(workerAdv->disponibilidad>0){
 				if(workerAdv->nodo==bloque0->nodo){
 					asignarBloque(workerAdv,bloque0,bloque1);
@@ -289,14 +289,14 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 		memcpy(dato+tamanioEslabon*i+INTSIZE,&entrada->bloque,INTSIZE);
 		memcpy(dato+tamanioEslabon*i+INTSIZE*2,entrada->pathTemporal,TEMPSIZE);
 	}
-	mensajeEnviar(master,TRANSFORMACION,dato,tamanioDato);
+	mensajeEnviar(master,Transformacion,dato,tamanioDato);
 	free(dato);
 
 	list_add_all(tablaEstados,tablaEstadosJob); //mutex
 	list_destroy(tablaEstadosJob);
 }
 
-void actualizarTablaEstados(Entrada* entradaA,int actualizando){
+void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 	void moverAUsados(bool(*cond)(void*)){
 		//mutex
 		Entrada* entrada;
@@ -311,8 +311,8 @@ void actualizarTablaEstados(Entrada* entradaA,int actualizando){
 		entrada->estado=EnProceso;
 		entrada->bloque=-1;
 	}
-	entradaA->estado=actualizando;//actualizando es ERROR o TERMINADO
-	if(actualizando==ERROR){
+	entradaA->estado=actualizando;
+	if(actualizando==Error||actualizando==Abortado){
 		void abortarJob(){
 			bool abortarEntrada(Entrada* entrada){
 				if(entrada->job==entradaA->job){
@@ -322,20 +322,22 @@ void actualizarTablaEstados(Entrada* entradaA,int actualizando){
 				return false;
 			}
 			moverAUsados(abortarJob);
+			mensajeEnviar(entradaA->masterid,Aborto,nullptr,0);//podría ser cierre, depende como lo implemente
 		}
-		if(entradaA->etapa==Transformacion){
-			bool buscarError(Entrada* entrada){
-				return entrada->estado==ERROR;
-			}
-			list_add(tablaUsados,list_remove(tablaEstados,buscarError));//mutex
+		if(entradaA->etapa==Transformacion&&actualizando!=Abortado){
 			if(entradaA->nodo==entradaA->nodoAlt){
 				abortarJob();
+				return;
 			}
 			Entrada alternativa;
 			darDatosEntrada(&alternativa);
 			alternativa.nodo=entradaA->nodoAlt;
 			alternativa.bloque=entradaA->bloqueAlt;
 			list_add(tablaEstados,&alternativa);
+			bool buscarError(Entrada* entrada){
+				return entrada->estado==Error;
+			}
+			list_add(tablaUsados,list_remove_by_condition(tablaEstados,buscarError));//mutex
 		}else{
 			abortarJob();
 		}
@@ -344,7 +346,7 @@ void actualizarTablaEstados(Entrada* entradaA,int actualizando){
 	bool trabajoTerminadoB=true;
 	void trabajoTerminado(bool(*cond)(void*)){
 		void aux(Entrada* entrada){
-			if(cond(entrada)&&entrada->estado!=TERMINADO)
+			if(cond(entrada)&&entrada->estado!=Terminado)
 				trabajoTerminadoB=false;
 		}
 		list_iterate(tablaEstados,aux);
@@ -362,24 +364,24 @@ void actualizarTablaEstados(Entrada* entradaA,int actualizando){
 			Entrada reducLocal;
 			darDatosEntrada(&reducLocal);
 			darPathTemporal(&reducLocal.pathTemporal,'l');
-			reducLocal.etapa=ReduccionLocal;
+			reducLocal.etapa=ReducLocal;
 			struct __attribute__((__packed__)){//para que no use relleno
 				int32_t nodo;
 				char* temp;
 			}dato;
 			dato.nodo=reducLocal.nodo;
 			dato.temp=reducLocal.pathTemporal;
-			mensajeEnviar(reducLocal.masterid,REDUCLOCAL,&dato,sizeof dato);
+			mensajeEnviar(reducLocal.masterid,ReducLocal,&dato,sizeof dato);
 			list_add(tablaEstados,&reducLocal);//mutex
 		}
-	}else if(entradaA->etapa==ReduccionLocal){
+	}else if(entradaA->etapa==ReducLocal){
 		trabajoTerminado(mismoJob);
 		if(trabajoTerminadoB){
 			moverAUsados(mismoJob);
 			Entrada reducGlobal;
 			darDatosEntrada(&reducGlobal);
 			darPathTemporal(&reducGlobal.pathTemporal,'g');
-			reducGlobal.etapa=ReduccionGlobal;
+			reducGlobal.etapa=ReducGlobal;
 			int32_t nodoMenorCarga=entradaA->nodo;
 			int menorCargaI=100; //
 			void menorCarga(Worker* worker){
@@ -394,15 +396,12 @@ void actualizarTablaEstados(Entrada* entradaA,int actualizando){
 			}dato;
 			dato.nodo=reducGlobal.nodo;
 			dato.temp=reducGlobal.pathTemporal;
-			mensajeEnviar(reducGlobal.masterid,REDUCGLOBAL,&dato,sizeof dato);
+			mensajeEnviar(reducGlobal.masterid,ReducGlobal,&dato,sizeof dato);
 			list_add(tablaEstados,&reducGlobal);//mutex
 		}
 	}else{
 		list_add(tablaUsados,list_remove_by_condition(tablaEstados,mismoJob));
-		char* temp;
-		darPathTemporal(&temp,'f');
-		mensajeEnviar(entradaA->masterid,TERMINADO,temp,TEMPSIZE);
-		free(temp);
+		mensajeEnviar(entradaA->masterid,Cierre,nullptr,0);
 	}
 }
 
@@ -415,7 +414,7 @@ void dibujarTablaEstados(){
 		char* etapa,*estado;
 		switch(entrada->etapa){
 		case Transformacion: etapa="transformacion"; break;
-		case ReduccionLocal: etapa="reduccion local"; break;
+		case ReducLocal: etapa="reduccion local"; break;
 		default: etapa="reduccion global";
 		}
 		switch(entrada->estado){
@@ -452,7 +451,7 @@ void darPathTemporal(char** ret,char pre){
 	else
 		agregado='0';
 	*ret[10]=agregado;
-	anterior=string_duplicate(*ret);
+	anterior=string_duplicate(*ret); //leak?
 }
 
 
