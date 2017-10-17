@@ -1,5 +1,7 @@
-[INFO] 21:49:26:569 FileSystem/(8210:8210): [EJECUCION] Proceso File System inicializado
-[INFO] 21:49:26:687 FileSystem/(8210:8210): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 21:49:26:694 FileSystem/(8210:8210): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 21:49:26:698 FileSystem/(8210:8210): [ESTADO] Recuperando estado anterior
-[INFO] 21:49:42:690 FileSystem/(8210:8210): [EJECUCION] Finalizando proceso File System...
+[INFO] 21:18:34:968 FileSystem/(4446:4446): [EJECUCION] Proceso File System inicializado
+[INFO] 21:18:34:968 FileSystem/(4446:4446): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 21:18:34:968 FileSystem/(4446:4446): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 21:18:34:968 FileSystem/(4446:4446): [ESTADO] Recuperando estado anterior
+[INFO] 21:18:37:863 FileSystem/(4446:4449): [ARCHIVO] El MD5 es dd4a7bad3b5862f4b43b36e05fbdd953  /home/utnso/Documentos/ansisop-parser/README.md
+
+[INFO] 21:18:42:707 FileSystem/(4446:4446): [EJECUCION] Finalizando proceso File System...

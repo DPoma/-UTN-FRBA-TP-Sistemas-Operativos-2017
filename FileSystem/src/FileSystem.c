@@ -689,11 +689,39 @@ void comandoCopiarArchivoDeYFS(Comando* comando) {
 void comandoCopiarBloque(Comando* comando) {
 
 }
-void comandoObtenerMD5(Comando* comando) {
 
+void comandoObtenerMD5(Comando* comando) {
+	//if (archivoEstaEnLista(nombreArchivo)) {
+		int descriptores[2];
+		int pidHijo;
+		pipe(descriptores);
+		String entrada = comando->argumentos[1];
+		String md5DeArchivo = memoriaAlocar(MAX_STRING);
+		String rutaArchivo = memoriaAlocar(MAX_STRING);
+		String nombreArchivo = directorioObtenerUltimoDirectorio(entrada);
+		stringCopiar(rutaArchivo, "/tmp/");
+		stringConcatenar(&rutaArchivo, nombreArchivo);
+		pidHijo = fork();
+		if(pidHijo == -1)
+			imprimirMensaje(archivoLog, "[ERROR] Fallo el fork (Estas en problemas amigo)");
+		else if(pidHijo == 0) {
+			close(1);
+			dup2(descriptores[1], 1);
+			close(descriptores[0]);
+			execlp("/usr/bin/md5sum", "md5sum", entrada, NULL);
+			exit(EXIT_SUCCESS);
+		} if(pidHijo > 0)
+			wait(NULL);
+		read(descriptores[0], md5DeArchivo, MAX_STRING);
+		imprimirMensajeUno(archivoLog,"[ARCHIVO] El MD5 es %s", md5DeArchivo);
+		memoriaLiberar(md5DeArchivo);
+		memoriaLiberar(rutaArchivo);
+		memoriaLiberar(nombreArchivo);
+	//} else
+		//imprimirMensaje("[ERROR] El archivo no se encuentra en el File System YAMA");
 }
 
-String directorioObtenerUltimoDir(String ruta) {
+String directorioObtenerUltimoDirectorio(String ruta) {
 	int indice;
 	int ultimaBarra;
 	for(indice=0; ruta[indice] != FIN; indice++)
@@ -722,7 +750,7 @@ void directorioMostrarArchivos(Directorio* directorioPadre) {
 
 void comandoListarDirectorio(Comando* comando) {
 
-	String nombreDirectorio = directorioObtenerUltimoDir(comando->argumentos[1]);
+	String nombreDirectorio = directorioObtenerUltimoDirectorio(comando->argumentos[1]);
 
 	bool directorioBuscarPorNombre(Directorio* directorio) {
 		return stringIguales(nombreDirectorio, directorio->nombre);
@@ -735,6 +763,7 @@ void comandoListarDirectorio(Comando* comando) {
 		imprimirMensaje(archivoLog, "[ERROR] El directorio no existe");
 	memoriaLiberar(nombreDirectorio);
 }
+
 void comandoInformacionArchivo(Comando* comando) {
 
 }

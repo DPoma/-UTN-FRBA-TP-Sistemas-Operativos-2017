@@ -28,7 +28,9 @@
 #include "commons/temporal.h"
 #include "commons/bitarray.h"
 #include <stdint.h>
-#include  <sys/stat.h>
+#include <sys/stat.h>
+#include <sys/wait.h>
+#include <sys/types.h>
 
 //--------------------------------------- Constantes -------------------------------------
 

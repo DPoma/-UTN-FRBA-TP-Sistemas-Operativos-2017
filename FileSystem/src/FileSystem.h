@@ -231,3 +231,4 @@ void directorioIniciarEstructura();
 void nodoIniciarEstructura();
 void bitmapIniciarEstructura();
 String* directorioSeparar(String ruta);
+String directorioObtenerUltimoDirectorio(String ruta);
