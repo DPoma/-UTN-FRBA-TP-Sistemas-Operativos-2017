@@ -10,7 +10,7 @@
 
 #include "Worker.h"
 
-int main(void) {
+/*int main(void) {
 	workerIniciar();
 	socketListenerWorker = socketCrearListener(configuracion->puertoWorker);
 	imprimirMensajeUno(archivoLog, "[CONEXION] Esperando conexiones de Master (Puerto: %s)", configuracion->puertoWorker);
@@ -18,7 +18,7 @@ int main(void) {
 		socketAceptarConexion();
 	imprimirMensaje(archivoLog, "[EJECUCION] Proceso Worker finalizado");
 	return EXIT_SUCCESS;
-}
+}*/
 
 void workerCrearHijo(Socket unSocket) {
 	int pid = fork();
@@ -69,7 +69,7 @@ void workerCrearHijo(Socket unSocket) {
 				memcpy(&origen,mensaje->datos + sizeof(int32_t)*2+sizeCodigo, sizeOrigen);
 				memcpy(&sizeDestino, mensaje->datos + sizeof(int32_t)*2 + sizeCodigo + sizeOrigen, sizeof(int32_t));
 				memcpy(&destino,mensaje->datos + sizeof(int32_t)*3+sizeCodigo+ sizeOrigen, sizeDestino);
-				//reduccionLocal();
+				reduccionLocal(codigo,origen,destino);
 				/*char* buffer = leerArchivo(path,offset,size);
 				log_info(logFile, "[FILE SYSTEM] EL KERNEL PIDE LEER: %s | OFFSET: %i | SIZE: %i", path, offset, size);
 				if(buffer=="-1"){
@@ -174,6 +174,7 @@ int transformar(char* codigo,int origen,char* destino){
 	strcat(commando,"chmod 0755");
 	strcat(commando,codigo);
 	system(commando);
+	free (commando);
 	//paso buffer a script y resultado script a sort
 	char*command=NULL;
 	strcat(command,codigo);
@@ -181,7 +182,37 @@ int transformar(char* codigo,int origen,char* destino){
 	strcat(command,"| sort >");
 	strcat(command,destino);
 	system(command);
+	free (command);
 	return 0;
+}
+
+int reduccionLocal(char* codigo,char* origen,char* destino){
+	char** listaOri;
+	listaOri = getOrigenesLocales(origen);
+	int i=0;
+	while(listaOri[i]!=NULL){
+		free(listaOri[i]);
+		i++;
+	}
+	//for(i=0;;i++)
+	free (listaOri);
+	return 0;
+}
+
+char** getOrigenesLocales(char* origen){
+	int cantOrigenes;
+	memcpy(&cantOrigenes, origen, sizeof(int32_t));
+	char* oris [cantOrigenes];
+	int i;
+	int size = sizeof(int32_t);
+	int sizeOri=0;
+	for(i=0;(i-1)==cantOrigenes;i++){
+		memcpy(&sizeOri, origen + size , sizeof(int32_t));
+		size= size + sizeof(int32_t);
+		memcpy(&oris[i],origen + size, sizeOri);
+		size= size + sizeOri;
+	}
+	return oris;
 }
 
 void socketAceptarConexion() {
