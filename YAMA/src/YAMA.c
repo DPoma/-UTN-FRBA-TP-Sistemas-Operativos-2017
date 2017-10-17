@@ -44,8 +44,7 @@ void yamaIniciar() {
 		worker.conectado=true;
 		worker.carga=0;
 		worker.tareasRealizadas=0;
-		worker.nodo=i; //pensando en borrar esto y manejarme solo con ip
-		memcpy(worker.ipYPuerto,infoNodos->datos+IPPORTSIZE*i,IPPORTSIZE);
+		worker.nodo=*(Dir*)(infoNodos+sizeof(Dir)*i);
 		list_add(workers,&worker);
 	}
 }
@@ -61,6 +60,10 @@ void configurar(){
 	configuracion->disponibilidadBase = archivoConfigEnteroDe(archivoConfig, "DISPONIBILIDAD_BASE");
 	configuracion->reconfigurar=false;
 	archivoConfigDestruir(archivoConfig);
+}
+
+bool mismoNodo(Dir a,Dir b){
+	return a.ip==b.ip&&a.port==b.port;//podría comparar solo ip
 }
 
 void yamaAtender() {
@@ -107,14 +110,13 @@ void yamaAtender() {
 					Mensaje* mensaje = mensajeRecibir(socketI);
 					mensajeObtenerDatos(mensaje,socketI);
 					if(mensaje->header.operacion==DESCONEXION){
-						int nodoDesconectado=*((int32_t*)mensaje->datos);
+						int32_t nodoDesconectado=*((int32_t*)mensaje->datos);
 						bool nodoDesconectadoF(Worker* worker){
-							return worker->nodo==nodoDesconectado;
+							return worker->nodo.ip==nodoDesconectado;
 						}
 						((Worker*)list_find(workers,nodoDesconectadoF))->conectado=false;
-
 						void cazarEntradasDesconectadas(Entrada* entrada){
-							if(entrada->nodo==nodoDesconectado){
+							if(entrada->nodo.ip==nodoDesconectado){
 								actualizarTablaEstados(entrada,Abortado);
 							}
 						}
@@ -148,10 +150,10 @@ void yamaAtender() {
 							servidor->maximoSocket--; //no debería romper nada
 						log_info(archivoLog, "[CONEXION] Proceso Master %d se ha desconectado",socketI);
 					}else{
-						int32_t nodo=*((int32_t*)mensaje->datos);
-						int32_t bloque=*((int32_t*)(mensaje->datos+INTSIZE));
+						Dir nodo=*((Dir*)mensaje->datos);
+						int32_t bloque=*((int32_t*)(mensaje->datos+INTSIZE*2));
 						bool buscarEntrada(Entrada* entrada){
-							return entrada->nodo==nodo&&entrada->bloque==bloque;
+							return entrada->nodo.ip==nodo.ip&&entrada->bloque==bloque;
 						}
 						actualizarTablaEstados(list_find(tablaEstados,buscarEntrada),mensaje->header.operacion);
 					}
@@ -210,7 +212,7 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 		void setearClock(Worker* worker){
 			if(worker->disponibilidad>mayorDisponibilidad){
 				mayorDisponibilidad=worker->disponibilidad;
-				clock=worker->nodo;
+				clock=ipToNum(worker->nodo.ip);
 			}
 		}
 		list_iterate(workers,setearClock);
@@ -244,10 +246,10 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 		}
 
 		bool encontrado=false;
-		if(workerClock->nodo==bloque0->nodo){
+		if(mismoNodo(workerClock->nodo,bloque0->nodo)){
 			asignarBloque(workerClock,bloque0,bloque1);
 			encontrado=true;
-		}else if(workerClock->nodo==bloque1->nodo){
+		}else if(mismoNodo(workerClock->nodo,bloque1->nodo)){
 			asignarBloque(workerClock,bloque1,bloque0);
 			encontrado=true;
 		}
@@ -269,10 +271,10 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 			}
 			Worker* workerAdv=obtenerWorker(&clockAdv);
 			if(workerAdv->disponibilidad>0){
-				if(workerAdv->nodo==bloque0->nodo){
+				if(mismoNodo(workerAdv->nodo,bloque0->nodo)){
 					asignarBloque(workerAdv,bloque0,bloque1);
 					break;
-				}else if(workerClock->nodo==bloque1->nodo){
+				}else if(mismoNodo(workerClock->nodo,bloque1->nodo)){
 					asignarBloque(workerAdv,bloque1,bloque0);
 					break;
 				}
@@ -280,14 +282,14 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 		}
 	}
 
-	int tamanioEslabon=INTSIZE*2+TEMPSIZE;
+	int tamanioEslabon=INTSIZE*3+TEMPSIZE;
 	int32_t tamanioDato=tamanioEslabon*tablaEstadosJob->elements_count;
 	void* dato=malloc(tamanioDato);
 	for(i=0;i<tablaEstadosJob->elements_count;i++){
 		Entrada* entrada=list_get(tablaEstadosJob,i);
-		memcpy(dato+tamanioEslabon*i,&entrada->nodo,INTSIZE);
-		memcpy(dato+tamanioEslabon*i+INTSIZE,&entrada->bloque,INTSIZE);
-		memcpy(dato+tamanioEslabon*i+INTSIZE*2,entrada->pathTemporal,TEMPSIZE);
+		memcpy(dato+tamanioEslabon*i,&entrada->nodo,INTSIZE*2);
+		memcpy(dato+tamanioEslabon*i+INTSIZE*2,&entrada->bloque,INTSIZE);
+		memcpy(dato+tamanioEslabon*i+INTSIZE*3,entrada->pathTemporal,TEMPSIZE);
 	}
 	mensajeEnviar(master,Transformacion,dato,tamanioDato);
 	free(dato);
@@ -325,7 +327,7 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 			mensajeEnviar(entradaA->masterid,Aborto,nullptr,0);//podría ser cierre, depende como lo implemente
 		}
 		if(entradaA->etapa==Transformacion&&actualizando!=Abortado){
-			if(entradaA->nodo==entradaA->nodoAlt){
+			if(mismoNodo(entradaA->nodo,entradaA->nodoAlt)){
 				abortarJob();
 				return;
 			}
@@ -354,35 +356,31 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 	bool mismoJob(Entrada* entrada){
 		return entrada->job==entradaA->job;
 	}
-	bool mismoNodo(Entrada* entrada){
-		return mismoJob(entrada)&&entrada->nodo==entradaA->nodo;
+	bool mismoNodoJob(Entrada* entrada){
+		return mismoJob(entrada)&&mismoNodo(entrada->nodo,entradaA->nodo);
 	}
 	if(entradaA->etapa==Transformacion){
-		trabajoTerminado(mismoNodo);
+		trabajoTerminado(mismoNodoJob);
 		if(trabajoTerminadoB){
-			moverAUsados(mismoNodo);
+			moverAUsados(mismoNodoJob);
 			Entrada reducLocal;
 			darDatosEntrada(&reducLocal);
 			darPathTemporal(&reducLocal.pathTemporal,'l');
 			reducLocal.etapa=ReducLocal;
-			struct __attribute__((__packed__)){//para que no use relleno
-				int32_t nodo;
-				char* temp;
-			}dato;
-			dato.nodo=reducLocal.nodo;
-			dato.temp=reducLocal.pathTemporal;
+			char dato[DIRSIZE+TEMPSIZE];
+			memcpy(dato,&reducLocal.nodo,DIRSIZE);
+			memcpy(dato+DIRSIZE,reducLocal.pathTemporal,TEMPSIZE);
 			mensajeEnviar(reducLocal.masterid,ReducLocal,&dato,sizeof dato);
 			list_add(tablaEstados,&reducLocal);//mutex
 		}
 	}else if(entradaA->etapa==ReducLocal){
 		trabajoTerminado(mismoJob);
 		if(trabajoTerminadoB){
-			moverAUsados(mismoJob);
 			Entrada reducGlobal;
 			darDatosEntrada(&reducGlobal);
 			darPathTemporal(&reducGlobal.pathTemporal,'g');
 			reducGlobal.etapa=ReducGlobal;
-			int32_t nodoMenorCarga=entradaA->nodo;
+			Dir nodoMenorCarga=entradaA->nodo;
 			int menorCargaI=100; //
 			void menorCarga(Worker* worker){
 				if(worker->carga<menorCargaI)
@@ -390,13 +388,17 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 					menorCargaI=worker->carga;
 			}
 			list_iterate(workers,menorCarga);
-			struct __attribute__((__packed__)){
-				int32_t nodo;
-				char* temp;
-			}dato;
-			dato.nodo=reducGlobal.nodo;
-			dato.temp=reducGlobal.pathTemporal;
-			mensajeEnviar(reducGlobal.masterid,ReducGlobal,&dato,sizeof dato);
+			Lista nodosReducidos=list_filter(tablaEstados,mismoJob);
+			int tamanoDato=DIRSIZE*(nodosReducidos->elements_count+1)+TEMPSIZE;
+			void* dato=malloc(tamanoDato);
+			memcpy(dato,reducGlobal.pathTemporal,TEMPSIZE);
+			memcpy(dato+TEMPSIZE,&nodoMenorCarga,DIRSIZE);
+			int i;
+			for(i=0;i<nodosReducidos->elements_count;i++){
+				memcpy(dato+TEMPSIZE+DIRSIZE*(i+1),list_get(nodosReducidos,i),DIRSIZE);
+			}
+			mensajeEnviar(reducGlobal.masterid,ReducGlobal,dato,tamanoDato);
+			moverAUsados(mismoJob);
 			list_add(tablaEstados,&reducGlobal);//mutex
 		}
 	}else{
@@ -423,7 +425,7 @@ void dibujarTablaEstados(){
 		default: estado="terminado";
 		}
 		printf("%d     %d     %d     %d     %s     %s    %s",
-				entrada->job,entrada->masterid,entrada->nodo,entrada->bloque,
+				entrada->job,entrada->masterid-2,ipToNum(entrada->nodo.ip),entrada->bloque,
 				etapa,entrada->pathTemporal,estado);
 	}
 	list_iterate(tablaUsados,dibujarEntrada);
@@ -454,42 +456,14 @@ void darPathTemporal(char** ret,char pre){
 	anterior=string_duplicate(*ret); //leak?
 }
 
-
-
-
-
-//wat is dis
-//void notificadorInformar(Socket unSocket) {
-//	char buffer[BUF_LEN];
-//	int length = read(unSocket, buffer, BUF_LEN);
-//	int offset = 0;
-//	while (offset < length) {
-//		struct inotify_event *event = (struct inotify_event *) &buffer[offset];
-//		if (event->len) {
-//		if (event->mask & IN_MODIFY) {
-//		if (!(event->mask & IN_ISDIR)) {
-//		if(strcmp(event->name, "ArchivoConfig.conf"))
-//			break;
-//		ArchivoConfig archivoConfig = config_create(RUTA_CONFIG);
-//		if(archivoConfigTieneCampo(archivoConfig, "RETARDO_PLANIFICACION")){
-//			int retardo = archivoConfigEnteroDe(archivoConfig, "RETARDO_PLANIFICACION");
-//				if(retardo != configuracion->retardoPlanificacion){
-//					puts("");
-//					log_warning(archivoLog, "[CONFIG]: SE MODIFICO EL ARCHIVO DE CONFIGURACION");
-//					configuracion->retardoPlanificacion = retardo;
-//					log_warning(archivoLog, "[CONFIG]: NUEVA RUTA METADATA: %s\n", configuracion->retardoPlanificacion);
-//
-//				}
-//				archivoConfigDestruir(archivoConfig);
-//		}
-//		}
-//		}
-//		}
-//		offset += sizeof (struct inotify_event) + event->len;
-//		}
-//
-//	//Esto se haria en otro lado
-//
-//	//inotify_rm_watch(file_descriptor, watch_descriptor);
-//		//close(file_descriptor);
-//}
+int ipToNum(int ip){
+	int index,i=0;
+	void buscarIp(Worker* worker){
+		if(worker->nodo.ip==ip)
+			index=i;
+		i++;
+	}
+	list_iterate(workers,buscarIp);
+	return index;
+}
+//lo mismo con socketMasters a menos que -2 funcione
