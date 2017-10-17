@@ -287,26 +287,33 @@ int reduccionGlobal(char* codigo,char* origen,char* destino){
 	return 0;
 }
 
-/*char** getOrigenesLocales(char* origen){
+globOri* getOrigenesGlobales(char* origen){
 	int cantOrigenes;
 	memcpy(&cantOrigenes, origen, sizeof(int32_t));
-	char* oris [cantOrigenes];
+	globOri* oris [cantOrigenes];
 	int i;
 	int size = sizeof(int32_t);
 	int sizeOri=0;
+	int sizeIP=0;
 	for(i=0;(i-1)==cantOrigenes;i++){
 		memcpy(&sizeOri, origen + size , sizeof(int32_t));
 		size= size + sizeof(int32_t);
-		memcpy(&oris[i],origen + size, sizeOri);
+		memcpy(&oris[i]->ruta,origen + size, sizeOri);
 		size= size + sizeOri;
+		memcpy(&sizeIP, origen + size , sizeof(int32_t));
+		size= size + sizeof(int32_t);
+		memcpy(&oris[i]->ip,origen + size, sizeOri);
+		size= size + sizeIP;
+		memcpy(&oris[i]->puerto, origen + size , sizeof(int32_t));
+		size= size + sizeof(int32_t);
 	}
 	return oris;
 }
 
-char* appendL(char** origenes){
+char* appendG(globOri* origenes){
 	char* rutaArchAppend;
 	return rutaArchAppend;
-}*/
+}
 
 void socketAceptarConexion() {
 	Socket nuevoSocket;
