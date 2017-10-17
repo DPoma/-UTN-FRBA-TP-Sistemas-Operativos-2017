@@ -127,7 +127,8 @@ Hilo hiloConsola;
 Lista listaDirectorios;
 Lista listaArchivos;
 Lista listaNodos;
-char bitmapDirectorios[LIMITE_DIRECTORIOS];
+String bi;
+Bitmap bitmapDirectorios;
 int directoriosDisponibles;
 
 //--------------------------------------- Funciones de File System -------------------------------------
@@ -231,4 +232,4 @@ void directorioIniciarEstructura();
 void nodoIniciarEstructura();
 void bitmapIniciarEstructura();
 String* directorioSeparar(String ruta);
-String directorioObtenerUltimoDirectorio(String ruta);
+String directorioExtraerNombreDeRuta(String ruta);

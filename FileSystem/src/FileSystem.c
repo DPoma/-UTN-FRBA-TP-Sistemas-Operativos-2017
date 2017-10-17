@@ -22,6 +22,7 @@ int main(int argc, String* argsv) {
 
 void iniciar() {
 	listaNodos = listaCrear();
+	bitmapDirectorios = bitarray_create_with_mode(bitmap);
 	fileLimpiar(RUTA_NODOS);
 	directorioIniciarEstructura();
 	bitmapIniciarEstructura();
@@ -645,9 +646,97 @@ void comandoRemoverArchivo(Comando* comando) {
 void comandoRemoverBloque(Comando* comando) {
 
 }
+int directorioObtenerIdentificador(String path) {
+	int id;
+	ControlDirectorio* control = directorioControlCrear(path);
+	while(stringValido(control->nombreDirectorio)) {
+		directorioBuscarIdentificador(control);
+		if(directorioExisteIdentificador(control->identificadorDirectorio)) {
+			if(control->nombresDirectorios[control->indiceNombresDirectorios + 1] == NULL) {
+				id = control->identificadorDirectorio;
+				return id;
+			}
+			else
+				control->identificadorPadre = control->identificadorDirectorio;
+
+			control->indiceNombresDirectorios++;
+			directorioControlSetearNombre(control);
+		}
+		else
+			return ERROR;
+	}
+	return ERROR;
+}
+
+Directorio* directorioBuscarEnLista(int identificadorDirectorio) {
+
+	bool buscarPorId(Directorio* directorio) {
+		return directorio->identificador == identificadorDirectorio;
+	}
+
+	Directorio* directorio = listaBuscar(listaDirectorios, buscarPorId);
+	return directorio;
+}
+
+bool directorioTieneAlgunArchivo(int identificador) {
+
+	bool archivoEsHijo(Archivo* archivo) {
+		return archivo->identificadorPadre == identificador;
+	}
+
+	return listaCumpleAlguno(listaArchivos, archivoEsHijo);
+}
+
+
+bool directorioTieneAlgunDirectorio(int identificador) {
+
+	bool directorioEsHijo(Directorio* directorio) {
+		return directorio->identificadorPadre == identificador;
+	}
+
+	return listaCumpleAlguno(listaDirectorios, directorioEsHijo);
+}
+
+bool directorioTieneAlgo(int identificador) {
+	return directorioTieneAlgunDirectorio(identificador) ||
+			directorioTieneAlgunArchivo(identificador);
+}
+
+
+void directorioEliminar(int identificador) {
+
+	bool tieneElMismoId(Directorio* directorio) {
+		return directorio->identificador == identificador;
+	}
+
+	listaEliminarDestruyendoPorCondicion(listaDirectorios, tieneElMismoId, memoriaLiberar);
+	//indiceDirectorios[idAEliminar] = 0;
+	directoriosDisponibles++;
+	directorioActualizarArchivo(idPadre);
+}
+
 
 void comandoRemoverDirectorio(Comando* comando) {
+	String ruta = comando->argumentos[1];
 
+	if (stringIguales(ruta , "/")) {
+		imprimirMensaje(archivoLog,"[ERROR] El directorio raiz no puede ser eliminado");
+		return;
+	}
+
+	int identificador = directorioObtenerIdentificador(ruta);
+
+	if(!directorioExisteIdentificador(identificador)) {
+		imprimirMensaje(archivoLog,"[ERROR] El directorio no existe");
+		return;
+	}
+
+	if(directorioTieneAlgo(identificador))
+		imprimirMensajeUno(archivoLog,"El directorio %s no puede ser eliminado ya que posee archivos o directorios",ruta);
+	else {
+		directorioEliminar(identificador);
+		imprimirMensajeUno(archivoLog,"El directorio %s ha sido eliminado",ruta);
+	}
 }
 
 void comandoRenombrarArchivoDirectorio(Comando* comando) {
@@ -697,7 +786,7 @@ void comandoObtenerMD5(Comando* comando) {
 		int descriptores[2];
 		pipe(descriptores);
 		String md5DeArchivo = memoriaAlocar(MAX_STRING);
-		String nombreArchivo = directorioObtenerUltimoDirectorio(comando->argumentos[1]);
+		String nombreArchivo = directorioExtraerNombreDeRuta(comando->argumentos[1]);
 		pidHijo = fork();
 		if(pidHijo == -1)
 			imprimirMensaje(archivoLog, "[ERROR] Fallo el fork (Estas en problemas amigo)");
@@ -725,7 +814,7 @@ void comandoObtenerMD5(Comando* comando) {
 		//imprimirMensaje("[ERROR] El archivo no se encuentra en el File System YAMA");
 }
 
-String directorioObtenerUltimoDirectorio(String ruta) {
+String directorioExtraerNombreDeRuta(String ruta) {
 	int indice;
 	int ultimaBarra;
 	for(indice=0; ruta[indice] != FIN; indice++)
@@ -754,7 +843,7 @@ void directorioMostrarArchivos(Directorio* directorioPadre) {
 
 void comandoListarDirectorio(Comando* comando) {
 
-	String nombreDirectorio = directorioObtenerUltimoDirectorio(comando->argumentos[1]);
+	String nombreDirectorio = directorioExtraerNombreDeRuta(comando->argumentos[1]);
 
 	bool directorioBuscarPorNombre(Directorio* directorio) {
 		return stringIguales(nombreDirectorio, directorio->nombre);

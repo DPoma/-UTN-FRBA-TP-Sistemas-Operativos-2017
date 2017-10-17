@@ -529,7 +529,7 @@ void listaOrdenar(Lista lista, bool(*funcion)(void*, void*)) {
 int listaCuantosCumplen(Lista lista, bool(*funcion)(void*)) {
 	return list_count_satisfying(lista, funcion);
 }
-bool listCumpleAlguno(Lista lista, bool(*funcion)(void*)) {
+bool listaCumpleAlguno(Lista lista, bool(*funcion)(void*)) {
 	return list_any_satisfy(lista, funcion);
 }
 bool listaCumplenTodos(Lista lista, bool(*funcion)(void*)) {
@@ -746,4 +746,17 @@ Dir getIpPort(Socket socket){
 	dir.ip=((struct sockaddr_in*)&addr)->sin_addr.s_addr;
 	dir.port=((struct sockaddr_in*)&addr)->sin_port;
 	return dir;
+}
+
+//--------------------------------------- Funciones de Bitmap -------------------------------------
+
+Bitmap* bitmapCrear(int tamanioBytes) {
+	Bitmap* bitmap = malloc(sizeof(Bitmap));
+	bitarray_create_with_mode(bitmap->bits, tamanioBytes, LSB_FIRST);
+	return bitmap;
+}
+
+void bitmapDestruir(Bitmap* bitmap) {
+	bitarray_destroy();
+
 }

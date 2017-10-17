@@ -75,7 +75,7 @@ typedef pthread_mutex_t Mutex;
 typedef pthread_t Hilo;
 typedef t_list* Lista;
 typedef FILE* File;
-typedef t_bitarray BitArray;
+typedef t_bitarray* BitArray;
 
 //--------------------------------------- Estructuras -------------------------------------
 
@@ -96,6 +96,11 @@ typedef struct {
 	String puerto;
 	String ip;
 } Conexion;
+
+typedef struct {
+	String bits;
+	BitArray controlBits;
+} Bitmap;
 
 typedef struct __attribute__((__packed__)){
 	int32_t ip;
@@ -231,7 +236,7 @@ int listaCantidadElementos(Lista lista);
 bool listaEstaVacia(Lista lista);
 void listaOrdenar(Lista lista, bool(*funcion)(void*, void*));
 int listaCuantosCumplen(Lista lista, bool(*funcion)(void*));
-bool listCumpleAlguno(Lista lista, bool(*funcion)(void*));
+bool listaCumpleAlguno(Lista lista, bool(*funcion)(void*));
 bool listaCumplenTodos(Lista lista, bool(*funcion)(void*));
 
 //--------------------------------------- Funciones para String -------------------------------------
