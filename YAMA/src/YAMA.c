@@ -44,8 +44,8 @@ void yamaIniciar() {
 		worker.conectado=true;
 		worker.carga=0;
 		worker.tareasRealizadas=0;
-		worker.nodo=i; //pensando en borrar esto y manejarme solo con ip
-		memcpy(worker.ipYPuerto,infoNodos->datos+IPPORTSIZE*i,IPPORTSIZE);
+		worker.nodo=*(Dir*)(infoNodos+sizeof(Dir)*i);
+		worker.num=i;
 		list_add(workers,&worker);
 	}
 }
@@ -61,6 +61,10 @@ void configurar(){
 	configuracion->disponibilidadBase = archivoConfigEnteroDe(archivoConfig, "DISPONIBILIDAD_BASE");
 	configuracion->reconfigurar=false;
 	archivoConfigDestruir(archivoConfig);
+}
+
+bool mismoNodo(Dir a,Dir b){
+	return a.ip==b.ip&&a.port==b.port;//podría comparar solo ip
 }
 
 void yamaAtender() {
@@ -107,14 +111,13 @@ void yamaAtender() {
 					Mensaje* mensaje = mensajeRecibir(socketI);
 					mensajeObtenerDatos(mensaje,socketI);
 					if(mensaje->header.operacion==DESCONEXION){
-						int nodoDesconectado=*((int32_t*)mensaje->datos);
+						int32_t nodoDesconectado=*((int32_t*)mensaje->datos);
 						bool nodoDesconectadoF(Worker* worker){
-							return worker->nodo==nodoDesconectado;
+							return worker->nodo.ip==nodoDesconectado;
 						}
 						((Worker*)list_find(workers,nodoDesconectadoF))->conectado=false;
-
 						void cazarEntradasDesconectadas(Entrada* entrada){
-							if(entrada->nodo==nodoDesconectado){
+							if(entrada->nodo.ip==nodoDesconectado){
 								actualizarTablaEstados(entrada,Abortado);
 							}
 						}
@@ -148,10 +151,10 @@ void yamaAtender() {
 							servidor->maximoSocket--; //no debería romper nada
 						log_info(archivoLog, "[CONEXION] Proceso Master %d se ha desconectado",socketI);
 					}else{
-						int32_t nodo=*((int32_t*)mensaje->datos);
-						int32_t bloque=*((int32_t*)(mensaje->datos+INTSIZE));
+						Dir nodo=*((Dir*)mensaje->datos);
+						int32_t bloque=*((int32_t*)(mensaje->datos+INTSIZE*2));
 						bool buscarEntrada(Entrada* entrada){
-							return entrada->nodo==nodo&&entrada->bloque==bloque;
+							return entrada->nodo.ip==nodo.ip&&entrada->bloque==bloque;
 						}
 						actualizarTablaEstados(list_find(tablaEstados,buscarEntrada),mensaje->header.operacion);
 					}
@@ -210,7 +213,7 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 		void setearClock(Worker* worker){
 			if(worker->disponibilidad>mayorDisponibilidad){
 				mayorDisponibilidad=worker->disponibilidad;
-				clock=worker->nodo;
+				clock=worker->num;
 			}
 		}
 		list_iterate(workers,setearClock);
@@ -244,10 +247,10 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 		}
 
 		bool encontrado=false;
-		if(workerClock->nodo==bloque0->nodo){
+		if(mismoNodo(workerClock->nodo,bloque0->nodo)){
 			asignarBloque(workerClock,bloque0,bloque1);
 			encontrado=true;
-		}else if(workerClock->nodo==bloque1->nodo){
+		}else if(mismoNodo(workerClock->nodo,bloque1->nodo)){
 			asignarBloque(workerClock,bloque1,bloque0);
 			encontrado=true;
 		}
@@ -269,10 +272,10 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 			}
 			Worker* workerAdv=obtenerWorker(&clockAdv);
 			if(workerAdv->disponibilidad>0){
-				if(workerAdv->nodo==bloque0->nodo){
+				if(mismoNodo(workerAdv->nodo,bloque0->nodo)){
 					asignarBloque(workerAdv,bloque0,bloque1);
 					break;
-				}else if(workerClock->nodo==bloque1->nodo){
+				}else if(mismoNodo(workerClock->nodo,bloque1->nodo)){
 					asignarBloque(workerAdv,bloque1,bloque0);
 					break;
 				}
@@ -280,14 +283,14 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 		}
 	}
 
-	int tamanioEslabon=INTSIZE*2+TEMPSIZE;
+	int tamanioEslabon=INTSIZE*3+TEMPSIZE;
 	int32_t tamanioDato=tamanioEslabon*tablaEstadosJob->elements_count;
 	void* dato=malloc(tamanioDato);
 	for(i=0;i<tablaEstadosJob->elements_count;i++){
 		Entrada* entrada=list_get(tablaEstadosJob,i);
-		memcpy(dato+tamanioEslabon*i,&entrada->nodo,INTSIZE);
-		memcpy(dato+tamanioEslabon*i+INTSIZE,&entrada->bloque,INTSIZE);
-		memcpy(dato+tamanioEslabon*i+INTSIZE*2,entrada->pathTemporal,TEMPSIZE);
+		memcpy(dato+tamanioEslabon*i,&entrada->nodo,INTSIZE*2);
+		memcpy(dato+tamanioEslabon*i+INTSIZE*2,&entrada->bloque,INTSIZE);
+		memcpy(dato+tamanioEslabon*i+INTSIZE*3,entrada->pathTemporal,TEMPSIZE);
 	}
 	mensajeEnviar(master,Transformacion,dato,tamanioDato);
 	free(dato);
@@ -325,7 +328,7 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 			mensajeEnviar(entradaA->masterid,Aborto,nullptr,0);//podría ser cierre, depende como lo implemente
 		}
 		if(entradaA->etapa==Transformacion&&actualizando!=Abortado){
-			if(entradaA->nodo==entradaA->nodoAlt){
+			if(mismoNodo(entradaA->nodo,entradaA->nodoAlt)){
 				abortarJob();
 				return;
 			}
@@ -354,20 +357,20 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 	bool mismoJob(Entrada* entrada){
 		return entrada->job==entradaA->job;
 	}
-	bool mismoNodo(Entrada* entrada){
-		return mismoJob(entrada)&&entrada->nodo==entradaA->nodo;
+	bool mismoNodoJob(Entrada* entrada){
+		return mismoJob(entrada)&&mismoNodo(entrada->nodo,entradaA->nodo);
 	}
 	if(entradaA->etapa==Transformacion){
-		trabajoTerminado(mismoNodo);
+		trabajoTerminado(mismoNodoJob);
 		if(trabajoTerminadoB){
-			moverAUsados(mismoNodo);
+			moverAUsados(mismoNodoJob);
 			Entrada reducLocal;
 			darDatosEntrada(&reducLocal);
 			darPathTemporal(&reducLocal.pathTemporal,'l');
 			reducLocal.etapa=ReducLocal;
 			struct __attribute__((__packed__)){//para que no use relleno
-				int32_t nodo;
-				char* temp;
+				Dir nodo;
+				char* temp; //esto esta mal TODO
 			}dato;
 			dato.nodo=reducLocal.nodo;
 			dato.temp=reducLocal.pathTemporal;
@@ -382,7 +385,7 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 			darDatosEntrada(&reducGlobal);
 			darPathTemporal(&reducGlobal.pathTemporal,'g');
 			reducGlobal.etapa=ReducGlobal;
-			int32_t nodoMenorCarga=entradaA->nodo;
+			Dir nodoMenorCarga=entradaA->nodo;
 			int menorCargaI=100; //
 			void menorCarga(Worker* worker){
 				if(worker->carga<menorCargaI)
@@ -391,8 +394,8 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 			}
 			list_iterate(workers,menorCarga);
 			struct __attribute__((__packed__)){
-				int32_t nodo;
-				char* temp;
+				Dir nodo;
+				char* temp; //
 			}dato;
 			dato.nodo=reducGlobal.nodo;
 			dato.temp=reducGlobal.pathTemporal;
@@ -423,7 +426,7 @@ void dibujarTablaEstados(){
 		default: estado="terminado";
 		}
 		printf("%d     %d     %d     %d     %s     %s    %s",
-				entrada->job,entrada->masterid,entrada->nodo,entrada->bloque,
+				entrada->job,entrada->masterid,entrada->nodo.ip,entrada->bloque,
 				etapa,entrada->pathTemporal,estado);
 	}
 	list_iterate(tablaUsados,dibujarEntrada);

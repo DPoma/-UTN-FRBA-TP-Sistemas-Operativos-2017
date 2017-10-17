@@ -20,6 +20,11 @@
 #define IPPORTSIZE 10
 #define nullptr NULL
 
+typedef struct __attribute__((__packed__)){
+	int32_t ip;
+	int32_t port;
+} Dir;
+
 typedef struct {
 	char puertoMaster[50];
 	char ipFileSystem[50];
@@ -41,7 +46,7 @@ typedef struct {
 Servidor* servidor;
 
 typedef struct {
-	int32_t nodo;
+	Dir nodo;
 	int32_t bloque;
 	//no pongo los bytes aca porque estan dos veces en bloques gemelos,
 	//los manejo aparte
@@ -52,8 +57,8 @@ typedef struct{
 	uint32_t carga; //son uint32_t porque lo pide el tp, yo usaria ints
 	uint32_t tareasRealizadas;
 	uint32_t disponibilidad;
-	uint32_t nodo; //para comparar con los bloques que reciba
-	char ipYPuerto[10]; //para que master sepa quien es quien
+	uint32_t num;
+	Dir nodo; //no me lo reconoce, por ahi estan mal los paths?
 } Worker;
 Lista workers;
 
@@ -63,10 +68,10 @@ int job=-1;
 typedef struct{
 	int job;
 	Socket masterid;
-	int32_t nodo;
+	Dir nodo;
 	int32_t bloque;
 	int32_t bytes;
-	int32_t nodoAlt;
+	Dir nodoAlt;
 	int32_t bloqueAlt;
 	Etapa etapa;
 	char* pathTemporal; //podría usar char[12] y no usar memoria dinamica, despues ver
