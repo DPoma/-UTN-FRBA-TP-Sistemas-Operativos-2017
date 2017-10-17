@@ -692,30 +692,34 @@ void comandoCopiarBloque(Comando* comando) {
 
 void comandoObtenerMD5(Comando* comando) {
 	//if (archivoEstaEnLista(nombreArchivo)) {
-		int descriptores[2];
 		int pidHijo;
+		int longitudMensaje;
+		int descriptores[2];
 		pipe(descriptores);
-		String entrada = comando->argumentos[1];
 		String md5DeArchivo = memoriaAlocar(MAX_STRING);
-		String rutaArchivo = memoriaAlocar(MAX_STRING);
-		String nombreArchivo = directorioObtenerUltimoDirectorio(entrada);
-		stringCopiar(rutaArchivo, "/tmp/");
-		stringConcatenar(&rutaArchivo, nombreArchivo);
+		String nombreArchivo = directorioObtenerUltimoDirectorio(comando->argumentos[1]);
 		pidHijo = fork();
 		if(pidHijo == -1)
 			imprimirMensaje(archivoLog, "[ERROR] Fallo el fork (Estas en problemas amigo)");
 		else if(pidHijo == 0) {
+			close(descriptores[0]);
 			close(1);
 			dup2(descriptores[1], 1);
-			close(descriptores[0]);
-			execlp("/usr/bin/md5sum", "md5sum", entrada, NULL);
-			exit(EXIT_SUCCESS);
-		} if(pidHijo > 0)
+			execlp("/usr/bin/md5sum", "md5sum", comando->argumentos[1], NULL);
+			close(descriptores[1]);
+		} if(pidHijo > 0) {
+			close(descriptores[1]);
 			wait(NULL);
-		read(descriptores[0], md5DeArchivo, MAX_STRING);
-		imprimirMensajeUno(archivoLog,"[ARCHIVO] El MD5 es %s", md5DeArchivo);
+			int bytesLeidos;
+			while((bytesLeidos = read(descriptores[0], md5DeArchivo, MAX_STRING)) > 0)
+				if(bytesLeidos > 0)
+					longitudMensaje = bytesLeidos;
+			close(descriptores[0]);
+		}
+		memcpy(md5DeArchivo+longitudMensaje, "\0", 1);
+		printf("[ARCHIVO] El MD5 es %s", md5DeArchivo);
+		log_info(archivoLog,"[ARCHIVO] El MD5 es %s", md5DeArchivo);
 		memoriaLiberar(md5DeArchivo);
-		memoriaLiberar(rutaArchivo);
 		memoriaLiberar(nombreArchivo);
 	//} else
 		//imprimirMensaje("[ERROR] El archivo no se encuentra en el File System YAMA");
