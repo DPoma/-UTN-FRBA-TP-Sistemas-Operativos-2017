@@ -177,18 +177,47 @@ int transformar(char* codigo,int origen,char* destino){
 	free (commando);
 	//paso buffer a script y resultado script a sort
 	char*command=NULL;
+	strcat(command,"cat");
+	strcat(command,buffer);
+	strcat(command,"|");
 	strcat(command,codigo);
-	strcat(command,buffer);//suponiendo que el script requiere un buffer como parametro
 	strcat(command,"| sort >");
 	strcat(command,destino);
 	system(command);
 	free (command);
+	//resuelto por parametro en vez de cat
+	/*strcat(command,codigo);
+	strcat(command,buffer);//suponiendo que el script requiere un buffer como parametro
+	strcat(command,"| sort >");
+	strcat(command,destino);
+	system(command);
+	free (command);*/
 	return 0;
 }
 
+//2da etapa
 int reduccionLocal(char* codigo,char* origen,char* destino){
 	char** listaOri;
 	listaOri = getOrigenesLocales(origen);
+	char* apendado;
+	apendado = appendL(listaOri);
+	//doy privilegios a script
+	char*commando=NULL;
+	strcat(commando,"chmod 0755");
+	strcat(commando,codigo);
+	system(commando);
+	free (commando);
+	//paso buffer a script y resultado script a sort
+	char*command=NULL;
+	strcat(command,"cat");
+	strcat(command,apendado);
+	strcat(command,"|");
+	strcat(command,codigo);
+	strcat(command,">");
+	strcat(command,destino);
+	system(command);
+	free (command);
+	free (apendado);
 	int i=0;
 	while(listaOri[i]!=NULL){
 		free(listaOri[i]);
@@ -213,6 +242,11 @@ char** getOrigenesLocales(char* origen){
 		size= size + sizeOri;
 	}
 	return oris;
+}
+
+char* appendL(char** origenes){
+	char* rutaArchAppend;
+	return rutaArchAppend;
 }
 
 void socketAceptarConexion() {
