@@ -17,6 +17,7 @@
 
 #define INTSIZE sizeof(int32_t)
 #define TEMPSIZE 12
+#define DIRSIZE sizeof(Dir)
 #define IPPORTSIZE 10
 #define nullptr NULL
 
@@ -57,7 +58,6 @@ typedef struct{
 	uint32_t carga; //son uint32_t porque lo pide el tp, yo usaria ints
 	uint32_t tareasRealizadas;
 	uint32_t disponibilidad;
-	uint32_t num;
 	Dir nodo; //no me lo reconoce, por ahi estan mal los paths?
 } Worker;
 Lista workers;
@@ -84,6 +84,8 @@ Lista tablaUsados; //entradas Abortadas, Error, o Terminadas que ya
 Configuracion* configuracion; //es un puntero por algun motivo?
 ArchivoLog archivoLog;
 int estadoYama;
+
+int ipToNum(int);
 
 void darPathTemporal(char**,char);
 void configurar();

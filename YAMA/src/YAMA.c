@@ -45,7 +45,6 @@ void yamaIniciar() {
 		worker.carga=0;
 		worker.tareasRealizadas=0;
 		worker.nodo=*(Dir*)(infoNodos+sizeof(Dir)*i);
-		worker.num=i;
 		list_add(workers,&worker);
 	}
 }
@@ -213,7 +212,7 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 		void setearClock(Worker* worker){
 			if(worker->disponibilidad>mayorDisponibilidad){
 				mayorDisponibilidad=worker->disponibilidad;
-				clock=worker->num;
+				clock=ipToNum(worker->nodo.ip);
 			}
 		}
 		list_iterate(workers,setearClock);
@@ -368,19 +367,15 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 			darDatosEntrada(&reducLocal);
 			darPathTemporal(&reducLocal.pathTemporal,'l');
 			reducLocal.etapa=ReducLocal;
-			struct __attribute__((__packed__)){//para que no use relleno
-				Dir nodo;
-				char* temp; //esto esta mal TODO
-			}dato;
-			dato.nodo=reducLocal.nodo;
-			dato.temp=reducLocal.pathTemporal;
+			char dato[DIRSIZE+TEMPSIZE];
+			memcpy(dato,&reducLocal.nodo,DIRSIZE);
+			memcpy(dato+DIRSIZE,reducLocal.pathTemporal,TEMPSIZE);
 			mensajeEnviar(reducLocal.masterid,ReducLocal,&dato,sizeof dato);
 			list_add(tablaEstados,&reducLocal);//mutex
 		}
 	}else if(entradaA->etapa==ReducLocal){
 		trabajoTerminado(mismoJob);
 		if(trabajoTerminadoB){
-			moverAUsados(mismoJob);
 			Entrada reducGlobal;
 			darDatosEntrada(&reducGlobal);
 			darPathTemporal(&reducGlobal.pathTemporal,'g');
@@ -393,13 +388,17 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 					menorCargaI=worker->carga;
 			}
 			list_iterate(workers,menorCarga);
-			struct __attribute__((__packed__)){
-				Dir nodo;
-				char* temp; //
-			}dato;
-			dato.nodo=reducGlobal.nodo;
-			dato.temp=reducGlobal.pathTemporal;
-			mensajeEnviar(reducGlobal.masterid,ReducGlobal,&dato,sizeof dato);
+			Lista nodosReducidos=list_filter(tablaEstados,mismoJob);
+			int tamanoDato=DIRSIZE*(nodosReducidos->elements_count+1)+TEMPSIZE;
+			void* dato=malloc(tamanoDato);
+			memcpy(dato,reducGlobal.pathTemporal,TEMPSIZE);
+			memcpy(dato+TEMPSIZE,&nodoMenorCarga,DIRSIZE);
+			int i;
+			for(i=0;i<nodosReducidos->elements_count;i++){
+				memcpy(dato+TEMPSIZE+DIRSIZE*(i+1),list_get(nodosReducidos,i),DIRSIZE);
+			}
+			mensajeEnviar(reducGlobal.masterid,ReducGlobal,dato,tamanoDato);
+			moverAUsados(mismoJob);
 			list_add(tablaEstados,&reducGlobal);//mutex
 		}
 	}else{
@@ -426,7 +425,7 @@ void dibujarTablaEstados(){
 		default: estado="terminado";
 		}
 		printf("%d     %d     %d     %d     %s     %s    %s",
-				entrada->job,entrada->masterid,entrada->nodo.ip,entrada->bloque,
+				entrada->job,entrada->masterid-2,ipToNum(entrada->nodo.ip),entrada->bloque,
 				etapa,entrada->pathTemporal,estado);
 	}
 	list_iterate(tablaUsados,dibujarEntrada);
@@ -457,42 +456,14 @@ void darPathTemporal(char** ret,char pre){
 	anterior=string_duplicate(*ret); //leak?
 }
 
-
-
-
-
-//wat is dis
-//void notificadorInformar(Socket unSocket) {
-//	char buffer[BUF_LEN];
-//	int length = read(unSocket, buffer, BUF_LEN);
-//	int offset = 0;
-//	while (offset < length) {
-//		struct inotify_event *event = (struct inotify_event *) &buffer[offset];
-//		if (event->len) {
-//		if (event->mask & IN_MODIFY) {
-//		if (!(event->mask & IN_ISDIR)) {
-//		if(strcmp(event->name, "ArchivoConfig.conf"))
-//			break;
-//		ArchivoConfig archivoConfig = config_create(RUTA_CONFIG);
-//		if(archivoConfigTieneCampo(archivoConfig, "RETARDO_PLANIFICACION")){
-//			int retardo = archivoConfigEnteroDe(archivoConfig, "RETARDO_PLANIFICACION");
-//				if(retardo != configuracion->retardoPlanificacion){
-//					puts("");
-//					log_warning(archivoLog, "[CONFIG]: SE MODIFICO EL ARCHIVO DE CONFIGURACION");
-//					configuracion->retardoPlanificacion = retardo;
-//					log_warning(archivoLog, "[CONFIG]: NUEVA RUTA METADATA: %s\n", configuracion->retardoPlanificacion);
-//
-//				}
-//				archivoConfigDestruir(archivoConfig);
-//		}
-//		}
-//		}
-//		}
-//		offset += sizeof (struct inotify_event) + event->len;
-//		}
-//
-//	//Esto se haria en otro lado
-//
-//	//inotify_rm_watch(file_descriptor, watch_descriptor);
-//		//close(file_descriptor);
-//}
+int ipToNum(int ip){
+	int index,i=0;
+	void buscarIp(Worker* worker){
+		if(worker->nodo.ip==ip)
+			index=i;
+		i++;
+	}
+	list_iterate(workers,buscarIp);
+	return index;
+}
+//lo mismo con socketMasters a menos que -2 funcione
