@@ -20,7 +20,7 @@ int main(void) {
 
 
 	while(dataNodeActivado()){
-		//atenderFileSystem(unSocket);
+		atenderFileSystem(unSocket);
 	}
 
 	finalizarDataNode();
@@ -70,6 +70,7 @@ Bloque getBloque(int numeroBloque){
 }
 */
 
+
 void guardarContenido(Bloque bloqueBuscado, Mensaje* mensajeAGuardar){
 	if(sizeof(mensajeAGuardar) < (8*1024*1024)){
 		//Seguramente esto este mal pero la lógica va por aqui
@@ -78,6 +79,8 @@ void guardarContenido(Bloque bloqueBuscado, Mensaje* mensajeAGuardar){
 		// NO se como realizar una fragmentacion interna
 	}
 }
+
+/*
 
 void freeMemory() {
 	Bloque aux;
@@ -88,16 +91,18 @@ void freeMemory() {
 		bloques = aux;
 	}
 	free(bloques.contenido);
-	*/
 }
 
 
+
+*/
 
 void atenderFileSystem(Socket unSocket){
 	Mensaje* peticion = mensajeRecibir(unSocket);
 
 	switch(peticion->header.operacion){
-		case -1:
+		case 0:
+		exit(0);
 		imprimirMensaje(archivoLog, "Error en el File System");
 		finalizarDataNode();
 		estadoDataNode = dataNodeDesactivado();
@@ -105,16 +110,16 @@ void atenderFileSystem(Socket unSocket){
 
 		case SETBLOQUE:
 		imprimirMensaje(archivoLog, "Grabando en el bloque n"); //desp lo cambio
-		int numeroBloque = mensajeRecibir(unSocket);
+		//int numeroBloque = mensajeRecibir(unSocket);
 
-		Mensaje* mensajeAGuardar = mensajeRecibir(unSocket);
-		setBloque(numeroBloque, mensajeAGuardar);
+		//Mensaje* mensajeAGuardar = mensajeRecibir(unSocket);
+		//setBloque(numeroBloque, mensajeAGuardar);
 		estadoDataNode = dataNodeActivado();
 		break;
 
 		case GETBLOQUE:
 		imprimirMensaje(archivoLog, "Se Obtuvo el bloque n");
-		getBloque(numeroBloque);
+		//getBloque(numeroBloque);
 		estadoDataNode = dataNodeActivado();
 		break;
 	}
@@ -127,6 +132,7 @@ void atenderFileSystem(Socket unSocket){
 void deserializar(Mensaje* mensaje){
 
 }
+
 
 
 
@@ -162,7 +168,7 @@ void dataNodeIniciar() {
 	archivoConfigObtenerCampos();
 	configuracion = configuracionCrear(RUTA_CONFIG, (Puntero)configuracionLeerArchivoConfig, campos);
 	configuracionImprimir(configuracion);
-	senialAsignarFuncion(SIGINT, funcionSenial);
+	//senialAsignarFuncion(SIGINT, funcionSenial);
 	dataNodeActivar();
 }
 

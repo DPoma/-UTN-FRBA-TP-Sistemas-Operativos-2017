@@ -20,6 +20,8 @@ int main(int argc, String* argsv) {
 
 //--------------------------------------- Funciones de File System -------------------------------------
 
+//EL INICIO ESTA AL REVES PARA DEBUGEAR
+
 void iniciar() {
 	listaArchivos = listaCrear();
 	listaDirectorios = listaCrear();
@@ -28,7 +30,6 @@ void iniciar() {
 	directoriosDisponibles = 100;
 	fileLimpiar(RUTA_NODOS);
 	fileLimpiar(RUTA_DIRECTORIOS);
-	bitmapIniciarEstructura();
 }
 
 void fileSystemIniciar(String flag) {
@@ -59,9 +60,9 @@ void fileSystemFinalizar() {
 	archivoLogDestruir(archivoLog);
 	bitmapDestruir(bitmapDirectorios);
 	memoriaLiberar(configuracion);
-	listaDestruirConElementos(listaNodos, (Puntero)nodoDestruir);
 	listaDestruirConElementos(listaDirectorios, memoriaLiberar);
 	listaDestruirConElementos(listaArchivos, (Puntero)archivoDestruir);
+	listaDestruirConElementos(listaNodos, (Puntero)nodoDestruir);
 	sleep(2);
 }
 
@@ -473,7 +474,7 @@ void servidorFinalizarConexion(Servidor* servidor, Socket unSocket) {
 	listaSocketsEliminar(unSocket, &servidor->listaMaster);
 	if(socketEsDataNode(servidor, unSocket)) {
 		listaSocketsEliminar(unSocket, &servidor->listaDataNodes);
-		listaEliminarDestruyendoPorCondicion(listaNodos, (Puntero)buscarNodoPorSocket, memoriaLiberar);
+		listaEliminarDestruyendoPorCondicion(listaNodos, (Puntero)buscarNodoPorSocket, (Puntero)nodoDestruir);
 		imprimirMensaje(archivoLog, "[CONEXION] Un proceso Data Node se ha desconectado");
 	}
 	else
@@ -634,12 +635,17 @@ void archivoIniciarEstructura() {
 }
 
 void comandoFormatearFileSystem() {
-	archivoIniciarEstructura();
 	listaDestruirConElementos(listaDirectorios, memoriaLiberar);
-	directorioIniciarEstructura();
+	bitmapDestruir(bitmapDirectorios);
+	bitmapDirectorios = bitmapCrear(13);
+	listaDirectorios = listaCrear();
+	directoriosDisponibles = 100;
+	fileLimpiar(RUTA_DIRECTORIOS);
+	archivoIniciarEstructura();
 	nodoIniciarEstructura();
-	bitmapIniciarEstructura();
 	imprimirMensaje(archivoLog, "[ESTADO] El File System ha sido formateado");
+
+
 }
 
 void comandoRemoverArchivo(Comando* comando) {
@@ -1073,25 +1079,16 @@ void directorioActualizar(ControlDirectorio* control, String rutaDirectorio) {
 		directorioCrearEntradas(control, rutaDirectorio);
 }
 
-void directorioIniciarEstructura() {
-
-}
 
 //--------------------------------------- Funciones de Archivo -------------------------------------
 
 
-void nodoIniciarEstructura() {
-	fileLimpiar(RUTA_NODOS);
-	nodoPersistir();
-}
-
-void bitmapPersistir(Nodo* nodo) {
+void nodoBitmapsPersistir(Nodo* nodo) {
 	String ruta = memoriaAlocar(MAX_STRING);
 	stringCopiar(ruta, RUTA_BITMAPS);
 	stringConcatenar(&ruta, nodo->nombre);
 	File archivo = fileAbrir(ruta, "a+");
 	memoriaLiberar(ruta);
-	nodo->bitmap = bitmapCrear(nodo->bloquesTotales/8);
 	int indice;
 	for(indice = 0; indice < nodo->bloquesTotales; indice++) {
 		bitmapLiberarBit(nodo->bitmap, indice);
@@ -1101,12 +1098,16 @@ void bitmapPersistir(Nodo* nodo) {
 	fileCerrar(archivo);
 }
 
-
-void bitmapIniciarEstructura() {
+void nodoIniciarEstructura() {
+	fileLimpiar(RUTA_NODOS);
+	nodoPersistir();
 	int indice;
 	for(indice = 0; indice < listaCantidadElementos(listaNodos); indice++)
-		bitmapPersistir(listaObtenerElemento(listaNodos, indice));
+		nodoBitmapsPersistir(listaObtenerElemento(listaNodos, indice));
 }
+
+
+
 
 Archivo* archivoCrear(String nombreArchivo, int idPadre, String tipo) {
 	Archivo* archivo = memoriaAlocar(sizeof(Archivo));
@@ -1137,6 +1138,7 @@ Nodo* nodoCrear(String nombre, int bloquesTotales, int bloquesLibres, Socket unS
 	nodo->bloquesTotales = bloquesTotales;
 	nodo->bloquesLibres = bloquesLibres;
 	nodo->socket = unSocket;
+	nodo->bitmap = bitmapCrear((nodo->bloquesTotales+7)/8);
 	return nodo;
 }
 
@@ -1236,6 +1238,7 @@ void nodoRecuperarEstadoAnterior() {
 
 void nodoDestruir(Nodo* nodo) {
 	bitmapDestruir(nodo->bitmap);
+	memoriaLiberar(nodo);
 }
 
 void archivoLogIniciar() {

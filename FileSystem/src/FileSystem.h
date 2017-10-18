@@ -229,7 +229,6 @@ void configuracionIniciar();
 void archivoDestruir(Archivo* archivo);
 void directorioIniciarEstructura();
 void nodoIniciarEstructura();
-void bitmapIniciarEstructura();
 String* directorioSeparar(String ruta);
 String directorioExtraerNombreDeRuta(String ruta);
 bool directorioExisteIdentificador(int identificador);

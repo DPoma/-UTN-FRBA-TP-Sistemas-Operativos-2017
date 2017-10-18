@@ -1,15 +1,27 @@
-[INFO] 21:00:05:584 FileSystem/(7737:7737): [EJECUCION] Proceso File System inicializado
-[INFO] 21:00:05:644 FileSystem/(7737:7737): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 21:00:05:645 FileSystem/(7737:7737): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 21:00:14:283 FileSystem/(7737:7740): [DIRECTORIO] El directorio /home/algo fue creado exitosamente
-[INFO] 21:00:17:609 FileSystem/(7737:7740): [DIRECTORIO] El directorio /home/algo/nose fue creado exitosamente
-[INFO] 21:00:21:440 FileSystem/(7737:7740): [DIRECTORIO] El directorio /home/jojo fue creado exitosamente
-[INFO] 21:00:26:16 FileSystem/(7737:7740): [DIRECTORIO] El directorio /user/temp fue creado exitosamente
-[INFO] 21:00:31:373 FileSystem/(7737:7740): [ERROR] El directorio ya existe
-[INFO] 21:00:42:205 FileSystem/(7737:7740): El directorio /home/jojo ha sido eliminado
-[INFO] 21:01:00:152 FileSystem/(7737:7740): El directorio /user/temp ha sido eliminado
-[INFO] 21:01:14:669 FileSystem/(7737:7740): [DIRECTORIO] El directorio /home/user fue creado exitosamente
-[INFO] 21:01:23:141 FileSystem/(7737:7740): El directorio /home/user ha sido eliminado
-[INFO] 21:01:26:583 FileSystem/(7737:7740): El directorio /home no puede ser eliminado ya que posee archivos o directorios
-[INFO] 21:01:41:93 FileSystem/(7737:7740): El directorio /home/algo/nose ha sido eliminado
-[INFO] 21:01:48:441 FileSystem/(7737:7737): [EJECUCION] Finalizando proceso File System...
+[INFO] 23:21:19:167 FileSystem/(9655:9655): [EJECUCION] Proceso File System inicializado
+[INFO] 23:21:19:223 FileSystem/(9655:9655): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 23:21:19:224 FileSystem/(9655:9655): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 23:21:20:181 FileSystem/(9655:9655): [CONEXION] Proceso Data Node conectado exitosamente
+[INFO] 23:21:20:740 FileSystem/(9655:9655): [CONEXION] Proceso Data Node conectado exitosamente
+[INFO] 23:21:25:612 FileSystem/(9655:9658): [DIRECTORIO] El directorio /home/algo fue creado exitosamente
+[INFO] 23:21:29:170 FileSystem/(9655:9658): [DIRECTORIO] El directorio /home/nose/lala fue creado exitosamente
+[INFO] 23:21:34:964 FileSystem/(9655:9658): El directorio /home/nose/lala ha sido eliminado
+[INFO] 23:21:36:323 FileSystem/(9655:9658): [ESTADO] El File System ha sido formateado
+[INFO] 23:21:38:238 FileSystem/(9655:9655): [CONEXION] Un proceso Data Node se ha desconectado
+[INFO] 23:21:39:745 FileSystem/(9655:9658): [ESTADO] El File System ha sido formateado
+[INFO] 23:21:41:187 FileSystem/(9655:9655): [CONEXION] Un proceso Data Node se ha desconectado
+[INFO] 23:21:42:947 FileSystem/(9655:9655): [CONEXION] Proceso Data Node conectado exitosamente
+[INFO] 23:21:43:372 FileSystem/(9655:9655): [CONEXION] Proceso Data Node conectado exitosamente
+[INFO] 23:21:44:519 FileSystem/(9655:9655): [CONEXION] Un proceso Data Node se ha desconectado
+[INFO] 23:21:45:574 FileSystem/(9655:9655): [CONEXION] Proceso Data Node conectado exitosamente
+[INFO] 23:21:48:934 FileSystem/(9655:9658): [ESTADO] El File System ha sido formateado
+[INFO] 23:21:52:627 FileSystem/(9655:9655): [CONEXION] Un proceso Data Node se ha desconectado
+[INFO] 23:21:54:674 FileSystem/(9655:9655): [CONEXION] Un proceso Data Node se ha desconectado
+[INFO] 23:21:55:550 FileSystem/(9655:9655): [CONEXION] Proceso Data Node conectado exitosamente
+[INFO] 23:21:56:30 FileSystem/(9655:9655): [CONEXION] Proceso Data Node conectado exitosamente
+[INFO] 23:21:58:186 FileSystem/(9655:9658): [ESTADO] El File System ha sido formateado
+[INFO] 23:21:59:543 FileSystem/(9655:9655): [CONEXION] Un proceso Data Node se ha desconectado
+[INFO] 23:21:59:939 FileSystem/(9655:9655): [CONEXION] Un proceso Data Node se ha desconectado
+[INFO] 23:22:09:865 FileSystem/(9655:9658): [DIRECTORIO] El directorio /home/bobo fue creado exitosamente
+[INFO] 23:22:20:619 FileSystem/(9655:9658): El directorio /home/bobo ha sido eliminado
+[INFO] 23:22:24:100 FileSystem/(9655:9655): [EJECUCION] Finalizando proceso File System...

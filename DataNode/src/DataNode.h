@@ -64,3 +64,4 @@ void deserizalizar(Mensaje* mensaje);
 void setBloque();
 void getBloque();
 void guardarContenido(Bloque bloqueBuscado, Mensaje* mensajeAGuardar);
+void atenderFileSystem(Socket unSocket);
