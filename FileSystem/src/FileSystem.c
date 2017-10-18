@@ -780,7 +780,7 @@ void comandoRenombrarArchivoDirectorio(Comando* comando) {
 		String viejoNombre= directorioObtenerUltimoNombre(comando->argumentos[1]);
 		stringCopiar(directorio->nombre, comando->argumentos[2]);
 		directorioPersistirRenombrar(identificador, directorio->nombre);
-		imprimirMensajeDos(archivoLog, "El directorio %s fue renombrado por %s", viejoNombre, directorio->nombre);
+		imprimirMensajeDos(archivoLog, "[DIRECTORIO] El directorio %s fue renombrado por %s", viejoNombre, directorio->nombre);
 		memoriaLiberar(viejoNombre);
 	}
 	else
@@ -807,7 +807,7 @@ void comandoMoverArchivoDirectorio(Comando* comando) {
 		directorio->identificadorPadre = directorioNuevoPadre->identificador;
 		directorioPersistirMovido(directorio->identificador, directorioNuevoPadre->identificador);
 		String nombre = directorioObtenerUltimoNombre(comando->argumentos[1]);
-		imprimirMensajeDos(archivoLog, "El directorio %s fue movido a %s", nombre, comando->argumentos[2]);
+		imprimirMensajeDos(archivoLog, "[DIRECTORIO] El directorio %s fue movido a %s", nombre, comando->argumentos[2]);
 		memoriaLiberar(nombre);
 	}
 	else
@@ -943,14 +943,14 @@ void directorioPersistirRenombrar(int idPadre, char*nuevoNombre) {
 	memset(buffer, '\0', 200);
 	memset(copia_buffer, '\0', 200);
 	char *saveptr;
-	char* id = string_new();
-	char* padre = string_new();
+	char id [10];
+	char padre [10];
 	while (fgets(buffer, sizeof(buffer), archivoDirectorio) != NULL) {
 		if (strcmp(buffer, "\n") != 0) {
 			strcpy(copia_buffer, buffer);
-			id = strtok_r(buffer, ";", &saveptr);
-			padre = strtok_r(NULL, ";", &saveptr);
-			padre = strtok_r(NULL, ";", &saveptr);
+			strcpy(id,strtok_r(buffer, ";", &saveptr));
+			strcpy(padre,strtok_r(NULL, ";", &saveptr));
+			strcpy(padre,strtok_r(NULL, ";", &saveptr));
 			if (atoi(id) == idPadre) {
 				strcat(nueva_copia, id);
 				strcat(nueva_copia, ";");
@@ -989,21 +989,22 @@ void directorioPersistirMovido(int idPadre, int nuevoPadre) {
 	memset(buffer, '\0', 200);
 	memset(copia_buffer, '\0', 200);
 	char *saveptr;
-	char* id = string_new();
-	char* nombre = string_new();
-	char* padre = string_new(); //este warning no se puede sacar pero esta bien, aunque dice que no hace nada hace algo
+	char id [10];
+	char nombre[MAX_STRING];
+	char padre [10];
+	char* padreNuevo = string_itoa(nuevoPadre);
 	while (fgets(buffer, sizeof(buffer), dir) != NULL) {
 		if (strcmp(buffer, "\n") != 0) {
 			strcpy(copia_buffer, buffer);
-			id = strtok_r(buffer, ";", &saveptr);
-			nombre = strtok_r(NULL, ";", &saveptr);
-			padre = strtok_r(NULL, ";", &saveptr);
+			strcpy(id,strtok_r(buffer, ";", &saveptr));
+			strcpy(nombre,strtok_r(NULL, ";", &saveptr));
+			strcpy(padre,strtok_r(NULL, ";", &saveptr));
 			if (atoi(id) == idPadre) {
 				strcat(nueva_copia, id);
 				strcat(nueva_copia, ";");
 				strcat(nueva_copia, nombre);
 				strcat(nueva_copia, ";");
-				strcat(nueva_copia, string_itoa(nuevoPadre));
+				strcat(nueva_copia, padreNuevo);
 				strcat(nueva_copia, "\n");
 				fprintf(aux, "%s", nueva_copia);
 			} else
@@ -1023,6 +1024,7 @@ void directorioPersistirMovido(int idPadre, int nuevoPadre) {
 	}
 	fclose(dir);
 	fclose(aux);
+	free(padreNuevo);
 }
 
 
