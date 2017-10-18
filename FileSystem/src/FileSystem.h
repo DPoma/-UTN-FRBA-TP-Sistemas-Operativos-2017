@@ -14,6 +14,7 @@
 #define RUTA_NODOS "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Metadata/nodos.bin"
 #define RUTA_ARCHIVOS "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Metadata/archivos/"
 #define RUTA_BITMAPS "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Metadata/bitmaps/"
+#define RUTA_AUXILIAR "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Metadata/Auxiliar.dat"
 
 //Identificador de cada comando
 #define FORMAT 1
@@ -52,7 +53,7 @@
 #define FLAG_D "-d"
 #define FLAG_CLEAN "--clean"
 #define MAX_STRING 255
-#define LIMITE_DIRECTORIOS 100
+#define MAX_DIR 100
 
 typedef struct {
 	int identificador;
@@ -109,14 +110,13 @@ typedef struct {
 } CopiaBloque;
 
 typedef struct {
-	//Socket socket;
 	char nombre[10];
-	String bitArray;
-	BitArray* bitmap;
+	Bitmap* bitmap;
 	int bloquesLibres;
 	int bloquesTotales;
 	Socket socket;
 } Nodo;
+
 
 
 String campos[2];
@@ -127,8 +127,7 @@ Hilo hiloConsola;
 Lista listaDirectorios;
 Lista listaArchivos;
 Lista listaNodos;
-String bi;
-Bitmap bitmapDirectorios;
+Bitmap* bitmapDirectorios;
 int directoriosDisponibles;
 
 //--------------------------------------- Funciones de File System -------------------------------------
@@ -233,3 +232,5 @@ void nodoIniciarEstructura();
 void bitmapIniciarEstructura();
 String* directorioSeparar(String ruta);
 String directorioExtraerNombreDeRuta(String ruta);
+bool directorioExisteIdentificador(int identificador);
+void directorioPersistirBorrado(int identificador);

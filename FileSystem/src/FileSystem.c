@@ -21,10 +21,13 @@ int main(int argc, String* argsv) {
 //--------------------------------------- Funciones de File System -------------------------------------
 
 void iniciar() {
+	listaArchivos = listaCrear();
+	listaDirectorios = listaCrear();
 	listaNodos = listaCrear();
-	bitmapDirectorios = bitarray_create_with_mode(bitmap);
+	bitmapDirectorios = bitmapCrear(13);
+	directoriosDisponibles = 100;
 	fileLimpiar(RUTA_NODOS);
-	directorioIniciarEstructura();
+	fileLimpiar(RUTA_DIRECTORIOS);
 	bitmapIniciarEstructura();
 }
 
@@ -33,7 +36,7 @@ void fileSystemIniciar(String flag) {
 	archivoLogIniciar();
 	configuracionIniciar();
 	fileSystemActivar();
-	if(stringIguales(flag, FLAG_CLEAN))
+	if(!stringIguales(flag, FLAG_CLEAN))
 		iniciar();
 	else
 		nodoRecuperarEstadoAnterior();
@@ -54,6 +57,7 @@ void fileSystemAtenderProcesos() {
 void fileSystemFinalizar() {
 	imprimirMensaje(archivoLog, "[EJECUCION] Finalizando proceso File System...");
 	archivoLogDestruir(archivoLog);
+	bitmapDestruir(bitmapDirectorios);
 	memoriaLiberar(configuracion);
 	listaDestruirConElementos(listaNodos, (Puntero)nodoDestruir);
 	listaDestruirConElementos(listaDirectorios, memoriaLiberar);
@@ -639,33 +643,38 @@ void comandoFormatearFileSystem() {
 }
 
 void comandoRemoverArchivo(Comando* comando) {
-
+	if(stringIguales(comando->argumentos[1], FLAG_D))
+		comandoRemoverDirectorio(comando);
 }
 
 
 void comandoRemoverBloque(Comando* comando) {
 
 }
+
 int directorioObtenerIdentificador(String path) {
-	int id;
+	int id = ERROR;
+	int indice;
 	ControlDirectorio* control = directorioControlCrear(path);
 	while(stringValido(control->nombreDirectorio)) {
 		directorioBuscarIdentificador(control);
-		if(directorioExisteIdentificador(control->identificadorDirectorio)) {
+		if(control->identificadorDirectorio != ERROR) {
 			if(control->nombresDirectorios[control->indiceNombresDirectorios + 1] == NULL) {
 				id = control->identificadorDirectorio;
-				return id;
+				break;
 			}
 			else
 				control->identificadorPadre = control->identificadorDirectorio;
-
 			control->indiceNombresDirectorios++;
 			directorioControlSetearNombre(control);
 		}
-		else
-			return ERROR;
 	}
-	return ERROR;
+
+	for(indice=0; stringValido(control->nombresDirectorios[indice]); indice++)
+		memoriaLiberar(control->nombresDirectorios[indice]);
+	memoriaLiberar(control->nombresDirectorios);
+	memoriaLiberar(control);
+	return id;
 }
 
 Directorio* directorioBuscarEnLista(int identificadorDirectorio) {
@@ -674,7 +683,7 @@ Directorio* directorioBuscarEnLista(int identificadorDirectorio) {
 		return directorio->identificador == identificadorDirectorio;
 	}
 
-	Directorio* directorio = listaBuscar(listaDirectorios, buscarPorId);
+	Directorio* directorio = listaBuscar(listaDirectorios, (Puntero)buscarPorId);
 	return directorio;
 }
 
@@ -684,7 +693,7 @@ bool directorioTieneAlgunArchivo(int identificador) {
 		return archivo->identificadorPadre == identificador;
 	}
 
-	return listaCumpleAlguno(listaArchivos, archivoEsHijo);
+	return listaCumpleAlguno(listaArchivos, (Puntero)archivoEsHijo);
 }
 
 
@@ -694,7 +703,7 @@ bool directorioTieneAlgunDirectorio(int identificador) {
 		return directorio->identificadorPadre == identificador;
 	}
 
-	return listaCumpleAlguno(listaDirectorios, directorioEsHijo);
+	return listaCumpleAlguno(listaDirectorios, (Puntero)directorioEsHijo);
 }
 
 bool directorioTieneAlgo(int identificador) {
@@ -709,15 +718,14 @@ void directorioEliminar(int identificador) {
 		return directorio->identificador == identificador;
 	}
 
-	listaEliminarDestruyendoPorCondicion(listaDirectorios, tieneElMismoId, memoriaLiberar);
-	//indiceDirectorios[idAEliminar] = 0;
+	listaEliminarDestruyendoPorCondicion(listaDirectorios, (Puntero)tieneElMismoId, (Puntero)memoriaLiberar);
+	bitmapLiberarBit(bitmapDirectorios, identificador);
 	directoriosDisponibles++;
-	directorioActualizarArchivo(idPadre);
 }
 
 
 void comandoRemoverDirectorio(Comando* comando) {
-	String ruta = comando->argumentos[1];
+	String ruta = comando->argumentos[2];
 
 	if (stringIguales(ruta , "/")) {
 		imprimirMensaje(archivoLog,"[ERROR] El directorio raiz no puede ser eliminado");
@@ -735,6 +743,7 @@ void comandoRemoverDirectorio(Comando* comando) {
 		imprimirMensajeUno(archivoLog,"El directorio %s no puede ser eliminado ya que posee archivos o directorios",ruta);
 	else {
 		directorioEliminar(identificador);
+		directorioPersistirBorrado(identificador);
 		imprimirMensajeUno(archivoLog,"El directorio %s ha sido eliminado",ruta);
 	}
 }
@@ -872,16 +881,14 @@ void comandoError() {
 
 //--------------------------------------- Funciones de Directorio -------------------------------------
 
-bool directorioIndiceOcupado(int indice) {
-	return bitmapDirectorios[indice] == 1;
-}
 
 bool directorioIndiceRespetaLimite(int indice) {
 	return indice < 100;
 }
 
 bool directorioIndiceEstaOcupado(int indice) {
-	return directorioIndiceRespetaLimite(indice) && directorioIndiceOcupado(indice);
+	return directorioIndiceRespetaLimite(indice) &&
+			bitmapBitOcupado(bitmapDirectorios, indice);
 }
 
 bool directorioExisteIdentificador(int identificador) {
@@ -923,6 +930,41 @@ String directorioConfigurarEntradaArchivo(String indice, String nombre, String p
 	stringConcatenar(&buffer,"\n");
 	return buffer;
 }
+
+
+void directorioPersistirBorrado(int identificador) {
+	File archivoDirectorio = fileAbrir(RUTA_DIRECTORIOS,"r");
+	File archivoAuxiliar = fileAbrir(RUTA_AUXILIAR, "w");
+	char buffer[200];
+	char copia[200];
+	int identificadorArchivo;
+	memset(buffer, '\0', 200);
+	memset(copia, '\0', 200);
+	while (fgets(buffer, sizeof(buffer), archivoDirectorio) != NULL) {
+		if (strcmp(buffer, "\n") != 0) {
+			strcpy(copia, buffer);
+			identificadorArchivo = atoi(strtok(buffer, ";"));
+			if (identificadorArchivo != identificador)
+				fprintf(archivoAuxiliar, "%s", copia);
+			memset(buffer, '\0', 200);
+			memset(copia, '\0', 200);
+		}
+	}
+
+	fileCerrar(archivoDirectorio);
+	fileCerrar(archivoAuxiliar);
+	archivoDirectorio = fileAbrir(RUTA_DIRECTORIOS,"w");
+	archivoAuxiliar = fileAbrir(RUTA_AUXILIAR, "r");
+	memset(buffer, '\0', 200);
+	while (fgets(buffer, sizeof(buffer), archivoAuxiliar) != NULL) {
+		fprintf(archivoDirectorio, "%s", buffer);
+		memset(buffer, '\0', 200);
+	}
+	fileCerrar(archivoDirectorio);
+	fileCerrar(archivoAuxiliar);
+
+}
+
 
 void directorioPersistir(Directorio* directorio){
 	File archivoDirectorio = fileAbrir(RUTA_DIRECTORIOS,"a+");
@@ -1007,7 +1049,7 @@ void directorioCrearDirectoriosRestantes(ControlDirectorio* control, String ruta
 	while(stringValido(control->nombresDirectorios[control->indiceNombresDirectorios])) {
 		int indice = directorioBuscarIndiceLibre();
 		Directorio* directorio = directorioCrear(indice, control->nombresDirectorios[control->indiceNombresDirectorios], control->identificadorPadre);
-		bitmapDirectorios[indice] = 1;
+		bitmapOcuparBit(bitmapDirectorios, indice);
 		listaAgregarElemento(listaDirectorios, directorio);
 		control->identificadorPadre = indice;
 		control->indiceNombresDirectorios++;
@@ -1032,9 +1074,7 @@ void directorioActualizar(ControlDirectorio* control, String rutaDirectorio) {
 }
 
 void directorioIniciarEstructura() {
-	directoriosDisponibles = 100;
-	listaDirectorios = listaCrear();
-	fileLimpiar(RUTA_DIRECTORIOS);
+
 }
 
 //--------------------------------------- Funciones de Archivo -------------------------------------
@@ -1051,13 +1091,11 @@ void bitmapPersistir(Nodo* nodo) {
 	stringConcatenar(&ruta, nodo->nombre);
 	File archivo = fileAbrir(ruta, "a+");
 	memoriaLiberar(ruta);
+	nodo->bitmap = bitmapCrear(nodo->bloquesTotales/8);
 	int indice;
-	for(indice = 8; indice < nodo->bloquesTotales; indice+=8);
-	nodo->bitArray = memoriaAlocar(indice/8);
-	nodo->bitmap = bitarray_create_with_mode(nodo->bitArray, indice/8, LSB_FIRST);
 	for(indice = 0; indice < nodo->bloquesTotales; indice++) {
-		bitarray_clean_bit(nodo->bitmap, indice);
-		fprintf(archivo, "%i", bitarray_test_bit(nodo->bitmap, indice));
+		bitmapLiberarBit(nodo->bitmap, indice);
+		fprintf(archivo, "%i", bitmapBitOcupado(nodo->bitmap, indice));
 	}
 	fprintf(archivo, "\n");
 	fileCerrar(archivo);
@@ -1197,9 +1235,7 @@ void nodoRecuperarEstadoAnterior() {
 }
 
 void nodoDestruir(Nodo* nodo) {
-	bitarray_destroy(nodo->bitmap);
-	memoriaLiberar(nodo->bitArray);
-	memoriaLiberar(nodo);
+	bitmapDestruir(nodo->bitmap);
 }
 
 void archivoLogIniciar() {
@@ -1207,34 +1243,6 @@ void archivoLogIniciar() {
 	imprimirMensajeProceso("# PROCESO FILE SYSTEM");
 	imprimirMensaje(archivoLog, "[EJECUCION] Proceso File System inicializado");
 }
-
-
-
-/* VER PORQUE FALLA
- #include "ZPrueba.h"
-
-void liberar(void* algo) {
-	if(algo!=NULL)
-	free(algo);
-}
-
-int main(void) {
-	char* a = "/home/utnso/jaja";
-	char** b = string_split(a, "/");
-	printf("%s\n", b[0]);
-	printf("%s\n", b[1]);
-	printf("%s\n", b[2]);
-	free(b[0]);
-	free(b[1]);
-	free(b[2]);
-	free(a);
-	return 0;
-}
-
- */
-
-
-
 /*
  void testCabecita() {
 	Nodo* nodo1 = nodoCrear("NODO1", 20, 1, 1);

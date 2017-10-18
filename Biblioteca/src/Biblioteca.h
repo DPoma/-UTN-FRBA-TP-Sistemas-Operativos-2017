@@ -278,4 +278,6 @@ void funcionSenial(int senial);
 void imprimirMensajeProceso(String mensaje);
 void fileLimpiar(String ruta);
 
+void bitmapDestruir(Bitmap* bitmap);
+
 

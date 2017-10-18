@@ -1,6 +1,15 @@
-[INFO] 23:45:27:143 FileSystem/(6525:6525): [EJECUCION] Proceso File System inicializado
-[INFO] 23:45:27:203 FileSystem/(6525:6525): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 23:45:27:204 FileSystem/(6525:6525): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 23:45:35:324 FileSystem/(6525:6528): [ARCHIVO] El MD5 es dd4a7bad3b5862f4b43b36e05fbdd953  /home/utnso/Documentos/ansisop-parser/README.md
-
-[INFO] 23:45:38:232 FileSystem/(6525:6525): [EJECUCION] Finalizando proceso File System...
+[INFO] 21:00:05:584 FileSystem/(7737:7737): [EJECUCION] Proceso File System inicializado
+[INFO] 21:00:05:644 FileSystem/(7737:7737): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 21:00:05:645 FileSystem/(7737:7737): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 21:00:14:283 FileSystem/(7737:7740): [DIRECTORIO] El directorio /home/algo fue creado exitosamente
+[INFO] 21:00:17:609 FileSystem/(7737:7740): [DIRECTORIO] El directorio /home/algo/nose fue creado exitosamente
+[INFO] 21:00:21:440 FileSystem/(7737:7740): [DIRECTORIO] El directorio /home/jojo fue creado exitosamente
+[INFO] 21:00:26:16 FileSystem/(7737:7740): [DIRECTORIO] El directorio /user/temp fue creado exitosamente
+[INFO] 21:00:31:373 FileSystem/(7737:7740): [ERROR] El directorio ya existe
+[INFO] 21:00:42:205 FileSystem/(7737:7740): El directorio /home/jojo ha sido eliminado
+[INFO] 21:01:00:152 FileSystem/(7737:7740): El directorio /user/temp ha sido eliminado
+[INFO] 21:01:14:669 FileSystem/(7737:7740): [DIRECTORIO] El directorio /home/user fue creado exitosamente
+[INFO] 21:01:23:141 FileSystem/(7737:7740): El directorio /home/user ha sido eliminado
+[INFO] 21:01:26:583 FileSystem/(7737:7740): El directorio /home no puede ser eliminado ya que posee archivos o directorios
+[INFO] 21:01:41:93 FileSystem/(7737:7740): El directorio /home/algo/nose ha sido eliminado
+[INFO] 21:01:48:441 FileSystem/(7737:7737): [EJECUCION] Finalizando proceso File System...
