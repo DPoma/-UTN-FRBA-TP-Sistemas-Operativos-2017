@@ -18,13 +18,19 @@ int main(void) {
 
 	dataBin=fopen(configuracion->rutaDataBin, "r+");
 
+	if(dataBin==NULL){
+		perror("No se pudo abrir databin");
+		imprimirMensaje(archivoLog,"[DATABIN] Error al abrir DataBin");
+		exit(-1);
+	}
+
 
 	while(dataNodeActivado()){
 		atenderFileSystem(unSocket);
 	}
 
 	finalizarDataNode();
-
+	fclose(dataBin);
 	socketCerrar(unSocket);
 	return EXIT_SUCCESS;
 
@@ -40,6 +46,51 @@ Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig) {
 	archivoConfigDestruir(archivoConfig);
 	return configuracion;
 }
+
+
+int setBloque(int nroBloque, char* datos, int size){ //el prumer bloque es 0
+
+	if(fseek(dataBin,nroBloque*MB,SEEK_SET)){
+		perror("Error en el posicionamiento del puntero");
+		imprimirMensaje(archivoLog, "[SETBLOQUE] No se pudo posicionar el puntero");
+		return -1;
+	}
+	else{
+		if(fwrite(datos,sizeof(char),size,dataBin)!= size){
+			perror("Error en la escritura");
+			imprimirMensajeUno(archivoLog,"[SETBLOQUE] No se pudo escribir en el bloque numero: %d", &nroBloque);
+			rewind(dataBin); //posiciona el puntero al principio del archivo
+			return FRACASOSETBLOQUE;
+		}
+		else{
+			imprimirMensajeUno(archivoLog, "[SETBLOQUE] Se escribio en el bloque numero: %d", &nroBloque);
+			rewind(dataBin); //posiciona el puntero al principio del archivo
+			return EXITOSETBLOQUE;
+		}
+	}
+
+
+
+}
+
+char* getBloque(int nroBloque){
+	char* data = malloc(sizeof(char)*MB);
+
+	if(fseek(dataBin,nroBloque*MB,SEEK_SET)){
+		perror("Error en el posicionamiento del puntero");
+		imprimirMensaje(archivoLog, "[GETBLOQUE] No se pudo posicionar el puntero");
+	}
+
+	fread(data,sizeof(char),MB,dataBin);
+	imprimirMensajeUno(archivoLog,"[GETBLOQUE] se leyo el bloque numero: %d", &nroBloque);
+
+	rewind(dataBin);
+
+	return data;
+	free(data);
+
+}
+
 
 
 
@@ -84,7 +135,7 @@ void guardarContenido(Bloque bloqueBuscado, Mensaje* mensajeAGuardar){
 
 void freeMemory() {
 	Bloque aux;
-	/*
+
 	while(bloques->sig != NULL){
 		free(bloques.contenido);
 		aux = bloques->sig;
@@ -99,40 +150,60 @@ void freeMemory() {
 
 void atenderFileSystem(Socket unSocket){
 	Mensaje* peticion = mensajeRecibir(unSocket);
-
+	int nroBloque;
+	int size_datos;
+	char* datosAEscribir;
+	int status;
+	int len;
+	char* data;
 	switch(peticion->header.operacion){
-		case 0:
-		exit(0);
+		case -1:
 		imprimirMensaje(archivoLog, "Error en el File System");
 		finalizarDataNode();
 		estadoDataNode = dataNodeDesactivado();
+		status = -1;
+		mensajeEnviar(unSocket, status, NULL, sizeof(int));
 		break;
 
 		case SETBLOQUE:
-		imprimirMensaje(archivoLog, "Grabando en el bloque n"); //desp lo cambio
-		//int numeroBloque = mensajeRecibir(unSocket);
+		memcpy(&nroBloque, peticion->datos, sizeof(int));
+		memcpy(&size_datos,peticion->datos+sizeof(int),sizeof(int));
+		memcpy(&datosAEscribir, peticion->datos + 2* (sizeof(int)), size_datos);
 
-		//Mensaje* mensajeAGuardar = mensajeRecibir(unSocket);
-		//setBloque(numeroBloque, mensajeAGuardar);
+		status = setBloque(nroBloque, datosAEscribir, size_datos);
+		imprimirMensajeUno(archivoLog, "Grabando en el bloque: %d", &nroBloque);
+
+		mensajeEnviar(unSocket, status, NULL, sizeof(int));
+
 		estadoDataNode = dataNodeActivado();
 		break;
 
 		case GETBLOQUE:
-		imprimirMensaje(archivoLog, "Se Obtuvo el bloque n");
-		//getBloque(numeroBloque);
+		memcpy(&nroBloque, peticion->datos, sizeof(int));
+
+		data = malloc(MB + sizeof(int));
+		data = getBloque(nroBloque);
+		imprimirMensajeUno(archivoLog, "Se Obtuvo el bloque numero: %d", &nroBloque);
+
+		if(data==NULL){
+			imprimirMensajeUno(archivoLog, "El bloque numero: %d esta vacio o se produjo un error", &nroBloque);
+			status = FRACASOGETBLOQUE;
+			mensajeEnviar(unSocket, status, NULL, sizeof(int));
+		}
+
+		else{
+
+			status = EXITOGETBLOQUE;
+			len = strlen(data) + 1;
+			mensajeEnviar(unSocket, status, data, len);
+		}
+
 		estadoDataNode = dataNodeActivado();
 		break;
 	}
 	 free(peticion);
+	 free(data);
 }
-
-//mandar mensaje confirmacion
-
-
-void deserializar(Mensaje* mensaje){
-
-}
-
 
 
 
@@ -187,8 +258,6 @@ void dataNodeActivar() {
 
 void dataNodeDesactivar() {
 	estadoDataNode = DESACTIVADO;
-
-
 
 }
 

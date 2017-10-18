@@ -72,8 +72,8 @@ void leerArchivoConfig(){
 
 int hayWorkersParaConectar(){
 	Mensaje* m = mensajeRecibir(socketYAMA);
-	if(*(int*)m->datos==-1){
-		archivoLogInformarMensaje(archivoLog,"No hay mas workers por conectar");
+	if(m->header.operacion-1){
+		imprimirMensaje(archivoLog,"No hay mas workers por conectar");
 		printf("No hay mas workers para conectar");
 		return -1;
 		}

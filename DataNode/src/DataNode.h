@@ -17,13 +17,13 @@
 #define GETBLOQUE 101
 #define SETBLOQUE 102
 
-/*
-typedef struct {
+#define EXITOGETBLOQUE 103
+#define FRACASOGETBLOQUE 104
 
+#define EXITOSETBLOQUE 105
+#define FRACASOSETBLOQUE 106
 
-
-} Serializado;
-*/
+#define MB 1048576
 
 typedef struct{
 	int nroBloque;
@@ -61,7 +61,7 @@ void dataNodeDesactivar();
 void finalizarDataNode();
 void freeMemory();
 void deserizalizar(Mensaje* mensaje);
-void setBloque();
-void getBloque();
+int setBloque(int nroBloque, char* datos, int size);
+char* getBloque(int nroBloque);
 void guardarContenido(Bloque bloqueBuscado, Mensaje* mensajeAGuardar);
 void atenderFileSystem(Socket unSocket);
