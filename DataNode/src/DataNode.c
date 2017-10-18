@@ -16,6 +16,7 @@ int main(void) {
 	Socket unSocket = socketCrearCliente(configuracion->ipFileSystem, configuracion->puertoFileSystem, ID_DATANODE);
 	mensajeEnviar(unSocket, 14, configuracion->nombreNodo, stringLongitud(configuracion->nombreNodo)+1);
 
+	/*
 	dataBin=fopen(configuracion->rutaDataBin, "r+");
 
 	if(dataBin==NULL){
@@ -24,7 +25,7 @@ int main(void) {
 		exit(-1);
 	}
 
-
+	*/
 	while(dataNodeActivado()){
 		atenderFileSystem(unSocket);
 	}
@@ -149,14 +150,15 @@ void freeMemory() {
 */
 
 void atenderFileSystem(Socket unSocket){
-	Mensaje* peticion = mensajeRecibir(unSocket);
+	Mensaje* mensaje = mensajeRecibir(unSocket);
 	int nroBloque;
 	int size_datos;
 	char* datosAEscribir;
 	int status;
 	int len;
 	char* data;
-	switch(peticion->header.operacion){
+	FILE* f;
+	switch(mensaje->header.operacion){
 		case -1:
 		imprimirMensaje(archivoLog, "Error en el File System");
 		finalizarDataNode();
@@ -166,20 +168,23 @@ void atenderFileSystem(Socket unSocket){
 		break;
 
 		case SETBLOQUE:
-		memcpy(&nroBloque, peticion->datos, sizeof(int));
-		memcpy(&size_datos,peticion->datos+sizeof(int),sizeof(int));
-		memcpy(&datosAEscribir, peticion->datos + 2* (sizeof(int)), size_datos);
+		f = fopen("/home/utnso/Escritorio/data.bin" ,"a+");
+		fwrite(mensaje->datos, sizeof(char), 32, f);
+		fclose(f);
+			//memcpy(&nroBloque, peticion->datos, sizeof(int));
+		//memcpy(&size_datos,peticion->datos+sizeof(int),sizeof(int));
+		//memcpy(&datosAEscribir, peticion->datos + 2* (sizeof(int)), size_datos);
 
-		status = setBloque(nroBloque, datosAEscribir, size_datos);
-		imprimirMensajeUno(archivoLog, "Grabando en el bloque: %d", &nroBloque);
+		//status = setBloque(nroBloque, datosAEscribir, size_datos);
+		//imprimirMensajeUno(archivoLog, "Grabando en el bloque: %d", (int*)nroBloque);
 
-		mensajeEnviar(unSocket, status, NULL, sizeof(int));
+		//mensajeEnviar(unSocket, status, NULL, sizeof(int));
 
-		estadoDataNode = dataNodeActivado();
+		//estadoDataNode = dataNodeActivado();
 		break;
 
 		case GETBLOQUE:
-		memcpy(&nroBloque, peticion->datos, sizeof(int));
+		//memcpy(&nroBloque, peticion->datos, sizeof(int));
 
 		data = malloc(MB + sizeof(int));
 		data = getBloque(nroBloque);
@@ -201,8 +206,8 @@ void atenderFileSystem(Socket unSocket){
 		estadoDataNode = dataNodeActivado();
 		break;
 	}
-	 free(peticion);
-	 free(data);
+	 //free(peticion);
+	 //free(data);
 }
 
 

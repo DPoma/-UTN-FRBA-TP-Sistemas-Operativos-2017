@@ -873,8 +873,8 @@ void comandoCrearDirectorio(Comando* comando) {
 
 void comandoCopiarArchivoDeFS(Comando* comando) {
 	Archivo* archivo = archivoBuscar(comando->argumentos[2]);
-
-	if(archivo == NULL) {
+	int n;
+	if(archivo != NULL) {
 		imprimirMensaje(archivoLog, "[ERROR] El archivo ya existe en el File System");
 		return;
 	}
@@ -884,9 +884,9 @@ void comandoCopiarArchivoDeFS(Comando* comando) {
 		imprimirMensaje(archivoLog, "[ERROR] El archivo a copiar no existe");
 		return;
 	}
-	String buffer = malloc(1048576);
+	String buffer = malloc(BLOQUE);
 	Nodo* nodo = listaObtenerElemento(listaNodos, 0);
-	while(fread(&buffer, sizeof(char),BLOQUE, file) == BLOQUE) {
+	for(n = 0; fread(buffer, sizeof(char),BLOQUE, file) == BLOQUE; n++) {
 		mensajeEnviar(nodo->socket, ESCRIBIR, buffer, BLOQUE);
 	}
 	imprimirMensaje(archivoLog, "[ARCHIVO] El archivo se copio en el File System con exito");

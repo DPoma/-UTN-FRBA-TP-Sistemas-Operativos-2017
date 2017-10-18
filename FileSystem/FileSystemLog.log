@@ -1,24 +1,6 @@
-[INFO] 13:06:15:670 FileSystem/(6990:6990): [EJECUCION] Proceso File System inicializado
-[INFO] 13:06:15:729 FileSystem/(6990:6990): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 13:06:15:730 FileSystem/(6990:6990): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 13:06:24:175 FileSystem/(6990:6993): [ERROR] Comando invalido
-[INFO] 13:06:29:101 FileSystem/(6990:6993): [DIRECTORIO] El directorio /home/algo/nose fue creado exitosamente
-[INFO] 13:06:32:3 FileSystem/(6990:6993): [DIRECTORIO] Listando archivos y directorios en nose
-[INFO] 13:06:33:6 FileSystem/(6990:6993): [DIRECTORIO] Manco (a)
-[INFO] 13:06:41:676 FileSystem/(6990:6993): [ARCHIVO] Nombre: Manco
-[INFO] 13:06:41:676 FileSystem/(6990:6993): [ARCHIVO] Tipo: TEXTO
-[INFO] 13:06:41:677 FileSystem/(6990:6993): [ARCHIVO] Ubicacion: /home/algo/nose/Manco
-[INFO] 13:06:41:679 FileSystem/(6990:6993): [ARCHIVO] Tamanio: 1115 bytes
-[INFO] 13:06:41:680 FileSystem/(6990:6993): [ARCHIVO] Bloques utilizados: 2
-[INFO] 13:06:41:682 FileSystem/(6990:6993): [ARCHIVO] Bloque 0: 1014 bytes
-[INFO] 13:06:41:684 FileSystem/(6990:6993): [ARCHIVO] Bloque 0 copia 0 en: Nodo: NODO1 | Bloque: 14
-[INFO] 13:06:41:685 FileSystem/(6990:6993): [ARCHIVO] Bloque 0 copia 1 en: Nodo: NODO2 | Bloque: 15
-[INFO] 13:06:41:686 FileSystem/(6990:6993): [ARCHIVO] Bloque 1: 101 bytes
-[INFO] 13:06:41:686 FileSystem/(6990:6993): [ARCHIVO] Bloque 1 copia 0 en: Nodo: NODO1 | Bloque: 99
-[INFO] 13:06:46:811 FileSystem/(6990:6993): [ERROR] El archivo no existe
-[INFO] 13:06:51:355 FileSystem/(6990:6993): [ERROR] El archivo no existe
-[INFO] 13:07:00:221 FileSystem/(6990:6993): [ERROR] Comando invalido
-[INFO] 13:07:09:503 FileSystem/(6990:6993): [ERROR] El archivo no existe
-[INFO] 13:07:15:361 FileSystem/(6990:6993): [DIRECTORIO] El directorio /home/algo/nose/gg fue creado exitosamente
-[INFO] 13:07:20:545 FileSystem/(6990:6993): [ERROR] El archivo no existe
-[INFO] 13:07:25:635 FileSystem/(6990:6990): [EJECUCION] Finalizando proceso File System...
+[INFO] 20:38:32:88 FileSystem/(9816:9816): [EJECUCION] Proceso File System inicializado
+[INFO] 20:38:33:221 FileSystem/(9816:9816): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 20:38:33:224 FileSystem/(9816:9816): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 20:38:36:30 FileSystem/(9816:9816): [CONEXION] Proceso Data Node conectado exitosamente
+[INFO] 20:38:40:106 FileSystem/(9816:9819): [DIRECTORIO] El directorio /home fue creado exitosamente
+[INFO] 20:39:14:101 FileSystem/(9816:9819): [ARCHIVO] El archivo se copio en el File System con exito
