@@ -18,13 +18,19 @@ int main(void) {
 
 	dataBin=fopen(configuracion->rutaDataBin, "r+");
 
+	if(dataBin==NULL){
+		perror("No se pudo abrir databin");
+		imprimirMensaje(archivoLog,"[DATABIN] Error al abrir DataBin");
+		exit(-1);
+	}
+
 
 	while(dataNodeActivado()){
 		atenderFileSystem(unSocket);
 	}
 
 	finalizarDataNode();
-
+	fclose(dataBin);
 	socketCerrar(unSocket);
 	return EXIT_SUCCESS;
 
@@ -40,6 +46,47 @@ Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig) {
 	archivoConfigDestruir(archivoConfig);
 	return configuracion;
 }
+
+
+void setBloque(int nroBloque, char* datos, int size){ //el prumer bloque es 0
+
+	if(fseek(dataBin,nroBloque*MB,SEEK_SET)){
+		perror("Error en el posicionamiento del puntero");
+		imprimirMensaje(archivoLog, "[SETBLOQUE] No se pudo posicionar el puntero");
+	}
+	else{
+		if(fwrite(datos,sizeof(char),size,dataBin)!= size){
+			perror("Error en la escritura");
+			imprimirMensajeUno(archivoLog,"[SETBLOQUE] No se pudo escribir en el bloque numero: %d", &nroBloque);
+		}
+		else{
+			imprimirMensajeUno(archivoLog, "[SETBLOQUE] Se escribio en el bloque numero: %d", &nroBloque);
+
+		}
+	}
+
+	rewind(dataBin); //posiciona el puntero al principio del archivo
+
+}
+
+char* getBloque(int nroBloque){
+	char* data = malloc(sizeof(char)*MB);
+
+	if(fseek(dataBin,nroBloque*MB,SEEK_SET)){
+		perror("Error en el posicionamiento del puntero");
+		imprimirMensaje(archivoLog, "[GETBLOQUE] No se pudo posicionar el puntero");
+	}
+
+	fread(data,sizeof(char),MB,dataBin);
+	imprimirMensajeUno(archivoLog,"[GETBLOQUE] se leyo el bloque numero: %d", &nroBloque);
+
+	rewind(dataBin);
+
+	return data;
+	free(data);
+
+}
+
 
 
 
@@ -84,7 +131,7 @@ void guardarContenido(Bloque bloqueBuscado, Mensaje* mensajeAGuardar){
 
 void freeMemory() {
 	Bloque aux;
-	/*
+
 	while(bloques->sig != NULL){
 		free(bloques.contenido);
 		aux = bloques->sig;
@@ -101,8 +148,7 @@ void atenderFileSystem(Socket unSocket){
 	Mensaje* peticion = mensajeRecibir(unSocket);
 
 	switch(peticion->header.operacion){
-		case 0:
-		exit(0);
+		case -1:
 		imprimirMensaje(archivoLog, "Error en el File System");
 		finalizarDataNode();
 		estadoDataNode = dataNodeDesactivado();
@@ -110,10 +156,7 @@ void atenderFileSystem(Socket unSocket){
 
 		case SETBLOQUE:
 		imprimirMensaje(archivoLog, "Grabando en el bloque n"); //desp lo cambio
-		//int numeroBloque = mensajeRecibir(unSocket);
 
-		//Mensaje* mensajeAGuardar = mensajeRecibir(unSocket);
-		//setBloque(numeroBloque, mensajeAGuardar);
 		estadoDataNode = dataNodeActivado();
 		break;
 
