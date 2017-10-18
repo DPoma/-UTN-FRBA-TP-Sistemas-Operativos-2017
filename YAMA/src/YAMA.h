@@ -21,11 +21,6 @@
 #define IPPORTSIZE 10
 #define nullptr NULL
 
-typedef struct __attribute__((__packed__)){
-	int32_t ip;
-	int32_t port;
-} Dir;
-
 typedef struct {
 	char puertoMaster[50];
 	char ipFileSystem[50];

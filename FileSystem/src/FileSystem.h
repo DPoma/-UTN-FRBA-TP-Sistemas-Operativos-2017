@@ -233,3 +233,4 @@ String* directorioSeparar(String ruta);
 String directorioExtraerNombreDeRuta(String ruta);
 bool directorioExisteIdentificador(int identificador);
 void directorioPersistirBorrado(int identificador);
+void testCabecita();

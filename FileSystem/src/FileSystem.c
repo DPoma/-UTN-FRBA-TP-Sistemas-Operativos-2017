@@ -30,6 +30,7 @@ void iniciar() {
 	directoriosDisponibles = 100;
 	fileLimpiar(RUTA_NODOS);
 	fileLimpiar(RUTA_DIRECTORIOS);
+	testCabecita();
 }
 
 void fileSystemIniciar(String flag) {
@@ -571,7 +572,7 @@ void servidorRegistrarDataNode(Servidor* servidor, Socket nuevoSocket) {
 	if(nuevoSocket != ERROR) {
 		listaSocketsAgregar(nuevoSocket, &servidor->listaDataNodes);
 		Mensaje* mensaje = mensajeRecibir(nuevoSocket);
-		Nodo* nodo = nodoCrear(mensaje->datos, 0, 0, nuevoSocket);
+		Nodo* nodo = nodoCrear(mensaje->datos, 190, 0, nuevoSocket);
 		mensajeDestruir(mensaje);
 		listaAgregarElemento(listaNodos, nodo);
 		imprimirMensaje(archivoLog, "[CONEXION] Proceso Data Node conectado exitosamente");
@@ -629,23 +630,22 @@ void archivoIniciarEstructura() {
 		memoriaLiberar(idPadre);
 		memoriaLiberar(ruta);
 	}
-	nftw(RUTA_ARCHIVO, NULL, )
 	listaDestruirConElementos(listaArchivos, (Puntero)archivoDestruir);
 	*/
 }
 
 void comandoFormatearFileSystem() {
 	listaDestruirConElementos(listaDirectorios, memoriaLiberar);
+	listaDestruirConElementos(listaArchivos, (Puntero)archivoDestruir);
 	bitmapDestruir(bitmapDirectorios);
 	bitmapDirectorios = bitmapCrear(13);
 	listaDirectorios = listaCrear();
+	listaArchivos = listaCrear();
 	directoriosDisponibles = 100;
 	fileLimpiar(RUTA_DIRECTORIOS);
 	archivoIniciarEstructura();
 	nodoIniciarEstructura();
 	imprimirMensaje(archivoLog, "[ESTADO] El File System ha sido formateado");
-
-
 }
 
 void comandoRemoverArchivo(Comando* comando) {
@@ -674,6 +674,8 @@ int directorioObtenerIdentificador(String path) {
 			control->indiceNombresDirectorios++;
 			directorioControlSetearNombre(control);
 		}
+		else
+			break;
 	}
 
 	for(indice=0; stringValido(control->nombresDirectorios[indice]); indice++)
@@ -840,36 +842,29 @@ String directorioExtraerNombreDeRuta(String ruta) {
 }
 
 void directorioMostrarArchivos(Directorio* directorioPadre) {
-	imprimirMensajeUno(archivoLog, "[DIRECTORIO] Listando archivos de %s", directorioPadre->nombre);
+	imprimirMensajeUno(archivoLog, "[DIRECTORIO] Listando archivos y directorios en %s", directorioPadre->nombre);
 	int indice;
+
 	for(indice=0; indice<listaCantidadElementos(listaDirectorios); indice++) {
 		Directorio* directorio = listaObtenerElemento(listaDirectorios, indice);
 		if(directorio->identificadorPadre == directorioPadre->identificador)
-			imprimirMensajeUno(archivoLog, "[DIRECTORIO] %s", directorio->nombre);
+			imprimirMensajeUno(archivoLog, "[DIRECTORIO] %s (d)", directorio->nombre);
 	}
-	/*
+
 	for(indice=0; indice<listaCantidadElementos(listaArchivos); indice++) {
 		Archivo* archivo = listaObtenerElemento(listaArchivos, indice);
-		if(archivo->identificadorPadre == directorioPadre->identificadorPadre)
-			imprimirMensajeUno(archivoLog, "[DIRECTORIO] %s", archivo->nombre);
+		if(archivo->identificadorPadre == directorioPadre->identificador)
+			imprimirMensajeUno(archivoLog, "[DIRECTORIO] %s (a)", archivo->nombre);
 	}
-	*/
 }
 
 void comandoListarDirectorio(Comando* comando) {
-
-	String nombreDirectorio = directorioExtraerNombreDeRuta(comando->argumentos[1]);
-
-	bool directorioBuscarPorNombre(Directorio* directorio) {
-		return stringIguales(nombreDirectorio, directorio->nombre);
-	}
-
-	Directorio* directorio = listaBuscar(listaDirectorios, (Puntero)directorioBuscarPorNombre);
+	int identificador = directorioObtenerIdentificador(comando->argumentos[1]);
+	Directorio* directorio = directorioBuscarEnLista(identificador);
 	if(directorio != NULL)
 		directorioMostrarArchivos(directorio);
 	else
 		imprimirMensaje(archivoLog, "[ERROR] El directorio no existe");
-	memoriaLiberar(nombreDirectorio);
 }
 
 void comandoInformacionArchivo(Comando* comando) {
@@ -1083,17 +1078,15 @@ void directorioActualizar(ControlDirectorio* control, String rutaDirectorio) {
 //--------------------------------------- Funciones de Archivo -------------------------------------
 
 
-void nodoBitmapsPersistir(Nodo* nodo) {
+void nodoPersistirBitmaps(Nodo* nodo) {
 	String ruta = memoriaAlocar(MAX_STRING);
 	stringCopiar(ruta, RUTA_BITMAPS);
 	stringConcatenar(&ruta, nodo->nombre);
 	File archivo = fileAbrir(ruta, "a+");
 	memoriaLiberar(ruta);
 	int indice;
-	for(indice = 0; indice < nodo->bloquesTotales; indice++) {
-		bitmapLiberarBit(nodo->bitmap, indice);
+	for(indice = 0; indice < nodo->bloquesTotales; indice++)
 		fprintf(archivo, "%i", bitmapBitOcupado(nodo->bitmap, indice));
-	}
 	fprintf(archivo, "\n");
 	fileCerrar(archivo);
 }
@@ -1103,7 +1096,7 @@ void nodoIniciarEstructura() {
 	nodoPersistir();
 	int indice;
 	for(indice = 0; indice < listaCantidadElementos(listaNodos); indice++)
-		nodoBitmapsPersistir(listaObtenerElemento(listaNodos, indice));
+		nodoPersistirBitmaps(listaObtenerElemento(listaNodos, indice));
 }
 
 
@@ -1246,14 +1239,10 @@ void archivoLogIniciar() {
 	imprimirMensajeProceso("# PROCESO FILE SYSTEM");
 	imprimirMensaje(archivoLog, "[EJECUCION] Proceso File System inicializado");
 }
-/*
+
  void testCabecita() {
-	Nodo* nodo1 = nodoCrear("NODO1", 20, 1, 1);
-	Nodo* nodo2 = nodoCrear("NODO2", 100, 1, 1);
-	listaAgregarElemento(listaNodos, nodo1);
-	listaAgregarElemento(listaNodos, nodo2);
 	Archivo* metadata = memoriaAlocar(sizeof(Archivo));
-	metadata->identificadorPadre = 99;
+	metadata->identificadorPadre = 1;
 	metadata->listaBloques = listaCrear();
 	stringCopiar(metadata->nombre, "Manco");
 	stringCopiar(metadata->tipo, "TEXTO");
@@ -1277,7 +1266,7 @@ void archivoLogIniciar() {
 	listaAgregarElemento(bloque2->listaCopias, copia3);
 	listaAgregarElemento(metadata->listaBloques, bloque);
 	listaAgregarElemento(metadata->listaBloques, bloque2);
+	listaAgregarElemento(listaArchivos, metadata);
 	archivoPersistir(metadata);
-	archivoDestruir(metadata);
 }
-*/
+
