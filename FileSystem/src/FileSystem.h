@@ -54,6 +54,8 @@
 #define FLAG_CLEAN "--clean"
 #define MAX_STRING 255
 #define MAX_DIR 100
+#define BLOQUE 1048576
+#define ESCRIBIR 101
 
 typedef struct {
 	int identificador;
