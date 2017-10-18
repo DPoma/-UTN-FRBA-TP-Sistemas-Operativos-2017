@@ -814,7 +814,43 @@ void comandoMoverArchivoDirectorio(Comando* comando) {
 		imprimirMensaje(archivoLog, "[ERROR] El directorio no existe");
 }
 
+Archivo* archivoBuscar(String path) {
+	Archivo* archivo = NULL;
+	String ultimo = directorioObtenerUltimoNombre(path);
+	int indice;
+	ControlDirectorio* control = directorioControlCrear(path);
+	while(stringValido(control->nombreDirectorio)) {
+		directorioBuscarIdentificador(control);
+		if(control->identificadorDirectorio != ERROR) {
+			control->identificadorPadre = control->identificadorDirectorio;
+			control->indiceNombresDirectorios++;
+			directorioControlSetearNombre(control);
+		}
+		else
+			break;
+	}
+
+
+	bool buscar(Archivo* archivo) {
+		return control->identificadorPadre == archivo->identificadorPadre &&
+				stringIguales(control->nombreDirectorio, archivo->nombre);
+	}
+
+	//Por si un directorio de la ruta no existe, me aseguro que el ultimo nombre sea el que salio del while ya que deberian ser iguales siempre
+	if(stringIguales(control->nombreDirectorio, ultimo))
+		archivo = listaBuscar(listaArchivos, (Puntero)buscar);
+
+	for(indice=0; stringValido(control->nombresDirectorios[indice]); indice++)
+		memoriaLiberar(control->nombresDirectorios[indice]);
+	memoriaLiberar(control->nombresDirectorios);
+	memoriaLiberar(control);
+	memoriaLiberar(ultimo);
+	return archivo;
+}
+
+
 void comandoMostrarArchivo(Comando* comando) {
+
 
 }
 
@@ -918,7 +954,34 @@ void comandoListarDirectorio(Comando* comando) {
 }
 
 void comandoInformacionArchivo(Comando* comando) {
+	Archivo* archivo = archivoBuscar(comando->argumentos[1]);
 
+	if(archivo == NULL) {
+		imprimirMensaje(archivoLog, "[ERROR] El archivo no existe");
+		return;
+	}
+
+	imprimirMensajeUno(archivoLog, "[ARCHIVO] Nombre: %s", archivo->nombre);
+	imprimirMensajeUno(archivoLog, "[ARCHIVO] Tipo: %s", archivo->tipo);
+	imprimirMensajeUno(archivoLog, "[ARCHIVO] Ubicacion: %s", comando->argumentos[1]);
+	int indice;
+	int tamanio = 0;
+	for(indice = 0; indice < listaCantidadElementos(archivo->listaBloques); indice++) {
+		Bloque* bloque = listaObtenerElemento(archivo->listaBloques, indice);
+		tamanio+= bloque->bytes;
+	}
+	imprimirMensajeUno(archivoLog, "[ARCHIVO] Tamanio: %i bytes", (int*)tamanio);
+	imprimirMensajeUno(archivoLog, "[ARCHIVO] Bloques utilizados: %i", (int*)listaCantidadElementos(archivo->listaBloques));
+	for(indice = 0; indice < listaCantidadElementos(archivo->listaBloques); indice++) {
+		Bloque* bloque = listaObtenerElemento(archivo->listaBloques, indice);
+		imprimirMensajeDos(archivoLog, "[ARCHIVO] Bloque %i: %i bytes", (int*)indice, (int*)bloque->bytes);
+		int indiceCopia;
+		for(indiceCopia = 0; indiceCopia < listaCantidadElementos(bloque->listaCopias); indiceCopia++) {
+			CopiaBloque* copiaBloque = listaObtenerElemento(bloque->listaCopias, indiceCopia);
+			imprimirMensajeCuatro(archivoLog, "[ARCHIVO] Bloque %i copia %i en: Nodo: %s | Bloque: %i", (int*)indice,
+					(int*)indiceCopia, copiaBloque->nombreNodo, (int*)copiaBloque->bloqueNodo);
+		}
+	}
 }
 
 void comandoFinalizar() {
@@ -1389,7 +1452,7 @@ void archivoLogIniciar() {
 
  void testCabecita() {
 	Archivo* metadata = memoriaAlocar(sizeof(Archivo));
-	metadata->identificadorPadre = 1;
+	metadata->identificadorPadre = 3;
 	metadata->listaBloques = listaCrear();
 	stringCopiar(metadata->nombre, "Manco");
 	stringCopiar(metadata->tipo, "TEXTO");

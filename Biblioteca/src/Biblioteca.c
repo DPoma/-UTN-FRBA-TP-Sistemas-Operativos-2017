@@ -673,6 +673,13 @@ void imprimirMensajeTres(ArchivoLog archivoLog, String mensaje, void* algo1, voi
 }
 
 
+void imprimirMensajeCuatro(ArchivoLog archivoLog, String mensaje, void* algo1, void* algo2, void* algo3, void* algo4) {
+	printf(mensaje, algo1, algo2, algo3, algo4);
+	puts("");
+	log_info(archivoLog, mensaje, algo1, algo2, algo3, algo4);
+}
+
+
 void imprimirMensajeProceso(String mensaje) {
 	puts("-------------------------------------------------------------------------");
 	puts(mensaje);
