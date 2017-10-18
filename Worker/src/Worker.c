@@ -10,7 +10,7 @@
 
 #include "Worker.h"
 
-int main(void) {
+/*int main(void) {
 	workerIniciar();
 	socketListenerWorker = socketCrearListener(configuracion->puertoWorker);
 	imprimirMensajeUno(archivoLog, "[CONEXION] Esperando conexiones de Master (Puerto: %s)", configuracion->puertoWorker);
@@ -18,7 +18,7 @@ int main(void) {
 		socketAceptarConexion();
 	imprimirMensaje(archivoLog, "[EJECUCION] Proceso Worker finalizado");
 	return EXIT_SUCCESS;
-}
+}*/
 
 void workerCrearHijo(Socket unSocket) {
 	int pid = fork();
@@ -69,7 +69,7 @@ void workerCrearHijo(Socket unSocket) {
 				memcpy(&origen,mensaje->datos + sizeof(int32_t)*2+sizeCodigo, sizeOrigen);
 				memcpy(&sizeDestino, mensaje->datos + sizeof(int32_t)*2 + sizeCodigo + sizeOrigen, sizeof(int32_t));
 				memcpy(&destino,mensaje->datos + sizeof(int32_t)*3+sizeCodigo+ sizeOrigen, sizeDestino);
-				//reduccionLocal();
+				reduccionLocal(codigo,origen,destino);
 				/*char* buffer = leerArchivo(path,offset,size);
 				log_info(logFile, "[FILE SYSTEM] EL KERNEL PIDE LEER: %s | OFFSET: %i | SIZE: %i", path, offset, size);
 				if(buffer=="-1"){
@@ -174,14 +174,145 @@ int transformar(char* codigo,int origen,char* destino){
 	strcat(commando,"chmod 0755");
 	strcat(commando,codigo);
 	system(commando);
+	free (commando);
 	//paso buffer a script y resultado script a sort
 	char*command=NULL;
+	strcat(command,"cat");
+	strcat(command,buffer);
+	strcat(command,"|");
 	strcat(command,codigo);
+	strcat(command,"| sort >");
+	strcat(command,destino);
+	system(command);
+	free (command);
+	//resuelto por parametro en vez de cat
+	/*strcat(command,codigo);
 	strcat(command,buffer);//suponiendo que el script requiere un buffer como parametro
 	strcat(command,"| sort >");
 	strcat(command,destino);
 	system(command);
+	free (command);*/
 	return 0;
+}
+
+//2da etapa
+int reduccionLocal(char* codigo,char* origen,char* destino){
+	char** listaOri;
+	listaOri = getOrigenesLocales(origen);
+	char* apendado;
+	apendado = appendL(listaOri);
+	//doy privilegios a script
+	char*commando=NULL;
+	strcat(commando,"chmod 0755");
+	strcat(commando,codigo);
+	system(commando);
+	free (commando);
+	//paso buffer a script y resultado script a sort
+	char*command=NULL;
+	strcat(command,"cat");
+	strcat(command,apendado);
+	strcat(command,"|");
+	strcat(command,codigo);
+	strcat(command,">");
+	strcat(command,destino);
+	system(command);
+	free (command);
+	free (apendado);
+	int i=0;
+	while(listaOri[i]!=NULL){
+		free(listaOri[i]);
+		i++;
+	}
+	//for(i=0;;i++)
+	free (listaOri);
+	return 0;
+}
+
+char** getOrigenesLocales(char* origen){
+	int cantOrigenes;
+	memcpy(&cantOrigenes, origen, sizeof(int32_t));
+	char* oris [cantOrigenes];
+	int i;
+	int size = sizeof(int32_t);
+	int sizeOri=0;
+	for(i=0;(i-1)==cantOrigenes;i++){
+		memcpy(&sizeOri, origen + size , sizeof(int32_t));
+		size= size + sizeof(int32_t);
+		memcpy(&oris[i],origen + size, sizeOri);
+		size= size + sizeOri;
+	}
+	return oris;
+}
+
+char* appendL(char** origenes){
+	char* rutaArchAppend;
+	return rutaArchAppend;
+}
+
+//3ra etapa
+int reduccionGlobal(char* codigo,char* origen,char* destino){
+	globOri* listaOri;
+	listaOri = getOrigenesGlobales(origen);
+	char* apendado;
+	apendado = appendG(listaOri);
+	//doy privilegios a script
+	char*commando=NULL;
+	strcat(commando,"chmod 0755");
+	strcat(commando,codigo);
+	system(commando);
+	free (commando);
+	//paso buffer a script y resultado script a sort
+	char*command=NULL;
+	strcat(command,"cat");
+	strcat(command,apendado);
+	strcat(command,"|");
+	strcat(command,codigo);
+	strcat(command,">");
+	strcat(command,destino);
+	system(command);
+	free (command);
+	free (apendado);
+	int i=0;
+	while(listaOri[i]->ruta!=NULL){
+		free(listaOri[i]->ruta);
+		i++;
+	}
+	i=0;
+	while(listaOri[i]->ip!=NULL){
+		free(listaOri[i]->ip);
+		i++;
+	}
+	//for(i=0;;i++)
+	free (listaOri);
+	return 0;
+}
+
+globOri* getOrigenesGlobales(char* origen){
+	int cantOrigenes;
+	memcpy(&cantOrigenes, origen, sizeof(int32_t));
+	globOri* oris [cantOrigenes];
+	int i;
+	int size = sizeof(int32_t);
+	int sizeOri=0;
+	int sizeIP=0;
+	for(i=0;(i-1)==cantOrigenes;i++){
+		memcpy(&sizeOri, origen + size , sizeof(int32_t));
+		size= size + sizeof(int32_t);
+		memcpy(&oris[i]->ruta,origen + size, sizeOri);
+		size= size + sizeOri;
+		memcpy(&sizeIP, origen + size , sizeof(int32_t));
+		size= size + sizeof(int32_t);
+		memcpy(&oris[i]->ip,origen + size, sizeOri);
+		size= size + sizeIP;
+		memcpy(&oris[i]->puerto, origen + size , sizeof(int32_t));
+		size= size + sizeof(int32_t);
+	}
+	return oris;
+}
+
+char* appendG(globOri* origenes){
+	char* rutaArchAppend;
+	return rutaArchAppend;
 }
 
 void socketAceptarConexion() {

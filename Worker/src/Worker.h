@@ -20,6 +20,12 @@ typedef struct {
 	char rutaDataBin[100];
 } Configuracion;
 
+typedef struct {
+	char* ruta;
+	char* ip;
+	int puerto;
+} globOri;
+
 const MB = 1048576;
 String campos[5];
 Configuracion* configuracion;
