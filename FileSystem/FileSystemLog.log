@@ -1,9 +1,16 @@
-[INFO] 09:28:56:21 FileSystem/(4124:4124): [EJECUCION] Proceso File System inicializado
-[INFO] 09:28:57:77 FileSystem/(4124:4124): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 09:28:57:78 FileSystem/(4124:4124): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 09:29:19:72 FileSystem/(4124:4127): [DIRECTORIO] El directorio /home/nose fue creado exitosamente
-[INFO] 09:29:21:811 FileSystem/(4124:4127): [DIRECTORIO] El directorio /home/algo fue creado exitosamente
-[INFO] 09:29:30:482 FileSystem/(4124:4127): [ERROR] El nuevo nombre ya existe
-[INFO] 09:29:54:474 FileSystem/(4124:4127): [ERROR] El directorio no existe
-[INFO] 09:30:36:224 FileSystem/(4124:4127): [ERROR] El nuevo nombre ya existe
-[INFO] 09:30:51:182 FileSystem/(4124:4124): [EJECUCION] Finalizando proceso File System...
+[INFO] 10:10:15:572 FileSystem/(4729:4729): [EJECUCION] Proceso File System inicializado
+[INFO] 10:10:15:637 FileSystem/(4729:4729): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 10:10:15:638 FileSystem/(4729:4729): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 10:10:18:541 FileSystem/(4729:4732): [DIRECTORIO] El directorio /home/algo fue creado exitosamente
+[INFO] 10:10:22:932 FileSystem/(4729:4732): [DIRECTORIO] El directorio /home/nose fue creado exitosamente
+[INFO] 10:10:28:106 FileSystem/(4729:4732): [DIRECTORIO] El directorio /home/algo/nose fue creado exitosamente
+[INFO] 10:10:37:848 FileSystem/(4729:4732): [ERROR] La ruta destino ya existe
+[INFO] 10:10:51:175 FileSystem/(4729:4732): [ERROR] El directorio no existe
+[INFO] 10:11:03:119 FileSystem/(4729:4732): [ERROR] El directorio no existe
+[INFO] 10:11:16:58 FileSystem/(4729:4732): [ERROR] El directorio no existe
+[INFO] 10:11:45:277 FileSystem/(4729:4732): El directorio nose fue movido a /home/nose
+[INFO] 10:11:51:707 FileSystem/(4729:4732): [DIRECTORIO] Listando archivos y directorios en nose
+[INFO] 10:11:51:720 FileSystem/(4729:4732): [DIRECTORIO] nose (d)
+[INFO] 10:12:47:429 FileSystem/(4729:4732): [DIRECTORIO] El directorio /bobo fue creado exitosamente
+[INFO] 10:13:06:597 FileSystem/(4729:4732): El directorio home fue movido a /bobo
+[INFO] 10:15:54:921 FileSystem/(4729:4729): [EJECUCION] Finalizando proceso File System...

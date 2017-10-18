@@ -756,7 +756,7 @@ void comandoRemoverDirectorio(Comando* comando) {
 	}
 }
 
-bool directorioExisteNuevoNombre(int idPadre, String nuevoNombre) {
+bool directorioExisteElNuevoDirectorio(int idPadre, String nuevoNombre) {
 
 	bool existeNuevoNombre(Directorio* directorio) {
 		return idPadre == directorio->identificadorPadre &&
@@ -772,7 +772,7 @@ void comandoRenombrarArchivoDirectorio(Comando* comando) {
 
 	if(directorio != NULL) {
 
-		if(directorioExisteNuevoNombre(directorio->identificadorPadre, comando->argumentos[2])) {
+		if(directorioExisteElNuevoDirectorio(directorio->identificadorPadre, comando->argumentos[2])) {
 			imprimirMensaje(archivoLog, "[ERROR] El nuevo nombre ya existe");
 			return;
 		}
@@ -787,8 +787,31 @@ void comandoRenombrarArchivoDirectorio(Comando* comando) {
 		imprimirMensaje(archivoLog, "[ERROR] El directorio no existe");
 }
 
-void comandoMoverArchivoDirectorio(Comando* comando) {
+Directorio* directorioBuscar(String path) {
+	int identificador = directorioObtenerIdentificador(path);
+	Directorio* directorio = directorioBuscarEnLista(identificador);
+	return directorio;
+}
 
+void comandoMoverArchivoDirectorio(Comando* comando) {
+	Directorio* directorio = directorioBuscar(comando->argumentos[1]);
+	Directorio* directorioNuevoPadre = directorioBuscar(comando->argumentos[2]);
+
+	if(directorio != NULL && directorioNuevoPadre != NULL) {
+
+		if(directorioExisteElNuevoDirectorio(directorioNuevoPadre->identificador, directorio->nombre)) {
+			imprimirMensaje(archivoLog, "[ERROR] La ruta destino ya existe");
+			return;
+		}
+
+		directorio->identificadorPadre = directorioNuevoPadre->identificador;
+		directorioPersistirMovido(directorio->identificador, directorioNuevoPadre->identificador);
+		String nombre = directorioObtenerUltimoNombre(comando->argumentos[1]);
+		imprimirMensajeDos(archivoLog, "El directorio %s fue movido a %s", nombre, comando->argumentos[2]);
+		memoriaLiberar(nombre);
+	}
+	else
+		imprimirMensaje(archivoLog, "[ERROR] El directorio no existe");
 }
 
 void comandoMostrarArchivo(Comando* comando) {
@@ -934,7 +957,6 @@ void directorioPersistirRenombrar(int idPadre, char*nuevoNombre) {
 				strcat(nueva_copia, nuevoNombre);
 				strcat(nueva_copia, ";");
 				strcat(nueva_copia, padre);
-				//strcat(nueva_copia, "\n");
 				fprintf(archivoAuxiliar, "%s", nueva_copia);
 			} else
 				fprintf(archivoAuxiliar, "%s", copia_buffer);
@@ -956,7 +978,51 @@ void directorioPersistirRenombrar(int idPadre, char*nuevoNombre) {
 }
 
 void directorioPersistirMovido(int idPadre, int nuevoPadre) {
-
+	FILE* dir;
+	FILE* aux;
+	dir = fopen(RUTA_DIRECTORIOS, "r");
+	aux = fopen(RUTA_AUXILIAR, "w");
+	char buffer[200];
+	char copia_buffer[200];
+	char nueva_copia[200];
+	memset(nueva_copia, '\0', 200);
+	memset(buffer, '\0', 200);
+	memset(copia_buffer, '\0', 200);
+	char *saveptr;
+	char* id = string_new();
+	char* nombre = string_new();
+	char* padre = string_new(); //este warning no se puede sacar pero esta bien, aunque dice que no hace nada hace algo
+	while (fgets(buffer, sizeof(buffer), dir) != NULL) {
+		if (strcmp(buffer, "\n") != 0) {
+			strcpy(copia_buffer, buffer);
+			id = strtok_r(buffer, ";", &saveptr);
+			nombre = strtok_r(NULL, ";", &saveptr);
+			padre = strtok_r(NULL, ";", &saveptr);
+			if (atoi(id) == idPadre) {
+				strcat(nueva_copia, id);
+				strcat(nueva_copia, ";");
+				strcat(nueva_copia, nombre);
+				strcat(nueva_copia, ";");
+				strcat(nueva_copia, string_itoa(nuevoPadre));
+				strcat(nueva_copia, "\n");
+				fprintf(aux, "%s", nueva_copia);
+			} else
+				fprintf(aux, "%s", copia_buffer);
+			memset(buffer, '\0', 200);
+			memset(copia_buffer, '\0', 200);
+		}
+	}
+	fclose(dir);
+	fclose(aux);
+	dir = fopen(RUTA_DIRECTORIOS, "w");
+	aux = fopen(RUTA_AUXILIAR, "r");
+	memset(buffer, '\0', 200);
+	while (fgets(buffer, sizeof(buffer), aux) != NULL) {
+		fprintf(dir, "%s", buffer);
+		memset(buffer, '\0', 200);
+	}
+	fclose(dir);
+	fclose(aux);
 }
 
 

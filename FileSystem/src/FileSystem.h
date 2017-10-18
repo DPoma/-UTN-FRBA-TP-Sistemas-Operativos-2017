@@ -235,3 +235,4 @@ bool directorioExisteIdentificador(int identificador);
 void directorioPersistirBorrado(int identificador);
 void testCabecita();
 void directorioPersistirRenombrar(int identificador, String nuevoNombre);
+void directorioPersistirMovido(int idPadre, int nuevoPadre);
