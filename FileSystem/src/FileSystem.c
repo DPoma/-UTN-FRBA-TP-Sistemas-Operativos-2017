@@ -756,8 +756,35 @@ void comandoRemoverDirectorio(Comando* comando) {
 	}
 }
 
-void comandoRenombrarArchivoDirectorio(Comando* comando) {
+bool directorioExisteNuevoNombre(int idPadre, String nuevoNombre) {
 
+	bool existeNuevoNombre(Directorio* directorio) {
+		return idPadre == directorio->identificadorPadre &&
+				stringIguales(nuevoNombre, directorio->nombre);
+	}
+
+	return listaCumpleAlguno(listaDirectorios, (Puntero)existeNuevoNombre);
+}
+
+void comandoRenombrarArchivoDirectorio(Comando* comando) {
+	int identificador = directorioObtenerIdentificador(comando->argumentos[1]);
+	Directorio* directorio = directorioBuscarEnLista(identificador);
+
+	if(directorio != NULL) {
+
+		if(directorioExisteNuevoNombre(directorio->identificadorPadre, comando->argumentos[2])) {
+			imprimirMensaje(archivoLog, "[ERROR] El nuevo nombre ya existe");
+			return;
+		}
+
+		String viejoNombre= directorioObtenerUltimoNombre(comando->argumentos[1]);
+		stringCopiar(directorio->nombre, comando->argumentos[2]);
+		directorioPersistirRenombrar(identificador, directorio->nombre);
+		imprimirMensajeDos(archivoLog, "El directorio %s fue renombrado por %s", viejoNombre, directorio->nombre);
+		memoriaLiberar(viejoNombre);
+	}
+	else
+		imprimirMensaje(archivoLog, "[ERROR] El directorio no existe");
 }
 
 void comandoMoverArchivoDirectorio(Comando* comando) {
@@ -803,7 +830,7 @@ void comandoObtenerMD5(Comando* comando) {
 		int descriptores[2];
 		pipe(descriptores);
 		String md5DeArchivo = memoriaAlocar(MAX_STRING);
-		String nombreArchivo = directorioExtraerNombreDeRuta(comando->argumentos[1]);
+		String nombreArchivo = directorioObtenerUltimoNombre(comando->argumentos[1]);
 		pidHijo = fork();
 		if(pidHijo == -1)
 			imprimirMensaje(archivoLog, "[ERROR] Fallo el fork (Estas en problemas amigo)");
@@ -831,7 +858,7 @@ void comandoObtenerMD5(Comando* comando) {
 		//imprimirMensaje("[ERROR] El archivo no se encuentra en el File System YAMA");
 }
 
-String directorioExtraerNombreDeRuta(String ruta) {
+String directorioObtenerUltimoNombre(String ruta) {
 	int indice;
 	int ultimaBarra;
 	for(indice=0; ruta[indice] != FIN; indice++)
@@ -881,6 +908,58 @@ void comandoError() {
 }
 
 //--------------------------------------- Funciones de Directorio -------------------------------------
+
+
+void directorioPersistirRenombrar(int idPadre, char*nuevoNombre) {
+	File archivoDirectorio = fopen(RUTA_DIRECTORIOS, "r");
+	FILE* archivoAuxiliar =  fopen(RUTA_AUXILIAR, "w");
+	char buffer[200];
+	char copia_buffer[200];
+	char nueva_copia[200];
+	memset(nueva_copia, '\0', 200);
+	memset(buffer, '\0', 200);
+	memset(copia_buffer, '\0', 200);
+	char *saveptr;
+	char* id = string_new();
+	char* padre = string_new();
+	while (fgets(buffer, sizeof(buffer), archivoDirectorio) != NULL) {
+		if (strcmp(buffer, "\n") != 0) {
+			strcpy(copia_buffer, buffer);
+			id = strtok_r(buffer, ";", &saveptr);
+			padre = strtok_r(NULL, ";", &saveptr);
+			padre = strtok_r(NULL, ";", &saveptr);
+			if (atoi(id) == idPadre) {
+				strcat(nueva_copia, id);
+				strcat(nueva_copia, ";");
+				strcat(nueva_copia, nuevoNombre);
+				strcat(nueva_copia, ";");
+				strcat(nueva_copia, padre);
+				//strcat(nueva_copia, "\n");
+				fprintf(archivoAuxiliar, "%s", nueva_copia);
+			} else
+				fprintf(archivoAuxiliar, "%s", copia_buffer);
+			memset(buffer, '\0', 200);
+			memset(copia_buffer, '\0', 200);
+		}
+	}
+	fclose(archivoDirectorio);
+	fclose(archivoAuxiliar);
+	archivoDirectorio = fopen(RUTA_DIRECTORIOS, "w");
+	archivoAuxiliar = fopen(RUTA_AUXILIAR, "r");
+	memset(buffer, '\0', 200);
+	while (fgets(buffer, sizeof(buffer), archivoAuxiliar) != NULL) {
+		fprintf(archivoDirectorio, "%s", buffer);
+		memset(buffer, '\0', 200);
+	}
+	fclose(archivoDirectorio);
+	fclose(archivoAuxiliar);
+}
+
+void directorioPersistirMovido(int idPadre, int nuevoPadre) {
+
+}
+
+
 
 
 bool directorioIndiceRespetaLimite(int indice) {

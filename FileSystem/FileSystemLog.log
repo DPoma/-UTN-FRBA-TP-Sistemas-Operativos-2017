@@ -1,35 +1,9 @@
-[INFO] 00:16:39:956 FileSystem/(10898:10898): [EJECUCION] Proceso File System inicializado
-[INFO] 00:16:40:13 FileSystem/(10898:10898): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 00:16:40:14 FileSystem/(10898:10898): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 00:16:43:527 FileSystem/(10898:10901): [DIRECTORIO] El directorio /home/algo fue creado exitosamente
-[INFO] 00:16:47:966 FileSystem/(10898:10901): [DIRECTORIO] El directorio /home/nose fue creado exitosamente
-[INFO] 00:16:51:95 FileSystem/(10898:10901): [DIRECTORIO] El directorio /home/bobo fue creado exitosamente
-[INFO] 00:16:53:540 FileSystem/(10898:10901): [DIRECTORIO] Listando archivos y directorios en home
-[INFO] 00:16:53:543 FileSystem/(10898:10901): [DIRECTORIO] algo (d)
-[INFO] 00:16:53:543 FileSystem/(10898:10901): [DIRECTORIO] nose (d)
-[INFO] 00:16:53:544 FileSystem/(10898:10901): [DIRECTORIO] bobo (d)
-[INFO] 00:16:53:545 FileSystem/(10898:10901): [DIRECTORIO] Manco (a)
-[INFO] 00:16:58:94 FileSystem/(10898:10901): El directorio /home/bobo ha sido eliminado
-[INFO] 00:17:01:905 FileSystem/(10898:10901): El directorio /home/algo ha sido eliminado
-[INFO] 00:17:07:271 FileSystem/(10898:10901): [DIRECTORIO] Listando archivos y directorios en home
-[INFO] 00:17:07:272 FileSystem/(10898:10901): [DIRECTORIO] nose (d)
-[INFO] 00:17:07:273 FileSystem/(10898:10901): [DIRECTORIO] Manco (a)
-[INFO] 00:17:14:462 FileSystem/(10898:10901): El directorio /home no puede ser eliminado ya que posee archivos o directorios
-[INFO] 00:17:32:936 FileSystem/(10898:10901): El directorio /home/nose ha sido eliminado
-[INFO] 00:17:41:179 FileSystem/(10898:10901): [DIRECTORIO] Listando archivos y directorios en home
-[INFO] 00:17:41:180 FileSystem/(10898:10901): [DIRECTORIO] Manco (a)
-[INFO] 00:17:46:385 FileSystem/(10898:10901): El directorio /home no puede ser eliminado ya que posee archivos o directorios
-[INFO] 00:17:52:116 FileSystem/(10898:10901): [ERROR] El directorio ya existe
-[INFO] 00:18:09:919 FileSystem/(10898:10901): [ERROR] El directorio no existe
-[INFO] 00:18:27:788 FileSystem/(10898:10901): [DIRECTORIO] El directorio /home/lala fue creado exitosamente
-[INFO] 00:18:37:930 FileSystem/(10898:10901): [DIRECTORIO] El directorio /home/baba fue creado exitosamente
-[INFO] 00:18:39:916 FileSystem/(10898:10901): [ESTADO] El File System ha sido formateado
-[INFO] 00:18:42:993 FileSystem/(10898:10898): [CONEXION] Proceso Data Node conectado exitosamente
-[INFO] 00:18:44:58 FileSystem/(10898:10898): [CONEXION] Proceso Data Node conectado exitosamente
-[INFO] 00:18:50:348 FileSystem/(10898:10901): [DIRECTORIO] El directorio /home/blaba fue creado exitosamente
-[INFO] 00:18:51:675 FileSystem/(10898:10901): [ESTADO] El File System ha sido formateado
-[INFO] 00:19:19:635 FileSystem/(10898:10901): [ARCHIVO] El MD5 es 0bf6cce1ccfda63b4ed193829a8a46ee  /home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Metadata/nodos.bin
-
-[INFO] 00:19:26:111 FileSystem/(10898:10898): [CONEXION] Un proceso Data Node se ha desconectado
-[INFO] 00:19:28:92 FileSystem/(10898:10901): [ESTADO] El File System ha sido formateado
-[INFO] 00:19:30:310 FileSystem/(10898:10898): [EJECUCION] Finalizando proceso File System...
+[INFO] 09:28:56:21 FileSystem/(4124:4124): [EJECUCION] Proceso File System inicializado
+[INFO] 09:28:57:77 FileSystem/(4124:4124): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 09:28:57:78 FileSystem/(4124:4124): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 09:29:19:72 FileSystem/(4124:4127): [DIRECTORIO] El directorio /home/nose fue creado exitosamente
+[INFO] 09:29:21:811 FileSystem/(4124:4127): [DIRECTORIO] El directorio /home/algo fue creado exitosamente
+[INFO] 09:29:30:482 FileSystem/(4124:4127): [ERROR] El nuevo nombre ya existe
+[INFO] 09:29:54:474 FileSystem/(4124:4127): [ERROR] El directorio no existe
+[INFO] 09:30:36:224 FileSystem/(4124:4127): [ERROR] El nuevo nombre ya existe
+[INFO] 09:30:51:182 FileSystem/(4124:4124): [EJECUCION] Finalizando proceso File System...
