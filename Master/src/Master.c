@@ -72,7 +72,7 @@ void leerArchivoConfig(){
 
 int hayWorkersParaConectar(){
 	Mensaje* m = mensajeRecibir(socketYAMA);
-	if(m->header.operacion-1){
+	if(m->header.operacion==-1){
 		imprimirMensaje(archivoLog,"No hay mas workers por conectar");
 		printf("No hay mas workers para conectar");
 		return -1;
@@ -83,26 +83,32 @@ int hayWorkersParaConectar(){
 
 }
 
-WorkerTransformacion* deserializar(){
-	Mensaje* mensaje = mensajeRecibir(socketYAMA);
+WorkerTransformacion* deserializar(Mensaje* mensaje){
+	int size = mensaje->header.tamanio;
 	int tamanio_ip;
 	char* nroip;
 	int numeroBloque;
-	int numeropuerto;
+	int numeroBytes;
+	int tamanionumeropuerto;
+	char* numeropuerto;
 	int tamanio_nombretemp;
 	char* nombrearchivo;
-	WorkerTransformacion* wt;
+	WorkerTransformacion* wt= malloc(size);
 
 	memcpy(&tamanio_ip,mensaje->datos,sizeof(int));
-	memcpy(&nroip,mensaje->datos + sizeof(int), wt->size_ip);
-	memcpy(&numeroBloque, mensaje->datos + sizeof(int)+ wt->size_ip, sizeof(int));
-	memcpy(&numeropuerto, mensaje->datos + (sizeof(int)*2) + wt->size_ip, sizeof(int));
-	memcpy(&tamanio_nombretemp, mensaje->datos + (sizeof(int)*3) + wt->size_ip, sizeof(int));
-	memcpy(&nombrearchivo, mensaje->datos+(sizeof(int)*3)+wt->size_ip+wt->size_nombretemp, wt->size_ip);
+	memcpy(&nroip,mensaje->datos + sizeof(int), tamanio_ip);
+	memcpy(&numeroBloque, mensaje->datos + sizeof(int)+ tamanio_ip, sizeof(int));
+	memcpy(&numeroBytes, mensaje->datos +sizeof(int)*2 + tamanio_ip, sizeof(int));
+	memcpy(&tamanionumeropuerto, mensaje->datos + sizeof(int)*3 + tamanio_ip, sizeof(int));
+	memcpy(&numeropuerto, mensaje->datos + sizeof(int)*3 + tamanio_ip + tamanionumeropuerto, tamanionumeropuerto);
+	memcpy(&tamanio_nombretemp, mensaje->datos + sizeof(int)*4 + tamanio_ip + tamanionumeropuerto, sizeof(int));
+	memcpy(&nombrearchivo, mensaje->datos + sizeof(int)*4 + tamanio_ip + tamanionumeropuerto, tamanio_nombretemp);
 
 	wt->size_ip=tamanio_ip;
 	wt->ip=nroip;
 	wt->nroBloque=numeroBloque;
+	wt->nroBytes=numeroBytes;
+	wt->size_puerto=tamanionumeropuerto;
 	wt->puerto=numeropuerto;
 	wt->size_nombretemp=tamanio_nombretemp;
 	wt->nombretemp=nombrearchivo;
@@ -156,13 +162,6 @@ void conexion(){
 
 }
 */
-void establecerConexionConWorker(Socket unSocket, WorkerTransformacion* wt){
-	imprimirMensajeDos(archivoLog,"[CONEXION] Estableciendo conexion con Worker (IP: %s | PUERTO: %s", wt->ip, wt->puerto);
-	socketWorker = socketCrearCliente(wt->ip, wt->puerto, ID_MASTER);
-
-	serializarYEnviar(wt->nroBloque,wt->nombretemp,socketWorker);
-
-}
 
 void confirmacionWorker(Socket unSocket){
 	Mensaje* mensaje = mensajeRecibir(unSocket);
@@ -178,23 +177,51 @@ void confirmacionWorker(Socket unSocket){
 	}
 }
 
-
-
-void serializarYEnviar(int nroBloque, char* nombretemp, Socket unSocket){
+void serializarYEnviar(int nroBloque, int nroBytes, char* nombretemp, Socket unSocket){
 	int size_nombretemp = strlen(nombretemp)+1;
-	char* data = malloc(sizeof(int)+size_nombretemp);
-	int len = size_nombretemp+sizeof(int);
+	char* data = malloc(sizeof(int)*2+size_nombretemp);
+	int len = size_nombretemp+sizeof(int)*2;
 
 	memcpy(data,&nroBloque, sizeof(int));
-	memcpy(data+sizeof(int),&nroBloque, sizeof(int));
-	memcpy(data+(sizeof(int)*2),nombretemp,size_nombretemp);
+	memcpy(data+sizeof(int),&nroBytes, sizeof(int));
+	memcpy(data+sizeof(int)*2,&nroBloque, sizeof(int));
+	memcpy(data+(sizeof(int)*3),nombretemp,size_nombretemp);
 
 	mensajeEnviar(unSocket,TRANSFORMACION,data,len);
 
 
 }
 
+void establecerConexionConWorker( WorkerTransformacion* wt){
 
+	imprimirMensajeDos(archivoLog,"[CONEXION] Estableciendo conexion con Worker (IP: %s | PUERTO: %s", wt->ip, wt->puerto);
+	socketWorker = socketCrearCliente(wt->ip, wt->puerto, ID_MASTER);
+	serializarYEnviar(wt->nroBloque,wt->nroBytes, wt->nombretemp,socketWorker);
+
+	confirmacionWorker(socketWorker);
+
+}
+
+
+
+void transformacion(Mensaje* mens){
+	WorkerTransformacion* wt = deserializar(mens);
+	pthread_t hilo;
+
+	pthread_create(&hilo,NULL,(void*)establecerConexionConWorker,&wt);
+
+
+}
+
+
+
+void reduccionLocal(){
+
+}
+
+void reduccionGlobal(){
+
+}
 
 
 
@@ -211,11 +238,41 @@ int main(void) {
 	imprimirMensaje(archivoLog, "[MENSAJE] Mensaje enviado");
 
 	while(masterActivado()){
-		socketCerrar(socketYAMA);
-		socketCerrar(socketWorker);
-		archivoLogDestruir(archivoLog);
-		memoriaLiberar(configuracion);
+		Mensaje* m = mensajeRecibir(socketYAMA);
+		switch(m->header.operacion){
+
+			case -1:
+			imprimirMensaje(archivoLog,"[EJECUCION] Error en Yama");
+			masterDesactivar();
+			break;
+
+			case TRANSFORMACION:
+
+			transformacion(m);
+			break;
+
+			case REDUCCION_LOCAL:
+
+			reduccionLocal();
+			break;
+
+			case REDUCCION_GLOBAL:
+
+			reduccionGlobal();
+			break;
+
 		}
+
+
+
+
+	}
+
+	socketCerrar(socketYAMA);
+	socketCerrar(socketWorker);
+	archivoLogDestruir(archivoLog);
+	memoriaLiberar(configuracion);
+
 
 	return EXIT_SUCCESS;
 

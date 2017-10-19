@@ -29,9 +29,10 @@ typedef struct {
 typedef struct{
 	int size_ip;
 	char* ip;
+	int nroBloque;
+	int nroBytes;
 	int size_puerto;
 	char* puerto;
-	int nroBloque;
 	int size_nombretemp;
 	char* nombretemp;
 }WorkerTransformacion;
@@ -54,7 +55,11 @@ void archivoConfigObtenerCampos();
 void funcionSenial();
 
 int hayWorkersParaConectar();
-WorkerTransformacion* deserializar();
+WorkerTransformacion* deserializar(Mensaje* mensaje);
+void confirmacionWorker(Socket unSocket);
+void serializarYEnviar(int nroBloque, int nroBytes, char* nombretemp, Socket unSocket);
+void establecerConexionConWorker(WorkerTransformacion* wt);
+void transformacion(Mensaje* mensaje);
 Lista workersAConectar();
 ListaSockets sockets();
 void serializarYEnviar();
