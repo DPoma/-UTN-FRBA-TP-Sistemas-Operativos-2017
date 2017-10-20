@@ -16,7 +16,6 @@ int main(void) {
 	Socket unSocket = socketCrearCliente(configuracion->ipFileSystem, configuracion->puertoFileSystem, ID_DATANODE);
 	mensajeEnviar(unSocket, 14, configuracion->nombreNodo, stringLongitud(configuracion->nombreNodo)+1);
 
-	/*
 	dataBin=fopen(configuracion->rutaDataBin, "r+");
 
 	if(dataBin==NULL){
@@ -25,7 +24,7 @@ int main(void) {
 		exit(-1);
 	}
 
-	*/
+
 	while(dataNodeActivado()){
 		atenderFileSystem(unSocket);
 	}
@@ -92,72 +91,35 @@ char* getBloque(int nroBloque){
 
 }
 
+Operacion* deserializar(Mensaje* mensaje){
+	int numeroBloque;
+	int tamaniodatos;
+	char* data;
+	int size = mensaje->header.tamanio;
+
+	Operacion* op = malloc(size);
+
+	memcpy(&numeroBloque, mensaje->datos, sizeof(int));
+	memcpy(&tamaniodatos, mensaje->datos + sizeof(int), sizeof(int));
+	memcpy(&data, mensaje->datos + sizeof(int)+ tamaniodatos, tamaniodatos);
+
+	op->nroBloque = numeroBloque;
+	op->size_datos = tamaniodatos;
+	op->datos = data;
+
+	return op;
 
 
-
-/*
-void setBloque(int numeroBloque, Mensaje* mensajeAGuardar){
-	Bloque bloqueBuscado = getBloque(numeroBloque);
-	guardarContenido(bloqueBuscado, mensajeAGuardar);
-}
-
-Bloque getBloque(int numeroBloque){
-	Bloque bloqueAux = bloques;
-	Bloque aux;
-	int encontrado = false;
-	while(!encontrado && bloqueAux!=NULL){
-		if(bloqueAux->nroBloque != numeroBloque) {
-			aux = bloqueAux->sig;
-			bloqueAux = aux;
-		} else {
-			encontrado = true;
-		}
-	}
-	if(bloqueAux == NULL){
-		printf("No se encontró el bloque buscado");
-	} else {
-		return bloqueAux;
-	}
-
-}
-*/
-
-
-void guardarContenido(Bloque bloqueBuscado, Mensaje* mensajeAGuardar){
-	if(sizeof(mensajeAGuardar) < (8*1024*1024)){
-		//Seguramente esto este mal pero la lógica va por aqui
-//		bloqueBuscado.contenido = mensajeAGuardar;
-	} else {
-		// NO se como realizar una fragmentacion interna
-	}
-}
-
-/*
-
-void freeMemory() {
-	Bloque aux;
-
-	while(bloques->sig != NULL){
-		free(bloques.contenido);
-		aux = bloques->sig;
-		bloques = aux;
-	}
-	free(bloques.contenido);
 }
 
 
-
-*/
 
 void atenderFileSystem(Socket unSocket){
 	Mensaje* mensaje = mensajeRecibir(unSocket);
-	int nroBloque;
-	int size_datos;
-	char* datosAEscribir;
 	int status;
-	int len;
 	char* data;
-	FILE* f;
+	int len;
+	Operacion* op = deserializar(mensaje);
 	switch(mensaje->header.operacion){
 		case -1:
 		imprimirMensaje(archivoLog, "Error en el File System");
@@ -168,30 +130,22 @@ void atenderFileSystem(Socket unSocket){
 		break;
 
 		case SETBLOQUE:
-		f = fopen("/home/utnso/Escritorio/data.bin" ,"a+");
-		fwrite(mensaje->datos, sizeof(char), 32, f);
-		fclose(f);
-			//memcpy(&nroBloque, peticion->datos, sizeof(int));
-		//memcpy(&size_datos,peticion->datos+sizeof(int),sizeof(int));
-		//memcpy(&datosAEscribir, peticion->datos + 2* (sizeof(int)), size_datos);
+		status = setBloque(op->nroBloque,op->datos, op->size_datos);
+		imprimirMensajeUno(archivoLog, "[SETBLOQUE]Grabando en el bloque: %d", &op->nroBloque);
 
-		//status = setBloque(nroBloque, datosAEscribir, size_datos);
-		//imprimirMensajeUno(archivoLog, "Grabando en el bloque: %d", (int*)nroBloque);
+		mensajeEnviar(unSocket, status, NULL, sizeof(int));
 
-		//mensajeEnviar(unSocket, status, NULL, sizeof(int));
-
-		//estadoDataNode = dataNodeActivado();
+		estadoDataNode = dataNodeActivado();
 		break;
 
 		case GETBLOQUE:
-		//memcpy(&nroBloque, peticion->datos, sizeof(int));
 
 		data = malloc(MB + sizeof(int));
-		data = getBloque(nroBloque);
-		imprimirMensajeUno(archivoLog, "Se Obtuvo el bloque numero: %d", &nroBloque);
+		data = getBloque(op->nroBloque);
+		imprimirMensajeUno(archivoLog, "[GETBLOQUE]Se Obtuvo el bloque numero: %d", &op->nroBloque);
 
 		if(data==NULL){
-			imprimirMensajeUno(archivoLog, "El bloque numero: %d esta vacio o se produjo un error", &nroBloque);
+			imprimirMensajeUno(archivoLog, "El bloque numero: %d esta vacio o se produjo un error", &op->nroBloque);
 			status = FRACASOGETBLOQUE;
 			mensajeEnviar(unSocket, status, NULL, sizeof(int));
 		}
@@ -206,8 +160,8 @@ void atenderFileSystem(Socket unSocket){
 		estadoDataNode = dataNodeActivado();
 		break;
 	}
-	 //free(peticion);
-	 //free(data);
+	 free(op);
+	 free(data);
 }
 
 

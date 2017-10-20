@@ -751,15 +751,15 @@ void archivoPersistirEntrada(File archivo, String entrada) {
 }
 
 
-Dir getIpPort(Socket socket){
-	struct sockaddr addr;
-	size_t size=sizeof addr;
-	getpeername(socket,&addr,&size);
-	Dir dir;
-	dir.ip=((struct sockaddr_in*)&addr)->sin_addr.s_addr;
-	dir.port=((struct sockaddr_in*)&addr)->sin_port;
-	return dir;
-}
+//Dir getIpPort(Socket socket){
+//	struct sockaddr addr;
+//	size_t size=sizeof addr;
+//	getpeername(socket,&addr,&size);
+//	Dir dir;
+//	dir.ip=((struct sockaddr_in*)&addr)->sin_addr.s_addr;
+//	dir.port=((struct sockaddr_in*)&addr)->sin_port;
+//	return dir;
+//}
 
 //--------------------------------------- Funciones de Bitmap -------------------------------------
 

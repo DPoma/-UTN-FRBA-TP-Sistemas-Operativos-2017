@@ -324,7 +324,7 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 				}
 				return false;
 			}
-			moverAUsados(abortarJob);
+			moverAUsados(abortarEntrada);
 			mensajeEnviar(entradaA->masterid,Aborto,nullptr,0);//podría ser cierre, depende como lo implemente
 		}
 		if(entradaA->etapa==Transformacion&&actualizando!=Abortado){
@@ -337,9 +337,9 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 			alternativa.nodo=entradaA->nodoAlt;
 			alternativa.bloque=entradaA->bloqueAlt;
 			char dato[DIRSIZE+INTSIZE*2]; //podría no mandarle los bytes
-			memcpy(dato,alternativa->nodo,DIRSIZE);
-			memcpy(dato+DIRSIZE,alternativa->bloque,INTSIZE);
-			memcpy(dato+DIRSIZE+INTSIZE,alternativa->bytes,INTSIZE);
+			memcpy(dato,&alternativa.nodo,DIRSIZE);
+			memcpy(dato+DIRSIZE,&alternativa.bloque,INTSIZE);
+			memcpy(dato+DIRSIZE+INTSIZE,&alternativa.bytes,INTSIZE);
 			mensajeEnviar(alternativa.masterid,Transformacion,dato,sizeof dato);
 			list_add(tablaEstados,&alternativa);
 			bool buscarError(Entrada* entrada){

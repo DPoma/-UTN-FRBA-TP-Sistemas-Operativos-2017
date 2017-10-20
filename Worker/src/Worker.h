@@ -26,7 +26,18 @@ typedef struct {
 	int puerto;
 } globOri;
 
-const MB = 1048576;
+typedef struct {
+	int cant;
+	globOri* oris;
+} lGlobOri;
+
+typedef struct {
+	int cant;
+	char** ruta;
+} locOri;
+
+
+const int MB = 1048576;
 String campos[5];
 Configuracion* configuracion;
 ArchivoLog archivoLog;
@@ -38,3 +49,9 @@ void socketAceptarConexion();
 
 void workerIniciar();
 int transformar(char*,int,char*);
+int reduccionLocal(char*,char*,char*);
+locOri getOrigenesLocales(char*);
+char* appendL(locOri);
+int reduccionGlobal(char*,char*,char*);
+lGlobOri getOrigenesGlobales(char*);
+char* appendG(lGlobOri);
