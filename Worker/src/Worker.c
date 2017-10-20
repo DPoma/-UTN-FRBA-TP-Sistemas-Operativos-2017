@@ -197,7 +197,7 @@ int transformar(char* codigo,int origen,char* destino){
 
 //2da etapa
 int reduccionLocal(char* codigo,char* origen,char* destino){
-	char** listaOri;
+	locOri listaOri;
 	listaOri = getOrigenesLocales(origen);
 	char* apendado;
 	apendado = appendL(listaOri);
@@ -219,39 +219,45 @@ int reduccionLocal(char* codigo,char* origen,char* destino){
 	free (command);
 	free (apendado);
 	int i=0;
-	while(listaOri[i]!=NULL){
-		free(listaOri[i]);
+	while(listaOri->ruta[i]!=NULL){
+		free(listaOri->ruta[i]);
 		i++;
 	}
 	//for(i=0;;i++)
-	free (listaOri);
+	//free (listaOri->ruta);
 	return 0;
 }
 
-char** getOrigenesLocales(char* origen){
-	int cantOrigenes;
-	memcpy(&cantOrigenes, origen, sizeof(int32_t));
-	char* oris [cantOrigenes];
+locOri getOrigenesLocales(char* origen){
+	locOri origenes;
+	memcpy(&origenes->cant, origen, sizeof(int32_t));
+	char* oris [origenes->cant];
 	int i;
 	int size = sizeof(int32_t);
 	int sizeOri=0;
-	for(i=0;(i-1)==cantOrigenes;i++){
+	for(i=0;(i+1)==origenes->cant;i++){
 		memcpy(&sizeOri, origen + size , sizeof(int32_t));
 		size= size + sizeof(int32_t);
 		memcpy(&oris[i],origen + size, sizeOri);
 		size= size + sizeOri;
+		origenes->ruta[i] =oris[i];
 	}
-	return oris;
+	return origenes;
 }
 
-char* appendL(char** origenes){
+char* appendL(locOri origen){
+	char** VRegistros;
+	int i;
+	for(i=0;(i+1)==origen->cant;i++){
+
+	}
 	char* rutaArchAppend;
 	return rutaArchAppend;
 }
 
 //3ra etapa
 int reduccionGlobal(char* codigo,char* origen,char* destino){
-	globOri* listaOri;
+	lGlobOri listaOri;
 	listaOri = getOrigenesGlobales(origen);
 	char* apendado;
 	apendado = appendG(listaOri);
@@ -273,29 +279,30 @@ int reduccionGlobal(char* codigo,char* origen,char* destino){
 	free (command);
 	free (apendado);
 	int i=0;
-	while(listaOri[i]->ruta!=NULL){
-		free(listaOri[i]->ruta);
+	while(listaOri->oris[i]->ruta!=NULL){
+		free(listaOri->oris[i]->ruta);
 		i++;
 	}
 	i=0;
-	while(listaOri[i]->ip!=NULL){
-		free(listaOri[i]->ip);
+	while(listaOri->oris[i]->ip!=NULL){
+		free(listaOri->oris[i]->ip);
 		i++;
 	}
 	//for(i=0;;i++)
-	free (listaOri);
+	//free (listaOri->oris);
+	for(i=0;(i-1)==origenes->cant;i++){
 	return 0;
 }
 
-globOri* getOrigenesGlobales(char* origen){
-	int cantOrigenes;
-	memcpy(&cantOrigenes, origen, sizeof(int32_t));
-	globOri* oris [cantOrigenes];
+lGlobOri getOrigenesGlobales(char* origen){
+	lGlobOri origenes;
+	memcpy(&origenes->cant, origen, sizeof(int32_t));
+	globOri oris [origenes->cant];
 	int i;
 	int size = sizeof(int32_t);
 	int sizeOri=0;
 	int sizeIP=0;
-	for(i=0;(i-1)==cantOrigenes;i++){
+	for(i=0;(i-1)==origenes->cant;i++){
 		memcpy(&sizeOri, origen + size , sizeof(int32_t));
 		size= size + sizeof(int32_t);
 		memcpy(&oris[i]->ruta,origen + size, sizeOri);
@@ -307,10 +314,11 @@ globOri* getOrigenesGlobales(char* origen){
 		memcpy(&oris[i]->puerto, origen + size , sizeof(int32_t));
 		size= size + sizeof(int32_t);
 	}
-	return oris;
+	origenes->oris = oris;
+	return origenes;
 }
 
-char* appendG(globOri* origenes){
+char* appendG(lGlobOri origenes){
 	char* rutaArchAppend;
 	return rutaArchAppend;
 }
