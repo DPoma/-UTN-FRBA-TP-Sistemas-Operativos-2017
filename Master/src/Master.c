@@ -85,33 +85,24 @@ int hayWorkersParaConectar(){
 
 WorkerTransformacion* deserializar(Mensaje* mensaje){
 	int size = mensaje->header.tamanio;
-	int tamanio_ip;
-	char* nroip;
+	int numeroip;
+	int numeropuerto;
 	int numeroBloque;
 	int numeroBytes;
-	int tamanionumeropuerto;
-	char* numeropuerto;
-	int tamanio_nombretemp;
-	char* nombrearchivo;
+	char* nombretemporal;
 	WorkerTransformacion* wt= malloc(size);
 
-	memcpy(&tamanio_ip,mensaje->datos,sizeof(int));
-	memcpy(&nroip,mensaje->datos + sizeof(int), tamanio_ip);
-	memcpy(&numeroBloque, mensaje->datos + sizeof(int)+ tamanio_ip, sizeof(int));
-	memcpy(&numeroBytes, mensaje->datos +sizeof(int)*2 + tamanio_ip, sizeof(int));
-	memcpy(&tamanionumeropuerto, mensaje->datos + sizeof(int)*3 + tamanio_ip, sizeof(int));
-	memcpy(&numeropuerto, mensaje->datos + sizeof(int)*3 + tamanio_ip + tamanionumeropuerto, tamanionumeropuerto);
-	memcpy(&tamanio_nombretemp, mensaje->datos + sizeof(int)*4 + tamanio_ip + tamanionumeropuerto, sizeof(int));
-	memcpy(&nombrearchivo, mensaje->datos + sizeof(int)*4 + tamanio_ip + tamanionumeropuerto, tamanio_nombretemp);
+	memcpy(&numeroip, mensaje->datos,sizeof(int));
+	memcpy(&numeropuerto, mensaje->datos + sizeof(int), sizeof(int));
+	memcpy(&numeroBloque, mensaje->datos + sizeof(int)*2 , sizeof(int));
+	memcpy(&numeroBytes, mensaje->datos + sizeof(int)*3, sizeof(int));
+	memcpy(&nombretemporal, mensaje->datos + sizeof(int)*3 +12, 12);//tamaño del nombre del temporal es 12
 
-	wt->size_ip=tamanio_ip;
-	wt->ip=nroip;
-	wt->nroBloque=numeroBloque;
-	wt->nroBytes=numeroBytes;
-	wt->size_puerto=tamanionumeropuerto;
-	wt->puerto=numeropuerto;
-	wt->size_nombretemp=tamanio_nombretemp;
-	wt->nombretemp=nombrearchivo;
+	wt->ip = numeroip;
+	wt->puerto = numeropuerto;
+	wt->nroBloque = numeropuerto;
+	wt->nroBytes = numeroBytes;
+	wt->nombretemp = nombretemporal;
 
 	return wt;
 
@@ -145,8 +136,8 @@ ListaSockets sockets(){
 	for(i=0; i<size;i++){
 
 	 wt = listaObtenerElemento(workers,i);
-	 sWorker = socketCrearCliente(wt->ip,wt->puerto,ID_MASTER);
-	 listaSocketsAgregar(sWorker,&sockets);
+	 //sWorker = socketCrearCliente(wt->ip,wt->puerto,ID_MASTER);  falta pasar a char* ip y puerto
+	 //listaSocketsAgregar(sWorker,&sockets);
 
 	}
 
@@ -192,10 +183,14 @@ void serializarYEnviar(int nroBloque, int nroBytes, char* nombretemp, Socket unS
 
 }
 
+
+
+
 void establecerConexionConWorker( WorkerTransformacion* wt){
 
-	imprimirMensajeDos(archivoLog,"[CONEXION] Estableciendo conexion con Worker (IP: %s | PUERTO: %s", wt->ip, wt->puerto);
-	socketWorker = socketCrearCliente(wt->ip, wt->puerto, ID_MASTER);
+	//falta convertir a char* ip y puerto
+	//imprimirMensajeDos(archivoLog,"[CONEXION] Estableciendo conexion con Worker (IP: %d | PUERTO: %d", wt->ip, wt->puerto);
+	//socketWorker = socketCrearCliente(wt->ip, wt->puerto, ID_MASTER);
 	serializarYEnviar(wt->nroBloque,wt->nroBytes, wt->nombretemp,socketWorker);
 
 	confirmacionWorker(socketWorker);

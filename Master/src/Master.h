@@ -27,13 +27,10 @@ typedef struct {
 } Configuracion;
 
 typedef struct{
-	int size_ip;
-	char* ip;
+	int ip;
+	int puerto;
 	int nroBloque;
 	int nroBytes;
-	int size_puerto;
-	char* puerto;
-	int size_nombretemp;
 	char* nombretemp;
 }WorkerTransformacion;
 
