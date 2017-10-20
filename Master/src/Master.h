@@ -44,7 +44,7 @@ Socket socketWorker;
 int estadoMaster;
 
 
-Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig);
+Configuracion* configuracionLeerArchivo(ArchivoConfig archivoConfig);
 void archivoConfigObtenerCampos();
 void establecerConexiones();
 void leerArchivoConfig();

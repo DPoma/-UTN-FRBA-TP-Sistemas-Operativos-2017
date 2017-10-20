@@ -64,7 +64,7 @@ void establecerConexiones(){
 
 void leerArchivoConfig(){
 	archivoConfigObtenerCampos();
-	configuracion = configuracionCrear(RUTA_CONFIG, (Puntero)configuracionLeerArchivoConfig, campos);
+	configuracion = configuracionCrear(RUTA_CONFIG, (Puntero)configuracionLeerArchivo, campos);
 	stringCopiar(configuracion->ipWorker, IP_LOCAL);
 	stringCopiar(configuracion->puertoWorker, "5050");
 	imprimirMensajeDos(archivoLog,"[CONEXION] Estableciendo Conexion con YAMA (IP: %s | Puerto %s)", configuracion->ipYama, configuracion->puertoYama);
@@ -273,7 +273,7 @@ int main(void) {
 
 }
 
-Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig) {
+Configuracion* configuracionLeerArchivo(ArchivoConfig archivoConfig) {
 	Configuracion* configuracion = memoriaAlocar(sizeof(Configuracion));
 	stringCopiar(configuracion->ipYama, archivoConfigStringDe(archivoConfig, "IP_YAMA"));
 	stringCopiar(configuracion->puertoYama, archivoConfigStringDe(archivoConfig, "PUERTO_YAMA"));

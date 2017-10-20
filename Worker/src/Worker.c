@@ -324,7 +324,7 @@ void socketAceptarConexion() {
 	}
 }
 
-Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig) {
+Configuracion* configuracionLeerArchivo(ArchivoConfig archivoConfig) {
 	Configuracion* configuracion = memoriaAlocar(sizeof(Configuracion));
 	stringCopiar(configuracion->ipFileSytem, archivoConfigStringDe(archivoConfig, "IP_FILESYSTEM"));
 	stringCopiar(configuracion->puertoFileSystem, archivoConfigStringDe(archivoConfig, "PUERTO_FILESYSTEM"));
@@ -371,7 +371,7 @@ void workerIniciar() {
 	archivoLog = archivoLogCrear(RUTA_LOG, "Worker");
 	archivoConfigObtenerCampos();
 	senialAsignarFuncion(SIGINT, funcionSenial);
-	configuracion = configuracionCrear(RUTA_CONFIG, (void*)configuracionLeerArchivoConfig, campos);
+	configuracion = configuracionCrear(RUTA_CONFIG, (void*)configuracionLeerArchivo, campos);
 	char* texto;
 	strcat(texto,"stat -c%s ");
 	strcat(texto, configuracion->rutaDataBin);
