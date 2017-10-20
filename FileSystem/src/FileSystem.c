@@ -756,7 +756,7 @@ void comandoRemoverDirectorio(Comando* comando) {
 	}
 }
 
-bool directorioExisteElNuevoDirectorio(int idPadre, String nuevoNombre) {
+bool directorioExisteElNuevoNombre(int idPadre, String nuevoNombre) {
 
 	bool existeNuevoNombre(Directorio* directorio) {
 		return idPadre == directorio->identificadorPadre &&
@@ -766,25 +766,91 @@ bool directorioExisteElNuevoDirectorio(int idPadre, String nuevoNombre) {
 	return listaCumpleAlguno(listaDirectorios, (Puntero)existeNuevoNombre);
 }
 
+
+bool archivoExisteElNuevoNombre(int idPadre, String nuevoNombre) {
+
+	bool existeNuevoNombre(Archivo* archivo) {
+		return idPadre == archivo->identificadorPadre &&
+				stringIguales(nuevoNombre, archivo->nombre);
+	}
+
+	return listaCumpleAlguno(listaArchivos, (Puntero)existeNuevoNombre);
+}
+
+
+void archivoPersistirRenombrar(Archivo* archivoARenombrar, String viejoNombre) {
+	String rutaArchivo = memoriaAlocar(200);
+	stringCopiar(rutaArchivo, RUTA_ARCHIVOS);
+	String padre = stringConvertirEntero(archivoARenombrar->identificadorPadre);
+	stringConcatenar(&rutaArchivo, padre);
+	stringConcatenar(&rutaArchivo, "/");
+	stringConcatenar(&rutaArchivo, viejoNombre);
+	File archivo = fileAbrir(rutaArchivo, "r");
+	FILE* archivoAuxiliar =  fopen(RUTA_AUXILIAR, "w");
+	char buffer[200];
+	while (fgets(buffer, sizeof(buffer), archivo) != NULL) {
+		if (strcmp(buffer, "\n") != 0) {
+			if(stringContiene(buffer, "NOMBRE=")) {
+				String algo = memoriaAlocar(200);
+				stringCopiar(algo, "NOMBRE=");
+				stringConcatenar(&algo, archivoARenombrar->nombre);
+				stringConcatenar(&algo, "\n");
+				fprintf(archivoAuxiliar, "%s", algo);
+				memoriaLiberar(algo);
+				}
+			else
+				fprintf(archivoAuxiliar, "%s", buffer);
+			memset(buffer, '\0', 200);
+		}
+	}
+	fclose(archivo);
+	fclose(archivoAuxiliar);
+
+	archivo = fopen(rutaArchivo, "w");
+	archivoAuxiliar = fopen(RUTA_AUXILIAR, "r");
+	memset(buffer, '\0', 200);
+	while (fgets(buffer, sizeof(buffer), archivoAuxiliar) != NULL) {
+		fprintf(archivo, "%s", buffer);
+		memset(buffer, '\0', 200);
+	}
+	fclose(archivo);
+	fclose(archivoAuxiliar);
+}
+
 void comandoRenombrarArchivoDirectorio(Comando* comando) {
 	int identificador = directorioObtenerIdentificador(comando->argumentos[1]);
 	Directorio* directorio = directorioBuscarEnLista(identificador);
+	Archivo* archivo = archivoBuscar(comando->argumentos[1]);
 
 	if(directorio != NULL) {
 
-		if(directorioExisteElNuevoDirectorio(directorio->identificadorPadre, comando->argumentos[2])) {
-			imprimirMensaje(archivoLog, "[ERROR] El nuevo nombre ya existe");
+		if(directorioExisteElNuevoNombre(directorio->identificadorPadre, comando->argumentos[2])) {
+			imprimirMensaje(archivoLog, "[ERROR] El nuevo nombre para el directorio ya existe");
 			return;
 		}
 
-		String viejoNombre= directorioObtenerUltimoNombre(comando->argumentos[1]);
+		String viejoNombre= rutaObtenerUltimoNombre(comando->argumentos[1]);
 		stringCopiar(directorio->nombre, comando->argumentos[2]);
 		directorioPersistirRenombrar(identificador, directorio->nombre);
 		imprimirMensajeDos(archivoLog, "[DIRECTORIO] El directorio %s fue renombrado por %s", viejoNombre, directorio->nombre);
 		memoriaLiberar(viejoNombre);
 	}
+
+	else if(archivo != NULL) {
+
+		if(archivoExisteElNuevoNombre(archivo->identificadorPadre, comando->argumentos[2])) {
+			imprimirMensaje(archivoLog, "[ARCHIVO] El nuevo nombre para el archivo ya existe");
+			return;
+		}
+
+		String viejoNombre= rutaObtenerUltimoNombre(comando->argumentos[1]);
+		stringCopiar(archivo->nombre, comando->argumentos[2]);
+		archivoPersistirRenombrar(archivo, viejoNombre);
+		imprimirMensajeDos(archivoLog, "[ARCHIVO] El archivo %s fue renombrado por %s", viejoNombre, archivo->nombre);
+		memoriaLiberar(viejoNombre);
+	}
 	else
-		imprimirMensaje(archivoLog, "[ERROR] El directorio no existe");
+		imprimirMensaje(archivoLog, "[ERROR] El archivo o directorio no existe");
 }
 
 Directorio* directorioBuscar(String path) {
@@ -799,14 +865,14 @@ void comandoMoverArchivoDirectorio(Comando* comando) {
 
 	if(directorio != NULL && directorioNuevoPadre != NULL) {
 
-		if(directorioExisteElNuevoDirectorio(directorioNuevoPadre->identificador, directorio->nombre)) {
+		if(directorioExisteElNuevoNombre(directorioNuevoPadre->identificador, directorio->nombre)) {
 			imprimirMensaje(archivoLog, "[ERROR] La ruta destino ya existe");
 			return;
 		}
 
 		directorio->identificadorPadre = directorioNuevoPadre->identificador;
 		directorioPersistirMovido(directorio->identificador, directorioNuevoPadre->identificador);
-		String nombre = directorioObtenerUltimoNombre(comando->argumentos[1]);
+		String nombre = rutaObtenerUltimoNombre(comando->argumentos[1]);
 		imprimirMensajeDos(archivoLog, "[DIRECTORIO] El directorio %s fue movido a %s", nombre, comando->argumentos[2]);
 		memoriaLiberar(nombre);
 	}
@@ -816,7 +882,7 @@ void comandoMoverArchivoDirectorio(Comando* comando) {
 
 Archivo* archivoBuscar(String path) {
 	Archivo* archivo = NULL;
-	String ultimo = directorioObtenerUltimoNombre(path);
+	String ultimo = rutaObtenerUltimoNombre(path);
 	int indice;
 	ControlDirectorio* control = directorioControlCrear(path);
 	while(stringValido(control->nombreDirectorio)) {
@@ -906,7 +972,7 @@ void comandoObtenerMD5(Comando* comando) {
 		int descriptores[2];
 		pipe(descriptores);
 		String md5DeArchivo = memoriaAlocar(MAX_STRING);
-		String nombreArchivo = directorioObtenerUltimoNombre(comando->argumentos[1]);
+		String nombreArchivo = rutaObtenerUltimoNombre(comando->argumentos[1]);
 		pidHijo = fork();
 		if(pidHijo == -1)
 			imprimirMensaje(archivoLog, "[ERROR] Fallo el fork (Estas en problemas amigo)");
@@ -934,7 +1000,7 @@ void comandoObtenerMD5(Comando* comando) {
 		//imprimirMensaje("[ERROR] El archivo no se encuentra en el File System YAMA");
 }
 
-String directorioObtenerUltimoNombre(String ruta) {
+String rutaObtenerUltimoNombre(String ruta) {
 	int indice;
 	int ultimaBarra;
 	for(indice=0; ruta[indice] != FIN; indice++)
@@ -1469,9 +1535,9 @@ void archivoLogIniciar() {
 
  void testCabecita() {
 	Archivo* metadata = memoriaAlocar(sizeof(Archivo));
-	metadata->identificadorPadre = 3;
+	metadata->identificadorPadre = 1;
 	metadata->listaBloques = listaCrear();
-	stringCopiar(metadata->nombre, "Manco");
+	stringCopiar(metadata->nombre, "test");
 	stringCopiar(metadata->tipo, "TEXTO");
 	Bloque* bloque = memoriaAlocar(sizeof(Bloque));
 	bloque->bytes = 1014;

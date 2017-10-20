@@ -1,6 +1,11 @@
-[INFO] 20:38:32:88 FileSystem/(9816:9816): [EJECUCION] Proceso File System inicializado
-[INFO] 20:38:33:221 FileSystem/(9816:9816): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 20:38:33:224 FileSystem/(9816:9816): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 20:38:36:30 FileSystem/(9816:9816): [CONEXION] Proceso Data Node conectado exitosamente
-[INFO] 20:38:40:106 FileSystem/(9816:9819): [DIRECTORIO] El directorio /home fue creado exitosamente
-[INFO] 20:39:14:101 FileSystem/(9816:9819): [ARCHIVO] El archivo se copio en el File System con exito
+[INFO] 12:37:34:405 FileSystem/(3816:3816): [EJECUCION] Proceso File System inicializado
+[INFO] 12:37:34:461 FileSystem/(3816:3816): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 12:37:34:462 FileSystem/(3816:3816): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 12:37:48:850 FileSystem/(3816:3819): [DIRECTORIO] El directorio /home/nose/algo fue creado exitosamente
+[INFO] 12:37:53:283 FileSystem/(3816:3819): [DIRECTORIO] Listando archivos y directorios en algo
+[INFO] 12:37:53:285 FileSystem/(3816:3819): [DIRECTORIO] Manco (a)
+[INFO] 12:39:14:238 FileSystem/(3816:3819): [ARCHIVO] El archivo Manco fue renombrado por holi
+[INFO] 12:39:44:667 FileSystem/(3816:3819): [DIRECTORIO] Listando archivos y directorios en algo
+[INFO] 12:39:44:668 FileSystem/(3816:3819): [DIRECTORIO] holi (a)
+[INFO] 12:39:55:258 FileSystem/(3816:3819): [ERROR] Comando invalido
+[INFO] 12:40:02:483 FileSystem/(3816:3819): [ERROR] El archivo o directorio no existe
