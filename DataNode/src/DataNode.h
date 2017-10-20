@@ -44,6 +44,14 @@ typedef struct {
 	char rutaDataBin[100];
 } Configuracion;
 
+typedef struct{
+	int nroBloque;
+	int size_datos;
+	char* datos;
+}Operacion;
+
+
+
 String campos[5];
 Configuracion* configuracion;
 ArchivoLog archivoLog;
@@ -60,7 +68,7 @@ void dataNodeActivar();
 void dataNodeDesactivar();
 void finalizarDataNode();
 void freeMemory();
-void deserizalizar(Mensaje* mensaje);
+Operacion* deserizalizar(Mensaje* mensaje);
 int setBloque(int nroBloque, char* datos, int size);
 char* getBloque(int nroBloque);
 void guardarContenido(Bloque bloqueBuscado, Mensaje* mensajeAGuardar);

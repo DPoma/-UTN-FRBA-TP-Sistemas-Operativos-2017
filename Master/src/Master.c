@@ -83,7 +83,7 @@ int hayWorkersParaConectar(){
 
 }
 
-WorkerTransformacion* deserializar(Mensaje* mensaje){
+WorkerTransformacion* deserializarTransformacion(Mensaje* mensaje){
 	int size = mensaje->header.tamanio;
 	int numeroip;
 	int numeropuerto;
@@ -115,7 +115,7 @@ Lista workersAConectar(){
 	WorkerTransformacion* wt;
 	while(hayWorkersParaConectar(socketYAMA)){
 		mens=mensajeRecibir(socketYAMA);
-		wt= deserializar(mens);
+		wt= deserializarTransformacion(mens);
 		listaAgregarEnPosicion(workers,(WorkerTransformacion*)wt, pos);
 		pos++;
 
@@ -136,8 +136,8 @@ ListaSockets sockets(){
 	for(i=0; i<size;i++){
 
 	 wt = listaObtenerElemento(workers,i);
-	 //sWorker = socketCrearCliente(wt->ip,wt->puerto,ID_MASTER);  falta pasar a char* ip y puerto
-	 //listaSocketsAgregar(sWorker,&sockets);
+	 sWorker = socketCrearCliente(string_itoa(wt->ip),string_itoa(wt->puerto),ID_MASTER);
+	 listaSocketsAgregar(sWorker,&sockets);
 
 	}
 
@@ -145,14 +145,6 @@ ListaSockets sockets(){
 
 }
 
-/*
-void conexion(){
-	pthread_t hilo;
-	Socket unSocket;
-	hiloCrear(&hilo,*establecerConexionConWorker,&unSocket);
-
-}
-*/
 
 void confirmacionWorker(Socket unSocket){
 	Mensaje* mensaje = mensajeRecibir(unSocket);
@@ -188,9 +180,9 @@ void serializarYEnviar(int nroBloque, int nroBytes, char* nombretemp, Socket unS
 
 void establecerConexionConWorker( WorkerTransformacion* wt){
 
-	//falta convertir a char* ip y puerto
-	//imprimirMensajeDos(archivoLog,"[CONEXION] Estableciendo conexion con Worker (IP: %d | PUERTO: %d", wt->ip, wt->puerto);
-	//socketWorker = socketCrearCliente(wt->ip, wt->puerto, ID_MASTER);
+
+	imprimirMensajeDos(archivoLog,"[CONEXION] Estableciendo conexion con Worker (IP: %d | PUERTO: %d", string_itoa(wt->ip), string_itoa(wt->puerto));
+	socketWorker = socketCrearCliente(string_itoa(wt->ip),string_itoa(wt->puerto), ID_MASTER);
 	serializarYEnviar(wt->nroBloque,wt->nroBytes, wt->nombretemp,socketWorker);
 
 	confirmacionWorker(socketWorker);
@@ -200,13 +192,15 @@ void establecerConexionConWorker( WorkerTransformacion* wt){
 
 
 void transformacion(Mensaje* mens){
-	WorkerTransformacion* wt = deserializar(mens);
+	WorkerTransformacion* wt = deserializarTransformacion(mens);
 	pthread_t hilo;
 
 	pthread_create(&hilo,NULL,(void*)establecerConexionConWorker,&wt);
 
-
+	pthread_join(hilo, NULL);
 }
+
+
 
 
 

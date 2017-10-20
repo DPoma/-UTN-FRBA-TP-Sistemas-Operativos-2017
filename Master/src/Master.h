@@ -52,7 +52,7 @@ void archivoConfigObtenerCampos();
 void funcionSenial();
 
 int hayWorkersParaConectar();
-WorkerTransformacion* deserializar(Mensaje* mensaje);
+WorkerTransformacion* deserializarTransformacion(Mensaje* mensaje);
 void confirmacionWorker(Socket unSocket);
 void serializarYEnviar(int nroBloque, int nroBytes, char* nombretemp, Socket unSocket);
 void establecerConexionConWorker(WorkerTransformacion* wt);
