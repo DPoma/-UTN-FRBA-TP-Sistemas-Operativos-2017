@@ -102,12 +102,6 @@ typedef struct {
 	BitArray controlBits;
 } Bitmap;
 
-typedef struct __attribute__((__packed__)){
-	int32_t ip;
-	int32_t port;
-} Dir;
-
-
 //--------------------------------------- Funciones para Socket -------------------------------------
 
 void socketConfigurar(Conexion* conexion, String ip, String puerto);
