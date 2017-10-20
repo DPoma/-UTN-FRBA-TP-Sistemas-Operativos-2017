@@ -235,7 +235,7 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 			worker->carga++; //y habría que usar mutex aca
 			worker->disponibilidad--;
 			worker->tareasRealizadas++;
-			Entrada* entrada=list_get(tablaEstadosJob,i/2);
+			Entrada* entrada=list_get(tablaEstadosJob,i);
 			entrada->nodo=worker->nodo;
 			entrada->bloque=bloque->bloque;
 			entrada->bytes=*bytes;
@@ -282,14 +282,15 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 		}
 	}
 
-	int tamanioEslabon=INTSIZE*3+TEMPSIZE;
+	int tamanioEslabon=INTSIZE*4+TEMPSIZE;//ip,puerto,bloque,bytes,temp
 	int32_t tamanioDato=tamanioEslabon*tablaEstadosJob->elements_count;
 	void* dato=malloc(tamanioDato);
 	for(i=0;i<tablaEstadosJob->elements_count;i++){
 		Entrada* entrada=list_get(tablaEstadosJob,i);
 		memcpy(dato+tamanioEslabon*i,&entrada->nodo,INTSIZE*2);
 		memcpy(dato+tamanioEslabon*i+INTSIZE*2,&entrada->bloque,INTSIZE);
-		memcpy(dato+tamanioEslabon*i+INTSIZE*3,entrada->pathTemporal,TEMPSIZE);
+		memcpy(dato+tamanioEslabon*i+INTSIZE*3,&entrada->bytes,INTSIZE);
+		memcpy(dato+tamanioEslabon*i+INTSIZE*4,entrada->pathTemporal,TEMPSIZE);
 	}
 	mensajeEnviar(master,Transformacion,dato,tamanioDato);
 	free(dato);
@@ -335,6 +336,11 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 			darDatosEntrada(&alternativa);
 			alternativa.nodo=entradaA->nodoAlt;
 			alternativa.bloque=entradaA->bloqueAlt;
+			char dato[DIRSIZE+INTSIZE*2]; //podría no mandarle los bytes
+			memcpy(dato,alternativa->nodo,DIRSIZE);
+			memcpy(dato+DIRSIZE,alternativa->bloque,INTSIZE);
+			memcpy(dato+DIRSIZE+INTSIZE,alternativa->bytes,INTSIZE);
+			mensajeEnviar(alternativa.masterid,Transformacion,dato,sizeof dato);
 			list_add(tablaEstados,&alternativa);
 			bool buscarError(Entrada* entrada){
 				return entrada->estado==Error;
