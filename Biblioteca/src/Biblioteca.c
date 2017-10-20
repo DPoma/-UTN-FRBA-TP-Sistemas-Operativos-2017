@@ -538,8 +538,10 @@ bool listaCumplenTodos(Lista lista, bool(*funcion)(void*)) {
 
 //--------------------------------------- Funciones para String -------------------------------------
 
-String stringCrear() {
-	return string_new();
+String stringCrear(int tamanio) {
+	String string = malloc(tamanio);
+	memset(string, '\0', tamanio);
+	return string;
 }
 
 bool stringContiene(String unString, String otroString) {
@@ -548,6 +550,10 @@ bool stringContiene(String unString, String otroString) {
 
 String stringConvertirEntero(int entero) {
 	return string_itoa(entero);
+}
+
+void stringLimpiar(String string, int tamanioString) {
+	memset(string, '\0', tamanioString);
 }
 
 String stringRepetirCaracter(char caracter, int repeticiones) {

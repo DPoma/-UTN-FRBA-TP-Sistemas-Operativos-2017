@@ -777,44 +777,44 @@ bool archivoExisteElNuevoNombre(int idPadre, String nuevoNombre) {
 	return listaCumpleAlguno(listaArchivos, (Puntero)existeNuevoNombre);
 }
 
+void archivoCopiarDeAuxiliar(String rutaArchivo) {
+	File archivo = fileAbrir(rutaArchivo, ESCRITURA);
+	File archivoAuxiliar = fileAbrir(RUTA_AUXILIAR, LECTURA);
+	String buffer = stringCrear(200);
+	while (fgets(buffer, 200, archivoAuxiliar) != NULL) {
+		fprintf(archivo, "%s", buffer);
+		stringLimpiar(buffer, 200);
+	}
+	fileCerrar(archivo);
+	fileCerrar(archivoAuxiliar);
+	memoriaLiberar(buffer);
+	memoriaLiberar(rutaArchivo);
+}
 
 void archivoPersistirRenombrar(Archivo* archivoARenombrar, String viejoNombre) {
-	String rutaArchivo = memoriaAlocar(200);
-	stringCopiar(rutaArchivo, RUTA_ARCHIVOS);
-	String padre = stringConvertirEntero(archivoARenombrar->identificadorPadre);
-	stringConcatenar(&rutaArchivo, padre);
-	stringConcatenar(&rutaArchivo, "/");
-	stringConcatenar(&rutaArchivo, viejoNombre);
-	File archivo = fileAbrir(rutaArchivo, "r");
-	FILE* archivoAuxiliar =  fopen(RUTA_AUXILIAR, "w");
-	char buffer[200];
-	while (fgets(buffer, sizeof(buffer), archivo) != NULL) {
-		if (strcmp(buffer, "\n") != 0) {
+	String rutaArchivo = string_from_format("%s%i/%s", RUTA_ARCHIVOS, archivoARenombrar->identificadorPadre, viejoNombre);
+	File archivo = fileAbrir(rutaArchivo, LECTURA);
+	File archivoAuxiliar =  fileAbrir(RUTA_AUXILIAR, ESCRITURA);
+	String buffer = stringCrear(200);
+	while (fgets(buffer, 200, archivo) != NULL) {
+		if (stringDistintos(buffer, "\n")) {
 			if(stringContiene(buffer, "NOMBRE=")) {
-				String algo = memoriaAlocar(200);
-				stringCopiar(algo, "NOMBRE=");
-				stringConcatenar(&algo, archivoARenombrar->nombre);
-				stringConcatenar(&algo, "\n");
-				fprintf(archivoAuxiliar, "%s", algo);
-				memoriaLiberar(algo);
+				String nombre = stringCrear(200);
+				stringCopiar(nombre, "NOMBRE=");
+				stringConcatenar(&nombre, archivoARenombrar->nombre);
+				stringConcatenar(&nombre, "\n");
+				fprintf(archivoAuxiliar, "%s", nombre);
+				memoriaLiberar(nombre);
 				}
 			else
 				fprintf(archivoAuxiliar, "%s", buffer);
-			memset(buffer, '\0', 200);
+			stringLimpiar(buffer, 200);
 		}
 	}
-	fclose(archivo);
-	fclose(archivoAuxiliar);
-
-	archivo = fopen(rutaArchivo, "w");
-	archivoAuxiliar = fopen(RUTA_AUXILIAR, "r");
-	memset(buffer, '\0', 200);
-	while (fgets(buffer, sizeof(buffer), archivoAuxiliar) != NULL) {
-		fprintf(archivo, "%s", buffer);
-		memset(buffer, '\0', 200);
-	}
-	fclose(archivo);
-	fclose(archivoAuxiliar);
+	fileCerrar(archivo);
+	fileCerrar(archivoAuxiliar);
+	memoriaLiberar(buffer);
+	archivoCopiarDeAuxiliar(rutaArchivo);
 }
 
 void comandoRenombrarArchivoDirectorio(Comando* comando) {
@@ -1215,7 +1215,7 @@ int directorioBuscarIndiceLibre() {
 }
 
 String directorioConfigurarEntradaArchivo(String indice, String nombre, String padre) {
-	String buffer = stringCrear();
+	String buffer = stringCrear(200);
 	stringConcatenar(&buffer,indice);
 	stringConcatenar(&buffer, ";");
 	stringConcatenar(&buffer, nombre);

@@ -1,11 +1,6 @@
-[INFO] 12:37:34:405 FileSystem/(3816:3816): [EJECUCION] Proceso File System inicializado
-[INFO] 12:37:34:461 FileSystem/(3816:3816): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 12:37:34:462 FileSystem/(3816:3816): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 12:37:48:850 FileSystem/(3816:3819): [DIRECTORIO] El directorio /home/nose/algo fue creado exitosamente
-[INFO] 12:37:53:283 FileSystem/(3816:3819): [DIRECTORIO] Listando archivos y directorios en algo
-[INFO] 12:37:53:285 FileSystem/(3816:3819): [DIRECTORIO] Manco (a)
-[INFO] 12:39:14:238 FileSystem/(3816:3819): [ARCHIVO] El archivo Manco fue renombrado por holi
-[INFO] 12:39:44:667 FileSystem/(3816:3819): [DIRECTORIO] Listando archivos y directorios en algo
-[INFO] 12:39:44:668 FileSystem/(3816:3819): [DIRECTORIO] holi (a)
-[INFO] 12:39:55:258 FileSystem/(3816:3819): [ERROR] Comando invalido
-[INFO] 12:40:02:483 FileSystem/(3816:3819): [ERROR] El archivo o directorio no existe
+[INFO] 13:47:46:619 FileSystem/(5094:5094): [EJECUCION] Proceso File System inicializado
+[INFO] 13:47:46:680 FileSystem/(5094:5094): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 13:47:46:681 FileSystem/(5094:5094): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 13:47:51:664 FileSystem/(5094:5097): [DIRECTORIO] El directorio /home fue creado exitosamente
+[INFO] 13:47:58:643 FileSystem/(5094:5097): [ARCHIVO] El archivo test fue renombrado por GGGGGGGGGGGGGGGGGGGGGGGGGGG
+[INFO] 13:48:09:832 FileSystem/(5094:5094): [EJECUCION] Finalizando proceso File System...

@@ -49,6 +49,10 @@
 #define C_INFO "info"
 #define C_EXIT "exit"
 
+#define ESCRITURA "w"
+#define LECTURA "r"
+
+
 #define FLAG_B "-b"
 #define FLAG_D "-d"
 #define FLAG_CLEAN "--clean"

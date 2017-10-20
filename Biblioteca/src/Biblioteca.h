@@ -75,21 +75,22 @@ typedef pthread_mutex_t Mutex;
 typedef pthread_t Hilo;
 typedef t_list* Lista;
 typedef FILE* File;
+typedef int32_t Entero;
 typedef t_bitarray* BitArray;
 
 //--------------------------------------- Estructuras -------------------------------------
 
-typedef struct {
-	int32_t operacion;
-	int32_t tamanio;
+typedef struct __attribute__((packed)){
+	Entero operacion;
+	Entero tamanio;
 } Header;
 
-typedef struct {
+typedef struct __attribute__((packed)){
 	Header header;
 	Puntero datos;
 } Mensaje;
 
-typedef struct {
+typedef struct __attribute__((packed)){
 	AddrInfo informacion;
 	SockAddrIn address;
 	Socklen tamanioAddress;
@@ -97,14 +98,14 @@ typedef struct {
 	String ip;
 } Conexion;
 
-typedef struct {
+typedef struct __attribute__((packed)){
 	String bits;
 	BitArray controlBits;
 } Bitmap;
 
-typedef struct __attribute__((__packed__)){
-	int32_t ip;
-	int32_t port;
+typedef struct __attribute__((packed)){
+	Entero ip;
+	Entero port;
 } Dir;
 
 
@@ -240,11 +241,11 @@ bool listaCumpleAlguno(Lista lista, bool(*funcion)(void*));
 bool listaCumplenTodos(Lista lista, bool(*funcion)(void*));
 
 //--------------------------------------- Funciones para String -------------------------------------
-
+String stringCrear();
 bool stringContiene(String unString, String otroString);
 String stringConvertirEntero(int entero);
 String stringRepetirCaracter(char caracter, int repeticiones);
-void  stringAgregarString(String* unString, String otroString);
+void  stringConcatenarString(String* unString, String otroString);
 String stringDuplicar(String string);
 void stringPonerEnMayuscula(String string);
 void stringPonerEnMinuscula(String string);
@@ -260,6 +261,7 @@ String stringDarVuelta(String string);
 String stringTomarCantidad(String string, int desde, int cantidad);
 String stringTomarDesdePosicion(String string, int posicion);
 String stringTomarDesdeInicio(String string, int cantidad);
+void stringLimpiar(String string, int tamanioString);
 
 //--------------------------------------- Funciones de HandShake-------------------------------------
 
