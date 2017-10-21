@@ -11,13 +11,19 @@
 #define RUTA_CONFIG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Master/MasterConfig.conf"
 #define RUTA_LOG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Master/MasterLog.log"
 
-#define TRANSFORMACION 702
-#define REDUCCION_LOCAL 703
-#define REDUCCION_GLOBAL 704
+
+typedef enum {Solicitud,Transformacion,ReducLocal,ReducGlobal,Cierre} Etapa;
 
 #define EXITOTRANSFORMACION 801
 #define FRACASOTRANSFORMACION 802
 
+typedef struct __attribute__((__packed__)){
+	int32_t ip;
+	int32_t port;
+} Dir;
+#define DIRSIZE sizeof(Dir)
+#define INTSIZE sizeof(int32_t)
+#define TEMPSIZE 12
 
 typedef struct {
 	char ipYama[50];
@@ -27,11 +33,10 @@ typedef struct {
 } Configuracion;
 
 typedef struct{
-	int ip;
-	int puerto;
-	int nroBloque;
-	int nroBytes;
-	char* nombretemp;
+	Dir dir;
+	int bloque;
+	int bytes;
+	char* temp;
 }WorkerTransformacion;
 
 
@@ -55,7 +60,7 @@ int hayWorkersParaConectar();
 WorkerTransformacion* deserializarTransformacion(Mensaje* mensaje);
 void confirmacionWorker(Socket unSocket);
 void serializarYEnviar(int nroBloque, int nroBytes, char* nombretemp, Socket unSocket);
-void establecerConexionConWorker(WorkerTransformacion* wt);
+void establecerConexionConWorker(Lista);
 void transformacion(Mensaje* mensaje);
 Lista workersAConectar();
 ListaSockets sockets();

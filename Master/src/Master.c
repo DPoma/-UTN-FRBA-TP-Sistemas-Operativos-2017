@@ -20,19 +20,13 @@ char* leerArchivo(FILE* archivo) {
 	return texto;
 }
 
-
-
-
 int archivoValido(FILE* archivo) {
 	return archivo != NULL;
 }
 
-
-
 bool esUnArchivo(char* c) {
 	return string_contains(c, ".");
 }
-
 
 void enviarArchivo(FILE* archivo) {
 	char* texto = leerArchivo(archivo);
@@ -41,7 +35,6 @@ void enviarArchivo(FILE* archivo) {
 	mensajeEnviar(socketWorker, 4, texto, strlen(texto)+1);
 	free(texto);
 }
-
 
 char* leerCaracteresEntrantes() {
 	int i, caracterLeido;
@@ -56,6 +49,8 @@ void establecerConexiones(){
 	imprimirMensajeDos(archivoLog,"[CONEXION] Estableciendo Conexion con YAMA (IP: %s | Puerto %s)", configuracion->ipYama, configuracion->puertoYama);
 	socketYAMA = socketCrearCliente(configuracion->ipYama, configuracion->puertoYama, ID_MASTER);
 	imprimirMensaje(archivoLog, "[CONEXION] Conexion existosa con YAMA");
+
+	//TODO se conecta con un worker al azar?
 	imprimirMensajeDos(archivoLog, "[CONEXION] Estableciendo Conexion con Worker (IP: %s | Puerto: %s)", configuracion->ipWorker, configuracion->puertoWorker);
 	socketWorker = socketCrearCliente(configuracion->ipWorker, configuracion->puertoWorker, ID_MASTER);
 	imprimirMensaje(archivoLog, "[CONEXION] Conexion existosa con Worker");
@@ -74,7 +69,6 @@ int hayWorkersParaConectar(){
 	Mensaje* m = mensajeRecibir(socketYAMA);
 	if(m->header.operacion==-1){
 		imprimirMensaje(archivoLog,"No hay mas workers por conectar");
-		printf("No hay mas workers para conectar");
 		return -1;
 		}
 	else{
@@ -98,11 +92,11 @@ WorkerTransformacion* deserializarTransformacion(Mensaje* mensaje){
 	memcpy(&numeroBytes, mensaje->datos + sizeof(int)*3, sizeof(int));
 	memcpy(&nombretemporal, mensaje->datos + sizeof(int)*3 +12, 12);//tamaño del nombre del temporal es 12
 
-	wt->ip = numeroip;
-	wt->puerto = numeropuerto;
-	wt->nroBloque = numeropuerto;
-	wt->nroBytes = numeroBytes;
-	wt->nombretemp = nombretemporal;
+	wt->dir.ip = numeroip;
+	wt->dir.port = numeropuerto;
+	wt->bloque = numeropuerto;
+	wt->bytes = numeroBytes;
+	wt->temp = nombretemporal;
 
 	return wt;
 
@@ -136,7 +130,7 @@ ListaSockets sockets(){
 	for(i=0; i<size;i++){
 
 	 wt = listaObtenerElemento(workers,i);
-	 sWorker = socketCrearCliente(string_itoa(wt->ip),string_itoa(wt->puerto),ID_MASTER);
+	 sWorker = socketCrearCliente(string_itoa(wt->dir.ip),string_itoa(wt->dir.port),ID_MASTER);
 	 listaSocketsAgregar(sWorker,&sockets);
 
 	}
@@ -145,20 +139,6 @@ ListaSockets sockets(){
 
 }
 
-
-void confirmacionWorker(Socket unSocket){
-	Mensaje* mensaje = mensajeRecibir(unSocket);
-
-	if(mensaje->header.operacion==EXITOTRANSFORMACION){
-		imprimirMensajeUno(archivoLog, "[TRANSFORMACION] Transformacion realizada con exito en el Worker %i", &unSocket); //desp lo cambio
-		mensajeEnviar(socketYAMA,EXITOTRANSFORMACION,&unSocket,sizeof(int));
-	}
-	else{
-		imprimirMensajeUno(archivoLog,"[TRANSFORMACION] Transformacion fallida en el Worker %i",&unSocket);
-		mensajeEnviar(socketYAMA,FRACASOTRANSFORMACION,&unSocket,sizeof(int));
-
-	}
-}
 
 void serializarYEnviar(int nroBloque, int nroBytes, char* nombretemp, Socket unSocket){
 	int size_nombretemp = strlen(nombretemp)+1;
@@ -170,7 +150,7 @@ void serializarYEnviar(int nroBloque, int nroBytes, char* nombretemp, Socket unS
 	memcpy(data+sizeof(int)*2,&nroBloque, sizeof(int));
 	memcpy(data+(sizeof(int)*3),nombretemp,size_nombretemp);
 
-	mensajeEnviar(unSocket,TRANSFORMACION,data,len);
+	mensajeEnviar(unSocket,Transformacion,data,len);
 
 
 }
@@ -178,30 +158,47 @@ void serializarYEnviar(int nroBloque, int nroBytes, char* nombretemp, Socket unS
 
 
 
-void establecerConexionConWorker( WorkerTransformacion* wt){
+void establecerConexionConWorker( Lista bloques){
+	WorkerTransformacion* wt = list_get(bloques,0);
+
+	socketWorker = socketCrearCliente(string_itoa(wt->dir.ip),string_itoa(wt->dir.port), ID_MASTER);
+
+	int i;
+	for(i=0;i<bloques->elements_count;i++){
+		WorkerTransformacion* wt=list_get(bloques,i);
+		serializarYEnviar(wt->bloque,wt->bytes, wt->temp,socketWorker);
+		imprimirMensajeDos(archivoLog,"[CONEXION] Estableciendo conexion con Worker (IP: %d | PUERTO: %d", string_itoa(wt->dir.ip), string_itoa(wt->dir.port));
+	}
+
+	for(i=0;i<bloques->elements_count;i++){
+		Mensaje* mensaje = mensajeRecibir(socketWorker);
+
+			//pasar dir y bloque
+			if(mensaje->header.operacion==EXITOTRANSFORMACION){
+				imprimirMensajeUno(archivoLog, "[TRANSFORMACION] Transformacion realizada con exito en el Worker %i", &socketWorker); //desp lo cambio
+				mensajeEnviar(socketYAMA,EXITOTRANSFORMACION,&socketWorker,sizeof(int));
+			}
+			else{
+				imprimirMensajeUno(archivoLog,"[TRANSFORMACION] Transformacion fallida en el Worker %i",&socketWorker);
+				mensajeEnviar(socketYAMA,FRACASOTRANSFORMACION,&socketWorker,sizeof(int));
+
+				//hacer conexion con YAMA
+				//recibir un bloque, agregar a la lista de bloques
+
+			}
+	}
+
+	//por cada uno de la lista decirle el bloque
+	//y controlar si termino o tuvo error
+	//el worker le tiene que dar el numero de bloque
+
+	//si hubo error tiene que abrir una conexion con yama
+	//y esperar que le conteste el bloque alternativo
 
 
-	imprimirMensajeDos(archivoLog,"[CONEXION] Estableciendo conexion con Worker (IP: %d | PUERTO: %d", string_itoa(wt->ip), string_itoa(wt->puerto));
-	socketWorker = socketCrearCliente(string_itoa(wt->ip),string_itoa(wt->puerto), ID_MASTER);
-	serializarYEnviar(wt->nroBloque,wt->nroBytes, wt->nombretemp,socketWorker);
 
-	confirmacionWorker(socketWorker);
 
 }
-
-
-
-void transformacion(Mensaje* mens){
-	WorkerTransformacion* wt = deserializarTransformacion(mens);
-	pthread_t hilo;
-
-	pthread_create(&hilo,NULL,(void*)establecerConexionConWorker,&wt);
-
-	pthread_join(hilo, NULL);
-}
-
-
-
 
 
 void reduccionLocal(){
@@ -214,47 +211,76 @@ void reduccionGlobal(){
 
 
 
-int main(void) {
+int main(int argc,char** argv) {
+//	if(argc!=5){
+//		puts("mal numero de argumentos");
+//		return -1;
+//	}
+
+	//FILE* de transformacion global
+
 	pantallaLimpiar();
 	leerArchivoConfig();
 	establecerConexiones();
 
 	masterActivar();
-
 	senialAsignarFuncion(SIGINT, funcionSenial);
-	mensajeEnviar(socketYAMA, HANDSHAKE, "HOLIII", 7);
-	mensajeEnviar(socketWorker, HANDSHAKE, "HOLIII", 7);
+//	mensajeEnviar(socketYAMA, HANDSHAKE, "HOLIII", 7);
+//	mensajeEnviar(socketWorker, HANDSHAKE, "HOLIII", 7);
 	imprimirMensaje(archivoLog, "[MENSAJE] Mensaje enviado");
+
+	mensajeEnviar(socketYAMA,Solicitud,argv[3],strlen(argv[3]));
+	Mensaje* mensaje=mensajeRecibir(socketYAMA);
+		Lista workers=list_create();
+		int i;
+		for(i=0;i<mensaje->header.tamanio;i+=DIRSIZE+INTSIZE*2+TEMPSIZE){
+			WorkerTransformacion* worker=malloc(mensaje->header.tamanio);
+			memcpy(&worker->dir,mensaje->datos+i,DIRSIZE);
+			memcpy(&worker->bloque,mensaje->datos+i+DIRSIZE,INTSIZE);
+			memcpy(&worker->bytes,mensaje->datos+i+DIRSIZE+INTSIZE,INTSIZE);
+			memcpy(&worker->temp,mensaje->datos+i+DIRSIZE+INTSIZE*2,TEMPSIZE);
+			list_add(workers,worker);
+		}
+		bool mismoNodo(Dir a,Dir b){
+			return a.ip==b.ip&&a.port==b.port;//podría comparar solo ip
+		}
+		Lista listas=list_create();
+		for(i=0;i<=workers->elements_count;i++){
+			WorkerTransformacion* worker=list_get(workers,i);
+			int j;
+			for(j=0;j<=listas->elements_count;j++){
+				Lista nodo=list_get(listas,j);
+				WorkerTransformacion* cmp=list_get(nodo,0);
+				if(mismoNodo(worker->dir,cmp->dir)){
+					list_add(nodo,worker);
+				}
+			}
+			Lista nodo=list_create();
+			list_add(nodo, worker);
+			list_add(nodo,listas);
+		}
+
+		Lista hilos=list_create();
+		for(i=0;i<=workers->elements_count;i++){
+			pthread_t hilo;
+			pthread_create(&hilo,NULL,(void*)establecerConexionConWorker,list_get(listas,i));
+			list_add(hilos,&hilo);
+		}
 
 	while(masterActivado()){
 		Mensaje* m = mensajeRecibir(socketYAMA);
 		switch(m->header.operacion){
-
-			case -1:
-			imprimirMensaje(archivoLog,"[EJECUCION] Error en Yama");
+		case Cierre:
+			imprimirMensaje(archivoLog,"[EJECUCION] Terminando proceso");
 			masterDesactivar();
 			break;
-
-			case TRANSFORMACION:
-
-			transformacion(m);
+		case ReducLocal:
+			reduccionLocal(m);
 			break;
-
-			case REDUCCION_LOCAL:
-
-			reduccionLocal();
+		case ReducGlobal:
+			reduccionGlobal(m);
 			break;
-
-			case REDUCCION_GLOBAL:
-
-			reduccionGlobal();
-			break;
-
 		}
-
-
-
-
 	}
 
 	socketCerrar(socketYAMA);
