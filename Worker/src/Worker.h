@@ -36,6 +36,12 @@ typedef struct {
 	char** ruta;
 } locOri;
 
+typedef struct {
+	int sizebuffer;
+	char* buffer;
+	int NumReg;
+} datosReg;
+
 int pid;
 
 const int MB = 1048576;
@@ -56,3 +62,4 @@ char* appendL(locOri*);
 int reduccionGlobal(char*,char*,char*);
 lGlobOri* getOrigenesGlobales(char*);
 char* appendG(lGlobOri*);
+datosReg* PasaRegistro(char*,int);

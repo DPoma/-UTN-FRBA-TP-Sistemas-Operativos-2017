@@ -31,6 +31,7 @@ void workerCrearHijo(Socket unSocket) {
 	int sizeOrigen;
 	char* destino;
 	int sizeDestino;
+	char* buffer;
 	switch(mensaje->header.operacion){
 			case -1:
 				imprimirMensaje(archivoLog, ("[EJECUCION] Tuve problemas para comunicarme con el Master (Pid hijo: %d)", pid)); //el hijo fallo en comunicarse con el master
@@ -56,6 +57,7 @@ void workerCrearHijo(Socket unSocket) {
 				lSend(conexion, buffer, 2, sizeof(char)*size);
 				free(buffer);
 				free(path);*/
+				lSend(unSocket, NULL, 2, 0);
 				free(codigo);
 				free(origen);
 				free(destino);
@@ -81,6 +83,7 @@ void workerCrearHijo(Socket unSocket) {
 				lSend(conexion, buffer, 2, sizeof(char)*size);
 				free(buffer);
 				free(path);*/
+				lSend(unSocket, NULL, 2, 0);
 				free(codigo);
 				free(origen);
 				free(destino);
@@ -106,6 +109,7 @@ void workerCrearHijo(Socket unSocket) {
 				lSend(conexion, buffer, 2, sizeof(char)*size);
 				free(buffer);
 				free(path);*/
+				lSend(unSocket, NULL, 2, 0);
 				free(codigo);
 				free(origen);
 				free(destino);
@@ -131,9 +135,48 @@ void workerCrearHijo(Socket unSocket) {
 				lSend(conexion, buffer, 2, sizeof(char)*size);
 				free(buffer);
 				free(path);*/
+				lSend(unSocket, NULL, 2, 0);
 				free(codigo);
 				free(origen);
 				free(destino);
+				break;
+			}
+			case 5:{ //PasaRegistro
+				int sizeRuta;
+				char* ruta;
+				int numeroReg;
+				memcpy(&sizeRuta, mensaje->datos, sizeof(int32_t));
+				memcpy(&ruta,mensaje->datos + sizeof(int32_t), sizeRuta);
+				memcpy(&numeroReg, mensaje->datos+ sizeof(int32_t) +sizeCodigo, sizeof(int32_t));
+				datosReg* Reg = PasaRegistro(ruta,numeroReg);
+				/*char* buffer = leerArchivo(path,offset,size);
+				log_info(logFile, "[FILE SYSTEM] EL KERNEL PIDE LEER: %s | OFFSET: %i | SIZE: %i", path, offset, size);
+				if(buffer=="-1"){
+					lSend(conexion, NULL, -4, 0);
+					log_error(logFile, "[LEER]: HUBO UN ERROR AL LEER");
+					break;
+				}
+				//enviar el buffer
+				lSend(conexion, buffer, 2, sizeof(char)*size);
+				free(buffer);
+				free(path);*/
+				//serializo
+				int mensajeSize = sizeof(int)*2 +  Reg->sizebuffer;
+				char* mensajeData = malloc(mensajeSize);
+				char* puntero = mensajeData;
+				memcpy(puntero, Reg->sizebuffer, sizeof(int));
+				puntero += sizeof(int);
+				memcpy(puntero, Reg->buffer, Reg->sizebuffer);
+				puntero += Reg->sizebuffer;
+				memcpy(puntero, Reg->NumReg, sizeof(int));
+				//envio
+				mensajeEnviar(unSocket,5,mensajeData,mensajeSize);
+				free(mensajeData);
+				free(puntero);
+				free(codigo);
+				free(origen);
+				free(destino);
+				free(buffer);
 				break;
 			}
 		}
@@ -274,10 +317,10 @@ char* appendL(locOri* origen){
 			i--;
 		}
 		while(c!="\n"){
-			c = fgetc(arch);
 			buffer = realloc(buffer,sizeof(char)*(cc+1));
 			buffer[cc]=c;
 			cc++;
+			c = fgetc(arch);
 		}
 		if(buffer!=NULL){
 			VRegistros[i]= realloc(VRegistros[i],sizeof(char)*(cc+1));
@@ -325,13 +368,13 @@ char* appendL(locOri* origen){
 			c = fgetc(arch);
 			if(c=="\n"){
 				VLineasiguiente[resultado] = VLineasiguiente[resultado]+1;
-				again=1;
+				again=0;
 			}
 			while(c!="\n"){
-				c = fgetc(arch);
 				buffer = realloc(buffer,sizeof(char)*(cc+1));
 				buffer[cc]=c;
 				cc++;
+				c = fgetc(arch);
 			}
 			if(buffer!=NULL){
 				VRegistros[resultado]= realloc(VRegistros[resultado],sizeof(char)*(cc+1));
@@ -475,10 +518,10 @@ char* appendG(lGlobOri* origenes){
 				i--;
 			}
 			while(c!="\n"){
-				c = fgetc(arch);
 				buffer = realloc(buffer,sizeof(char)*(cc+1));
 				buffer[cc]=c;
 				cc++;
+				c = fgetc(arch);
 			}
 			close(arch);
 			c=NULL;
@@ -576,13 +619,13 @@ char* appendG(lGlobOri* origenes){
 				c = fgetc(arch);
 				if(c=="\n"){
 					VLineasiguiente[resultado] = VLineasiguiente[resultado]+1;
-					again=1;
+					again=0;
 				}
 				while(c!="\n"){
-					c = fgetc(arch);
 					buffer = realloc(buffer,sizeof(char)*(cc+1));
 					buffer[cc]=c;
 					cc++;
+					c = fgetc(arch);
 				}
 				c=NULL;
 			}
@@ -635,6 +678,43 @@ char* appendG(lGlobOri* origenes){
 	return rutaArchAppend;
 }
 
+datosReg* PasaRegistro(char* ruta,int NroReg){
+	datosReg* Reg;
+	char* buffer;
+	FILE* arch;
+	char c;
+	int cc;
+	int again=0;
+	int i;
+	arch = fopen(ruta,"r");
+	while(again==0){
+		again=1;
+		for(i=0;i==NroReg;i++){
+			while(c!="\n"){
+				c = fgetc(arch);
+			}
+			c=NULL;
+		}
+		c = fgetc(arch);
+		if(c=="\n"){
+			NroReg = NroReg+1;
+			again=0;
+		}
+		while(c!="\n"){
+			buffer = realloc(buffer,sizeof(char)*(cc+1));
+			buffer[cc]=c;
+			cc++;
+			c = fgetc(arch);
+		}
+		c=NULL;
+	}
+	close(arch);
+	Reg->sizebuffer=cc;
+	Reg->buffer = malloc(Reg->sizebuffer);
+	Reg->buffer=buffer;
+	Reg->NumReg=NroReg;
+	return Reg;
+}
 
 void socketAceptarConexion() {
 	Socket nuevoSocket;
