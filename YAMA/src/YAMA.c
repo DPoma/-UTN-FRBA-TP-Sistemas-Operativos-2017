@@ -325,7 +325,7 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 				return false;
 			}
 			moverAUsados(abortarEntrada);
-			mensajeEnviar(entradaA->masterid,Cierre,nullptr,0);//podría ser cierre, depende como lo implemente
+			mensajeEnviar(entradaA->masterid,Aborto,nullptr,0);
 		}
 		if(entradaA->etapa==Transformacion&&actualizando!=Abortado){
 			if(mismoNodo(entradaA->nodo,entradaA->nodoAlt)){

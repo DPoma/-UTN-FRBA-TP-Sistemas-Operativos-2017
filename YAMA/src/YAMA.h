@@ -62,7 +62,7 @@ typedef struct{
 } Worker;
 Lista workers;
 
-typedef enum {Solicitud,Transformacion,ReducLocal,ReducGlobal,Cierre} Etapa;
+typedef enum {Solicitud,Transformacion,ReducLocal,ReducGlobal,Cierre,Aborto} Etapa;
 typedef enum {EnProceso=0,Error,Terminado,Abortado} Estado;
 int job=-1;
 typedef struct{
