@@ -12,10 +12,10 @@
 #define RUTA_LOG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Master/MasterLog.log"
 
 
-typedef enum {Solicitud,Transformacion,ReducLocal,ReducGlobal,Cierre} Etapa;
+typedef enum {Solicitud,Transformacion=1,ReducLocal=2,ReducGlobal=3,Almacenamiento=4,Cierre,Aborto=6} Etapa;
 
 #define EXITOTRANSFORMACION 801
-#define FRACASOTRANSFORMACION 802
+#define FRACASOTRANSFORMACION -801
 
 typedef struct __attribute__((__packed__)){
 	int32_t ip;

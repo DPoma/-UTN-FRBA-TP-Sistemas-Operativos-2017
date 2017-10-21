@@ -34,7 +34,7 @@ void workerCrearHijo(Socket unSocket) {
 	switch(mensaje->header.operacion){
 			case -1:
 				imprimirMensaje(archivoLog, ("[EJECUCION] Tuve problemas para comunicarme con el Master (Pid hijo: %d)", pid)); //el hijo fallo en comunicarse con el master
-				lSend(unSocket, NULL, -4, 0); //MANDA AL MASTER QUE FALLO
+				mensajeEnviar(unSocket, -4, NULL, 0); //MANDA AL MASTER QUE FALLO
 				free(mensaje);
 				break;
 			case 1: //Etapa Transformacion
@@ -45,7 +45,10 @@ void workerCrearHijo(Socket unSocket) {
 				memcpy(&origen,mensaje->datos + sizeof(int32_t)+sizeCodigo, sizeof(int32_t));
 				memcpy(&sizeDestino, mensaje->datos + sizeof(int32_t)*2 + sizeCodigo , sizeof(int32_t));
 				memcpy(&destino,mensaje->datos + sizeof(int32_t)*3+sizeCodigo, sizeDestino);
-				transformar(codigo,origenB,destino);
+				int result = transformar(codigo,origenB,destino);
+				if(result==-1){
+					mensajeEnviar(unSocket, -801, NULL, 0);
+				}
 				/*char* buffer = leerArchivo(path,offset,size);
 				log_info(logFile, "[FILE SYSTEM] EL KERNEL PIDE LEER: %s | OFFSET: %i | SIZE: %i", path, offset, size);
 				if(buffer=="-1"){
@@ -57,7 +60,7 @@ void workerCrearHijo(Socket unSocket) {
 				lSend(conexion, buffer, 2, sizeof(char)*size);
 				free(buffer);
 				free(path);*/
-				lSend(unSocket, NULL, 2, 0);
+				mensajeEnviar(unSocket, 801, NULL, 0);
 				free(codigo);
 				free(origen);
 				free(destino);
@@ -72,7 +75,10 @@ void workerCrearHijo(Socket unSocket) {
 				memcpy(&origen,mensaje->datos + sizeof(int32_t)*2+sizeCodigo, sizeOrigen);
 				memcpy(&sizeDestino, mensaje->datos + sizeof(int32_t)*2 + sizeCodigo + sizeOrigen, sizeof(int32_t));
 				memcpy(&destino,mensaje->datos + sizeof(int32_t)*3+sizeCodigo+ sizeOrigen, sizeDestino);
-				reduccionLocal(codigo,origen,destino);
+				int result=reduccionLocal(codigo,origen,destino);
+				if(result==-1){
+					mensajeEnviar(unSocket, -802, NULL, 0);
+				}
 				/*char* buffer = leerArchivo(path,offset,size);
 				log_info(logFile, "[FILE SYSTEM] EL KERNEL PIDE LEER: %s | OFFSET: %i | SIZE: %i", path, offset, size);
 				if(buffer=="-1"){
@@ -84,7 +90,7 @@ void workerCrearHijo(Socket unSocket) {
 				lSend(conexion, buffer, 2, sizeof(char)*size);
 				free(buffer);
 				free(path);*/
-				lSend(unSocket, NULL, 2, 0);
+				mensajeEnviar(unSocket, 802, NULL, 0);
 				free(codigo);
 				free(origen);
 				free(destino);
@@ -99,7 +105,10 @@ void workerCrearHijo(Socket unSocket) {
 				memcpy(&origen,mensaje->datos + sizeof(int32_t)*2+sizeCodigo, sizeOrigen);
 				memcpy(&sizeDestino, mensaje->datos + sizeof(int32_t)*2 + sizeCodigo + sizeOrigen, sizeof(int32_t));
 				memcpy(&destino,mensaje->datos + sizeof(int32_t)*3+sizeCodigo+ sizeOrigen, sizeDestino);
-				reduccionGlobal(codigo,origen,destino);
+				int result = reduccionGlobal(codigo,origen,destino);
+				if(result==-1){
+					mensajeEnviar(unSocket, -803, NULL, 0);
+				}
 				/*char* buffer = leerArchivo(path,offset,size);
 				log_info(logFile, "[FILE SYSTEM] EL KERNEL PIDE LEER: %s | OFFSET: %i | SIZE: %i", path, offset, size);
 				if(buffer=="-1"){
@@ -111,7 +120,7 @@ void workerCrearHijo(Socket unSocket) {
 				lSend(conexion, buffer, 2, sizeof(char)*size);
 				free(buffer);
 				free(path);*/
-				lSend(unSocket, NULL, 2, 0);
+				mensajeEnviar(unSocket, 803, NULL, 0);
 				free(codigo);
 				free(origen);
 				free(destino);
@@ -131,7 +140,7 @@ void workerCrearHijo(Socket unSocket) {
 				memcpy(&sizeRuta, mensaje->datos+ sizeof(int32_t) +sizeNombre, sizeof(int32_t));
 				memcpy(&Ruta,mensaje->datos + sizeof(int32_t)*2+sizeCodigo, sizeRuta);
 				//almacenar();
-				//leer el archivo y meter todo en un buffer
+				//leer el archivo y meterlo en un buffer
 				FILE* arch;
 				arch = fopen(Ruta,"r");
 				c = fgetc(arch);
@@ -173,12 +182,13 @@ void workerCrearHijo(Socket unSocket) {
 				mensajeEnviar(socketFS,2,mensajeData,mensajeSize); //CAMBIAR 2 Seguramente
 				free(mensajeData);
 				free(puntero);
-				lSend(unSocket, NULL, 2, 0);
+				mensajeEnviar(unSocket, 2, NULL, 0);
 				free(codigo);
 				free(origen);
 				free(destino);
 				free(mensaje);
 				break;
+				mensajeEnviar(unSocket, 804, NULL, 0);
 			}
 			case 5:{ //PasaRegistro
 				int sizeRuta;
@@ -215,6 +225,12 @@ void workerCrearHijo(Socket unSocket) {
 				free(codigo);
 				free(origen);
 				free(destino);
+				free(mensaje);
+				break;
+			}
+			case 6:{ //Aborto
+				imprimirMensaje(archivoLog, ("[EJECUCION] El Master me aborto (Pid hijo: %d)", pid)); //el hijo fallo en comunicarse con el master
+				mensajeEnviar(unSocket, -806, NULL, 0); //MANDA AL MASTER QUE FALLO
 				free(mensaje);
 				break;
 			}
