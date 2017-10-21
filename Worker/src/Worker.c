@@ -31,11 +31,11 @@ void workerCrearHijo(Socket unSocket) {
 	int sizeOrigen;
 	char* destino;
 	int sizeDestino;
-	char* buffer;
 	switch(mensaje->header.operacion){
 			case -1:
 				imprimirMensaje(archivoLog, ("[EJECUCION] Tuve problemas para comunicarme con el Master (Pid hijo: %d)", pid)); //el hijo fallo en comunicarse con el master
 				lSend(unSocket, NULL, -4, 0); //MANDA AL MASTER QUE FALLO
+				free(mensaje);
 				break;
 			case 1: //Etapa Transformacion
 			{
@@ -61,6 +61,7 @@ void workerCrearHijo(Socket unSocket) {
 				free(codigo);
 				free(origen);
 				free(destino);
+				free(mensaje);
 				break;
 			}
 			case 2:{ //Etapa Reduccion Local
@@ -87,6 +88,7 @@ void workerCrearHijo(Socket unSocket) {
 				free(codigo);
 				free(origen);
 				free(destino);
+				free(mensaje);
 				break;
 			}
 			case 3:{ //Etapa Reduccion Global
@@ -113,32 +115,69 @@ void workerCrearHijo(Socket unSocket) {
 				free(codigo);
 				free(origen);
 				free(destino);
+				free(mensaje);
 				break;
 			}
 			case 4:{ //Almacenamiento Definitivo
-
-				memcpy(&sizeCodigo, mensaje->datos, sizeof(int32_t));
-				memcpy(&codigo,mensaje->datos + sizeof(int32_t), sizeCodigo);
-				memcpy(&sizeOrigen, mensaje->datos+ sizeof(int32_t) +sizeCodigo, sizeof(int32_t));
-				memcpy(&origen,mensaje->datos + sizeof(int32_t)*2+sizeCodigo, sizeOrigen);
-				memcpy(&sizeDestino, mensaje->datos + sizeof(int32_t)*2 + sizeCodigo + sizeOrigen, sizeof(int32_t));
-				memcpy(&destino,mensaje->datos + sizeof(int32_t)*3+sizeCodigo+ sizeOrigen, sizeDestino);
+				int sizeNombre;
+				char* Nombre;
+				int sizeRuta;
+				char* Ruta;
+				int sizebuffer=0;
+				char* buffer;
+				char* c;
+				memcpy(&sizeNombre, mensaje->datos, sizeof(int32_t));
+				memcpy(&Nombre,mensaje->datos + sizeof(int32_t), sizeNombre);
+				memcpy(&sizeRuta, mensaje->datos+ sizeof(int32_t) +sizeNombre, sizeof(int32_t));
+				memcpy(&Ruta,mensaje->datos + sizeof(int32_t)*2+sizeCodigo, sizeRuta);
 				//almacenar();
-				/*char* buffer = leerArchivo(path,offset,size);
-				log_info(logFile, "[FILE SYSTEM] EL KERNEL PIDE LEER: %s | OFFSET: %i | SIZE: %i", path, offset, size);
-				if(buffer=="-1"){
-					lSend(conexion, NULL, -4, 0);
-					log_error(logFile, "[LEER]: HUBO UN ERROR AL LEER");
-					break;
+				//leer el archivo y meter todo en un buffer
+				FILE* arch;
+				arch = fopen(Ruta,"r");
+				c = fgetc(arch);
+				while(c!=EOF){
+					buffer = realloc(buffer,sizeof(char)*(sizebuffer+1));
+					buffer[sizebuffer]=c;
+					sizebuffer++;
+					c = fgetc(arch);
 				}
-				//enviar el buffer
-				lSend(conexion, buffer, 2, sizeof(char)*size);
-				free(buffer);
-				free(path);*/
+						/*if(buffer!=NULL){
+							VRegistros[i]= realloc(VRegistros[i],sizeof(char)*(sizebuffer+1));
+							VRegistros[i]= buffer;
+							sizebuffer=0;
+							free(buffer);
+						}*/
+				c=NULL;
+				close(arch);
+				//creo socket
+				Socket socketFS;
+				imprimirMensajeDos(archivoLog, "[CONEXION] Realizando conexion con FileSystem (IP: %s | Puerto %s)", configuracion->ipFileSytem, configuracion->puertoFileSystem);
+				socketFS = socketCrearCliente(configuracion->ipFileSytem,configuracion->puertoFileSystem,ID_WORKER);
+				imprimirMensaje(archivoLog, "[CONEXION] Conexion exitosa con FileSystem");
+				//serializo
+				int mensajeSize = sizeof(int32_t)*3 + sizeNombre + sizeRuta + sizebuffer;
+				char* mensajeData = malloc(mensajeSize);
+				char* puntero = mensajeData;
+				memcpy(puntero, sizeNombre, sizeof(int32_t));
+				puntero += sizeof(int32_t);
+				memcpy(puntero, Nombre, sizeNombre);
+				puntero += sizeNombre;
+				memcpy(puntero, sizeRuta, sizeof(int32_t));
+				puntero += sizeof(int32_t);
+				memcpy(puntero, Ruta, sizeRuta);
+				puntero += sizeRuta;
+				memcpy(puntero, sizebuffer, sizeof(int32_t));
+				puntero += sizeof(int32_t);
+				memcpy(puntero, buffer, sizebuffer);
+				//envio
+				mensajeEnviar(socketFS,2,mensajeData,mensajeSize); //CAMBIAR 2 Seguramente
+				free(mensajeData);
+				free(puntero);
 				lSend(unSocket, NULL, 2, 0);
 				free(codigo);
 				free(origen);
 				free(destino);
+				free(mensaje);
 				break;
 			}
 			case 5:{ //PasaRegistro
@@ -176,7 +215,7 @@ void workerCrearHijo(Socket unSocket) {
 				free(codigo);
 				free(origen);
 				free(destino);
-				free(buffer);
+				free(mensaje);
 				break;
 			}
 		}
@@ -213,13 +252,19 @@ int transformar(char* codigo,int origen,char* destino){
 	}*/
 	fclose(arch);
 	//doy privilegios a script
-	char commando [500]=NULL;
+	char commando [500];
+	for(i=0;i==500;i++){
+		commando[i]=NULL;
+	}
 	strcat(commando,"chmod 0755");
 	strcat(commando,codigo);
 	system(commando);
 	free (commando);
 	//paso buffer a script y resultado script a sort
-	char command [500]=NULL;
+	char command [500];
+	for(i=0;i==500;i++){
+		command[i]=NULL;
+	}
 	strcat(command,"cat");
 	strcat(command,buffer);
 	strcat(command,"|");
@@ -243,15 +288,22 @@ int reduccionLocal(char* codigo,char* origen,char* destino){
 	locOri* listaOri;
 	listaOri = getOrigenesLocales(origen);
 	char* apendado;
+	int i;
 	apendado = appendL(listaOri);
 	//doy privilegios a script
-	char commando [500]=NULL;
+	char commando [500];
+	for(i=0;i==500;i++){
+		commando[i]=NULL;
+	}
 	strcat(commando,"chmod 0755");
 	strcat(commando,codigo);
 	system(commando);
 	free (commando);
 	//paso buffer a script y resultado script a sort
-	char command [500]=NULL;
+	char command [500];
+	for(i=0;i==500;i++){
+		command[i]=NULL;
+	}
 	strcat(command,"cat");
 	strcat(command,apendado);
 	strcat(command,"|");
@@ -261,7 +313,7 @@ int reduccionLocal(char* codigo,char* origen,char* destino){
 	system(command);
 	free (command);
 	free (apendado);
-	int i=0;
+	i=0;
 	while(listaOri->ruta[i]!=NULL){
 		free(listaOri->ruta[i]);
 		i++;
@@ -428,14 +480,21 @@ int reduccionGlobal(char* codigo,char* origen,char* destino){
 	listaOri = getOrigenesGlobales(origen);
 	char* apendado;
 	apendado = appendG(listaOri);
+	int i=0;
 	//doy privilegios a script
-	char commando [500]=NULL;
+	char commando [500];
+	for(i=0;i==500;i++){
+		commando[i]=NULL;
+	}
 	strcat(commando,"chmod 0755");
 	strcat(commando,codigo);
 	system(commando);
 	free (commando);
 	//paso buffer a script y resultado script a sort
-	char command [500]=NULL;
+	char command [500];
+	for(i=0;i==500;i++){
+		command[i]=NULL;
+	}
 	strcat(command,"cat");
 	strcat(command,apendado);
 	strcat(command,"|");
@@ -445,7 +504,7 @@ int reduccionGlobal(char* codigo,char* origen,char* destino){
 	system(command);
 	free (command);
 	free (apendado);
-	int i=0;
+	i=0;
 	while(((globOri*)listaOri->oris[i])->ruta!=NULL){
 		free(((globOri*)listaOri->oris[i])->ruta);
 		i++;
@@ -532,23 +591,23 @@ char* appendG(lGlobOri* origenes){
 		socketClientWorker = socketCrearCliente(((globOri*)origenes->oris[i])->ip,((globOri*)origenes->oris[i])->puerto,ID_WORKER);
 		imprimirMensaje(archivoLog, "[CONEXION] Conexion exitosa con Worker");
 		//serializo
-		int mensajeSize = sizeof(int)*2 + sizeof(((globOri*)origenes->oris[i])->ruta);
+		int mensajeSize = sizeof(int32_t)*2 + sizeof(((globOri*)origenes->oris[i])->ruta);
 		char* mensajeData = malloc(mensajeSize);
 		char* puntero = mensajeData;
-		memcpy(puntero, sizeof(((globOri*)origenes->oris[i])->ruta), sizeof(int));
-		puntero += sizeof(int);
+		memcpy(puntero, sizeof(((globOri*)origenes->oris[i])->ruta), sizeof(int32_t));
+		puntero += sizeof(int32_t);
 		memcpy(puntero, ((globOri*)origenes->oris[i])->ruta, sizeof(((globOri*)origenes->oris[i])->ruta));
 		puntero += sizeof(((globOri*)origenes->oris[i])->ruta);
-		memcpy(puntero, VLineasiguiente[i], sizeof(int));
+		memcpy(puntero, VLineasiguiente[i], sizeof(int32_t));
 		//envio y recibo
 		mensajeEnviar(socketClientWorker,5,mensajeData,mensajeSize);
 		free(mensajeData);
 		free(puntero);
 		Mensaje* mensaje =mensajeRecibir(socketClientWorker);
 		//deserializo
-		memcpy(&bufferSize, mensaje, sizeof(int));
-		memcpy(&buffer, mensaje + sizeof(int), sizeof(bufferSize));
-		memcpy(&VLineasiguiente[i], mensaje + sizeof(int) + sizeof(bufferSize), sizeof(int));
+		memcpy(&bufferSize, mensaje, sizeof(int32_t));
+		memcpy(&buffer, mensaje + sizeof(int32_t), sizeof(bufferSize));
+		memcpy(&VLineasiguiente[i], mensaje + sizeof(int32_t) + sizeof(bufferSize), sizeof(int32_t));
 		free(mensaje);
 		}
 
@@ -637,23 +696,23 @@ char* appendG(lGlobOri* origenes){
 		socketClientWorker = socketCrearCliente(((globOri*)origenes->oris[resultado])->ip,((globOri*)origenes->oris[resultado])->puerto,ID_WORKER);
 		imprimirMensaje(archivoLog, "[CONEXION] Conexion exitosa con Worker");
 		//serializo
-		int mensajeSize = sizeof(int)*2 + sizeof(((globOri*)origenes->oris[resultado])->ruta);
+		int mensajeSize = sizeof(int32_t)*2 + sizeof(((globOri*)origenes->oris[resultado])->ruta);
 		char* mensajeData = malloc(mensajeSize);
 		char* puntero = mensajeData;
-		memcpy(puntero, sizeof(((globOri*)origenes->oris[resultado])->ruta), sizeof(int));
-		puntero += sizeof(int);
+		memcpy(puntero, sizeof(((globOri*)origenes->oris[resultado])->ruta), sizeof(int32_t));
+		puntero += sizeof(int32_t);
 		memcpy(puntero, ((globOri*)origenes->oris[resultado])->ruta, sizeof(((globOri*)origenes->oris[resultado])->ruta));
 		puntero += sizeof(((globOri*)origenes->oris[resultado])->ruta);
-		memcpy(puntero, VLineasiguiente[resultado], sizeof(int));
+		memcpy(puntero, VLineasiguiente[resultado], sizeof(int32_t));
 		//envio y recibo
 		mensajeEnviar(socketClientWorker,5,mensajeData,mensajeSize);
 		free(mensajeData);
 		free(puntero);
 		Mensaje* mensaje =mensajeRecibir(socketClientWorker);
 		//deserializo
-		memcpy(&bufferSize, mensaje, sizeof(int));
-		memcpy(&buffer, mensaje + sizeof(int), sizeof(bufferSize));
-		memcpy(&VLineasiguiente[resultado], mensaje + sizeof(int) + sizeof(bufferSize), sizeof(int));
+		memcpy(&bufferSize, mensaje, sizeof(int32_t));
+		memcpy(&buffer, mensaje + sizeof(int32_t), sizeof(bufferSize));
+		memcpy(&VLineasiguiente[resultado], mensaje + sizeof(int32_t) + sizeof(bufferSize), sizeof(int32_t));
 		free(mensaje);
 		}
 		if(buffer!=NULL){
