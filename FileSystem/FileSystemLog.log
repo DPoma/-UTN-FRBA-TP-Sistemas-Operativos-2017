@@ -1,6 +1,6 @@
-[INFO] 00:42:00:779 FileSystem/(12922:12922): [EJECUCION] Proceso File System inicializado
-[INFO] 00:42:00:836 FileSystem/(12922:12922): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 00:42:00:837 FileSystem/(12922:12922): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 00:42:12:952 FileSystem/(12922:12925): [DIRECTORIO] El directorio /home fue creado
-[INFO] 00:42:24:307 FileSystem/(12922:12925): [ERROR] No se puede eliminar el bloque ya que es el ultimo
-[INFO] 00:42:29:733 FileSystem/(12922:12922): [EJECUCION] Finalizando proceso File System...
+[INFO] 01:13:59:904 FileSystem/(13625:13625): [EJECUCION] Proceso File System inicializado
+[INFO] 01:13:59:960 FileSystem/(13625:13625): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 01:13:59:962 FileSystem/(13625:13625): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 01:14:05:662 FileSystem/(13625:13628): [DIRECTORIO] El directorio /home fue creado
+[INFO] 01:14:26:977 FileSystem/(13625:13628): [BLOQUE] La copia N°0 del bloque N°0 del archivo /home/test ha sido eliminada
+[INFO] 01:15:04:600 FileSystem/(13625:13625): [EJECUCION] Finalizando proceso File System...

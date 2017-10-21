@@ -659,6 +659,7 @@ void comandoRemoverBloque(Comando* comando) {
 		return;
 	}
 
+	archivoPersistirRemoverBloque(archivo, numeroBloque, numeroCopia);
 	copiaBloqueEliminar(copia);
 	listaEliminarDestruyendoElemento(bloque->listaCopias, numeroCopia, memoriaLiberar);
 	imprimirMensajeTres(archivoLog, "[BLOQUE] La copia N°%i del bloque N°%i del archivo %s ha sido eliminada",(int*)numeroCopia, (int*)numeroBloque, comando->argumentos[2]);
@@ -1495,6 +1496,27 @@ void archivoPersistirMover(Archivo* archivoAMover, int nuevoPadre) {
 	fileCerrar(archivoAuxiliar);
 	memoriaLiberar(buffer);
 	auxiliarCopiarEn(rutaArchivoMovido);
+}
+
+void archivoPersistirRemoverBloque(Archivo* archivo, int numeroBloque, int numeroCopia) {
+	String rutaArchivo = string_from_format("%s/%i/%s", RUTA_ARCHIVOS, archivo->identificadorPadre, archivo->nombre);
+	String linea = string_from_format("BLOQUE%i_COPIA%i=", numeroBloque, numeroCopia);
+	File file = fileAbrir(rutaArchivo, LECTURA);
+	File archivoAuxiliar =  fileAbrir(RUTA_AUXILIAR, ESCRITURA);
+
+	String buffer = stringCrear(MAX_STRING);
+	while (fgets(buffer, MAX_STRING, file) != NULL) {
+		if (stringDistintos(buffer, "\n")) {
+			if(!stringContiene(buffer, linea))
+				fprintf(archivoAuxiliar, "%s", buffer);
+			stringLimpiar(buffer, MAX_STRING);
+		}
+	}
+	fileCerrar(file);
+	fileCerrar(archivoAuxiliar);
+	memoriaLiberar(buffer);
+	memoriaLiberar(linea);
+	auxiliarCopiarEn(rutaArchivo);
 }
 
 //--------------------------------------- Funciones de Nodo -------------------------------------

@@ -263,6 +263,7 @@ void archivoIniciarEstructura();
 void archivoPersistirRenombrar(Archivo* archivoARenombrar, String viejoNombre);
 void archivoPersistirMover(Archivo* archivoAMover, int viejoPadre);
 int archivoObtenerPosicion(Archivo* archivo);
+void archivoPersistirRemoverBloque(Archivo* archivo, int numeroBloque, int numeroCopia);
 
 //--------------------------------------- Funciones de Bloque -------------------------------------
 
