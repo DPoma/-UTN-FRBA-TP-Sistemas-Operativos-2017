@@ -59,7 +59,7 @@ int estadoDataNode;
 FILE* dataBin;
 Bloque bloques;
 
-Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig);
+Configuracion* configuracionLeerArchivo(ArchivoConfig archivoConfig);
 void archivoConfigObtenerCampos();
 void dataNodeIniciar();
 bool dataNodeActivado();

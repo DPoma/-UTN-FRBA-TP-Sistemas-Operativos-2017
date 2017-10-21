@@ -36,7 +36,7 @@ int main(void) {
 
 }
 
-Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig) {
+Configuracion* configuracionLeerArchivo(ArchivoConfig archivoConfig) {
 	Configuracion* configuracion = memoriaAlocar(sizeof(Configuracion));
 	stringCopiar(configuracion->ipFileSystem, archivoConfigStringDe(archivoConfig, "IP_FILESYSTEM"));
 	stringCopiar(configuracion->puertoFileSystem, archivoConfigStringDe(archivoConfig, "PUERTO_FILESYSTEM"));
@@ -196,7 +196,7 @@ void dataNodeIniciar() {
 	imprimirMensajeProceso("# PROCESO DATA NODE");
 	archivoLog = archivoLogCrear(RUTA_LOG, "DataNode");
 	archivoConfigObtenerCampos();
-	configuracion = configuracionCrear(RUTA_CONFIG, (Puntero)configuracionLeerArchivoConfig, campos);
+	configuracion = configuracionCrear(RUTA_CONFIG, (Puntero)configuracionLeerArchivo, campos);
 	configuracionImprimir(configuracion);
 	//senialAsignarFuncion(SIGINT, funcionSenial);
 	dataNodeActivar();
