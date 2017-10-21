@@ -2,7 +2,7 @@
  * FileSystem.h
 
  *
- *  Created on: 14/9/2017
+ *  Created on: 14/8/2017
  *      Author: Dario Poma
  */
 
@@ -10,59 +10,61 @@
 
 #define RUTA_CONFIG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/FileSystem/FileSystemConfig.conf"
 #define RUTA_LOG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/FileSystem/FileSystemLog.log"
-#define RUTA_DIRECTORIOS "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Metadata/Directorios.dat"
-#define RUTA_NODOS "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Metadata/nodos.bin"
-#define RUTA_ARCHIVOS "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Metadata/archivos/"
-#define RUTA_BITMAPS "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Metadata/bitmaps/"
-#define RUTA_AUXILIAR "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Metadata/Auxiliar.dat"
+#define RUTA_DIRECTORIOS "/home/utnso/Escritorio/Metadata/Directorios.dat"
+#define RUTA_NODOS "/home/utnso/Escritorio/Metadata/nodos.bin"
+#define RUTA_ARCHIVOS "/home/utnso/Escritorio/Metadata/archivos"
+#define RUTA_BITMAPS "/home/utnso/Escritorio/Metadata/bitmaps"
+#define RUTA_AUXILIAR "/home/utnso/Escritorio/Metadata/Auxiliar.dat"
 
-//Identificador de cada comando
-#define FORMAT 1
-#define RM 2
-#define RMB 3
-#define RMD 4
-#define RENAME 5
-#define MV 6
-#define CAT 7
-#define MKDIR 8
-#define CPFROM 9
-#define CPTO 10
-#define CPBLOCK 11
-#define MD5 12
-#define LS 13
-#define INFO 14
-#define EXIT 15
+#define ID_FORMAT 1
+#define ID_RM 2
+#define ID_RENAME 5
+#define ID_MV 6
+#define ID_CAT 7
+#define ID_MKDIR 8
+#define ID_CPFROM 9
+#define ID_CPTO 10
+#define ID_CPBLOCK 11
+#define ID_MD5 12
+#define ID_LS 13
+#define ID_INFO 14
+#define ID_EXIT 15
 
-#define C_FORMAT "format"
-#define C_RM "rm"
-#define C_RMB "rm -b"
-#define C_RMD "rm -d"
-#define C_RENAME "rename"
-#define C_MV "mv"
-#define C_CAT "cat"
-#define C_MKDIR "mkdir"
-#define C_CPFROM "cpfrom"
-#define C_CPTO "cpto"
-#define C_CPBLOCK "cpblock"
-#define C_MD5 "md5"
-#define C_LS "ls"
-#define C_INFO "info"
-#define C_EXIT "exit"
+#define FORMAT "format"
+#define RM "rm"
+#define RMB "rm -b"
+#define RMD "rm -d"
+#define RENAME "rename"
+#define MV "mv"
+#define CAT "cat"
+#define MKDIR "mkdir"
+#define CPFROM "cpfrom"
+#define CPTO "cpto"
+#define CPBLOCK "cpblock"
+#define MD5 "md5"
+#define LS "ls"
+#define INFO "info"
+#define EXIT "exit"
+
+#define ESCRITURA "w"
+#define LECTURA "r"
+
 
 #define FLAG_B "-b"
 #define FLAG_D "-d"
 #define FLAG_CLEAN "--clean"
-#define MAX_STRING 255
+#define MAX_STRING 300
 #define MAX_DIR 100
 #define BLOQUE 32 //1048576
+
 #define ESCRIBIR 102
 
-typedef struct {
+typedef struct __attribute__((packed)){
 	int identificador;
 	String argumentos[5];
 } Comando;
 
-typedef struct {
+typedef struct __attribute__((packed)){
 	ListaSockets listaSelect;
 	ListaSockets listaMaster;
 	ListaSockets listaWorkers;
@@ -74,19 +76,19 @@ typedef struct {
 } Servidor;
 
 
-typedef struct {
-	char puertoYAMA[50];
-	char puertoDataNode[50];
+typedef struct __attribute__((packed)){
+	char puertoYAMA[20];
+	char puertoDataNode[20];
 } Configuracion;
 
 
-typedef struct {
+typedef struct __attribute__((packed)){
 	int identificador;
 	int identificadorPadre;
-	char nombre[MAX_STRING];
+	char nombre[255];
 } Directorio;
 
-typedef struct {
+typedef struct __attribute__((packed)){
 	int identificadorPadre;
 	int identificadorDirectorio;
 	int indiceNombresDirectorios;
@@ -94,31 +96,30 @@ typedef struct {
 	String* nombresDirectorios;
 } ControlDirectorio;
 
-typedef struct {
+typedef struct __attribute__((packed)){
 	int identificadorPadre;
-	char tipo[8];
-	char nombre[MAX_STRING];
+	char tipo[10];
+	char nombre[255];
 	Lista listaBloques;
 } Archivo;
 
-typedef struct {
+typedef struct __attribute__((packed)){
 	int bytes;
 	Lista listaCopias;
 } Bloque;
 
-typedef struct {
-	char nombreNodo[6];
+typedef struct __attribute__((packed)){
+	char nombreNodo[10];
 	int  bloqueNodo;
 } CopiaBloque;
 
-typedef struct {
+typedef struct __attribute__((packed)){
 	char nombre[10];
 	Bitmap* bitmap;
 	int bloquesLibres;
 	int bloquesTotales;
 	Socket socket;
 } Nodo;
-
 
 
 String campos[2];
@@ -138,6 +139,10 @@ void fileSystemIniciar();
 void fileSystemCrearConsola();
 void fileSystemAtenderProcesos();
 void fileSystemFinalizar();
+bool fileSystemActivado();
+bool fileSystemDesactivado();
+void fileSystemActivar();
+void fileSystemDesactivar();
 
 //--------------------------------------- Funciones de Socket-------------------------------------
 
@@ -179,31 +184,16 @@ Comando consolaObtenerComando();
 //--------------------------------------- Funciones de Configuracion -------------------------------------
 
 void configuracionImprimir(Configuracion* configuracion);
-Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig);
+Configuracion* configuracionLeerArchivo(ArchivoConfig archivoConfig);
 
-
-void archivoConfigObtenerCampos();
-void funcionSenial(int senial);
-bool fileSystemActivado();
-bool fileSystemDesactivado();
-void fileSystemActivar();
-void fileSystemDesactivar();
-
-Directorio* directorioCrear(int indice, String nombre, int padre);
-void directorioGuardarEnArchivo(Directorio unDirectorio);
-Directorio directorioLeerDeArchivo(File unArchivo);
-void directorioPosicionarEnRegistro(File archivo, int posicion);
-long directorioCantidadRegistros(File archivo);
-long directorioObtenerPosicionActualArchivo(File archivo);
-void nodoPersistir();
-
+//--------------------------------------- Funciones de Comando -------------------------------------
 
 void comandoFormatearFileSystem();
-void comandoRemoverArchivo(Comando* comando);
+void comandoRemover(Comando* comando);
 void comandoRemoverBloque(Comando* comando);
 void comandoRemoverDirectorio(Comando* comando);
-void comandoRenombrarArchivoDirectorio(Comando* comando);
-void comandoMoverArchivoDirectorio(Comando* comando);
+void comandoRenombrar(Comando* comando);
+void comandoMover(Comando* comando);
 void comandoMostrarArchivo(Comando* comando);
 void comandoCrearDirectorio(Comando* comando);
 void comandoCopiarArchivoDeFS(Comando* comando);
@@ -215,26 +205,88 @@ void comandoInformacionArchivo(Comando* comando);
 void comandoFinalizar();
 void comandoError();
 
-void archivoPersistir(Archivo* metadata);
+//--------------------------------------- Funciones de Directorio -------------------------------------
+
+Directorio* directorioCrear(int indice, String nombre, int padre);
 void directorioControlSetearNombre(ControlDirectorio* control);
 void directorioBuscarIdentificador(ControlDirectorio* control);
 void directorioActualizar(ControlDirectorio* control, String rutaDirectorio);
 ControlDirectorio* directorioControlCrear(String rutaDirectorio);
-Nodo* nodoCrear(String nombre, int bloquesTotales, int bloquesLibres, Socket unSocket);
-void directorioLimpiarLista();
-void nodoLimpiarLista();
+bool directorioExisteIdentificador(int identificador);
+void directorioPersistirRemover(int identificador);
+void directorioPersistirRenombrar(int identificador, String nuevoNombre);
+void directorioPersistirMover(int idPadre, int nuevoPadre);
+void directorioIniciarEstructura();
+String* rutaSeparar(String ruta);
+Directorio* directorioBuscar(String path);
+void directorioMostrarArchivos(Directorio* directorioPadre);
+void directorioPersistirRenombrar(int idPadre, char*nuevoNombre);
+void directorioPersistirMover(int idPadre, int nuevoPadre);
+bool directorioIndiceRespetaLimite(int indice);
+bool directorioIndiceEstaOcupado(int indice);
+bool directorioExisteIdentificador(int identificador);
+bool directorioIndicesIguales(int unIndice, int otroIndice);
+bool directorioSonIguales(Directorio* directorio, String nombreDirectorio, int idPadre);
+Directorio* directorioCrear(int indice, String nombre, int padre);
+int directorioBuscarIdentificadorLibre();
+String directorioConfigurarEntradaArchivo(String indice, String nombre, String padre);
+void directorioPersistirRemover(int identificador);
+void directorioPersistir(Directorio* directorio);
+void directorioBuscarIdentificador(ControlDirectorio* control);
+int directorioIndicesACrear(String* nombresDirectorios, int indiceDirectorios);
+bool directorioHaySuficientesIndices(ControlDirectorio* control);
+void directorioControlSetearNombre(ControlDirectorio* control);
+ControlDirectorio* directorioControlCrear(String rutaDirectorio);
+void directorioControlarEntradas(ControlDirectorio* control, String path);
+void directorioCrearDirectoriosRestantes(ControlDirectorio* control, String rutaDirectorio);
+void directorioCrearEntradas(ControlDirectorio* control, String rutaDirectorio);
+void directorioActualizar(ControlDirectorio* control, String rutaDirectorio);
+bool directorioExisteElNuevoNombre(int idPadre, String nuevoNombre);
+int directorioObtenerIdentificador(String path);
+Directorio* directorioBuscarEnLista(int identificadorDirectorio);
+bool directorioTieneAlgunArchivo(int identificador);
+bool directorioTieneAlgunDirectorio(int identificador);
+bool directorioTieneAlgo(int identificador);
+void directorioEliminar(int identificador);
 
-void archivoLogIniciar();
+//--------------------------------------- Funciones de Archivo -------------------------------------
+
+Archivo* archivoBuscar(String path);
+void archivoPersistirMover(Archivo* archivoAMover, int nuevoPadre);
+void archivoDestruir(Archivo* archivo);
+void archivoPersistir(Archivo* metadata);
+Archivo* archivoCrear(String nombreArchivo, int idPadre, String tipo);
+void archivoDestruir(Archivo* archivo);
+bool archivoExiste(int idPadre, String nombre);
+void archivoIniciarEstructura();
+void archivoPersistirRenombrar(Archivo* archivoARenombrar, String viejoNombre);
+void archivoPersistirMover(Archivo* archivoAMover, int viejoPadre);
+
+//--------------------------------------- Funciones de Bloque -------------------------------------
+
+Bloque* bloqueCrear(int bytes);
+void bloqueDestruir(Bloque* bloque);
+
+//--------------------------------------- Funciones de Copia Bloque -------------------------------------
+
+CopiaBloque* copiaBloqueCrear(int numeroBloqueDelNodo, String nombreNodo);
+
+//--------------------------------------- Funciones de Nodo -------------------------------------
+
+Nodo* nodoCrear(String nombre, int bloquesTotales, int bloquesLibres, Socket unSocket);
+void nodoPersistir();
+void nodoLimpiarLista();
 void nodoDestruir(Nodo* nodo);
 void nodoRecuperarEstadoAnterior();
-void configuracionIniciar();
-void archivoDestruir(Archivo* archivo);
-void directorioIniciarEstructura();
 void nodoIniciarEstructura();
-String* directorioSeparar(String ruta);
-String directorioObtenerUltimoNombre(String ruta);
-bool directorioExisteIdentificador(int identificador);
-void directorioPersistirBorrado(int identificador);
+void nodoPersistirBitmaps(Nodo* nodo);
+
+//--------------------------------------- Funciones Varias -------------------------------------
+
+void auxiliarCopiarEn(String rutaArchivo);
+void logIniciar();
+void configuracionIniciar();
+String rutaObtenerUltimoNombre(String ruta);
+void archivoConfigObtenerCampos();
+void funcionSenial(int senial);
 void testCabecita();
-void directorioPersistirRenombrar(int identificador, String nuevoNombre);
-void directorioPersistirMovido(int idPadre, int nuevoPadre);

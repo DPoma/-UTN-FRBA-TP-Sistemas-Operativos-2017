@@ -246,13 +246,117 @@ locOri getOrigenesLocales(char* origen){
 }
 
 char* appendL(locOri origen){
-	char** VRegistros;
+	char* VRegistros[origen->cant];
+	int VLineasiguiente[origen->cant];
+	FILE* arch;
+	int cantEOF=0;
+	int allend=0;
+	int resultado;
 	int i;
-	for(i=0;(i+1)==origen->cant;i++){
-
-	}
+	int again=0;
+	char c;
+	int cc = 0;
+	char* buffer=NULL;
 	char* rutaArchAppend;
+	//cargo  primer registro de cada archivo
+	for(i=0;i==origen->cant;i++){
+		VRegistros[i]=NULL;
+		VLineasiguiente[i]=1;
+		arch = fopen(origen->ruta[i],"r");
+		/*fseek(arch,MB*origen,SEEK_SET);
+		int i;
+		char c;
+		int cc = 0;*/
+		c = fgetc(arch);
+		if(c=="\n"){
+			VLineasiguiente[resultado] = VLineasiguiente[resultado]+1;
+			i--;
+		}
+		while(c!="\n"){
+			c = fgetc(arch);
+			buffer = realloc(buffer,sizeof(char)*(cc+1));
+			buffer[cc]=c;
+			cc++;
+		}
+		if(buffer!=NULL){
+			VRegistros[i]= realloc(VRegistros[i],sizeof(char)*(cc+1));
+			VRegistros[i]= buffer;
+			cc=0;
+			free(buffer);
+		}
+		c=NULL;
+		close(arch);
+	}
+	i=0;
+	//control de EOF de todos los archivos
+	for(i=0;i==origen->cant;i++){
+		if(VRegistros[i]== NULL){
+			cantEOF++;
+		}
+	}
+	if(cantEOF==origen->cant){
+		allend=1;
+	}
+	cantEOF=0;
+	//comienzo de apareo
+	while(allend==0){
+		//funcion de posicion donde esta el registro de mayor orden
+		resultado = registroMayorOrden(VRegistros,origen->cant);
+		//registro mayor a archivo apareo definitivo
+		arch = fopen(rutaArchAppend,"w");
+		fwrite(VRegistros[resultado], sizeof(char), sizeof(VRegistros[resultado]), arch);
+		fwrite("\n", sizeof(char), 1, arch);
+		close(arch);
+		free(VRegistros[resultado]);
+		VRegistros[resultado]=NULL;
+		//remplazo registro
+		VLineasiguiente[resultado] = VLineasiguiente[resultado]+1;
+		arch = fopen(origen->ruta[resultado],"r");
+		while(again==0){
+			again=1;
+			for(i=0;i==VLineasiguiente[resultado];i++){
+				while(c!="\n"){
+					c = fgetc(arch);
+				}
+				c=NULL;
+			}
+			c = fgetc(arch);
+			if(c=="\n"){
+				VLineasiguiente[resultado] = VLineasiguiente[resultado]+1;
+				again=1;
+			}
+			while(c!="\n"){
+				c = fgetc(arch);
+				buffer = realloc(buffer,sizeof(char)*(cc+1));
+				buffer[cc]=c;
+				cc++;
+			}
+			if(buffer!=NULL){
+				VRegistros[resultado]= realloc(VRegistros[resultado],sizeof(char)*(cc+1));
+				VRegistros[resultado]= buffer;
+				cc=0;
+				free(buffer);
+			}
+			c=NULL;
+		}
+		close(arch);
+		//control de EOF de todos los archivos
+		for(i=0;i==origen->cant;i++){
+			if(VRegistros[i]== NULL){
+				cantEOF++;
+			}
+		}
+		if(cantEOF==origen->cant){
+			allend=1;
+		}
+		cantEOF=0;
+	}
 	return rutaArchAppend;
+}
+
+int registroMayorOrden(char** VRegistros,int cant){
+	int posicion;
+	return posicion;
 }
 
 //3ra etapa
@@ -332,7 +436,7 @@ void socketAceptarConexion() {
 	}
 }
 
-Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig) {
+Configuracion* configuracionLeerArchivo(ArchivoConfig archivoConfig) {
 	Configuracion* configuracion = memoriaAlocar(sizeof(Configuracion));
 	stringCopiar(configuracion->ipFileSytem, archivoConfigStringDe(archivoConfig, "IP_FILESYSTEM"));
 	stringCopiar(configuracion->puertoFileSystem, archivoConfigStringDe(archivoConfig, "PUERTO_FILESYSTEM"));
@@ -379,7 +483,7 @@ void workerIniciar() {
 	archivoLog = archivoLogCrear(RUTA_LOG, "Worker");
 	archivoConfigObtenerCampos();
 	senialAsignarFuncion(SIGINT, funcionSenial);
-	configuracion = configuracionCrear(RUTA_CONFIG, (void*)configuracionLeerArchivoConfig, campos);
+	configuracion = configuracionCrear(RUTA_CONFIG, (void*)configuracionLeerArchivo, campos);
 	char* texto;
 	strcat(texto,"stat -c%s ");
 	strcat(texto, configuracion->rutaDataBin);
