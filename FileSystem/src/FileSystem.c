@@ -631,7 +631,37 @@ void comandoRemover(Comando* comando) {
 }
 
 void comandoRemoverBloque(Comando* comando) {
+	Archivo* archivo = archivoBuscar(comando->argumentos[2]);
 
+	if(archivo == NULL) {
+		imprimirMensaje(archivoLog, "[ERROR] El archivo no existe");
+		return;
+	}
+
+	int numeroBloque = atoi(comando->argumentos[3]);
+	int numeroCopia = atoi(comando->argumentos[4]);
+	Bloque* bloque = listaObtenerElemento(archivo->listaBloques, numeroBloque);
+
+	if(bloque == NULL) {
+		imprimirMensaje(archivoLog, "[ERROR] El numero de bloque no existe");
+		return;
+	}
+
+	if(listaCantidadElementos(bloque->listaCopias) == 1) {
+		imprimirMensaje(archivoLog, "[ERROR] No se puede eliminar el bloque ya que es el ultimo");
+		return;
+	}
+
+	CopiaBloque* copia = listaObtenerElemento(bloque->listaCopias, numeroCopia);
+
+	if(copia == NULL) {
+		imprimirMensaje(archivoLog, "[ERROR] El numero de copia no existe");
+		return;
+	}
+
+	copiaBloqueEliminar(copia);
+	listaEliminarDestruyendoElemento(bloque->listaCopias, numeroCopia, memoriaLiberar);
+	imprimirMensajeTres(archivoLog, "[BLOQUE] La copia N°%i del bloque N°%i del archivo %s ha sido eliminada",(int*)numeroCopia, (int*)numeroBloque, comando->argumentos[2]);
 }
 
 
@@ -674,14 +704,7 @@ void comandoRemoverArchivo(Comando* comando) {
 		int indiceCopia;
 		for(indiceCopia=0; indiceCopia<listaCantidadElementos(bloque->listaCopias); indiceCopia++) {
 			CopiaBloque* copia = listaObtenerElemento(bloque->listaCopias, indiceCopia);
-
-			bool buscarNodo(Nodo* nodo) {
-				return stringIguales(nodo->nombre,copia->nombreNodo);
-			}
-
-			Nodo* nodo = listaBuscar(listaNodos, (Puntero)buscarNodo);
-			bitmapLiberarBit(nodo->bitmap, copia->bloqueNodo);
-			nodoPersistirBitmap(nodo);
+			copiaBloqueEliminar(copia);
 		}
 	}
 
@@ -1341,7 +1364,8 @@ Archivo* archivoBuscar(String path) {
 				stringIguales(control->nombreDirectorio, archivo->nombre);
 	}
 
-	//Por si un directorio de la ruta no existe, me aseguro que el ultimo nombre sea el que salio del while ya que deberian ser iguales siempre
+	//Por si un directorio de la ruta no existe, me aseguro que el
+	//ultimo nombre sea el que salio del while ya que deberian ser iguales siempre
 	if(stringIguales(control->nombreDirectorio, ultimo))
 		archivo = listaBuscar(listaArchivos, (Puntero)buscar);
 
@@ -1584,6 +1608,16 @@ CopiaBloque* copiaBloqueCrear(int numeroBloqueDelNodo, String nombreNodo) {
 	return copiaBloque;
 }
 
+void copiaBloqueEliminar(CopiaBloque* copia) {
+
+	bool buscarNodo(Nodo* nodo) {
+		return stringIguales(nodo->nombre,copia->nombreNodo);
+	}
+
+	Nodo* nodo = listaBuscar(listaNodos, (Puntero)buscarNodo);
+	bitmapLiberarBit(nodo->bitmap, copia->bloqueNodo);
+	nodoPersistirBitmap(nodo);
+}
 
 //--------------------------------------- Funciones varias------------------------------------
 
@@ -1627,37 +1661,46 @@ void testCabecita() {
 	Nodo* nodo1 = nodoCrear("NODIN1", 100, 95, 99);
 	bitmapOcuparBit(nodo1->bitmap, 99);
 	bitmapOcuparBit(nodo1->bitmap, 2);
+
 	Nodo* nodo2 = nodoCrear("NODIN2", 100, 95, 99);
 	bitmapOcuparBit(nodo2->bitmap, 97);
 	nodoPersistirBitmap(nodo1);
 	nodoPersistirBitmap(nodo2);
+
 	listaAgregarElemento(listaNodos, nodo1);
 	listaAgregarElemento(listaNodos, nodo2);
+
 	Archivo* archivo = memoriaAlocar(sizeof(Archivo));
 	archivo->identificadorPadre = 1;
 	archivo->listaBloques = listaCrear();
 	stringCopiar(archivo->nombre, "test");
 	stringCopiar(archivo->tipo, "TEXTO");
-	Bloque* bloque = memoriaAlocar(sizeof(Bloque));
-	bloque->bytes = 1014;
-	bloque->listaCopias = listaCrear();
-	CopiaBloque* copia = memoriaAlocar(sizeof(CopiaBloque));
-	copia->bloqueNodo = 99;
-	stringCopiar(copia->nombreNodo, "NODIN1");
-	CopiaBloque* copia2 = memoriaAlocar(sizeof(CopiaBloque));;
-	copia2->bloqueNodo = 97;
-	stringCopiar(copia2->nombreNodo, "NODIN2");
-	Bloque* bloque2 = memoriaAlocar(sizeof(Bloque));
-	bloque2->bytes = 101;
-	bloque2->listaCopias = listaCrear();
-	CopiaBloque* copia3 = memoriaAlocar(sizeof(CopiaBloque));;
-	copia3->bloqueNodo = 2;
-	stringCopiar(copia3->nombreNodo, "NODIN1");
-	listaAgregarElemento(bloque->listaCopias, copia);
-	listaAgregarElemento(bloque->listaCopias, copia2);
-	listaAgregarElemento(bloque2->listaCopias, copia3);
-	listaAgregarElemento(archivo->listaBloques, bloque);
-	listaAgregarElemento(archivo->listaBloques, bloque2);
+
+	Bloque* bloque0 = memoriaAlocar(sizeof(Bloque));
+	bloque0->bytes = 1014;
+	bloque0->listaCopias = listaCrear();
+
+	Bloque* bloque1 = memoriaAlocar(sizeof(Bloque));
+	bloque1->bytes = 101;
+	bloque1->listaCopias = listaCrear();
+
+	CopiaBloque* copia0Bloque0 = memoriaAlocar(sizeof(CopiaBloque));
+	copia0Bloque0->bloqueNodo = 99;
+	stringCopiar(copia0Bloque0->nombreNodo, "NODIN1");
+
+	CopiaBloque* copia1Bloque0 = memoriaAlocar(sizeof(CopiaBloque));;
+	copia1Bloque0->bloqueNodo = 97;
+	stringCopiar(copia1Bloque0->nombreNodo, "NODIN2");
+
+	CopiaBloque* copia0Bloque1 = memoriaAlocar(sizeof(CopiaBloque));;
+	copia0Bloque1->bloqueNodo = 2;
+
+	stringCopiar(copia0Bloque1->nombreNodo, "NODIN1");
+	listaAgregarElemento(bloque0->listaCopias, copia0Bloque0);
+	listaAgregarElemento(bloque0->listaCopias, copia1Bloque0);
+	listaAgregarElemento(bloque1->listaCopias, copia0Bloque1);
+	listaAgregarElemento(archivo->listaBloques, bloque0);
+	listaAgregarElemento(archivo->listaBloques, bloque1);
 	listaAgregarElemento(listaArchivos, archivo);
 	archivoPersistir(archivo);
 }

@@ -272,6 +272,7 @@ void bloqueDestruir(Bloque* bloque);
 //--------------------------------------- Funciones de Copia Bloque -------------------------------------
 
 CopiaBloque* copiaBloqueCrear(int numeroBloqueDelNodo, String nombreNodo);
+void copiaBloqueEliminar(CopiaBloque* copia);
 
 //--------------------------------------- Funciones de Nodo -------------------------------------
 
