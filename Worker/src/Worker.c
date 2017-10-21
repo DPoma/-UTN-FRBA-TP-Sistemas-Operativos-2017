@@ -197,7 +197,7 @@ int transformar(char* codigo,int origen,char* destino){
 
 //2da etapa
 int reduccionLocal(char* codigo,char* origen,char* destino){
-	locOri listaOri;
+	locOri* listaOri;
 	listaOri = getOrigenesLocales(origen);
 	char* apendado;
 	apendado = appendL(listaOri);
@@ -228,8 +228,8 @@ int reduccionLocal(char* codigo,char* origen,char* destino){
 	return 0;
 }
 
-locOri getOrigenesLocales(char* origen){
-	locOri origenes;
+locOri* getOrigenesLocales(char* origen){
+	locOri* origenes;
 	memcpy(&origenes->cant, origen, sizeof(int32_t));
 	char* oris [origenes->cant];
 	int i;
@@ -245,10 +245,11 @@ locOri getOrigenesLocales(char* origen){
 	return origenes;
 }
 
-char* appendL(locOri origen){
+char* appendL(locOri* origen){
 	char* VRegistros[origen->cant];
 	int VLineasiguiente[origen->cant];
 	FILE* arch;
+	int var;
 	int cantEOF=0;
 	int allend=0;
 	int resultado;
@@ -269,7 +270,7 @@ char* appendL(locOri origen){
 		int cc = 0;*/
 		c = fgetc(arch);
 		if(c=="\n"){
-			VLineasiguiente[resultado] = VLineasiguiente[resultado]+1;
+			VLineasiguiente[resultado] = VLineasiguiente[resultado] +1;
 			i--;
 		}
 		while(c!="\n"){
@@ -355,13 +356,30 @@ char* appendL(locOri origen){
 }
 
 int registroMayorOrden(char** VRegistros,int cant){
-	int posicion;
+	int posicion=-1;
+	int flag=0;
+	int i;
+	int resultado;
+	for(i=0;i==cant;i++){
+		if(VRegistros[i]!=NULL){
+			if(flag==0){
+				posicion=i;
+				flag=1;
+			}
+			else{
+				resultado = strcmp(VRegistros[posicion],VRegistros[i]);
+				if(resultado<1){
+					posicion=i;
+				}
+			}
+		}
+	}
 	return posicion;
 }
 
 //3ra etapa
 int reduccionGlobal(char* codigo,char* origen,char* destino){
-	lGlobOri listaOri;
+	lGlobOri* listaOri;
 	listaOri = getOrigenesGlobales(origen);
 	char* apendado;
 	apendado = appendG(listaOri);
@@ -383,25 +401,25 @@ int reduccionGlobal(char* codigo,char* origen,char* destino){
 	free (command);
 	free (apendado);
 	int i=0;
-	while(listaOri->oris[i]->ruta!=NULL){
-		free(listaOri->oris[i]->ruta);
+	while(((globOri*)listaOri->oris[i])->ruta!=NULL){
+		free(((globOri*)listaOri->oris[i])->ruta);
 		i++;
 	}
 	i=0;
-	while(listaOri->oris[i]->ip!=NULL){
-		free(listaOri->oris[i]->ip);
+	while(((globOri*)listaOri->oris[i])->ip!=NULL){
+		free(((globOri*)listaOri->oris[i])->ip);
 		i++;
 	}
 	//for(i=0;;i++)
 	//free (listaOri->oris);
-	for(i=0;(i-1)==origenes->cant;i++){
+	//for(i=0;(i-1)==origenes->cant;i++){
 	return 0;
 }
 
-lGlobOri getOrigenesGlobales(char* origen){
-	lGlobOri origenes;
+lGlobOri* getOrigenesGlobales(char* origen){
+	lGlobOri* origenes;
 	memcpy(&origenes->cant, origen, sizeof(int32_t));
-	globOri oris [origenes->cant];
+	globOri** oris [origenes->cant];
 	int i;
 	int size = sizeof(int32_t);
 	int sizeOri=0;
@@ -409,20 +427,20 @@ lGlobOri getOrigenesGlobales(char* origen){
 	for(i=0;(i-1)==origenes->cant;i++){
 		memcpy(&sizeOri, origen + size , sizeof(int32_t));
 		size= size + sizeof(int32_t);
-		memcpy(&oris[i]->ruta,origen + size, sizeOri);
+		memcpy(((globOri*) oris[i])->ruta,origen + size, sizeOri);
 		size= size + sizeOri;
 		memcpy(&sizeIP, origen + size , sizeof(int32_t));
 		size= size + sizeof(int32_t);
-		memcpy(&oris[i]->ip,origen + size, sizeOri);
+		memcpy(((globOri*) oris[i])->ip,origen + size, sizeOri);
 		size= size + sizeIP;
-		memcpy(&oris[i]->puerto, origen + size , sizeof(int32_t));
+		memcpy(((globOri*) oris[i])->puerto, origen + size , sizeof(int32_t));
 		size= size + sizeof(int32_t);
 	}
 	origenes->oris = oris;
 	return origenes;
 }
 
-char* appendG(lGlobOri origenes){
+char* appendG(lGlobOri* origenes){
 	char* rutaArchAppend;
 	return rutaArchAppend;
 }
@@ -436,7 +454,7 @@ void socketAceptarConexion() {
 	}
 }
 
-Configuracion* configuracionLeerArchivo(ArchivoConfig archivoConfig) {
+Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig) {
 	Configuracion* configuracion = memoriaAlocar(sizeof(Configuracion));
 	stringCopiar(configuracion->ipFileSytem, archivoConfigStringDe(archivoConfig, "IP_FILESYSTEM"));
 	stringCopiar(configuracion->puertoFileSystem, archivoConfigStringDe(archivoConfig, "PUERTO_FILESYSTEM"));
@@ -483,7 +501,7 @@ void workerIniciar() {
 	archivoLog = archivoLogCrear(RUTA_LOG, "Worker");
 	archivoConfigObtenerCampos();
 	senialAsignarFuncion(SIGINT, funcionSenial);
-	configuracion = configuracionCrear(RUTA_CONFIG, (void*)configuracionLeerArchivo, campos);
+	configuracion = configuracionCrear(RUTA_CONFIG, (void*)configuracionLeerArchivoConfig, campos);
 	char* texto;
 	strcat(texto,"stat -c%s ");
 	strcat(texto, configuracion->rutaDataBin);

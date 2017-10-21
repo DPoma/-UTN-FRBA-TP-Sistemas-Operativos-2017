@@ -325,7 +325,7 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 				return false;
 			}
 			moverAUsados(abortarEntrada);
-			mensajeEnviar(entradaA->masterid,Aborto,nullptr,0);//podría ser cierre, depende como lo implemente
+			mensajeEnviar(entradaA->masterid,Aborto,nullptr,0);
 		}
 		if(entradaA->etapa==Transformacion&&actualizando!=Abortado){
 			if(mismoNodo(entradaA->nodo,entradaA->nodoAlt)){
@@ -368,15 +368,20 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 	if(entradaA->etapa==Transformacion){
 		trabajoTerminado(mismoNodoJob);
 		if(trabajoTerminadoB){
-			moverAUsados(mismoNodoJob);
 			Entrada reducLocal;
 			darDatosEntrada(&reducLocal);
 			darPathTemporal(&reducLocal.pathTemporal,'l');
 			reducLocal.etapa=ReducLocal;
-			char dato[DIRSIZE+TEMPSIZE];
+			Lista nodos=list_filter(tablaEstados,mismoNodoJob);
+			int tamanio=TEMPSIZE*(nodos->elements_count+1)+DIRSIZE;
+			void* dato=malloc(tamanio);
 			memcpy(dato,&reducLocal.nodo,DIRSIZE);
 			memcpy(dato+DIRSIZE,reducLocal.pathTemporal,TEMPSIZE);
-			mensajeEnviar(reducLocal.masterid,ReducLocal,&dato,sizeof dato);
+			int i,j;
+			for(i=TEMPSIZE+DIRSIZE,j=0;i<tamanio;i+=TEMPSIZE,j++)
+				memcpy(dato+i,((Entrada*)list_get(nodos,j))->pathTemporal,TEMPSIZE);
+			mensajeEnviar(reducLocal.masterid,ReducLocal,dato,tamanio);
+			moverAUsados(mismoNodoJob);
 			list_add(tablaEstados,&reducLocal);//mutex
 		}
 	}else if(entradaA->etapa==ReducLocal){
@@ -395,21 +400,26 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 			}
 			list_iterate(workers,menorCarga);
 			Lista nodosReducidos=list_filter(tablaEstados,mismoJob);
-			int tamanoDato=DIRSIZE*(nodosReducidos->elements_count+1)+TEMPSIZE;
-			void* dato=malloc(tamanoDato);
+			int tamanio=(DIRSIZE+TEMPSIZE)*(nodosReducidos->elements_count+1);
+			void* dato=malloc(tamanio);
 			memcpy(dato,reducGlobal.pathTemporal,TEMPSIZE);
 			memcpy(dato+TEMPSIZE,&nodoMenorCarga,DIRSIZE);
-			int i;
-			for(i=0;i<nodosReducidos->elements_count;i++){
-				memcpy(dato+TEMPSIZE+DIRSIZE*(i+1),list_get(nodosReducidos,i),DIRSIZE);
+			int i,j;
+			for(i=TEMPSIZE+DIRSIZE,j=0;i<tamanio;i+=DIRSIZE+TEMPSIZE,j++){
+				memcpy(dato+i,&((Entrada*)list_get(nodosReducidos,j))->nodo,DIRSIZE);
+				memcpy(dato+i+DIRSIZE,((Entrada*)list_get(nodosReducidos,j))->pathTemporal,TEMPSIZE);
 			}
-			mensajeEnviar(reducGlobal.masterid,ReducGlobal,dato,tamanoDato);
+			mensajeEnviar(reducGlobal.masterid,ReducGlobal,dato,tamanio);
 			moverAUsados(mismoJob);
 			list_add(tablaEstados,&reducGlobal);//mutex
 		}
 	}else{
-		list_add(tablaUsados,list_remove_by_condition(tablaEstados,mismoJob));
-		mensajeEnviar(entradaA->masterid,Cierre,nullptr,0);
+		Entrada* reducGlobal=list_find(tablaEstados,mismoJob);
+		char dato[DIRSIZE+TEMPSIZE];
+		memcpy(dato,&reducGlobal->nodo,DIRSIZE);
+		memcpy(dato+DIRSIZE,reducGlobal->pathTemporal,TEMPSIZE);
+		mensajeEnviar(entradaA->masterid,Cierre,dato,sizeof dato);
+		list_add(tablaUsados,list_remove_by_condition(tablaEstados,mismoJob));//como funciona esto? funciona? por ahi le tengo que meter un casteo
 	}
 }
 
