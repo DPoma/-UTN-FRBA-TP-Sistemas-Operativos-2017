@@ -300,6 +300,7 @@ char* appendL(locOri* origen){
 	}
 	cantEOF=0;
 	//comienzo de apareo
+	i=0;
 	while(allend==0){
 		//funcion de posicion donde esta el registro de mayor orden
 		resultado = registroMayorOrden(VRegistros,origen->cant);
@@ -341,6 +342,7 @@ char* appendL(locOri* origen){
 			c=NULL;
 		}
 		close(arch);
+		i=0;
 		//control de EOF de todos los archivos
 		for(i=0;i==origen->cant;i++){
 			if(VRegistros[i]== NULL){
@@ -463,6 +465,7 @@ char* appendG(lGlobOri* origenes){
 		local=0;
 		VRegistros[i]=NULL;
 		VLineasiguiente[i]=1;
+			//etapa local
 		if(((globOri*)origenes->oris[i])->ip=="0"){ //VER SI SE CAMBIA
 			local=1;
 			arch = fopen(((globOri*)origenes->oris[i])->ruta,"r");
@@ -480,6 +483,7 @@ char* appendG(lGlobOri* origenes){
 			close(arch);
 			c=NULL;
 		}
+			//etapa remota
 		if (local==0){
 		imprimirMensajeDos(archivoLog, "[CONEXION] Realizando conexion con Worker (IP: %s | Puerto %s)", ((globOri*)origenes->oris[i])->ip, ((globOri*)origenes->oris[i])->puerto);
 		socketClientWorker = socketCrearCliente(((globOri*)origenes->oris[i])->ip,((globOri*)origenes->oris[i])->puerto,ID_WORKER);
@@ -502,6 +506,7 @@ char* appendG(lGlobOri* origenes){
 		memcpy(&bufferSize, mensaje, sizeof(int));
 		memcpy(&buffer, mensaje + sizeof(int), sizeof(bufferSize));
 		memcpy(&VLineasiguiente[i], mensaje + sizeof(int) + sizeof(bufferSize), sizeof(int));
+		free(mensaje);
 		}
 
 		//etapa local
@@ -541,8 +546,10 @@ char* appendG(lGlobOri* origenes){
 		allend=1;
 	}
 	cantEOF=0;
+	i=0;
 	//comienzo de apareo
 	while(allend==0){
+		local=0;
 		//funcion de posicion donde esta el registro de mayor orden
 		resultado = registroMayorOrden(VRegistros,origenes->cant);
 		//registro mayor a archivo apareo definitivo
@@ -554,35 +561,65 @@ char* appendG(lGlobOri* origenes){
 		VRegistros[resultado]=NULL;
 		//remplazo registro
 		VLineasiguiente[resultado] = VLineasiguiente[resultado]+1;
-		arch = fopen(((globOri*)origenes->oris[i])->ruta[resultado],"r");
-		while(again==0){
-			again=1;
-			for(i=0;i==VLineasiguiente[resultado];i++){
+			//etapa local
+		if(((globOri*)origenes->oris[resultado])->ip=="0"){ //VER SI SE CAMBIA
+			local=1;
+			arch = fopen(((globOri*)origenes->oris[resultado])->ruta,"r");
+			while(again==0){
+				again=1;
+				for(i=0;i==VLineasiguiente[resultado];i++){
+					while(c!="\n"){
+						c = fgetc(arch);
+					}
+					c=NULL;
+				}
+				c = fgetc(arch);
+				if(c=="\n"){
+					VLineasiguiente[resultado] = VLineasiguiente[resultado]+1;
+					again=1;
+				}
 				while(c!="\n"){
 					c = fgetc(arch);
+					buffer = realloc(buffer,sizeof(char)*(cc+1));
+					buffer[cc]=c;
+					cc++;
 				}
 				c=NULL;
 			}
-			c = fgetc(arch);
-			if(c=="\n"){
-				VLineasiguiente[resultado] = VLineasiguiente[resultado]+1;
-				again=1;
-			}
-			while(c!="\n"){
-				c = fgetc(arch);
-				buffer = realloc(buffer,sizeof(char)*(cc+1));
-				buffer[cc]=c;
-				cc++;
-			}
-			if(buffer!=NULL){
-				VRegistros[resultado]= realloc(VRegistros[resultado],sizeof(char)*(cc+1));
-				VRegistros[resultado]= buffer;
-				cc=0;
-				free(buffer);
-			}
-			c=NULL;
+			close(arch);
 		}
-		close(arch);
+			//etapa remota
+		if (local==0){
+		imprimirMensajeDos(archivoLog, "[CONEXION] Realizando conexion con Worker (IP: %s | Puerto %s)", ((globOri*)origenes->oris[resultado])->ip, ((globOri*)origenes->oris[resultado])->puerto);
+		socketClientWorker = socketCrearCliente(((globOri*)origenes->oris[resultado])->ip,((globOri*)origenes->oris[resultado])->puerto,ID_WORKER);
+		imprimirMensaje(archivoLog, "[CONEXION] Conexion exitosa con Worker");
+		//serializo
+		int mensajeSize = sizeof(int)*2 + sizeof(((globOri*)origenes->oris[resultado])->ruta);
+		char* mensajeData = malloc(mensajeSize);
+		char* puntero = mensajeData;
+		memcpy(puntero, sizeof(((globOri*)origenes->oris[resultado])->ruta), sizeof(int));
+		puntero += sizeof(int);
+		memcpy(puntero, ((globOri*)origenes->oris[resultado])->ruta, sizeof(((globOri*)origenes->oris[resultado])->ruta));
+		puntero += sizeof(((globOri*)origenes->oris[resultado])->ruta);
+		memcpy(puntero, VLineasiguiente[resultado], sizeof(int));
+		//envio y recibo
+		mensajeEnviar(socketClientWorker,5,mensajeData,mensajeSize);
+		free(mensajeData);
+		free(puntero);
+		Mensaje* mensaje =mensajeRecibir(socketClientWorker);
+		//deserializo
+		memcpy(&bufferSize, mensaje, sizeof(int));
+		memcpy(&buffer, mensaje + sizeof(int), sizeof(bufferSize));
+		memcpy(&VLineasiguiente[resultado], mensaje + sizeof(int) + sizeof(bufferSize), sizeof(int));
+		free(mensaje);
+		}
+		if(buffer!=NULL){
+			VRegistros[resultado]= realloc(VRegistros[resultado],sizeof(char)*(cc+1));
+			VRegistros[resultado]= buffer;
+			cc=0;
+			free(buffer);
+		}
+		i=0;
 		//control de EOF de todos los archivos
 		for(i=0;i==origenes->cant;i++){
 			if(VRegistros[i]== NULL){
@@ -594,7 +631,6 @@ char* appendG(lGlobOri* origenes){
 		}
 		cantEOF=0;
 	}
-
 
 	return rutaArchAppend;
 }
