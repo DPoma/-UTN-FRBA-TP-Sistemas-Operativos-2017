@@ -213,13 +213,13 @@ int transformar(char* codigo,int origen,char* destino){
 	}*/
 	fclose(arch);
 	//doy privilegios a script
-	char*commando=NULL;
+	char commando [500]=NULL;
 	strcat(commando,"chmod 0755");
 	strcat(commando,codigo);
 	system(commando);
 	free (commando);
 	//paso buffer a script y resultado script a sort
-	char*command=NULL;
+	char command [500]=NULL;
 	strcat(command,"cat");
 	strcat(command,buffer);
 	strcat(command,"|");
@@ -245,13 +245,13 @@ int reduccionLocal(char* codigo,char* origen,char* destino){
 	char* apendado;
 	apendado = appendL(listaOri);
 	//doy privilegios a script
-	char*commando=NULL;
+	char commando [500]=NULL;
 	strcat(commando,"chmod 0755");
 	strcat(commando,codigo);
 	system(commando);
 	free (commando);
 	//paso buffer a script y resultado script a sort
-	char*command=NULL;
+	char command [500]=NULL;
 	strcat(command,"cat");
 	strcat(command,apendado);
 	strcat(command,"|");
@@ -289,6 +289,7 @@ locOri* getOrigenesLocales(char* origen){
 }
 
 char* appendL(locOri* origen){
+	char* rutaArchAppend = string_from_format("/home/utnso/Escritorio/appendtemp%s", pid);
 	char* VRegistros[origen->cant];
 	int VLineasiguiente[origen->cant];
 	FILE* arch;
@@ -301,7 +302,6 @@ char* appendL(locOri* origen){
 	char c;
 	int cc = 0;
 	char* buffer=NULL;
-	char* rutaArchAppend;
 	//cargo  primer registro de cada archivo
 	for(i=0;i==origen->cant;i++){
 		VRegistros[i]=NULL;
@@ -429,13 +429,13 @@ int reduccionGlobal(char* codigo,char* origen,char* destino){
 	char* apendado;
 	apendado = appendG(listaOri);
 	//doy privilegios a script
-	char*commando=NULL;
+	char commando [500]=NULL;
 	strcat(commando,"chmod 0755");
 	strcat(commando,codigo);
 	system(commando);
 	free (commando);
 	//paso buffer a script y resultado script a sort
-	char*command=NULL;
+	char command [500]=NULL;
 	strcat(command,"cat");
 	strcat(command,apendado);
 	strcat(command,"|");
@@ -486,6 +486,7 @@ lGlobOri* getOrigenesGlobales(char* origen){
 }
 
 char* appendG(lGlobOri* origenes){
+	char* rutaArchAppend = string_from_format("/home/utnso/Escritorio/appendtemp%s", pid);
 	char* VRegistros[origenes->cant];
 	int VLineasiguiente[origenes->cant];
 	FILE* arch;
@@ -499,7 +500,6 @@ char* appendG(lGlobOri* origenes){
 	int cc = 0;
 	int bufferSize;
 	char* buffer=NULL;
-	char* rutaArchAppend;
 	Socket socketClientWorker;
 	int local;
 	//cargo  primer registro de cada archivo
