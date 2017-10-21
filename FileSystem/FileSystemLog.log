@@ -1,9 +1,7 @@
-[INFO] 20:47:26:442 FileSystem/(9630:9630): [EJECUCION] Proceso File System inicializado
-[INFO] 20:47:26:497 FileSystem/(9630:9630): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 20:47:26:498 FileSystem/(9630:9630): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 20:47:29:527 FileSystem/(9630:9633): [DIRECTORIO] El directorio /home fue creado
-[INFO] 20:47:37:127 FileSystem/(9630:9633): [DIRECTORIO] El directorio /user fue creado
-[INFO] 20:47:43:157 FileSystem/(9630:9633): [DIRECTORIO] El archivo test fue movido a /user
-[INFO] 20:48:02:276 FileSystem/(9630:9633): [ERROR] El archivo o directorio no existe
-[INFO] 20:48:13:752 FileSystem/(9630:9633): [ARCHIVO] El archivo test fue renombrado por GG
-[INFO] 20:48:20:954 FileSystem/(9630:9630): [EJECUCION] Finalizando proceso File System...
+[INFO] 22:58:01:610 FileSystem/(11518:11518): [EJECUCION] Proceso File System inicializado
+[INFO] 22:58:01:666 FileSystem/(11518:11518): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 22:58:01:667 FileSystem/(11518:11518): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 22:58:14:741 FileSystem/(11518:11521): [DIRECTORIO] El directorio /home fue creado
+[INFO] 22:58:27:433 FileSystem/(11518:11521): [ERROR] El archivo no existe
+[INFO] 22:58:30:714 FileSystem/(11518:11521): [ARCHIVO] El archivo /home/test fue eliminado
+[INFO] 22:59:02:88 FileSystem/(11518:11518): [EJECUCION] Finalizando proceso File System...
