@@ -771,7 +771,7 @@ datosReg* PasaRegistro(char* ruta,int NroReg){
 	Reg->sizebuffer=cc;
 	Reg->buffer = malloc(Reg->sizebuffer);
 	Reg->buffer=buffer;
-	Reg->NumReg=NroReg;
+	Reg->NumReg=NroReg+1;
 	return Reg;
 }
 
