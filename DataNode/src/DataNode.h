@@ -8,6 +8,11 @@
 
 #include "../../Biblioteca/src/Biblioteca.c"
 #include <sys/mman.h>
+#include <fcntl.h>
+
+#include <sys/types.h>
+#include <sys/stat.h>
+
 
 #define RUTA_CONFIG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Worker/NodoConfig.conf"
 #define RUTA_LOG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/DataNode/DataNodeLog.log"

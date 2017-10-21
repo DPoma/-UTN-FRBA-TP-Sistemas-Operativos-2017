@@ -17,7 +17,15 @@ int main(void) {
 	mensajeEnviar(unSocket, 14, configuracion->nombreNodo, stringLongitud(configuracion->nombreNodo)+1);
 
 	dataBin=fopen(configuracion->rutaDataBin, "r+");
+/*
+	struct stat s;
+	size_t tamanio;
+	char* map;
+	int fdDatabin = open(configuracion->rutaDataBin, O_RDONLY|O_WRONLY);
+	tamanio=s.st_size;
 
+	map = mmap(0,tamanio,PROT_READ,MAP_SHARED,fdDatabin,0);
+*/
 	if(dataBin==NULL){
 		perror("No se pudo abrir databin");
 		imprimirMensaje(archivoLog,"[DATABIN] Error al abrir DataBin");
@@ -87,7 +95,6 @@ char* getBloque(int nroBloque){
 	rewind(dataBin);
 
 	return data;
-	free(data);
 
 }
 
