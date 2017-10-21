@@ -498,7 +498,7 @@ Socket servidorAceptarYAMA(Servidor* servidor, Socket unSocket) {
 	nuevoSocket = socketAceptar(unSocket, ID_YAMA);
 	if(nuevoSocket != ERROR) {
 		servidor->procesoYAMA = nuevoSocket;
-		imprimirMensaje(archivoLog, "[CONEXION] Proceso YAMA conectado exitosamente");
+		imprimirMensaje(archivoLog, "[CONEXION] El proceso YAMA se ha conectado");
 	}
 	return nuevoSocket;
 }
@@ -577,7 +577,7 @@ void servidorRegistrarDataNode(Servidor* servidor, Socket nuevoSocket) {
 		Nodo* nodo = nodoCrear(mensaje->datos, 190, 0, nuevoSocket);
 		mensajeDestruir(mensaje);
 		listaAgregarElemento(listaNodos, nodo);
-		imprimirMensaje(archivoLog, "[CONEXION] Proceso Data Node conectado exitosamente");
+		imprimirMensaje(archivoLog, "[CONEXION] Un proceso Data Node se ha conectado");
 	}
 }
 
@@ -624,8 +624,11 @@ void comandoFormatearFileSystem() {
 void comandoRemover(Comando* comando) {
 	if(stringIguales(comando->argumentos[1], FLAG_D))
 		comandoRemoverDirectorio(comando);
+	else if(stringIguales(comando->argumentos[1], FLAG_B))
+		comandoRemoverBloque(comando);
+	else
+		comandoRemoverArchivo(comando);
 }
-
 
 void comandoRemoverBloque(Comando* comando) {
 
@@ -655,6 +658,36 @@ void comandoRemoverDirectorio(Comando* comando) {
 		directorioPersistirRemover(identificador);
 		imprimirMensajeUno(archivoLog,"El directorio %s ha sido eliminado",ruta);
 	}
+}
+
+void comandoRemoverArchivo(Comando* comando) {
+	Archivo* archivo = archivoBuscar(comando->argumentos[1]);
+
+	if(archivo == NULL) {
+		imprimirMensaje(archivoLog,"[ERROR] El archivo no existe");
+		return;
+	}
+
+	int indice;
+	for(indice=0; indice<listaCantidadElementos(archivo->listaBloques); indice++) {
+		Bloque* bloque = listaObtenerElemento(archivo->listaBloques, indice);
+		int indiceCopia;
+		for(indiceCopia=0; indiceCopia<listaCantidadElementos(bloque->listaCopias); indiceCopia++) {
+			CopiaBloque* copia = listaObtenerElemento(bloque->listaCopias, indiceCopia);
+
+			bool buscarNodo(Nodo* nodo) {
+				return stringIguales(nodo->nombre,copia->nombreNodo);
+			}
+
+			Nodo* nodo = listaBuscar(listaNodos, (Puntero)buscarNodo);
+			bitmapLiberarBit(nodo->bitmap, copia->bloqueNodo);
+			nodoPersistirBitmap(nodo);
+		}
+	}
+
+	int posicion = archivoObtenerPosicion(archivo);
+	listaEliminarDestruyendoElemento(listaArchivos, posicion, (Puntero)archivoDestruir);
+	imprimirMensajeUno(archivoLog, "[ARCHIVO] El archivo %s fue eliminado", comando->argumentos[1]);
 }
 
 
@@ -734,7 +767,6 @@ void comandoMover(Comando* comando) {
 
 void comandoMostrarArchivo(Comando* comando) {
 
-
 }
 
 void comandoCrearDirectorio(Comando* comando) {
@@ -783,6 +815,7 @@ void comandoCopiarArchivoDeFS(Comando* comando) {
 void comandoCopiarArchivoDeYFS(Comando* comando) {
 
 }
+
 void comandoCopiarBloque(Comando* comando) {
 
 }
@@ -888,7 +921,6 @@ Directorio* directorioBuscar(String path) {
 }
 
 void directorioMostrarArchivos(Directorio* directorioPadre) {
-	imprimirMensajeUno(archivoLog, "[DIRECTORIO] Listando archivos y directorios en %s", directorioPadre->nombre);
 	int indice;
 
 	for(indice=0; indice<listaCantidadElementos(listaDirectorios); indice++) {
@@ -903,7 +935,6 @@ void directorioMostrarArchivos(Directorio* directorioPadre) {
 			imprimirMensajeUno(archivoLog, "[DIRECTORIO] %s (a)", archivo->nombre);
 	}
 }
-
 
 void directorioPersistir(Directorio* directorio){
 	File archivoDirectorio = fileAbrir(RUTA_DIRECTORIOS,"a+");
@@ -1223,6 +1254,7 @@ int directorioObtenerIdentificador(String path) {
 	return id;
 }
 
+
 Directorio* directorioBuscarEnLista(int identificadorDirectorio) {
 
 	bool buscarPorId(Directorio* directorio) {
@@ -1329,6 +1361,12 @@ bool archivoExiste(int idPadre, String nombre) {
 	}
 
 	return listaCumpleAlguno(listaArchivos, (Puntero)existeNuevoNombre);
+}
+
+int archivoObtenerPosicion(Archivo* archivo) {
+	int indice;
+	for(indice=0; archivo != listaObtenerElemento(listaArchivos, indice); indice++);
+	return indice;
 }
 
 
@@ -1504,7 +1542,7 @@ void nodoPersistir() {
 }
 
 
-void nodoPersistirBitmaps(Nodo* nodo) {
+void nodoPersistirBitmap(Nodo* nodo) {
 	String ruta = string_from_format("%s/%s", RUTA_BITMAPS, nodo->nombre);
 	File archivo = fileAbrir(ruta, ESCRITURA);
 	memoriaLiberar(ruta);
@@ -1520,7 +1558,7 @@ void nodoIniciarEstructura() {
 	nodoPersistir();
 	int indice;
 	for(indice = 0; indice < listaCantidadElementos(listaNodos); indice++)
-		nodoPersistirBitmaps(listaObtenerElemento(listaNodos, indice));
+		nodoPersistirBitmap(listaObtenerElemento(listaNodos, indice));
 }
 
 //--------------------------------------- Funciones de Bloque-------------------------------------
@@ -1570,7 +1608,6 @@ void logIniciar() {
 }
 
 
-
 String rutaObtenerUltimoNombre(String ruta) {
 	int indice;
 	int ultimaBarra;
@@ -1581,34 +1618,47 @@ String rutaObtenerUltimoNombre(String ruta) {
 	return directorio;
 }
 
+void testear(String mensaje, void* algo) {
+	printf(mensaje, algo);
+	puts("");
+}
 
 void testCabecita() {
-	Archivo* metadata = memoriaAlocar(sizeof(Archivo));
-	metadata->identificadorPadre = 1;
-	metadata->listaBloques = listaCrear();
-	stringCopiar(metadata->nombre, "test");
-	stringCopiar(metadata->tipo, "TEXTO");
+	Nodo* nodo1 = nodoCrear("NODIN1", 100, 95, 99);
+	bitmapOcuparBit(nodo1->bitmap, 99);
+	bitmapOcuparBit(nodo1->bitmap, 2);
+	Nodo* nodo2 = nodoCrear("NODIN2", 100, 95, 99);
+	bitmapOcuparBit(nodo2->bitmap, 97);
+	nodoPersistirBitmap(nodo1);
+	nodoPersistirBitmap(nodo2);
+	listaAgregarElemento(listaNodos, nodo1);
+	listaAgregarElemento(listaNodos, nodo2);
+	Archivo* archivo = memoriaAlocar(sizeof(Archivo));
+	archivo->identificadorPadre = 1;
+	archivo->listaBloques = listaCrear();
+	stringCopiar(archivo->nombre, "test");
+	stringCopiar(archivo->tipo, "TEXTO");
 	Bloque* bloque = memoriaAlocar(sizeof(Bloque));
 	bloque->bytes = 1014;
 	bloque->listaCopias = listaCrear();
 	CopiaBloque* copia = memoriaAlocar(sizeof(CopiaBloque));
-	copia->bloqueNodo = 14;
-	stringCopiar(copia->nombreNodo, "NODO1");
+	copia->bloqueNodo = 99;
+	stringCopiar(copia->nombreNodo, "NODIN1");
 	CopiaBloque* copia2 = memoriaAlocar(sizeof(CopiaBloque));;
-	copia2->bloqueNodo = 15;
-	stringCopiar(copia2->nombreNodo, "NODO2");
+	copia2->bloqueNodo = 97;
+	stringCopiar(copia2->nombreNodo, "NODIN2");
 	Bloque* bloque2 = memoriaAlocar(sizeof(Bloque));
 	bloque2->bytes = 101;
 	bloque2->listaCopias = listaCrear();
 	CopiaBloque* copia3 = memoriaAlocar(sizeof(CopiaBloque));;
-	copia3->bloqueNodo = 99;
-	stringCopiar(copia3->nombreNodo, "NODO1");
+	copia3->bloqueNodo = 2;
+	stringCopiar(copia3->nombreNodo, "NODIN1");
 	listaAgregarElemento(bloque->listaCopias, copia);
 	listaAgregarElemento(bloque->listaCopias, copia2);
 	listaAgregarElemento(bloque2->listaCopias, copia3);
-	listaAgregarElemento(metadata->listaBloques, bloque);
-	listaAgregarElemento(metadata->listaBloques, bloque2);
-	listaAgregarElemento(listaArchivos, metadata);
-	archivoPersistir(metadata);
+	listaAgregarElemento(archivo->listaBloques, bloque);
+	listaAgregarElemento(archivo->listaBloques, bloque2);
+	listaAgregarElemento(listaArchivos, archivo);
+	archivoPersistir(archivo);
 }
 

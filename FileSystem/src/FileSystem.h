@@ -192,6 +192,7 @@ void comandoFormatearFileSystem();
 void comandoRemover(Comando* comando);
 void comandoRemoverBloque(Comando* comando);
 void comandoRemoverDirectorio(Comando* comando);
+void comandoRemoverArchivo(Comando* comando);
 void comandoRenombrar(Comando* comando);
 void comandoMover(Comando* comando);
 void comandoMostrarArchivo(Comando* comando);
@@ -261,6 +262,7 @@ bool archivoExiste(int idPadre, String nombre);
 void archivoIniciarEstructura();
 void archivoPersistirRenombrar(Archivo* archivoARenombrar, String viejoNombre);
 void archivoPersistirMover(Archivo* archivoAMover, int viejoPadre);
+int archivoObtenerPosicion(Archivo* archivo);
 
 //--------------------------------------- Funciones de Bloque -------------------------------------
 
@@ -279,7 +281,7 @@ void nodoLimpiarLista();
 void nodoDestruir(Nodo* nodo);
 void nodoRecuperarEstadoAnterior();
 void nodoIniciarEstructura();
-void nodoPersistirBitmaps(Nodo* nodo);
+void nodoPersistirBitmap(Nodo* nodo);
 
 //--------------------------------------- Funciones Varias -------------------------------------
 
@@ -290,3 +292,4 @@ String rutaObtenerUltimoNombre(String ruta);
 void archivoConfigObtenerCampos();
 void funcionSenial(int senial);
 void testCabecita();
+void testear(String mensaje, void* algo);
