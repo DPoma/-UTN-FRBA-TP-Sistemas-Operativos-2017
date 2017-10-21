@@ -36,6 +36,7 @@ typedef struct {
 	char** ruta;
 } locOri;
 
+int pid;
 
 const int MB = 1048576;
 String campos[5];

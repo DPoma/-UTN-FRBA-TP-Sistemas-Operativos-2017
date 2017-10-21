@@ -10,7 +10,7 @@
 
 #include "Worker.h"
 
-/*int main(void) {
+int main(void) {
 	workerIniciar();
 	socketListenerWorker = socketCrearListener(configuracion->puertoWorker);
 	imprimirMensajeUno(archivoLog, "[CONEXION] Esperando conexiones de Master (Puerto: %s)", configuracion->puertoWorker);
@@ -18,10 +18,10 @@
 		socketAceptarConexion();
 	imprimirMensaje(archivoLog, "[EJECUCION] Proceso Worker finalizado");
 	return EXIT_SUCCESS;
-}*/
+}
 
 void workerCrearHijo(Socket unSocket) {
-	int pid = fork();
+	pid = fork();
 	if(pid == 0) {
 	imprimirMensaje(archivoLog, "[CONEXION] Esperando mensajes de Master");
 	Mensaje* mensaje = mensajeRecibir(unSocket);
@@ -33,8 +33,8 @@ void workerCrearHijo(Socket unSocket) {
 	int sizeDestino;
 	switch(mensaje->header.operacion){
 			case -1:
-				imprimirMensaje(archivoLog, "[EJECUCION] Murio el Master"); //revisar si deve morir por este caso
-				estadoWorker=0;
+				imprimirMensaje(archivoLog, ("[EJECUCION] Tuve problemas para comunicarme con el Master (Pid hijo: %d)", pid)); //el hijo fallo en comunicarse con el master
+				lSend(unSocket, NULL, -4, 0); //MANDA AL MASTER QUE FALLO
 				break;
 			case 1: //Etapa Transformacion
 			{
@@ -94,7 +94,7 @@ void workerCrearHijo(Socket unSocket) {
 				memcpy(&origen,mensaje->datos + sizeof(int32_t)*2+sizeCodigo, sizeOrigen);
 				memcpy(&sizeDestino, mensaje->datos + sizeof(int32_t)*2 + sizeCodigo + sizeOrigen, sizeof(int32_t));
 				memcpy(&destino,mensaje->datos + sizeof(int32_t)*3+sizeCodigo+ sizeOrigen, sizeDestino);
-				//reduccionGlobal();
+				reduccionGlobal(codigo,origen,destino);
 				/*char* buffer = leerArchivo(path,offset,size);
 				log_info(logFile, "[FILE SYSTEM] EL KERNEL PIDE LEER: %s | OFFSET: %i | SIZE: %i", path, offset, size);
 				if(buffer=="-1"){
@@ -270,7 +270,7 @@ char* appendL(locOri* origen){
 		int cc = 0;*/
 		c = fgetc(arch);
 		if(c=="\n"){
-			VLineasiguiente[resultado] = VLineasiguiente[resultado] +1;
+			VLineasiguiente[i] = VLineasiguiente[i] +1;
 			i--;
 		}
 		while(c!="\n"){
@@ -441,9 +441,164 @@ lGlobOri* getOrigenesGlobales(char* origen){
 }
 
 char* appendG(lGlobOri* origenes){
+	char* VRegistros[origenes->cant];
+	int VLineasiguiente[origenes->cant];
+	FILE* arch;
+	int var;
+	int cantEOF=0;
+	int allend=0;
+	int resultado;
+	int i;
+	int again=0;
+	char c;
+	int cc = 0;
+	int bufferSize;
+	char* buffer=NULL;
 	char* rutaArchAppend;
+	Socket socketClientWorker;
+	int local;
+	//cargo  primer registro de cada archivo
+	for(i=0;i==origenes->cant;i++){
+		//me fijo si el archivo el local o remoto
+		local=0;
+		VRegistros[i]=NULL;
+		VLineasiguiente[i]=1;
+		if(((globOri*)origenes->oris[i])->ip=="0"){ //VER SI SE CAMBIA
+			local=1;
+			arch = fopen(((globOri*)origenes->oris[i])->ruta,"r");
+			c = fgetc(arch);
+			if(c=="\n"){
+				VLineasiguiente[i] = VLineasiguiente[i] +1;
+				i--;
+			}
+			while(c!="\n"){
+				c = fgetc(arch);
+				buffer = realloc(buffer,sizeof(char)*(cc+1));
+				buffer[cc]=c;
+				cc++;
+			}
+			close(arch);
+			c=NULL;
+		}
+		if (local==0){
+		imprimirMensajeDos(archivoLog, "[CONEXION] Realizando conexion con Worker (IP: %s | Puerto %s)", ((globOri*)origenes->oris[i])->ip, ((globOri*)origenes->oris[i])->puerto);
+		socketClientWorker = socketCrearCliente(((globOri*)origenes->oris[i])->ip,((globOri*)origenes->oris[i])->puerto,ID_WORKER);
+		imprimirMensaje(archivoLog, "[CONEXION] Conexion exitosa con Worker");
+		//serializo
+		int mensajeSize = sizeof(int)*2 + sizeof(((globOri*)origenes->oris[i])->ruta);
+		char* mensajeData = malloc(mensajeSize);
+		char* puntero = mensajeData;
+		memcpy(puntero, sizeof(((globOri*)origenes->oris[i])->ruta), sizeof(int));
+		puntero += sizeof(int);
+		memcpy(puntero, ((globOri*)origenes->oris[i])->ruta, sizeof(((globOri*)origenes->oris[i])->ruta));
+		puntero += sizeof(((globOri*)origenes->oris[i])->ruta);
+		memcpy(puntero, VLineasiguiente[i], sizeof(int));
+		//envio y recibo
+		mensajeEnviar(socketClientWorker,5,mensajeData,mensajeSize);
+		free(mensajeData);
+		free(puntero);
+		Mensaje* mensaje =mensajeRecibir(socketClientWorker);
+		//deserializo
+		memcpy(&bufferSize, mensaje, sizeof(int));
+		memcpy(&buffer, mensaje + sizeof(int), sizeof(bufferSize));
+		memcpy(&VLineasiguiente[i], mensaje + sizeof(int) + sizeof(bufferSize), sizeof(int));
+		}
+
+		//etapa local
+		/*VRegistros[i]=NULL;
+		VLineasiguiente[i]=1;
+		fseek(arch,MB*origen,SEEK_SET);
+		int i;
+		char c;
+		int cc = 0;
+		c = fgetc(arch);
+		if(c=="\n"){
+			VLineasiguiente[resultado] = VLineasiguiente[resultado] +1;
+			i--;
+		}
+		while(c!="\n"){
+			c = fgetc(arch);
+			buffer = realloc(buffer,sizeof(char)*(cc+1));
+			buffer[cc]=c;
+			cc++;
+		}*/
+
+		if(buffer!=NULL){
+			VRegistros[i]= realloc(VRegistros[i],sizeof(char)*(cc+1));
+			VRegistros[i]= buffer;
+			cc=0;
+			free(buffer);
+		}
+	}
+	i=0;
+	//control de EOF de todos los archivos
+	for(i=0;i==origenes->cant;i++){
+		if(VRegistros[i]== NULL){
+			cantEOF++;
+		}
+	}
+	if(cantEOF==origenes->cant){
+		allend=1;
+	}
+	cantEOF=0;
+	//comienzo de apareo
+	while(allend==0){
+		//funcion de posicion donde esta el registro de mayor orden
+		resultado = registroMayorOrden(VRegistros,origenes->cant);
+		//registro mayor a archivo apareo definitivo
+		arch = fopen(rutaArchAppend,"w");
+		fwrite(VRegistros[resultado], sizeof(char), sizeof(VRegistros[resultado]), arch);
+		fwrite("\n", sizeof(char), 1, arch);
+		close(arch);
+		free(VRegistros[resultado]);
+		VRegistros[resultado]=NULL;
+		//remplazo registro
+		VLineasiguiente[resultado] = VLineasiguiente[resultado]+1;
+		arch = fopen(((globOri*)origenes->oris[i])->ruta[resultado],"r");
+		while(again==0){
+			again=1;
+			for(i=0;i==VLineasiguiente[resultado];i++){
+				while(c!="\n"){
+					c = fgetc(arch);
+				}
+				c=NULL;
+			}
+			c = fgetc(arch);
+			if(c=="\n"){
+				VLineasiguiente[resultado] = VLineasiguiente[resultado]+1;
+				again=1;
+			}
+			while(c!="\n"){
+				c = fgetc(arch);
+				buffer = realloc(buffer,sizeof(char)*(cc+1));
+				buffer[cc]=c;
+				cc++;
+			}
+			if(buffer!=NULL){
+				VRegistros[resultado]= realloc(VRegistros[resultado],sizeof(char)*(cc+1));
+				VRegistros[resultado]= buffer;
+				cc=0;
+				free(buffer);
+			}
+			c=NULL;
+		}
+		close(arch);
+		//control de EOF de todos los archivos
+		for(i=0;i==origenes->cant;i++){
+			if(VRegistros[i]== NULL){
+				cantEOF++;
+			}
+		}
+		if(cantEOF==origenes->cant){
+			allend=1;
+		}
+		cantEOF=0;
+	}
+
+
 	return rutaArchAppend;
 }
+
 
 void socketAceptarConexion() {
 	Socket nuevoSocket;
@@ -451,6 +606,13 @@ void socketAceptarConexion() {
 	if(nuevoSocket != ERROR) {
 		imprimirMensaje(archivoLog, "[CONEXION] Proceso Master conectado exitosamente");
 		workerCrearHijo(nuevoSocket);
+	}
+	else{
+		nuevoSocket = socketAceptar(socketListenerWorker, ID_WORKER);
+		if(nuevoSocket != ERROR) {
+			imprimirMensaje(archivoLog, "[CONEXION] Proceso Worker conectado exitosamente");
+			workerCrearHijo(nuevoSocket);
+		}
 	}
 }
 
