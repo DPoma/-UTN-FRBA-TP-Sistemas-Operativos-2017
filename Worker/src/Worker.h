@@ -28,7 +28,7 @@ typedef struct {
 
 typedef struct {
 	int cant;
-	globOri* oris;
+	void** oris;
 } lGlobOri;
 
 typedef struct {
@@ -50,8 +50,8 @@ void socketAceptarConexion();
 void workerIniciar();
 int transformar(char*,int,char*);
 int reduccionLocal(char*,char*,char*);
-locOri getOrigenesLocales(char*);
-char* appendL(locOri);
+locOri* getOrigenesLocales(char*);
+char* appendL(locOri*);
 int reduccionGlobal(char*,char*,char*);
-lGlobOri getOrigenesGlobales(char*);
-char* appendG(lGlobOri);
+lGlobOri* getOrigenesGlobales(char*);
+char* appendG(lGlobOri*);
