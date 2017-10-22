@@ -255,6 +255,8 @@ bool directorioTieneAlgunArchivo(int identificador);
 bool directorioTieneAlgunDirectorio(int identificador);
 bool directorioTieneAlgo(int identificador);
 void directorioEliminar(int identificador);
+void directorioCrearMetadata(Entero identificador);
+void directorioEliminarMetadata(Entero identificador);
 
 //--------------------------------------- Funciones de Archivo -------------------------------------
 

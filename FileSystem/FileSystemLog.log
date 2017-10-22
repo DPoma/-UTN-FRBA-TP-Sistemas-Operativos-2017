@@ -1,12 +1,10 @@
-[INFO] 23:51:16:763 FileSystem/(6117:6117): [EJECUCION] Proceso File System inicializado
-[INFO] 23:51:16:819 FileSystem/(6117:6117): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 23:51:16:820 FileSystem/(6117:6117): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 23:51:16:821 FileSystem/(6117:6117): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
-[INFO] 23:51:38:22 FileSystem/(6117:6122): [DIRECTORIO] El directorio /home fue creado
-[INFO] 23:51:44:627 FileSystem/(6117:6122): [ERROR] No se puede eliminar el bloque ya que es el ultimo
-[INFO] 23:51:50:106 FileSystem/(6117:6122): [BLOQUE] La copia N°1 del bloque N°0 del archivo /home/test ha sido eliminada
-[INFO] 23:52:27:932 FileSystem/(6117:6122): [DIRECTORIO] El directorio /user fue creado
-[INFO] 23:52:37:540 FileSystem/(6117:6122): [DIRECTORIO] El archivo test fue movido a /user
-[INFO] 23:52:58:18 FileSystem/(6117:6122): [ERROR] El archivo o directorio no existe
-[INFO] 23:53:06:452 FileSystem/(6117:6122): [ARCHIVO] El archivo test fue renombrado por HOLI
-[INFO] 23:53:37:265 FileSystem/(6117:6117): [EJECUCION] Finalizando proceso File System...
+[INFO] 00:35:47:344 FileSystem/(6921:6921): [EJECUCION] Proceso File System inicializado
+[INFO] 00:35:47:402 FileSystem/(6921:6921): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 00:35:47:403 FileSystem/(6921:6921): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 00:35:47:404 FileSystem/(6921:6921): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
+[INFO] 00:35:51:522 FileSystem/(6921:6926): [DIRECTORIO] El directorio /home fue creado
+[INFO] 00:36:00:566 FileSystem/(6921:6926): [DIRECTORIO] El directorio /home/user fue creado
+[INFO] 00:36:20:954 FileSystem/(6921:6926): [DIRECTORIO] El archivo test fue movido a /home/user
+[INFO] 00:36:45:708 FileSystem/(6921:6926): [ARCHIVO] El archivo test fue renombrado por TEST
+[INFO] 00:37:25:591 FileSystem/(6921:6926): [ARCHIVO] El archivo TEST fue renombrado por test
+[INFO] 00:37:36:152 FileSystem/(6921:6921): [EJECUCION] Finalizando proceso File System...

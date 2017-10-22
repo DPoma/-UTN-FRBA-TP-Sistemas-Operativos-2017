@@ -49,7 +49,7 @@ void iniciar() {
 	listaNodos = listaCrear();
 	bitmapDirectorios = bitmapCrear(13);
 	directoriosDisponibles = 100;
-	testCabecita();
+
 }
 
 void fileSystemIniciar(String flag) {
@@ -434,7 +434,7 @@ void consolaEjecutarComando(Comando* comando) {
 		case ID_RENAME: comandoRenombrar(comando); break;
 		case ID_MV: comandoMover(comando); break;
 		case ID_CAT: comandoMostrarArchivo(comando); break;
-		case ID_MKDIR: comandoCrearDirectorio(comando); break;
+		case ID_MKDIR: comandoCrearDirectorio(comando); testCabecita(); break;
 		case ID_CPFROM: comandoCopiarArchivoDeFS(comando); break;
 		case ID_CPTO: comandoCopiarArchivoDeYFS(comando); break;
 		case ID_CPBLOCK: comandoCopiarBloque(comando); break;
@@ -713,6 +713,7 @@ void comandoRemoverDirectorio(Comando* comando) {
 	if(directorioTieneAlgo(identificador))
 		imprimirMensajeUno(archivoLog,"El directorio %s no puede ser eliminado ya que posee archivos o directorios",ruta);
 	else {
+		directorioEliminarMetadata(identificador);
 		directorioEliminar(identificador);
 		directorioPersistirRemover(identificador);
 		imprimirMensajeUno(archivoLog,"El directorio %s ha sido eliminado",ruta);
@@ -773,9 +774,14 @@ void comandoRenombrar(Comando* comando) {
 
 		String viejoNombre= rutaObtenerUltimoNombre(comando->argumentos[1]);
 		archivoPersistirRenombrar(archivo, comando->argumentos[2]);
+		String antiguaRuta = string_from_format("%s/%i/%s", rutaDirectorioArchivos, archivo->identificadorPadre, archivo->nombre);
+		String nuevaRuta = string_from_format("%s/%i/%s", rutaDirectorioArchivos, archivo->identificadorPadre, comando->argumentos[2]);
+		rename(antiguaRuta, nuevaRuta);
 		stringCopiar(archivo->nombre, comando->argumentos[2]);
 		imprimirMensajeDos(archivoLog, "[ARCHIVO] El archivo %s fue renombrado por %s", viejoNombre, archivo->nombre);
 		memoriaLiberar(viejoNombre);
+		memoriaLiberar(antiguaRuta);
+		memoriaLiberar(nuevaRuta);
 	}
 	else
 		imprimirMensaje(archivoLog, "[ERROR] El archivo o directorio no existe");
@@ -1202,25 +1208,6 @@ void directorioControlSetearNombre(ControlDirectorio* control) {
 	control->nombreDirectorio = control->nombresDirectorios[control->indiceNombresDirectorios];
 }
 
-String* rutaSeparar(String ruta) {
-	int indice;
-	int contadorDirectorios = 0;
-	for(indice = 0; ruta[indice] != FIN; indice++)
-		if(caracterIguales(ruta[indice], BARRA))
-			contadorDirectorios++;
-	String* directorios = memoriaAlocar((contadorDirectorios+1)*sizeof(String));
-	int PosicionUltimaBarra = 0;
-	contadorDirectorios = 0;
-	for(indice = 0; caracterDistintos(ruta[indice], FIN); indice++)
-		if(caracterIguales(ruta[indice],BARRA) && indice != 0) {
-			directorios[contadorDirectorios] = stringTomarCantidad(ruta, PosicionUltimaBarra+1, indice-PosicionUltimaBarra-1);
-			PosicionUltimaBarra = indice;
-			contadorDirectorios++;
-		}
-	directorios[contadorDirectorios] = stringTomarCantidad(ruta, PosicionUltimaBarra+1, indice-PosicionUltimaBarra-1);
-	directorios[contadorDirectorios+1] = NULL;
-	return directorios;
-}
 
 ControlDirectorio* directorioControlCrear(String rutaDirectorio) {
 	ControlDirectorio* controlDirectorio = memoriaAlocar(sizeof(ControlDirectorio));
@@ -1240,6 +1227,18 @@ void directorioControlarEntradas(ControlDirectorio* control, String path) {
 	control->indiceNombresDirectorios++;
 }
 
+void directorioCrearMetadata(Entero identificador) {
+	String directorio = string_from_format("%s/%i", rutaDirectorioArchivos, identificador);
+	mkdir(directorio, 0777);
+	memoriaLiberar(directorio);
+}
+
+void directorioEliminarMetadata(Entero identificador) {
+	String directorio = string_from_format("%s/%i", rutaDirectorioArchivos, identificador);
+	fileLimpiar(directorio);
+	memoriaLiberar(directorio);
+}
+
 void directorioCrearDirectoriosRestantes(ControlDirectorio* control, String rutaDirectorio) {
 	while(stringValido(control->nombresDirectorios[control->indiceNombresDirectorios])) {
 		int indice = directorioBuscarIdentificadorLibre();
@@ -1249,6 +1248,7 @@ void directorioCrearDirectoriosRestantes(ControlDirectorio* control, String ruta
 		control->identificadorPadre = indice;
 		control->indiceNombresDirectorios++;
 		directoriosDisponibles--;
+		directorioCrearMetadata(directorio->identificador);
 		directorioPersistir(directorio);
 	}
 	imprimirMensajeUno(archivoLog, "[DIRECTORIO] El directorio %s fue creado", rutaDirectorio);
@@ -1454,9 +1454,6 @@ void archivoIniciarEstructura() {
 }
 
 void archivoPersistirCrear(Archivo* archivo) {
-	String rutaDirectorio = string_from_format("%s/%i", rutaDirectorioArchivos, archivo->identificadorPadre);
-	mkdir(rutaDirectorio, 0777);
-	memoriaLiberar(rutaDirectorio);
 	String ruta = string_from_format("%s/%i/%s", rutaDirectorioArchivos, archivo->identificadorPadre, archivo->nombre);
 	File file = fileAbrir(ruta, "a+");
 	memoriaLiberar(ruta);
@@ -1778,6 +1775,28 @@ String rutaObtenerUltimoNombre(String ruta) {
 	String directorio = stringTomarDesdePosicion(ruta+1, ultimaBarra);
 	return directorio;
 }
+
+
+String* rutaSeparar(String ruta) {
+	int indice;
+	int contadorDirectorios = 0;
+	for(indice = 0; ruta[indice] != FIN; indice++)
+		if(caracterIguales(ruta[indice], BARRA))
+			contadorDirectorios++;
+	String* directorios = memoriaAlocar((contadorDirectorios+1)*sizeof(String));
+	int PosicionUltimaBarra = 0;
+	contadorDirectorios = 0;
+	for(indice = 0; caracterDistintos(ruta[indice], FIN); indice++)
+		if(caracterIguales(ruta[indice],BARRA) && indice != 0) {
+			directorios[contadorDirectorios] = stringTomarCantidad(ruta, PosicionUltimaBarra+1, indice-PosicionUltimaBarra-1);
+			PosicionUltimaBarra = indice;
+			contadorDirectorios++;
+		}
+	directorios[contadorDirectorios] = stringTomarCantidad(ruta, PosicionUltimaBarra+1, indice-PosicionUltimaBarra-1);
+	directorios[contadorDirectorios+1] = NULL;
+	return directorios;
+}
+
 
 void testear(String mensaje, void* algo) {
 	printf(mensaje, algo);
