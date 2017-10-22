@@ -195,10 +195,10 @@ Configuracion* configuracionLeerArchivo(ArchivoConfig archivoConfig);
 //--------------------------------------- Funciones de Comando -------------------------------------
 
 void comandoFormatearFileSystem();
-void comandoRemover(Comando* comando);
-void comandoRemoverBloque(Comando* comando);
-void comandoRemoverDirectorio(Comando* comando);
-void comandoRemoverArchivo(Comando* comando);
+void comandoEliminar(Comando* comando);
+void comandoEliminarBloque(Comando* comando);
+void comandoEliminarDirectorio(Comando* comando);
+void comandoEliminarArchivo(Comando* comando);
 void comandoRenombrar(Comando* comando);
 void comandoMover(Comando* comando);
 void comandoMostrarArchivo(Comando* comando);
@@ -220,15 +220,13 @@ void directorioBuscarIdentificador(ControlDirectorio* control);
 void directorioActualizar(ControlDirectorio* control, String rutaDirectorio);
 ControlDirectorio* directorioControlCrear(String rutaDirectorio);
 bool directorioExisteIdentificador(int identificador);
-void directorioPersistirRemover(int identificador);
-void directorioPersistirRenombrar(int identificador, String nuevoNombre);
-void directorioPersistirMover(int idPadre, int nuevoPadre);
+void directorioPersistirEliminar(Directorio* directorio);
+void directorioPersistirRenombrar(Directorio* directorio, String nuevoNombre);
+void directorioPersistirMover(Directorio* directorio, Entero nuevoPadre);
 void directorioIniciarEstructura();
 String* rutaSeparar(String ruta);
 Directorio* directorioBuscar(String path);
 void directorioMostrarArchivos(Directorio* directorioPadre);
-void directorioPersistirRenombrar(int idPadre, char*nuevoNombre);
-void directorioPersistirMover(int idPadre, int nuevoPadre);
 bool directorioIndiceRespetaLimite(int indice);
 bool directorioIndiceEstaOcupado(int indice);
 bool directorioExisteIdentificador(int identificador);
@@ -237,7 +235,6 @@ bool directorioSonIguales(Directorio* directorio, String nombreDirectorio, int i
 Directorio* directorioCrear(int indice, String nombre, int padre);
 int directorioBuscarIdentificadorLibre();
 String directorioConfigurarEntradaArchivo(String indice, String nombre, String padre);
-void directorioPersistirRemover(int identificador);
 void directorioPersistir(Directorio* directorio);
 void directorioBuscarIdentificador(ControlDirectorio* control);
 int directorioIndicesACrear(String* nombresDirectorios, int indiceDirectorios);
@@ -271,9 +268,9 @@ void archivoIniciarEstructura();
 void archivoPersistirRenombrar(Archivo* archivoARenombrar, String viejoNombre);
 void archivoPersistirMover(Archivo* archivoAMover, int viejoPadre);
 int archivoObtenerPosicion(Archivo* archivo);
-void archivoPersistirRemoverBloque(Archivo* archivo, int numeroBloque, int numeroCopia);
+void archivoPersistirEliminarBloque(Archivo* archivo, int numeroBloque, int numeroCopia);
 void archivoPersistirControlCrear(Archivo* archivo);
-void archivoPersistirControlRemover(Archivo* archivo);
+void archivoPersistirControlEliminar(Archivo* archivo);
 void archivoPersistirControlRenombrar(Archivo* archivo, String nuevoNombre);
 void archivoPersistirControlMover(Archivo* archivo, Entero nuevoPadre);
 //--------------------------------------- Funciones de Bloque -------------------------------------
@@ -298,7 +295,7 @@ void nodoPersistirBitmap(Nodo* nodo);
 
 //--------------------------------------- Funciones Varias -------------------------------------
 
-void auxiliarCopiarEn(String rutaArchivo);
+void bufferCopiarEn(String rutaArchivo);
 void logIniciar();
 void configuracionIniciar();
 String rutaObtenerUltimoNombre(String ruta);
