@@ -126,6 +126,7 @@ Configuracion* configuracion;
 ArchivoLog archivoLog;
 int estadoFileSystem;
 int directoriosDisponibles;
+int estadoSeguro;
 Hilo hiloConsola;
 Lista listaDirectorios;
 Lista listaArchivos;
@@ -191,6 +192,8 @@ Comando consolaObtenerComando();
 
 void configuracionImprimir(Configuracion* configuracion);
 Configuracion* configuracionLeerArchivo(ArchivoConfig archivoConfig);
+void configuracionIniciarRutas();
+void configuracionDestruirRutas();
 
 //--------------------------------------- Funciones de Comando -------------------------------------
 
@@ -224,7 +227,6 @@ void directorioPersistirEliminar(Directorio* directorio);
 void directorioPersistirRenombrar(Directorio* directorio, String nuevoNombre);
 void directorioPersistirMover(Directorio* directorio, Entero nuevoPadre);
 void directorioIniciarEstructura();
-String* rutaSeparar(String ruta);
 Directorio* directorioBuscar(String path);
 void directorioMostrarArchivos(Directorio* directorioPadre);
 bool directorioIndiceRespetaLimite(int indice);
@@ -286,12 +288,13 @@ void copiaBloqueEliminar(CopiaBloque* copia);
 //--------------------------------------- Funciones de Nodo -------------------------------------
 
 Nodo* nodoCrear(String nombre, int bloquesTotales, int bloquesLibres, Socket unSocket);
-void nodoPersistir();
+void nodoPersistirConectados();
 void nodoLimpiarLista();
 void nodoDestruir(Nodo* nodo);
 void nodoRecuperarEstadoAnterior();
-void nodoIniciarEstructura();
 void nodoPersistirBitmap(Nodo* nodo);
+void nodoFormatear(Nodo* nodo);
+void nodoFormatearConectados();
 
 //--------------------------------------- Funciones Varias -------------------------------------
 
@@ -299,7 +302,14 @@ void bufferCopiarEn(String rutaArchivo);
 void logIniciar();
 void configuracionIniciar();
 String rutaObtenerUltimoNombre(String ruta);
+bool rutaBarrasEstanSeparadas(String ruta);
+String* rutaSeparar(String ruta);
+bool rutaTieneAlMenosUnaBarra(String ruta);
+bool rutaValida(String ruta);
 void archivoConfigObtenerCampos();
 void funcionSenial(int senial);
 void testCabecita();
-void testear(String mensaje, void* algo);
+void metadataCrear();
+void metadataEliminar();
+void metadataIniciar();
+void metadataRecuperar();

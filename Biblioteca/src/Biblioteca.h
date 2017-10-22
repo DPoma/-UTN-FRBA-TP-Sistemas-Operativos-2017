@@ -21,6 +21,7 @@
 #include <pthread.h>
 #include <semaphore.h>
 #include <signal.h>
+#include <math.h>
 #include "commons/config.h"
 #include "commons/log.h"
 #include "commons/string.h"
@@ -274,7 +275,7 @@ bool handShakeIdsIguales(int idEnviada, int idEsperada);
 void funcionSenial(int senial);
 void imprimirMensajeProceso(String mensaje);
 void fileLimpiar(String ruta);
-
+int bitmapCalculo(int cantidadBloques);
 void bitmapDestruir(Bitmap* bitmap);
 
 

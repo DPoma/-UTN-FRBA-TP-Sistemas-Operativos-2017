@@ -22,45 +22,17 @@ int main(int argc, String* argsv) {
 
 //EL INICIO ESTA AL REVES PARA DEBUGEAR (SACAR ! A STRING IGUALES)
 
-
-void metadataCrear() {
-	rutaDirectorioArchivos = string_from_format("%s/archivos", configuracion->rutaMetadata);
-	rutaDirectorioBitmaps = string_from_format("%s/bitmaps", configuracion->rutaMetadata);
-	rutaArchivos = string_from_format("%s/Archivos.txt", configuracion->rutaMetadata);
-	rutaDirectorios = string_from_format("%s/Directorios.txt", configuracion->rutaMetadata);
-	rutaNodos = string_from_format("%s/Nodos", configuracion->rutaMetadata);
-	rutaBuffer = string_from_format("%s/Buffer.txt", configuracion->rutaMetadata);
-	mkdir(configuracion->rutaMetadata, 0777);
-	mkdir(rutaDirectorioArchivos, 0777);
-	mkdir(rutaDirectorioBitmaps, 0777);
-}
-
-void metadataBorrar() {
-	String comando = string_from_format("rm -r -f %s", configuracion->rutaMetadata);
-	system(comando);
-	memoriaLiberar(comando);
-}
-
-void iniciar() {
-	metadataBorrar();
-	metadataCrear();
-	listaArchivos = listaCrear();
-	listaDirectorios = listaCrear();
-	listaNodos = listaCrear();
-	bitmapDirectorios = bitmapCrear(13);
-	directoriosDisponibles = 100;
-
-}
-
 void fileSystemIniciar(String flag) {
 	pantallaLimpiar();
 	logIniciar();
 	configuracionIniciar();
+	estadoSeguro = 0;
 	fileSystemActivar();
+	listaNodos = listaCrear();
 	if(!stringIguales(flag, FLAG_CLEAN))
-		iniciar();
+		metadataIniciar();
 	else
-		nodoRecuperarEstadoAnterior();
+		metadataRecuperar();
 }
 
 void fileSystemCrearConsola() {
@@ -76,22 +48,15 @@ void fileSystemAtenderProcesos() {
 }
 
 void fileSystemFinalizar() {
-	imprimirMensaje(archivoLog, "[EJECUCION] Finalizando proceso File System...");
+	imprimirMensaje(archivoLog, "[EJECUCION] File System finalizado correctamente");
 	archivoLogDestruir(archivoLog);
 	bitmapDestruir(bitmapDirectorios);
-	memoriaLiberar(configuracion);
-	memoriaLiberar(rutaNodos);
-	memoriaLiberar(rutaBuffer);
-	memoriaLiberar(rutaDirectorioArchivos);
-	memoriaLiberar(rutaDirectorioBitmaps);
-	memoriaLiberar(rutaDirectorios);
-	memoriaLiberar(rutaArchivos);
+	configuracionDestruirRutas();
 	listaDestruirConElementos(listaDirectorios, memoriaLiberar);
 	listaDestruirConElementos(listaArchivos, (Puntero)archivoDestruir);
 	listaDestruirConElementos(listaNodos, (Puntero)nodoDestruir);
 	sleep(2);
 }
-
 
 bool fileSystemActivado() {
 	return estadoFileSystem == ACTIVADO;
@@ -108,7 +73,6 @@ void fileSystemActivar() {
 void fileSystemDesactivar() {
 	estadoFileSystem = DESACTIVADO;
 }
-
 
 //--------------------------------------- Funciones de Configuracion -------------------------------------
 
@@ -127,17 +91,38 @@ void configuracionImprimir(Configuracion* configuracion) {
 	imprimirMensajeUno(archivoLog, "[INFORMACION] Ruta de metadata: %s", configuracion->rutaMetadata);
 }
 
-void configuracionSetearCampos() {
+void configuracionIniciarCampos() {
 	campos[0] = "PUERTO_YAMA";
 	campos[1] = "PUERTO_DATANODE";
 	campos[2] = "RUTA_METADATA";
 }
 
 void configuracionIniciar() {
-	configuracionSetearCampos();
+	configuracionIniciarCampos();
 	configuracion = configuracionCrear(RUTA_CONFIG, (Puntero)configuracionLeerArchivo, campos);
+	configuracionIniciarRutas();
 	configuracionImprimir(configuracion);
 }
+
+void configuracionIniciarRutas() {
+	rutaDirectorioArchivos = string_from_format("%s/archivos", configuracion->rutaMetadata);
+	rutaDirectorioBitmaps = string_from_format("%s/bitmaps", configuracion->rutaMetadata);
+	rutaArchivos = string_from_format("%s/Archivos.txt", configuracion->rutaMetadata);
+	rutaDirectorios = string_from_format("%s/Directorios.txt", configuracion->rutaMetadata);
+	rutaNodos = string_from_format("%s/Nodos.bin", configuracion->rutaMetadata);
+	rutaBuffer = string_from_format("%s/Buffer.txt", configuracion->rutaMetadata);
+}
+
+void configuracionDestruirRutas() {
+	memoriaLiberar(configuracion);
+	memoriaLiberar(rutaNodos);
+	memoriaLiberar(rutaBuffer);
+	memoriaLiberar(rutaDirectorioArchivos);
+	memoriaLiberar(rutaDirectorioBitmaps);
+	memoriaLiberar(rutaDirectorios);
+	memoriaLiberar(rutaArchivos);
+}
+
 
 //--------------------------------------- Funciones de Consola -------------------------------------
 
@@ -600,12 +585,19 @@ void servidorFinalizar(Servidor* servidor) {
 
 void servidorRegistrarDataNode(Servidor* servidor, Socket nuevoSocket) {
 	if(nuevoSocket != ERROR) {
-		listaSocketsAgregar(nuevoSocket, &servidor->listaDataNodes);
-		Mensaje* mensaje = mensajeRecibir(nuevoSocket);
-		Nodo* nodo = nodoCrear(mensaje->datos, 190, 0, nuevoSocket);
-		mensajeDestruir(mensaje);
-		listaAgregarElemento(listaNodos, nodo);
-		imprimirMensaje(archivoLog, "[CONEXION] Un proceso Data Node se ha conectado");
+		if(estadoSeguro == 0) {
+			listaSocketsAgregar(nuevoSocket, &servidor->listaDataNodes);
+			Mensaje* mensaje = mensajeRecibir(nuevoSocket);
+			Nodo* nodo = nodoCrear(mensaje->datos, 190, 0, nuevoSocket);
+			mensajeDestruir(mensaje);
+			listaAgregarElemento(listaNodos, nodo);
+			imprimirMensaje(archivoLog, "[CONEXION] Un proceso Data Node se ha conectado");
+		}
+		else {
+			//Nodo* nodo = nodoRecuperar();
+			//listaAgregarElemento(listaNodos, nodo);
+			//imprimirMensaje(archivoLog, "[CONEXION] Un proceso Data Node se ha reconectado");
+		}
 	}
 }
 
@@ -639,13 +631,10 @@ void comandoFormatearFileSystem() {
 	listaDestruirConElementos(listaDirectorios, memoriaLiberar);
 	listaDestruirConElementos(listaArchivos, (Puntero)archivoDestruir);
 	bitmapDestruir(bitmapDirectorios);
-	bitmapDirectorios = bitmapCrear(13);
-	listaDirectorios = listaCrear();
-	listaArchivos = listaCrear();
-	directoriosDisponibles = 100;
-	fileLimpiar(rutaDirectorios);
-	archivoIniciarEstructura();
-	nodoIniciarEstructura();
+	metadataIniciar();
+	nodoFormatearConectados();
+	nodoPersistirConectados();
+	estadoSeguro = 1;
 	imprimirMensaje(archivoLog, "[ESTADO] El File System ha sido formateado");
 }
 
@@ -660,6 +649,11 @@ void comandoEliminar(Comando* comando) {
 
 void comandoEliminarBloque(Comando* comando) {
 	Archivo* archivo = archivoBuscar(comando->argumentos[2]);
+
+	if(!rutaValida(comando->argumentos[2])) {
+		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
+		return;
+	}
 
 	if(archivo == NULL) {
 		imprimirMensaje(archivoLog, "[ERROR] El archivo no existe");
@@ -697,8 +691,8 @@ void comandoEliminarBloque(Comando* comando) {
 void comandoEliminarDirectorio(Comando* comando) {
 	String ruta = comando->argumentos[2];
 
-	if (stringIguales(ruta , "/")) {
-		imprimirMensaje(archivoLog,"[ERROR] El directorio raiz no puede ser eliminado");
+	if(!rutaValida(ruta)) {
+		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return;
 	}
 
@@ -721,6 +715,11 @@ void comandoEliminarDirectorio(Comando* comando) {
 
 void comandoEliminarArchivo(Comando* comando) {
 	Archivo* archivo = archivoBuscar(comando->argumentos[1]);
+
+	if(!rutaValida(comando->argumentos[1])) {
+		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
+		return;
+	}
 
 	if(archivo == NULL) {
 		imprimirMensaje(archivoLog,"[ERROR] El archivo no existe");
@@ -746,6 +745,12 @@ void comandoEliminarArchivo(Comando* comando) {
 
 
 void comandoRenombrar(Comando* comando) {
+
+	if(!rutaValida(comando->argumentos[1])) {
+		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
+		return;
+	}
+
 	int identificador = directorioObtenerIdentificador(comando->argumentos[1]);
 	Directorio* directorio = directorioBuscarEnLista(identificador);
 	Archivo* archivo = archivoBuscar(comando->argumentos[1]);
@@ -787,6 +792,17 @@ void comandoRenombrar(Comando* comando) {
 }
 
 void comandoMover(Comando* comando) {
+
+	if(!rutaValida(comando->argumentos[1])) {
+		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
+		return;
+	}
+
+	if(!rutaValida(comando->argumentos[2])) {
+		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
+		return;
+	}
+
 	Directorio* directorio = directorioBuscar(comando->argumentos[1]);
 	Directorio* directorioNuevoPadre = directorioBuscar(comando->argumentos[2]);
 	Archivo* archivo = archivoBuscar(comando->argumentos[1]);
@@ -829,8 +845,8 @@ void comandoMostrarArchivo(Comando* comando) {
 
 void comandoCrearDirectorio(Comando* comando) {
 
-	if(stringIguales(comando->argumentos[1], "/")) {
-		imprimirMensaje(archivoLog, "[ERROR] El directorio raiz no puede ser creado");
+	if(!rutaValida(comando->argumentos[1])) {
+		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return;
 	}
 
@@ -850,6 +866,7 @@ void comandoCrearDirectorio(Comando* comando) {
 }
 
 void comandoCopiarArchivoDeFS(Comando* comando) {
+
 	Archivo* archivo = archivoBuscar(comando->argumentos[2]);
 	int n;
 	if(archivo != NULL) {
@@ -879,6 +896,12 @@ void comandoCopiarBloque(Comando* comando) {
 }
 
 void comandoObtenerMD5(Comando* comando) {
+
+	if(!rutaValida(comando->argumentos[1])) {
+		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
+		return;
+	}
+
 	//if (archivoEstaEnLista(nombreArchivo)) {
 		int pidHijo;
 		int longitudMensaje;
@@ -914,6 +937,12 @@ void comandoObtenerMD5(Comando* comando) {
 }
 
 void comandoListarDirectorio(Comando* comando) {
+
+	if(!rutaValida(comando->argumentos[1])) {
+		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
+		return;
+	}
+
 	int identificador = directorioObtenerIdentificador(comando->argumentos[1]);
 	Directorio* directorio = directorioBuscarEnLista(identificador);
 	if(directorio != NULL)
@@ -923,6 +952,12 @@ void comandoListarDirectorio(Comando* comando) {
 }
 
 void comandoInformacionArchivo(Comando* comando) {
+
+	if(!rutaValida(comando->argumentos[1])) {
+		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
+		return;
+	}
+
 	Archivo* archivo = archivoBuscar(comando->argumentos[1]);
 
 	if(archivo == NULL) {
@@ -1108,9 +1143,6 @@ String directorioConfigurarEntradaArchivo(String indice, String nombre, String p
 	return buffer;
 }
 
-
-
-
 void directorioBuscarIdentificador(ControlDirectorio* control) {
 	Directorio* directorio;
 	int indice;
@@ -1139,7 +1171,6 @@ bool directorioHaySuficientesIndices(ControlDirectorio* control) {
 void directorioControlSetearNombre(ControlDirectorio* control) {
 	control->nombreDirectorio = control->nombresDirectorios[control->indiceNombresDirectorios];
 }
-
 
 ControlDirectorio* directorioControlCrear(String rutaDirectorio) {
 	ControlDirectorio* controlDirectorio = memoriaAlocar(sizeof(ControlDirectorio));
@@ -1199,7 +1230,6 @@ void directorioActualizar(ControlDirectorio* control, String rutaDirectorio) {
 	else
 		directorioCrearEntradas(control, rutaDirectorio);
 }
-
 
 
 bool directorioExisteElNuevoNombre(int idPadre, String nuevoNombre) {
@@ -1286,7 +1316,6 @@ void directorioEliminar(int identificador) {
 	directoriosDisponibles++;
 }
 
-
 //--------------------------------------- Funciones de Archivo -------------------------------------
 
 Archivo* archivoCrear(String nombreArchivo, int idPadre, String tipo) {
@@ -1320,7 +1349,6 @@ Archivo* archivoBuscar(String path) {
 			break;
 	}
 
-
 	bool buscar(Archivo* archivo) {
 		return control->identificadorPadre == archivo->identificadorPadre &&
 				stringIguales(control->nombreDirectorio, archivo->nombre);
@@ -1353,36 +1381,6 @@ int archivoObtenerPosicion(Archivo* archivo) {
 	int indice;
 	for(indice=0; archivo != listaObtenerElemento(listaArchivos, indice); indice++);
 	return indice;
-}
-
-
-void archivoIniciarEstructura() {
-	/*
-	int indice;
-	for(indice=0; indice<listaCantidadElementos(listaArchivos); indice++) {
-		Archivo* archivo = listaObtenerElemento(listaArchivos, indice);
-		String idPadre = stringConvertirEntero(archivo->identificadorPadre);
-		String ruta = memoriaAlocar(MAX_STRING);
-		stringCopiar(ruta, RUTA_ARCHIVOS);
-		stringConcatenar(&ruta, idPadre);
-		stringConcatenar(&ruta, "/");
-		stringConcatenar(&ruta, archivo->nombre);
-		fileLimpiar(ruta);
-		memoriaLiberar(idPadre);
-		memoriaLiberar(ruta);
-	}
-	for(indice=0; indice<listaCantidadElementos(listaDirectorios); indice++) {
-		Directorio* directorio = listaObtenerElemento(listaDirectorios, indice);
-		String idPadre = stringConvertirEntero(directorio->identificador);
-		String ruta = memoriaAlocar(MAX_STRING);
-		stringCopiar(ruta, RUTA_ARCHIVOS);
-		stringConcatenar(&ruta, idPadre);
-		rmdir(ruta);
-		memoriaLiberar(idPadre);
-		memoriaLiberar(ruta);
-	}
-	listaDestruirConElementos(listaArchivos, (Puntero)archivoDestruir);
-	*/
 }
 
 void archivoPersistirCrear(Archivo* archivo) {
@@ -1562,8 +1560,22 @@ Nodo* nodoCrear(String nombre, int bloquesTotales, int bloquesLibres, Socket unS
 	nodo->bloquesTotales = bloquesTotales;
 	nodo->bloquesLibres = bloquesLibres;
 	nodo->socket = unSocket;
-	nodo->bitmap = bitmapCrear((nodo->bloquesTotales+7)/8);
+	nodo->bitmap = bitmapCrear(nodo->bloquesTotales);
 	return nodo;
+}
+
+void nodoFormatear(Nodo* nodo) {
+	nodo->bloquesLibres = nodo->bloquesTotales;
+	bitmapDestruir(nodo->bitmap);
+	nodo->bitmap = bitmapCrear(nodo->bloquesTotales);
+}
+
+void nodoFormatearConectados() {
+	int indice;
+	for(indice = 0; indice < listaCantidadElementos(listaNodos); indice++) {
+		Nodo* unNodo = listaObtenerElemento(listaNodos, indice);
+		nodoFormatear(unNodo);
+	}
 }
 
 void nodoDestruir(Nodo* nodo) {
@@ -1602,19 +1614,19 @@ void nodoRecuperarEstadoAnterior() {
 	archivoConfigDestruir(archivoNodo);
 }
 
-
-void nodoPersistir() {
+void nodoPersistirConectados() {
 	File archivo = fileAbrir(rutaNodos, "a+");
 	int indice;
 	int contadorBloquesTotales = 0;
 	int contadorBloquesLibres = 0;
 	for(indice = 0; indice < listaCantidadElementos(listaNodos); indice++) {
 		Nodo* unNodo = listaObtenerElemento(listaNodos, indice);
-		fprintf(archivo, "NOMBRE_NODO%i=%s\n", indice, unNodo->nombre);
+		fprintf(archivo, "NOMBRE_NODO=%s\n", unNodo->nombre);
 		fprintf(archivo, "%s_BLOQUES_TOTALES=%i\n", unNodo->nombre, unNodo->bloquesTotales);
 		fprintf(archivo, "%s_BLOQUES_LIBRES=%i\n",unNodo->nombre, unNodo->bloquesLibres);
 		contadorBloquesTotales+=unNodo->bloquesTotales;
 		contadorBloquesLibres+=unNodo->bloquesLibres;
+		nodoPersistirBitmap(listaObtenerElemento(listaNodos, indice));
 	}
 	fprintf(archivo, "NODOS_CONECTADOS=%i\n", indice);
 	fprintf(archivo, "BLOQUES_LIBRES=%i\n", contadorBloquesTotales);
@@ -1632,14 +1644,6 @@ void nodoPersistirBitmap(Nodo* nodo) {
 		fprintf(archivo, "%i", bitmapBitOcupado(nodo->bitmap, indice));
 	fprintf(archivo, "\n");
 	fileCerrar(archivo);
-}
-
-void nodoIniciarEstructura() {
-	fileLimpiar(rutaNodos);
-	nodoPersistir();
-	int indice;
-	for(indice = 0; indice < listaCantidadElementos(listaNodos); indice++)
-		nodoPersistirBitmap(listaObtenerElemento(listaNodos, indice));
 }
 
 //--------------------------------------- Funciones de Bloque-------------------------------------
@@ -1678,6 +1682,31 @@ void copiaBloqueEliminar(CopiaBloque* copia) {
 
 //--------------------------------------- Funciones varias------------------------------------
 
+void metadataCrear() {
+	mkdir(configuracion->rutaMetadata, 0777);
+	mkdir(rutaDirectorioArchivos, 0777);
+	mkdir(rutaDirectorioBitmaps, 0777);
+}
+
+void metadataEliminar() {
+	String comando = string_from_format("rm -r -f %s", configuracion->rutaMetadata);
+	system(comando);
+	memoriaLiberar(comando);
+}
+
+void metadataIniciar() {
+	metadataEliminar();
+	metadataCrear();
+	listaArchivos = listaCrear();
+	listaDirectorios = listaCrear();
+	bitmapDirectorios = bitmapCrear(13);
+	directoriosDisponibles = 100;
+}
+
+void metadataRecuperar() {
+
+}
+
 void bufferCopiarEn(String rutaArchivo) {
 	File archivo = fileAbrir(rutaArchivo, ESCRITURA);
 	File archivoAuxiliar = fileAbrir(rutaBuffer, LECTURA);
@@ -1697,7 +1726,6 @@ void logIniciar() {
 	imprimirMensaje(archivoLog, "[EJECUCION] Proceso File System inicializado");
 }
 
-
 String rutaObtenerUltimoNombre(String ruta) {
 	int indice;
 	int ultimaBarra;
@@ -1708,6 +1736,37 @@ String rutaObtenerUltimoNombre(String ruta) {
 	return directorio;
 }
 
+bool rutaTieneAlMenosUnaBarra(String ruta) {
+	return stringContiene(ruta, "/");
+}
+
+bool rutaBarrasEstanSeparadas(String ruta) {
+	int indice;
+	for(indice=0; indice<stringLongitud(ruta); indice++) {
+		if(caracterIguales(ruta[indice], '/')) {
+
+			if(indice==0) {
+				if(caracterIguales(ruta[indice+1], '/'))
+					return false;
+			}
+			else {
+				if(indice==stringLongitud(ruta)-1)
+					return false;
+				else
+					if(caracterIguales(ruta[indice-1], '/') ||
+						caracterIguales(ruta[indice+1], '/'))
+						return false;
+			}
+
+		}
+	}
+	return true;
+}
+
+bool rutaValida(String ruta) {
+	return rutaTieneAlMenosUnaBarra(ruta) &&
+			rutaBarrasEstanSeparadas(ruta);
+}
 
 String* rutaSeparar(String ruta) {
 	int indice;
@@ -1729,19 +1788,13 @@ String* rutaSeparar(String ruta) {
 	return directorios;
 }
 
-
-void testear(String mensaje, void* algo) {
-	printf(mensaje, algo);
-	puts("");
-}
-
 void testCabecita() {
-	Nodo* nodo1 = nodoCrear("NODIN1", 100, 95, 99);
-	bitmapOcuparBit(nodo1->bitmap, 99);
-	bitmapOcuparBit(nodo1->bitmap, 2);
+	Nodo* nodo1 = nodoCrear("NODIN1", 10, 1, 99);
+	bitmapOcuparBit(nodo1->bitmap, 4);
+	bitmapOcuparBit(nodo1->bitmap, 9);
 
-	Nodo* nodo2 = nodoCrear("NODIN2", 100, 95, 99);
-	bitmapOcuparBit(nodo2->bitmap, 97);
+	Nodo* nodo2 = nodoCrear("NODIN2", 5, 3, 99);
+	bitmapOcuparBit(nodo2->bitmap, 0);
 	nodoPersistirBitmap(nodo1);
 	nodoPersistirBitmap(nodo2);
 
@@ -1763,17 +1816,17 @@ void testCabecita() {
 	bloque1->listaCopias = listaCrear();
 
 	CopiaBloque* copia0Bloque0 = memoriaAlocar(sizeof(CopiaBloque));
-	copia0Bloque0->bloqueNodo = 99;
+	copia0Bloque0->bloqueNodo = 4;
 	stringCopiar(copia0Bloque0->nombreNodo, "NODIN1");
 
 	CopiaBloque* copia1Bloque0 = memoriaAlocar(sizeof(CopiaBloque));;
-	copia1Bloque0->bloqueNodo = 97;
+	copia1Bloque0->bloqueNodo = 0;
 	stringCopiar(copia1Bloque0->nombreNodo, "NODIN2");
 
 	CopiaBloque* copia0Bloque1 = memoriaAlocar(sizeof(CopiaBloque));;
-	copia0Bloque1->bloqueNodo = 2;
-
+	copia0Bloque1->bloqueNodo = 9;
 	stringCopiar(copia0Bloque1->nombreNodo, "NODIN1");
+
 	listaAgregarElemento(bloque0->listaCopias, copia0Bloque0);
 	listaAgregarElemento(bloque0->listaCopias, copia1Bloque0);
 	listaAgregarElemento(bloque1->listaCopias, copia0Bloque1);
