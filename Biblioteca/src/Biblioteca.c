@@ -746,9 +746,6 @@ void fileLimpiar(String ruta) {
 	}
 }
 
-void archivoPersistirEntrada(File archivo, String entrada) {
-	fprintf(archivo, "%s", entrada);
-}
 
 
 //Dir getIpPort(Socket socket){

@@ -1,6 +1,12 @@
-[INFO] 01:13:59:904 FileSystem/(13625:13625): [EJECUCION] Proceso File System inicializado
-[INFO] 01:13:59:960 FileSystem/(13625:13625): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 01:13:59:962 FileSystem/(13625:13625): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 01:14:05:662 FileSystem/(13625:13628): [DIRECTORIO] El directorio /home fue creado
-[INFO] 01:14:26:977 FileSystem/(13625:13628): [BLOQUE] La copia N°0 del bloque N°0 del archivo /home/test ha sido eliminada
-[INFO] 01:15:04:600 FileSystem/(13625:13625): [EJECUCION] Finalizando proceso File System...
+[INFO] 23:51:16:763 FileSystem/(6117:6117): [EJECUCION] Proceso File System inicializado
+[INFO] 23:51:16:819 FileSystem/(6117:6117): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 23:51:16:820 FileSystem/(6117:6117): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 23:51:16:821 FileSystem/(6117:6117): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
+[INFO] 23:51:38:22 FileSystem/(6117:6122): [DIRECTORIO] El directorio /home fue creado
+[INFO] 23:51:44:627 FileSystem/(6117:6122): [ERROR] No se puede eliminar el bloque ya que es el ultimo
+[INFO] 23:51:50:106 FileSystem/(6117:6122): [BLOQUE] La copia N°1 del bloque N°0 del archivo /home/test ha sido eliminada
+[INFO] 23:52:27:932 FileSystem/(6117:6122): [DIRECTORIO] El directorio /user fue creado
+[INFO] 23:52:37:540 FileSystem/(6117:6122): [DIRECTORIO] El archivo test fue movido a /user
+[INFO] 23:52:58:18 FileSystem/(6117:6122): [ERROR] El archivo o directorio no existe
+[INFO] 23:53:06:452 FileSystem/(6117:6122): [ARCHIVO] El archivo test fue renombrado por HOLI
+[INFO] 23:53:37:265 FileSystem/(6117:6117): [EJECUCION] Finalizando proceso File System...

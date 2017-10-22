@@ -10,11 +10,6 @@
 
 #define RUTA_CONFIG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/FileSystem/FileSystemConfig.conf"
 #define RUTA_LOG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/FileSystem/FileSystemLog.log"
-#define RUTA_DIRECTORIOS "/home/utnso/Escritorio/Metadata/Directorios.dat"
-#define RUTA_NODOS "/home/utnso/Escritorio/Metadata/nodos.bin"
-#define RUTA_ARCHIVOS "/home/utnso/Escritorio/Metadata/archivos"
-#define RUTA_BITMAPS "/home/utnso/Escritorio/Metadata/bitmaps"
-#define RUTA_AUXILIAR "/home/utnso/Escritorio/Metadata/Auxiliar.dat"
 
 #define ID_FORMAT 1
 #define ID_RM 2
@@ -49,22 +44,23 @@
 #define ESCRITURA "w"
 #define LECTURA "r"
 
-
 #define FLAG_B "-b"
 #define FLAG_D "-d"
 #define FLAG_CLEAN "--clean"
-#define MAX_STRING 300
+#define BUFFER 300
 #define MAX_DIR 100
 #define BLOQUE 32 //1048576
 
 #define ESCRIBIR 102
 
-typedef struct __attribute__((packed)){
+//--------------------------------------- Estructuras -------------------------------------
+
+typedef struct {
 	int identificador;
 	String argumentos[5];
 } Comando;
 
-typedef struct __attribute__((packed)){
+typedef struct {
 	ListaSockets listaSelect;
 	ListaSockets listaMaster;
 	ListaSockets listaWorkers;
@@ -76,9 +72,10 @@ typedef struct __attribute__((packed)){
 } Servidor;
 
 
-typedef struct __attribute__((packed)){
+typedef struct {
 	char puertoYAMA[20];
 	char puertoDataNode[20];
+	char rutaMetadata[255];
 } Configuracion;
 
 
@@ -88,7 +85,7 @@ typedef struct __attribute__((packed)){
 	char nombre[255];
 } Directorio;
 
-typedef struct __attribute__((packed)){
+typedef struct {
 	int identificadorPadre;
 	int identificadorDirectorio;
 	int indiceNombresDirectorios;
@@ -103,7 +100,7 @@ typedef struct __attribute__((packed)){
 	Lista listaBloques;
 } Archivo;
 
-typedef struct __attribute__((packed)){
+typedef struct {
 	int bytes;
 	Lista listaCopias;
 } Bloque;
@@ -122,16 +119,25 @@ typedef struct __attribute__((packed)){
 } Nodo;
 
 
-String campos[2];
+//--------------------------------------- Variables globales -------------------------------------
+
+String campos[3];
 Configuracion* configuracion;
 ArchivoLog archivoLog;
 int estadoFileSystem;
+int directoriosDisponibles;
 Hilo hiloConsola;
 Lista listaDirectorios;
 Lista listaArchivos;
 Lista listaNodos;
 Bitmap* bitmapDirectorios;
-int directoriosDisponibles;
+String rutaDirectorioArchivos;
+String rutaDirectorioBitmaps;
+String rutaDirectorios;
+String rutaArchivos;
+String rutaNodos;
+String rutaBuffer;
+
 
 //--------------------------------------- Funciones de File System -------------------------------------
 
@@ -255,7 +261,7 @@ void directorioEliminar(int identificador);
 Archivo* archivoBuscar(String path);
 void archivoPersistirMover(Archivo* archivoAMover, int nuevoPadre);
 void archivoDestruir(Archivo* archivo);
-void archivoPersistir(Archivo* metadata);
+void archivoPersistirCrear(Archivo* metadata);
 Archivo* archivoCrear(String nombreArchivo, int idPadre, String tipo);
 void archivoDestruir(Archivo* archivo);
 bool archivoExiste(int idPadre, String nombre);
@@ -264,7 +270,10 @@ void archivoPersistirRenombrar(Archivo* archivoARenombrar, String viejoNombre);
 void archivoPersistirMover(Archivo* archivoAMover, int viejoPadre);
 int archivoObtenerPosicion(Archivo* archivo);
 void archivoPersistirRemoverBloque(Archivo* archivo, int numeroBloque, int numeroCopia);
-
+void archivoPersistirControlCrear(Archivo* archivo);
+void archivoPersistirControlRemover(Archivo* archivo);
+void archivoPersistirControlRenombrar(Archivo* archivo, String nuevoNombre);
+void archivoPersistirControlMover(Archivo* archivo, Entero nuevoPadre);
 //--------------------------------------- Funciones de Bloque -------------------------------------
 
 Bloque* bloqueCrear(int bytes);
