@@ -38,15 +38,16 @@ void yamaIniciar() {
 	//infoNodos es una lista de ips y puertos
 	Mensaje* infoNodos=mensajeRecibir(servidor->fileSystem);
 	mensajeObtenerDatos(infoNodos,servidor->fileSystem);
-	int i=0;
-	while(i<infoNodos->header.tamanio/IPPORTSIZE){
+	int i;
+	for(i=0;i<infoNodos->header.tamanio/DIRSIZE;i++){
 		Worker worker;
 		worker.conectado=true;
 		worker.carga=0;
 		worker.tareasRealizadas=0;
-		worker.nodo=*(Dir*)(infoNodos+sizeof(Dir)*i);
-		list_add(workers,&worker);
+		worker.nodo=*(Dir*)(infoNodos+sizeof(Dir)*i);//TODO puede que rompa porque no es deep copying
+		list_add(workers,&worker); //TODO
 	}
+	mensajeDestruir(infoNodos);
 }
 
 void configurar(){
@@ -63,7 +64,7 @@ void configurar(){
 }
 
 bool mismoNodo(Dir a,Dir b){
-	return a.ip==b.ip&&a.port==b.port;//podría comparar solo ip
+	return stringIguales(a.ip,b.ip)&&stringIguales(a.port,b.port);//podría comparar solo ip
 }
 
 void yamaAtender() {
@@ -110,14 +111,15 @@ void yamaAtender() {
 					Mensaje* mensaje = mensajeRecibir(socketI);
 					mensajeObtenerDatos(mensaje,socketI);
 					if(mensaje->header.operacion==DESCONEXION){
-						int32_t nodoDesconectado=*((int32_t*)mensaje->datos);
+						char nodoDesconectado[20];
+						strncpy(nodoDesconectado,mensaje->datos,20);
 						bool nodoDesconectadoF(Worker* worker){
-							return worker->nodo.ip==nodoDesconectado;
+							return stringIguales(worker->nodo.ip,nodoDesconectado);
 						}
 						((Worker*)list_find(workers,nodoDesconectadoF))->conectado=false;
 						void cazarEntradasDesconectadas(Entrada* entrada){
-							if(entrada->nodo.ip==nodoDesconectado){
-								actualizarTablaEstados(entrada,Abortado);
+							if(stringIguales(entrada->nodo.ip,nodoDesconectado)){
+								actualizarTablaEstados(entrada,Error);
 							}
 						}
 						list_iterate(tablaEstados,cazarEntradasDesconectadas);
@@ -138,6 +140,7 @@ void yamaAtender() {
 						int32_t masterid = socketI;
 						//el mensaje es el path del archivo
 						//aca le acoplo el numero de master y se lo mando al fileSystem
+						//lo de acoplar esta por si uso hilos, sino esta al pedo
 						mensaje=realloc(mensaje->datos,mensaje->header.tamanio+INTSIZE);
 						memmove(mensaje->datos+INTSIZE,mensaje,mensaje->header.tamanio);
 						memcpy(mensaje->datos,&masterid,INTSIZE);
@@ -150,10 +153,10 @@ void yamaAtender() {
 							servidor->maximoSocket--; //no debería romper nada
 						log_info(archivoLog, "[CONEXION] Proceso Master %d se ha desconectado",socketI);
 					}else{
-						Dir nodo=*((Dir*)mensaje->datos);
-						int32_t bloque=*((int32_t*)(mensaje->datos+INTSIZE*2));
+						Dir nodo=*((Dir*)mensaje->datos);//TODO puede que rompa porque no es deep copying
+						int32_t bloque=*((int32_t*)(mensaje->datos+DIRSIZE));
 						bool buscarEntrada(Entrada* entrada){
-							return entrada->nodo.ip==nodo.ip&&entrada->bloque==bloque;
+							return stringIguales(entrada->nodo.ip,nodo.ip)&&entrada->bloque==bloque;
 						}
 						actualizarTablaEstados(list_find(tablaEstados,buscarEntrada),mensaje->header.operacion);
 					}
@@ -165,14 +168,13 @@ void yamaAtender() {
 }
 
 void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
-	int i=0;
+	int i;
 	Lista bloques=list_create();
 	Lista byteses=list_create();
-	while((sizeof(Bloque)*2+INTSIZE)*i<=tamanio){
-		list_add(bloques,(Bloque*)(listaBloques+(sizeof(Bloque)*2+INTSIZE)*i));
-		list_add(bloques,(Bloque*)(listaBloques+(sizeof(Bloque)*2+INTSIZE)*i+sizeof(Bloque)));
-		list_add(byteses,(int32_t*)(listaBloques+(sizeof(Bloque)*2+INTSIZE)*i+sizeof(Bloque)*2));
-		i++;
+	for(i=0;i<=tamanio;i+=sizeof(Bloque)*2+INTSIZE){
+		list_add(bloques,(Bloque*)(listaBloques+i));
+		list_add(bloques,(Bloque*)(listaBloques+i+sizeof(Bloque)));
+		list_add(byteses,(int32_t*)(listaBloques+i+sizeof(Bloque)*2));
 	}
 	Lista tablaEstadosJob;
 	job++;//mutex (supongo que las variables globales se comparten entre hilos)
@@ -181,7 +183,7 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 		entrada.job=job;
 		entrada.masterid=master;
 		darPathTemporal(&entrada.pathTemporal,'t');
-		list_add(tablaEstadosJob,&entrada);
+		list_add(tablaEstadosJob,&entrada);//TODO
 	}
 
 	if(stringIguales(configuracion->algoritmoBalanceo,"Clock")){
@@ -282,15 +284,15 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 		}
 	}
 
-	int tamanioEslabon=INTSIZE*4+TEMPSIZE;//ip,puerto,bloque,bytes,temp
+	int tamanioEslabon=DIRSIZE+INTSIZE*2+TEMPSIZE;//dir,bloque,bytes,temp
 	int32_t tamanioDato=tamanioEslabon*tablaEstadosJob->elements_count;
 	void* dato=malloc(tamanioDato);
-	for(i=0;i<tablaEstadosJob->elements_count;i++){
+	for(i=0;i<tamanioDato;i+=tamanioEslabon){
 		Entrada* entrada=list_get(tablaEstadosJob,i);
-		memcpy(dato+tamanioEslabon*i,&entrada->nodo,INTSIZE*2);
-		memcpy(dato+tamanioEslabon*i+INTSIZE*2,&entrada->bloque,INTSIZE);
-		memcpy(dato+tamanioEslabon*i+INTSIZE*3,&entrada->bytes,INTSIZE);
-		memcpy(dato+tamanioEslabon*i+INTSIZE*4,entrada->pathTemporal,TEMPSIZE);
+		memcpy(dato+i,&entrada->nodo,DIRSIZE);
+		memcpy(dato+i+DIRSIZE,&entrada->bloque,INTSIZE);
+		memcpy(dato+i+DIRSIZE+INTSIZE,&entrada->bytes,INTSIZE);
+		memcpy(dato+i+DIRSIZE+INTSIZE*2,entrada->pathTemporal,TEMPSIZE);
 	}
 	mensajeEnviar(master,Transformacion,dato,tamanioDato);
 	free(dato);
@@ -334,14 +336,14 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 			}
 			Entrada alternativa;
 			darDatosEntrada(&alternativa);
-			alternativa.nodo=entradaA->nodoAlt;
+			alternativa.nodo=entradaA->nodoAlt;//TODO deep?
 			alternativa.bloque=entradaA->bloqueAlt;
 			char dato[DIRSIZE+INTSIZE*2]; //podría no mandarle los bytes
 			memcpy(dato,&alternativa.nodo,DIRSIZE);
 			memcpy(dato+DIRSIZE,&alternativa.bloque,INTSIZE);
 			memcpy(dato+DIRSIZE+INTSIZE,&alternativa.bytes,INTSIZE);
 			mensajeEnviar(alternativa.masterid,Transformacion,dato,sizeof dato);
-			list_add(tablaEstados,&alternativa);
+			list_add(tablaEstados,&alternativa); //TODO
 			bool buscarError(Entrada* entrada){
 				return entrada->estado==Error;
 			}
@@ -382,7 +384,7 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 				memcpy(dato+i,((Entrada*)list_get(nodos,j))->pathTemporal,TEMPSIZE);
 			mensajeEnviar(reducLocal.masterid,ReducLocal,dato,tamanio);
 			moverAUsados(mismoNodoJob);
-			list_add(tablaEstados,&reducLocal);//mutex
+			list_add(tablaEstados,&reducLocal);//mutex TODO
 		}
 	}else if(entradaA->etapa==ReducLocal){
 		trabajoTerminado(mismoJob);
@@ -391,7 +393,7 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 			darDatosEntrada(&reducGlobal);
 			darPathTemporal(&reducGlobal.pathTemporal,'g');
 			reducGlobal.etapa=ReducGlobal;
-			Dir nodoMenorCarga=entradaA->nodo;
+			Dir nodoMenorCarga=entradaA->nodo;//deep
 			int menorCargaI=100; //
 			void menorCarga(Worker* worker){
 				if(worker->carga<menorCargaI)
@@ -411,15 +413,16 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 			}
 			mensajeEnviar(reducGlobal.masterid,ReducGlobal,dato,tamanio);
 			moverAUsados(mismoJob);
-			list_add(tablaEstados,&reducGlobal);//mutex
+			list_add(tablaEstados,&reducGlobal);//mutex TODO
 		}
 	}else{
 		Entrada* reducGlobal=list_find(tablaEstados,mismoJob);
 		char dato[DIRSIZE+TEMPSIZE];
+		//TODO creo que estoy haciendo cualquier cosa aca, mirar bien
 		memcpy(dato,&reducGlobal->nodo,DIRSIZE);
 		memcpy(dato+DIRSIZE,reducGlobal->pathTemporal,TEMPSIZE);
 		mensajeEnviar(entradaA->masterid,Cierre,dato,sizeof dato);
-		list_add(tablaUsados,list_remove_by_condition(tablaEstados,mismoJob));//como funciona esto? funciona? por ahi le tengo que meter un casteo
+		list_add(tablaUsados,list_remove_by_condition(tablaEstados,mismoJob));
 	}
 }
 
@@ -472,10 +475,10 @@ void darPathTemporal(char** ret,char pre){
 	anterior=string_duplicate(*ret); //leak?
 }
 
-int ipToNum(int ip){
+int ipToNum(char* ip){//no se si puede pasar un array a pointer asi nomas
 	int index,i=0;
 	void buscarIp(Worker* worker){
-		if(worker->nodo.ip==ip)
+		if(stringIguales(worker->nodo.ip,ip))
 			index=i;
 		i++;
 	}
