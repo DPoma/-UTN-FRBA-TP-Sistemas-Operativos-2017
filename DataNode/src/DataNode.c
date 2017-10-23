@@ -28,20 +28,21 @@ void dataNodeIniciar() {
 	configuracion = configuracionCrear(RUTA_CONFIG, (Puntero)configuracionLeerArchivo, campos);
 	configuracionImprimir(configuracion);
 	dataBinAbrir();
+	dataBinCalcularBloques();
+	punteroDataBin = dataBinMapear();
 	//senialAsignarFuncion(SIGINT, funcionSenial);
 	dataNodeActivar();
 	imprimirMensajeDos(archivoLog, "[CONEXION] Estableciendo conexion con File System (IP: %s | Puerto %s)", configuracion->ipFileSystem, configuracion->puertoFileSystem);
-	Socket socketFileSystem = socketCrearCliente(configuracion->ipFileSystem, configuracion->puertoFileSystem, ID_DATANODE);
-	mensajeEnviar(socketFileSystem, 14, configuracion->nombreNodo, stringLongitud(configuracion->nombreNodo)+1);
+	socketFileSystem = socketCrearCliente(configuracion->ipFileSystem, configuracion->puertoFileSystem, ID_DATANODE);
+	//mensajeEnviar(socketFileSystem, 14, configuracion->nombreNodo, stringLongitud(configuracion->nombreNodo)+1);
 }
 
 void dataNodeAtenderFileSystem(){
 	Mensaje* mensaje = mensajeRecibir(socketFileSystem);
-	Bloque* bloque = dataBinCrearBloque(mensaje->datos); //Ponerlo en set y get ya que sino cuando reciba error copia cualquier cosa
 	switch(mensaje->header.operacion){
-		case ERROR: dataNodeDesconectarFS(); break;
-		case SET_BLOQUE: dataBinSetBloque(bloque->numeroBloque, bloque->datos); break;
-		case GET_BLOQUE: dataBinGetBloque(bloque->numeroBloque); break;
+		case DESCONEXION: dataNodeDesconectarFS(); break;
+		case GET_BLOQUE: dataBinGetBloque(mensaje->datos); break;
+		case SET_BLOQUE: dataBinSetBloque(mensaje->datos); break;
 	}
 	mensajeDestruir(mensaje);
 }
@@ -56,7 +57,7 @@ void dataNodeFinalizar(){
 
 void dataNodeDesconectarFS() {
 	imprimirMensaje(archivoLog, "[CONEXION] El File System se desconecto");
-	estadoDataNode = dataNodeDesactivado();
+	dataNodeDesactivar();
 }
 
 bool dataNodeActivado() {
@@ -99,7 +100,6 @@ void configuracionIniciarCampos() {
 	campos[2] = "NOMBRE_NODO";
 	campos[3] = "PUERTO_WORKER";
 	campos[4] = "RUTA_DATABIN";
-	campos[5] = "IP_PROPIO";
 }
 
 
@@ -113,35 +113,95 @@ void dataBinAbrir() {
 	}
 }
 
-String dataBinUbicarPuntero(Entero numeroBloque) {
-	String puntero = punteroDatabin + (BLOQUE * numeroBloque);
+Puntero dataBinUbicarPuntero(Entero numeroBloque) {
+	Puntero puntero = punteroDataBin + (BLOQUE * numeroBloque);
 	return puntero;
 }
 
-void dataBinSetBloque(Entero numeroBloque, String datos) {
-	String puntero = dataBinUbicarPuntero(numeroBloque);
-	memcpy(puntero, datos, BLOQUE);
-	imprimirMensajeUno(archivoLog, "[DATABIN] El bloque N°%i fue escrito", (int*)numeroBloque);
-	return;
+void dataBinGetBloque(Puntero datos) {
+	Entero numeroBloque = *(Entero*)datos;
+	if(numeroBloque < dataBinBloques) {
+		Puntero puntero = getBloque(numeroBloque);
+		mensajeEnviar(socketFileSystem, 1, puntero, BLOQUE);
+	}
+	else {
+		imprimirMensaje(archivoLog,"[ERROR] El bloque no existe");
+		mensajeEnviar(socketFileSystem, -2, NULL, NULO);
+	}
 }
 
-String dataBinGetBloque(Entero numeroBloque) {
-	String puntero = dataBinUbicarPuntero(numeroBloque);
-	imprimirMensajeUno(archivoLog, "[DATABIN] El bloque N°%i fue leido", (int*)numeroBloque);
-	return puntero;
+void dataBinSetBloque(Puntero datos) {
+	Entero numeroBloque;
+	memcpy(&numeroBloque, datos, sizeof(Entero));
+	if(numeroBloque < dataBinBloques)
+		setBloque(numeroBloque, datos+sizeof(Entero));
+	else {
+		imprimirMensaje(archivoLog,"[ERROR] El bloque no existe");
+		mensajeEnviar(socketFileSystem, -2, NULL, NULO);
+	}
+
 }
 
-Bloque* dataBinCrearBloque(Puntero puntero) {
-	Bloque* bloque = memoriaAlocar(sizeof(Bloque));
-	memcpy(&bloque->numeroBloque, puntero, sizeof(Entero));
-	memcpy(&bloque->tamanioDatos, puntero+sizeof(Entero), sizeof(Entero));
-	memcpy(bloque->datos, puntero+(2*sizeof(Entero)), bloque->tamanioDatos);
-	return bloque;
+
+Puntero dataBinMapear() {
+	Puntero Puntero;
+	int descriptorArchivo = open(configuracion->rutaDataBin, O_CLOEXEC | O_RDWR);
+	if (descriptorArchivo == ERROR) {
+		imprimirMensaje(archivoLog, "[ERROR] Fallo el open()");
+		perror("open");
+		exit(EXIT_FAILURE);
+	}
+	struct stat estadoArchivo;
+	if (fstat(descriptorArchivo, &estadoArchivo) == ERROR) {
+		imprimirMensaje(archivoLog, "[ERROR] Fallo el fstat()");
+		perror("fstat");
+		exit(EXIT_FAILURE);
+	}
+	dataBinTamanio = estadoArchivo.st_size;
+
+	/* Segun lo que entendi (mi no saber mucho ingles)
+	 * El mmap() sirve para mapear un archivo en memoria, lo cual es mucho mas rapido y comodo, tambien me evito utilizar los falgo()
+	 * mmap(Direccion, Tamanio, Proteccion, Mapeo, Descriptor, Offset)
+	 * Direccion: Elegis la direccion que queres, lo mejor es poner 0 asi lo elige el SO
+	 * Tamanio: El tamanio del archivo
+	 * Proteccion: Serian como los permisos leer, escribir, ejecutar
+	 * Mapeo: Por lo que entendi si es compartido los cambios se reflejan el archivo, si es privado no
+	 * Descriptor: El fd del archivo
+	 * Offset: Desde donde quiero que empiece a apuntar el puntero, en este caso desde el principio (0)
+	 */
+
+	Puntero = mmap(0, dataBinTamanio, PROT_WRITE | PROT_READ | PROT_EXEC, MAP_SHARED, descriptorArchivo, 0);
+	if (Puntero == MAP_FAILED) {
+		imprimirMensaje(archivoLog, "[ERROR] Fallo el mmap(), corran por sus vidas");
+		perror("mmap");
+		exit(EXIT_FAILURE);
+	}
+	close(descriptorArchivo);
+	return Puntero;
 }
 
 //--------------------------------------- Funciones varias -------------------------------------
 
+Puntero getBloque(Entero numeroBloque) {
+	Puntero puntero = dataBinUbicarPuntero(numeroBloque);
+	imprimirMensajeUno(archivoLog, "[DATABIN] El bloque N°%i fue leido", (int*)numeroBloque);
+	return puntero;
+}
+
+void setBloque(Entero numeroBloque, Puntero datos) {
+	Puntero puntero = dataBinUbicarPuntero(numeroBloque);
+	memcpy(puntero, datos, BLOQUE);
+	imprimirMensajeUno(archivoLog, "[DATABIN] El bloque N°%i fue escrito", (int*)numeroBloque);
+}
+
+void dataBinCalcularBloques() {
+	dataBinBloques = (int)ceil((double)dataBinTamanio/(double)BLOQUE);
+}
+
 void funcionSenial(int senial) {
+	socketCerrar(socketFileSystem);
 	dataNodeDesactivar();
+	//dataNodeFinalizar();
 	puts("");
+	//exit(1);
 }

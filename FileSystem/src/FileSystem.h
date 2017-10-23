@@ -49,7 +49,7 @@
 #define FLAG_CLEAN "--clean"
 #define BUFFER 300
 #define MAX_DIR 100
-#define BLOQUE 32 //1048576
+
 
 #define ESCRIBIR 102
 
