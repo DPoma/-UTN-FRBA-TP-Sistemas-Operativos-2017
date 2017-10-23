@@ -878,23 +878,69 @@ void comandoCrearDirectorio(Comando* comando) {
 	memoriaLiberar(control);
 }
 
-void comandoCopiarArchivoDeFS(Comando* comando) {
-	Archivo* archivo = archivoBuscar(comando->argumentos[2]);
-	int n;
-	if(archivo != NULL) {
-		imprimirMensaje(archivoLog, "[ERROR] El archivo ya existe en el File System");
-		return;
+
+bool masVago(Nodo* unNodo, Nodo* otroNodo) {
+	return unNodo->bloquesLibres > otroNodo->bloquesLibres;
+}
+
+
+Nodo* nodoBuscarVago(int posicion) {
+
+	listaOrdenar(listaNodos, (Puntero)masVago);
+
+	int indice;
+	for(indice=0; indice<listaCantidadElementos(listaNodos) ;indice++) {
+		Nodo* nodo = listaObtenerElemento(listaNodos, indice);
+		printf("Nodo %i cant bloques libres %i\n", indice, nodo->bloquesLibres);
 	}
-	File file = fileAbrir(comando->argumentos[1], "r");
+
+	return listaObtenerElemento(listaNodos, posicion);
+}
+
+void archivoAlmacenar(String rutaLocal, String rutaYama) {
+/*
+	if(archivoEsBinario)
+		return;
+	else
+		//texto
+		return;
+	comandoCrearDirectorio(rutaYama); //Copiar todo de nuevo
+*/
+	File file = fileAbrir(rutaLocal, "r");
 	if(file == NULL) {
 		imprimirMensaje(archivoLog, "[ERROR] El archivo a copiar no existe");
 		return;
 	}
 	String buffer = malloc(BLOQUE);
-	Nodo* nodo = listaObtenerElemento(listaNodos, 0);
-	for(n = 0; fread(buffer, sizeof(char),BLOQUE, file) == BLOQUE; n++) {
-		mensajeEnviar(nodo->socket, ESCRIBIR, buffer, BLOQUE);
+	Nodo* unNodo = nodoBuscarVago(0);
+	Nodo* otroNodo = nodoBuscarVago(1);
+	if(unNodo == otroNodo) {
+		//Por las dudas agregar un if a buscarvago en caso de que sea solo un nodo
+		imprimirMensaje(archivoLog, "[ERROR] No puede enviarse dos copias al mismo nodo");
+		return;
 	}
+	int indice;
+	String nombre = rutaObtenerUltimoNombre(rutaLocal);
+	int idPadre = directorioObtenerIdentificador(rutaYama);
+	Archivo* archivo = archivoCrear(nombre, idPadre, 0);
+	for(indice = 0; fread(buffer, sizeof(char),BLOQUE, file) == BLOQUE; indice++) {
+		Bloque* bloque = bloqueCrear(1048576);
+		//bloqueEnviarANodo(bloque, unNodo, buffer); //buscar bloque por fist first, acutalizando bitmap, agregarlo a la lista de copias etc
+		//bloqueEnviarANodo(bloque, otroNodo, buffer);
+	}
+	archivoPersistirCrear(archivo);
+	imprimirMensaje(archivoLog, "[ARCHIVO] El archivo fue copiado en el File System");
+}
+
+
+void comandoCopiarArchivoDeFS(Comando* comando) {
+	Archivo* archivo = archivoBuscar(comando->argumentos[2]);
+	if(archivo != NULL) {
+		imprimirMensaje(archivoLog, "[ERROR] El archivo ya existe en el File System");
+		return;
+	}
+
+
 	imprimirMensaje(archivoLog, "[ARCHIVO] El archivo se copio en el File System con exito");
 }
 
