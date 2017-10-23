@@ -458,6 +458,16 @@ int listaAgregarElemento(Lista lista, void* elemento) {
 	return list_add(lista, elemento);
 }
 
+int list_addM(Lista lista,void* elemento,size_t tamanio){
+	void* ptr=malloc(tamanio);
+	memcpy(ptr,elemento,tamanio);
+	return list_add(lista,ptr);
+}
+
+int listaAgregarElementoM(Lista lista, void* elemento,size_t tamanio) {
+	return list_addM(lista, elemento,tamanio);
+}
+
 void listaAgregarEnPosicion(Lista lista, void* elemento, int posicion) {
 	list_add_in_index(lista, posicion, elemento);
 }
@@ -793,7 +803,7 @@ size_t bitmapCantidadBits(Bitmap* bitmap) {
 	return bitarray_get_max_bit(bitmap->controlBits);
 }
 int bitmapCalculo(int cantidadBloques) {
-	return (int)ceil((double)cantidadBloques/(double)8);
+	return (int)ceil((double)cantidadBloques/(double)8);//roto
 }
 
 

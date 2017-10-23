@@ -216,6 +216,8 @@ Lista listaCrear();
 void listaDestruir(Lista lista);
 void listaDestruirConElementos(Lista lista, void(*funcion)(void*));
 int listaAgregarElemento(Lista lista, void* elemento);
+int list_addM(Lista,void*,size_t);
+int listaAgregarElementoM(Lista lista, void* elemento,size_t);
 void listaAgregarEnPosicion(Lista lista, void* elemento, int posicion);
 void listaAgregarOtraLista(Lista lista, Lista otraLista);
 void* listaObtenerElemento(Lista lista, int posicion);
