@@ -35,14 +35,14 @@ typedef struct{
 //--------------------------------------- Variables Globales -------------------------------------
 
 int estadoDataNode;
-String punteroDatabin;;
+int tamanioDataBin;
+Puntero punteroDataBin;
 String campos[5];
 Socket socketFileSystem;
 Configuracion* configuracion;
 ArchivoLog archivoLog;
 File dataBin;
 Bloque bloques;
-
 
 //--------------------------------------- Funciones de Configuracion -------------------------------------
 
@@ -64,14 +64,13 @@ void dataNodeDesconectarFS();
 //--------------------------------------- Funciones de DataBin -------------------------------------
 
 void dataBinAbrir();
-String dataBinUbicarPuntero(Entero numeroBloque);
-void dataBinSetBloque(Entero numeroBloque, String datos);
-String dataBinGetBloque(Entero numeroBloque);
+Puntero dataBinUbicarPuntero(Entero numeroBloque);
+void dataBinSetBloque(Puntero datos);
+Puntero dataBinGetBloque(Puntero datos);
 Bloque* dataBinCrearBloque(Puntero puntero);
+Puntero dataBinMapear();
 
 //--------------------------------------- Funciones Varias -------------------------------------
 
-void freeMemory();
-Bloque* deserizalizar(Mensaje* mensaje);
-void guardarContenido(Bloque bloqueBuscado, Mensaje* mensajeAGuardar);
-
+Puntero getBloque(Entero numeroBloque);
+void setBloque(Entero numeroBloque, String datos);
