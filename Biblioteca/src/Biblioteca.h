@@ -21,6 +21,7 @@
 #include <pthread.h>
 #include <semaphore.h>
 #include <signal.h>
+#include <math.h>
 #include "commons/config.h"
 #include "commons/log.h"
 #include "commons/string.h"
@@ -31,6 +32,8 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <sys/types.h>
+#include <sys/mman.h>
+#include <fcntl.h>
 
 //--------------------------------------- Constantes -------------------------------------
 
@@ -56,6 +59,8 @@
 #define ID_MASTER 3
 #define ID_WORKER 4
 #define ID_DATANODE 5
+#define ESCRITURA "w"
+#define LECTURA "r"
 
 //--------------------------------------- Definiciones -------------------------------------
 
@@ -274,7 +279,7 @@ bool handShakeIdsIguales(int idEnviada, int idEsperada);
 void funcionSenial(int senial);
 void imprimirMensajeProceso(String mensaje);
 void fileLimpiar(String ruta);
-
+int bitmapCalculo(int cantidadBloques);
 void bitmapDestruir(Bitmap* bitmap);
 
 

@@ -746,9 +746,6 @@ void fileLimpiar(String ruta) {
 	}
 }
 
-void archivoPersistirEntrada(File archivo, String entrada) {
-	fprintf(archivo, "%s", entrada);
-}
 
 
 //Dir getIpPort(Socket socket){
@@ -763,7 +760,8 @@ void archivoPersistirEntrada(File archivo, String entrada) {
 
 //--------------------------------------- Funciones de Bitmap -------------------------------------
 
-Bitmap* bitmapCrear(int tamanioBytes) {
+Bitmap* bitmapCrear(int cantidadBloques) {
+	int tamanioBytes = bitmapCalculo(cantidadBloques);
 	Bitmap* bitmap = malloc(sizeof(Bitmap));
 	bitmap->bits = malloc(tamanioBytes);
 	bitmap->controlBits = bitarray_create_with_mode(bitmap->bits, tamanioBytes, LSB_FIRST);
@@ -794,6 +792,8 @@ bool bitmapBitOcupado(Bitmap* bitmap, int posicion) {
 size_t bitmapCantidadBits(Bitmap* bitmap) {
 	return bitarray_get_max_bit(bitmap->controlBits);
 }
-
+int bitmapCalculo(int cantidadBloques) {
+	return (int)ceil((double)cantidadBloques/(double)8);
+}
 
 
