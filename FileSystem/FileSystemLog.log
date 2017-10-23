@@ -1,6 +1,6 @@
-[INFO] 22:48:22:343 FileSystem/(11638:11638): [EJECUCION] Proceso File System inicializado
-[INFO] 22:48:22:400 FileSystem/(11638:11638): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 22:48:22:401 FileSystem/(11638:11638): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 22:48:22:402 FileSystem/(11638:11638): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
-[INFO] 22:48:24:966 FileSystem/(11638:11643): [ERROR] El directorio raiz no puede ser renombrado
-[INFO] 22:48:29:888 FileSystem/(11638:11638): [EJECUCION] Proceso File System finalizado
+[INFO] 00:40:25:656 FileSystem/(13260:13260): [EJECUCION] Proceso File System inicializado
+[INFO] 00:40:25:716 FileSystem/(13260:13260): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 00:40:25:717 FileSystem/(13260:13260): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 00:40:25:718 FileSystem/(13260:13260): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
+[INFO] 00:40:56:756 FileSystem/(13260:13265): [ERROR] El nombre del directorio es demasiado largo
+[INFO] 00:40:58:595 FileSystem/(13260:13260): [EJECUCION] Proceso File System finalizado

@@ -220,7 +220,6 @@ void comandoError();
 Directorio* directorioCrear(int indice, String nombre, int padre);
 void directorioControlSetearNombre(ControlDirectorio* control);
 void directorioBuscarIdentificador(ControlDirectorio* control);
-void directorioActualizar(ControlDirectorio* control, String rutaDirectorio);
 ControlDirectorio* directorioControlCrear(String rutaDirectorio);
 bool directorioExisteIdentificador(int identificador);
 void directorioPersistirEliminar(Directorio* directorio);
@@ -244,7 +243,7 @@ bool directorioHaySuficientesIndices(ControlDirectorio* control);
 void directorioControlSetearNombre(ControlDirectorio* control);
 ControlDirectorio* directorioControlCrear(String rutaDirectorio);
 void directorioControlarEntradas(ControlDirectorio* control, String path);
-void directorioCrearDirectoriosRestantes(ControlDirectorio* control, String rutaDirectorio);
+int directorioCrearDirectoriosRestantes(ControlDirectorio* control, String rutaDirectorio);
 void directorioCrearEntradas(ControlDirectorio* control, String rutaDirectorio);
 void directorioActualizar(ControlDirectorio* control, String rutaDirectorio);
 bool directorioExisteElNuevoNombre(int idPadre, String nuevoNombre);
@@ -254,9 +253,10 @@ bool directorioTieneAlgunArchivo(int identificador);
 bool directorioTieneAlgunDirectorio(int identificador);
 bool directorioTieneAlgo(int identificador);
 void directorioEliminar(int identificador);
-void directorioCrearConPersistencia(int identificador, String nombre, int identificadorPadre);
+int directorioCrearConPersistencia(int identificador, String nombre, int identificadorPadre);
 void directorioCrearMetadata(Entero identificador);
 void directorioEliminarMetadata(Entero identificador);
+bool directorioEsHijoDe(Directorio* hijo, Directorio* padre);
 
 //--------------------------------------- Funciones de Archivo -------------------------------------
 

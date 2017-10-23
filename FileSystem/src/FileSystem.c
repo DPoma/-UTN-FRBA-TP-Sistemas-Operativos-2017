@@ -743,7 +743,7 @@ void comandoEliminarArchivo(Comando* comando) {
 	fileLimpiar(rutaArchivo);
 	memoriaLiberar(rutaArchivo);
 	listaEliminarDestruyendoElemento(listaArchivos, posicion, (Puntero)archivoDestruir);
-	imprimirMensajeUno(archivoLog, "[ARCHIVO] El archivo %s fue eliminado", comando->argumentos[1]);
+	imprimirMensajeUno(archivoLog, "[ARCHIVO] El archivo %s ha sido eliminado", comando->argumentos[1]);
 }
 
 void comandoRenombrar(Comando* comando) {
@@ -785,6 +785,7 @@ void comandoRenombrar(Comando* comando) {
 		imprimirMensaje(archivoLog, "[ERROR] El archivo o directorio no existe");
 }
 
+
 void comandoMover(Comando* comando) {
 	if(!rutaValida(comando->argumentos[1])) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
@@ -794,12 +795,28 @@ void comandoMover(Comando* comando) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return;
 	}
+	if(stringIguales(comando->argumentos[1], "/")) {
+		imprimirMensaje(archivoLog,"[ERROR] El directorio raiz no puede ser movido");
+		return;
+	}
 	Directorio* directorio = directorioBuscar(comando->argumentos[1]);
-	Directorio* directorioNuevoPadre = directorioBuscar(comando->argumentos[2]);
+	Directorio* directorioNuevoPadre;
+	if(stringIguales(comando->argumentos[2], "/"))
+		directorioNuevoPadre = directorioBuscarEnLista(0);
+	else
+		directorioNuevoPadre = directorioBuscar(comando->argumentos[2]);
 	Archivo* archivo = archivoBuscar(comando->argumentos[1]);
 	if(directorio != NULL && directorioNuevoPadre != NULL) {
 		if(directorioExisteElNuevoNombre(directorioNuevoPadre->identificador, directorio->nombre)) {
 			imprimirMensaje(archivoLog, "[ERROR] La ruta destino ya existe");
+			return;
+		}
+		if(directorioEsHijoDe(directorioNuevoPadre, directorio)) {
+			imprimirMensaje(archivoLog, "[ERROR] El directorio no puede moverse a uno de sus subdirectorios");
+			return;
+		}
+		if(directorioNuevoPadre->identificador == directorio->identificador) {
+			imprimirMensaje(archivoLog, "[ERROR] El directorio no puede moverse a si mismo");
 			return;
 		}
 		directorioPersistirMover(directorio, directorioNuevoPadre->identificador);
@@ -833,13 +850,25 @@ void comandoCrearDirectorio(Comando* comando) {
 		return;
 	}
 	if(stringIguales(comando->argumentos[1], "/")) {
-		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
+		imprimirMensaje(archivoLog,"[ERROR] El directorio raiz no puede ser creado");
 		return;
 	}
 	ControlDirectorio* control = directorioControlCrear(comando->argumentos[1]);
 	while(stringValido(control->nombreDirectorio)) {
 		directorioBuscarIdentificador(control);
-		directorioActualizar(control, comando->argumentos[1]);
+		if (directorioExisteIdentificador(control->identificadorDirectorio))
+			directorioControlarEntradas(control, comando->argumentos[1]);
+		else if(directorioHaySuficientesIndices(control)) {
+			int estado = directorioCrearDirectoriosRestantes(control, comando->argumentos[1]);
+			if(estado == -1) {
+				imprimirMensaje(archivoLog,"[ERROR] El nombre del directorio es demasiado largo");
+				break;
+			}
+		}
+		else {
+			imprimirMensaje(archivoLog,"[ERROR] Se alcanzo el limite de directorios permitidos (100)");
+			break;
+		}
 		directorioControlSetearNombre(control);
 	}
 	int indice;
@@ -1190,38 +1219,31 @@ void directorioEliminarMetadata(Entero identificador) {
 	memoriaLiberar(directorio);
 }
 
-void directorioCrearConPersistencia(int identificador, String nombre, int identificadorPadre) {
+int directorioCrearConPersistencia(int identificador, String nombre, int identificadorPadre) {
+	if(stringLongitud(nombre) >= 255)
+		return -1;
 	Directorio* directorio = directorioCrear(identificador, nombre, identificadorPadre);
 	bitmapOcuparBit(bitmapDirectorios, identificador);
 	listaAgregarElemento(listaDirectorios, directorio);
 	directoriosDisponibles--;
 	directorioCrearMetadata(directorio->identificador);
 	directorioPersistir(directorio);
+	return 0;
 }
 
-void directorioCrearDirectoriosRestantes(ControlDirectorio* control, String rutaDirectorio) {
+int directorioCrearDirectoriosRestantes(ControlDirectorio* control, String rutaDirectorio) {
 	while(stringValido(control->nombresDirectorios[control->indiceNombresDirectorios])) {
 		int indice = directorioBuscarIdentificadorLibre();
-		directorioCrearConPersistencia(indice, control->nombresDirectorios[control->indiceNombresDirectorios], control->identificadorPadre);
+		int estado = directorioCrearConPersistencia(indice, control->nombresDirectorios[control->indiceNombresDirectorios], control->identificadorPadre);
+		if(estado == -1)
+			return -1;
 		control->identificadorPadre = indice;
 		control->indiceNombresDirectorios++;
 	}
 	imprimirMensajeUno(archivoLog, "[DIRECTORIO] El directorio %s fue creado", rutaDirectorio);
+	return 0;
 }
 
-void directorioCrearEntradas(ControlDirectorio* control, String rutaDirectorio) {
-	if(directorioHaySuficientesIndices(control))
-		directorioCrearDirectoriosRestantes(control, rutaDirectorio);
-	else
-		imprimirMensaje(archivoLog,"[ERROR] No se pudo crear el directorio por superar el limite permitido (100)");
-}
-
-void directorioActualizar(ControlDirectorio* control, String rutaDirectorio) {
-	if (directorioExisteIdentificador(control->identificadorDirectorio))
-		directorioControlarEntradas(control, rutaDirectorio);
-	else
-		directorioCrearEntradas(control, rutaDirectorio);
-}
 
 bool directorioExisteElNuevoNombre(int idPadre, String nuevoNombre) {
 
@@ -1304,6 +1326,10 @@ void directorioEliminar(int identificador) {
 	listaEliminarDestruyendoPorCondicion(listaDirectorios, (Puntero)tieneElMismoId, (Puntero)memoriaLiberar);
 	bitmapLiberarBit(bitmapDirectorios, identificador);
 	directoriosDisponibles++;
+}
+
+bool directorioEsHijoDe(Directorio* hijo, Directorio* padre) {
+	return hijo->identificadorPadre == padre->identificador;
 }
 
 //--------------------------------------- Funciones de Archivo -------------------------------------
@@ -1688,7 +1714,7 @@ void metadataIniciar() {
 	listaArchivos = listaCrear();
 	listaDirectorios = listaCrear();
 	bitmapDirectorios = bitmapCrear(13);
-	directoriosDisponibles = 100;
+	directoriosDisponibles = MAX_DIR;
 	directorioCrearConPersistencia(0, "root", -1);
 	testCabecita();
 }
