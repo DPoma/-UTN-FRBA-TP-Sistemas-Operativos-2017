@@ -17,12 +17,11 @@
 
 #define INTSIZE sizeof(int32_t)
 #define TEMPSIZE 12
-#define IPPORTSIZE 10
 #define nullptr NULL
 
 typedef struct __attribute__((__packed__)){
-	int32_t ip;
-	int32_t port;
+	char ip[20];
+	char port[20];
 } Dir;
 #define DIRSIZE sizeof(Dir)
 
@@ -85,7 +84,7 @@ Configuracion* configuracion; //es un puntero por algun motivo?
 ArchivoLog archivoLog;
 int estadoYama;
 
-int ipToNum(int);
+int ipToNum(char*);
 
 void darPathTemporal(char**,char);
 void configurar();
