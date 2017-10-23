@@ -28,20 +28,21 @@ void dataNodeIniciar() {
 	configuracion = configuracionCrear(RUTA_CONFIG, (Puntero)configuracionLeerArchivo, campos);
 	configuracionImprimir(configuracion);
 	dataBinAbrir();
+	dataBinCalcularBloques();
 	punteroDataBin = dataBinMapear();
 	//senialAsignarFuncion(SIGINT, funcionSenial);
 	dataNodeActivar();
 	imprimirMensajeDos(archivoLog, "[CONEXION] Estableciendo conexion con File System (IP: %s | Puerto %s)", configuracion->ipFileSystem, configuracion->puertoFileSystem);
-	Socket socketFileSystem = socketCrearCliente(configuracion->ipFileSystem, configuracion->puertoFileSystem, ID_DATANODE);
-	mensajeEnviar(socketFileSystem, 14, configuracion->nombreNodo, stringLongitud(configuracion->nombreNodo)+1);
+	socketFileSystem = socketCrearCliente(configuracion->ipFileSystem, configuracion->puertoFileSystem, ID_DATANODE);
+	//mensajeEnviar(socketFileSystem, 14, configuracion->nombreNodo, stringLongitud(configuracion->nombreNodo)+1);
 }
 
 void dataNodeAtenderFileSystem(){
 	Mensaje* mensaje = mensajeRecibir(socketFileSystem);
 	switch(mensaje->header.operacion){
-		case ERROR: dataNodeDesconectarFS(); break;
-		case SET_BLOQUE: dataBinSetBloque(mensaje->datos); break;
+		case DESCONEXION: dataNodeDesconectarFS(); break;
 		case GET_BLOQUE: dataBinGetBloque(mensaje->datos); break;
+		case SET_BLOQUE: dataBinSetBloque(mensaje->datos); break;
 	}
 	mensajeDestruir(mensaje);
 }
@@ -56,7 +57,7 @@ void dataNodeFinalizar(){
 
 void dataNodeDesconectarFS() {
 	imprimirMensaje(archivoLog, "[CONEXION] El File System se desconecto");
-	estadoDataNode = dataNodeDesactivado();
+	dataNodeDesactivar();
 }
 
 bool dataNodeActivado() {
@@ -117,24 +118,30 @@ Puntero dataBinUbicarPuntero(Entero numeroBloque) {
 	return puntero;
 }
 
-Puntero dataBinGetBloque(Puntero datos) {
-	Bloque* bloque = dataBinCrearBloque(datos);
-	Puntero puntero = getBloque(bloque->numeroBloque);
-	return puntero;
+void dataBinGetBloque(Puntero datos) {
+	Entero numeroBloque = *(Entero*)datos;
+	if(numeroBloque < dataBinBloques) {
+		Puntero puntero = getBloque(numeroBloque);
+		mensajeEnviar(socketFileSystem, 1, puntero, BLOQUE);
+	}
+	else {
+		imprimirMensaje(archivoLog,"[ERROR] El bloque no existe");
+		mensajeEnviar(socketFileSystem, -2, NULL, NULO);
+	}
 }
 
 void dataBinSetBloque(Puntero datos) {
-	Bloque* bloque = dataBinCrearBloque(datos);
-	setBloque(bloque->numeroBloque, bloque->datos);
+	Entero numeroBloque;
+	memcpy(&numeroBloque, datos, sizeof(Entero));
+	if(numeroBloque < dataBinBloques)
+		setBloque(numeroBloque, datos+sizeof(Entero));
+	else {
+		imprimirMensaje(archivoLog,"[ERROR] El bloque no existe");
+		mensajeEnviar(socketFileSystem, -2, NULL, NULO);
+	}
+
 }
 
-Bloque* dataBinCrearBloque(Puntero datos) {
-	Bloque* bloque = memoriaAlocar(sizeof(Bloque));
-	memcpy(&bloque->numeroBloque, datos, sizeof(Entero));
-	memcpy(&bloque->tamanioDatos, datos+sizeof(Entero), sizeof(Entero));
-	memcpy(bloque->datos, datos+(2*sizeof(Entero)), bloque->tamanioDatos);
-	return bloque;
-}
 
 Puntero dataBinMapear() {
 	Puntero Puntero;
@@ -150,7 +157,7 @@ Puntero dataBinMapear() {
 		perror("fstat");
 		exit(EXIT_FAILURE);
 	}
-	tamanioDataBin = estadoArchivo.st_size;
+	dataBinTamanio = estadoArchivo.st_size;
 
 	/* Segun lo que entendi (mi no saber mucho ingles)
 	 * El mmap() sirve para mapear un archivo en memoria, lo cual es mucho mas rapido y comodo, tambien me evito utilizar los falgo()
@@ -163,7 +170,7 @@ Puntero dataBinMapear() {
 	 * Offset: Desde donde quiero que empiece a apuntar el puntero, en este caso desde el principio (0)
 	 */
 
-	Puntero = mmap(0, tamanioDataBin, PROT_WRITE | PROT_READ | PROT_EXEC, MAP_SHARED, descriptorArchivo, 0);
+	Puntero = mmap(0, dataBinTamanio, PROT_WRITE | PROT_READ | PROT_EXEC, MAP_SHARED, descriptorArchivo, 0);
 	if (Puntero == MAP_FAILED) {
 		imprimirMensaje(archivoLog, "[ERROR] Fallo el mmap(), corran por sus vidas");
 		perror("mmap");
@@ -181,13 +188,20 @@ Puntero getBloque(Entero numeroBloque) {
 	return puntero;
 }
 
-void setBloque(Entero numeroBloque, String datos) {
+void setBloque(Entero numeroBloque, Puntero datos) {
 	Puntero puntero = dataBinUbicarPuntero(numeroBloque);
 	memcpy(puntero, datos, BLOQUE);
 	imprimirMensajeUno(archivoLog, "[DATABIN] El bloque N°%i fue escrito", (int*)numeroBloque);
 }
 
+void dataBinCalcularBloques() {
+	dataBinBloques = (int)ceil((double)dataBinTamanio/(double)BLOQUE);
+}
+
 void funcionSenial(int senial) {
+	socketCerrar(socketFileSystem);
 	dataNodeDesactivar();
+	//dataNodeFinalizar();
 	puts("");
+	//exit(1);
 }

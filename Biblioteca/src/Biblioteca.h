@@ -61,6 +61,7 @@
 #define ID_DATANODE 5
 #define ESCRITURA "w"
 #define LECTURA "r"
+#define BLOQUE 1048576
 
 //--------------------------------------- Definiciones -------------------------------------
 
@@ -140,11 +141,8 @@ void listaSocketsLimpiar(ListaSockets* listaSockets);
 
 void* mensajeCrear(int operacion, Puntero dato, int tamanioDato);
 void mensajeEnviar(Socket socketReceptor, int operacion, Puntero dato, int tamanioDato);
-void mensajeSetearError(Mensaje* mensaje, int idError);
-void mensajeVerificarEstado(Mensaje* mensaje, int bytes);
 bool mensajeOperacionIgualA(Mensaje* mensaje, int operacion);
 Mensaje* mensajeRecibir(Socket socketEmisor);
-bool mensajeOperacionErronea(Mensaje* mensaje);
 void mensajeDestruir(Mensaje* mensaje);
 void mensajeAvisarDesconexion(Mensaje* mensaje);
 bool mensajeConexionFinalizada(int bytes);
