@@ -46,6 +46,7 @@
 
 #define FLAG_B "-b"
 #define FLAG_D "-d"
+#define FLAG_T "-t"
 #define FLAG_CLEAN "--clean"
 #define BUFFER 300
 #define MAX_DIR 100

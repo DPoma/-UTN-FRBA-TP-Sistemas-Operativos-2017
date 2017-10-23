@@ -230,12 +230,12 @@ bool consolaComandoTipoUno(String comando) {
 bool consolaComandoTipoDos(String comando) {
 	return stringIguales(comando, RENAME) ||
 			stringIguales(comando, MV) ||
-			stringIguales(comando, CPFROM) ||
 			stringIguales(comando, CPTO);
 }
 
 bool consolaComandoTipoTres(String comando) {
-	return stringIguales(comando, CPBLOCK);
+	return stringIguales(comando, CPFROM) ||
+			stringIguales(comando, CPBLOCK);
 }
 
 int consolaComandoCantidadArgumentos(String comando) {
@@ -860,7 +860,7 @@ void comandoCrearDirectorio(Comando* comando) {
 			directorioControlarEntradas(control, comando->argumentos[1]);
 		else if(directorioHaySuficientesIndices(control)) {
 			int estado = directorioCrearDirectoriosRestantes(control, comando->argumentos[1]);
-			if(estado == -1) {
+			if(estado == ERROR) {
 				imprimirMensaje(archivoLog,"[ERROR] El nombre del directorio es demasiado largo");
 				break;
 			}
@@ -878,6 +878,24 @@ void comandoCrearDirectorio(Comando* comando) {
 	memoriaLiberar(control);
 }
 
+
+
+
+
+
+
+
+
+
+
+int nodoBuscarBloqueLibre(Nodo* nodo) {
+	int indice;
+		for(indice = 0; bitmapBitOcupado(nodo->bitmap, indice); indice++);
+		if(indice < nodo->bloquesTotales)
+			return indice;
+		else
+			return ERROR;
+}
 
 bool masVago(Nodo* unNodo, Nodo* otroNodo) {
 	return unNodo->bloquesLibres > otroNodo->bloquesLibres;
@@ -897,21 +915,41 @@ Nodo* nodoBuscarVago(int posicion) {
 	return listaObtenerElemento(listaNodos, posicion);
 }
 
-void archivoAlmacenar(String rutaLocal, String rutaYama) {
-/*
-	if(archivoEsBinario)
+void bloqueEnviarANodo(Bloque* bloque, Nodo* nodo, String buffer) {
+	int numeroBloque = nodoBuscarBloqueLibre(nodo);
+	CopiaBloque* copia = copiaBloqueCrear(numeroBloque, nodo->nombre);
+	listaAgregarElemento(bloque->listaCopias, copia);
+	bitmapOcuparBit(nodo->bitmap, numeroBloque);
+	mensajeEnviar(nodo->socket, ESCRIBIR, buffer, BLOQUE);
+	 //TODO habria que guardar el numero de bloque?
+}
+
+void comandoCopiarArchivoDeFS(Comando* comando) {
+	if(stringDistintos(comando->argumentos[1], FLAG_T) &&
+			stringDistintos(comando->argumentos[1], FLAG_B)) {
+		imprimirMensaje(archivoLog, "[ERROR] Comando invalido");
 		return;
-	else
-		//texto
-		return;
-	comandoCrearDirectorio(rutaYama); //Copiar todo de nuevo
-*/
-	File file = fileAbrir(rutaLocal, "r");
+	}
+	File file = fileAbrir(comando->argumentos[2], LECTURA);
 	if(file == NULL) {
 		imprimirMensaje(archivoLog, "[ERROR] El archivo a copiar no existe");
 		return;
 	}
-	String buffer = malloc(BLOQUE);
+	if(!rutaValida(comando->argumentos[3])) {
+		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
+		return;
+	}
+	Directorio* directorio = directorioBuscar(comando->argumentos[3]);
+	if(directorio == NULL) {
+		imprimirMensaje(archivoLog, "[ERROR] El directorio ingresado no existe");
+		return;
+	}
+	String nombreArchivoACopiar = rutaObtenerUltimoNombre(comando->argumentos[2]);
+	if(archivoExiste(directorio->identificador, nombreArchivoACopiar)) {
+		imprimirMensaje(archivoLog, "[ERROR] El archivo ya existe en el File System");
+		return;
+	}
+	String buffer = memoriaAlocar(BLOQUE);
 	Nodo* unNodo = nodoBuscarVago(0);
 	Nodo* otroNodo = nodoBuscarVago(1);
 	if(unNodo == otroNodo) {
@@ -919,30 +957,56 @@ void archivoAlmacenar(String rutaLocal, String rutaYama) {
 		imprimirMensaje(archivoLog, "[ERROR] No puede enviarse dos copias al mismo nodo");
 		return;
 	}
+	String nombre = rutaObtenerUltimoNombre(comando->argumentos[2]);
+	int idPadre = directorioObtenerIdentificador(comando->argumentos[3]);
+	Archivo* archivo;
+	if(stringIguales(comando->argumentos[1], FLAG_B))
+		archivo = archivoCrear(nombre, idPadre, "BINARIO");
+	else
+		archivo = archivoCrear(nombre, idPadre, "TEXTO");
 	int indice;
-	String nombre = rutaObtenerUltimoNombre(rutaLocal);
-	int idPadre = directorioObtenerIdentificador(rutaYama);
-	Archivo* archivo = archivoCrear(nombre, idPadre, 0);
-	for(indice = 0; fread(buffer, sizeof(char),BLOQUE, file) == BLOQUE; indice++) {
-		Bloque* bloque = bloqueCrear(1048576);
-		//bloqueEnviarANodo(bloque, unNodo, buffer); //buscar bloque por fist first, acutalizando bitmap, agregarlo a la lista de copias etc
-		//bloqueEnviarANodo(bloque, otroNodo, buffer);
+	if(stringIguales(comando->argumentos[1], FLAG_B)) {
+		for(indice = 0; fread(buffer, sizeof(char),BLOQUE, file) == BLOQUE; indice++) {
+			Bloque* bloque = bloqueCrear(BLOQUE);
+			bloqueEnviarANodo(bloque, unNodo, buffer);
+			bloqueEnviarANodo(bloque, otroNodo, buffer);
+			listaAgregarElemento(archivo->listaBloques, bloque);
+		}
+	}
+	else {
+		for(indice = 0; fgets(buffer, BLOQUE, file) != NULL; indice++) {
+			if(stringLongitud(buffer)) {
+				//Enviar a bloque anterior
+			}
+			else {
+				Bloque* bloque = bloqueCrear(BLOQUE);
+				bloqueEnviarANodo(bloque, unNodo, buffer);
+				bloqueEnviarANodo(bloque, otroNodo, buffer);
+				listaAgregarElemento(archivo->listaBloques, bloque);
+			}
+		}
 	}
 	archivoPersistirCrear(archivo);
-	imprimirMensaje(archivoLog, "[ARCHIVO] El archivo fue copiado en el File System");
-}
-
-
-void comandoCopiarArchivoDeFS(Comando* comando) {
-	Archivo* archivo = archivoBuscar(comando->argumentos[2]);
-	if(archivo != NULL) {
-		imprimirMensaje(archivoLog, "[ERROR] El archivo ya existe en el File System");
-		return;
-	}
-
-
 	imprimirMensaje(archivoLog, "[ARCHIVO] El archivo se copio en el File System con exito");
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 void comandoCopiarArchivoDeYFS(Comando* comando) {
 
@@ -966,7 +1030,7 @@ void comandoObtenerMD5(Comando* comando) {
 		String md5DeArchivo = memoriaAlocar(BUFFER);
 		String nombreArchivo = rutaObtenerUltimoNombre(comando->argumentos[1]);
 		pidHijo = fork();
-		if(pidHijo == -1)
+		if(pidHijo == ERROR)
 			imprimirMensaje(archivoLog, "[ERROR] Fallo el fork (Estas en problemas amigo)");
 		else if(pidHijo == 0) {
 			close(descriptores[0]);
@@ -1267,7 +1331,7 @@ void directorioEliminarMetadata(Entero identificador) {
 
 int directorioCrearConPersistencia(int identificador, String nombre, int identificadorPadre) {
 	if(stringLongitud(nombre) >= 255)
-		return -1;
+		return ERROR;
 	Directorio* directorio = directorioCrear(identificador, nombre, identificadorPadre);
 	bitmapOcuparBit(bitmapDirectorios, identificador);
 	listaAgregarElemento(listaDirectorios, directorio);
@@ -1281,8 +1345,8 @@ int directorioCrearDirectoriosRestantes(ControlDirectorio* control, String rutaD
 	while(stringValido(control->nombresDirectorios[control->indiceNombresDirectorios])) {
 		int indice = directorioBuscarIdentificadorLibre();
 		int estado = directorioCrearConPersistencia(indice, control->nombresDirectorios[control->indiceNombresDirectorios], control->identificadorPadre);
-		if(estado == -1)
-			return -1;
+		if(estado == ERROR)
+			return ERROR;
 		control->identificadorPadre = indice;
 		control->indiceNombresDirectorios++;
 	}
