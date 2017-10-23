@@ -32,6 +32,8 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <sys/types.h>
+#include <sys/mman.h>
+#include <fcntl.h>
 
 //--------------------------------------- Constantes -------------------------------------
 
@@ -57,6 +59,8 @@
 #define ID_MASTER 3
 #define ID_WORKER 4
 #define ID_DATANODE 5
+#define ESCRITURA "w"
+#define LECTURA "r"
 
 //--------------------------------------- Definiciones -------------------------------------
 

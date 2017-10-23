@@ -7,39 +7,16 @@
  */
 
 #include "../../Biblioteca/src/Biblioteca.c"
-#include <sys/mman.h>
-#include <fcntl.h>
 
-#include <sys/types.h>
-#include <sys/stat.h>
-
+//--------------------------------------- Constantes -------------------------------------
 
 #define RUTA_CONFIG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Worker/NodoConfig.conf"
 #define RUTA_LOG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/DataNode/DataNodeLog.log"
+#define BLOQUE 1048576
+#define GET_BLOQUE 101
+#define SET_BLOQUE 102
 
-//Defines de operaciones
-
-#define GETBLOQUE 101
-#define SETBLOQUE 102
-
-#define EXITOGETBLOQUE 103
-#define FRACASOGETBLOQUE 104
-
-#define EXITOSETBLOQUE 105
-#define FRACASOSETBLOQUE 106
-
-#define MB 1048576
-
-typedef struct{
-	int nroBloque;
-/*		EL tamaño de un contenido es de 1 MB = 1024 Kb (no se si esta bien esto)
-
-//Debo establecer el tamaño del contenido que se pueda guardar
-	char* contenido = malloc(sizeof(char)*1024*1024*8);
-
-	Bloque* sig;
-	La pequeña linea de arriba da error, no recuedo como debía ser la estructura para que funque*/
-}Bloque;
+//--------------------------------------- Estructuras -------------------------------------
 
 typedef struct {
 	char ipFileSystem[50];
@@ -50,31 +27,51 @@ typedef struct {
 } Configuracion;
 
 typedef struct{
-	int nroBloque;
-	int size_datos;
-	char* datos;
-}Operacion;
+	Entero numeroBloque;
+	Entero tamanioDatos;
+	Puntero datos;
+} Bloque;
 
+//--------------------------------------- Variables Globales -------------------------------------
 
-
+int estadoDataNode;
+String punteroDatabin;;
 String campos[5];
+Socket socketFileSystem;
 Configuracion* configuracion;
 ArchivoLog archivoLog;
-int estadoDataNode;
-FILE* dataBin;
+File dataBin;
 Bloque bloques;
 
+
+//--------------------------------------- Funciones de Configuracion -------------------------------------
+
 Configuracion* configuracionLeerArchivo(ArchivoConfig archivoConfig);
-void archivoConfigObtenerCampos();
+void configuracionImprimir(Configuracion* configuracion);
+void configuracionIniciarCampos();
+
+//--------------------------------------- Funciones de DataNode -------------------------------------
+
 void dataNodeIniciar();
+void dataNodeAtenderFileSystem();
+void dataNodeFinalizar();
 bool dataNodeActivado();
 bool dataNodeDesactivado();
 void dataNodeActivar();
 void dataNodeDesactivar();
-void finalizarDataNode();
+void dataNodeDesconectarFS();
+
+//--------------------------------------- Funciones de DataBin -------------------------------------
+
+void dataBinAbrir();
+String dataBinUbicarPuntero(Entero numeroBloque);
+void dataBinSetBloque(Entero numeroBloque, String datos);
+String dataBinGetBloque(Entero numeroBloque);
+Bloque* dataBinCrearBloque(Puntero puntero);
+
+//--------------------------------------- Funciones Varias -------------------------------------
+
 void freeMemory();
-Operacion* deserizalizar(Mensaje* mensaje);
-int setBloque(int nroBloque, char* datos, int size);
-char* getBloque(int nroBloque);
+Bloque* deserizalizar(Mensaje* mensaje);
 void guardarContenido(Bloque bloqueBuscado, Mensaje* mensajeAGuardar);
-void atenderFileSystem(Socket unSocket);
+

@@ -12,203 +12,52 @@
 
 int main(void) {
 	dataNodeIniciar();
-	imprimirMensajeDos(archivoLog, "[CONEXION] Estableciendo conexion con File System (IP: %s | Puerto %s)", configuracion->ipFileSystem, configuracion->puertoFileSystem);
-	Socket unSocket = socketCrearCliente(configuracion->ipFileSystem, configuracion->puertoFileSystem, ID_DATANODE);
-	mensajeEnviar(unSocket, 14, configuracion->nombreNodo, stringLongitud(configuracion->nombreNodo)+1);
-
-	dataBin=fopen(configuracion->rutaDataBin, "r+");
-/*
-	struct stat s;
-	size_t tamanio;
-	char* map;
-	int fdDatabin = open(configuracion->rutaDataBin, O_RDONLY|O_WRONLY);
-	tamanio=s.st_size;
-
-	map = mmap(0,tamanio,PROT_READ,MAP_SHARED,fdDatabin,0);
-*/
-	if(dataBin==NULL){
-		perror("No se pudo abrir databin");
-		imprimirMensaje(archivoLog,"[DATABIN] Error al abrir DataBin");
-		exit(-1);
-	}
-
-
-	while(dataNodeActivado()){
-		atenderFileSystem(unSocket);
-	}
-
-	finalizarDataNode();
-	fclose(dataBin);
-	socketCerrar(unSocket);
+	while(dataNodeActivado())
+		dataNodeAtenderFileSystem();
+	dataNodeFinalizar();
 	return EXIT_SUCCESS;
-
 }
 
-Configuracion* configuracionLeerArchivo(ArchivoConfig archivoConfig) {
-	Configuracion* configuracion = memoriaAlocar(sizeof(Configuracion));
-	stringCopiar(configuracion->ipFileSystem, archivoConfigStringDe(archivoConfig, "IP_FILESYSTEM"));
-	stringCopiar(configuracion->puertoFileSystem, archivoConfigStringDe(archivoConfig, "PUERTO_FILESYSTEM"));
-	stringCopiar(configuracion->nombreNodo, archivoConfigStringDe(archivoConfig, "NOMBRE_NODO"));
-	stringCopiar(configuracion->puertoWorker, archivoConfigStringDe(archivoConfig, "PUERTO_WORKER"));
-	stringCopiar(configuracion->rutaDataBin, archivoConfigStringDe(archivoConfig, "RUTA_DATABIN"));
-	archivoConfigDestruir(archivoConfig);
-	return configuracion;
-}
-
-
-int setBloque(int nroBloque, char* datos, int size){ //el prumer bloque es 0
-
-	if(fseek(dataBin,nroBloque*MB,SEEK_SET)){
-		perror("Error en el posicionamiento del puntero");
-		imprimirMensaje(archivoLog, "[SETBLOQUE] No se pudo posicionar el puntero");
-		return -1;
-	}
-	else{
-		if(fwrite(datos,sizeof(char),size,dataBin)!= size){
-			perror("Error en la escritura");
-			imprimirMensajeUno(archivoLog,"[SETBLOQUE] No se pudo escribir en el bloque numero: %d", &nroBloque);
-			rewind(dataBin); //posiciona el puntero al principio del archivo
-			return FRACASOSETBLOQUE;
-		}
-		else{
-			imprimirMensajeUno(archivoLog, "[SETBLOQUE] Se escribio en el bloque numero: %d", &nroBloque);
-			rewind(dataBin); //posiciona el puntero al principio del archivo
-			return EXITOSETBLOQUE;
-		}
-	}
-
-
-
-}
-
-char* getBloque(int nroBloque){
-	char* data = malloc(sizeof(char)*MB);
-
-	if(fseek(dataBin,nroBloque*MB,SEEK_SET)){
-		perror("Error en el posicionamiento del puntero");
-		imprimirMensaje(archivoLog, "[GETBLOQUE] No se pudo posicionar el puntero");
-	}
-
-	fread(data,sizeof(char),MB,dataBin);
-	imprimirMensajeUno(archivoLog,"[GETBLOQUE] se leyo el bloque numero: %d", &nroBloque);
-
-	rewind(dataBin);
-
-	return data;
-
-}
-
-Operacion* deserializar(Mensaje* mensaje){
-	int numeroBloque;
-	int tamaniodatos;
-	char* data;
-	int size = mensaje->header.tamanio;
-
-	Operacion* op = malloc(size);
-
-	memcpy(&numeroBloque, mensaje->datos, sizeof(int));
-	memcpy(&tamaniodatos, mensaje->datos + sizeof(int), sizeof(int));
-	memcpy(&data, mensaje->datos + sizeof(int)+ tamaniodatos, tamaniodatos);
-
-	op->nroBloque = numeroBloque;
-	op->size_datos = tamaniodatos;
-	op->datos = data;
-
-	return op;
-
-
-}
-
-
-
-void atenderFileSystem(Socket unSocket){
-	Mensaje* mensaje = mensajeRecibir(unSocket);
-	int status;
-	char* data;
-	int len;
-	Operacion* op = deserializar(mensaje);
-	switch(mensaje->header.operacion){
-		case -1:
-		imprimirMensaje(archivoLog, "Error en el File System");
-		finalizarDataNode();
-		estadoDataNode = dataNodeDesactivado();
-		status = -1;
-		mensajeEnviar(unSocket, status, NULL, sizeof(int));
-		break;
-
-		case SETBLOQUE:
-		status = setBloque(op->nroBloque,op->datos, op->size_datos);
-		imprimirMensajeUno(archivoLog, "[SETBLOQUE]Grabando en el bloque: %d", &op->nroBloque);
-
-		mensajeEnviar(unSocket, status, NULL, sizeof(int));
-
-		estadoDataNode = dataNodeActivado();
-		break;
-
-		case GETBLOQUE:
-
-		data = malloc(MB + sizeof(int));
-		data = getBloque(op->nroBloque);
-		imprimirMensajeUno(archivoLog, "[GETBLOQUE]Se Obtuvo el bloque numero: %d", &op->nroBloque);
-
-		if(data==NULL){
-			imprimirMensajeUno(archivoLog, "El bloque numero: %d esta vacio o se produjo un error", &op->nroBloque);
-			status = FRACASOGETBLOQUE;
-			mensajeEnviar(unSocket, status, NULL, sizeof(int));
-		}
-
-		else{
-
-			status = EXITOGETBLOQUE;
-			len = strlen(data) + 1;
-			mensajeEnviar(unSocket, status, data, len);
-		}
-
-		estadoDataNode = dataNodeActivado();
-		break;
-	}
-	 free(op);
-	 free(data);
-}
-
-
-
-void finalizarDataNode(){
-	imprimirMensaje(archivoLog, "[EJECUCION] Proceso Data Node finalizado");
-	archivoLogDestruir(archivoLog);
-	memoriaLiberar(configuracion);
-}
-
-void configuracionImprimir(Configuracion* configuracion) {
-	imprimirMensajeUno(archivoLog, "[CONFIGURACION] Nombre Nodo: %s", configuracion->nombreNodo);
-	imprimirMensajeUno(archivoLog, "[CONFIGURACION] Ruta archivo data.bin: %s", configuracion->rutaDataBin);
-}
-
-void archivoConfigObtenerCampos() {
-	campos[0] = "IP_FILESYSTEM";
-	campos[1] = "PUERTO_FILESYSTEM";
-	campos[2] = "NOMBRE_NODO";
-	campos[3] = "PUERTO_WORKER";
-	campos[4] = "RUTA_DATABIN";
-	campos[5] = "IP_PROPIO";
-}
-
-void funcionSenial(int senial) {
-	dataNodeDesactivar();
-	puts("");
-}
+//--------------------------------------- Funciones de DataNode -------------------------------------
 
 void dataNodeIniciar() {
 	pantallaLimpiar();
 	imprimirMensajeProceso("# PROCESO DATA NODE");
 	archivoLog = archivoLogCrear(RUTA_LOG, "DataNode");
-	archivoConfigObtenerCampos();
+	configuracionIniciarCampos();
 	configuracion = configuracionCrear(RUTA_CONFIG, (Puntero)configuracionLeerArchivo, campos);
 	configuracionImprimir(configuracion);
+	dataBinAbrir();
 	//senialAsignarFuncion(SIGINT, funcionSenial);
 	dataNodeActivar();
+	imprimirMensajeDos(archivoLog, "[CONEXION] Estableciendo conexion con File System (IP: %s | Puerto %s)", configuracion->ipFileSystem, configuracion->puertoFileSystem);
+	Socket socketFileSystem = socketCrearCliente(configuracion->ipFileSystem, configuracion->puertoFileSystem, ID_DATANODE);
+	mensajeEnviar(socketFileSystem, 14, configuracion->nombreNodo, stringLongitud(configuracion->nombreNodo)+1);
 }
 
+void dataNodeAtenderFileSystem(){
+	Mensaje* mensaje = mensajeRecibir(socketFileSystem);
+	Bloque* bloque = dataBinCrearBloque(mensaje->datos); //Ponerlo en set y get ya que sino cuando reciba error copia cualquier cosa
+	switch(mensaje->header.operacion){
+		case ERROR: dataNodeDesconectarFS(); break;
+		case SET_BLOQUE: dataBinSetBloque(bloque->numeroBloque, bloque->datos); break;
+		case GET_BLOQUE: dataBinGetBloque(bloque->numeroBloque); break;
+	}
+	mensajeDestruir(mensaje);
+}
+
+void dataNodeFinalizar(){
+	socketCerrar(socketFileSystem);
+	memoriaLiberar(configuracion);
+	fileCerrar(dataBin);
+	imprimirMensaje(archivoLog, "[EJECUCION] Proceso Data Node finalizado");
+	archivoLogDestruir(archivoLog);
+}
+
+void dataNodeDesconectarFS() {
+	imprimirMensaje(archivoLog, "[CONEXION] El File System se desconecto");
+	estadoDataNode = dataNodeDesactivado();
+}
 
 bool dataNodeActivado() {
 	return estadoDataNode == ACTIVADO;
@@ -224,6 +73,75 @@ void dataNodeActivar() {
 
 void dataNodeDesactivar() {
 	estadoDataNode = DESACTIVADO;
-
 }
 
+//--------------------------------------- Funciones de Configuracion -------------------------------------
+
+Configuracion* configuracionLeerArchivo(ArchivoConfig archivoConfig) {
+	Configuracion* configuracion = memoriaAlocar(sizeof(Configuracion));
+	stringCopiar(configuracion->ipFileSystem, archivoConfigStringDe(archivoConfig, "IP_FILESYSTEM"));
+	stringCopiar(configuracion->puertoFileSystem, archivoConfigStringDe(archivoConfig, "PUERTO_FILESYSTEM"));
+	stringCopiar(configuracion->nombreNodo, archivoConfigStringDe(archivoConfig, "NOMBRE_NODO"));
+	stringCopiar(configuracion->puertoWorker, archivoConfigStringDe(archivoConfig, "PUERTO_WORKER"));
+	stringCopiar(configuracion->rutaDataBin, archivoConfigStringDe(archivoConfig, "RUTA_DATABIN"));
+	archivoConfigDestruir(archivoConfig);
+	return configuracion;
+}
+
+void configuracionImprimir(Configuracion* configuracion) {
+	imprimirMensajeUno(archivoLog, "[CONFIGURACION] Nombre Nodo: %s", configuracion->nombreNodo);
+	imprimirMensajeUno(archivoLog, "[CONFIGURACION] Ruta archivo data.bin: %s", configuracion->rutaDataBin);
+}
+
+void configuracionIniciarCampos() {
+	campos[0] = "IP_FILESYSTEM";
+	campos[1] = "PUERTO_FILESYSTEM";
+	campos[2] = "NOMBRE_NODO";
+	campos[3] = "PUERTO_WORKER";
+	campos[4] = "RUTA_DATABIN";
+	campos[5] = "IP_PROPIO";
+}
+
+
+//--------------------------------------- Funciones de DataBin -------------------------------------
+
+void dataBinAbrir() {
+	dataBin = fileAbrir(configuracion->rutaDataBin, LECTURA);
+	if(dataBin == NULL){
+		imprimirMensaje(archivoLog,"[ERROR] No se pudo abrir el archivo data.bin");
+		exit(EXIT_FAILURE);
+	}
+}
+
+String dataBinUbicarPuntero(Entero numeroBloque) {
+	String puntero = punteroDatabin + (BLOQUE * numeroBloque);
+	return puntero;
+}
+
+void dataBinSetBloque(Entero numeroBloque, String datos) {
+	String puntero = dataBinUbicarPuntero(numeroBloque);
+	memcpy(puntero, datos, BLOQUE);
+	imprimirMensajeUno(archivoLog, "[DATABIN] El bloque N°%i fue escrito", (int*)numeroBloque);
+	return;
+}
+
+String dataBinGetBloque(Entero numeroBloque) {
+	String puntero = dataBinUbicarPuntero(numeroBloque);
+	imprimirMensajeUno(archivoLog, "[DATABIN] El bloque N°%i fue leido", (int*)numeroBloque);
+	return puntero;
+}
+
+Bloque* dataBinCrearBloque(Puntero puntero) {
+	Bloque* bloque = memoriaAlocar(sizeof(Bloque));
+	memcpy(&bloque->numeroBloque, puntero, sizeof(Entero));
+	memcpy(&bloque->tamanioDatos, puntero+sizeof(Entero), sizeof(Entero));
+	memcpy(bloque->datos, puntero+(2*sizeof(Entero)), bloque->tamanioDatos);
+	return bloque;
+}
+
+//--------------------------------------- Funciones varias -------------------------------------
+
+void funcionSenial(int senial) {
+	dataNodeDesactivar();
+	puts("");
+}

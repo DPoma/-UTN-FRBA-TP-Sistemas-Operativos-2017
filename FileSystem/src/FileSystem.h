@@ -8,6 +8,8 @@
 
 #include "../../Biblioteca/src/Biblioteca.c"
 
+//--------------------------------------- Constantes -------------------------------------
+
 #define RUTA_CONFIG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/FileSystem/FileSystemConfig.conf"
 #define RUTA_LOG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/FileSystem/FileSystemLog.log"
 
@@ -40,9 +42,6 @@
 #define LS "ls"
 #define INFO "info"
 #define EXIT "exit"
-
-#define ESCRITURA "w"
-#define LECTURA "r"
 
 #define FLAG_B "-b"
 #define FLAG_D "-d"
