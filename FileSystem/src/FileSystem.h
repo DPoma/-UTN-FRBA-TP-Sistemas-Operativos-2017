@@ -111,6 +111,8 @@ typedef struct __attribute__((packed)){
 } CopiaBloque;
 
 typedef struct __attribute__((packed)){
+	char puerto[20];
+	char ip[20];
 	char nombre[10];
 	Bitmap* bitmap;
 	int bloquesLibres;
@@ -118,6 +120,11 @@ typedef struct __attribute__((packed)){
 	Socket socket;
 } Nodo;
 
+
+typedef struct __attribute__((packed)) {
+	char ip[20];
+	char puerto[20];
+} ConexionNodo;
 
 //--------------------------------------- Variables globales -------------------------------------
 
@@ -132,6 +139,9 @@ Lista listaDirectorios;
 Lista listaArchivos;
 Lista listaNodos;
 Bitmap* bitmapDirectorios;
+Socket socketYama;
+Socket socketDataNode;
+Socket socketWorker;
 String rutaDirectorioArchivos;
 String rutaDirectorioBitmaps;
 String rutaDirectorios;
@@ -288,7 +298,7 @@ void copiaBloqueEliminar(CopiaBloque* copia);
 
 //--------------------------------------- Funciones de Nodo -------------------------------------
 
-Nodo* nodoCrear(String nombre, int bloquesTotales, int bloquesLibres, Socket unSocket);
+Nodo* nodoCrear(int bloquesTotales, int bloquesLibres, Socket unSocket);
 void nodoPersistirConectados();
 void nodoLimpiarLista();
 void nodoDestruir(Nodo* nodo);

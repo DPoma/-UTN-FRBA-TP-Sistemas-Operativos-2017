@@ -1,6 +1,3 @@
-[INFO] 20:15:50:660 DataNode/(13141:13141): [CONFIGURACION] Nombre Nodo: NODO63
-[INFO] 20:15:50:681 DataNode/(13141:13141): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data.bin
-[INFO] 20:15:50:690 DataNode/(13141:13141): [CONEXION] Estableciendo conexion con File System (IP: 127.0.0.1 | Puerto 5040)
-[INFO] 20:15:50:716 DataNode/(13141:13141): [ERROR] El bloque no existe
-[INFO] 20:15:52:202 DataNode/(13141:13141): [CONEXION] El File System se desconecto
-[INFO] 20:15:52:210 DataNode/(13141:13141): [EJECUCION] Proceso Data Node finalizado
+[INFO] 20:30:39:441 DataNode/(13687:13687): [CONFIGURACION] Nombre Nodo: NODO63
+[INFO] 20:30:39:441 DataNode/(13687:13687): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data.bin
+[INFO] 20:30:39:441 DataNode/(13687:13687): [CONEXION] Estableciendo conexion con File System (IP: 127.0.0.1 | Puerto 5040)

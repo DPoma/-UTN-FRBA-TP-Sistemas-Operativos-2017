@@ -512,6 +512,7 @@ Socket servidorAceptarYAMA(Servidor* servidor, Socket unSocket) {
 		servidor->procesoYAMA = nuevoSocket;
 		imprimirMensaje(archivoLog, "[CONEXION] El proceso YAMA se ha conectado");
 	}
+	socketYama = nuevoSocket;
 	return nuevoSocket;
 }
 
@@ -581,19 +582,22 @@ void servidorFinalizar(Servidor* servidor) {
 
 void servidorRegistrarDataNode(Servidor* servidor, Socket nuevoSocket) {
 	if(nuevoSocket != ERROR) {
-		if(estadoSeguro == 0) {
+		//if(estadoSeguro == 0) { TODO POnerlo lindo
 			listaSocketsAgregar(nuevoSocket, &servidor->listaDataNodes);
 			Mensaje* mensaje = mensajeRecibir(nuevoSocket);
-			Nodo* nodo = nodoCrear(mensaje->datos, 190, 0, nuevoSocket);
+			Nodo* nodo = nodoCrear(190, 0, nuevoSocket);
+			memcpy(nodo->nombre, mensaje->datos, 20);
+			memcpy(nodo->ip, mensaje->datos+10, 20);
+			memcpy(nodo->puerto, mensaje->datos+30, 20);
 			mensajeDestruir(mensaje);
 			listaAgregarElemento(listaNodos, nodo);
 			imprimirMensaje(archivoLog, "[CONEXION] Un proceso Data Node se ha conectado");
-		}
-		else {
+		//}
+		//else {
 			//Nodo* nodo = nodoRecuperar();
 			//listaAgregarElemento(listaNodos, nodo);
 			//imprimirMensaje(archivoLog, "[CONEXION] Un proceso Data Node se ha reconectado");
-		}
+		//}
 	}
 }
 
@@ -631,6 +635,16 @@ void comandoFormatearFileSystem() {
 	nodoFormatearConectados();
 	nodoPersistirConectados();
 	estadoSeguro = 1;
+	//TODO Ponerlo lindo
+	int cantidadNodos = listaCantidadElementos(listaNodos);
+	ConexionNodo nodos[cantidadNodos];
+	int indice;
+	for(indice=0; indice<cantidadNodos; indice++) {
+		Nodo* nodo = listaObtenerElemento(listaNodos, indice);
+		stringCopiar(nodos[indice].ip, nodo->ip);
+		stringCopiar(nodos[indice].puerto, nodo->puerto);
+	}
+	mensajeEnviar(socketYama, 201, nodos, cantidadNodos*sizeof(ConexionNodo));
 	imprimirMensaje(archivoLog, "[ESTADO] El File System ha sido formateado");
 }
 
@@ -1678,9 +1692,8 @@ void archivoPersistirEliminarBloque(Archivo* archivo, int numeroBloque, int nume
 
 //--------------------------------------- Funciones de Nodo -------------------------------------
 
-Nodo* nodoCrear(String nombre, int bloquesTotales, int bloquesLibres, Socket unSocket) {
+Nodo* nodoCrear(int bloquesTotales, int bloquesLibres, Socket unSocket) {
 	Nodo* nodo = memoriaAlocar(sizeof(Nodo));
-	stringCopiar(nodo->nombre, nombre);
 	nodo->bloquesTotales = bloquesTotales;
 	nodo->bloquesLibres = bloquesLibres;
 	nodo->socket = unSocket;
@@ -1731,7 +1744,8 @@ void nodoRecuperarEstadoAnterior() {
 		stringCopiar(campo, nombreNodo);
 		stringConcatenar(&campo, "_BLOQUES_LIBRES");
 		int bloquesLibres = archivoConfigEnteroDe(archivoNodo, campo);
-		Nodo* nodo = nodoCrear(nombreNodo, bloquesTotales, bloquesLibres, 0);
+		Nodo* nodo = nodoCrear(bloquesTotales, bloquesLibres, 0);
+		stringCopiar(nodo->nombre,nombreNodo);
 		memoriaLiberar(campo);
 		listaAgregarElemento(listaNodos, nodo);
 	}
@@ -1826,7 +1840,7 @@ void metadataIniciar() {
 	bitmapDirectorios = bitmapCrear(13);
 	directoriosDisponibles = MAX_DIR;
 	directorioCrearConPersistencia(0, "root", -1);
-	testCabecita();
+	//testCabecita();
 }
 
 void metadataRecuperar() {
@@ -1925,10 +1939,12 @@ bool rutaEsNumero(String ruta) {
 }
 
 void testCabecita() {
-	Nodo* nodo1 = nodoCrear("NODIN1", 10, 1, 99);
+	Nodo* nodo1 = nodoCrear(10, 1, 99);
+	stringCopiar(nodo1->nombre, "NODO1");
 	bitmapOcuparBit(nodo1->bitmap, 4);
 	bitmapOcuparBit(nodo1->bitmap, 9);
-	Nodo* nodo2 = nodoCrear("NODIN2", 5, 3, 99);
+	Nodo* nodo2 = nodoCrear(5, 3, 99);
+	stringCopiar(nodo1->nombre, "NODO2");
 	bitmapOcuparBit(nodo2->bitmap, 0);
 	nodoPersistirBitmap(nodo1);
 	nodoPersistirBitmap(nodo2);
