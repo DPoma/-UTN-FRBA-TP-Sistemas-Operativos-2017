@@ -243,6 +243,8 @@ void listaOrdenar(Lista lista, bool(*funcion)(void*, void*));
 int listaCuantosCumplen(Lista lista, bool(*funcion)(void*));
 bool listaCumpleAlguno(Lista lista, bool(*funcion)(void*));
 bool listaCumplenTodos(Lista lista, bool(*funcion)(void*));
+void* listaPrimerElemento(Lista lista);
+bool listaTieneElementos(Lista lista);
 
 //--------------------------------------- Funciones para String -------------------------------------
 String stringCrear();

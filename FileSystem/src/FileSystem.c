@@ -24,7 +24,7 @@ int main(int argc, String* argsv) {
 
 void fileSystemIniciar(String flag) {
 	pantallaLimpiar();
-	logIniciar();
+	configuracionIniciarLog();
 	configuracionIniciar();
 	estadoSeguro = 0;
 	fileSystemActivar();
@@ -104,6 +104,12 @@ void configuracionIniciar() {
 	configuracionImprimir(configuracion);
 }
 
+void configuracionIniciarLog() {
+	archivoLog = archivoLogCrear(RUTA_LOG, "FileSystem");
+	imprimirMensajeProceso("# PROCESO FILE SYSTEM");
+	imprimirMensaje(archivoLog, "[EJECUCION] Proceso File System inicializado");
+}
+
 void configuracionIniciarRutas() {
 	rutaDirectorioArchivos = string_from_format("%s/archivos", configuracion->rutaMetadata);
 	rutaDirectorioBitmaps = string_from_format("%s/bitmaps", configuracion->rutaMetadata);
@@ -123,6 +129,179 @@ void configuracionDestruirRutas() {
 	memoriaLiberar(rutaArchivos);
 }
 
+//--------------------------------------- Funciones de Servidor -------------------------------------
+
+bool servidorObtenerMaximoSocket(Servidor* servidor) {
+	return servidor->maximoSocket;
+}
+
+void servidorSetearListaSelect(Servidor* servidor) {
+	servidor->listaSelect = servidor->listaMaster;
+}
+
+void servidorControlarMaximoSocket(Servidor* servidor, Socket unSocket) {
+	if(socketEsMayor(unSocket, servidor->maximoSocket))
+		servidor->maximoSocket = unSocket;
+}
+
+void servidorEsperarSolicitud(Servidor* servidor) {
+	socketSelect(servidor->maximoSocket, &servidor->listaSelect);
+}
+
+
+void servidorFinalizarConexion(Servidor* servidor, Socket unSocket) {
+
+	bool buscarNodoPorSocket(void* unNodo) {
+		Nodo* nodo = (Nodo*)unNodo;;
+		return nodo->socket == unSocket;
+	}
+
+	listaSocketsEliminar(unSocket, &servidor->listaMaster);
+	if(socketEsDataNode(servidor, unSocket)) {
+		listaSocketsEliminar(unSocket, &servidor->listaDataNodes);
+		listaEliminarDestruyendoPorCondicion(listaNodos, (Puntero)buscarNodoPorSocket, (Puntero)nodoDestruir);
+		imprimirMensaje(archivoLog, "[CONEXION] Un proceso Data Node se ha desconectado");
+	}
+	else
+		imprimirMensaje(archivoLog, "[CONEXION] El proceso YAMA se ha desconectado");
+	socketCerrar(unSocket);
+}
+
+void servidorRegistrarConexion(Servidor* servidor, Socket unSocket) {
+	if(unSocket != ERROR) {
+		listaSocketsAgregar(unSocket, &servidor->listaMaster);
+		servidorControlarMaximoSocket(servidor, unSocket);
+	}
+}
+
+Socket servidorAceptarYAMA(Servidor* servidor, Socket unSocket) {
+	Socket nuevoSocket;
+	nuevoSocket = socketAceptar(unSocket, ID_YAMA);
+	if(nuevoSocket != ERROR) {
+		servidor->procesoYAMA = nuevoSocket;
+		imprimirMensaje(archivoLog, "[CONEXION] El proceso YAMA se ha conectado");
+	}
+	socketYama = nuevoSocket;
+	return nuevoSocket;
+}
+
+void servidorRecibirMensaje(Servidor* servidor, Socket unSocket) {
+	Mensaje* mensaje = mensajeRecibir(unSocket);
+	if(mensajeDesconexion(mensaje))
+		servidorFinalizarConexion(servidor, unSocket);
+	else {
+		puts("MENSAJE");
+	}
+	mensajeDestruir(mensaje);
+}
+
+void servidorActivarListenerYAMA(Servidor* servidor) {
+	servidor->listenerYAMA = socketCrearListener(configuracion->puertoYAMA);
+	listaSocketsAgregar(servidor->listenerYAMA, &servidor->listaMaster);
+	servidorControlarMaximoSocket(servidor, servidor->listenerYAMA);
+}
+
+void servidorActivarListenerDataNode(Servidor* servidor) {
+	servidor->listenerDataNode = socketCrearListener(configuracion->puertoDataNode);
+	listaSocketsAgregar(servidor->listenerDataNode, &servidor->listaMaster);
+	servidorControlarMaximoSocket(servidor, servidor->listenerDataNode);
+}
+
+void servidorActivarListeners(Servidor* servidor) {
+	servidorActivarListenerDataNode(servidor);
+	servidorActivarListenerYAMA(servidor);
+}
+
+void servidorInicializar(Servidor* servidor) {
+	servidor->maximoSocket = 0;
+	listaSocketsLimpiar(&servidor->listaMaster);
+	listaSocketsLimpiar(&servidor->listaSelect);
+	listaSocketsLimpiar(&servidor->listaDataNodes);
+	servidorActivarListeners(servidor);
+}
+
+void servidorFinalizar(Servidor* servidor) {
+	memoriaLiberar(servidor);
+}
+
+void servidorRegistrarDataNode(Servidor* servidor, Socket nuevoSocket) {
+	if(nuevoSocket != ERROR) {
+		//if(estadoSeguro == 0) { TODO POnerlo lindo
+			listaSocketsAgregar(nuevoSocket, &servidor->listaDataNodes);
+			Mensaje* mensaje = mensajeRecibir(nuevoSocket);
+			Nodo* nodo = nodoCrear(20, 20, nuevoSocket);
+			memcpy(nodo->nombre, mensaje->datos, 10);
+			memcpy(nodo->ip, mensaje->datos+10, 20);
+			memcpy(nodo->puerto, mensaje->datos+30, 20);
+			printf("IP = %s\n", nodo->ip);
+			printf("puerto = %s\n", nodo->puerto);
+			printf("nombre = %s\n", nodo->nombre);
+			mensajeDestruir(mensaje);
+			listaAgregarElemento(listaNodos, nodo);
+			imprimirMensaje(archivoLog, "[CONEXION] Un proceso Data Node se ha conectado");
+		//}
+		//else {
+			//Nodo* nodo = nodoRecuperar();
+			//listaAgregarElemento(listaNodos, nodo);
+			//imprimirMensaje(archivoLog, "[CONEXION] Un proceso Data Node se ha reconectado");
+		//}
+	}
+}
+
+void servidorAtenderPedidos(Servidor* servidor) {
+	servidorSetearListaSelect(servidor);
+	servidorEsperarSolicitud(servidor);
+	Socket unSocket;
+	Socket maximoSocket = servidor->maximoSocket;
+	for(unSocket = 0; unSocket <= maximoSocket; unSocket++)
+		if (socketRealizoSolicitud(servidor, unSocket)) {
+			if(socketEsListener(servidor, unSocket)) {
+				Socket nuevoSocket;
+				if(socketEsListenerDataNode(servidor, unSocket)) {
+					nuevoSocket = socketAceptar(unSocket, ID_DATANODE);
+					if(fileSystemDesactivado())
+						break;
+					servidorRegistrarDataNode(servidor, nuevoSocket);
+				}
+				else
+					nuevoSocket = servidorAceptarYAMA(servidor, unSocket);
+				servidorRegistrarConexion(servidor, nuevoSocket);
+			}
+			else
+				servidorRecibirMensaje(servidor, unSocket);
+		}
+}
+
+//--------------------------------------- Funciones de Socket -------------------------------------
+
+bool socketEsDataNode(Servidor* servidor, Socket unSocket) {
+	return listaSocketsContiene(unSocket, &servidor->listaDataNodes);
+}
+
+bool socketEsWorker(Servidor* servidor, Socket unSocket) {
+	return listaSocketsContiene(unSocket, &servidor->listaWorkers);
+}
+
+bool socketEsYAMA(Servidor* servidor, Socket unSocket) {
+	return socketSonIguales(servidor->procesoYAMA, unSocket);
+}
+
+bool socketEsListenerDataNode(Servidor* servidor, Socket unSocket) {
+	return socketSonIguales(servidor->listenerDataNode, unSocket);
+}
+
+
+bool socketEsListenerYAMA(Servidor* servidor, Socket unSocket) {
+	return socketSonIguales(servidor->listenerYAMA, unSocket);
+}
+
+bool socketEsListener(Servidor* servidor, Socket unSocket) {
+	return socketEsListenerDataNode(servidor, unSocket) || socketEsListenerYAMA(servidor, unSocket);
+}
+
+bool socketRealizoSolicitud(Servidor* servidor, Socket unSocket) {
+	return listaSocketsContiene(unSocket, &servidor->listaSelect);
+}
 
 //--------------------------------------- Funciones de Consola -------------------------------------
 
@@ -238,17 +417,6 @@ bool consolaComandoTipoTres(String comando) {
 			stringIguales(comando, CPBLOCK);
 }
 
-int consolaComandoCantidadArgumentos(String comando) {
-	if(consolaComandoTipoUno(comando))
-		return 1;
-	if(consolaComandoTipoDos(comando))
-		return 2;
-	if(consolaComandoTipoTres(comando))
-		return 3;
-	else
-		return 0;
-}
-
 bool consolaComandoExiste(String comando) {
 	return consolaComandoTipoUno(comando) ||
 			consolaComandoTipoDos(comando) ||
@@ -277,11 +445,6 @@ bool consolaValidarComandoTipoTres(String* subcadenas) {
 		   stringValido(subcadenas[2]) &&
 		   stringValido(subcadenas[3]) &&
 		   stringNulo(subcadenas[4]);
-}
-
-bool consolaComandoEsEliminarFlag(String buffer) {
-	return stringIguales(buffer, FLAG_B) ||
-			stringIguales(buffer, FLAG_D);
 }
 
 bool consolaComandoEliminarFlagB(String* subcadenas) {
@@ -323,34 +486,16 @@ bool consolaComandoControlarArgumentos(String* subcadenas) {
 		return consolaValidarComandoSinTipo(subcadenas);
 }
 
-void consolaNormalizarEliminarFlagB(String* buffer) {
-	buffer[0] = stringDuplicar(RMB);
-	buffer[1] = buffer[2];
-	buffer[2] = buffer[3];
-	buffer[3] = buffer[4];
-	buffer[4] = NULL;
-}
-
-void consolaNormalizarEliminarFlagD(String* buffer) {
-	buffer[0] = stringDuplicar(RMD);
-	buffer[1] = buffer[2];
-	buffer[2] = buffer[3];
-	buffer[3] = buffer[4];
-	buffer[4] = NULL;
-}
-
-void consolaNormalizarComando(String* buffer) {
-	if(stringIguales(buffer[1], FLAG_B))
-		consolaNormalizarEliminarFlagB(buffer);
-	else
-		consolaNormalizarEliminarFlagD(buffer);
-}
-
 bool consolaValidarComando(String* buffer) {
 	if(consolaComandoExiste(buffer[0]))
 		return consolaComandoControlarArgumentos(buffer);
 	else
 		return false;
+}
+
+bool consolaflagInvalido(String flag) {
+	return stringDistintos(flag, FLAG_T) &&
+			stringDistintos(flag, FLAG_B);
 }
 
 String consolaLeerEntrada() {
@@ -447,185 +592,6 @@ void consolaAtenderComandos() {
 			consolaDestruirComando(&comando, entrada);
 		}
 	}
-}
-
-//--------------------------------------- Funciones de Servidor -------------------------------------
-
-bool servidorObtenerMaximoSocket(Servidor* servidor) {
-	return servidor->maximoSocket;
-}
-
-void servidorSetearListaSelect(Servidor* servidor) {
-	servidor->listaSelect = servidor->listaMaster;
-}
-
-void servidorControlarMaximoSocket(Servidor* servidor, Socket unSocket) {
-	if(socketEsMayor(unSocket, servidor->maximoSocket))
-		servidor->maximoSocket = unSocket;
-}
-
-void servidorEsperarSolicitud(Servidor* servidor) {
-	socketSelect(servidor->maximoSocket, &servidor->listaSelect);
-}
-
-bool socketEsDataNode(Servidor* servidor, Socket unSocket) {
-	return listaSocketsContiene(unSocket, &servidor->listaDataNodes);
-}
-
-bool socketEsWorker(Servidor* servidor, Socket unSocket) {
-	return listaSocketsContiene(unSocket, &servidor->listaWorkers);
-}
-
-bool socketEsYAMA(Servidor* servidor, Socket unSocket) {
-	return socketSonIguales(servidor->procesoYAMA, unSocket);
-}
-
-void servidorFinalizarConexion(Servidor* servidor, Socket unSocket) {
-
-	bool buscarNodoPorSocket(void* unNodo) {
-		Nodo* nodo = (Nodo*)unNodo;;
-		return nodo->socket == unSocket;
-	}
-
-	listaSocketsEliminar(unSocket, &servidor->listaMaster);
-	if(socketEsDataNode(servidor, unSocket)) {
-		listaSocketsEliminar(unSocket, &servidor->listaDataNodes);
-		listaEliminarDestruyendoPorCondicion(listaNodos, (Puntero)buscarNodoPorSocket, (Puntero)nodoDestruir);
-		imprimirMensaje(archivoLog, "[CONEXION] Un proceso Data Node se ha desconectado");
-	}
-	else
-		imprimirMensaje(archivoLog, "[CONEXION] El proceso YAMA se ha desconectado");
-	socketCerrar(unSocket);
-}
-
-void servidorRegistrarConexion(Servidor* servidor, Socket unSocket) {
-	if(unSocket != ERROR) {
-		listaSocketsAgregar(unSocket, &servidor->listaMaster);
-		servidorControlarMaximoSocket(servidor, unSocket);
-	}
-}
-
-Socket servidorAceptarYAMA(Servidor* servidor, Socket unSocket) {
-	Socket nuevoSocket;
-	nuevoSocket = socketAceptar(unSocket, ID_YAMA);
-	if(nuevoSocket != ERROR) {
-		servidor->procesoYAMA = nuevoSocket;
-		imprimirMensaje(archivoLog, "[CONEXION] El proceso YAMA se ha conectado");
-	}
-	socketYama = nuevoSocket;
-	return nuevoSocket;
-}
-
-bool socketEsListenerDataNode(Servidor* servidor, Socket unSocket) {
-	return socketSonIguales(servidor->listenerDataNode, unSocket);
-}
-
-void servidorAceptarConexion(Servidor* servidor, Socket unSocket) {
-
-}
-
-void servidorRecibirMensaje(Servidor* servidor, Socket unSocket) {
-	Mensaje* mensaje = mensajeRecibir(unSocket);
-	if(mensajeDesconexion(mensaje))
-		servidorFinalizarConexion(servidor, unSocket);
-	else {
-		puts("MENSAJE");
-	}
-	mensajeDestruir(mensaje);
-}
-
-
-bool socketEsListenerYAMA(Servidor* servidor, Socket unSocket) {
-	return socketSonIguales(servidor->listenerYAMA, unSocket);
-}
-
-bool socketEsListener(Servidor* servidor, Socket unSocket) {
-	return socketEsListenerDataNode(servidor, unSocket) || socketEsListenerYAMA(servidor, unSocket);
-}
-
-bool socketRealizoSolicitud(Servidor* servidor, Socket unSocket) {
-	return listaSocketsContiene(unSocket, &servidor->listaSelect);
-}
-
-void servidorControlarSocket(Servidor* servidor, Socket unSocket) {
-
-}
-
-void servidorActivarListenerYAMA(Servidor* servidor) {
-	servidor->listenerYAMA = socketCrearListener(configuracion->puertoYAMA);
-	listaSocketsAgregar(servidor->listenerYAMA, &servidor->listaMaster);
-	servidorControlarMaximoSocket(servidor, servidor->listenerYAMA);
-}
-
-void servidorActivarListenerDataNode(Servidor* servidor) {
-	servidor->listenerDataNode = socketCrearListener(configuracion->puertoDataNode);
-	listaSocketsAgregar(servidor->listenerDataNode, &servidor->listaMaster);
-	servidorControlarMaximoSocket(servidor, servidor->listenerDataNode);
-}
-
-void servidorActivarListeners(Servidor* servidor) {
-	servidorActivarListenerDataNode(servidor);
-	servidorActivarListenerYAMA(servidor);
-}
-
-void servidorInicializar(Servidor* servidor) {
-	servidor->maximoSocket = 0;
-	listaSocketsLimpiar(&servidor->listaMaster);
-	listaSocketsLimpiar(&servidor->listaSelect);
-	listaSocketsLimpiar(&servidor->listaDataNodes);
-	servidorActivarListeners(servidor);
-}
-
-void servidorFinalizar(Servidor* servidor) {
-	memoriaLiberar(servidor);
-}
-
-void servidorRegistrarDataNode(Servidor* servidor, Socket nuevoSocket) {
-	if(nuevoSocket != ERROR) {
-		//if(estadoSeguro == 0) { TODO POnerlo lindo
-			listaSocketsAgregar(nuevoSocket, &servidor->listaDataNodes);
-			Mensaje* mensaje = mensajeRecibir(nuevoSocket);
-			Nodo* nodo = nodoCrear(20, 20, nuevoSocket);
-			memcpy(nodo->nombre, mensaje->datos, 10);
-			memcpy(nodo->ip, mensaje->datos+10, 20);
-			memcpy(nodo->puerto, mensaje->datos+30, 20);
-			printf("IP = %s\n", nodo->ip);
-			printf("puerto = %s\n", nodo->puerto);
-			printf("nombre = %s\n", nodo->nombre);
-			mensajeDestruir(mensaje);
-			listaAgregarElemento(listaNodos, nodo);
-			imprimirMensaje(archivoLog, "[CONEXION] Un proceso Data Node se ha conectado");
-		//}
-		//else {
-			//Nodo* nodo = nodoRecuperar();
-			//listaAgregarElemento(listaNodos, nodo);
-			//imprimirMensaje(archivoLog, "[CONEXION] Un proceso Data Node se ha reconectado");
-		//}
-	}
-}
-
-void servidorAtenderPedidos(Servidor* servidor) {
-	servidorSetearListaSelect(servidor);
-	servidorEsperarSolicitud(servidor);
-	Socket unSocket;
-	Socket maximoSocket = servidor->maximoSocket;
-	for(unSocket = 0; unSocket <= maximoSocket; unSocket++)
-		if (socketRealizoSolicitud(servidor, unSocket)) {
-			if(socketEsListener(servidor, unSocket)) {
-				Socket nuevoSocket;
-				if(socketEsListenerDataNode(servidor, unSocket)) {
-					nuevoSocket = socketAceptar(unSocket, ID_DATANODE);
-					if(fileSystemDesactivado())
-						break;
-					servidorRegistrarDataNode(servidor, nuevoSocket);
-				}
-				else
-					nuevoSocket = servidorAceptarYAMA(servidor, unSocket);
-				servidorRegistrarConexion(servidor, nuevoSocket);
-			}
-			else
-				servidorRecibirMensaje(servidor, unSocket);
-		}
 }
 
 //--------------------------------------- Funciones de Comando -------------------------------------
@@ -895,53 +861,8 @@ void comandoCrearDirectorio(Comando* comando) {
 	memoriaLiberar(control);
 }
 
-
-int nodoBuscarBloqueLibre(Nodo* nodo) {
-	int indice;
-		for(indice = 0; bitmapBitOcupado(nodo->bitmap, indice); indice++);
-		if(indice < nodo->bloquesTotales)
-			return indice;
-		else
-			return ERROR;
-}
-
-bool nodoBloquesLibres(Nodo* unNodo, Nodo* otroNodo) {
-	return unNodo->bloquesLibres > otroNodo->bloquesLibres;
-}
-
-
-Nodo* nodoBuscarVago(int posicion) {
-
-return NULL;
-}
-
-BloqueDataBin* bloqueDataBinCrear(Entero numeroBloque, String buffer) {
-	BloqueDataBin* bloqueDataBin = memoriaAlocar(sizeof(BloqueDataBin));
-	bloqueDataBin->numeroBloque = numeroBloque;
-	stringCopiar(bloqueDataBin->bloque, buffer);
-	return bloqueDataBin;
-}
-
-void bloqueEnviarANodo(Bloque* bloque, Nodo* nodo, String buffer) {
-	Entero numeroBloque = nodoBuscarBloqueLibre(nodo);
-	if(numeroBloque == ERROR)
-		imprimirMensaje(archivoLog, "[ERROR] No hay bloques libres en el Data Node");
-	CopiaBloque* copia = copiaBloqueCrear(numeroBloque, nodo->nombre);
-	listaAgregarElemento(bloque->listaCopias, copia);
-	bitmapOcuparBit(nodo->bitmap, numeroBloque);
-	nodo->bloquesLibres--;
-	BloqueDataBin* bloqueDataBin = bloqueDataBinCrear(numeroBloque, buffer);
-	mensajeEnviar(nodo->socket, ESCRIBIR, bloqueDataBin, sizeof(BloqueDataBin));
-	printf("Envia el bloque %i al Nodo %p\n", bloque->numeroBloque, nodo);
-}
-
-bool nodoTieneBloquesLibres(Nodo* nodo) {
-	return nodo->bloquesLibres > 0;
-}
-
 void comandoCopiarArchivoDeFS(Comando* comando) {
-	if(stringDistintos(comando->argumentos[1], FLAG_T) &&
-			stringDistintos(comando->argumentos[1], FLAG_B)) {
+	if(consolaflagInvalido(comando->argumentos[1])) {
 		imprimirMensaje(archivoLog, "[ERROR] Flag invalido");
 		return;
 	}
@@ -959,48 +880,28 @@ void comandoCopiarArchivoDeFS(Comando* comando) {
 		imprimirMensaje(archivoLog, "[ERROR] El directorio ingresado no existe");
 		return;
 	}
-	String nombreArchivoACopiar = rutaObtenerUltimoNombre(comando->argumentos[2]);
-	if(archivoExiste(directorio->identificador, nombreArchivoACopiar)) {
+	String nombreArchivo = rutaObtenerUltimoNombre(comando->argumentos[2]);
+	if(archivoExiste(directorio->identificador, nombreArchivo)) {
 		imprimirMensaje(archivoLog, "[ERROR] El archivo ya existe en el File System");
 		return;
 	}
-	String buffer = memoriaAlocar(BLOQUE);
-	Nodo* nodo;
-	String nombre = rutaObtenerUltimoNombre(comando->argumentos[2]);
-	int idPadre = directorioObtenerIdentificador(comando->argumentos[3]);
-	Archivo* archivo;
-	if(stringIguales(comando->argumentos[1], FLAG_B))
-		archivo = archivoCrear(nombre, idPadre, "BINARIO");
-	else
-		archivo = archivoCrear(nombre, idPadre, "TEXTO");
-	int indice;
+	Archivo* archivo = archivoCrear(nombreArchivo, directorio->identificador, comando->argumentos[1]);
 	if(stringIguales(comando->argumentos[1], FLAG_B)) {
-		for(indice = 0; fread(buffer, sizeof(char),BLOQUE, file) == BLOQUE; indice++) {
-			Bloque* bloque = bloqueCrear(BLOQUE, indice);
-			int copiasRealizadas = 0;
+		int numeroBloqueArchivo;
+		String buffer = stringCrear(BLOQUE);
+		for(numeroBloqueArchivo = 0; fread(buffer, sizeof(char),BLOQUE, file) == BLOQUE; numeroBloqueArchivo++) {
+			Bloque* bloque = bloqueCrear(BLOQUE, numeroBloqueArchivo);
+			int copiasRealizadas;
 			Lista nodosDisponibles = listaFiltrar(listaNodos, (Puntero)nodoTieneBloquesLibres);
-			while(listaCantidadElementos(nodosDisponibles) > 0 && copiasRealizadas < MAX_COPIAS) {
-				listaOrdenar(nodosDisponibles, (Puntero)nodoBloquesLibres);
-				nodo = listaObtenerElemento(nodosDisponibles, 0);
-				Entero numeroBloque = nodoBuscarBloqueLibre(nodo);
-				if(numeroBloque != ERROR) { //Este if estaria al pedo ya que el filter te asegura de que todos los nodos tengan un bloque libre al menos
-					CopiaBloque* copia = copiaBloqueCrear(numeroBloque, nodo->nombre);
-					listaAgregarElemento(bloque->listaCopias, copia);
-					bitmapOcuparBit(nodo->bitmap, numeroBloque);
-					nodo->bloquesLibres--;
-					//TODO Actualizar archivo del nodooooooooooo
-					BloqueDataBin* bloqueDataBin = bloqueDataBinCrear(numeroBloque, buffer);
-					mensajeEnviar(nodo->socket, ESCRIBIR, bloqueDataBin, sizeof(BloqueDataBin));
-					copiasRealizadas++;
-					if(nodo->bloquesLibres == 0) {
-						imprimirMensajeUno(archivoLog, AMARILLO"[ADVERTENCIA] No hay bloques libres en %s"BLANCO, nodo->nombre);
-						nodosDisponibles = listaFiltrar(listaNodos, (Puntero)nodoTieneBloquesLibres);
-					}
-				}
-				else //Si entra aca es porque el bitmap no encontro un 0 (bloque libre) igual el filter deberia encargarse de que nunca suceda eso
-					imprimirMensaje(archivoLog, ROJO"[ERROR] Si estas viendo esto es porque el listaFiltrar() te traiciono"BLANCO);
+			for(copiasRealizadas = 0; listaTieneElementos(nodosDisponibles) && copiasRealizadas < MAX_COPIAS; copiasRealizadas++) {
+				listaOrdenar(nodosDisponibles, (Puntero)nodoCantidadBloquesLibres);
+				Nodo* nodo = listaPrimerElemento(nodosDisponibles);
+				Entero numeroBloqueNodo = nodoBuscarBloqueLibre(nodo);
+				bloqueCopiar(bloque, nodo, numeroBloqueNodo);
+				bloqueEnviarANodo(nodo->socket, numeroBloqueNodo, buffer);
+				nodoVerificarBloquesLibres(nodo, nodosDisponibles);
 			}
-			if(copiasRealizadas < MAX_COPIAS && listaCantidadElementos(nodosDisponibles) == NULO) {
+			if(copiasRealizadas < MAX_COPIAS) {
 				imprimirMensaje(archivoLog, ROJO"[ERROR] No hay nodos con bloques libres, se suspende la operacion"BLANCO);
 				return;
 			}
@@ -1008,21 +909,40 @@ void comandoCopiarArchivoDeFS(Comando* comando) {
 		}
 	}
 	else {
-		for(indice = 0; fgets(buffer, BLOQUE, file) != NULL; indice++) {
-			listaOrdenar(listaNodos, (Puntero)nodoBloquesLibres);
-			nodo = nodoBuscarVago(0);
-			if(stringLongitud(buffer)) {
-				//Enviar a bloque anterior
+		String buffer = stringCrear(BLOQUE);
+		String datos = stringCrear(BLOQUE);
+		int bytesRestantes = BLOQUE;
+		int numeroBloqueArchivo;
+		for(numeroBloqueArchivo = 0; fgets(buffer, BLOQUE, file) != NULL; numeroBloqueArchivo++) {
+			int tamanioBuffer = stringLongitud(buffer);
+			if(tamanioBuffer <= bytesRestantes) {
+				stringConcatenar(&datos, buffer);
+				bytesRestantes-=tamanioBuffer;
 			}
 			else {
-				Bloque* bloque = bloqueCrear(BLOQUE, indice);
-				bloqueEnviarANodo(bloque, nodo, buffer);
+				int bytesUtilizados = stringLongitud(datos)+1;
+				printf("Bytes utilizados %i\n", bytesUtilizados);
+				Bloque* bloque = bloqueCrear(bytesUtilizados, numeroBloqueArchivo);
+				int copiasRealizadas;
+				Lista nodosDisponibles = listaFiltrar(listaNodos, (Puntero)nodoTieneBloquesLibres);
+				for(copiasRealizadas = 0; listaTieneElementos(nodosDisponibles) && copiasRealizadas < MAX_COPIAS; copiasRealizadas++) {
+					listaOrdenar(nodosDisponibles, (Puntero)nodoCantidadBloquesLibres);
+					Nodo* nodo = listaPrimerElemento(nodosDisponibles);
+					Entero numeroBloqueNodo = nodoBuscarBloqueLibre(nodo);
+					bloqueCopiar(bloque, nodo, numeroBloqueNodo);
+					bloqueEnviarANodo(nodo->socket, numeroBloqueNodo, buffer);
+					nodoVerificarBloquesLibres(nodo, nodosDisponibles);
+				}
+				if(copiasRealizadas < MAX_COPIAS) {
+					imprimirMensaje(archivoLog, ROJO"[ERROR] No hay nodos con bloques libres, se suspende la operacion"BLANCO);
+					return;
+				}
 				listaAgregarElemento(archivo->listaBloques, bloque);
 			}
 		}
 	}
 	archivoPersistirCrear(archivo);
-	imprimirMensaje(archivoLog, "[ARCHIVO] El archivo se copio en el File System con exito");
+	imprimirMensajeUno(archivoLog, "[ARCHIVO] El archivo %s fue copiado en File System", comando->argumentos[2]);
 }
 
 
@@ -1201,7 +1121,7 @@ void directorioPersistirEliminar(Directorio* directorio) {
 	fileCerrar(archivoBuffer);
 	memoriaLiberar(linea);
 	memoriaLiberar(buffer);
-	bufferCopiarEn(rutaDirectorios);
+	archivoBufferCopiarEn(rutaDirectorios);
 }
 
 
@@ -1223,7 +1143,7 @@ void directorioPersistirRenombrar(Directorio* directorio, String nuevoNombre) {
 	fileCerrar(archivoBuffer);
 	memoriaLiberar(linea);
 	memoriaLiberar(buffer);
-	bufferCopiarEn(rutaDirectorios);
+	archivoBufferCopiarEn(rutaDirectorios);
 }
 
 void directorioPersistirMover(Directorio* directorio, Entero nuevoPadre) {
@@ -1244,7 +1164,7 @@ void directorioPersistirMover(Directorio* directorio, Entero nuevoPadre) {
 	fileCerrar(archivoBuffer);
 	memoriaLiberar(linea);
 	memoriaLiberar(buffer);
-	bufferCopiarEn(rutaDirectorios);
+	archivoBufferCopiarEn(rutaDirectorios);
 }
 
 bool directorioIndiceRespetaLimite(int indice) {
@@ -1466,7 +1386,10 @@ Archivo* archivoCrear(String nombreArchivo, int idPadre, String tipo) {
 	Archivo* archivo = memoriaAlocar(sizeof(Archivo));
 	stringCopiar(archivo->nombre, nombreArchivo);
 	archivo->identificadorPadre = idPadre;
-	stringCopiar(archivo->tipo, tipo);
+	if(stringIguales(tipo, FLAG_B))
+		stringCopiar(archivo->tipo, "BINARIO");
+	else
+		stringCopiar(archivo->tipo, "TEXTO");
 	archivo->listaBloques = listaCrear();
 	return archivo;
 }
@@ -1498,8 +1421,6 @@ Archivo* archivoBuscar(String path) {
 				stringIguales(control->nombreDirectorio, archivo->nombre);
 	}
 
-	//Por si un directorio de la ruta no existe, me aseguro que el
-	//ultimo nombre sea el que salio del while ya que deberian ser iguales siempre
 	if(stringIguales(control->nombreDirectorio, ultimo))
 		archivo = listaBuscar(listaArchivos, (Puntero)buscar);
 	for(indice=0; stringValido(control->nombresDirectorios[indice]); indice++)
@@ -1568,7 +1489,7 @@ void archivoPersistirRenombrar(Archivo* archivoRenombrar, String nuevoNombre) {
 	fileCerrar(archivo);
 	fileCerrar(archivoAuxiliar);
 	memoriaLiberar(buffer);
-	bufferCopiarEn(rutaArchivo);
+	archivoBufferCopiarEn(rutaArchivo);
 	memoriaLiberar(rutaArchivo);
 	archivoPersistirControlRenombrar(archivoRenombrar, nuevoNombre);
 }
@@ -1596,7 +1517,7 @@ void archivoPersistirMover(Archivo* archivoAMover, Entero nuevoPadre) {
 	fileCerrar(archivo);
 	fileCerrar(archivoAuxiliar);
 	memoriaLiberar(buffer);
-	bufferCopiarEn(rutaArchivoMovido);
+	archivoBufferCopiarEn(rutaArchivoMovido);
 	memoriaLiberar(rutaArchivoMovido);
 	archivoPersistirControlMover(archivoAMover, nuevoPadre);
 }
@@ -1626,7 +1547,7 @@ void archivoPersistirControlEliminar(Archivo* archivo){
 	fileCerrar(control);
 	memoriaLiberar(buffer);
 	memoriaLiberar(linea);
-	bufferCopiarEn(rutaArchivos);
+	archivoBufferCopiarEn(rutaArchivos);
 }
 
 
@@ -1648,7 +1569,7 @@ void archivoPersistirControlRenombrar(Archivo* archivo, String nuevoNombre){
 	fileCerrar(control);
 	memoriaLiberar(buffer);
 	memoriaLiberar(linea);
-	bufferCopiarEn(rutaArchivos);
+	archivoBufferCopiarEn(rutaArchivos);
 }
 
 void archivoPersistirControlMover(Archivo* archivo, Entero nuevoPadre){
@@ -1669,7 +1590,7 @@ void archivoPersistirControlMover(Archivo* archivo, Entero nuevoPadre){
 	fileCerrar(control);
 	memoriaLiberar(buffer);
 	memoriaLiberar(linea);
-	bufferCopiarEn(rutaArchivos);
+	archivoBufferCopiarEn(rutaArchivos);
 }
 
 
@@ -1690,7 +1611,7 @@ void archivoPersistirEliminarBloque(Archivo* archivo, int numeroBloque, int nume
 	fileCerrar(archivoAuxiliar);
 	memoriaLiberar(buffer);
 	memoriaLiberar(linea);
-	bufferCopiarEn(rutaArchivo);
+	archivoBufferCopiarEn(rutaArchivo);
 	memoriaLiberar(rutaArchivo);
 }
 
@@ -1788,6 +1709,30 @@ void nodoPersistirBitmap(Nodo* nodo) {
 	fileCerrar(archivo);
 }
 
+int nodoBuscarBloqueLibre(Nodo* nodo) {
+	int indice;
+		for(indice = 0; bitmapBitOcupado(nodo->bitmap, indice); indice++);
+		if(indice < nodo->bloquesTotales)
+			return indice;
+		else
+			return ERROR;
+}
+
+bool nodoCantidadBloquesLibres(Nodo* unNodo, Nodo* otroNodo) {
+	return unNodo->bloquesLibres > otroNodo->bloquesLibres;
+}
+
+bool nodoTieneBloquesLibres(Nodo* nodo) {
+	return nodo->bloquesLibres > 0;
+}
+
+void nodoVerificarBloquesLibres(Nodo* nodo, Lista nodosDisponibles) {
+	if(nodo->bloquesLibres == 0) {
+		imprimirMensajeUno(archivoLog, AMARILLO"[ADVERTENCIA] No hay bloques libres en %s"BLANCO, nodo->nombre);
+		nodosDisponibles = listaFiltrar(listaNodos, (Puntero)nodoTieneBloquesLibres);
+	}
+}
+
 //--------------------------------------- Funciones de Bloque-------------------------------------
 
 Bloque* bloqueCrear(int bytes, int numero) {
@@ -1802,6 +1747,21 @@ void bloqueDestruir(Bloque* bloque) {
 	listaDestruirConElementos(bloque->listaCopias, memoriaLiberar);
 	memoriaLiberar(bloque);
 }
+
+void bloqueEnviarANodo(Socket unSocket, Entero numeroBloque, String buffer) {
+	BloqueNodo* bloqueDataBin = bloqueNodoCrear(numeroBloque, buffer);
+	mensajeEnviar(unSocket, ESCRIBIR, bloqueDataBin, sizeof(BloqueNodo));
+	memoriaLiberar(bloqueDataBin);
+}
+
+void bloqueCopiar(Bloque* bloque, Nodo* nodo, Entero numeroBloqueNodo) {
+	//TODO Actualizar archivo del nodooooooooooo
+	CopiaBloque* copia = copiaBloqueCrear(numeroBloqueNodo, nodo->nombre);
+	bitmapOcuparBit(nodo->bitmap, numeroBloqueNodo);
+	nodo->bloquesLibres--;
+	listaAgregarElemento(bloque->listaCopias, copia);
+}
+
 
 //--------------------------------------- Funciones de Copia Bloque-------------------------------------
 
@@ -1823,7 +1783,7 @@ void copiaBloqueEliminar(CopiaBloque* copia) {
 	nodoPersistirBitmap(nodo);
 }
 
-//--------------------------------------- Funciones varias------------------------------------
+//--------------------------------------- Funciones de Metadata------------------------------------
 
 void metadataCrear() {
 	mkdir(configuracion->rutaMetadata, 0777);
@@ -1852,24 +1812,7 @@ void metadataRecuperar() {
 
 }
 
-void bufferCopiarEn(String rutaArchivo) {
-	File archivo = fileAbrir(rutaArchivo, ESCRITURA);
-	File archivoAuxiliar = fileAbrir(rutaBuffer, LECTURA);
-	String buffer = stringCrear(MAX_STRING);
-	while (fgets(buffer, MAX_STRING, archivoAuxiliar) != NULL) {
-		fprintf(archivo, "%s", buffer);
-		stringLimpiar(buffer, MAX_STRING);
-	}
-	fileCerrar(archivo);
-	fileCerrar(archivoAuxiliar);
-	memoriaLiberar(buffer);
-}
-
-void logIniciar() {
-	archivoLog = archivoLogCrear(RUTA_LOG, "FileSystem");
-	imprimirMensajeProceso("# PROCESO FILE SYSTEM");
-	imprimirMensaje(archivoLog, "[EJECUCION] Proceso File System inicializado");
-}
+//--------------------------------------- Funciones de Ruta------------------------------------
 
 String rutaObtenerUltimoNombre(String ruta) {
 	int indice;
@@ -1941,6 +1884,28 @@ bool rutaEsNumero(String ruta) {
 			return false;
 	}
 	return true;
+}
+
+//--------------------------------------- Funciones varias ------------------------------------
+
+void archivoBufferCopiarEn(String rutaArchivo) {
+	File archivo = fileAbrir(rutaArchivo, ESCRITURA);
+	File archivoAuxiliar = fileAbrir(rutaBuffer, LECTURA);
+	String buffer = stringCrear(MAX_STRING);
+	while (fgets(buffer, MAX_STRING, archivoAuxiliar) != NULL) {
+		fprintf(archivo, "%s", buffer);
+		stringLimpiar(buffer, MAX_STRING);
+	}
+	fileCerrar(archivo);
+	fileCerrar(archivoAuxiliar);
+	memoriaLiberar(buffer);
+}
+
+BloqueNodo* bloqueNodoCrear(Entero numeroBloque, String buffer) {
+	BloqueNodo* bloqueNodo = memoriaAlocar(sizeof(BloqueNodo));
+	bloqueNodo->numeroBloque = numeroBloque;
+	stringCopiar(bloqueNodo->bloque, buffer);
+	return bloqueNodo;
 }
 
 void testCabecita() {

@@ -479,6 +479,10 @@ void* listaObtenerElemento(Lista lista, int posicion) {
 	return list_get(lista, posicion);
 }
 
+void* listaPrimerElemento(Lista lista) {
+	return list_get(lista, 0);
+}
+
 Lista listaTomar(Lista lista, int cantidadElementos) {
 	return list_take(lista, cantidadElementos);
 }
@@ -494,21 +498,27 @@ Lista listaFiltrar(Lista lista, bool(*funcion)(void*)) {
 Lista listaMapear(Lista lista, void*(*funcion)(void*)) {
 	return list_map(lista, funcion);
 }
+
 void* listaReemplazarElemento(Lista lista, void* elemento, int posicion) {
 	return list_replace(lista, posicion, elemento);
 }
+
 void listaReemplazarDestruyendoElemento(Lista lista, void* elemento, int posicion, void(*funcion)(void*)) {
 	list_replace_and_destroy_element(lista, posicion, elemento, funcion);
 }
+
 void listaEliminarElemento(Lista lista, int posicion) {
 	list_remove(lista, posicion);
 }
+
 void listaEliminarDestruyendoElemento(Lista lista, int posicion, void(*funcion)(void*)) {
 	list_remove_and_destroy_element(lista, posicion, funcion);
 }
+
 void listaEliminarPorCondicion(Lista lista, bool(*funcion)(void*)) {
 	list_remove_by_condition(lista, funcion);
 }
+
 void listaEliminarDestruyendoPorCondicion(Lista lista, bool(*funcion)(void*), void(*funcionDestruir)(void*)) {
 	list_remove_and_destroy_by_condition(lista, funcion, funcionDestruir);
 }
@@ -530,18 +540,27 @@ void* listaBuscar(Lista lista, bool(*funcion)(void*)) {
 int listaCantidadElementos(Lista lista) {
 	return list_size(lista);
 }
+
 bool listaEstaVacia(Lista lista) {
 	return list_is_empty(lista);
 }
+
+bool listaTieneElementos(Lista lista) {
+	return !list_is_empty(lista);
+}
+
 void listaOrdenar(Lista lista, bool(*funcion)(void*, void*)) {
 	list_sort(lista, funcion);
 }
+
 int listaCuantosCumplen(Lista lista, bool(*funcion)(void*)) {
 	return list_count_satisfying(lista, funcion);
 }
+
 bool listaCumpleAlguno(Lista lista, bool(*funcion)(void*)) {
 	return list_any_satisfy(lista, funcion);
 }
+
 bool listaCumplenTodos(Lista lista, bool(*funcion)(void*)) {
 	return list_all_satisfy(lista, funcion);
 }

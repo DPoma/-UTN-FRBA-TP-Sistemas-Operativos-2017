@@ -126,7 +126,7 @@ typedef struct {
 typedef struct __attribute__((packed)) {
 	Entero numeroBloque;
 	char bloque[BLOQUE];
-} BloqueDataBin;
+} BloqueNodo;
 
 typedef struct __attribute__((packed)) {
 	char ip[20];
@@ -157,7 +157,6 @@ String rutaArchivos;
 String rutaNodos;
 String rutaBuffer;
 
-
 //--------------------------------------- Funciones de File System -------------------------------------
 
 void fileSystemIniciar();
@@ -169,14 +168,14 @@ bool fileSystemDesactivado();
 void fileSystemActivar();
 void fileSystemDesactivar();
 
-//--------------------------------------- Funciones de Socket-------------------------------------
+//--------------------------------------- Funciones de Configuracion -------------------------------------
 
-bool socketEsListenerYAMA(Servidor* servidor, Socket unSocket);
-bool socketEsListener(Servidor* servidor, Socket unSocket);
-bool socketRealizoSolicitud(Servidor* servidor, Socket unSocket);
-bool socketEsDataNode(Servidor* servidor, Socket unSocket);
-bool socketEsYAMA(Servidor* servidor, Socket unSocket);
-bool socketEsListenerDataNode(Servidor* servidor, Socket unSocket);
+void configuracionImprimir(Configuracion* configuracion);
+Configuracion* configuracionLeerArchivo(ArchivoConfig archivoConfig);
+void configuracionIniciarRutas();
+void configuracionDestruirRutas();
+void configuracionIniciarLog();
+void configuracionIniciar();
 
 //--------------------------------------- Funciones de Servidor -------------------------------------
 
@@ -199,19 +198,50 @@ void servidorFinalizar(Servidor* servidor);
 void servidorAtenderSolicitud(Servidor* servidor);
 void servidorAtenderPedidos(Servidor* servidor);
 
+//--------------------------------------- Funciones de Socket-------------------------------------
+
+bool socketEsListenerYAMA(Servidor* servidor, Socket unSocket);
+bool socketEsListener(Servidor* servidor, Socket unSocket);
+bool socketRealizoSolicitud(Servidor* servidor, Socket unSocket);
+bool socketEsDataNode(Servidor* servidor, Socket unSocket);
+bool socketEsYAMA(Servidor* servidor, Socket unSocket);
+bool socketEsListenerDataNode(Servidor* servidor, Socket unSocket);
+
 //--------------------------------------- Funciones de Consola -------------------------------------
 
+bool consolaEntradaRespetaLimiteEspacios(String entrada);
+bool consolaEntradaSinEspacioEnExtremos(String entrada);
+bool consolaEntradaEspaciosSeparados(String entrada);
+bool consolaEntradaEspaciosBienUtilizados(String entrada);
+bool consolaEntradaSinTabs(String entrada);
+bool consolaEntradaTieneEspaciosNecesarios(String entrada);
+bool consolaEntradaLlena(String entrada);
+bool consolaEntradaDecente(String entrada);
+bool consolaComandoTipoUno(String comando);
+bool consolaComandoTipoDos(String comando);
+bool consolaComandoTipoTres(String comando);
+bool consolaComandoExiste(String comando);
+bool consolaValidarComandoSinTipo(String* subcadenas);
+bool consolaValidarComandoTipoUno(String* subcadenas);
+bool consolaValidarComandoTipoDos(String* subcadenas);
+bool consolaValidarComandoTipoTres(String* subcadenas);
+bool consolaComandoEliminarFlagB(String* subcadenas);
+bool consolaComandoEliminarFlagD(String* subcadenas);
+bool consolaValidarComandoFlagB(String* subcadenas);
+bool consolaValidarComandoFlagD(String* subcadenas);
+bool consolaComandoControlarArgumentos(String* subcadenas);
+bool consolaValidarComando(String* buffer);
+bool consolaflagInvalido(String flag);
+void consolaIniciarArgumentos(String* argumentos);
+void consolaLiberarArgumentos(String* argumentos);
+void consolaObtenerArgumentos(String* buffer, String entrada);
+void consolaSetearArgumentos(String* argumentos, String* buffer);
+void consolaConfigurarComando(Comando* comando, String entrada);
+void consolaEjecutarComando(Comando* comando);
+void consolaDestruirComando(Comando* comando, String entrada);
 void consolaAtenderComandos();
-int consolaIdentificarComando(char* comando);
-char* consolaLeerCaracteresEntrantes();
-Comando consolaObtenerComando();
-
-//--------------------------------------- Funciones de Configuracion -------------------------------------
-
-void configuracionImprimir(Configuracion* configuracion);
-Configuracion* configuracionLeerArchivo(ArchivoConfig archivoConfig);
-void configuracionIniciarRutas();
-void configuracionDestruirRutas();
+int consolaIdentificarComando(String comando);
+String consolaLeerEntrada();
 
 //--------------------------------------- Funciones de Comando -------------------------------------
 
@@ -294,15 +324,6 @@ void archivoPersistirControlCrear(Archivo* archivo);
 void archivoPersistirControlEliminar(Archivo* archivo);
 void archivoPersistirControlRenombrar(Archivo* archivo, String nuevoNombre);
 void archivoPersistirControlMover(Archivo* archivo, Entero nuevoPadre);
-//--------------------------------------- Funciones de Bloque -------------------------------------
-
-Bloque* bloqueCrear(int bytes, int numero);
-void bloqueDestruir(Bloque* bloque);
-
-//--------------------------------------- Funciones de Copia Bloque -------------------------------------
-
-CopiaBloque* copiaBloqueCrear(int numeroBloqueDelNodo, String nombreNodo);
-void copiaBloqueEliminar(CopiaBloque* copia);
 
 //--------------------------------------- Funciones de Nodo -------------------------------------
 
@@ -314,22 +335,40 @@ void nodoRecuperarEstadoAnterior();
 void nodoPersistirBitmap(Nodo* nodo);
 void nodoFormatear(Nodo* nodo);
 void nodoFormatearConectados();
+void nodoVerificarBloquesLibres(Nodo* nodo, Lista nodosDisponibles);
+bool nodoTieneBloquesLibres(Nodo* nodo);
+bool nodoCantidadBloquesLibres(Nodo* unNodo, Nodo* otroNodo);
+int nodoBuscarBloqueLibre(Nodo* nodo);
 
-//--------------------------------------- Funciones Varias -------------------------------------
+//--------------------------------------- Funciones de Bloque -------------------------------------
 
-void bufferCopiarEn(String rutaArchivo);
-void logIniciar();
-void configuracionIniciar();
+Bloque* bloqueCrear(int bytes, int numero);
+void bloqueDestruir(Bloque* bloque);
+void bloqueCopiar(Bloque* bloque, Nodo* nodo, Entero numeroBloqueNodo);
+void bloqueEnviarANodo(Socket unSocket, Entero numeroBloque, String buffer);
+
+//--------------------------------------- Funciones de Copia Bloque -------------------------------------
+
+CopiaBloque* copiaBloqueCrear(int numeroBloqueDelNodo, String nombreNodo);
+void copiaBloqueEliminar(CopiaBloque* copia);
+
+//--------------------------------------- Funciones de Metadata -------------------------------------
+
+void metadataCrear();
+void metadataEliminar();
+void metadataIniciar();
+void metadataRecuperar();
+
+//--------------------------------------- Funciones de Ruta------------------------------------
+
 String rutaObtenerUltimoNombre(String ruta);
 bool rutaBarrasEstanSeparadas(String ruta);
 String* rutaSeparar(String ruta);
 bool rutaTieneAlMenosUnaBarra(String ruta);
 bool rutaValida(String ruta);
 bool rutaEsNumero(String ruta);
-void archivoConfigObtenerCampos();
-void funcionSenial(int senial);
+
+//--------------------------------------- Funciones Varias -------------------------------------
+BloqueNodo* bloqueNodoCrear(Entero numeroBloque, String buffer);
 void testCabecita();
-void metadataCrear();
-void metadataEliminar();
-void metadataIniciar();
-void metadataRecuperar();
+void archivoBufferCopiarEn(String rutaArchivo);
