@@ -45,7 +45,7 @@ void yamaIniciar() {
 		worker.carga=0;
 		worker.tareasRealizadas=0;
 		worker.nodo=*(Dir*)(infoNodos+sizeof(Dir)*i);//TODO puede que rompa porque no es deep copying
-		list_add(workers,&worker); //TODO
+		list_addM(workers,&worker,sizeof(Worker));
 	}
 	mensajeDestruir(infoNodos);
 }
@@ -123,6 +123,9 @@ void yamaAtender() {
 							}
 						}
 						list_iterate(tablaEstados,cazarEntradasDesconectadas);
+						//podría romper por estar recorriendo una lista con una funcion
+						//que puede modificar la lista, pero no deberia
+
 						//podría haber un mensaje de reconexion
 						//si es que los nodos pueden reconectarse
 					}else{
@@ -183,7 +186,7 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 		entrada.job=job;
 		entrada.masterid=master;
 		darPathTemporal(&entrada.pathTemporal,'t');
-		list_add(tablaEstadosJob,&entrada);//TODO
+		list_addM(tablaEstadosJob,&entrada,sizeof(Entrada));
 	}
 
 	if(stringIguales(configuracion->algoritmoBalanceo,"Clock")){
@@ -343,7 +346,7 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 			memcpy(dato+DIRSIZE,&alternativa.bloque,INTSIZE);
 			memcpy(dato+DIRSIZE+INTSIZE,&alternativa.bytes,INTSIZE);
 			mensajeEnviar(alternativa.masterid,Transformacion,dato,sizeof dato);
-			list_add(tablaEstados,&alternativa); //TODO
+			list_addM(tablaEstados,&alternativa,sizeof(Entrada));
 			bool buscarError(Entrada* entrada){
 				return entrada->estado==Error;
 			}
@@ -384,7 +387,7 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 				memcpy(dato+i,((Entrada*)list_get(nodos,j))->pathTemporal,TEMPSIZE);
 			mensajeEnviar(reducLocal.masterid,ReducLocal,dato,tamanio);
 			moverAUsados(mismoNodoJob);
-			list_add(tablaEstados,&reducLocal);//mutex TODO
+			list_addM(tablaEstados,&reducLocal,sizeof(Entrada));//mutex
 		}
 	}else if(entradaA->etapa==ReducLocal){
 		trabajoTerminado(mismoJob);
@@ -413,7 +416,7 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 			}
 			mensajeEnviar(reducGlobal.masterid,ReducGlobal,dato,tamanio);
 			moverAUsados(mismoJob);
-			list_add(tablaEstados,&reducGlobal);//mutex TODO
+			list_addM(tablaEstados,&reducGlobal,sizeof(Entrada));//mutex
 		}
 	}else{
 		Entrada* reducGlobal=list_find(tablaEstados,mismoJob);
