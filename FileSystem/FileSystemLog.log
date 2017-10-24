@@ -1,21 +1,27 @@
-[INFO] 12:11:18:411 FileSystem/(6019:6019): [EJECUCION] Proceso File System inicializado
-[INFO] 12:11:18:480 FileSystem/(6019:6019): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 12:11:18:481 FileSystem/(6019:6019): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 12:11:18:482 FileSystem/(6019:6019): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
-[INFO] 12:11:19:287 FileSystem/(6019:6019): [CONEXION] Un proceso Data Node se ha conectado
-[INFO] 12:11:19:919 FileSystem/(6019:6019): [CONEXION] Un proceso Data Node se ha conectado
-[INFO] 12:11:20:526 FileSystem/(6019:6019): [CONEXION] Un proceso Data Node se ha conectado
-[INFO] 12:11:26:52 FileSystem/(6019:6024): [DIRECTORIO] El directorio /home fue creado
-[INFO] 12:11:41:30 FileSystem/(6019:6024): [ARCHIVO] El archivo se copio en el File System con exito
-[INFO] 12:11:44:859 FileSystem/(6019:6024): [ARCHIVO] El archivo se copio en el File System con exito
-[INFO] 12:11:50:682 FileSystem/(6019:6024): [ARCHIVO] El archivo se copio en el File System con exito
-[INFO] 12:11:52:301 FileSystem/(6019:6024): [ARCHIVO] El archivo se copio en el File System con exito
-[INFO] 12:11:53:737 FileSystem/(6019:6024): [ARCHIVO] El archivo se copio en el File System con exito
-[INFO] 12:11:54:991 FileSystem/(6019:6024): [ARCHIVO] El archivo se copio en el File System con exito
-[INFO] 12:11:56:500 FileSystem/(6019:6024): [ARCHIVO] El archivo se copio en el File System con exito
-[INFO] 12:12:31:211 FileSystem/(6019:6024): [ARCHIVO] El archivo se copio en el File System con exito
-[INFO] 12:12:37:734 FileSystem/(6019:6024): [ARCHIVO] El archivo se copio en el File System con exito
-[INFO] 12:12:40:269 FileSystem/(6019:6024): [34m[AVISO] No hay bloques libres en el Nodo 0x426ad50[0m
-[INFO] 12:12:40:310 FileSystem/(6019:6024): [34m[AVISO] No hay bloques libres en el Nodo 0x426b9b0[0m
-[INFO] 12:12:40:369 FileSystem/(6019:6024): [34m[AVISO] No hay bloques libres en el Nodo 0x426b380[0m
-[INFO] 12:12:40:376 FileSystem/(6019:6024): [34m[ERROR] No hay ningun Nodo con bloques libres, se suspende la operacion[0m
+[INFO] 13:00:01:735 FileSystem/(6916:6916): [EJECUCION] Proceso File System inicializado
+[INFO] 13:00:01:794 FileSystem/(6916:6916): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 13:00:01:796 FileSystem/(6916:6916): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 13:00:01:796 FileSystem/(6916:6916): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
+[INFO] 13:00:02:204 FileSystem/(6916:6916): [CONEXION] Un proceso Data Node se ha conectado
+[INFO] 13:00:02:717 FileSystem/(6916:6916): [CONEXION] Un proceso Data Node se ha conectado
+[INFO] 13:00:03:452 FileSystem/(6916:6916): [CONEXION] Un proceso Data Node se ha conectado
+[INFO] 13:00:15:474 FileSystem/(6916:6916): [CONEXION] Un proceso Data Node se ha conectado
+[INFO] 13:00:21:556 FileSystem/(6916:6921): [DIRECTORIO] El directorio /home fue creado
+[INFO] 13:00:35:880 FileSystem/(6916:6921): [ARCHIVO] El archivo se copio en el File System con exito
+[INFO] 13:00:39:365 FileSystem/(6916:6921): [ARCHIVO] El archivo se copio en el File System con exito
+[INFO] 13:00:42:372 FileSystem/(6916:6921): [ARCHIVO] El archivo se copio en el File System con exito
+[INFO] 13:00:44:600 FileSystem/(6916:6921): [ARCHIVO] El archivo se copio en el File System con exito
+[INFO] 13:00:45:875 FileSystem/(6916:6921): [ARCHIVO] El archivo se copio en el File System con exito
+[INFO] 13:00:48:125 FileSystem/(6916:6921): [ARCHIVO] El archivo se copio en el File System con exito
+[INFO] 13:00:49:206 FileSystem/(6916:6921): [ARCHIVO] El archivo se copio en el File System con exito
+[INFO] 13:00:50:415 FileSystem/(6916:6921): [ARCHIVO] El archivo se copio en el File System con exito
+[INFO] 13:00:51:779 FileSystem/(6916:6921): [ARCHIVO] El archivo se copio en el File System con exito
+[INFO] 13:00:53:230 FileSystem/(6916:6921): [ARCHIVO] El archivo se copio en el File System con exito
+[INFO] 13:00:54:352 FileSystem/(6916:6921): [ARCHIVO] El archivo se copio en el File System con exito
+[INFO] 13:00:55:734 FileSystem/(6916:6921): [ARCHIVO] El archivo se copio en el File System con exito
+[INFO] 13:01:03:696 FileSystem/(6916:6921): [33m[ADVERTENCIA] No hay bloques libres en NODO63[0m
+[INFO] 13:01:03:735 FileSystem/(6916:6921): [33m[ADVERTENCIA] No hay bloques libres en NODO63[0m
+[INFO] 13:01:03:740 FileSystem/(6916:6921): [ARCHIVO] El archivo se copio en el File System con exito
+[INFO] 13:01:10:248 FileSystem/(6916:6921): [33m[ADVERTENCIA] No hay bloques libres en NODO63[0m
+[INFO] 13:01:10:295 FileSystem/(6916:6921): [33m[ADVERTENCIA] No hay bloques libres en NODO63[0m
+[INFO] 13:01:10:298 FileSystem/(6916:6921): [31m[ERROR] No hay nodos con bloques libres, se suspende la operacion[0m

@@ -1,23 +1,25 @@
-[INFO] 12:11:20:525 DataNode/(6034:6034): [CONFIGURACION] Nombre Nodo: NODO63
-[INFO] 12:11:20:525 DataNode/(6034:6034): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data.bin
-[INFO] 12:11:20:525 DataNode/(6034:6034): [CONEXION] Estableciendo conexion con File System (IP: 127.0.0.1 | Puerto 5040)
-[INFO] 12:11:40:792 DataNode/(6034:6034): [DATABIN] El bloque N°0 fue escrito
-[INFO] 12:11:40:979 DataNode/(6034:6034): [DATABIN] El bloque N°1 fue escrito
-[INFO] 12:11:44:644 DataNode/(6034:6034): [DATABIN] El bloque N°2 fue escrito
-[INFO] 12:11:44:811 DataNode/(6034:6034): [DATABIN] El bloque N°3 fue escrito
-[INFO] 12:11:50:461 DataNode/(6034:6034): [DATABIN] El bloque N°4 fue escrito
-[INFO] 12:11:50:644 DataNode/(6034:6034): [DATABIN] El bloque N°5 fue escrito
-[INFO] 12:11:52:89 DataNode/(6034:6034): [DATABIN] El bloque N°6 fue escrito
-[INFO] 12:11:52:262 DataNode/(6034:6034): [DATABIN] El bloque N°7 fue escrito
-[INFO] 12:11:53:461 DataNode/(6034:6034): [DATABIN] El bloque N°8 fue escrito
-[INFO] 12:11:53:684 DataNode/(6034:6034): [DATABIN] El bloque N°9 fue escrito
-[INFO] 12:11:54:752 DataNode/(6034:6034): [DATABIN] El bloque N°10 fue escrito
-[INFO] 12:11:54:944 DataNode/(6034:6034): [DATABIN] El bloque N°11 fue escrito
-[INFO] 12:11:56:281 DataNode/(6034:6034): [DATABIN] El bloque N°12 fue escrito
-[INFO] 12:11:56:455 DataNode/(6034:6034): [DATABIN] El bloque N°13 fue escrito
-[INFO] 12:12:31:5 DataNode/(6034:6034): [DATABIN] El bloque N°14 fue escrito
-[INFO] 12:12:31:176 DataNode/(6034:6034): [DATABIN] El bloque N°15 fue escrito
-[INFO] 12:12:37:512 DataNode/(6034:6034): [DATABIN] El bloque N°16 fue escrito
-[INFO] 12:12:37:692 DataNode/(6034:6034): [DATABIN] El bloque N°17 fue escrito
-[INFO] 12:12:40:86 DataNode/(6034:6034): [DATABIN] El bloque N°18 fue escrito
-[INFO] 12:12:40:309 DataNode/(6034:6034): [DATABIN] El bloque N°19 fue escrito
+[INFO] 13:00:15:471 DataNode/(6972:6972): [CONFIGURACION] Nombre Nodo: NODO63
+[INFO] 13:00:15:471 DataNode/(6972:6972): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data.bin
+[INFO] 13:00:15:472 DataNode/(6972:6972): [CONEXION] Estableciendo conexion con File System (IP: 127.0.0.1 | Puerto 5040)
+[INFO] 13:00:35:753 DataNode/(6972:6972): [DATABIN] El bloque N°0 fue escrito
+[INFO] 13:00:35:839 DataNode/(6972:6972): [DATABIN] El bloque N°1 fue escrito
+[INFO] 13:00:39:267 DataNode/(6972:6972): [DATABIN] El bloque N°2 fue escrito
+[INFO] 13:00:42:204 DataNode/(6972:6972): [DATABIN] El bloque N°3 fue escrito
+[INFO] 13:00:42:341 DataNode/(6972:6972): [DATABIN] El bloque N°4 fue escrito
+[INFO] 13:00:44:501 DataNode/(6972:6972): [DATABIN] El bloque N°5 fue escrito
+[INFO] 13:00:45:719 DataNode/(6972:6972): [DATABIN] El bloque N°6 fue escrito
+[INFO] 13:00:45:840 DataNode/(6972:6972): [DATABIN] El bloque N°7 fue escrito
+[INFO] 13:00:48:25 DataNode/(6972:6972): [DATABIN] El bloque N°8 fue escrito
+[INFO] 13:00:49:39 DataNode/(6972:6972): [DATABIN] El bloque N°9 fue escrito
+[INFO] 13:00:49:172 DataNode/(6972:6972): [DATABIN] El bloque N°10 fue escrito
+[INFO] 13:00:50:315 DataNode/(6972:6972): [DATABIN] El bloque N°11 fue escrito
+[INFO] 13:00:51:619 DataNode/(6972:6972): [DATABIN] El bloque N°12 fue escrito
+[INFO] 13:00:51:747 DataNode/(6972:6972): [DATABIN] El bloque N°13 fue escrito
+[INFO] 13:00:53:133 DataNode/(6972:6972): [DATABIN] El bloque N°14 fue escrito
+[INFO] 13:00:54:184 DataNode/(6972:6972): [DATABIN] El bloque N°15 fue escrito
+[INFO] 13:00:54:313 DataNode/(6972:6972): [DATABIN] El bloque N°16 fue escrito
+[INFO] 13:00:55:626 DataNode/(6972:6972): [DATABIN] El bloque N°17 fue escrito
+[INFO] 13:01:03:560 DataNode/(6972:6972): [DATABIN] El bloque N°18 fue escrito
+[INFO] 13:01:03:695 DataNode/(6972:6972): [DATABIN] El bloque N°19 fue escrito
+[INFO] 13:02:23:101 DataNode/(6972:6972): [CONEXION] El File System se desconecto
+[INFO] 13:02:23:102 DataNode/(6972:6972): [EJECUCION] Proceso Data Node finalizado

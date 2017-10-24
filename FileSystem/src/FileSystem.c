@@ -978,23 +978,12 @@ void comandoCopiarArchivoDeFS(Comando* comando) {
 		for(indice = 0; fread(buffer, sizeof(char),BLOQUE, file) == BLOQUE; indice++) {
 			Bloque* bloque = bloqueCrear(BLOQUE, indice);
 			int copiasRealizadas = 0;
-
 			Lista nodosDisponibles = listaFiltrar(listaNodos, (Puntero)nodoTieneBloquesLibres);
-
-			while( listaCantidadElementos(nodosDisponibles) > 0 && copiasRealizadas < MAX_COPIAS) {
+			while(listaCantidadElementos(nodosDisponibles) > 0 && copiasRealizadas < MAX_COPIAS) {
 				listaOrdenar(nodosDisponibles, (Puntero)nodoBloquesLibres);
-				//TODO TESTING
-				int i;
-				for(i=0; i<listaCantidadElementos(nodosDisponibles) ;i++) {
-					Nodo* nodo = listaObtenerElemento(nodosDisponibles, i);
-					printf("Nodo %p cant bloques libres %i\n", nodo, nodo->bloquesLibres);
-				}
-				//BORRAR
-
 				nodo = listaObtenerElemento(nodosDisponibles, 0);
 				Entero numeroBloque = nodoBuscarBloqueLibre(nodo);
-				//TODO Cambiar por bloques libres asi se evita buscar al dop
-				if(numeroBloque != ERROR) {
+				if(numeroBloque != ERROR) { //Este if estaria al pedo ya que el filter te asegura de que todos los nodos tengan un bloque libre al menos
 					CopiaBloque* copia = copiaBloqueCrear(numeroBloque, nodo->nombre);
 					listaAgregarElemento(bloque->listaCopias, copia);
 					bitmapOcuparBit(nodo->bitmap, numeroBloque);
@@ -1003,16 +992,16 @@ void comandoCopiarArchivoDeFS(Comando* comando) {
 					BloqueDataBin* bloqueDataBin = bloqueDataBinCrear(numeroBloque, buffer);
 					mensajeEnviar(nodo->socket, ESCRIBIR, bloqueDataBin, sizeof(BloqueDataBin));
 					copiasRealizadas++;
-					printf("Envia el bloque %i al Nodo %p\n", bloque->numeroBloque, nodo);
 					if(nodo->bloquesLibres == 0) {
-						imprimirMensajeUno(archivoLog, ANSI_COLOR_BLUE "[AVISO] No hay bloques libres en el Nodo %p" ANSI_COLOR_RESET, nodo);
-						printf("Nodo libre deberia ser -1 =  %i", nodoBuscarBloqueLibre(nodo));
+						imprimirMensajeUno(archivoLog, AMARILLO"[ADVERTENCIA] No hay bloques libres en %s"BLANCO, nodo->nombre);
 						nodosDisponibles = listaFiltrar(listaNodos, (Puntero)nodoTieneBloquesLibres);
 					}
 				}
+				else //Si entra aca es porque el bitmap no encontro un 0 (bloque libre) igual el filter deberia encargarse de que nunca suceda eso
+					imprimirMensaje(archivoLog, ROJO"[ERROR] Si estas viendo esto es porque el listaFiltrar() te traiciono"BLANCO);
 			}
-			if(listaCantidadElementos(nodosDisponibles) == NULO) {
-				imprimirMensaje(archivoLog, ANSI_COLOR_BLUE "[ERROR] No hay ningun Nodo con bloques libres, se suspende la operacion" ANSI_COLOR_RESET);
+			if(copiasRealizadas < MAX_COPIAS && listaCantidadElementos(nodosDisponibles) == NULO) {
+				imprimirMensaje(archivoLog, ROJO"[ERROR] No hay nodos con bloques libres, se suspende la operacion"BLANCO);
 				return;
 			}
 			listaAgregarElemento(archivo->listaBloques, bloque);
