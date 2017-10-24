@@ -1,23 +1,41 @@
-[INFO] 17:37:00:851 FileSystem/(10405:10405): [EJECUCION] Proceso File System inicializado
-[INFO] 17:37:00:909 FileSystem/(10405:10405): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 17:37:00:911 FileSystem/(10405:10405): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 17:37:00:911 FileSystem/(10405:10405): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
-[INFO] 17:37:03:14 FileSystem/(10405:10405): [CONEXION] Un proceso Data Node se ha conectado
-[INFO] 17:37:03:643 FileSystem/(10405:10405): [CONEXION] Un proceso Data Node se ha conectado
-[INFO] 17:37:04:123 FileSystem/(10405:10405): [CONEXION] Un proceso Data Node se ha conectado
-[INFO] 17:37:16:983 FileSystem/(10405:10410): [DIRECTORIO] El directorio /home fue creado
-[INFO] 17:37:43:255 FileSystem/(10405:10410): [ARCHIVO] El archivo /home/utnso/Escritorio/test2 fue copiado en File System
-[INFO] 17:37:45:627 FileSystem/(10405:10410): [ARCHIVO] El archivo /home/utnso/Escritorio/test2 fue copiado en File System
-[INFO] 17:37:47:23 FileSystem/(10405:10410): [ARCHIVO] El archivo /home/utnso/Escritorio/test2 fue copiado en File System
-[INFO] 17:37:48:372 FileSystem/(10405:10410): [ARCHIVO] El archivo /home/utnso/Escritorio/test2 fue copiado en File System
-[INFO] 17:37:49:684 FileSystem/(10405:10410): [ARCHIVO] El archivo /home/utnso/Escritorio/test2 fue copiado en File System
-[INFO] 17:37:50:925 FileSystem/(10405:10410): [ARCHIVO] El archivo /home/utnso/Escritorio/test2 fue copiado en File System
-[INFO] 17:37:51:983 FileSystem/(10405:10410): [ARCHIVO] El archivo /home/utnso/Escritorio/test2 fue copiado en File System
-[INFO] 17:37:53:69 FileSystem/(10405:10410): [ARCHIVO] El archivo /home/utnso/Escritorio/test2 fue copiado en File System
-[INFO] 17:37:54:167 FileSystem/(10405:10410): [ARCHIVO] El archivo /home/utnso/Escritorio/test2 fue copiado en File System
-[INFO] 17:37:56:270 FileSystem/(10405:10410): [33m[ADVERTENCIA] No hay bloques libres en NODO63[0m
-[INFO] 17:37:56:310 FileSystem/(10405:10410): [33m[ADVERTENCIA] No hay bloques libres en NODO63[0m
-[INFO] 17:37:56:350 FileSystem/(10405:10410): [33m[ADVERTENCIA] No hay bloques libres en NODO63[0m
-[INFO] 17:37:56:352 FileSystem/(10405:10410): [ARCHIVO] El archivo /home/utnso/Escritorio/test2 fue copiado en File System
-[INFO] 17:37:59:605 FileSystem/(10405:10410): [31m[ERROR] No hay nodos con bloques libres, se suspende la operacion[0m
-[INFO] 17:39:05:706 FileSystem/(10405:10405): [EJECUCION] Proceso File System finalizado
+[INFO] 19:15:38:903 FileSystem/(11537:11537): [EJECUCION] Proceso File System inicializado
+[INFO] 19:15:38:961 FileSystem/(11537:11537): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 19:15:38:963 FileSystem/(11537:11537): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 19:15:38:963 FileSystem/(11537:11537): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
+[INFO] 19:15:40:88 FileSystem/(11537:11537): [CONEXION] Un proceso Data Node se ha conectado
+[INFO] 19:15:46:474 FileSystem/(11537:11542): [DIRECTORIO] El directorio /home fue creado
+[INFO] 19:16:11:997 FileSystem/(11537:11542): [ARCHIVO] El archivo /home/utnso/Escritorio/test2 fue copiado en File System
+[INFO] 19:16:16:451 FileSystem/(11537:11542): [DIRECTORIO] test2 (a)
+[INFO] 19:16:24:186 FileSystem/(11537:11542): [ERROR] El archivo o directorio ya existe
+[INFO] 19:16:49:304 FileSystem/(11537:11542): [DIRECTORIO] El archivo test2 fue movido a /
+[INFO] 19:16:50:510 FileSystem/(11537:11542): [DIRECTORIO] home (d)
+[INFO] 19:16:50:513 FileSystem/(11537:11542): [DIRECTORIO] test2 (a)
+[INFO] 19:16:57:277 FileSystem/(11537:11542): [DIRECTORIO] El directorio esta vacio
+[INFO] 19:17:02:572 FileSystem/(11537:11542): [DIRECTORIO] El directorio /home/test2 fue creado
+[INFO] 19:17:04:949 FileSystem/(11537:11542): [DIRECTORIO] test2 (d)
+[INFO] 19:17:25:210 FileSystem/(11537:11542): [ERROR] La nueva ubicacion del archivo o directorio ya existe
+[INFO] 19:17:41:263 FileSystem/(11537:11542): [DIRECTORIO] test2 (d)
+[INFO] 19:17:49:489 FileSystem/(11537:11542): [ERROR] La nueva ubicacion del archivo o directorio ya existe
+[INFO] 19:17:53:432 FileSystem/(11537:11542): [DIRECTORIO] home (d)
+[INFO] 19:17:53:433 FileSystem/(11537:11542): [DIRECTORIO] test2 (a)
+[INFO] 19:18:23:644 FileSystem/(11537:11542): [DIRECTORIO] test2 (d)
+[INFO] 19:18:36:404 FileSystem/(11537:11542): [ARCHIVO] El archivo /home/utnso/Escritorio/test2 fue copiado en File System
+[INFO] 19:19:00:616 FileSystem/(11537:11542): [DIRECTORIO] test2 (d)
+[INFO] 19:19:00:618 FileSystem/(11537:11542): [DIRECTORIO] test2 (a)
+[INFO] 19:19:59:777 FileSystem/(11537:11542): [ERROR] El archivo ya existe en el File System
+[INFO] 19:20:46:636 FileSystem/(11537:11542): [DIRECTORIO] El directorio /home/test2 ha sido eliminado
+[INFO] 19:20:48:752 FileSystem/(11537:11542): [DIRECTORIO] test2 (a)
+[INFO] 19:21:16:853 FileSystem/(11537:11542): [ARCHIVO] Nombre: test2
+[INFO] 19:21:16:856 FileSystem/(11537:11542): [ARCHIVO] Tipo: BINARIO
+[INFO] 19:21:16:858 FileSystem/(11537:11542): [ARCHIVO] Ubicacion: /home/test2
+[INFO] 19:21:16:884 FileSystem/(11537:11542): [ARCHIVO] Tamanio: 3145728 bytes
+[INFO] 19:21:16:886 FileSystem/(11537:11542): [ARCHIVO] Bloques utilizados: 3
+[INFO] 19:21:16:888 FileSystem/(11537:11542): [ARCHIVO] Bloque 0: 1048576 bytes
+[INFO] 19:21:16:890 FileSystem/(11537:11542): [ARCHIVO] Bloque 0 copia 0 en: Nodo: NODO63 | Bloque: 6
+[INFO] 19:21:16:891 FileSystem/(11537:11542): [ARCHIVO] Bloque 0 copia 1 en: Nodo: NODO63 | Bloque: 7
+[INFO] 19:21:16:892 FileSystem/(11537:11542): [ARCHIVO] Bloque 1: 1048576 bytes
+[INFO] 19:21:16:892 FileSystem/(11537:11542): [ARCHIVO] Bloque 1 copia 0 en: Nodo: NODO63 | Bloque: 8
+[INFO] 19:21:16:893 FileSystem/(11537:11542): [ARCHIVO] Bloque 1 copia 1 en: Nodo: NODO63 | Bloque: 9
+[INFO] 19:21:16:893 FileSystem/(11537:11542): [ARCHIVO] Bloque 2: 1048576 bytes
+[INFO] 19:21:16:894 FileSystem/(11537:11542): [ARCHIVO] Bloque 2 copia 0 en: Nodo: NODO63 | Bloque: 10
+[INFO] 19:21:16:894 FileSystem/(11537:11542): [ARCHIVO] Bloque 2 copia 1 en: Nodo: NODO63 | Bloque: 11

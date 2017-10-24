@@ -1,25 +1,15 @@
-[INFO] 17:37:04:122 DataNode/(10420:10420): [CONFIGURACION] Nombre Nodo: NODO63
-[INFO] 17:37:04:122 DataNode/(10420:10420): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data.bin
-[INFO] 17:37:04:122 DataNode/(10420:10420): [CONEXION] Estableciendo conexion con File System (IP: 127.0.0.1 | Puerto 5040)
-[INFO] 17:37:43:124 DataNode/(10420:10420): [DATABIN] El bloque N°0 fue escrito
-[INFO] 17:37:43:216 DataNode/(10420:10420): [DATABIN] El bloque N°1 fue escrito
-[INFO] 17:37:45:452 DataNode/(10420:10420): [DATABIN] El bloque N°2 fue escrito
-[INFO] 17:37:45:586 DataNode/(10420:10420): [DATABIN] El bloque N°3 fue escrito
-[INFO] 17:37:46:864 DataNode/(10420:10420): [DATABIN] El bloque N°4 fue escrito
-[INFO] 17:37:46:992 DataNode/(10420:10420): [DATABIN] El bloque N°5 fue escrito
-[INFO] 17:37:48:211 DataNode/(10420:10420): [DATABIN] El bloque N°6 fue escrito
-[INFO] 17:37:48:340 DataNode/(10420:10420): [DATABIN] El bloque N°7 fue escrito
-[INFO] 17:37:49:510 DataNode/(10420:10420): [DATABIN] El bloque N°8 fue escrito
-[INFO] 17:37:49:650 DataNode/(10420:10420): [DATABIN] El bloque N°9 fue escrito
-[INFO] 17:37:50:764 DataNode/(10420:10420): [DATABIN] El bloque N°10 fue escrito
-[INFO] 17:37:50:892 DataNode/(10420:10420): [DATABIN] El bloque N°11 fue escrito
-[INFO] 17:37:51:822 DataNode/(10420:10420): [DATABIN] El bloque N°12 fue escrito
-[INFO] 17:37:51:948 DataNode/(10420:10420): [DATABIN] El bloque N°13 fue escrito
-[INFO] 17:37:52:911 DataNode/(10420:10420): [DATABIN] El bloque N°14 fue escrito
-[INFO] 17:37:53:36 DataNode/(10420:10420): [DATABIN] El bloque N°15 fue escrito
-[INFO] 17:37:53:998 DataNode/(10420:10420): [DATABIN] El bloque N°16 fue escrito
-[INFO] 17:37:54:129 DataNode/(10420:10420): [DATABIN] El bloque N°17 fue escrito
-[INFO] 17:37:56:166 DataNode/(10420:10420): [DATABIN] El bloque N°18 fue escrito
-[INFO] 17:37:56:309 DataNode/(10420:10420): [DATABIN] El bloque N°19 fue escrito
-[INFO] 17:39:07:930 DataNode/(10420:10420): [CONEXION] El File System se desconecto
-[INFO] 17:39:07:931 DataNode/(10420:10420): [EJECUCION] Proceso Data Node finalizado
+[INFO] 19:15:40:29 DataNode/(11544:11544): [CONFIGURACION] Nombre Nodo: NODO63
+[INFO] 19:15:40:30 DataNode/(11544:11544): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data.bin
+[INFO] 19:15:40:30 DataNode/(11544:11544): [CONEXION] Estableciendo conexion con File System (IP: 127.0.0.1 | Puerto 5040)
+[INFO] 19:16:11:854 DataNode/(11544:11544): [DATABIN] El bloque N°0 fue escrito
+[INFO] 19:16:11:857 DataNode/(11544:11544): [DATABIN] El bloque N°1 fue escrito
+[INFO] 19:16:11:890 DataNode/(11544:11544): [DATABIN] El bloque N°2 fue escrito
+[INFO] 19:16:11:919 DataNode/(11544:11544): [DATABIN] El bloque N°3 fue escrito
+[INFO] 19:16:11:959 DataNode/(11544:11544): [DATABIN] El bloque N°4 fue escrito
+[INFO] 19:16:11:989 DataNode/(11544:11544): [DATABIN] El bloque N°5 fue escrito
+[INFO] 19:18:36:248 DataNode/(11544:11544): [DATABIN] El bloque N°6 fue escrito
+[INFO] 19:18:36:279 DataNode/(11544:11544): [DATABIN] El bloque N°7 fue escrito
+[INFO] 19:18:36:312 DataNode/(11544:11544): [DATABIN] El bloque N°8 fue escrito
+[INFO] 19:18:36:341 DataNode/(11544:11544): [DATABIN] El bloque N°9 fue escrito
+[INFO] 19:18:36:373 DataNode/(11544:11544): [DATABIN] El bloque N°10 fue escrito
+[INFO] 19:18:36:401 DataNode/(11544:11544): [DATABIN] El bloque N°11 fue escrito

@@ -730,6 +730,7 @@ void comandoEliminarArchivo(Comando* comando) {
 }
 
 void comandoRenombrar(Comando* comando) {
+	//TODO Verificar si no renombra con un nombre ya existente
 	if(!rutaValida(comando->argumentos[1])) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return;
@@ -782,16 +783,25 @@ void comandoMover(Comando* comando) {
 		imprimirMensaje(archivoLog,"[ERROR] El directorio raiz no puede ser movido");
 		return;
 	}
-	Directorio* directorio = directorioBuscar(comando->argumentos[1]);
 	Directorio* directorioNuevoPadre;
 	if(stringIguales(comando->argumentos[2], "/"))
 		directorioNuevoPadre = directorioBuscarEnLista(0);
 	else
 		directorioNuevoPadre = directorioBuscar(comando->argumentos[2]);
+	if(directorioNuevoPadre == NULL) {
+		imprimirMensaje(archivoLog,"[ERROR] El directorio destino no existe");
+		return;
+	}
 	Archivo* archivo = archivoBuscar(comando->argumentos[1]);
-	if(directorio != NULL && directorioNuevoPadre != NULL) {
-		if(directorioExisteElNuevoNombre(directorioNuevoPadre->identificador, directorio->nombre)) {
-			imprimirMensaje(archivoLog, "[ERROR] La ruta destino ya existe");
+	Directorio* directorio = directorioBuscar(comando->argumentos[1]);
+	if(archivo == NULL && directorio == NULL) {
+		imprimirMensaje(archivoLog,"[ERROR] El archivo o directorio no existe");
+		return;
+	}
+	if(directorio != NULL) {
+		int existeArchivo = archivoExiste(directorioNuevoPadre->identificador, directorio->nombre);
+		if(directorioExisteElNuevoNombre(directorioNuevoPadre->identificador, directorio->nombre) || existeArchivo)  {
+			imprimirMensaje(archivoLog, "[ERROR] La nueva ubicacion del archivo o directorio ya existe");
 			return;
 		}
 		if(directorioEsHijoDe(directorioNuevoPadre, directorio)) {
@@ -808,9 +818,10 @@ void comandoMover(Comando* comando) {
 		imprimirMensajeDos(archivoLog, "[DIRECTORIO] El directorio %s fue movido a %s", nombre, comando->argumentos[2]);
 		memoriaLiberar(nombre);
 	}
-	else if(archivo != NULL && directorioNuevoPadre != NULL) {
-		if(archivoExiste(directorioNuevoPadre->identificador, archivo->nombre)) {
-			imprimirMensaje(archivoLog, "[ERROR] La ruta destino ya existe");
+	else {
+		int existeDirectorio = directorioExisteElNuevoNombre(directorioNuevoPadre->identificador, archivo->nombre);
+		if(archivoExiste(directorioNuevoPadre->identificador, archivo->nombre) || existeDirectorio) {
+			imprimirMensaje(archivoLog, "[ERROR] La nueva ubicacion del archivo o directorio ya existe");
 			return;
 		}
 		archivoPersistirMover(archivo, directorioNuevoPadre->identificador);
@@ -819,12 +830,10 @@ void comandoMover(Comando* comando) {
 		imprimirMensajeDos(archivoLog, "[DIRECTORIO] El archivo %s fue movido a %s", nombre, comando->argumentos[2]);
 		memoriaLiberar(nombre);
 	}
-	else
-		imprimirMensaje(archivoLog, "[ERROR] El archivo o directorio no existe");
 }
 
 void comandoMostrarArchivo(Comando* comando) {
-
+//TODO
 }
 
 void comandoCrearDirectorio(Comando* comando) {
@@ -836,6 +845,12 @@ void comandoCrearDirectorio(Comando* comando) {
 		imprimirMensaje(archivoLog,"[ERROR] El directorio raiz no puede ser creado");
 		return;
 	}
+	Archivo* archivo = archivoBuscar(comando->argumentos[1]);
+	if(archivo != NULL) {
+		imprimirMensaje(archivoLog,"[ERROR] El archivo o directorio ya existe");
+		return;
+	}
+
 	ControlDirectorio* control = directorioControlCrear(comando->argumentos[1]);
 	while(stringValido(control->nombreDirectorio)) {
 		directorioBuscarIdentificador(control);
@@ -942,6 +957,9 @@ void comandoCopiarArchivoDeFS(Comando* comando) {
 		}
 	}
 	archivoPersistirCrear(archivo);
+	//TODO Validar que no cree si existe un directorio con el mismo nombre
+	//TODO Probar con archivo de texto
+	listaAgregarElemento(listaArchivos, archivo);
 	imprimirMensajeUno(archivoLog, "[ARCHIVO] El archivo %s fue copiado en File System", comando->argumentos[2]);
 }
 
@@ -1249,7 +1267,7 @@ ControlDirectorio* directorioControlCrear(String rutaDirectorio) {
 
 void directorioControlarEntradas(ControlDirectorio* control, String path) {
 	if(control->nombresDirectorios[control->indiceNombresDirectorios + 1] == NULL)
-		imprimirMensaje(archivoLog, "[ERROR] El directorio ya existe");
+		imprimirMensaje(archivoLog, "[ERROR] El archivo o directorio ya existe");
 	else
 		control->identificadorPadre = control->identificadorDirectorio;
 	control->indiceNombresDirectorios++;
@@ -1948,3 +1966,19 @@ void testCabecita() {
 	listaAgregarElemento(listaArchivos, archivo);
 	archivoPersistirCrear(archivo);
 }
+
+/*
+ * diferenciar nombre de archivo y directorio
+mkdir con nombres existentes entre archivos y dire
+el rename si hay un archivo o dir igual nombre modifica el directorio
+El mover si hay un archivo y dir con el mismo nombre dice que no se puede mover un dirctorio a si mismo
+
+Hacer cpfrom
+
+valgrind --log-file=/home/utnso/Escritorio/log --leak-check=full --show-leak-kinds=all ./FileSystem
+
+cpfrom -b /home/utnso/Escritorio/test2 /home
+
+Si es con clean una vez que formateo dejo de escuchar el socket de datanodes
+Si NO es con clean una vez que recupero el estado anterior dejo de escuchar datanodes
+*/
