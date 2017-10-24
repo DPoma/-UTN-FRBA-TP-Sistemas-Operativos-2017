@@ -1,5 +1,23 @@
-[INFO] 23:19:26:775 DataNode/(16042:16042): [CONFIGURACION] Nombre Nodo: NODO63
-[INFO] 23:19:26:775 DataNode/(16042:16042): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data.bin
-[INFO] 23:19:26:775 DataNode/(16042:16042): [CONEXION] Estableciendo conexion con File System (IP: 127.0.0.1 | Puerto 5040)
-[INFO] 23:27:39:971 DataNode/(16042:16042): [CONEXION] El File System se desconecto
-[INFO] 23:27:39:971 DataNode/(16042:16042): [EJECUCION] Proceso Data Node finalizado
+[INFO] 12:11:20:525 DataNode/(6034:6034): [CONFIGURACION] Nombre Nodo: NODO63
+[INFO] 12:11:20:525 DataNode/(6034:6034): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data.bin
+[INFO] 12:11:20:525 DataNode/(6034:6034): [CONEXION] Estableciendo conexion con File System (IP: 127.0.0.1 | Puerto 5040)
+[INFO] 12:11:40:792 DataNode/(6034:6034): [DATABIN] El bloque N°0 fue escrito
+[INFO] 12:11:40:979 DataNode/(6034:6034): [DATABIN] El bloque N°1 fue escrito
+[INFO] 12:11:44:644 DataNode/(6034:6034): [DATABIN] El bloque N°2 fue escrito
+[INFO] 12:11:44:811 DataNode/(6034:6034): [DATABIN] El bloque N°3 fue escrito
+[INFO] 12:11:50:461 DataNode/(6034:6034): [DATABIN] El bloque N°4 fue escrito
+[INFO] 12:11:50:644 DataNode/(6034:6034): [DATABIN] El bloque N°5 fue escrito
+[INFO] 12:11:52:89 DataNode/(6034:6034): [DATABIN] El bloque N°6 fue escrito
+[INFO] 12:11:52:262 DataNode/(6034:6034): [DATABIN] El bloque N°7 fue escrito
+[INFO] 12:11:53:461 DataNode/(6034:6034): [DATABIN] El bloque N°8 fue escrito
+[INFO] 12:11:53:684 DataNode/(6034:6034): [DATABIN] El bloque N°9 fue escrito
+[INFO] 12:11:54:752 DataNode/(6034:6034): [DATABIN] El bloque N°10 fue escrito
+[INFO] 12:11:54:944 DataNode/(6034:6034): [DATABIN] El bloque N°11 fue escrito
+[INFO] 12:11:56:281 DataNode/(6034:6034): [DATABIN] El bloque N°12 fue escrito
+[INFO] 12:11:56:455 DataNode/(6034:6034): [DATABIN] El bloque N°13 fue escrito
+[INFO] 12:12:31:5 DataNode/(6034:6034): [DATABIN] El bloque N°14 fue escrito
+[INFO] 12:12:31:176 DataNode/(6034:6034): [DATABIN] El bloque N°15 fue escrito
+[INFO] 12:12:37:512 DataNode/(6034:6034): [DATABIN] El bloque N°16 fue escrito
+[INFO] 12:12:37:692 DataNode/(6034:6034): [DATABIN] El bloque N°17 fue escrito
+[INFO] 12:12:40:86 DataNode/(6034:6034): [DATABIN] El bloque N°18 fue escrito
+[INFO] 12:12:40:309 DataNode/(6034:6034): [DATABIN] El bloque N°19 fue escrito

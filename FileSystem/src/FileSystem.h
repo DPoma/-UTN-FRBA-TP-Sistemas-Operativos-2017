@@ -43,13 +43,15 @@
 #define INFO "info"
 #define EXIT "exit"
 
+#define FLAG_C "--clean"
 #define FLAG_B "-b"
 #define FLAG_D "-d"
 #define FLAG_T "-t"
-#define FLAG_CLEAN "--clean"
-#define BUFFER 300
-#define MAX_DIR 100
 
+#define MAX_STRING 300
+#define MAX_NOMBRE 255
+#define MAX_DIR 100
+#define MAX_COPIAS 2
 
 #define ESCRIBIR 102
 
@@ -75,14 +77,14 @@ typedef struct {
 typedef struct {
 	char puertoYAMA[20];
 	char puertoDataNode[20];
-	char rutaMetadata[255];
+	char rutaMetadata[MAX_NOMBRE];
 } Configuracion;
 
 
-typedef struct __attribute__((packed)){
+typedef struct {
 	int identificador;
 	int identificadorPadre;
-	char nombre[255];
+	char nombre[MAX_NOMBRE];
 } Directorio;
 
 typedef struct {
@@ -93,24 +95,25 @@ typedef struct {
 	String* nombresDirectorios;
 } ControlDirectorio;
 
-typedef struct __attribute__((packed)){
+typedef struct {
 	int identificadorPadre;
 	char tipo[10];
-	char nombre[255];
+	char nombre[MAX_NOMBRE];
 	Lista listaBloques;
 } Archivo;
 
 typedef struct {
-	int bytes;
+	int bytesUtilizados;
+	int numeroBloque;
 	Lista listaCopias;
 } Bloque;
 
-typedef struct __attribute__((packed)){
+typedef struct {
 	char nombreNodo[10];
 	int  bloqueNodo;
 } CopiaBloque;
 
-typedef struct __attribute__((packed)){
+typedef struct {
 	char puerto[20];
 	char ip[20];
 	char nombre[10];
@@ -120,6 +123,10 @@ typedef struct __attribute__((packed)){
 	Socket socket;
 } Nodo;
 
+typedef struct __attribute__((packed)) {
+	Entero numeroBloque;
+	char bloque[BLOQUE];
+} BloqueDataBin;
 
 typedef struct __attribute__((packed)) {
 	char ip[20];
@@ -138,6 +145,7 @@ Hilo hiloConsola;
 Lista listaDirectorios;
 Lista listaArchivos;
 Lista listaNodos;
+Lista listaNodosDisponibles;
 Bitmap* bitmapDirectorios;
 Socket socketYama;
 Socket socketDataNode;
@@ -288,7 +296,7 @@ void archivoPersistirControlRenombrar(Archivo* archivo, String nuevoNombre);
 void archivoPersistirControlMover(Archivo* archivo, Entero nuevoPadre);
 //--------------------------------------- Funciones de Bloque -------------------------------------
 
-Bloque* bloqueCrear(int bytes);
+Bloque* bloqueCrear(int bytes, int numero);
 void bloqueDestruir(Bloque* bloque);
 
 //--------------------------------------- Funciones de Copia Bloque -------------------------------------

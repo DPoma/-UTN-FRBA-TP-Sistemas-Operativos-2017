@@ -28,10 +28,10 @@ void dataNodeIniciar() {
 	configuracion = configuracionCrear(RUTA_CONFIG, (Puntero)configuracionLeerArchivo, campos);
 	configuracionImprimir(configuracion);
 	dataBinAbrir();
-	dataBinCalcularBloques();
 	punteroDataBin = dataBinMapear();
 	//senialAsignarFuncion(SIGINT, funcionSenial);
 	dataNodeActivar();
+	dataBinCalcularBloques();
 	imprimirMensajeDos(archivoLog, "[CONEXION] Estableciendo conexion con File System (IP: %s | Puerto %s)", configuracion->ipFileSystem, configuracion->puertoFileSystem);
 	socketFileSystem = socketCrearCliente(configuracion->ipFileSystem, configuracion->puertoFileSystem, ID_DATANODE);
 	Puntero datos = memoriaAlocar(50);
@@ -132,7 +132,7 @@ void dataBinGetBloque(Puntero datos) {
 	}
 	else {
 		imprimirMensaje(archivoLog,"[ERROR] El bloque no existe");
-		mensajeEnviar(socketFileSystem, -2, NULL, NULO);
+		//mensajeEnviar(socketFileSystem, -2, NULL, NULO);
 	}
 }
 
@@ -143,7 +143,7 @@ void dataBinSetBloque(Puntero datos) {
 		setBloque(numeroBloque, datos+sizeof(Entero));
 	else {
 		imprimirMensaje(archivoLog,"[ERROR] El bloque no existe");
-		mensajeEnviar(socketFileSystem, -2, NULL, NULO);
+		//mensajeEnviar(socketFileSystem, -2, NULL, NULO);
 	}
 
 }
