@@ -10,6 +10,8 @@
 
 #include "YAMA.h"
 
+//Para probar los ips y puertos ejecutar el FS, yama y algunos datanodes poner en la consola del fs "format" para que pase a un estado estable
+//Deberian aparecer las ips y los puertos
 
 int main(void) {
 	yamaIniciar();
@@ -34,18 +36,19 @@ void yamaIniciar() {
 	imprimirMensajeDos(archivoLog, "[CONEXION] Realizando conexion con File System (IP: %s | Puerto %s)", configuracion->ipFileSystem, configuracion->puertoFileSystem);
 	servidor->fileSystem = socketCrearCliente(configuracion->ipFileSystem, configuracion->puertoFileSystem, ID_YAMA);
 	imprimirMensaje(archivoLog, "[CONEXION] Conexion exitosa con File System");
-
 	//infoNodos es una lista de ips y puertos
 	Mensaje* infoNodos=mensajeRecibir(servidor->fileSystem);
-	mensajeObtenerDatos(infoNodos,servidor->fileSystem);
+	//mensajeObtenerDatos(infoNodos,servidor->fileSystem); No hace falta, ya lo usa implicitamente mensajeRecibir
 	int i;
 	for(i=0;i<infoNodos->header.tamanio/DIRSIZE;i++){
 		Worker worker;
 		worker.conectado=true;
 		worker.carga=0;
 		worker.tareasRealizadas=0;
-		worker.nodo=*(Dir*)(infoNodos+sizeof(Dir)*i);//TODO puede que rompa porque no es deep copying
-		list_addM(workers,&worker,sizeof(Worker));
+		worker.nodo=*(Dir*)(infoNodos->datos+sizeof(Dir)*i);//TODO puede que rompa porque no es deep copying (No rompe solo faltaba infoNodos->datos)
+		printf("IP = %s\n", worker.nodo.ip);
+		printf("Puerto = %s\n", worker.nodo.port);
+		//list_addM(workers,&worker,sizeof(Worker)); TODO tira segmentation fault no vi porque
 	}
 	mensajeDestruir(infoNodos);
 }
@@ -79,6 +82,7 @@ void yamaAtender() {
 	imprimirMensajeUno(archivoLog, "[CONEXION] Esperando conexiones de un Master (Puerto %s)", configuracion->puertoMaster);
 	servidor->listenerMaster = socketCrearListener(configuracion->puertoMaster);
 	listaSocketsAgregar(servidor->listenerMaster, &servidor->listaMaster);
+	//TODO Aca deberia ir un socketAceptar porque sino sigue de largo e imprime el mensaje de abajo
 	imprimirMensaje(archivoLog, "[CONEXION] Conexion exitosa con Master");
 	servidorControlarMaximoSocket(servidor->fileSystem);
 	servidorControlarMaximoSocket(servidor->listenerMaster);

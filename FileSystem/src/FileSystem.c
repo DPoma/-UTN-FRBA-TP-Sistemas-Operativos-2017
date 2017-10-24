@@ -586,9 +586,12 @@ void servidorRegistrarDataNode(Servidor* servidor, Socket nuevoSocket) {
 			listaSocketsAgregar(nuevoSocket, &servidor->listaDataNodes);
 			Mensaje* mensaje = mensajeRecibir(nuevoSocket);
 			Nodo* nodo = nodoCrear(190, 0, nuevoSocket);
-			memcpy(nodo->nombre, mensaje->datos, 20);
+			memcpy(nodo->nombre, mensaje->datos, 10);
 			memcpy(nodo->ip, mensaje->datos+10, 20);
 			memcpy(nodo->puerto, mensaje->datos+30, 20);
+			printf("IP = %s\n", nodo->ip);
+			printf("puerto = %s\n", nodo->puerto);
+			printf("nombre = %s\n", nodo->nombre);
 			mensajeDestruir(mensaje);
 			listaAgregarElemento(listaNodos, nodo);
 			imprimirMensaje(archivoLog, "[CONEXION] Un proceso Data Node se ha conectado");

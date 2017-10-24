@@ -1,12 +1,9 @@
-[INFO] 20:30:07:410 FileSystem/(13595:13595): [EJECUCION] Proceso File System inicializado
-[INFO] 20:30:07:469 FileSystem/(13595:13595): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 20:30:07:470 FileSystem/(13595:13595): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 20:30:07:470 FileSystem/(13595:13595): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
-[INFO] 20:30:10:395 FileSystem/(13595:13595): [CONEXION] Un proceso Data Node se ha conectado
-[INFO] 20:30:24:80 FileSystem/(13595:13595): [CONEXION] Un proceso Data Node se ha conectado
-[INFO] 20:30:31:536 FileSystem/(13595:13595): [CONEXION] Un proceso Data Node se ha conectado
-[INFO] 20:30:37:954 FileSystem/(13595:13595): [CONEXION] Un proceso Data Node se ha desconectado
-[INFO] 20:30:39:442 FileSystem/(13595:13595): [CONEXION] Un proceso Data Node se ha conectado
-[INFO] 20:30:40:988 FileSystem/(13595:13595): [CONEXION] Un proceso Data Node se ha desconectado
-[INFO] 20:30:43:77 FileSystem/(13595:13600): [ESTADO] El File System ha sido formateado
-[INFO] 20:31:17:464 FileSystem/(13595:13595): [EJECUCION] Proceso File System finalizado
+[INFO] 23:19:22:91 FileSystem/(16028:16028): [EJECUCION] Proceso File System inicializado
+[INFO] 23:19:22:148 FileSystem/(16028:16028): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 23:19:22:150 FileSystem/(16028:16028): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 23:19:22:150 FileSystem/(16028:16028): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
+[INFO] 23:19:22:891 FileSystem/(16028:16028): [CONEXION] Un proceso Data Node se ha conectado
+[INFO] 23:19:23:580 FileSystem/(16028:16028): [CONEXION] El proceso YAMA se ha conectado
+[INFO] 23:19:26:793 FileSystem/(16028:16028): [CONEXION] Un proceso Data Node se ha conectado
+[INFO] 23:19:29:618 FileSystem/(16028:16033): [ESTADO] El File System ha sido formateado
+[INFO] 23:27:37:151 FileSystem/(16028:16028): [CONEXION] El proceso YAMA se ha desconectado

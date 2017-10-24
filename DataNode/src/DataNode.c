@@ -34,7 +34,13 @@ void dataNodeIniciar() {
 	dataNodeActivar();
 	imprimirMensajeDos(archivoLog, "[CONEXION] Estableciendo conexion con File System (IP: %s | Puerto %s)", configuracion->ipFileSystem, configuracion->puertoFileSystem);
 	socketFileSystem = socketCrearCliente(configuracion->ipFileSystem, configuracion->puertoFileSystem, ID_DATANODE);
-	mensajeEnviar(socketFileSystem, 14, configuracion->nombreNodo, stringLongitud(configuracion->nombreNodo)+1);
+	Puntero datos = memoriaAlocar(50);
+	char ip[20] = "127.0.0.0";
+	memcpy(datos, configuracion->nombreNodo ,10);
+	memcpy(datos+10, ip , 20);
+	memcpy(datos+30, configuracion->puertoFileSystem ,20);
+	mensajeEnviar(socketFileSystem, 14, datos, 50);
+	memoriaLiberar(datos);
 }
 
 void dataNodeAtenderFileSystem(){

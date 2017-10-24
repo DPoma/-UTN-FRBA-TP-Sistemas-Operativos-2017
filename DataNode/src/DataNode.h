@@ -18,11 +18,11 @@
 //--------------------------------------- Estructuras -------------------------------------
 
 typedef struct {
-	char ipFileSystem[50];
-	char puertoFileSystem[50];
-	char nombreNodo[50];
-	char puertoWorker[50];
-	char rutaDataBin[100];
+	char ipFileSystem[20];
+	char puertoFileSystem[20];
+	char nombreNodo[10];
+	char puertoWorker[20];
+	char rutaDataBin[255];
 } Configuracion;
 
 //--------------------------------------- Variables Globales -------------------------------------
