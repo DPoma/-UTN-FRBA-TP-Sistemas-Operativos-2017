@@ -197,7 +197,7 @@ Puntero getBloque(Entero numeroBloque) {
 
 void setBloque(Entero numeroBloque, Puntero datos) {
 	Puntero puntero = dataBinUbicarPuntero(numeroBloque);
-	memcpy(puntero, datos, BLOQUE);
+	memcpy(puntero, datos, BLOQUE); //TODO ver si es bloque o el largo del dato
 	imprimirMensajeUno(archivoLog, "[DATABIN] El bloque N°%i fue escrito", (int*)numeroBloque);
 }
 

@@ -957,17 +957,28 @@ void comandoCopiarArchivoDeFS(Comando* comando) {
 	else {
 		String buffer = stringCrear(BLOQUE);
 		String datos = stringCrear(BLOQUE);
-		int bytesRestantes = BLOQUE;
+		String lineaFaltante = stringCrear(BLOQUE);
+		int bytesRestantes = BLOQUE-1;
 		int numeroBloqueArchivo = 0;
 		while(fgets(buffer, BLOQUE, file) != NULL) {
 			int tamanioBuffer = stringLongitud(buffer);
+			int tamanioLinea = stringLongitud(lineaFaltante);
+			//printf("La linea faltante es de %i bytes\n", stringLongitud(lineaFaltante));
+			//TODO VER que pasa si supera la longitud permitida un return supongo
+			stringConcatenar(&datos, lineaFaltante);
+			bytesRestantes-=tamanioLinea;
+			stringLimpiar(lineaFaltante, BLOQUE);
+			//printf("Los bytes rest es de %i bytes\n", bytesRestantes);
 			if(tamanioBuffer < bytesRestantes) {
+				//printf("El buffer es de %i bytes\n", stringLongitud(buffer));
 				stringConcatenar(&datos, buffer);
 				bytesRestantes-=tamanioBuffer;
+				//printf("Los bytes rest es de %i bytes\n", bytesRestantes);
 			}
 			else {
+				stringCopiar(lineaFaltante, buffer);
 				int bytesUtilizados = stringLongitud(datos)+1;
-				bytesRestantes = BLOQUE;
+				bytesRestantes = BLOQUE-1;
 				Bloque* bloque = bloqueCrear(bytesUtilizados, numeroBloqueArchivo);
 				int copiasRealizadas;
 				Lista nodosDisponibles = listaFiltrar(listaNodos, (Puntero)nodoTieneBloquesLibres);
@@ -976,7 +987,8 @@ void comandoCopiarArchivoDeFS(Comando* comando) {
 					Nodo* nodo = listaPrimerElemento(nodosDisponibles);
 					Entero numeroBloqueNodo = nodoBuscarBloqueLibre(nodo);
 					bloqueCopiar(bloque, nodo, numeroBloqueNodo);
-					BloqueNodo* bloqueDataBin = bloqueNodoCrear(numeroBloqueArchivo, datos);
+					printf("voy a copiar %i bytes, contando el barra cero \n", bytesUtilizados );
+					BloqueNodo* bloqueDataBin = bloqueNodoCrear(numeroBloqueNodo, datos);
 					mensajeEnviar(nodo->socket, ESCRIBIR, bloqueDataBin, sizeof(Entero)+bytesUtilizados);
 					memoriaLiberar(bloqueDataBin);
 					nodoVerificarBloquesLibres(nodo, nodosDisponibles);
@@ -987,9 +999,15 @@ void comandoCopiarArchivoDeFS(Comando* comando) {
 				}
 				listaAgregarElemento(archivo->listaBloques, bloque);
 				numeroBloqueArchivo++;
+				memoriaLiberar(datos);
+				datos = stringCrear(BLOQUE);
+
+				//stringLimpiar(datos, BLOQUE);
 			}
+			//stringLimpiar(buffer, BLOQUE);
 		}
 	}
+	puts("LLEGUE A PERSISTENCIA");
 	archivoPersistirCrear(archivo);
 	//TODO Validar que no cree si existe un directorio con el mismo nombre
 	//TODO Probar con archivo de texto
@@ -1507,10 +1525,12 @@ void archivoPersistirCrear(Archivo* archivo) {
 	fprintf(file, "ID_PADRE=%i\n", archivo->identificadorPadre);
 	fprintf(file, "TIPO=%s\n", archivo->tipo);
 	int indice;
+	printf("elemntos de lista bloques %i\n", listaCantidadElementos(archivo->listaBloques));
 	for(indice = 0; indice < listaCantidadElementos(archivo->listaBloques); indice++) {
 		Bloque* bloque = listaObtenerElemento(archivo->listaBloques, indice);
 		fprintf(file, "BLOQUE%i_BYTES=%i\n",indice, bloque->bytesUtilizados);
 		int indiceCopia;
+		printf("elemntos de la lista copias %i\n", listaCantidadElementos(bloque->listaCopias));
 		for(indiceCopia = 0; indiceCopia < listaCantidadElementos(bloque->listaCopias); indiceCopia++) {
 			CopiaBloque* copiaBloque = listaObtenerElemento(bloque->listaCopias, indiceCopia);
 			fprintf(file, "BLOQUE%i_COPIA%i=[%s,%i]\n", indice, indiceCopia, copiaBloque->nombreNodo, copiaBloque->bloqueNodo);
