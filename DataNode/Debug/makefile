@@ -35,7 +35,7 @@ DataNode: $(OBJS) $(USER_OBJS)
 
 # Other Targets
 clean:
-	-$(RM) $(OBJS)$(C_DEPS)$(EXECUTABLES) DataNode
+	-$(RM) $(EXECUTABLES)$(OBJS)$(C_DEPS) DataNode
 	-@echo ' '
 
 .PHONY: all clean dependents

@@ -1,15 +1,42 @@
-[INFO] 19:15:40:29 DataNode/(11544:11544): [CONFIGURACION] Nombre Nodo: NODO63
-[INFO] 19:15:40:30 DataNode/(11544:11544): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data.bin
-[INFO] 19:15:40:30 DataNode/(11544:11544): [CONEXION] Estableciendo conexion con File System (IP: 127.0.0.1 | Puerto 5040)
-[INFO] 19:16:11:854 DataNode/(11544:11544): [DATABIN] El bloque N°0 fue escrito
-[INFO] 19:16:11:857 DataNode/(11544:11544): [DATABIN] El bloque N°1 fue escrito
-[INFO] 19:16:11:890 DataNode/(11544:11544): [DATABIN] El bloque N°2 fue escrito
-[INFO] 19:16:11:919 DataNode/(11544:11544): [DATABIN] El bloque N°3 fue escrito
-[INFO] 19:16:11:959 DataNode/(11544:11544): [DATABIN] El bloque N°4 fue escrito
-[INFO] 19:16:11:989 DataNode/(11544:11544): [DATABIN] El bloque N°5 fue escrito
-[INFO] 19:18:36:248 DataNode/(11544:11544): [DATABIN] El bloque N°6 fue escrito
-[INFO] 19:18:36:279 DataNode/(11544:11544): [DATABIN] El bloque N°7 fue escrito
-[INFO] 19:18:36:312 DataNode/(11544:11544): [DATABIN] El bloque N°8 fue escrito
-[INFO] 19:18:36:341 DataNode/(11544:11544): [DATABIN] El bloque N°9 fue escrito
-[INFO] 19:18:36:373 DataNode/(11544:11544): [DATABIN] El bloque N°10 fue escrito
-[INFO] 19:18:36:401 DataNode/(11544:11544): [DATABIN] El bloque N°11 fue escrito
+[INFO] 23:52:08:738 DataNode/(4806:4806): [CONFIGURACION] Nombre Nodo: NODO63
+[INFO] 23:52:08:738 DataNode/(4806:4806): [CONFIGURACION] Ruta archivo data.bin: /home/dario/Escritorio/data.bin
+[INFO] 23:52:08:739 DataNode/(4806:4806): [DATABIN] Cantidad de bloques disponibles 20480
+[INFO] 23:52:08:739 DataNode/(4806:4806): [CONEXION] Estableciendo conexion con File System (IP: 127.0.0.1 | Puerto 5040)
+[INFO] 23:52:25:757 DataNode/(4806:4806): [DATABIN] El bloque N°0 fue escrito
+[INFO] 23:52:25:795 DataNode/(4806:4806): [DATABIN] El bloque N°1 fue escrito
+[INFO] 23:52:25:796 DataNode/(4806:4806): [DATABIN] El bloque N°2 fue escrito
+[INFO] 23:52:25:796 DataNode/(4806:4806): [DATABIN] El bloque N°3 fue escrito
+[INFO] 23:52:25:797 DataNode/(4806:4806): [DATABIN] El bloque N°4 fue escrito
+[INFO] 23:52:25:797 DataNode/(4806:4806): [DATABIN] El bloque N°5 fue escrito
+[INFO] 23:52:25:798 DataNode/(4806:4806): [DATABIN] El bloque N°6 fue escrito
+[INFO] 23:52:25:798 DataNode/(4806:4806): [DATABIN] El bloque N°7 fue escrito
+[INFO] 23:52:25:798 DataNode/(4806:4806): [DATABIN] El bloque N°8 fue escrito
+[INFO] 23:52:25:799 DataNode/(4806:4806): [DATABIN] El bloque N°9 fue escrito
+[INFO] 23:52:25:799 DataNode/(4806:4806): [DATABIN] El bloque N°10 fue escrito
+[INFO] 23:52:25:800 DataNode/(4806:4806): [DATABIN] El bloque N°11 fue escrito
+[INFO] 23:52:25:800 DataNode/(4806:4806): [DATABIN] El bloque N°12 fue escrito
+[INFO] 23:52:25:801 DataNode/(4806:4806): [DATABIN] El bloque N°13 fue escrito
+[INFO] 23:52:25:801 DataNode/(4806:4806): [DATABIN] El bloque N°14 fue escrito
+[INFO] 23:52:25:801 DataNode/(4806:4806): [DATABIN] El bloque N°15 fue escrito
+[INFO] 23:52:25:803 DataNode/(4806:4806): [DATABIN] El bloque N°16 fue escrito
+[INFO] 23:52:25:804 DataNode/(4806:4806): [DATABIN] El bloque N°17 fue escrito
+[INFO] 23:52:25:811 DataNode/(4806:4806): [DATABIN] El bloque N°18 fue escrito
+[INFO] 23:52:25:812 DataNode/(4806:4806): [DATABIN] El bloque N°19 fue escrito
+[INFO] 23:52:25:824 DataNode/(4806:4806): [DATABIN] El bloque N°20 fue escrito
+[INFO] 23:52:25:825 DataNode/(4806:4806): [DATABIN] El bloque N°21 fue escrito
+[INFO] 23:52:25:831 DataNode/(4806:4806): [DATABIN] El bloque N°22 fue escrito
+[INFO] 23:52:25:831 DataNode/(4806:4806): [DATABIN] El bloque N°23 fue escrito
+[INFO] 23:52:33:48 DataNode/(4806:4806): [DATABIN] El bloque N°0 fue leido
+[INFO] 23:52:33:50 DataNode/(4806:4806): [DATABIN] El bloque N°2 fue leido
+[INFO] 23:52:33:53 DataNode/(4806:4806): [DATABIN] El bloque N°4 fue leido
+[INFO] 23:52:33:53 DataNode/(4806:4806): [DATABIN] El bloque N°6 fue leido
+[INFO] 23:52:33:56 DataNode/(4806:4806): [DATABIN] El bloque N°8 fue leido
+[INFO] 23:52:33:56 DataNode/(4806:4806): [DATABIN] El bloque N°10 fue leido
+[INFO] 23:52:33:57 DataNode/(4806:4806): [DATABIN] El bloque N°12 fue leido
+[INFO] 23:52:33:57 DataNode/(4806:4806): [DATABIN] El bloque N°14 fue leido
+[INFO] 23:52:33:58 DataNode/(4806:4806): [DATABIN] El bloque N°16 fue leido
+[INFO] 23:52:33:58 DataNode/(4806:4806): [DATABIN] El bloque N°18 fue leido
+[INFO] 23:52:33:59 DataNode/(4806:4806): [DATABIN] El bloque N°20 fue leido
+[INFO] 23:52:33:59 DataNode/(4806:4806): [DATABIN] El bloque N°22 fue leido
+[INFO] 23:55:48:959 DataNode/(4806:4806): [CONEXION] El File System se desconecto
+[INFO] 23:55:48:960 DataNode/(4806:4806): [EJECUCION] Proceso Data Node finalizado

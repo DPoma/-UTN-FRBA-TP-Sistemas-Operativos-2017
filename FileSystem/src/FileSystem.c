@@ -190,7 +190,9 @@ void servidorRecibirMensaje(Servidor* servidor, Socket unSocket) {
 	if(mensajeDesconexion(mensaje))
 		servidorFinalizarConexion(servidor, unSocket);
 	else {
-		puts("MENSAJE");
+		if(mensaje->header.operacion == 14) {
+			printf("%s", (String)mensaje->datos);
+		}
 	}
 	mensajeDestruir(mensaje);
 }
@@ -229,7 +231,7 @@ void servidorRegistrarDataNode(Servidor* servidor, Socket nuevoSocket) {
 		//if(estadoSeguro == 0) { TODO POnerlo lindo
 			listaSocketsAgregar(nuevoSocket, &servidor->listaDataNodes);
 			Mensaje* mensaje = mensajeRecibir(nuevoSocket);
-			Nodo* nodo = nodoCrear(20, 20, nuevoSocket);
+			Nodo* nodo = nodoCrear(20480, 20480, nuevoSocket);
 			memcpy(nodo->nombre, mensaje->datos, 10);
 			memcpy(nodo->ip, mensaje->datos+10, 20);
 			memcpy(nodo->puerto, mensaje->datos+30, 20);
@@ -739,11 +741,15 @@ void comandoRenombrar(Comando* comando) {
 		imprimirMensaje(archivoLog,"[ERROR] El directorio raiz no puede ser renombrado");
 		return;
 	}
-	int identificador = directorioObtenerIdentificador(comando->argumentos[1]);
-	Directorio* directorio = directorioBuscarEnLista(identificador);
+	Directorio* directorio = directorioBuscar(comando->argumentos[1]);
 	Archivo* archivo = archivoBuscar(comando->argumentos[1]);
+	if(archivo == NULL && directorio == NULL) {
+		imprimirMensaje(archivoLog, "[ERROR] El archivo o directorio no existe");
+		return;
+	}
 	if(directorio != NULL) {
-		if(directorioExisteElNuevoNombre(directorio->identificadorPadre, comando->argumentos[2])) {
+		int existeArchivo = archivoExiste(directorio->identificadorPadre, comando->argumentos[2]);
+		if(directorioExiste(directorio->identificadorPadre, comando->argumentos[2]) || existeArchivo) {
 			imprimirMensaje(archivoLog, "[ERROR] El nuevo nombre para el directorio ya existe");
 			return;
 		}
@@ -751,8 +757,9 @@ void comandoRenombrar(Comando* comando) {
 		stringCopiar(directorio->nombre, comando->argumentos[2]);
 		imprimirMensajeDos(archivoLog, "[DIRECTORIO] El directorio %s fue renombrado por %s", comando->argumentos[1], directorio->nombre);
 	}
-	else if(archivo != NULL) {
-		if(archivoExiste(archivo->identificadorPadre, comando->argumentos[2])) {
+	else {
+		int existeDirectorio = directorioExiste(archivo->identificadorPadre, comando->argumentos[2]);
+		if(archivoExiste(archivo->identificadorPadre, comando->argumentos[2]) || existeDirectorio) {
 			imprimirMensaje(archivoLog, "[ARCHIVO] El nuevo nombre para el archivo ya existe");
 			return;
 		}
@@ -765,8 +772,6 @@ void comandoRenombrar(Comando* comando) {
 		memoriaLiberar(antiguaRuta);
 		memoriaLiberar(nuevaRuta);
 	}
-	else
-		imprimirMensaje(archivoLog, "[ERROR] El archivo o directorio no existe");
 }
 
 
@@ -800,7 +805,7 @@ void comandoMover(Comando* comando) {
 	}
 	if(directorio != NULL) {
 		int existeArchivo = archivoExiste(directorioNuevoPadre->identificador, directorio->nombre);
-		if(directorioExisteElNuevoNombre(directorioNuevoPadre->identificador, directorio->nombre) || existeArchivo)  {
+		if(directorioExiste(directorioNuevoPadre->identificador, directorio->nombre) || existeArchivo)  {
 			imprimirMensaje(archivoLog, "[ERROR] La nueva ubicacion del archivo o directorio ya existe");
 			return;
 		}
@@ -819,7 +824,7 @@ void comandoMover(Comando* comando) {
 		memoriaLiberar(nombre);
 	}
 	else {
-		int existeDirectorio = directorioExisteElNuevoNombre(directorioNuevoPadre->identificador, archivo->nombre);
+		int existeDirectorio = directorioExiste(directorioNuevoPadre->identificador, archivo->nombre);
 		if(archivoExiste(directorioNuevoPadre->identificador, archivo->nombre) || existeDirectorio) {
 			imprimirMensaje(archivoLog, "[ERROR] La nueva ubicacion del archivo o directorio ya existe");
 			return;
@@ -833,7 +838,33 @@ void comandoMover(Comando* comando) {
 }
 
 void comandoMostrarArchivo(Comando* comando) {
-//TODO
+	if(!rutaValida(comando->argumentos[1])) {
+		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
+		return;
+	}
+	Archivo* archivo = archivoBuscar(comando->argumentos[1]);
+	if(archivo == NULL) {
+		imprimirMensaje(archivoLog,"[ERROR] El archivo no existe");
+		return;
+	}
+	int numeroBloque;
+	for(numeroBloque=0; numeroBloque < listaCantidadElementos(archivo->listaBloques); numeroBloque++) {
+		Bloque* bloque = listaObtenerElemento(archivo->listaBloques, numeroBloque);
+		int numeroCopia;
+		int bloqueNoFueImpreso = true;
+		for(numeroCopia=0; numeroCopia<listaCantidadElementos(bloque->listaCopias) && bloqueNoFueImpreso; numeroCopia++) {
+			CopiaBloque* copia = listaObtenerElemento(bloque->listaCopias, numeroCopia);
+			Nodo* nodo = nodoBuscar(copia->nombreNodo);
+			if(nodo != NULL) {
+				mensajeEnviar(nodo->socket, 101 ,&copia->bloqueNodo, sizeof(Entero));
+				bloqueNoFueImpreso = false;
+			}
+		}
+		if(bloqueNoFueImpreso) {
+			imprimirMensaje(archivoLog,"[ERROR] No hay nodos disponibles para obtener el bloque");
+			return;
+		}
+	}
 }
 
 void comandoCrearDirectorio(Comando* comando) {
@@ -936,6 +967,7 @@ void comandoCopiarArchivoDeFS(Comando* comando) {
 			}
 			else {
 				int bytesUtilizados = stringLongitud(datos)+1;
+				bytesRestantes = BLOQUE;
 				printf("Bytes utilizados %i\n", bytesUtilizados);
 				Bloque* bloque = bloqueCrear(bytesUtilizados, numeroBloqueArchivo);
 				int copiasRealizadas;
@@ -1311,7 +1343,7 @@ int directorioCrearDirectoriosRestantes(ControlDirectorio* control, String rutaD
 }
 
 
-bool directorioExisteElNuevoNombre(int idPadre, String nuevoNombre) {
+bool directorioExiste(int idPadre, String nuevoNombre) {
 
 	bool existeNuevoNombre(Directorio* directorio) {
 		return idPadre == directorio->identificadorPadre &&
@@ -1749,6 +1781,15 @@ void nodoVerificarBloquesLibres(Nodo* nodo, Lista nodosDisponibles) {
 		imprimirMensajeUno(archivoLog, AMARILLO"[ADVERTENCIA] No hay bloques libres en %s"BLANCO, nodo->nombre);
 		nodosDisponibles = listaFiltrar(listaNodos, (Puntero)nodoTieneBloquesLibres);
 	}
+}
+
+Nodo* nodoBuscar(String nombre) {
+
+	bool buscarPorNombre(Nodo* nodo) {
+		return stringIguales(nodo->nombre, nombre);
+	}
+
+	return listaBuscar(listaNodos, (Puntero)buscarPorNombre);
 }
 
 //--------------------------------------- Funciones de Bloque-------------------------------------

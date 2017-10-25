@@ -10,8 +10,8 @@
 
 //--------------------------------------- Constantes -------------------------------------
 
-#define RUTA_CONFIG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/FileSystem/FileSystemConfig.conf"
-#define RUTA_LOG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/FileSystem/FileSystemLog.log"
+#define RUTA_CONFIG "/home/dario/Escritorio/tp-2017-2c-El-legado-del-Esqui/FileSystem/FileSystemConfig.conf"
+#define RUTA_LOG "/home/dario/Escritorio/tp-2017-2c-El-legado-del-Esqui/FileSystem/FileSystemLog.log"
 
 #define ID_FORMAT 1
 #define ID_RM 2
@@ -294,7 +294,7 @@ void directorioControlarEntradas(ControlDirectorio* control, String path);
 int directorioCrearDirectoriosRestantes(ControlDirectorio* control, String rutaDirectorio);
 void directorioCrearEntradas(ControlDirectorio* control, String rutaDirectorio);
 void directorioActualizar(ControlDirectorio* control, String rutaDirectorio);
-bool directorioExisteElNuevoNombre(int idPadre, String nuevoNombre);
+bool directorioExiste(int idPadre, String nuevoNombre);
 int directorioObtenerIdentificador(String path);
 Directorio* directorioBuscarEnLista(int identificadorDirectorio);
 bool directorioTieneAlgunArchivo(int identificador);
@@ -339,6 +339,7 @@ void nodoVerificarBloquesLibres(Nodo* nodo, Lista nodosDisponibles);
 bool nodoTieneBloquesLibres(Nodo* nodo);
 bool nodoCantidadBloquesLibres(Nodo* unNodo, Nodo* otroNodo);
 int nodoBuscarBloqueLibre(Nodo* nodo);
+Nodo* nodoBuscar(String nombre);
 
 //--------------------------------------- Funciones de Bloque -------------------------------------
 

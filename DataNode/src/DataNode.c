@@ -128,7 +128,7 @@ void dataBinGetBloque(Puntero datos) {
 	Entero numeroBloque = *(Entero*)datos;
 	if(numeroBloque < dataBinBloques) {
 		Puntero puntero = getBloque(numeroBloque);
-		mensajeEnviar(socketFileSystem, 1, puntero, BLOQUE);
+		mensajeEnviar(socketFileSystem, 14, puntero, BLOQUE);
 	}
 	else {
 		imprimirMensaje(archivoLog,"[ERROR] El bloque no existe");
@@ -202,6 +202,7 @@ void setBloque(Entero numeroBloque, Puntero datos) {
 
 void dataBinCalcularBloques() {
 	dataBinBloques = (int)ceil((double)dataBinTamanio/(double)BLOQUE);
+	imprimirMensajeUno(archivoLog, "[DATABIN] Cantidad de bloques disponibles %i", (int*)dataBinBloques);
 }
 
 void funcionSenial(int senial) {
