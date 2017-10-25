@@ -982,18 +982,19 @@ void comandoCopiarArchivoDeFS(Comando* comando) {
 				estado = -2;
 				break;
 			}
-			int tamanioLineaFaltante = stringLongitud(lineaFaltante);
-			if(tamanioLineaFaltante > 0) {
-				stringConcatenar(&datos, lineaFaltante);
-				bytesDisponibles-= stringLongitud(lineaFaltante);
-				stringLimpiar(lineaFaltante, BLOQUE);
-			}
-			if(tamanioBuffer < bytesDisponibles) {
+			//int tamanioLineaFaltante = stringLongitud(lineaFaltante);
+			//if(tamanioLineaFaltante > 0) {
+			//stringConcatenar(&datos, lineaFaltante);
+			//	bytesDisponibles-= stringLongitud(lineaFaltante);
+			//stringLimpiar(lineaFaltante, BLOQUE);
+			//}
+			if(tamanioBuffer <= bytesDisponibles) {
 				stringConcatenar(&datos, buffer);
 				bytesDisponibles-= tamanioBuffer;
 			}
 			else {
-				stringCopiar(lineaFaltante, buffer);
+				//(stringCopiar(lineaFaltante, buffer);
+				//TODO ver con varios nodos
 				int bytesUtilizados = stringLongitud(datos)+1;
 				bytesDisponibles = BLOQUE-1;
 				Bloque* bloque = bloqueCrear(bytesUtilizados, numeroBloqueArchivo);
@@ -1005,7 +1006,9 @@ void comandoCopiarArchivoDeFS(Comando* comando) {
 				}
 				numeroBloqueArchivo++;
 				memoriaLiberar(datos);
-				datos = stringCrear(BLOQUE);
+				datos = stringCrear(BLOQUE); //TODO linea faltante en if
+				stringConcatenar(&datos, buffer);
+				bytesDisponibles-= tamanioBuffer;
 			}
 		}
 		if(estado == ACTIVADO && stringLongitud(datos) > 0  ) {
