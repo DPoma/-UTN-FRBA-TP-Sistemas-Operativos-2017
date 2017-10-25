@@ -51,7 +51,7 @@
 #define MAX_STRING 300
 #define MAX_NOMBRE 255
 #define MAX_DIR 100
-#define MAX_COPIAS 2
+#define MAX_COPIAS 1
 
 #define ESCRIBIR 102
 

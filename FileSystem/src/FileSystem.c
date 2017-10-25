@@ -928,10 +928,15 @@ void comandoCopiarArchivoDeFS(Comando* comando) {
 	}
 	String nombreArchivo = rutaObtenerUltimoNombre(comando->argumentos[2]);
 	if(archivoExiste(directorio->identificador, nombreArchivo)) {
-		imprimirMensaje(archivoLog, "[ERROR] El archivo ya existe en el File System");
+		imprimirMensaje(archivoLog, "[ERROR] Un archivo con ese nombre ya existe en el directorio destino");
+		return;
+	}
+	if(directorioExiste(directorio->identificador, nombreArchivo)) {
+		imprimirMensaje(archivoLog, "[ERROR] Un directorio con ese nombre ya existe en el directorio destino");
 		return;
 	}
 	Archivo* archivo = archivoCrear(nombreArchivo, directorio->identificador, comando->argumentos[1]);
+	memoriaLiberar(nombreArchivo);
 	if(stringIguales(comando->argumentos[1], FLAG_B)) {
 		int numeroBloqueArchivo;
 		String buffer = stringCrear(BLOQUE);
@@ -961,28 +966,35 @@ void comandoCopiarArchivoDeFS(Comando* comando) {
 		int bytesRestantes = BLOQUE-1;
 		int numeroBloqueArchivo = 0;
 		Puntero hayDatosParaLeer;
-		while((hayDatosParaLeer=fgets(buffer, BLOQUE, file)) != NULL || stringLongitud(lineaFaltante) > 0) {
+		while((hayDatosParaLeer=fgets(buffer, MAX_STRING, file)) != NULL || stringLongitud(datos) > 0) {
 			int tamanioBuffer = 0;
 			int tamanioLinea = 0;
 			if(hayDatosParaLeer != NULL) {
 				tamanioBuffer = stringLongitud(buffer);
 				tamanioLinea = stringLongitud(lineaFaltante);
-				//printf("La linea faltante es de %i bytes\n", stringLongitud(lineaFaltante));
+				if(tamanioBuffer > BLOQUE-1 || tamanioLinea > BLOQUE-1) {
+					imprimirMensaje(archivoLog, ROJO"[ERROR] La linea leida es demasiado larga, se aborta la operacion"BLANCO);
+					archivoDestruir(archivo);
+					return;
+				}
 				//TODO VER que pasa si supera la longitud permitida un return supongo
 				stringConcatenar(&datos, lineaFaltante);
 				bytesRestantes-=tamanioLinea;
 				stringLimpiar(lineaFaltante, BLOQUE);
 			} else {
+				tamanioLinea = stringLongitud(lineaFaltante);
+				if(tamanioLinea > BLOQUE-1) {
+					imprimirMensaje(archivoLog, ROJO"[ERROR] La linea leida es demasiado larga, se aborta la operacion"BLANCO);
+					archivoDestruir(archivo);
+					return;
+				}
 				stringConcatenar(&datos, lineaFaltante);
 				tamanioBuffer = bytesRestantes;
-				buffer = VACIO;
+				stringCopiar(buffer, VACIO);
 			}
-			//printf("Los bytes rest es de %i bytes\n", bytesRestantes);
 			if(tamanioBuffer < bytesRestantes) {
-				//printf("El buffer es de %i bytes\n", stringLongitud(buffer));
 				stringConcatenar(&datos, buffer);
 				bytesRestantes-=tamanioBuffer;
-				//printf("Los bytes rest es de %i bytes\n", bytesRestantes);
 			}
 			else {
 				stringCopiar(lineaFaltante, buffer);
@@ -996,29 +1008,30 @@ void comandoCopiarArchivoDeFS(Comando* comando) {
 					Nodo* nodo = listaPrimerElemento(nodosDisponibles);
 					Entero numeroBloqueNodo = nodoBuscarBloqueLibre(nodo);
 					bloqueCopiar(bloque, nodo, numeroBloqueNodo);
-					printf("voy a copiar %i bytes, contando el barra cero \n", bytesUtilizados );
 					BloqueNodo* bloqueDataBin = bloqueNodoCrear(numeroBloqueNodo, datos);
 					mensajeEnviar(nodo->socket, ESCRIBIR, bloqueDataBin, sizeof(Entero)+bytesUtilizados);
 					memoriaLiberar(bloqueDataBin);
 					nodoVerificarBloquesLibres(nodo, nodosDisponibles);
 				}
 				if(copiasRealizadas < MAX_COPIAS) {
-					imprimirMensaje(archivoLog, ROJO"[ERROR] No hay nodos con bloques libres, se suspende la operacion"BLANCO);
+					imprimirMensaje(archivoLog, ROJO"[ERROR] No hay nodos o bloques disponibles, se aborta la operacion"BLANCO);
+					archivoDestruir(archivo); //TODO ver si se deja o se destruye
 					return;
 				}
 				listaAgregarElemento(archivo->listaBloques, bloque);
 				numeroBloqueArchivo++;
+				listaDestruir(nodosDisponibles);
 				memoriaLiberar(datos);
 				datos = stringCrear(BLOQUE);
 			}
 		}
+		memoriaLiberar(datos);
+		memoriaLiberar(buffer);
+		memoriaLiberar(lineaFaltante);
 	}
-	//TODO ver que guarde linea restante al salir del for
-	puts("LLEGUE A PERSISTENCIA");
 	archivoPersistirCrear(archivo);
-	//TODO Validar que no cree si existe un directorio con el mismo nombre
-	//TODO Probar con archivo de texto
 	listaAgregarElemento(listaArchivos, archivo);
+	fileCerrar(file);
 	imprimirMensajeUno(archivoLog, "[ARCHIVO] El archivo %s fue copiado en File System", comando->argumentos[2]);
 }
 
@@ -1532,12 +1545,10 @@ void archivoPersistirCrear(Archivo* archivo) {
 	fprintf(file, "ID_PADRE=%i\n", archivo->identificadorPadre);
 	fprintf(file, "TIPO=%s\n", archivo->tipo);
 	int indice;
-	printf("elemntos de lista bloques %i\n", listaCantidadElementos(archivo->listaBloques));
 	for(indice = 0; indice < listaCantidadElementos(archivo->listaBloques); indice++) {
 		Bloque* bloque = listaObtenerElemento(archivo->listaBloques, indice);
 		fprintf(file, "BLOQUE%i_BYTES=%i\n",indice, bloque->bytesUtilizados);
 		int indiceCopia;
-		printf("elemntos de la lista copias %i\n", listaCantidadElementos(bloque->listaCopias));
 		for(indiceCopia = 0; indiceCopia < listaCantidadElementos(bloque->listaCopias); indiceCopia++) {
 			CopiaBloque* copiaBloque = listaObtenerElemento(bloque->listaCopias, indiceCopia);
 			fprintf(file, "BLOQUE%i_COPIA%i=[%s,%i]\n", indice, indiceCopia, copiaBloque->nombreNodo, copiaBloque->bloqueNodo);
