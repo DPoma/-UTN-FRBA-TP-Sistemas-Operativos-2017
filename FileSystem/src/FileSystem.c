@@ -190,7 +190,7 @@ void servidorRecibirMensaje(Servidor* servidor, Socket unSocket) {
 	if(mensajeDesconexion(mensaje))
 		servidorFinalizarConexion(servidor, unSocket);
 	else {
-		if(mensaje->header.operacion == 14) {
+		if(mensaje->header.operacion == 14) {;
 			printf("%s", (String)mensaje->datos);
 		}
 	}
@@ -958,17 +958,16 @@ void comandoCopiarArchivoDeFS(Comando* comando) {
 		String buffer = stringCrear(BLOQUE);
 		String datos = stringCrear(BLOQUE);
 		int bytesRestantes = BLOQUE;
-		int numeroBloqueArchivo;
-		for(numeroBloqueArchivo = 0; fgets(buffer, BLOQUE, file) != NULL; numeroBloqueArchivo++) {
+		int numeroBloqueArchivo = 0;
+		while(fgets(buffer, BLOQUE, file) != NULL) {
 			int tamanioBuffer = stringLongitud(buffer);
-			if(tamanioBuffer <= bytesRestantes) {
+			if(tamanioBuffer < bytesRestantes) {
 				stringConcatenar(&datos, buffer);
 				bytesRestantes-=tamanioBuffer;
 			}
 			else {
 				int bytesUtilizados = stringLongitud(datos)+1;
 				bytesRestantes = BLOQUE;
-				printf("Bytes utilizados %i\n", bytesUtilizados);
 				Bloque* bloque = bloqueCrear(bytesUtilizados, numeroBloqueArchivo);
 				int copiasRealizadas;
 				Lista nodosDisponibles = listaFiltrar(listaNodos, (Puntero)nodoTieneBloquesLibres);
@@ -977,7 +976,9 @@ void comandoCopiarArchivoDeFS(Comando* comando) {
 					Nodo* nodo = listaPrimerElemento(nodosDisponibles);
 					Entero numeroBloqueNodo = nodoBuscarBloqueLibre(nodo);
 					bloqueCopiar(bloque, nodo, numeroBloqueNodo);
-					bloqueEnviarANodo(nodo->socket, numeroBloqueNodo, buffer);
+					BloqueNodo* bloqueDataBin = bloqueNodoCrear(numeroBloqueArchivo, datos);
+					mensajeEnviar(nodo->socket, ESCRIBIR, bloqueDataBin, sizeof(Entero)+bytesUtilizados);
+					memoriaLiberar(bloqueDataBin);
 					nodoVerificarBloquesLibres(nodo, nodosDisponibles);
 				}
 				if(copiasRealizadas < MAX_COPIAS) {
@@ -985,6 +986,7 @@ void comandoCopiarArchivoDeFS(Comando* comando) {
 					return;
 				}
 				listaAgregarElemento(archivo->listaBloques, bloque);
+				numeroBloqueArchivo++;
 			}
 		}
 	}

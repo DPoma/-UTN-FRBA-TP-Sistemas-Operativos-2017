@@ -1,9 +1,4 @@
-[INFO] 23:52:07:874 FileSystem/(4798:4798): [EJECUCION] Proceso File System inicializado
-[INFO] 23:52:08:97 FileSystem/(4798:4798): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 23:52:08:101 FileSystem/(4798:4798): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 23:52:08:103 FileSystem/(4798:4798): [INFORMACION] Ruta de metadata: /home/dario/Escritorio/Metadata
-[INFO] 23:52:08:879 FileSystem/(4798:4798): [CONEXION] Un proceso Data Node se ha conectado
-[INFO] 23:52:11:917 FileSystem/(4798:4805): [DIRECTORIO] El directorio /home fue creado
-[INFO] 23:52:25:860 FileSystem/(4798:4805): [ARCHIVO] El archivo /home/dario/Escritorio/dudas fue copiado en File System
-[INFO] 23:52:28:288 FileSystem/(4798:4805): [DIRECTORIO] dudas (a)
-[INFO] 23:55:46:704 FileSystem/(4798:4798): [EJECUCION] Proceso File System finalizado
+[INFO] 01:29:58:601 FileSystem/(6579:6579): [EJECUCION] Proceso File System inicializado
+[INFO] 01:29:58:826 FileSystem/(6579:6579): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 01:29:58:831 FileSystem/(6579:6579): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 01:29:58:833 FileSystem/(6579:6579): [INFORMACION] Ruta de metadata: /home/dario/Escritorio/Metadata

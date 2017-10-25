@@ -137,6 +137,7 @@ void dataBinGetBloque(Puntero datos) {
 }
 
 void dataBinSetBloque(Puntero datos) {
+	printf("MENSAJE A GUARDAR: %s", (String)datos+sizeof(Entero));
 	Entero numeroBloque;
 	memcpy(&numeroBloque, datos, sizeof(Entero));
 	if(numeroBloque < dataBinBloques)
