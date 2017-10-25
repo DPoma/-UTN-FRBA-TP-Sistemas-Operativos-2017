@@ -346,7 +346,7 @@ Nodo* nodoBuscar(String nombre);
 Bloque* bloqueCrear(int bytes, int numero);
 void bloqueDestruir(Bloque* bloque);
 void bloqueCopiar(Bloque* bloque, Nodo* nodo, Entero numeroBloqueNodo);
-void bloqueEnviarANodo(Socket unSocket, Entero numeroBloque, String buffer);
+void bloqueEnviarANodo(Socket unSocket, Entero numeroBloque, String buffer, int tamanioUtilizado);
 
 //--------------------------------------- Funciones de Copia Bloque -------------------------------------
 

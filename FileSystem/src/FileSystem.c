@@ -732,7 +732,6 @@ void comandoEliminarArchivo(Comando* comando) {
 }
 
 void comandoRenombrar(Comando* comando) {
-	//TODO Verificar si no renombra con un nombre ya existente
 	if(!rutaValida(comando->argumentos[1])) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return;
@@ -907,14 +906,26 @@ void comandoCrearDirectorio(Comando* comando) {
 	memoriaLiberar(control);
 }
 
+
+int bloqueEnviarCopiasANodos(Bloque* bloque, String buffer, int tamanioUtilizado) {
+	Lista nodosDisponibles = listaFiltrar(listaNodos, (Puntero)nodoTieneBloquesLibres);
+	int copiasEnviadas;
+	for(copiasEnviadas = 0; listaTieneElementos(nodosDisponibles) && copiasEnviadas < MAX_COPIAS; copiasEnviadas++) {
+		listaOrdenar(nodosDisponibles, (Puntero)nodoCantidadBloquesLibres);
+		Nodo* nodo = listaPrimerElemento(nodosDisponibles);
+		Entero numeroBloqueNodo = nodoBuscarBloqueLibre(nodo);
+		bloqueCopiar(bloque, nodo, numeroBloqueNodo);
+		bloqueEnviarANodo(nodo->socket, numeroBloqueNodo, buffer, tamanioUtilizado);
+		nodoVerificarBloquesLibres(nodo, nodosDisponibles);
+	}
+	listaDestruir(nodosDisponibles);
+	return copiasEnviadas;
+}
+
+
 void comandoCopiarArchivoDeFS(Comando* comando) {
 	if(consolaflagInvalido(comando->argumentos[1])) {
 		imprimirMensaje(archivoLog, "[ERROR] Flag invalido");
-		return;
-	}
-	File file = fileAbrir(comando->argumentos[2], LECTURA);
-	if(file == NULL) {
-		imprimirMensaje(archivoLog, "[ERROR] El archivo a copiar no existe");
 		return;
 	}
 	if(!rutaValida(comando->argumentos[3])) {
@@ -929,110 +940,98 @@ void comandoCopiarArchivoDeFS(Comando* comando) {
 	String nombreArchivo = rutaObtenerUltimoNombre(comando->argumentos[2]);
 	if(archivoExiste(directorio->identificador, nombreArchivo)) {
 		imprimirMensaje(archivoLog, "[ERROR] Un archivo con ese nombre ya existe en el directorio destino");
+		memoriaLiberar(nombreArchivo);
 		return;
 	}
 	if(directorioExiste(directorio->identificador, nombreArchivo)) {
 		imprimirMensaje(archivoLog, "[ERROR] Un directorio con ese nombre ya existe en el directorio destino");
+		memoriaLiberar(nombreArchivo);
+		return;
+	}
+	File file = fileAbrir(comando->argumentos[2], LECTURA);
+	if(file == NULL) {
+		imprimirMensaje(archivoLog, "[ERROR] El archivo a copiar no existe");
+		memoriaLiberar(nombreArchivo);
 		return;
 	}
 	Archivo* archivo = archivoCrear(nombreArchivo, directorio->identificador, comando->argumentos[1]);
 	memoriaLiberar(nombreArchivo);
+	int estado = ACTIVADO;//TODO vaidar si la linea es larga
 	if(stringIguales(comando->argumentos[1], FLAG_B)) {
-		int numeroBloqueArchivo;
 		String buffer = stringCrear(BLOQUE);
+		int numeroBloqueArchivo;
 		for(numeroBloqueArchivo = 0; fread(buffer, sizeof(char),BLOQUE, file) == BLOQUE; numeroBloqueArchivo++) {
 			Bloque* bloque = bloqueCrear(BLOQUE, numeroBloqueArchivo);
-			int copiasRealizadas;
-			Lista nodosDisponibles = listaFiltrar(listaNodos, (Puntero)nodoTieneBloquesLibres);
-			for(copiasRealizadas = 0; listaTieneElementos(nodosDisponibles) && copiasRealizadas < MAX_COPIAS; copiasRealizadas++) {
-				listaOrdenar(nodosDisponibles, (Puntero)nodoCantidadBloquesLibres);
-				Nodo* nodo = listaPrimerElemento(nodosDisponibles);
-				Entero numeroBloqueNodo = nodoBuscarBloqueLibre(nodo);
-				bloqueCopiar(bloque, nodo, numeroBloqueNodo);
-				bloqueEnviarANodo(nodo->socket, numeroBloqueNodo, buffer);
-				nodoVerificarBloquesLibres(nodo, nodosDisponibles);
-			}
-			if(copiasRealizadas < MAX_COPIAS) {
-				imprimirMensaje(archivoLog, ROJO"[ERROR] No hay nodos con bloques libres, se suspende la operacion"BLANCO);
-				return;
-			}
 			listaAgregarElemento(archivo->listaBloques, bloque);
+			int copiasEnviadas = bloqueEnviarCopiasANodos(bloque, buffer, sizeof(BloqueNodo));
+			if(copiasEnviadas < MAX_COPIAS) {
+				estado = ERROR;
+				break;
+			}
 		}
 	}
 	else {
-		String buffer = stringCrear(BLOQUE);
+		String buffer = stringCrear(MAX_STRING);
 		String datos = stringCrear(BLOQUE);
 		String lineaFaltante = stringCrear(BLOQUE);
-		int bytesRestantes = BLOQUE-1;
+		int bytesDisponibles = BLOQUE-1;
 		int numeroBloqueArchivo = 0;
-		Puntero hayDatosParaLeer;
-		while((hayDatosParaLeer=fgets(buffer, MAX_STRING, file)) != NULL || stringLongitud(datos) > 0) {
-			int tamanioBuffer = 0;
-			int tamanioLinea = 0;
-			if(hayDatosParaLeer != NULL) {
-				tamanioBuffer = stringLongitud(buffer);
-				tamanioLinea = stringLongitud(lineaFaltante);
-				if(tamanioBuffer > BLOQUE-1 || tamanioLinea > BLOQUE-1) {
-					imprimirMensaje(archivoLog, ROJO"[ERROR] La linea leida es demasiado larga, se aborta la operacion"BLANCO);
-					archivoDestruir(archivo);
-					return;
-				}
-				//TODO VER que pasa si supera la longitud permitida un return supongo
-				stringConcatenar(&datos, lineaFaltante);
-				bytesRestantes-=tamanioLinea;
-				stringLimpiar(lineaFaltante, BLOQUE);
-			} else {
-				tamanioLinea = stringLongitud(lineaFaltante);
-				if(tamanioLinea > BLOQUE-1) {
-					imprimirMensaje(archivoLog, ROJO"[ERROR] La linea leida es demasiado larga, se aborta la operacion"BLANCO);
-					archivoDestruir(archivo);
-					return;
-				}
-				stringConcatenar(&datos, lineaFaltante);
-				tamanioBuffer = bytesRestantes;
-				stringCopiar(buffer, VACIO);
+		while(fgets(buffer, MAX_STRING, file) != NULL) {
+			int tamanioBuffer = stringLongitud(buffer);
+			if(tamanioBuffer > BLOQUE-1) {
+				estado = -2;
+				break;
 			}
-			if(tamanioBuffer < bytesRestantes) {
+			int tamanioLineaFaltante = stringLongitud(lineaFaltante);
+			if(tamanioLineaFaltante > 0) {
+				stringConcatenar(&datos, lineaFaltante);
+				bytesDisponibles-= stringLongitud(lineaFaltante);
+				stringLimpiar(lineaFaltante, BLOQUE);
+			}
+			if(tamanioBuffer < bytesDisponibles) {
 				stringConcatenar(&datos, buffer);
-				bytesRestantes-=tamanioBuffer;
+				bytesDisponibles-= tamanioBuffer;
 			}
 			else {
 				stringCopiar(lineaFaltante, buffer);
 				int bytesUtilizados = stringLongitud(datos)+1;
-				bytesRestantes = BLOQUE-1;
+				bytesDisponibles = BLOQUE-1;
 				Bloque* bloque = bloqueCrear(bytesUtilizados, numeroBloqueArchivo);
-				int copiasRealizadas;
-				Lista nodosDisponibles = listaFiltrar(listaNodos, (Puntero)nodoTieneBloquesLibres);
-				for(copiasRealizadas = 0; listaTieneElementos(nodosDisponibles) && copiasRealizadas < MAX_COPIAS; copiasRealizadas++) {
-					listaOrdenar(nodosDisponibles, (Puntero)nodoCantidadBloquesLibres);
-					Nodo* nodo = listaPrimerElemento(nodosDisponibles);
-					Entero numeroBloqueNodo = nodoBuscarBloqueLibre(nodo);
-					bloqueCopiar(bloque, nodo, numeroBloqueNodo);
-					BloqueNodo* bloqueDataBin = bloqueNodoCrear(numeroBloqueNodo, datos);
-					mensajeEnviar(nodo->socket, ESCRIBIR, bloqueDataBin, sizeof(Entero)+bytesUtilizados);
-					memoriaLiberar(bloqueDataBin);
-					nodoVerificarBloquesLibres(nodo, nodosDisponibles);
-				}
-				if(copiasRealizadas < MAX_COPIAS) {
-					imprimirMensaje(archivoLog, ROJO"[ERROR] No hay nodos o bloques disponibles, se aborta la operacion"BLANCO);
-					archivoDestruir(archivo); //TODO ver si se deja o se destruye
-					return;
-				}
 				listaAgregarElemento(archivo->listaBloques, bloque);
+				int copiasEnviadas = bloqueEnviarCopiasANodos(bloque, datos, sizeof(Entero)+bytesUtilizados);
+				if(copiasEnviadas < MAX_COPIAS) {
+					estado = ERROR;
+					break;
+				}
 				numeroBloqueArchivo++;
-				listaDestruir(nodosDisponibles);
 				memoriaLiberar(datos);
 				datos = stringCrear(BLOQUE);
 			}
+		}
+		if(estado == ACTIVADO && stringLongitud(datos) > 0  ) {
+			int bytesUtilizados = stringLongitud(datos)+1;
+			Bloque* bloque = bloqueCrear(bytesUtilizados, numeroBloqueArchivo);
+			listaAgregarElemento(archivo->listaBloques, bloque);
+			int copiasEnviadas = bloqueEnviarCopiasANodos(bloque, datos, sizeof(Entero)+bytesUtilizados);
+			if(copiasEnviadas < MAX_COPIAS)
+				estado = ERROR;
 		}
 		memoriaLiberar(datos);
 		memoriaLiberar(buffer);
 		memoriaLiberar(lineaFaltante);
 	}
-	archivoPersistirCrear(archivo);
-	listaAgregarElemento(listaArchivos, archivo);
 	fileCerrar(file);
-	imprimirMensajeUno(archivoLog, "[ARCHIVO] El archivo %s fue copiado en File System", comando->argumentos[2]);
+	if(estado == -2) {
+		archivoDestruir(archivo);
+		imprimirMensaje(archivoLog, ROJO"[ERROR] La linea leida es demasiado larga, se aborta la operacion"BLANCO);
+	}else if(estado == ERROR) {
+		archivoDestruir(archivo);
+		imprimirMensaje(archivoLog, ROJO"[ERROR] No hay nodos o bloques disponibles, se aborta la operacion"BLANCO);
+	} else {
+		archivoPersistirCrear(archivo);
+		listaAgregarElemento(listaArchivos, archivo);
+		imprimirMensajeUno(archivoLog, "[ARCHIVO] El archivo %s fue copiado en File System", comando->argumentos[2]);
+	}
 }
 
 
@@ -1394,6 +1393,8 @@ bool directorioExiste(int idPadre, String nuevoNombre) {
 }
 
 int directorioObtenerIdentificador(String path) {
+	if(stringIguales(path, "/"))
+		return 0;
 	int id = ERROR;
 	int indice;
 	ControlDirectorio* control = directorioControlCrear(path);
@@ -1847,9 +1848,9 @@ void bloqueDestruir(Bloque* bloque) {
 	memoriaLiberar(bloque);
 }
 
-void bloqueEnviarANodo(Socket unSocket, Entero numeroBloque, String buffer) {
+void bloqueEnviarANodo(Socket unSocket, Entero numeroBloque, String buffer, int tamanioUtilizado) {
 	BloqueNodo* bloqueDataBin = bloqueNodoCrear(numeroBloque, buffer);
-	mensajeEnviar(unSocket, ESCRIBIR, bloqueDataBin, sizeof(BloqueNodo));
+	mensajeEnviar(unSocket, ESCRIBIR, bloqueDataBin, tamanioUtilizado);
 	memoriaLiberar(bloqueDataBin);
 }
 

@@ -1,8 +1,6 @@
-[INFO] 13:24:10:835 FileSystem/(9607:9607): [EJECUCION] Proceso File System inicializado
-[INFO] 13:24:10:895 FileSystem/(9607:9607): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 13:24:10:897 FileSystem/(9607:9607): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 13:24:10:897 FileSystem/(9607:9607): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
-[INFO] 13:24:13:978 FileSystem/(9607:9612): [DIRECTORIO] El directorio /home fue creado
-[INFO] 13:24:32:365 FileSystem/(9607:9612): [31m[ERROR] No hay nodos con bloques libres, se suspende la operacion[0m
-[INFO] 13:24:36:447 FileSystem/(9607:9607): [CONEXION] Un proceso Data Node se ha conectado
-[INFO] 13:25:05:88 FileSystem/(9607:9612): [ARCHIVO] El archivo /home/utnso/Escritorio/test fue copiado en File System
+[INFO] 18:28:45:183 FileSystem/(13674:13674): [EJECUCION] Proceso File System inicializado
+[INFO] 18:28:45:247 FileSystem/(13674:13674): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 18:28:45:249 FileSystem/(13674:13674): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 18:28:45:250 FileSystem/(13674:13674): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
+[INFO] 18:28:45:954 FileSystem/(13674:13674): [CONEXION] Un proceso Data Node se ha conectado
+[INFO] 18:28:48:11 FileSystem/(13674:13679): [ARCHIVO] El archivo /home/utnso/Escritorio/algo fue copiado en File System
