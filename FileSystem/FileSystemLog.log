@@ -1,9 +1,5 @@
-[INFO] 19:20:50:567 FileSystem/(14413:14413): [EJECUCION] Proceso File System inicializado
-[INFO] 19:20:50:624 FileSystem/(14413:14413): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 19:20:50:625 FileSystem/(14413:14413): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 19:20:50:626 FileSystem/(14413:14413): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
-[INFO] 19:20:59:598 FileSystem/(14413:14418): [ERROR] Comando invalido
-[INFO] 19:21:00:999 FileSystem/(14413:14413): [CONEXION] Un proceso Data Node se ha conectado
-[INFO] 19:21:01:408 FileSystem/(14413:14413): [CONEXION] Un proceso Data Node se ha conectado
-[INFO] 19:21:01:883 FileSystem/(14413:14413): [CONEXION] Un proceso Data Node se ha conectado
-[INFO] 19:21:09:387 FileSystem/(14413:14418): [ARCHIVO] El archivo /home/utnso/Escritorio/gg fue copiado en File System
+[INFO] 19:55:11:870 FileSystem/(2857:2857): [EJECUCION] Proceso File System inicializado
+[INFO] 19:55:11:871 FileSystem/(2857:2857): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 19:55:11:872 FileSystem/(2857:2857): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 19:55:11:872 FileSystem/(2857:2857): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
+[INFO] 19:55:32:569 FileSystem/(2857:2857): [CONEXION] El proceso YAMA se ha conectado

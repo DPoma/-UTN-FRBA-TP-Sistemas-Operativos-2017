@@ -36,19 +36,18 @@ void yamaIniciar() {
 	imprimirMensajeDos(archivoLog, "[CONEXION] Realizando conexion con File System (IP: %s | Puerto %s)", configuracion->ipFileSystem, configuracion->puertoFileSystem);
 	servidor->fileSystem = socketCrearCliente(configuracion->ipFileSystem, configuracion->puertoFileSystem, ID_YAMA);
 	imprimirMensaje(archivoLog, "[CONEXION] Conexion exitosa con File System");
-	//infoNodos es una lista de ips y puertos
+	workers=list_create();
 	Mensaje* infoNodos=mensajeRecibir(servidor->fileSystem);
-	//mensajeObtenerDatos(infoNodos,servidor->fileSystem); No hace falta, ya lo usa implicitamente mensajeRecibir
 	int i;
 	for(i=0;i<infoNodos->header.tamanio/DIRSIZE;i++){
 		Worker worker;
 		worker.conectado=true;
 		worker.carga=0;
 		worker.tareasRealizadas=0;
-		worker.nodo=*(Dir*)(infoNodos->datos+sizeof(Dir)*i);//TODO puede que rompa porque no es deep copying (No rompe solo faltaba infoNodos->datos)
+		worker.nodo=*(Dir*)(infoNodos->datos+sizeof(Dir)*i);//TODO puede que rompa porque no es deep copying
 		printf("IP = %s\n", worker.nodo.ip);
 		printf("Puerto = %s\n", worker.nodo.port);
-		//list_addM(workers,&worker,sizeof(Worker)); TODO tira segmentation fault no vi porque
+		list_addM(workers,&worker,sizeof(Worker)); //TODO tira segmentation fault no vi porque
 	}
 	mensajeDestruir(infoNodos);
 }
@@ -113,7 +112,6 @@ void yamaAtender() {
 					}
 				}else if(socketI==servidor->fileSystem){
 					Mensaje* mensaje = mensajeRecibir(socketI);
-					mensajeObtenerDatos(mensaje,socketI);
 					if(mensaje->header.operacion==DESCONEXION){
 						char nodoDesconectado[20];
 						strncpy(nodoDesconectado,mensaje->datos,20);
@@ -142,7 +140,6 @@ void yamaAtender() {
 					mensajeDestruir(mensaje);
 				}else{ //master
 					Mensaje* mensaje = mensajeRecibir(socketI);
-					mensajeObtenerDatos(mensaje,socketI);
 					if(mensaje->header.operacion==Solicitud){
 						int32_t masterid = socketI;
 						//el mensaje es el path del archivo
@@ -152,7 +149,7 @@ void yamaAtender() {
 						memmove(mensaje->datos+INTSIZE,mensaje,mensaje->header.tamanio);
 						memcpy(mensaje->datos,&masterid,INTSIZE);
 						mensajeEnviar(servidor->fileSystem,Solicitud,mensaje->datos,mensaje->header.tamanio+INTSIZE);
-						imprimirMensajeUno(archivoLog, "[ENVIO] path de master #%d enviado al fileSystem",&socketI);
+						log_info(archivoLog, "[ENVIO] path de master #%d enviado al fileSystem",&socketI);
 					}else if(mensaje->header.operacion==DESCONEXION){
 						listaSocketsEliminar(socketI, &servidor->listaMaster);
 						socketCerrar(socketI);

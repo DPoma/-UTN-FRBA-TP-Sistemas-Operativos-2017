@@ -1,4 +1,4 @@
-[INFO] 23:19:23:564 YAMA/(16038:16038): [CONEXION] Realizando conexion con File System (IP: 127.0.0.1 | Puerto 5060)
-[INFO] 23:19:23:579 YAMA/(16038:16038): [CONEXION] Conexion exitosa con File System
-[INFO] 23:19:29:618 YAMA/(16038:16038): [CONEXION] Esperando conexiones de un Master (Puerto 5070)
-[INFO] 23:19:29:618 YAMA/(16038:16038): [CONEXION] Conexion exitosa con Master
+[INFO] 19:55:32:566 YAMA/(2869:2869): [CONEXION] Realizando conexion con File System (IP: 127.0.0.1 | Puerto 5060)
+[INFO] 19:55:32:570 YAMA/(2869:2869): [CONEXION] Conexion exitosa con File System
+[INFO] 20:15:40:402 YAMA/(2869:2869): [CONEXION] Esperando conexiones de un Master (Puerto 5070)
+[INFO] 20:15:40:402 YAMA/(2869:2869): [CONEXION] Conexion exitosa con Master
