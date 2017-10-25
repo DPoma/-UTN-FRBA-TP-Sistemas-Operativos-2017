@@ -960,14 +960,23 @@ void comandoCopiarArchivoDeFS(Comando* comando) {
 		String lineaFaltante = stringCrear(BLOQUE);
 		int bytesRestantes = BLOQUE-1;
 		int numeroBloqueArchivo = 0;
-		while(fgets(buffer, BLOQUE, file) != NULL) {
-			int tamanioBuffer = stringLongitud(buffer);
-			int tamanioLinea = stringLongitud(lineaFaltante);
-			//printf("La linea faltante es de %i bytes\n", stringLongitud(lineaFaltante));
-			//TODO VER que pasa si supera la longitud permitida un return supongo
-			stringConcatenar(&datos, lineaFaltante);
-			bytesRestantes-=tamanioLinea;
-			stringLimpiar(lineaFaltante, BLOQUE);
+		Puntero hayDatosParaLeer;
+		while((hayDatosParaLeer=fgets(buffer, BLOQUE, file)) != NULL || stringLongitud(lineaFaltante) > 0) {
+			int tamanioBuffer = 0;
+			int tamanioLinea = 0;
+			if(hayDatosParaLeer != NULL) {
+				tamanioBuffer = stringLongitud(buffer);
+				tamanioLinea = stringLongitud(lineaFaltante);
+				//printf("La linea faltante es de %i bytes\n", stringLongitud(lineaFaltante));
+				//TODO VER que pasa si supera la longitud permitida un return supongo
+				stringConcatenar(&datos, lineaFaltante);
+				bytesRestantes-=tamanioLinea;
+				stringLimpiar(lineaFaltante, BLOQUE);
+			} else {
+				stringConcatenar(&datos, lineaFaltante);
+				tamanioBuffer = bytesRestantes;
+				buffer = VACIO;
+			}
 			//printf("Los bytes rest es de %i bytes\n", bytesRestantes);
 			if(tamanioBuffer < bytesRestantes) {
 				//printf("El buffer es de %i bytes\n", stringLongitud(buffer));
@@ -1001,12 +1010,10 @@ void comandoCopiarArchivoDeFS(Comando* comando) {
 				numeroBloqueArchivo++;
 				memoriaLiberar(datos);
 				datos = stringCrear(BLOQUE);
-
-				//stringLimpiar(datos, BLOQUE);
 			}
-			//stringLimpiar(buffer, BLOQUE);
 		}
 	}
+	//TODO ver que guarde linea restante al salir del for
 	puts("LLEGUE A PERSISTENCIA");
 	archivoPersistirCrear(archivo);
 	//TODO Validar que no cree si existe un directorio con el mismo nombre

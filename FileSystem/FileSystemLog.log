@@ -1,7 +1,8 @@
-[INFO] 10:28:27:499 FileSystem/(7119:7119): [EJECUCION] Proceso File System inicializado
-[INFO] 10:28:27:557 FileSystem/(7119:7119): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 10:28:27:558 FileSystem/(7119:7119): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 10:28:27:559 FileSystem/(7119:7119): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
-[INFO] 10:28:28:170 FileSystem/(7119:7119): [CONEXION] Un proceso Data Node se ha conectado
-[INFO] 10:28:31:610 FileSystem/(7119:7124): [DIRECTORIO] El directorio /home fue creado
-[INFO] 10:28:40:430 FileSystem/(7119:7124): [ARCHIVO] El archivo /home/utnso/Escritorio/test fue copiado en File System
+[INFO] 11:46:13:298 FileSystem/(7912:7912): [EJECUCION] Proceso File System inicializado
+[INFO] 11:46:13:357 FileSystem/(7912:7912): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 11:46:13:358 FileSystem/(7912:7912): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 11:46:13:359 FileSystem/(7912:7912): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
+[INFO] 11:46:14:107 FileSystem/(7912:7912): [CONEXION] Un proceso Data Node se ha conectado
+[INFO] 11:46:16:746 FileSystem/(7912:7917): [DIRECTORIO] El directorio /home fue creado
+[INFO] 11:46:26:465 FileSystem/(7912:7917): [ARCHIVO] El archivo /home/utnso/Escritorio/test fue copiado en File System
+[INFO] 11:47:30:602 FileSystem/(7912:7912): [EJECUCION] Proceso File System finalizado
