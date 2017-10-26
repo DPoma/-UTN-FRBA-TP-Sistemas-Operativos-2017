@@ -11,11 +11,13 @@
 #define RUTA_CONFIG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Master/MasterConfig.conf"
 #define RUTA_LOG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Master/MasterLog.log"
 
-
 typedef enum {Solicitud,Transformacion=1,ReducLocal=2,ReducGlobal=3,Almacenamiento=4,Cierre,Aborto=6} Etapa;
 
 #define EXITOTRANSFORMACION 801
 #define FRACASOTRANSFORMACION -801
+
+#define SCRIPT_TRANSFORMACION 501
+#define SCRIPT_REDUCTOR 502
 
 typedef struct __attribute__((__packed__)){
 	char ip[20];
@@ -60,12 +62,13 @@ void funcionSenial();
 int hayWorkersParaConectar();
 WorkerTransformacion* deserializarTransformacion(Mensaje* mensaje);
 void confirmacionWorker(Socket unSocket);
-void serializarYEnviar(int nroBloque, int nroBytes, char* nombretemp, Socket unSocket);
+void serializarYEnviar(Entero nroBloque, Entero nroBytes, char* nombretemp, Socket unSocket);
 void establecerConexionConWorker(Lista);
 void transformacion(Mensaje* mensaje);
 Lista workersAConectar();
 ListaSockets sockets();
 void serializarYEnviar();
+void enviarScript(Socket unSocket, char* ruta, Entero operacion);
 
 
 bool masterActivado();

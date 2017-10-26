@@ -140,7 +140,7 @@ ListaSockets sockets(){
 }
 
 
-void serializarYEnviar(int nroBloque, int nroBytes, char* nombretemp, Socket unSocket){
+void serializarYEnviar(Entero nroBloque, Entero nroBytes, char* nombretemp, Socket unSocket){
 	int size_nombretemp = strlen(nombretemp)+1;
 	char* data = malloc(sizeof(int)*2+size_nombretemp);
 	int len = size_nombretemp+sizeof(int)*2;
@@ -155,6 +155,29 @@ void serializarYEnviar(int nroBloque, int nroBytes, char* nombretemp, Socket unS
 
 }
 
+void enviarScript(Socket unSocket, char* ruta, Entero operacion){//operacion para ver si es el script transformacion o reductor
+	char* buffer;
+	int len;
+	char* data;
+
+	FILE* f =fopen(ruta, "r+");
+
+	while(!feof(f)){
+	 fread(&buffer, sizeof(char), 1, f);
+
+	}
+
+	len = strlen(buffer) + 1;
+
+	data = malloc(len + sizeof(int));
+
+	memcpy(data, &len, sizeof(int));
+	memcpy(data + sizeof(int),buffer, len);
+
+	mensajeEnviar(unSocket,operacion, data, len);
+
+	fclose(f);
+}
 
 
 
