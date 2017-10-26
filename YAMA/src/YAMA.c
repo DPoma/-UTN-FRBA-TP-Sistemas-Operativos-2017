@@ -47,7 +47,7 @@ void yamaIniciar() {
 		worker.nodo=*(Dir*)(infoNodos->datos+sizeof(Dir)*i);//TODO puede que rompa porque no es deep copying
 		printf("IP = %s\n", worker.nodo.ip);
 		printf("Puerto = %s\n", worker.nodo.port);
-		list_addM(workers,&worker,sizeof(Worker)); //TODO tira segmentation fault no vi porque
+		list_addM(workers,&worker,sizeof(Worker));
 	}
 	mensajeDestruir(infoNodos);
 }
@@ -81,8 +81,6 @@ void yamaAtender() {
 	imprimirMensajeUno(archivoLog, "[CONEXION] Esperando conexiones de un Master (Puerto %s)", configuracion->puertoMaster);
 	servidor->listenerMaster = socketCrearListener(configuracion->puertoMaster);
 	listaSocketsAgregar(servidor->listenerMaster, &servidor->listaMaster);
-	//TODO Aca deberia ir un socketAceptar porque sino sigue de largo e imprime el mensaje de abajo
-	imprimirMensaje(archivoLog, "[CONEXION] Conexion exitosa con Master");
 	servidorControlarMaximoSocket(servidor->fileSystem);
 	servidorControlarMaximoSocket(servidor->listenerMaster);
 
@@ -95,7 +93,7 @@ void yamaAtender() {
 
 		dibujarTablaEstados();
 
-		servidor->listaSelect = servidor->listaMaster;
+		servidor->listaSelect = servidor->listaMaster;//esto anda asi?
 		socketSelect(servidor->maximoSocket, &servidor->listaSelect);
 		Socket socketI;
 		Socket maximoSocket = servidor->maximoSocket;
