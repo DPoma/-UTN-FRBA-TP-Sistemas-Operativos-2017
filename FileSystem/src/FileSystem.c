@@ -191,7 +191,7 @@ void servidorRecibirMensaje(Servidor* servidor, Socket unSocket) {
 		servidorFinalizarConexion(servidor, unSocket);
 	else {
 		if(mensaje->header.operacion == 14) {;
-			printf("%s", (String)mensaje->datos);
+			//printf("%s", (String)mensaje->datos);
 		}
 	}
 	mensajeDestruir(mensaje);
@@ -836,6 +836,11 @@ void comandoMover(Comando* comando) {
 	}
 }
 
+bool bloqueOrdenarPorNumero(Bloque* unBloque, Bloque* otroBloque) {
+	return unBloque->numeroBloque < otroBloque->numeroBloque;
+}
+
+
 void comandoMostrarArchivo(Comando* comando) {
 	if(!rutaValida(comando->argumentos[1])) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
@@ -848,13 +853,15 @@ void comandoMostrarArchivo(Comando* comando) {
 	}
 	int numeroBloque;
 	for(numeroBloque=0; numeroBloque < listaCantidadElementos(archivo->listaBloques); numeroBloque++) {
+		listaOrdenar(archivo->listaBloques, (Puntero)bloqueOrdenarPorNumero);
 		Bloque* bloque = listaObtenerElemento(archivo->listaBloques, numeroBloque);
 		int numeroCopia;
 		int bloqueNoFueImpreso = true;
 		for(numeroCopia=0; numeroCopia<listaCantidadElementos(bloque->listaCopias) && bloqueNoFueImpreso; numeroCopia++) {
 			CopiaBloque* copia = listaObtenerElemento(bloque->listaCopias, numeroCopia);
-			Nodo* nodo = nodoBuscar(copia->nombreNodo);
+			Nodo* nodo = nodoBuscar(copia->nombreNodo);;
 			if(nodo != NULL) {
+				printf("DEBERIA IMPRIMIR BLOQUE %i DEL NODO %s\n", copia->bloqueNodo, nodo->nombre);
 				mensajeEnviar(nodo->socket, 101 ,&copia->bloqueNodo, sizeof(Entero));
 				bloqueNoFueImpreso = false;
 			}
@@ -956,7 +963,7 @@ void comandoCopiarArchivoDeFS(Comando* comando) {
 	}
 	Archivo* archivo = archivoCrear(nombreArchivo, directorio->identificador, comando->argumentos[1]);
 	memoriaLiberar(nombreArchivo);
-	int estado = ACTIVADO;//TODO vaidar si la linea es larga
+	int estado = ACTIVADO;
 	if(stringIguales(comando->argumentos[1], FLAG_B)) {
 		String buffer = stringCrear(BLOQUE);
 		int numeroBloqueArchivo;
@@ -982,18 +989,11 @@ void comandoCopiarArchivoDeFS(Comando* comando) {
 				estado = -2;
 				break;
 			}
-			//int tamanioLineaFaltante = stringLongitud(lineaFaltante);
-			//if(tamanioLineaFaltante > 0) {
-			//stringConcatenar(&datos, lineaFaltante);
-			//	bytesDisponibles-= stringLongitud(lineaFaltante);
-			//stringLimpiar(lineaFaltante, BLOQUE);
-			//}
 			if(tamanioBuffer <= bytesDisponibles) {
 				stringConcatenar(&datos, buffer);
 				bytesDisponibles-= tamanioBuffer;
 			}
 			else {
-				//(stringCopiar(lineaFaltante, buffer);
 				//TODO ver con varios nodos
 				int bytesUtilizados = stringLongitud(datos)+1;
 				bytesDisponibles = BLOQUE-1;
@@ -1006,7 +1006,7 @@ void comandoCopiarArchivoDeFS(Comando* comando) {
 				}
 				numeroBloqueArchivo++;
 				memoriaLiberar(datos);
-				datos = stringCrear(BLOQUE); //TODO linea faltante en if
+				datos = stringCrear(BLOQUE);
 				stringConcatenar(&datos, buffer);
 				bytesDisponibles-= tamanioBuffer;
 			}
@@ -1859,6 +1859,7 @@ void bloqueEnviarANodo(Socket unSocket, Entero numeroBloque, String buffer, int 
 
 void bloqueCopiar(Bloque* bloque, Nodo* nodo, Entero numeroBloqueNodo) {
 	//TODO Actualizar archivo del nodooooooooooo
+	printf("GUARDO EL BLOQUE %i DEL ARCHIVO EN EL BLOQUE %i DEL %s\n", bloque->numeroBloque, numeroBloqueNodo, nodo->nombre);
 	CopiaBloque* copia = copiaBloqueCrear(numeroBloqueNodo, nodo->nombre);
 	bitmapOcuparBit(nodo->bitmap, numeroBloqueNodo);
 	nodo->bloquesLibres--;

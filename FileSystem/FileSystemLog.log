@@ -1,5 +1,22 @@
-[INFO] 19:55:11:870 FileSystem/(2857:2857): [EJECUCION] Proceso File System inicializado
-[INFO] 19:55:11:871 FileSystem/(2857:2857): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 19:55:11:872 FileSystem/(2857:2857): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 19:55:11:872 FileSystem/(2857:2857): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
-[INFO] 19:55:32:569 FileSystem/(2857:2857): [CONEXION] El proceso YAMA se ha conectado
+[INFO] 23:37:44:850 FileSystem/(4706:4706): [EJECUCION] Proceso File System inicializado
+[INFO] 23:37:44:852 FileSystem/(4706:4706): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 23:37:44:853 FileSystem/(4706:4706): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 23:37:44:855 FileSystem/(4706:4706): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
+[INFO] 23:37:47:184 FileSystem/(4706:4706): [CONEXION] Un proceso Data Node se ha conectado
+[INFO] 23:37:59:664 FileSystem/(4706:4706): [CONEXION] Un proceso Data Node se ha conectado
+[INFO] 23:38:20:270 FileSystem/(4706:4711): [ARCHIVO] El archivo /home/utnso/Escritorio/TODO fue copiado en File System
+[INFO] 23:38:25:705 FileSystem/(4706:4706): [CONEXION] Un proceso Data Node se ha desconectado
+[INFO] 23:38:37:525 FileSystem/(4706:4711): [ERROR] No hay nodos disponibles para obtener el bloque
+[INFO] 23:38:52:391 FileSystem/(4706:4706): [CONEXION] Un proceso Data Node se ha conectado
+[INFO] 23:39:27:504 FileSystem/(4706:4706): [CONEXION] Un proceso Data Node se ha desconectado
+[INFO] 23:39:33:505 FileSystem/(4706:4711): [ERROR] No hay nodos disponibles para obtener el bloque
+[INFO] 23:40:07:557 FileSystem/(4706:4706): [CONEXION] Un proceso Data Node se ha conectado
+[INFO] 23:40:24:36 FileSystem/(4706:4711): [ARCHIVO] El archivo /home/utnso/Escritorio/algo fue copiado en File System
+[INFO] 23:40:55:255 FileSystem/(4706:4711): [DIRECTORIO] TODO (a)
+[INFO] 23:40:55:258 FileSystem/(4706:4711): [DIRECTORIO] algo (a)
+[INFO] 23:41:00:449 FileSystem/(4706:4711): [ARCHIVO] El archivo /algo ha sido eliminado
+[INFO] 23:41:14:930 FileSystem/(4706:4711): [31m[ERROR] La linea leida es demasiado larga, se aborta la operacion[0m
+[INFO] 23:41:25:861 FileSystem/(4706:4706): [CONEXION] Un proceso Data Node se ha desconectado
+[INFO] 23:41:27:344 FileSystem/(4706:4706): [CONEXION] Un proceso Data Node se ha desconectado
+[INFO] 23:41:53:814 FileSystem/(4706:4711): [31m[ERROR] No hay nodos o bloques disponibles, se aborta la operacion[0m
+[INFO] 23:42:22:981 FileSystem/(4706:4706): [EJECUCION] Proceso File System finalizado
