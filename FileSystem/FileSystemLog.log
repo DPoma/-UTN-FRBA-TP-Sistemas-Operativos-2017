@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 [INFO] 23:37:44:850 FileSystem/(4706:4706): [EJECUCION] Proceso File System inicializado
 [INFO] 23:37:44:852 FileSystem/(4706:4706): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
 [INFO] 23:37:44:853 FileSystem/(4706:4706): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
@@ -20,3 +21,14 @@
 [INFO] 23:41:27:344 FileSystem/(4706:4706): [CONEXION] Un proceso Data Node se ha desconectado
 [INFO] 23:41:53:814 FileSystem/(4706:4711): [31m[ERROR] No hay nodos o bloques disponibles, se aborta la operacion[0m
 [INFO] 23:42:22:981 FileSystem/(4706:4706): [EJECUCION] Proceso File System finalizado
+=======
+[INFO] 20:43:06:37 FileSystem/(2086:2086): [EJECUCION] Proceso File System inicializado
+[INFO] 20:43:06:52 FileSystem/(2086:2086): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 20:43:06:52 FileSystem/(2086:2086): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 20:43:06:52 FileSystem/(2086:2086): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
+[INFO] 20:43:27:416 FileSystem/(2086:2086): [CONEXION] El proceso YAMA se ha conectado
+[INFO] 20:54:51:542 FileSystem/(2086:2086): [CONEXION] Un proceso Data Node se ha conectado
+[INFO] 20:55:11:271 FileSystem/(2086:2086): [CONEXION] Un proceso Data Node se ha conectado
+[INFO] 20:55:41:115 FileSystem/(2086:2091): [ESTADO] El File System ha sido formateado
+[INFO] 21:08:38:691 FileSystem/(2086:2086): [CONEXION] Un proceso Data Node se ha desconectado
+>>>>>>> origin/master
