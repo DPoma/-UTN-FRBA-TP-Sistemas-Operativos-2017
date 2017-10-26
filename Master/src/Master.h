@@ -18,9 +18,10 @@ typedef enum {Solicitud,Transformacion=1,ReducLocal=2,ReducGlobal=3,Almacenamien
 #define FRACASOTRANSFORMACION -801
 
 typedef struct __attribute__((__packed__)){
-	int32_t ip;
+	char ip[20];
 	int32_t port;
 } Dir;
+
 #define DIRSIZE sizeof(Dir)
 #define INTSIZE sizeof(int32_t)
 #define TEMPSIZE 12

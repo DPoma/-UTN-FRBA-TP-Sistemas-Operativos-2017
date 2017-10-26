@@ -187,8 +187,8 @@ void workerCrearHijo(Socket unSocket) {
 				free(origen);
 				free(destino);
 				free(mensaje);
-				break;
 				mensajeEnviar(unSocket, 804, NULL, 0);
+				break;
 			}
 			case 5:{ //PasaRegistro
 				int sizeRuta;

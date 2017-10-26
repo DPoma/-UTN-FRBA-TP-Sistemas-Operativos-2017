@@ -79,20 +79,20 @@ int hayWorkersParaConectar(){
 
 WorkerTransformacion* deserializarTransformacion(Mensaje* mensaje){
 	int size = mensaje->header.tamanio;
-	int numeroip;
+	char* numeroip;
 	int numeropuerto;
 	int numeroBloque;
 	int numeroBytes;
 	char* nombretemporal;
 	WorkerTransformacion* wt= malloc(size);
 
-	memcpy(&numeroip, mensaje->datos,sizeof(int));
-	memcpy(&numeropuerto, mensaje->datos + sizeof(int), sizeof(int));
-	memcpy(&numeroBloque, mensaje->datos + sizeof(int)*2 , sizeof(int));
-	memcpy(&numeroBytes, mensaje->datos + sizeof(int)*3, sizeof(int));
-	memcpy(&nombretemporal, mensaje->datos + sizeof(int)*3 +12, 12);//tamaño del nombre del temporal es 12
+	memcpy(&numeroip, mensaje->datos,20);
+	memcpy(&numeropuerto, mensaje->datos + 20, sizeof(int));
+	memcpy(&numeroBloque, mensaje->datos + sizeof(int)+20 , sizeof(int));
+	memcpy(&numeroBytes, mensaje->datos + sizeof(int)*2 + 20 , sizeof(int));
+	memcpy(&nombretemporal, mensaje->datos + sizeof(int)*3 +12 +20, 12);//tamaño del nombre del temporal es 12
 
-	wt->dir.ip = numeroip;
+	strcpy(wt->dir.ip , numeroip);
 	wt->dir.port = numeropuerto;
 	wt->bloque = numeropuerto;
 	wt->bytes = numeroBytes;
@@ -130,7 +130,7 @@ ListaSockets sockets(){
 	for(i=0; i<size;i++){
 
 	 wt = listaObtenerElemento(workers,i);
-	 sWorker = socketCrearCliente(string_itoa(wt->dir.ip),string_itoa(wt->dir.port),ID_MASTER);
+	 sWorker = socketCrearCliente(wt->dir.ip,string_itoa(wt->dir.port),ID_MASTER);
 	 listaSocketsAgregar(sWorker,&sockets);
 
 	}
@@ -161,13 +161,13 @@ void serializarYEnviar(int nroBloque, int nroBytes, char* nombretemp, Socket unS
 void establecerConexionConWorker( Lista bloques){
 	WorkerTransformacion* wt = list_get(bloques,0);
 
-	socketWorker = socketCrearCliente(string_itoa(wt->dir.ip),string_itoa(wt->dir.port), ID_MASTER);
+	socketWorker = socketCrearCliente(wt->dir.ip,string_itoa(wt->dir.port), ID_MASTER);
 
 	int i;
 	for(i=0;i<bloques->elements_count;i++){
 		WorkerTransformacion* wt=list_get(bloques,i);
 		serializarYEnviar(wt->bloque,wt->bytes, wt->temp,socketWorker);
-		imprimirMensajeDos(archivoLog,"[CONEXION] Estableciendo conexion con Worker (IP: %d | PUERTO: %d", string_itoa(wt->dir.ip), string_itoa(wt->dir.port));
+		imprimirMensajeDos(archivoLog,"[CONEXION] Estableciendo conexion con Worker (IP: %s | PUERTO: %d", wt->dir.ip, string_itoa(wt->dir.port));
 	}
 
 	for(i=0;i<bloques->elements_count;i++){
