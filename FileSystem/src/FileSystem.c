@@ -228,7 +228,8 @@ void servidorFinalizar(Servidor* servidor) {
 
 void servidorRegistrarDataNode(Servidor* servidor, Socket nuevoSocket) {
 	if(nuevoSocket != ERROR) {
-		//if(estadoSeguro == 0) { TODO POnerlo lindo
+		//if(estadoSeguro == 0) { TODO POnerlo lindo y cuando hago format que no
+		//elimine de la lista en caso de que se desconecten
 			listaSocketsAgregar(nuevoSocket, &servidor->listaDataNodes);
 			Mensaje* mensaje = mensajeRecibir(nuevoSocket);
 			Nodo* nodo = nodoCrear(20480, 20480, nuevoSocket);
@@ -615,7 +616,7 @@ void comandoFormatearFileSystem() {
 		stringCopiar(nodos[indice].ip, nodo->ip);
 		stringCopiar(nodos[indice].puerto, nodo->puerto);
 	}
-	mensajeEnviar(socketYama, 201, nodos, cantidadNodos*sizeof(ConexionNodo));
+//	mensajeEnviar(socketYama, 201, nodos, cantidadNodos*sizeof(ConexionNodo));
 	imprimirMensaje(archivoLog, "[ESTADO] El File System ha sido formateado");
 }
 
@@ -836,11 +837,6 @@ void comandoMover(Comando* comando) {
 	}
 }
 
-bool bloqueOrdenarPorNumero(Bloque* unBloque, Bloque* otroBloque) {
-	return unBloque->numeroBloque < otroBloque->numeroBloque;
-}
-
-
 void comandoMostrarArchivo(Comando* comando) {
 	if(!rutaValida(comando->argumentos[1])) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
@@ -913,23 +909,7 @@ void comandoCrearDirectorio(Comando* comando) {
 	memoriaLiberar(control);
 }
 
-
-int bloqueEnviarCopiasANodos(Bloque* bloque, String buffer, int tamanioUtilizado) {
-	Lista nodosDisponibles = listaFiltrar(listaNodos, (Puntero)nodoTieneBloquesLibres);
-	int copiasEnviadas;
-	for(copiasEnviadas = 0; listaTieneElementos(nodosDisponibles) && copiasEnviadas < MAX_COPIAS; copiasEnviadas++) {
-		listaOrdenar(nodosDisponibles, (Puntero)nodoCantidadBloquesLibres);
-		Nodo* nodo = listaPrimerElemento(nodosDisponibles);
-		Entero numeroBloqueNodo = nodoBuscarBloqueLibre(nodo);
-		bloqueCopiar(bloque, nodo, numeroBloqueNodo);
-		bloqueEnviarANodo(nodo->socket, numeroBloqueNodo, buffer, tamanioUtilizado);
-		nodoVerificarBloquesLibres(nodo, nodosDisponibles);
-	}
-	listaDestruir(nodosDisponibles);
-	return copiasEnviadas;
-}
-
-
+//TODO ver con archivo binario
 void comandoCopiarArchivoDeFS(Comando* comando) {
 	if(consolaflagInvalido(comando->argumentos[1])) {
 		imprimirMensaje(archivoLog, "[ERROR] Flag invalido");
@@ -994,7 +974,6 @@ void comandoCopiarArchivoDeFS(Comando* comando) {
 				bytesDisponibles-= tamanioBuffer;
 			}
 			else {
-				//TODO ver con varios nodos
 				int bytesUtilizados = stringLongitud(datos)+1;
 				bytesDisponibles = BLOQUE-1;
 				Bloque* bloque = bloqueCrear(bytesUtilizados, numeroBloqueArchivo);
@@ -1033,21 +1012,60 @@ void comandoCopiarArchivoDeFS(Comando* comando) {
 	} else {
 		archivoPersistirCrear(archivo);
 		listaAgregarElemento(listaArchivos, archivo);
+		nodoPersistirConectados();
 		imprimirMensajeUno(archivoLog, "[ARCHIVO] El archivo %s fue copiado en File System", comando->argumentos[2]);
 	}
 }
 
 
 void comandoCopiarArchivoDeYFS(Comando* comando) {
-
+//TODO
 }
 
 void comandoCopiarBloque(Comando* comando) {
-
+	if(!rutaValida(comando->argumentos[1])) {
+		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
+		return;
+	}
+	if(stringIguales(comando->argumentos[1], "/")) {
+		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
+		return;
+	}
+	Archivo* archivo = archivoBuscar(comando->argumentos[1]);
+	if(archivo == NULL) {
+		imprimirMensaje(archivoLog, "[ERROR] El archivo no existe");
+		return;
+	}
+	if(!rutaEsNumero(comando->argumentos[2])) {
+		imprimirMensaje(archivoLog,"[ERROR] El numero de bloque no es valido");
+		return;
+	}
+	Nodo* nodo = nodoBuscar(comando->argumentos[3]);
+	if(nodo == NULL) {
+		imprimirMensaje(archivoLog,"[ERROR] El nodo no existe");
+		return;
+	}
+	int numeroBloque = atoi(comando->argumentos[2]);
+	Bloque* bloque = listaObtenerElemento(archivo->listaBloques, numeroBloque);
+	if(bloque == NULL) {
+		imprimirMensaje(archivoLog, "[ERROR] El numero de bloque no existe");
+		return;
+	}
+	Entero numeroBloqueNodo = nodoBuscarBloqueLibre(nodo);
+	if(numeroBloqueNodo == ERROR) {
+		imprimirMensaje(archivoLog, "[ERROR] No hay bloques libres en el nodo");
+		return;
+	}
+	bloqueCopiar(bloque, nodo, numeroBloqueNodo);
+	//TODO enviar a socket agregar un case en data node
+	archivoPersistirCrear(archivo);
+	nodoPersistirConectados();
+	//TODO que no persista todos los bitmaps, solo el necesario
+	//Ver forma de persistir archivos, la complique solo parece...
 }
 
 void comandoObtenerMD5(Comando* comando) {
-
+	//TODO ver si guardar en una variable al crear el archivo (ver foro)
 	if(!rutaValida(comando->argumentos[1])) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return;
@@ -1543,7 +1561,7 @@ int archivoObtenerPosicion(Archivo* archivo) {
 
 void archivoPersistirCrear(Archivo* archivo) {
 	String ruta = string_from_format("%s/%i/%s", rutaDirectorioArchivos, archivo->identificadorPadre, archivo->nombre);
-	File file = fileAbrir(ruta, "a+");
+	File file = fileAbrir(ruta, "w");
 	memoriaLiberar(ruta);
 	fprintf(file, "NOMBRE=%s\n", archivo->nombre);
 	fprintf(file, "ID_PADRE=%i\n", archivo->identificadorPadre);
@@ -1772,7 +1790,7 @@ void nodoRecuperarEstadoAnterior() {
 }
 
 void nodoPersistirConectados() {
-	File archivo = fileAbrir(rutaNodos, "a+");
+	File archivo = fileAbrir(rutaNodos, "w");
 	int indice;
 	int contadorBloquesTotales = 0;
 	int contadorBloquesLibres = 0;
@@ -1786,8 +1804,8 @@ void nodoPersistirConectados() {
 		nodoPersistirBitmap(listaObtenerElemento(listaNodos, indice));
 	}
 	fprintf(archivo, "NODOS_CONECTADOS=%i\n", indice);
-	fprintf(archivo, "BLOQUES_LIBRES=%i\n", contadorBloquesTotales);
-	fprintf(archivo, "BLOQUES_TOTALES=%i\n", contadorBloquesLibres);
+	fprintf(archivo, "BLOQUES_LIBRES=%i\n", contadorBloquesLibres);
+	fprintf(archivo, "BLOQUES_TOTALES=%i\n", contadorBloquesTotales);
 	fileCerrar(archivo);
 }
 
@@ -1858,12 +1876,30 @@ void bloqueEnviarANodo(Socket unSocket, Entero numeroBloque, String buffer, int 
 }
 
 void bloqueCopiar(Bloque* bloque, Nodo* nodo, Entero numeroBloqueNodo) {
-	//TODO Actualizar archivo del nodooooooooooo
 	printf("GUARDO EL BLOQUE %i DEL ARCHIVO EN EL BLOQUE %i DEL %s\n", bloque->numeroBloque, numeroBloqueNodo, nodo->nombre);
 	CopiaBloque* copia = copiaBloqueCrear(numeroBloqueNodo, nodo->nombre);
 	bitmapOcuparBit(nodo->bitmap, numeroBloqueNodo);
 	nodo->bloquesLibres--;
 	listaAgregarElemento(bloque->listaCopias, copia);
+}
+
+bool bloqueOrdenarPorNumero(Bloque* unBloque, Bloque* otroBloque) {
+	return unBloque->numeroBloque < otroBloque->numeroBloque;
+}
+
+int bloqueEnviarCopiasANodos(Bloque* bloque, String buffer, int tamanioUtilizado) {
+	Lista nodosDisponibles = listaFiltrar(listaNodos, (Puntero)nodoTieneBloquesLibres);
+	int copiasEnviadas;
+	for(copiasEnviadas = 0; listaTieneElementos(nodosDisponibles) && copiasEnviadas < MAX_COPIAS; copiasEnviadas++) {
+		listaOrdenar(nodosDisponibles, (Puntero)nodoCantidadBloquesLibres);
+		Nodo* nodo = listaPrimerElemento(nodosDisponibles);
+		Entero numeroBloqueNodo = nodoBuscarBloqueLibre(nodo);
+		bloqueCopiar(bloque, nodo, numeroBloqueNodo);
+		bloqueEnviarANodo(nodo->socket, numeroBloqueNodo, buffer, tamanioUtilizado);
+		nodoVerificarBloquesLibres(nodo, nodosDisponibles);
+	}
+	listaDestruir(nodosDisponibles);
+	return copiasEnviadas;
 }
 
 

@@ -1,12 +1,12 @@
-<<<<<<< HEAD
-[INFO] 23:40:07:534 DataNode/(4749:4749): [CONFIGURACION] Nombre Nodo: NODO19
-[INFO] 23:40:07:543 DataNode/(4749:4749): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data2.bin
-[INFO] 23:40:07:546 DataNode/(4749:4749): [DATABIN] Cantidad de bloques disponibles 81920
-[INFO] 23:40:07:547 DataNode/(4749:4749): [CONEXION] Estableciendo conexion con File System (IP: 127.0.0.1 | Puerto 5040)
-[INFO] 23:40:24:32 DataNode/(4749:4749): [DATABIN] El bloque N°0 fue escrito
-=======
-[INFO] 20:55:11:269 DataNode/(2365:2365): [CONFIGURACION] Nombre Nodo: NODO63
-[INFO] 20:55:11:269 DataNode/(2365:2365): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data.bin
-[INFO] 20:55:11:270 DataNode/(2365:2365): [DATABIN] Cantidad de bloques disponibles 81920
-[INFO] 20:55:11:270 DataNode/(2365:2365): [CONEXION] Estableciendo conexion con File System (IP: 127.0.0.1 | Puerto 5040)
->>>>>>> origin/master
+[INFO] 01:09:35:225 DataNode/(5999:5999): [CONFIGURACION] Nombre Nodo: NODO4
+[INFO] 01:09:35:226 DataNode/(5999:5999): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data2.bin
+[INFO] 01:09:35:230 DataNode/(5999:5999): [DATABIN] Cantidad de bloques disponibles 81920
+[INFO] 01:09:35:232 DataNode/(5999:5999): [CONEXION] Estableciendo conexion con File System (IP: 127.0.0.1 | Puerto 5040)
+[INFO] 01:10:25:800 DataNode/(5999:5999): [DATABIN] El bloque N°0 fue escrito
+[INFO] 01:10:25:836 DataNode/(5999:5999): [DATABIN] El bloque N°1 fue escrito
+[INFO] 01:10:25:836 DataNode/(5999:5999): [DATABIN] El bloque N°2 fue escrito
+[INFO] 01:10:25:836 DataNode/(5999:5999): [DATABIN] El bloque N°3 fue escrito
+[INFO] 01:10:25:836 DataNode/(5999:5999): [DATABIN] El bloque N°4 fue escrito
+[INFO] 01:10:25:846 DataNode/(5999:5999): [DATABIN] El bloque N°5 fue escrito
+[INFO] 01:18:59:123 DataNode/(5999:5999): [CONEXION] El File System se desconecto
+[INFO] 01:18:59:124 DataNode/(5999:5999): [EJECUCION] Proceso Data Node finalizado
