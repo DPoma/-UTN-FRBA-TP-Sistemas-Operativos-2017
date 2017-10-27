@@ -798,6 +798,7 @@ void comandoRenombrar(Comando* comando) {
 		memoriaLiberar(nuevaRuta);
 		stringCopiar(archivo->nombre, comando->argumentos[2]);
 		archivoPersistir(archivo);
+		archivoPersistirControl();
 		imprimirMensajeDos(archivoLog, "[ARCHIVO] El archivo %s fue renombrado por %s", comando->argumentos[1], archivo->nombre);
 
 	}
@@ -864,6 +865,7 @@ void comandoMover(Comando* comando) {
 		memoriaLiberar(rutaArchivo);
 		archivo->identificadorPadre = directorioNuevoPadre->identificador;
 		archivoPersistir(archivo);
+		archivoPersistirControl();
 		String nombre = rutaObtenerUltimoNombre(comando->argumentos[1]);
 		imprimirMensajeDos(archivoLog, "[DIRECTORIO] El archivo %s fue movido a %s", nombre, comando->argumentos[2]);
 		memoriaLiberar(nombre);
@@ -1041,9 +1043,10 @@ void comandoCopiarArchivoDeFS(Comando* comando) {
 		archivoDestruir(archivo);
 		imprimirMensaje(archivoLog, ROJO"[ERROR] No hay nodos o bloques disponibles, se aborta la operacion"BLANCO);
 	} else {
-		archivoPersistir(archivo);
-		archivoPersistirControl(archivo);
+
 		listaAgregarElemento(listaArchivos, archivo);
+		archivoPersistir(archivo);
+		archivoPersistirControl();
 		nodoPersistirConectados();
 		imprimirMensajeUno(archivoLog, "[ARCHIVO] El archivo %s fue copiado en File System", comando->argumentos[2]);
 	}
@@ -1563,7 +1566,7 @@ void archivoPersistirControl(){
 	int indice;
 	for(indice = 0; indice < listaCantidadElementos(listaArchivos); indice++) {
 		Archivo* archivo = listaObtenerElemento(listaArchivos, indice);
-		String entrada = string_from_format("%i;%s\n", archivo->identificadorPadre, archivo->nombre);
+		String entrada = string_from_format("%s;%i\n", archivo->nombre, archivo->identificadorPadre);
 		fprintf(file, "%s", entrada);
 		memoriaLiberar(entrada);
 	}
