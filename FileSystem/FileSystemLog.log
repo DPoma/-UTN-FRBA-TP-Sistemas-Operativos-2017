@@ -1,58 +1,85 @@
-[INFO] 19:15:17:246 FileSystem/(12313:12313): [EJECUCION] Proceso File System inicializado
-[INFO] 19:15:17:303 FileSystem/(12313:12313): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 19:15:17:304 FileSystem/(12313:12313): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 19:15:17:304 FileSystem/(12313:12313): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
-[INFO] 19:15:18:634 FileSystem/(12313:12313): [CONEXION] Un proceso Data Node se ha conectado
-[INFO] 19:15:31:386 FileSystem/(12313:12318): [ARCHIVO] El archivo /home/utnso/Escritorio/lala fue copiado en File System
-[INFO] 19:15:41:287 FileSystem/(12313:12318): [ARCHIVO] Nombre: lala
-[INFO] 19:15:41:288 FileSystem/(12313:12318): [ARCHIVO] Tipo: BINARIO
-[INFO] 19:15:41:289 FileSystem/(12313:12318): [ARCHIVO] Ubicacion: /lala
-[INFO] 19:15:41:291 FileSystem/(12313:12318): [ARCHIVO] Tamanio: 1024 bytes
-[INFO] 19:15:41:292 FileSystem/(12313:12318): [ARCHIVO] Bloques utilizados: 4
-[INFO] 19:15:41:294 FileSystem/(12313:12318): [ARCHIVO] Bloque 0: 256 bytes
-[INFO] 19:15:41:296 FileSystem/(12313:12318): [ARCHIVO] Bloque 0 copia 0 en: Nodo: NODO4 | Bloque: 0
-[INFO] 19:15:41:297 FileSystem/(12313:12318): [ARCHIVO] Bloque 0 copia 1 en: Nodo: NODO4 | Bloque: 1
-[INFO] 19:15:41:298 FileSystem/(12313:12318): [ARCHIVO] Bloque 1: 256 bytes
-[INFO] 19:15:41:298 FileSystem/(12313:12318): [ARCHIVO] Bloque 1 copia 0 en: Nodo: NODO4 | Bloque: 2
-[INFO] 19:15:41:299 FileSystem/(12313:12318): [ARCHIVO] Bloque 1 copia 1 en: Nodo: NODO4 | Bloque: 3
-[INFO] 19:15:41:299 FileSystem/(12313:12318): [ARCHIVO] Bloque 2: 256 bytes
-[INFO] 19:15:41:300 FileSystem/(12313:12318): [ARCHIVO] Bloque 2 copia 0 en: Nodo: NODO4 | Bloque: 4
-[INFO] 19:15:41:300 FileSystem/(12313:12318): [ARCHIVO] Bloque 2 copia 1 en: Nodo: NODO4 | Bloque: 5
-[INFO] 19:15:41:300 FileSystem/(12313:12318): [ARCHIVO] Bloque 3: 256 bytes
-[INFO] 19:15:41:301 FileSystem/(12313:12318): [ARCHIVO] Bloque 3 copia 0 en: Nodo: NODO4 | Bloque: 6
-[INFO] 19:15:41:301 FileSystem/(12313:12318): [ARCHIVO] Bloque 3 copia 1 en: Nodo: NODO4 | Bloque: 7
-[INFO] 19:16:00:330 FileSystem/(12313:12318): [BLOQUE] La copia N°0 del bloque N°3 del archivo /lala ha sido eliminada
-[INFO] 19:16:28:435 FileSystem/(12313:12318): [ARCHIVO] Nombre: lala
-[INFO] 19:16:28:436 FileSystem/(12313:12318): [ARCHIVO] Tipo: BINARIO
-[INFO] 19:16:28:437 FileSystem/(12313:12318): [ARCHIVO] Ubicacion: /lala
-[INFO] 19:16:28:439 FileSystem/(12313:12318): [ARCHIVO] Tamanio: 1024 bytes
-[INFO] 19:16:28:440 FileSystem/(12313:12318): [ARCHIVO] Bloques utilizados: 4
-[INFO] 19:16:28:442 FileSystem/(12313:12318): [ARCHIVO] Bloque 0: 256 bytes
-[INFO] 19:16:28:443 FileSystem/(12313:12318): [ARCHIVO] Bloque 0 copia 0 en: Nodo: NODO4 | Bloque: 0
-[INFO] 19:16:28:444 FileSystem/(12313:12318): [ARCHIVO] Bloque 0 copia 1 en: Nodo: NODO4 | Bloque: 1
-[INFO] 19:16:28:446 FileSystem/(12313:12318): [ARCHIVO] Bloque 1: 256 bytes
-[INFO] 19:16:28:447 FileSystem/(12313:12318): [ARCHIVO] Bloque 1 copia 0 en: Nodo: NODO4 | Bloque: 2
-[INFO] 19:16:28:448 FileSystem/(12313:12318): [ARCHIVO] Bloque 1 copia 1 en: Nodo: NODO4 | Bloque: 3
-[INFO] 19:16:28:455 FileSystem/(12313:12318): [ARCHIVO] Bloque 2: 256 bytes
-[INFO] 19:16:28:456 FileSystem/(12313:12318): [ARCHIVO] Bloque 2 copia 0 en: Nodo: NODO4 | Bloque: 4
-[INFO] 19:16:28:456 FileSystem/(12313:12318): [ARCHIVO] Bloque 2 copia 1 en: Nodo: NODO4 | Bloque: 5
-[INFO] 19:16:28:457 FileSystem/(12313:12318): [ARCHIVO] Bloque 3: 256 bytes
-[INFO] 19:16:28:457 FileSystem/(12313:12318): [ARCHIVO] Bloque 3 copia 0 en: Nodo: NODO4 | Bloque: 7
-[INFO] 19:17:20:546 FileSystem/(12313:12318): [ARCHIVO] Nombre: lala
-[INFO] 19:17:20:547 FileSystem/(12313:12318): [ARCHIVO] Tipo: BINARIO
-[INFO] 19:17:20:548 FileSystem/(12313:12318): [ARCHIVO] Ubicacion: /lala
-[INFO] 19:17:20:549 FileSystem/(12313:12318): [ARCHIVO] Tamanio: 1024 bytes
-[INFO] 19:17:20:550 FileSystem/(12313:12318): [ARCHIVO] Bloques utilizados: 4
-[INFO] 19:17:20:551 FileSystem/(12313:12318): [ARCHIVO] Bloque 0: 256 bytes
-[INFO] 19:17:20:553 FileSystem/(12313:12318): [ARCHIVO] Bloque 0 copia 0 en: Nodo: NODO4 | Bloque: 0
-[INFO] 19:17:20:554 FileSystem/(12313:12318): [ARCHIVO] Bloque 0 copia 1 en: Nodo: NODO4 | Bloque: 1
-[INFO] 19:17:20:555 FileSystem/(12313:12318): [ARCHIVO] Bloque 0 copia 2 en: Nodo: NODO4 | Bloque: 6
-[INFO] 19:17:20:557 FileSystem/(12313:12318): [ARCHIVO] Bloque 1: 256 bytes
-[INFO] 19:17:20:558 FileSystem/(12313:12318): [ARCHIVO] Bloque 1 copia 0 en: Nodo: NODO4 | Bloque: 2
-[INFO] 19:17:20:559 FileSystem/(12313:12318): [ARCHIVO] Bloque 1 copia 1 en: Nodo: NODO4 | Bloque: 3
-[INFO] 19:17:20:571 FileSystem/(12313:12318): [ARCHIVO] Bloque 2: 256 bytes
-[INFO] 19:17:20:575 FileSystem/(12313:12318): [ARCHIVO] Bloque 2 copia 0 en: Nodo: NODO4 | Bloque: 4
-[INFO] 19:17:20:584 FileSystem/(12313:12318): [ARCHIVO] Bloque 2 copia 1 en: Nodo: NODO4 | Bloque: 5
-[INFO] 19:17:20:586 FileSystem/(12313:12318): [ARCHIVO] Bloque 3: 256 bytes
-[INFO] 19:17:20:586 FileSystem/(12313:12318): [ARCHIVO] Bloque 3 copia 0 en: Nodo: NODO4 | Bloque: 7
-[INFO] 19:17:24:157 FileSystem/(12313:12313): [EJECUCION] Proceso File System finalizado
+[INFO] 20:20:18:252 FileSystem/(13859:13859): [EJECUCION] Proceso File System inicializado
+[INFO] 20:20:18:310 FileSystem/(13859:13859): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 20:20:18:311 FileSystem/(13859:13859): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 20:20:18:312 FileSystem/(13859:13859): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
+[INFO] 20:20:19:771 FileSystem/(13859:13859): [CONEXION] Un proceso Data Node se ha conectado
+[INFO] 20:20:39:664 FileSystem/(13859:13864): [ARCHIVO] El archivo /home/utnso/Escritorio/TODO fue copiado en File System
+[INFO] 20:20:43:268 FileSystem/(13859:13864): [ARCHIVO] Nombre: TODO
+[INFO] 20:20:43:269 FileSystem/(13859:13864): [ARCHIVO] Tipo: TEXTO
+[INFO] 20:20:43:270 FileSystem/(13859:13864): [ARCHIVO] Ubicacion: /TODO
+[INFO] 20:20:43:272 FileSystem/(13859:13864): [ARCHIVO] Tamanio: 1211 bytes
+[INFO] 20:20:43:273 FileSystem/(13859:13864): [ARCHIVO] Bloques utilizados: 6
+[INFO] 20:20:43:275 FileSystem/(13859:13864): [ARCHIVO] Bloque 0: 209 bytes
+[INFO] 20:20:43:277 FileSystem/(13859:13864): [ARCHIVO] Bloque 0 copia 0 en: Nodo: NODO4 | Bloque: 0
+[INFO] 20:20:43:278 FileSystem/(13859:13864): [ARCHIVO] Bloque 0 copia 1 en: Nodo: NODO4 | Bloque: 1
+[INFO] 20:20:43:279 FileSystem/(13859:13864): [ARCHIVO] Bloque 1: 189 bytes
+[INFO] 20:20:43:279 FileSystem/(13859:13864): [ARCHIVO] Bloque 1 copia 0 en: Nodo: NODO4 | Bloque: 2
+[INFO] 20:20:43:279 FileSystem/(13859:13864): [ARCHIVO] Bloque 1 copia 1 en: Nodo: NODO4 | Bloque: 3
+[INFO] 20:20:43:280 FileSystem/(13859:13864): [ARCHIVO] Bloque 2: 206 bytes
+[INFO] 20:20:43:280 FileSystem/(13859:13864): [ARCHIVO] Bloque 2 copia 0 en: Nodo: NODO4 | Bloque: 4
+[INFO] 20:20:43:281 FileSystem/(13859:13864): [ARCHIVO] Bloque 2 copia 1 en: Nodo: NODO4 | Bloque: 5
+[INFO] 20:20:43:281 FileSystem/(13859:13864): [ARCHIVO] Bloque 3: 163 bytes
+[INFO] 20:20:43:281 FileSystem/(13859:13864): [ARCHIVO] Bloque 3 copia 0 en: Nodo: NODO4 | Bloque: 6
+[INFO] 20:20:43:282 FileSystem/(13859:13864): [ARCHIVO] Bloque 3 copia 1 en: Nodo: NODO4 | Bloque: 7
+[INFO] 20:20:43:282 FileSystem/(13859:13864): [ARCHIVO] Bloque 4: 233 bytes
+[INFO] 20:20:43:283 FileSystem/(13859:13864): [ARCHIVO] Bloque 4 copia 0 en: Nodo: NODO4 | Bloque: 8
+[INFO] 20:20:43:283 FileSystem/(13859:13864): [ARCHIVO] Bloque 4 copia 1 en: Nodo: NODO4 | Bloque: 9
+[INFO] 20:20:43:283 FileSystem/(13859:13864): [ARCHIVO] Bloque 5: 211 bytes
+[INFO] 20:20:43:284 FileSystem/(13859:13864): [ARCHIVO] Bloque 5 copia 0 en: Nodo: NODO4 | Bloque: 10
+[INFO] 20:20:43:284 FileSystem/(13859:13864): [ARCHIVO] Bloque 5 copia 1 en: Nodo: NODO4 | Bloque: 11
+[INFO] 20:21:51:340 FileSystem/(13859:13864): [DIRECTORIO] El directorio /home fue creado
+[INFO] 20:21:58:976 FileSystem/(13859:13864): [DIRECTORIO] El archivo TODO fue movido a /home
+[INFO] 20:27:42:610 FileSystem/(13859:13864): [DIRECTORIO] El directorio /user fue creado
+[INFO] 20:28:02:669 FileSystem/(13859:13864): [DIRECTORIO] El archivo TODO fue movido a /user
+[INFO] 20:28:13:27 FileSystem/(13859:13864): [ARCHIVO] El archivo /user/TODO fue renombrado por lala
+[INFO] 20:29:01:382 FileSystem/(13859:13864): [ARCHIVO] Nombre: lala
+[INFO] 20:29:01:383 FileSystem/(13859:13864): [ARCHIVO] Tipo: TEXTO
+[INFO] 20:29:01:383 FileSystem/(13859:13864): [ARCHIVO] Ubicacion: /user/lala
+[INFO] 20:29:01:383 FileSystem/(13859:13864): [ARCHIVO] Tamanio: 1211 bytes
+[INFO] 20:29:01:383 FileSystem/(13859:13864): [ARCHIVO] Bloques utilizados: 6
+[INFO] 20:29:01:384 FileSystem/(13859:13864): [ARCHIVO] Bloque 0: 209 bytes
+[INFO] 20:29:01:384 FileSystem/(13859:13864): [ARCHIVO] Bloque 0 copia 0 en: Nodo: NODO4 | Bloque: 0
+[INFO] 20:29:01:384 FileSystem/(13859:13864): [ARCHIVO] Bloque 0 copia 1 en: Nodo: NODO4 | Bloque: 1
+[INFO] 20:29:01:385 FileSystem/(13859:13864): [ARCHIVO] Bloque 1: 189 bytes
+[INFO] 20:29:01:385 FileSystem/(13859:13864): [ARCHIVO] Bloque 1 copia 0 en: Nodo: NODO4 | Bloque: 2
+[INFO] 20:29:01:386 FileSystem/(13859:13864): [ARCHIVO] Bloque 1 copia 1 en: Nodo: NODO4 | Bloque: 3
+[INFO] 20:29:01:386 FileSystem/(13859:13864): [ARCHIVO] Bloque 2: 206 bytes
+[INFO] 20:29:01:387 FileSystem/(13859:13864): [ARCHIVO] Bloque 2 copia 0 en: Nodo: NODO4 | Bloque: 4
+[INFO] 20:29:01:387 FileSystem/(13859:13864): [ARCHIVO] Bloque 2 copia 1 en: Nodo: NODO4 | Bloque: 5
+[INFO] 20:29:01:387 FileSystem/(13859:13864): [ARCHIVO] Bloque 3: 163 bytes
+[INFO] 20:29:01:388 FileSystem/(13859:13864): [ARCHIVO] Bloque 3 copia 0 en: Nodo: NODO4 | Bloque: 6
+[INFO] 20:29:01:388 FileSystem/(13859:13864): [ARCHIVO] Bloque 3 copia 1 en: Nodo: NODO4 | Bloque: 7
+[INFO] 20:29:01:389 FileSystem/(13859:13864): [ARCHIVO] Bloque 4: 233 bytes
+[INFO] 20:29:01:389 FileSystem/(13859:13864): [ARCHIVO] Bloque 4 copia 0 en: Nodo: NODO4 | Bloque: 8
+[INFO] 20:29:01:390 FileSystem/(13859:13864): [ARCHIVO] Bloque 4 copia 1 en: Nodo: NODO4 | Bloque: 9
+[INFO] 20:29:01:390 FileSystem/(13859:13864): [ARCHIVO] Bloque 5: 211 bytes
+[INFO] 20:29:01:390 FileSystem/(13859:13864): [ARCHIVO] Bloque 5 copia 0 en: Nodo: NODO4 | Bloque: 10
+[INFO] 20:29:01:391 FileSystem/(13859:13864): [ARCHIVO] Bloque 5 copia 1 en: Nodo: NODO4 | Bloque: 11
+[INFO] 20:29:11:794 FileSystem/(13859:13864): [ERROR] El archivo no existe
+[INFO] 20:29:31:953 FileSystem/(13859:13864): [ARCHIVO] Nombre: lala
+[INFO] 20:29:31:954 FileSystem/(13859:13864): [ARCHIVO] Tipo: TEXTO
+[INFO] 20:29:31:955 FileSystem/(13859:13864): [ARCHIVO] Ubicacion: /user/lala
+[INFO] 20:29:31:956 FileSystem/(13859:13864): [ARCHIVO] Tamanio: 1211 bytes
+[INFO] 20:29:31:957 FileSystem/(13859:13864): [ARCHIVO] Bloques utilizados: 6
+[INFO] 20:29:31:958 FileSystem/(13859:13864): [ARCHIVO] Bloque 0: 209 bytes
+[INFO] 20:29:31:960 FileSystem/(13859:13864): [ARCHIVO] Bloque 0 copia 0 en: Nodo: NODO4 | Bloque: 0
+[INFO] 20:29:31:961 FileSystem/(13859:13864): [ARCHIVO] Bloque 0 copia 1 en: Nodo: NODO4 | Bloque: 1
+[INFO] 20:29:31:962 FileSystem/(13859:13864): [ARCHIVO] Bloque 1: 189 bytes
+[INFO] 20:29:31:963 FileSystem/(13859:13864): [ARCHIVO] Bloque 1 copia 0 en: Nodo: NODO4 | Bloque: 2
+[INFO] 20:29:31:964 FileSystem/(13859:13864): [ARCHIVO] Bloque 1 copia 1 en: Nodo: NODO4 | Bloque: 3
+[INFO] 20:29:31:964 FileSystem/(13859:13864): [ARCHIVO] Bloque 2: 206 bytes
+[INFO] 20:29:31:965 FileSystem/(13859:13864): [ARCHIVO] Bloque 2 copia 0 en: Nodo: NODO4 | Bloque: 4
+[INFO] 20:29:31:965 FileSystem/(13859:13864): [ARCHIVO] Bloque 2 copia 1 en: Nodo: NODO4 | Bloque: 5
+[INFO] 20:29:31:966 FileSystem/(13859:13864): [ARCHIVO] Bloque 3: 163 bytes
+[INFO] 20:29:31:966 FileSystem/(13859:13864): [ARCHIVO] Bloque 3 copia 0 en: Nodo: NODO4 | Bloque: 6
+[INFO] 20:29:31:966 FileSystem/(13859:13864): [ARCHIVO] Bloque 3 copia 1 en: Nodo: NODO4 | Bloque: 7
+[INFO] 20:29:31:971 FileSystem/(13859:13864): [ARCHIVO] Bloque 4: 233 bytes
+[INFO] 20:29:31:972 FileSystem/(13859:13864): [ARCHIVO] Bloque 4 copia 0 en: Nodo: NODO4 | Bloque: 8
+[INFO] 20:29:31:972 FileSystem/(13859:13864): [ARCHIVO] Bloque 4 copia 1 en: Nodo: NODO4 | Bloque: 9
+[INFO] 20:29:31:973 FileSystem/(13859:13864): [ARCHIVO] Bloque 5: 211 bytes
+[INFO] 20:29:31:973 FileSystem/(13859:13864): [ARCHIVO] Bloque 5 copia 0 en: Nodo: NODO4 | Bloque: 10
+[INFO] 20:29:31:974 FileSystem/(13859:13864): [ARCHIVO] Bloque 5 copia 1 en: Nodo: NODO4 | Bloque: 11
+[INFO] 20:29:31:974 FileSystem/(13859:13864): [ARCHIVO] Bloque 5 copia 2 en: Nodo: NODO4 | Bloque: 12
+[INFO] 20:29:46:457 FileSystem/(13859:13864): [BLOQUE] La copia N°0 del bloque N°5 del archivo /user/lala ha sido eliminada
+[INFO] 20:30:02:321 FileSystem/(13859:13864): [BLOQUE] La copia N°0 del bloque N°5 del archivo /user/lala ha sido eliminada
+[INFO] 20:31:06:925 FileSystem/(13859:13859): [EJECUCION] Proceso File System finalizado

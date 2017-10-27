@@ -203,7 +203,7 @@ void bloqueCopiar(Puntero datos) {
 	Entero numeroBloqueNodo = nodoBuscarBloqueLibre(nodoBuffer);
 	bloqueEnviarANodo(nodoBuffer->socket, numeroBloqueNodo, datos);
 	bloqueCopiarEnNodo(bloqueBuffer, nodoBuffer, numeroBloqueNodo);
-	archivoPersistirCrear(archivoBuffer);
+	archivoPersistir(archivoBuffer);
 	nodoPersistirBitmap(nodoBuffer);
 	archivoBuffer = NULL;
 	nodoBuffer = NULL;
@@ -698,11 +698,9 @@ void comandoEliminarBloque(Comando* comando) {
 		imprimirMensaje(archivoLog, "[ERROR] No se puede eliminar el bloque ya que es el ultimo");
 		return;
 	}
-
-	//archivoPersistirEliminarBloque(archivo, numeroBloque, numeroCopia);
 	copiaBloqueEliminar(copia);
 	listaEliminarDestruyendoElemento(bloque->listaCopias, numeroCopia, memoriaLiberar);
-	archivoPersistirCrear(archivo);
+	archivoPersistir(archivo);
 	imprimirMensajeTres(archivoLog, "[BLOQUE] La copia N°%i del bloque N°%i del archivo %s ha sido eliminada",(int*)numeroCopia, (int*)numeroBloque, comando->argumentos[2]);
 }
 
@@ -725,8 +723,6 @@ void comandoEliminarDirectorio(Comando* comando) {
 	if(directorioTieneAlgo(directorio->identificador))
 		imprimirMensajeUno(archivoLog,"[ERROR] El directorio %s no esta vacio",ruta);
 	else {
-		directorioPersistirEliminar(directorio);
-		directorioEliminarMetadata(directorio->identificador);
 		directorioEliminar(directorio->identificador);
 		imprimirMensajeUno(archivoLog,"[DIRECTORIO] El directorio %s ha sido eliminado",ruta);
 	}
@@ -756,11 +752,11 @@ void comandoEliminarArchivo(Comando* comando) {
 		}
 	}
 	int posicion = archivoObtenerPosicion(archivo);
-	archivoPersistirControlEliminar(archivo);
 	String rutaArchivo = string_from_format("%s/%i/%s", rutaDirectorioArchivos, archivo->identificadorPadre, archivo->nombre);
 	fileLimpiar(rutaArchivo);
 	memoriaLiberar(rutaArchivo);
 	listaEliminarDestruyendoElemento(listaArchivos, posicion, (Puntero)archivoDestruir);
+	archivoPersistirControl();
 	imprimirMensajeUno(archivoLog, "[ARCHIVO] El archivo %s ha sido eliminado", comando->argumentos[1]);
 }
 
@@ -785,8 +781,8 @@ void comandoRenombrar(Comando* comando) {
 			imprimirMensaje(archivoLog, "[ERROR] El nuevo nombre para el directorio ya existe");
 			return;
 		}
-		directorioPersistirRenombrar(directorio, comando->argumentos[2]);
 		stringCopiar(directorio->nombre, comando->argumentos[2]);
+		directorioPersistir();
 		imprimirMensajeDos(archivoLog, "[DIRECTORIO] El directorio %s fue renombrado por %s", comando->argumentos[1], directorio->nombre);
 	}
 	else {
@@ -795,14 +791,15 @@ void comandoRenombrar(Comando* comando) {
 			imprimirMensaje(archivoLog, "[ARCHIVO] El nuevo nombre para el archivo ya existe");
 			return;
 		}
-		archivoPersistirRenombrar(archivo, comando->argumentos[2]);
 		String antiguaRuta = string_from_format("%s/%i/%s", rutaDirectorioArchivos, archivo->identificadorPadre, archivo->nombre);
 		String nuevaRuta = string_from_format("%s/%i/%s", rutaDirectorioArchivos, archivo->identificadorPadre, comando->argumentos[2]);
 		rename(antiguaRuta, nuevaRuta);
-		stringCopiar(archivo->nombre, comando->argumentos[2]);
-		imprimirMensajeDos(archivoLog, "[ARCHIVO] El archivo %s fue renombrado por %s", comando->argumentos[1], archivo->nombre);
 		memoriaLiberar(antiguaRuta);
 		memoriaLiberar(nuevaRuta);
+		stringCopiar(archivo->nombre, comando->argumentos[2]);
+		archivoPersistir(archivo);
+		imprimirMensajeDos(archivoLog, "[ARCHIVO] El archivo %s fue renombrado por %s", comando->argumentos[1], archivo->nombre);
+
 	}
 }
 
@@ -849,8 +846,9 @@ void comandoMover(Comando* comando) {
 			imprimirMensaje(archivoLog, "[ERROR] El directorio no puede moverse a si mismo");
 			return;
 		}
-		directorioPersistirMover(directorio, directorioNuevoPadre->identificador);
+
 		directorio->identificadorPadre = directorioNuevoPadre->identificador;
+		directorioPersistir();
 		String nombre = rutaObtenerUltimoNombre(comando->argumentos[1]);
 		imprimirMensajeDos(archivoLog, "[DIRECTORIO] El directorio %s fue movido a %s", nombre, comando->argumentos[2]);
 		memoriaLiberar(nombre);
@@ -861,8 +859,11 @@ void comandoMover(Comando* comando) {
 			imprimirMensaje(archivoLog, "[ERROR] La nueva ubicacion del archivo o directorio ya existe");
 			return;
 		}
-		archivoPersistirMover(archivo, directorioNuevoPadre->identificador);
+		String rutaArchivo = string_from_format("%s/%i/%s", rutaDirectorioArchivos, archivo->identificadorPadre, archivo->nombre);
+		fileLimpiar(rutaArchivo);
+		memoriaLiberar(rutaArchivo);
 		archivo->identificadorPadre = directorioNuevoPadre->identificador;
+		archivoPersistir(archivo);
 		String nombre = rutaObtenerUltimoNombre(comando->argumentos[1]);
 		imprimirMensajeDos(archivoLog, "[DIRECTORIO] El archivo %s fue movido a %s", nombre, comando->argumentos[2]);
 		memoriaLiberar(nombre);
@@ -992,7 +993,6 @@ void comandoCopiarArchivoDeFS(Comando* comando) {
 	else {
 		String buffer = stringCrear(MAX_STRING);
 		String datos = stringCrear(BLOQUE);
-		String lineaFaltante = stringCrear(BLOQUE);
 		int bytesDisponibles = BLOQUE-1;
 		int numeroBloqueArchivo = 0;
 		while(fgets(buffer, MAX_STRING, file) != NULL) {
@@ -1032,7 +1032,6 @@ void comandoCopiarArchivoDeFS(Comando* comando) {
 		}
 		memoriaLiberar(datos);
 		memoriaLiberar(buffer);
-		memoriaLiberar(lineaFaltante);
 	}
 	fileCerrar(file);
 	if(estado == -2) {
@@ -1042,8 +1041,8 @@ void comandoCopiarArchivoDeFS(Comando* comando) {
 		archivoDestruir(archivo);
 		imprimirMensaje(archivoLog, ROJO"[ERROR] No hay nodos o bloques disponibles, se aborta la operacion"BLANCO);
 	} else {
-		archivoPersistirCrear(archivo);
-		archivoPersistirControlCrear(archivo);
+		archivoPersistir(archivo);
+		archivoPersistirControl(archivo);
 		listaAgregarElemento(listaArchivos, archivo);
 		nodoPersistirConectados();
 		imprimirMensajeUno(archivoLog, "[ARCHIVO] El archivo %s fue copiado en File System", comando->argumentos[2]);
@@ -1237,77 +1236,17 @@ void directorioMostrarArchivos(int identificadorPadre) {
 		imprimirMensaje(archivoLog, "[DIRECTORIO] El directorio esta vacio");
 }
 
-void directorioPersistir(Directorio* directorio){
-	File archivoDirectorio = fileAbrir(rutaDirectorios,"a+");
-	String indice = stringConvertirEntero(directorio->identificador);
-	String padre = stringConvertirEntero(directorio->identificadorPadre);
-	String entrada = directorioConfigurarEntradaArchivo(indice, directorio->nombre, padre);
-	fprintf(archivoDirectorio, "%s", entrada);
-	fileCerrar(archivoDirectorio);
-	memoriaLiberar(entrada);
-	memoriaLiberar(indice);
-	memoriaLiberar(padre);
-}
-
-void directorioPersistirEliminar(Directorio* directorio) {
-	File archivoDirectorio = fileAbrir(rutaDirectorios, LECTURA);
-	File archivoBuffer = fileAbrir(rutaBuffer, ESCRITURA);
-	String buffer = stringCrear(MAX_STRING);
-	String linea = string_from_format("%i;%s;%i", directorio->identificador, directorio->nombre, directorio->identificadorPadre);
-	while (fgets(buffer, MAX_STRING, archivoDirectorio) != NULL) {
-		if (stringDistintos(buffer, "\n"))
-			if (!stringContiene(buffer, linea))
-				fprintf(archivoBuffer, "%s", buffer);
-		stringLimpiar(buffer, MAX_STRING);
+void directorioPersistir(){
+	File archivoDirectorio = fileAbrir(rutaDirectorios, ESCRITURA);
+	listaOrdenar(listaDirectorios, (Puntero)directorioOrdenarPorIdentificador);
+	int indice;
+	for(indice = 0; indice < listaCantidadElementos(listaDirectorios); indice++) {
+		Directorio* directorio = listaObtenerElemento(listaDirectorios, indice);
+		String entrada = string_from_format("%i;%s;%i\n",directorio->identificador, directorio->nombre, directorio->identificadorPadre);
+		fprintf(archivoDirectorio, "%s", entrada);
+		memoriaLiberar(entrada);
 	}
 	fileCerrar(archivoDirectorio);
-	fileCerrar(archivoBuffer);
-	memoriaLiberar(linea);
-	memoriaLiberar(buffer);
-	archivoBufferCopiarEn(rutaDirectorios);
-}
-
-
-void directorioPersistirRenombrar(Directorio* directorio, String nuevoNombre) {
-	File archivoDirectorio = fileAbrir(rutaDirectorios, LECTURA);
-	File archivoBuffer = fileAbrir(rutaBuffer, ESCRITURA);
-	String buffer = stringCrear(MAX_STRING);
-	String linea = string_from_format("%i;%s;%i", directorio->identificador, directorio->nombre, directorio->identificadorPadre);
-	while(fgets(buffer, MAX_STRING, archivoDirectorio) != NULL) {
-		if (stringDistintos(buffer, "\n")) {
-			if (stringContiene(buffer, linea))
-				fprintf(archivoBuffer, "%i;%s;%i\n", directorio->identificador, nuevoNombre, directorio->identificadorPadre);
-			else
-				fprintf(archivoBuffer, "%s", buffer);
-		}
-		stringLimpiar(buffer, MAX_STRING);
-	}
-	fileCerrar(archivoDirectorio);
-	fileCerrar(archivoBuffer);
-	memoriaLiberar(linea);
-	memoriaLiberar(buffer);
-	archivoBufferCopiarEn(rutaDirectorios);
-}
-
-void directorioPersistirMover(Directorio* directorio, Entero nuevoPadre) {
-	File archivoDirectorio = fileAbrir(rutaDirectorios, LECTURA);
-	File archivoBuffer = fileAbrir(rutaBuffer, ESCRITURA);
-	String buffer = stringCrear(MAX_STRING);
-	String linea = string_from_format("%i;%s;%i", directorio->identificador, directorio->nombre, directorio->identificadorPadre);
-	while (fgets(buffer, MAX_STRING, archivoDirectorio) != NULL) {
-		if (stringDistintos(buffer, "\n")) {
-			if (stringContiene(buffer, linea))
-				fprintf(archivoBuffer, "%i;%s;%i\n", directorio->identificador, directorio->nombre, nuevoPadre);
-			else
-				fprintf(archivoBuffer, "%s", buffer);
-		}
-		stringLimpiar(buffer, MAX_STRING);
-	}
-	fileCerrar(archivoDirectorio);
-	fileCerrar(archivoBuffer);
-	memoriaLiberar(linea);
-	memoriaLiberar(buffer);
-	archivoBufferCopiarEn(rutaDirectorios);
 }
 
 bool directorioIndiceRespetaLimite(int indice) {
@@ -1418,7 +1357,7 @@ int directorioCrearConPersistencia(int identificador, String nombre, int identif
 	listaAgregarElemento(listaDirectorios, directorio);
 	directoriosDisponibles--;
 	directorioCrearMetadata(directorio->identificador);
-	directorioPersistir(directorio);
+	directorioPersistir();
 	return 0;
 }
 
@@ -1519,10 +1458,16 @@ void directorioEliminar(int identificador) {
 	listaEliminarDestruyendoPorCondicion(listaDirectorios, (Puntero)tieneElMismoId, (Puntero)memoriaLiberar);
 	bitmapLiberarBit(bitmapDirectorios, identificador);
 	directoriosDisponibles++;
+	directorioEliminarMetadata(identificador);
+	directorioPersistir();
 }
 
 bool directorioEsHijoDe(Directorio* hijo, Directorio* padre) {
 	return hijo->identificadorPadre == padre->identificador;
+}
+
+bool directorioOrdenarPorIdentificador(Directorio* unDirectorio, Directorio* otroDirectorio) {
+	return unDirectorio->identificador < otroDirectorio->identificador;
 }
 
 //--------------------------------------- Funciones de Archivo -------------------------------------
@@ -1592,7 +1537,7 @@ int archivoObtenerPosicion(Archivo* archivo) {
 	return indice;
 }
 
-void archivoPersistirCrear(Archivo* archivo) {
+void archivoPersistir(Archivo* archivo) {
 	String ruta = string_from_format("%s/%i/%s", rutaDirectorioArchivos, archivo->identificadorPadre, archivo->nombre);
 	File file = fileAbrir(ruta, ESCRITURA);
 	memoriaLiberar(ruta);
@@ -1612,151 +1557,22 @@ void archivoPersistirCrear(Archivo* archivo) {
 	fileCerrar(file);
 }
 
-
-void archivoPersistirRenombrar(Archivo* archivoRenombrar, String nuevoNombre) {
-	String rutaArchivo = string_from_format("%s/%i/%s", rutaDirectorioArchivos, archivoRenombrar->identificadorPadre, archivoRenombrar->nombre);
-	File archivo = fileAbrir(rutaArchivo, LECTURA);
-	File archivoAuxiliar =  fileAbrir(rutaBuffer, ESCRITURA);
-	String buffer = stringCrear(MAX_STRING);
-	while (fgets(buffer, MAX_STRING, archivo) != NULL) {
-		if (stringDistintos(buffer, "\n")) {
-			if(stringContiene(buffer, "NOMBRE=")) {
-				String nombre = string_from_format("NOMBRE=%s\n", nuevoNombre);
-				fprintf(archivoAuxiliar, "%s", nombre);
-				memoriaLiberar(nombre);
-				}
-			else
-				fprintf(archivoAuxiliar, "%s", buffer);
-			stringLimpiar(buffer, 200);
-		}
-	}
-	fileCerrar(archivo);
-	fileCerrar(archivoAuxiliar);
-	memoriaLiberar(buffer);
-	archivoBufferCopiarEn(rutaArchivo);
-	memoriaLiberar(rutaArchivo);
-	archivoPersistirControlRenombrar(archivoRenombrar, nuevoNombre);
-}
-
-void archivoPersistirMover(Archivo* archivoAMover, Entero nuevoPadre) {
-	String rutaArchivo = string_from_format("%s/%i/%s", rutaDirectorioArchivos, archivoAMover->identificadorPadre, archivoAMover->nombre);
-	String rutaArchivoMovido = string_from_format("%s/%i/%s", rutaDirectorioArchivos, nuevoPadre, archivoAMover->nombre);
-	File archivo = fileAbrir(rutaArchivo, LECTURA);
-	fileLimpiar(rutaArchivo);
-	memoriaLiberar(rutaArchivo);
-	File archivoAuxiliar =  fileAbrir(rutaBuffer, ESCRITURA);
-	String buffer = stringCrear(MAX_STRING);
-	while (fgets(buffer, MAX_STRING, archivo) != NULL) {
-		if (stringDistintos(buffer, "\n")) {
-			if(stringContiene(buffer, "ID_PADRE=")) {
-				String padre = string_from_format("ID_PADRE=%i\n", nuevoPadre);
-				fprintf(archivoAuxiliar, "%s", padre);
-				memoriaLiberar(padre);
-				}
-			else
-				fprintf(archivoAuxiliar, "%s", buffer);
-			stringLimpiar(buffer, MAX_STRING);
-		}
-	}
-	fileCerrar(archivo);
-	fileCerrar(archivoAuxiliar);
-	memoriaLiberar(buffer);
-	archivoBufferCopiarEn(rutaArchivoMovido);
-	memoriaLiberar(rutaArchivoMovido);
-	archivoPersistirControlMover(archivoAMover, nuevoPadre);
-}
-
-
-void archivoPersistirControlCrear(Archivo* archivo){
-	File file = fileAbrir(rutaArchivos,"a+");
-	String entrada = string_from_format("%i;%s\n", archivo->identificadorPadre, archivo->nombre);
-	fprintf(file, "%s", entrada);
-	fileCerrar(file);
-	memoriaLiberar(entrada);
-}
-
-void archivoPersistirControlEliminar(Archivo* archivo){
-	File control = fileAbrir(rutaArchivos, LECTURA);
-	File auxiliar = fileAbrir(rutaBuffer, ESCRITURA);
-	String buffer = stringCrear(MAX_STRING);
-	String linea = string_from_format("%i;%s", archivo->identificadorPadre, archivo->nombre);
-	while (fgets(buffer, MAX_STRING, control) != NULL) {
-		if (stringDistintos(buffer, "\n")) {
-			if(!stringContiene(buffer, linea))
-				fprintf(auxiliar, "%s", buffer);
-			stringLimpiar(buffer, MAX_STRING);
-		}
-	}
-	fileCerrar(auxiliar);
-	fileCerrar(control);
-	memoriaLiberar(buffer);
-	memoriaLiberar(linea);
-	archivoBufferCopiarEn(rutaArchivos);
-}
-
-
-void archivoPersistirControlRenombrar(Archivo* archivo, String nuevoNombre){
-	File control = fileAbrir(rutaArchivos, LECTURA);
-	File auxiliar = fileAbrir(rutaBuffer, ESCRITURA);
-	String buffer = stringCrear(MAX_STRING);
-	String linea = string_from_format("%i;%s", archivo->identificadorPadre, archivo->nombre);
-	while (fgets(buffer, MAX_STRING, control) != NULL) {
-		if (stringDistintos(buffer, "\n")) {
-			if(stringContiene(buffer, linea))
-				fprintf(auxiliar, "%i;%s\n", archivo->identificadorPadre, nuevoNombre);
-			else
-				fprintf(auxiliar, "%s", buffer);
-			stringLimpiar(buffer, MAX_STRING);
-		}
-	}
-	fileCerrar(auxiliar);
-	fileCerrar(control);
-	memoriaLiberar(buffer);
-	memoriaLiberar(linea);
-	archivoBufferCopiarEn(rutaArchivos);
-}
-
-void archivoPersistirControlMover(Archivo* archivo, Entero nuevoPadre){
-	File control = fileAbrir(rutaArchivos, LECTURA);
-	File auxiliar = fileAbrir(rutaBuffer, ESCRITURA);
-	String buffer = stringCrear(MAX_STRING);
-	String linea = string_from_format("%i;%s", archivo->identificadorPadre, archivo->nombre);
-	while (fgets(buffer, MAX_STRING, control) != NULL) {
-		if (stringDistintos(buffer, "\n")) {
-			if(stringContiene(buffer, linea))
-				fprintf(auxiliar, "%i;%s\n", nuevoPadre, archivo->nombre);
-			else
-				fprintf(auxiliar, "%s", buffer);
-			stringLimpiar(buffer, MAX_STRING);
-		}
-	}
-	fileCerrar(auxiliar);
-	fileCerrar(control);
-	memoriaLiberar(buffer);
-	memoriaLiberar(linea);
-	archivoBufferCopiarEn(rutaArchivos);
-}
-
-
-void archivoPersistirEliminarBloque(Archivo* archivo, int numeroBloque, int numeroCopia) {
-	String rutaArchivo = string_from_format("%s/%i/%s", rutaDirectorioArchivos, archivo->identificadorPadre, archivo->nombre);
-	String linea = string_from_format("BLOQUE%i_COPIA%i=", numeroBloque, numeroCopia);
-	File file = fileAbrir(rutaArchivo, LECTURA);
-	File archivoAuxiliar =  fileAbrir(rutaBuffer, ESCRITURA);
-	String buffer = stringCrear(MAX_STRING);
-	while (fgets(buffer, MAX_STRING, file) != NULL) {
-		if (stringDistintos(buffer, "\n")) {
-			if(!stringContiene(buffer, linea))
-				fprintf(archivoAuxiliar, "%s", buffer);
-			stringLimpiar(buffer, MAX_STRING);
-		}
+void archivoPersistirControl(){
+	File file = fileAbrir(rutaArchivos, ESCRITURA);
+	listaOrdenar(listaArchivos, (Puntero)archivoOrdenarPorNombre);
+	int indice;
+	for(indice = 0; indice < listaCantidadElementos(listaArchivos); indice++) {
+		Archivo* archivo = listaObtenerElemento(listaArchivos, indice);
+		String entrada = string_from_format("%i;%s\n", archivo->identificadorPadre, archivo->nombre);
+		fprintf(file, "%s", entrada);
+		memoriaLiberar(entrada);
 	}
 	fileCerrar(file);
-	fileCerrar(archivoAuxiliar);
-	memoriaLiberar(buffer);
-	memoriaLiberar(linea);
-	archivoBufferCopiarEn(rutaArchivo);
-	memoriaLiberar(rutaArchivo);
+
+}
+
+bool archivoOrdenarPorNombre(Archivo* unArchivo, Archivo* otroArchivo) {
+	return unArchivo->nombre[0] < otroArchivo->nombre[0];
 }
 
 //--------------------------------------- Funciones de Nodo -------------------------------------
@@ -2060,19 +1876,6 @@ bool rutaEsNumero(String ruta) {
 
 //--------------------------------------- Funciones varias ------------------------------------
 
-void archivoBufferCopiarEn(String rutaArchivo) {
-	File archivo = fileAbrir(rutaArchivo, ESCRITURA);
-	File archivoAuxiliar = fileAbrir(rutaBuffer, LECTURA);
-	String buffer = stringCrear(MAX_STRING);
-	while (fgets(buffer, MAX_STRING, archivoAuxiliar) != NULL) {
-		fprintf(archivo, "%s", buffer);
-		stringLimpiar(buffer, MAX_STRING);
-	}
-	fileCerrar(archivo);
-	fileCerrar(archivoAuxiliar);
-	memoriaLiberar(buffer);
-}
-
 BloqueNodo* bloqueNodoCrear(Entero numeroBloque, String buffer, int tamanioUtilizado) {
 	BloqueNodo* bloqueNodo = memoriaAlocar(sizeof(BloqueNodo));
 	bloqueNodo->numeroBloque = numeroBloque;
@@ -2118,7 +1921,7 @@ void testCabecita() {
 	listaAgregarElemento(archivo->listaBloques, bloque0);
 	listaAgregarElemento(archivo->listaBloques, bloque1);
 	listaAgregarElemento(listaArchivos, archivo);
-	archivoPersistirCrear(archivo);
+	archivoPersistir(archivo);
 }
 
 /*

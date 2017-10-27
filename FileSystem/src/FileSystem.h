@@ -275,9 +275,6 @@ void directorioControlSetearNombre(ControlDirectorio* control);
 void directorioBuscarIdentificador(ControlDirectorio* control);
 ControlDirectorio* directorioControlCrear(String rutaDirectorio);
 bool directorioExisteIdentificador(int identificador);
-void directorioPersistirEliminar(Directorio* directorio);
-void directorioPersistirRenombrar(Directorio* directorio, String nuevoNombre);
-void directorioPersistirMover(Directorio* directorio, Entero nuevoPadre);
 void directorioIniciarEstructura();
 Directorio* directorioBuscar(String path);
 void directorioMostrarArchivos(int identificadorPadre);
@@ -289,7 +286,7 @@ bool directorioSonIguales(Directorio* directorio, String nombreDirectorio, int i
 Directorio* directorioCrear(int indice, String nombre, int padre);
 int directorioBuscarIdentificadorLibre();
 String directorioConfigurarEntradaArchivo(String indice, String nombre, String padre);
-void directorioPersistir(Directorio* directorio);
+void directorioPersistir();
 void directorioBuscarIdentificador(ControlDirectorio* control);
 int directorioIndicesACrear(String* nombresDirectorios, int indiceDirectorios);
 bool directorioHaySuficientesIndices(ControlDirectorio* control);
@@ -310,25 +307,21 @@ int directorioCrearConPersistencia(int identificador, String nombre, int identif
 void directorioCrearMetadata(Entero identificador);
 void directorioEliminarMetadata(Entero identificador);
 bool directorioEsHijoDe(Directorio* hijo, Directorio* padre);
+bool directorioOrdenarPorIdentificador(Directorio* unDirectorio, Directorio* otroDirectorio);
 
 //--------------------------------------- Funciones de Archivo -------------------------------------
 
 Archivo* archivoBuscar(String path);
-void archivoPersistirMover(Archivo* archivoAMover, int nuevoPadre);
 void archivoDestruir(Archivo* archivo);
-void archivoPersistirCrear(Archivo* metadata);
+void archivoPersistir(Archivo* metadata);
 Archivo* archivoCrear(String nombreArchivo, int idPadre, String tipo);
 void archivoDestruir(Archivo* archivo);
 bool archivoExiste(int idPadre, String nombre);
 void archivoIniciarEstructura();
-void archivoPersistirRenombrar(Archivo* archivoARenombrar, String viejoNombre);
-void archivoPersistirMover(Archivo* archivoAMover, int viejoPadre);
 int archivoObtenerPosicion(Archivo* archivo);
 void archivoPersistirEliminarBloque(Archivo* archivo, int numeroBloque, int numeroCopia);
-void archivoPersistirControlCrear(Archivo* archivo);
-void archivoPersistirControlEliminar(Archivo* archivo);
-void archivoPersistirControlRenombrar(Archivo* archivo, String nuevoNombre);
-void archivoPersistirControlMover(Archivo* archivo, Entero nuevoPadre);
+void archivoPersistirControl();
+bool archivoOrdenarPorNombre(Archivo* unArchivo, Archivo* otroArchivo);
 
 //--------------------------------------- Funciones de Nodo -------------------------------------
 
@@ -379,4 +372,3 @@ bool rutaEsNumero(String ruta);
 //--------------------------------------- Funciones Varias -------------------------------------
 BloqueNodo* bloqueNodoCrear(Entero numeroBloque, String buffer, int tamanioUtilizado);
 void testCabecita();
-void archivoBufferCopiarEn(String rutaArchivo);
