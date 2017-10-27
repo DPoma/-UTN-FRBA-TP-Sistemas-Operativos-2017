@@ -53,7 +53,9 @@
 #define MAX_DIR 100
 #define MAX_COPIAS 2
 
-#define ESCRIBIR 102
+#define LEER_BLOQUE 101
+#define ESCRIBIR_BLOQUE 102
+#define COPIAR_BLOQUE 103
 
 //--------------------------------------- Estructuras -------------------------------------
 
@@ -156,6 +158,9 @@ String rutaDirectorios;
 String rutaArchivos;
 String rutaNodos;
 String rutaBuffer;
+Nodo* nodoBuffer;
+Bloque* bloqueBuffer;
+Archivo* archivoBuffer;
 
 //--------------------------------------- Funciones de File System -------------------------------------
 
@@ -345,9 +350,9 @@ Nodo* nodoBuscar(String nombre);
 
 Bloque* bloqueCrear(int bytes, int numero);
 void bloqueDestruir(Bloque* bloque);
-void bloqueCopiar(Bloque* bloque, Nodo* nodo, Entero numeroBloqueNodo);
-void bloqueEnviarANodo(Socket unSocket, Entero numeroBloque, String buffer, int tamanioUtilizado);
-int bloqueEnviarCopiasANodos(Bloque* bloque, String buffer, int tamanioUtilizado);
+void bloqueCopiarEnNodo(Bloque* bloque, Nodo* nodo, Entero numeroBloqueNodo);
+void bloqueEnviarANodo(Socket unSocket, Entero numeroBloque, String buffer);
+int bloqueEnviarCopiasANodos(Bloque* bloque, String buffer);
 bool bloqueOrdenarPorNumero(Bloque* unBloque, Bloque* otroBloque);
 
 //--------------------------------------- Funciones de Copia Bloque -------------------------------------

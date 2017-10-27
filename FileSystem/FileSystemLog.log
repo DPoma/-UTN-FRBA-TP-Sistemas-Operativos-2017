@@ -1,7 +1,284 @@
-[INFO] 16:20:01:823 FileSystem/(9744:9744): [EJECUCION] Proceso File System inicializado
-[INFO] 16:20:01:880 FileSystem/(9744:9744): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 16:20:01:882 FileSystem/(9744:9744): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 16:20:01:882 FileSystem/(9744:9744): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
-[INFO] 16:20:03:302 FileSystem/(9744:9744): [CONEXION] Un proceso Data Node se ha conectado
-[INFO] 16:20:15:545 FileSystem/(9744:9749): [ARCHIVO] El archivo /home/utnso/Escritorio/lala fue copiado en File System
-[INFO] 16:20:27:118 FileSystem/(9744:9744): [EJECUCION] Proceso File System finalizado
+[INFO] 18:33:14:587 FileSystem/(11662:11662): [EJECUCION] Proceso File System inicializado
+[INFO] 18:33:14:649 FileSystem/(11662:11662): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 18:33:14:650 FileSystem/(11662:11662): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 18:33:14:650 FileSystem/(11662:11662): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
+[INFO] 18:33:16:111 FileSystem/(11662:11662): [CONEXION] Un proceso Data Node se ha conectado
+[INFO] 18:33:28:186 FileSystem/(11662:11667): [ARCHIVO] El archivo /home/utnso/Escritorio/TODO fue copiado en File System
+[INFO] 18:34:02:704 FileSystem/(11662:11667): [ARCHIVO] Nombre: TODO
+[INFO] 18:34:02:732 FileSystem/(11662:11667): [ARCHIVO] Tipo: TEXTO
+[INFO] 18:34:02:739 FileSystem/(11662:11667): [ARCHIVO] Ubicacion: /TODO
+[INFO] 18:34:02:743 FileSystem/(11662:11667): [ARCHIVO] Tamanio: 1211 bytes
+[INFO] 18:34:02:745 FileSystem/(11662:11667): [ARCHIVO] Bloques utilizados: 6
+[INFO] 18:34:02:746 FileSystem/(11662:11667): [ARCHIVO] Bloque 0: 209 bytes
+[INFO] 18:34:02:749 FileSystem/(11662:11667): [ARCHIVO] Bloque 0 copia 0 en: Nodo: NODO6 | Bloque: 0
+[INFO] 18:34:02:749 FileSystem/(11662:11667): [ARCHIVO] Bloque 0 copia 1 en: Nodo: NODO6 | Bloque: 1
+[INFO] 18:34:02:750 FileSystem/(11662:11667): [ARCHIVO] Bloque 1: 189 bytes
+[INFO] 18:34:02:751 FileSystem/(11662:11667): [ARCHIVO] Bloque 1 copia 0 en: Nodo: NODO6 | Bloque: 2
+[INFO] 18:34:02:751 FileSystem/(11662:11667): [ARCHIVO] Bloque 1 copia 1 en: Nodo: NODO6 | Bloque: 3
+[INFO] 18:34:02:752 FileSystem/(11662:11667): [ARCHIVO] Bloque 2: 206 bytes
+[INFO] 18:34:02:752 FileSystem/(11662:11667): [ARCHIVO] Bloque 2 copia 0 en: Nodo: NODO6 | Bloque: 4
+[INFO] 18:34:02:752 FileSystem/(11662:11667): [ARCHIVO] Bloque 2 copia 1 en: Nodo: NODO6 | Bloque: 5
+[INFO] 18:34:02:753 FileSystem/(11662:11667): [ARCHIVO] Bloque 3: 163 bytes
+[INFO] 18:34:02:753 FileSystem/(11662:11667): [ARCHIVO] Bloque 3 copia 0 en: Nodo: NODO6 | Bloque: 6
+[INFO] 18:34:02:754 FileSystem/(11662:11667): [ARCHIVO] Bloque 3 copia 1 en: Nodo: NODO6 | Bloque: 7
+[INFO] 18:34:02:754 FileSystem/(11662:11667): [ARCHIVO] Bloque 4: 233 bytes
+[INFO] 18:34:02:755 FileSystem/(11662:11667): [ARCHIVO] Bloque 4 copia 0 en: Nodo: NODO6 | Bloque: 8
+[INFO] 18:34:02:755 FileSystem/(11662:11667): [ARCHIVO] Bloque 4 copia 1 en: Nodo: NODO6 | Bloque: 9
+[INFO] 18:34:02:755 FileSystem/(11662:11667): [ARCHIVO] Bloque 5: 211 bytes
+[INFO] 18:34:02:756 FileSystem/(11662:11667): [ARCHIVO] Bloque 5 copia 0 en: Nodo: NODO6 | Bloque: 10
+[INFO] 18:34:02:756 FileSystem/(11662:11667): [ARCHIVO] Bloque 5 copia 1 en: Nodo: NODO6 | Bloque: 11
+[INFO] 18:34:02:757 FileSystem/(11662:11667): [ARCHIVO] Bloque 5 copia 2 en: Nodo: NODO6 | Bloque: 12
+[INFO] 18:34:28:82 FileSystem/(11662:11662): [CONEXION] Un proceso Data Node se ha conectado
+[INFO] 18:34:57:93 FileSystem/(11662:11662): [CONEXION] Un proceso Data Node se ha desconectado
+[INFO] 18:35:20:13 FileSystem/(11662:11662): [CONEXION] Un proceso Data Node se ha conectado
+[INFO] 18:35:28:221 FileSystem/(11662:11667): [ERROR] Comando invalido
+[INFO] 18:35:49:642 FileSystem/(11662:11667): [ARCHIVO] Nombre: TODO
+[INFO] 18:35:49:643 FileSystem/(11662:11667): [ARCHIVO] Tipo: TEXTO
+[INFO] 18:35:49:644 FileSystem/(11662:11667): [ARCHIVO] Ubicacion: /TODO
+[INFO] 18:35:49:645 FileSystem/(11662:11667): [ARCHIVO] Tamanio: 1211 bytes
+[INFO] 18:35:49:646 FileSystem/(11662:11667): [ARCHIVO] Bloques utilizados: 6
+[INFO] 18:35:49:648 FileSystem/(11662:11667): [ARCHIVO] Bloque 0: 209 bytes
+[INFO] 18:35:49:649 FileSystem/(11662:11667): [ARCHIVO] Bloque 0 copia 0 en: Nodo: NODO6 | Bloque: 0
+[INFO] 18:35:49:650 FileSystem/(11662:11667): [ARCHIVO] Bloque 0 copia 1 en: Nodo: NODO6 | Bloque: 1
+[INFO] 18:35:49:652 FileSystem/(11662:11667): [ARCHIVO] Bloque 1: 189 bytes
+[INFO] 18:35:49:653 FileSystem/(11662:11667): [ARCHIVO] Bloque 1 copia 0 en: Nodo: NODO6 | Bloque: 2
+[INFO] 18:35:49:654 FileSystem/(11662:11667): [ARCHIVO] Bloque 1 copia 1 en: Nodo: NODO6 | Bloque: 3
+[INFO] 18:35:49:666 FileSystem/(11662:11667): [ARCHIVO] Bloque 2: 206 bytes
+[INFO] 18:35:49:669 FileSystem/(11662:11667): [ARCHIVO] Bloque 2 copia 0 en: Nodo: NODO6 | Bloque: 4
+[INFO] 18:35:49:677 FileSystem/(11662:11667): [ARCHIVO] Bloque 2 copia 1 en: Nodo: NODO6 | Bloque: 5
+[INFO] 18:35:49:677 FileSystem/(11662:11667): [ARCHIVO] Bloque 3: 163 bytes
+[INFO] 18:35:49:678 FileSystem/(11662:11667): [ARCHIVO] Bloque 3 copia 0 en: Nodo: NODO6 | Bloque: 6
+[INFO] 18:35:49:679 FileSystem/(11662:11667): [ARCHIVO] Bloque 3 copia 1 en: Nodo: NODO6 | Bloque: 7
+[INFO] 18:35:49:679 FileSystem/(11662:11667): [ARCHIVO] Bloque 4: 233 bytes
+[INFO] 18:35:49:681 FileSystem/(11662:11667): [ARCHIVO] Bloque 4 copia 0 en: Nodo: NODO6 | Bloque: 8
+[INFO] 18:35:49:681 FileSystem/(11662:11667): [ARCHIVO] Bloque 4 copia 1 en: Nodo: NODO6 | Bloque: 9
+[INFO] 18:35:49:682 FileSystem/(11662:11667): [ARCHIVO] Bloque 4 copia 2 en: Nodo: NODO4 | Bloque: 0
+[INFO] 18:35:49:682 FileSystem/(11662:11667): [ARCHIVO] Bloque 5: 211 bytes
+[INFO] 18:35:49:682 FileSystem/(11662:11667): [ARCHIVO] Bloque 5 copia 0 en: Nodo: NODO6 | Bloque: 10
+[INFO] 18:35:49:683 FileSystem/(11662:11667): [ARCHIVO] Bloque 5 copia 1 en: Nodo: NODO6 | Bloque: 11
+[INFO] 18:35:49:683 FileSystem/(11662:11667): [ARCHIVO] Bloque 5 copia 2 en: Nodo: NODO6 | Bloque: 12
+[INFO] 18:36:01:702 FileSystem/(11662:11667): [ERROR] Comando invalido
+[INFO] 18:36:04:808 FileSystem/(11662:11667): [ARCHIVO] Nombre: TODO
+[INFO] 18:36:04:810 FileSystem/(11662:11667): [ARCHIVO] Tipo: TEXTO
+[INFO] 18:36:04:811 FileSystem/(11662:11667): [ARCHIVO] Ubicacion: /TODO
+[INFO] 18:36:04:813 FileSystem/(11662:11667): [ARCHIVO] Tamanio: 1211 bytes
+[INFO] 18:36:04:814 FileSystem/(11662:11667): [ARCHIVO] Bloques utilizados: 6
+[INFO] 18:36:04:815 FileSystem/(11662:11667): [ARCHIVO] Bloque 0: 209 bytes
+[INFO] 18:36:04:816 FileSystem/(11662:11667): [ARCHIVO] Bloque 0 copia 0 en: Nodo: NODO6 | Bloque: 0
+[INFO] 18:36:04:817 FileSystem/(11662:11667): [ARCHIVO] Bloque 0 copia 1 en: Nodo: NODO6 | Bloque: 1
+[INFO] 18:36:04:819 FileSystem/(11662:11667): [ARCHIVO] Bloque 1: 189 bytes
+[INFO] 18:36:04:831 FileSystem/(11662:11667): [ARCHIVO] Bloque 1 copia 0 en: Nodo: NODO6 | Bloque: 2
+[INFO] 18:36:04:833 FileSystem/(11662:11667): [ARCHIVO] Bloque 1 copia 1 en: Nodo: NODO6 | Bloque: 3
+[INFO] 18:36:04:841 FileSystem/(11662:11667): [ARCHIVO] Bloque 2: 206 bytes
+[INFO] 18:36:04:842 FileSystem/(11662:11667): [ARCHIVO] Bloque 2 copia 0 en: Nodo: NODO6 | Bloque: 4
+[INFO] 18:36:04:842 FileSystem/(11662:11667): [ARCHIVO] Bloque 2 copia 1 en: Nodo: NODO6 | Bloque: 5
+[INFO] 18:36:04:843 FileSystem/(11662:11667): [ARCHIVO] Bloque 3: 163 bytes
+[INFO] 18:36:04:844 FileSystem/(11662:11667): [ARCHIVO] Bloque 3 copia 0 en: Nodo: NODO6 | Bloque: 6
+[INFO] 18:36:04:844 FileSystem/(11662:11667): [ARCHIVO] Bloque 3 copia 1 en: Nodo: NODO6 | Bloque: 7
+[INFO] 18:36:04:846 FileSystem/(11662:11667): [ARCHIVO] Bloque 4: 233 bytes
+[INFO] 18:36:04:846 FileSystem/(11662:11667): [ARCHIVO] Bloque 4 copia 0 en: Nodo: NODO6 | Bloque: 8
+[INFO] 18:36:04:847 FileSystem/(11662:11667): [ARCHIVO] Bloque 4 copia 1 en: Nodo: NODO6 | Bloque: 9
+[INFO] 18:36:04:847 FileSystem/(11662:11667): [ARCHIVO] Bloque 4 copia 2 en: Nodo: NODO4 | Bloque: 0
+[INFO] 18:36:04:847 FileSystem/(11662:11667): [ARCHIVO] Bloque 5: 211 bytes
+[INFO] 18:36:04:848 FileSystem/(11662:11667): [ARCHIVO] Bloque 5 copia 0 en: Nodo: NODO6 | Bloque: 10
+[INFO] 18:36:04:848 FileSystem/(11662:11667): [ARCHIVO] Bloque 5 copia 1 en: Nodo: NODO6 | Bloque: 11
+[INFO] 18:36:04:849 FileSystem/(11662:11667): [ARCHIVO] Bloque 5 copia 2 en: Nodo: NODO6 | Bloque: 12
+[INFO] 18:36:18:562 FileSystem/(11662:11667): [BLOQUE] La copia N°0 del bloque N°5 del archivo /TODO ha sido eliminada
+[INFO] 18:36:33:453 FileSystem/(11662:11667): [BLOQUE] La copia N°1 del bloque N°5 del archivo /TODO ha sido eliminada
+[INFO] 18:36:37:14 FileSystem/(11662:11667): [ERROR] El numero de copia no existe
+[INFO] 18:37:00:243 FileSystem/(11662:11667): [ARCHIVO] Nombre: TODO
+[INFO] 18:37:00:243 FileSystem/(11662:11667): [ARCHIVO] Tipo: TEXTO
+[INFO] 18:37:00:244 FileSystem/(11662:11667): [ARCHIVO] Ubicacion: /TODO
+[INFO] 18:37:00:244 FileSystem/(11662:11667): [ARCHIVO] Tamanio: 1211 bytes
+[INFO] 18:37:00:245 FileSystem/(11662:11667): [ARCHIVO] Bloques utilizados: 6
+[INFO] 18:37:00:245 FileSystem/(11662:11667): [ARCHIVO] Bloque 0: 209 bytes
+[INFO] 18:37:00:245 FileSystem/(11662:11667): [ARCHIVO] Bloque 0 copia 0 en: Nodo: NODO6 | Bloque: 0
+[INFO] 18:37:00:246 FileSystem/(11662:11667): [ARCHIVO] Bloque 0 copia 1 en: Nodo: NODO6 | Bloque: 1
+[INFO] 18:37:00:246 FileSystem/(11662:11667): [ARCHIVO] Bloque 1: 189 bytes
+[INFO] 18:37:00:246 FileSystem/(11662:11667): [ARCHIVO] Bloque 1 copia 0 en: Nodo: NODO6 | Bloque: 2
+[INFO] 18:37:00:247 FileSystem/(11662:11667): [ARCHIVO] Bloque 1 copia 1 en: Nodo: NODO6 | Bloque: 3
+[INFO] 18:37:00:247 FileSystem/(11662:11667): [ARCHIVO] Bloque 2: 206 bytes
+[INFO] 18:37:00:247 FileSystem/(11662:11667): [ARCHIVO] Bloque 2 copia 0 en: Nodo: NODO6 | Bloque: 4
+[INFO] 18:37:00:248 FileSystem/(11662:11667): [ARCHIVO] Bloque 2 copia 1 en: Nodo: NODO6 | Bloque: 5
+[INFO] 18:37:00:248 FileSystem/(11662:11667): [ARCHIVO] Bloque 3: 163 bytes
+[INFO] 18:37:00:249 FileSystem/(11662:11667): [ARCHIVO] Bloque 3 copia 0 en: Nodo: NODO6 | Bloque: 6
+[INFO] 18:37:00:249 FileSystem/(11662:11667): [ARCHIVO] Bloque 3 copia 1 en: Nodo: NODO6 | Bloque: 7
+[INFO] 18:37:00:250 FileSystem/(11662:11667): [ARCHIVO] Bloque 4: 233 bytes
+[INFO] 18:37:00:250 FileSystem/(11662:11667): [ARCHIVO] Bloque 4 copia 0 en: Nodo: NODO6 | Bloque: 8
+[INFO] 18:37:00:251 FileSystem/(11662:11667): [ARCHIVO] Bloque 4 copia 1 en: Nodo: NODO6 | Bloque: 9
+[INFO] 18:37:00:251 FileSystem/(11662:11667): [ARCHIVO] Bloque 4 copia 2 en: Nodo: NODO4 | Bloque: 0
+[INFO] 18:37:00:251 FileSystem/(11662:11667): [ARCHIVO] Bloque 5: 211 bytes
+[INFO] 18:37:00:252 FileSystem/(11662:11667): [ARCHIVO] Bloque 5 copia 0 en: Nodo: NODO6 | Bloque: 11
+[INFO] 18:41:55:435 FileSystem/(11662:11667): [ARCHIVO] Nombre: TODO
+[INFO] 18:41:55:436 FileSystem/(11662:11667): [ARCHIVO] Tipo: TEXTO
+[INFO] 18:41:55:438 FileSystem/(11662:11667): [ARCHIVO] Ubicacion: /TODO
+[INFO] 18:41:55:439 FileSystem/(11662:11667): [ARCHIVO] Tamanio: 1211 bytes
+[INFO] 18:41:55:440 FileSystem/(11662:11667): [ARCHIVO] Bloques utilizados: 6
+[INFO] 18:41:55:442 FileSystem/(11662:11667): [ARCHIVO] Bloque 0: 209 bytes
+[INFO] 18:41:55:443 FileSystem/(11662:11667): [ARCHIVO] Bloque 0 copia 0 en: Nodo: NODO6 | Bloque: 0
+[INFO] 18:41:55:444 FileSystem/(11662:11667): [ARCHIVO] Bloque 0 copia 1 en: Nodo: NODO6 | Bloque: 1
+[INFO] 18:41:55:445 FileSystem/(11662:11667): [ARCHIVO] Bloque 1: 189 bytes
+[INFO] 18:41:55:446 FileSystem/(11662:11667): [ARCHIVO] Bloque 1 copia 0 en: Nodo: NODO6 | Bloque: 2
+[INFO] 18:41:55:452 FileSystem/(11662:11667): [ARCHIVO] Bloque 1 copia 1 en: Nodo: NODO6 | Bloque: 3
+[INFO] 18:41:55:452 FileSystem/(11662:11667): [ARCHIVO] Bloque 2: 206 bytes
+[INFO] 18:41:55:453 FileSystem/(11662:11667): [ARCHIVO] Bloque 2 copia 0 en: Nodo: NODO6 | Bloque: 4
+[INFO] 18:41:55:453 FileSystem/(11662:11667): [ARCHIVO] Bloque 2 copia 1 en: Nodo: NODO6 | Bloque: 5
+[INFO] 18:41:55:454 FileSystem/(11662:11667): [ARCHIVO] Bloque 3: 163 bytes
+[INFO] 18:41:55:454 FileSystem/(11662:11667): [ARCHIVO] Bloque 3 copia 0 en: Nodo: NODO6 | Bloque: 6
+[INFO] 18:41:55:454 FileSystem/(11662:11667): [ARCHIVO] Bloque 3 copia 1 en: Nodo: NODO6 | Bloque: 7
+[INFO] 18:41:55:455 FileSystem/(11662:11667): [ARCHIVO] Bloque 4: 233 bytes
+[INFO] 18:41:55:455 FileSystem/(11662:11667): [ARCHIVO] Bloque 4 copia 0 en: Nodo: NODO6 | Bloque: 8
+[INFO] 18:41:55:456 FileSystem/(11662:11667): [ARCHIVO] Bloque 4 copia 1 en: Nodo: NODO6 | Bloque: 9
+[INFO] 18:41:55:456 FileSystem/(11662:11667): [ARCHIVO] Bloque 4 copia 2 en: Nodo: NODO4 | Bloque: 0
+[INFO] 18:41:55:457 FileSystem/(11662:11667): [ARCHIVO] Bloque 5: 211 bytes
+[INFO] 18:41:55:457 FileSystem/(11662:11667): [ARCHIVO] Bloque 5 copia 0 en: Nodo: NODO6 | Bloque: 11
+[INFO] 18:41:55:457 FileSystem/(11662:11667): [ARCHIVO] Bloque 5 copia 1 en: Nodo: NODO4 | Bloque: 1
+[INFO] 18:42:05:331 FileSystem/(11662:11667): [BLOQUE] La copia N°0 del bloque N°5 del archivo /TODO ha sido eliminada
+[INFO] 18:42:09:757 FileSystem/(11662:11667): [ARCHIVO] Nombre: TODO
+[INFO] 18:42:09:758 FileSystem/(11662:11667): [ARCHIVO] Tipo: TEXTO
+[INFO] 18:42:09:758 FileSystem/(11662:11667): [ARCHIVO] Ubicacion: /TODO
+[INFO] 18:42:09:759 FileSystem/(11662:11667): [ARCHIVO] Tamanio: 1211 bytes
+[INFO] 18:42:09:761 FileSystem/(11662:11667): [ARCHIVO] Bloques utilizados: 6
+[INFO] 18:42:09:762 FileSystem/(11662:11667): [ARCHIVO] Bloque 0: 209 bytes
+[INFO] 18:42:09:763 FileSystem/(11662:11667): [ARCHIVO] Bloque 0 copia 0 en: Nodo: NODO6 | Bloque: 0
+[INFO] 18:42:09:765 FileSystem/(11662:11667): [ARCHIVO] Bloque 0 copia 1 en: Nodo: NODO6 | Bloque: 1
+[INFO] 18:42:09:766 FileSystem/(11662:11667): [ARCHIVO] Bloque 1: 189 bytes
+[INFO] 18:42:09:767 FileSystem/(11662:11667): [ARCHIVO] Bloque 1 copia 0 en: Nodo: NODO6 | Bloque: 2
+[INFO] 18:42:09:768 FileSystem/(11662:11667): [ARCHIVO] Bloque 1 copia 1 en: Nodo: NODO6 | Bloque: 3
+[INFO] 18:42:09:770 FileSystem/(11662:11667): [ARCHIVO] Bloque 2: 206 bytes
+[INFO] 18:42:09:781 FileSystem/(11662:11667): [ARCHIVO] Bloque 2 copia 0 en: Nodo: NODO6 | Bloque: 4
+[INFO] 18:42:09:786 FileSystem/(11662:11667): [ARCHIVO] Bloque 2 copia 1 en: Nodo: NODO6 | Bloque: 5
+[INFO] 18:42:09:797 FileSystem/(11662:11667): [ARCHIVO] Bloque 3: 163 bytes
+[INFO] 18:42:09:800 FileSystem/(11662:11667): [ARCHIVO] Bloque 3 copia 0 en: Nodo: NODO6 | Bloque: 6
+[INFO] 18:42:09:801 FileSystem/(11662:11667): [ARCHIVO] Bloque 3 copia 1 en: Nodo: NODO6 | Bloque: 7
+[INFO] 18:42:09:802 FileSystem/(11662:11667): [ARCHIVO] Bloque 4: 233 bytes
+[INFO] 18:42:09:803 FileSystem/(11662:11667): [ARCHIVO] Bloque 4 copia 0 en: Nodo: NODO6 | Bloque: 8
+[INFO] 18:42:09:803 FileSystem/(11662:11667): [ARCHIVO] Bloque 4 copia 1 en: Nodo: NODO6 | Bloque: 9
+[INFO] 18:42:09:804 FileSystem/(11662:11667): [ARCHIVO] Bloque 4 copia 2 en: Nodo: NODO4 | Bloque: 0
+[INFO] 18:42:09:804 FileSystem/(11662:11667): [ARCHIVO] Bloque 5: 211 bytes
+[INFO] 18:42:09:804 FileSystem/(11662:11667): [ARCHIVO] Bloque 5 copia 0 en: Nodo: NODO4 | Bloque: 1
+[INFO] 18:42:46:712 FileSystem/(11662:11667): [ERROR] Comando invalido
+[INFO] 18:42:50:75 FileSystem/(11662:11667): [ARCHIVO] Nombre: TODO
+[INFO] 18:42:50:76 FileSystem/(11662:11667): [ARCHIVO] Tipo: TEXTO
+[INFO] 18:42:50:77 FileSystem/(11662:11667): [ARCHIVO] Ubicacion: /TODO
+[INFO] 18:42:50:78 FileSystem/(11662:11667): [ARCHIVO] Tamanio: 1211 bytes
+[INFO] 18:42:50:79 FileSystem/(11662:11667): [ARCHIVO] Bloques utilizados: 6
+[INFO] 18:42:50:80 FileSystem/(11662:11667): [ARCHIVO] Bloque 0: 209 bytes
+[INFO] 18:42:50:81 FileSystem/(11662:11667): [ARCHIVO] Bloque 0 copia 0 en: Nodo: NODO6 | Bloque: 0
+[INFO] 18:42:50:82 FileSystem/(11662:11667): [ARCHIVO] Bloque 0 copia 1 en: Nodo: NODO6 | Bloque: 1
+[INFO] 18:42:50:84 FileSystem/(11662:11667): [ARCHIVO] Bloque 1: 189 bytes
+[INFO] 18:42:50:85 FileSystem/(11662:11667): [ARCHIVO] Bloque 1 copia 0 en: Nodo: NODO6 | Bloque: 2
+[INFO] 18:42:50:86 FileSystem/(11662:11667): [ARCHIVO] Bloque 1 copia 1 en: Nodo: NODO6 | Bloque: 3
+[INFO] 18:42:50:88 FileSystem/(11662:11667): [ARCHIVO] Bloque 2: 206 bytes
+[INFO] 18:42:50:89 FileSystem/(11662:11667): [ARCHIVO] Bloque 2 copia 0 en: Nodo: NODO6 | Bloque: 4
+[INFO] 18:42:50:90 FileSystem/(11662:11667): [ARCHIVO] Bloque 2 copia 1 en: Nodo: NODO6 | Bloque: 5
+[INFO] 18:42:50:100 FileSystem/(11662:11667): [ARCHIVO] Bloque 3: 163 bytes
+[INFO] 18:42:50:100 FileSystem/(11662:11667): [ARCHIVO] Bloque 3 copia 0 en: Nodo: NODO6 | Bloque: 6
+[INFO] 18:42:50:101 FileSystem/(11662:11667): [ARCHIVO] Bloque 3 copia 1 en: Nodo: NODO6 | Bloque: 7
+[INFO] 18:42:50:101 FileSystem/(11662:11667): [ARCHIVO] Bloque 4: 233 bytes
+[INFO] 18:42:50:102 FileSystem/(11662:11667): [ARCHIVO] Bloque 4 copia 0 en: Nodo: NODO6 | Bloque: 8
+[INFO] 18:42:50:102 FileSystem/(11662:11667): [ARCHIVO] Bloque 4 copia 1 en: Nodo: NODO6 | Bloque: 9
+[INFO] 18:42:50:103 FileSystem/(11662:11667): [ARCHIVO] Bloque 4 copia 2 en: Nodo: NODO4 | Bloque: 0
+[INFO] 18:42:50:103 FileSystem/(11662:11667): [ARCHIVO] Bloque 5: 211 bytes
+[INFO] 18:42:50:104 FileSystem/(11662:11667): [ARCHIVO] Bloque 5 copia 0 en: Nodo: NODO4 | Bloque: 1
+[INFO] 18:43:01:669 FileSystem/(11662:11667): [BLOQUE] La copia N°0 del bloque N°0 del archivo /TODO ha sido eliminada
+[INFO] 18:44:08:753 FileSystem/(11662:11667): [BLOQUE] La copia N°1 del bloque N°0 del archivo /TODO ha sido eliminada
+[INFO] 18:44:15:643 FileSystem/(11662:11667): [ERROR] No se puede eliminar el bloque ya que es el ultimo
+[INFO] 18:44:33:685 FileSystem/(11662:11667): [ARCHIVO] Nombre: TODO
+[INFO] 18:44:33:686 FileSystem/(11662:11667): [ARCHIVO] Tipo: TEXTO
+[INFO] 18:44:33:686 FileSystem/(11662:11667): [ARCHIVO] Ubicacion: /TODO
+[INFO] 18:44:33:686 FileSystem/(11662:11667): [ARCHIVO] Tamanio: 1211 bytes
+[INFO] 18:44:33:686 FileSystem/(11662:11667): [ARCHIVO] Bloques utilizados: 6
+[INFO] 18:44:33:687 FileSystem/(11662:11667): [ARCHIVO] Bloque 0: 209 bytes
+[INFO] 18:44:33:687 FileSystem/(11662:11667): [ARCHIVO] Bloque 0 copia 0 en: Nodo: NODO6 | Bloque: 1
+[INFO] 18:44:33:687 FileSystem/(11662:11667): [ARCHIVO] Bloque 0 copia 1 en: Nodo: NODO4 | Bloque: 2
+[INFO] 18:44:33:688 FileSystem/(11662:11667): [ARCHIVO] Bloque 1: 189 bytes
+[INFO] 18:44:33:689 FileSystem/(11662:11667): [ARCHIVO] Bloque 1 copia 0 en: Nodo: NODO6 | Bloque: 2
+[INFO] 18:44:33:689 FileSystem/(11662:11667): [ARCHIVO] Bloque 1 copia 1 en: Nodo: NODO6 | Bloque: 3
+[INFO] 18:44:33:689 FileSystem/(11662:11667): [ARCHIVO] Bloque 2: 206 bytes
+[INFO] 18:44:33:690 FileSystem/(11662:11667): [ARCHIVO] Bloque 2 copia 0 en: Nodo: NODO6 | Bloque: 4
+[INFO] 18:44:33:690 FileSystem/(11662:11667): [ARCHIVO] Bloque 2 copia 1 en: Nodo: NODO6 | Bloque: 5
+[INFO] 18:44:33:691 FileSystem/(11662:11667): [ARCHIVO] Bloque 3: 163 bytes
+[INFO] 18:44:33:691 FileSystem/(11662:11667): [ARCHIVO] Bloque 3 copia 0 en: Nodo: NODO6 | Bloque: 6
+[INFO] 18:44:33:691 FileSystem/(11662:11667): [ARCHIVO] Bloque 3 copia 1 en: Nodo: NODO6 | Bloque: 7
+[INFO] 18:44:33:692 FileSystem/(11662:11667): [ARCHIVO] Bloque 4: 233 bytes
+[INFO] 18:44:33:692 FileSystem/(11662:11667): [ARCHIVO] Bloque 4 copia 0 en: Nodo: NODO6 | Bloque: 8
+[INFO] 18:44:33:693 FileSystem/(11662:11667): [ARCHIVO] Bloque 4 copia 1 en: Nodo: NODO6 | Bloque: 9
+[INFO] 18:44:33:693 FileSystem/(11662:11667): [ARCHIVO] Bloque 4 copia 2 en: Nodo: NODO4 | Bloque: 0
+[INFO] 18:44:33:694 FileSystem/(11662:11667): [ARCHIVO] Bloque 5: 211 bytes
+[INFO] 18:44:33:694 FileSystem/(11662:11667): [ARCHIVO] Bloque 5 copia 0 en: Nodo: NODO4 | Bloque: 1
+[INFO] 18:45:02:614 FileSystem/(11662:11667): [BLOQUE] La copia N°0 del bloque N°0 del archivo /TODO ha sido eliminada
+[INFO] 18:45:05:171 FileSystem/(11662:11667): [ARCHIVO] Nombre: TODO
+[INFO] 18:45:05:173 FileSystem/(11662:11667): [ARCHIVO] Tipo: TEXTO
+[INFO] 18:45:05:174 FileSystem/(11662:11667): [ARCHIVO] Ubicacion: /TODO
+[INFO] 18:45:05:175 FileSystem/(11662:11667): [ARCHIVO] Tamanio: 1211 bytes
+[INFO] 18:45:05:176 FileSystem/(11662:11667): [ARCHIVO] Bloques utilizados: 6
+[INFO] 18:45:05:177 FileSystem/(11662:11667): [ARCHIVO] Bloque 0: 209 bytes
+[INFO] 18:45:05:179 FileSystem/(11662:11667): [ARCHIVO] Bloque 0 copia 0 en: Nodo: NODO4 | Bloque: 2
+[INFO] 18:45:05:180 FileSystem/(11662:11667): [ARCHIVO] Bloque 1: 189 bytes
+[INFO] 18:45:05:181 FileSystem/(11662:11667): [ARCHIVO] Bloque 1 copia 0 en: Nodo: NODO6 | Bloque: 2
+[INFO] 18:45:05:192 FileSystem/(11662:11667): [ARCHIVO] Bloque 1 copia 1 en: Nodo: NODO6 | Bloque: 3
+[INFO] 18:45:05:196 FileSystem/(11662:11667): [ARCHIVO] Bloque 2: 206 bytes
+[INFO] 18:45:05:197 FileSystem/(11662:11667): [ARCHIVO] Bloque 2 copia 0 en: Nodo: NODO6 | Bloque: 4
+[INFO] 18:45:05:202 FileSystem/(11662:11667): [ARCHIVO] Bloque 2 copia 1 en: Nodo: NODO6 | Bloque: 5
+[INFO] 18:45:05:203 FileSystem/(11662:11667): [ARCHIVO] Bloque 3: 163 bytes
+[INFO] 18:45:05:204 FileSystem/(11662:11667): [ARCHIVO] Bloque 3 copia 0 en: Nodo: NODO6 | Bloque: 6
+[INFO] 18:45:05:205 FileSystem/(11662:11667): [ARCHIVO] Bloque 3 copia 1 en: Nodo: NODO6 | Bloque: 7
+[INFO] 18:45:05:206 FileSystem/(11662:11667): [ARCHIVO] Bloque 4: 233 bytes
+[INFO] 18:45:05:206 FileSystem/(11662:11667): [ARCHIVO] Bloque 4 copia 0 en: Nodo: NODO6 | Bloque: 8
+[INFO] 18:45:05:207 FileSystem/(11662:11667): [ARCHIVO] Bloque 4 copia 1 en: Nodo: NODO6 | Bloque: 9
+[INFO] 18:45:05:208 FileSystem/(11662:11667): [ARCHIVO] Bloque 4 copia 2 en: Nodo: NODO4 | Bloque: 0
+[INFO] 18:45:05:208 FileSystem/(11662:11667): [ARCHIVO] Bloque 5: 211 bytes
+[INFO] 18:45:05:209 FileSystem/(11662:11667): [ARCHIVO] Bloque 5 copia 0 en: Nodo: NODO4 | Bloque: 1
+[INFO] 18:45:35:719 FileSystem/(11662:11667): [ERROR] Comando invalido
+[INFO] 18:48:06:877 FileSystem/(11662:11667): [ARCHIVO] Nombre: TODO
+[INFO] 18:48:06:877 FileSystem/(11662:11667): [ARCHIVO] Tipo: TEXTO
+[INFO] 18:48:06:878 FileSystem/(11662:11667): [ARCHIVO] Ubicacion: /TODO
+[INFO] 18:48:06:880 FileSystem/(11662:11667): [ARCHIVO] Tamanio: 1211 bytes
+[INFO] 18:48:06:881 FileSystem/(11662:11667): [ARCHIVO] Bloques utilizados: 6
+[INFO] 18:48:06:883 FileSystem/(11662:11667): [ARCHIVO] Bloque 0: 209 bytes
+[INFO] 18:48:06:884 FileSystem/(11662:11667): [ARCHIVO] Bloque 0 copia 0 en: Nodo: NODO4 | Bloque: 2
+[INFO] 18:48:06:885 FileSystem/(11662:11667): [ARCHIVO] Bloque 1: 189 bytes
+[INFO] 18:48:06:887 FileSystem/(11662:11667): [ARCHIVO] Bloque 1 copia 0 en: Nodo: NODO6 | Bloque: 2
+[INFO] 18:48:06:888 FileSystem/(11662:11667): [ARCHIVO] Bloque 1 copia 1 en: Nodo: NODO6 | Bloque: 3
+[INFO] 18:48:06:889 FileSystem/(11662:11667): [ARCHIVO] Bloque 2: 206 bytes
+[INFO] 18:48:06:902 FileSystem/(11662:11667): [ARCHIVO] Bloque 2 copia 0 en: Nodo: NODO6 | Bloque: 4
+[INFO] 18:48:06:903 FileSystem/(11662:11667): [ARCHIVO] Bloque 2 copia 1 en: Nodo: NODO6 | Bloque: 5
+[INFO] 18:48:06:904 FileSystem/(11662:11667): [ARCHIVO] Bloque 3: 163 bytes
+[INFO] 18:48:06:904 FileSystem/(11662:11667): [ARCHIVO] Bloque 3 copia 0 en: Nodo: NODO6 | Bloque: 6
+[INFO] 18:48:06:905 FileSystem/(11662:11667): [ARCHIVO] Bloque 3 copia 1 en: Nodo: NODO6 | Bloque: 7
+[INFO] 18:48:06:905 FileSystem/(11662:11667): [ARCHIVO] Bloque 4: 233 bytes
+[INFO] 18:48:06:905 FileSystem/(11662:11667): [ARCHIVO] Bloque 4 copia 0 en: Nodo: NODO6 | Bloque: 8
+[INFO] 18:48:06:913 FileSystem/(11662:11667): [ARCHIVO] Bloque 4 copia 1 en: Nodo: NODO6 | Bloque: 9
+[INFO] 18:48:06:913 FileSystem/(11662:11667): [ARCHIVO] Bloque 4 copia 2 en: Nodo: NODO4 | Bloque: 0
+[INFO] 18:48:06:915 FileSystem/(11662:11667): [ARCHIVO] Bloque 5: 211 bytes
+[INFO] 18:48:06:915 FileSystem/(11662:11667): [ARCHIVO] Bloque 5 copia 0 en: Nodo: NODO4 | Bloque: 1
+[INFO] 18:48:06:916 FileSystem/(11662:11667): [ARCHIVO] Bloque 5 copia 1 en: Nodo: NODO6 | Bloque: 0
+[INFO] 18:48:06:916 FileSystem/(11662:11667): [ARCHIVO] Bloque 5 copia 2 en: Nodo: NODO4 | Bloque: 3
+[INFO] 18:48:19:287 FileSystem/(11662:11667): [BLOQUE] La copia N°0 del bloque N°5 del archivo /TODO ha sido eliminada
+[INFO] 18:48:26:185 FileSystem/(11662:11667): [BLOQUE] La copia N°1 del bloque N°5 del archivo /TODO ha sido eliminada
+[INFO] 18:48:40:405 FileSystem/(11662:11667): [ARCHIVO] Nombre: TODO
+[INFO] 18:48:40:406 FileSystem/(11662:11667): [ARCHIVO] Tipo: TEXTO
+[INFO] 18:48:40:407 FileSystem/(11662:11667): [ARCHIVO] Ubicacion: /TODO
+[INFO] 18:48:40:408 FileSystem/(11662:11667): [ARCHIVO] Tamanio: 1211 bytes
+[INFO] 18:48:40:409 FileSystem/(11662:11667): [ARCHIVO] Bloques utilizados: 6
+[INFO] 18:48:40:410 FileSystem/(11662:11667): [ARCHIVO] Bloque 0: 209 bytes
+[INFO] 18:48:40:411 FileSystem/(11662:11667): [ARCHIVO] Bloque 0 copia 0 en: Nodo: NODO4 | Bloque: 2
+[INFO] 18:48:40:412 FileSystem/(11662:11667): [ARCHIVO] Bloque 1: 189 bytes
+[INFO] 18:48:40:414 FileSystem/(11662:11667): [ARCHIVO] Bloque 1 copia 0 en: Nodo: NODO6 | Bloque: 2
+[INFO] 18:48:40:415 FileSystem/(11662:11667): [ARCHIVO] Bloque 1 copia 1 en: Nodo: NODO6 | Bloque: 3
+[INFO] 18:48:40:416 FileSystem/(11662:11667): [ARCHIVO] Bloque 2: 206 bytes
+[INFO] 18:48:40:418 FileSystem/(11662:11667): [ARCHIVO] Bloque 2 copia 0 en: Nodo: NODO6 | Bloque: 4
+[INFO] 18:48:40:419 FileSystem/(11662:11667): [ARCHIVO] Bloque 2 copia 1 en: Nodo: NODO6 | Bloque: 5
+[INFO] 18:48:40:420 FileSystem/(11662:11667): [ARCHIVO] Bloque 3: 163 bytes
+[INFO] 18:48:40:433 FileSystem/(11662:11667): [ARCHIVO] Bloque 3 copia 0 en: Nodo: NODO6 | Bloque: 6
+[INFO] 18:48:40:435 FileSystem/(11662:11667): [ARCHIVO] Bloque 3 copia 1 en: Nodo: NODO6 | Bloque: 7
+[INFO] 18:48:40:445 FileSystem/(11662:11667): [ARCHIVO] Bloque 4: 233 bytes
+[INFO] 18:48:40:450 FileSystem/(11662:11667): [ARCHIVO] Bloque 4 copia 0 en: Nodo: NODO6 | Bloque: 8
+[INFO] 18:48:40:454 FileSystem/(11662:11667): [ARCHIVO] Bloque 4 copia 1 en: Nodo: NODO6 | Bloque: 9
+[INFO] 18:48:40:456 FileSystem/(11662:11667): [ARCHIVO] Bloque 4 copia 2 en: Nodo: NODO4 | Bloque: 0
+[INFO] 18:48:40:457 FileSystem/(11662:11667): [ARCHIVO] Bloque 5: 211 bytes
+[INFO] 18:48:40:460 FileSystem/(11662:11667): [ARCHIVO] Bloque 5 copia 0 en: Nodo: NODO6 | Bloque: 0
+[INFO] 18:49:19:367 FileSystem/(11662:11667): [DIRECTORIO] El directorio /MNACO fue creado
+[INFO] 18:51:10:935 FileSystem/(11662:11667): [ERROR] La ruta ingresada no es valida
+[INFO] 18:51:29:602 FileSystem/(11662:11662): [EJECUCION] Proceso File System finalizado

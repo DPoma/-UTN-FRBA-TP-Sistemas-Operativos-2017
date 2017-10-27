@@ -251,7 +251,7 @@ String stringCrear();
 bool stringContiene(String unString, String otroString);
 String stringConvertirEntero(int entero);
 String stringRepetirCaracter(char caracter, int repeticiones);
-void  stringConcatenarString(String* unString, String otroString);
+void  stringConcatenarString(String unString, String otroString);
 String stringDuplicar(String string);
 void stringPonerEnMayuscula(String string);
 void stringPonerEnMinuscula(String string);

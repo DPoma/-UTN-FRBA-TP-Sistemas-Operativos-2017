@@ -47,8 +47,9 @@ void dataNodeAtenderFileSystem(){
 	Mensaje* mensaje = mensajeRecibir(socketFileSystem);
 	switch(mensaje->header.operacion){
 		case DESCONEXION: dataNodeDesconectarFS(); break;
-		case GET_BLOQUE: dataBinGetBloque(mensaje->datos); break;
-		case SET_BLOQUE: dataBinSetBloque(mensaje->datos); break;
+		case LEER_BLOQUE: bloqueLeer(mensaje->datos); break;
+		case ESCRIBIR_BLOQUE: bloqueEscribir(mensaje->datos); break;
+		case COPIAR_BLOQUE: bloqueCopiarEnNodo(mensaje->datos); break;
 	}
 	mensajeDestruir(mensaje);
 }
@@ -108,6 +109,30 @@ void configuracionIniciarCampos() {
 	campos[4] = "RUTA_DATABIN";
 }
 
+//--------------------------------------- Funciones de bloques -------------------------------------
+
+Bloque bloqueBuscar(Entero numeroBloque) {
+	Bloque bloque = punteroDataBin + (BLOQUE * numeroBloque);
+	return bloque;
+}
+
+void bloqueLeer(Puntero datos) {
+	Entero numeroBloque = *(Entero*)datos;
+	Bloque bloque = getBloque(numeroBloque);
+	mensajeEnviar(socketFileSystem, LEER_BLOQUE, bloque, BLOQUE);
+}
+
+void bloqueEscribir(Puntero datos) {
+	Entero numeroBloque;
+	memcpy(&numeroBloque, datos, sizeof(Entero));
+	setBloque(numeroBloque, datos+sizeof(Entero));
+}
+
+void bloqueCopiarEnNodo(Puntero datos) {
+	Entero numeroBloqueACopiar = *(Entero*)datos;
+	Bloque bloqueACopiar = getBloque(numeroBloqueACopiar);
+	mensajeEnviar(socketFileSystem, COPIAR_BLOQUE, bloqueACopiar, BLOQUE);
+}
 
 //--------------------------------------- Funciones de DataBin -------------------------------------
 
@@ -118,36 +143,6 @@ void dataBinAbrir() {
 		exit(EXIT_FAILURE);
 	}
 }
-
-Puntero dataBinUbicarPuntero(Entero numeroBloque) {
-	Puntero puntero = punteroDataBin + (BLOQUE * numeroBloque);
-	return puntero;
-}
-
-void dataBinGetBloque(Puntero datos) {
-	Entero numeroBloque = *(Entero*)datos;
-	if(numeroBloque < dataBinBloques) {
-		Puntero puntero = getBloque(numeroBloque);
-		mensajeEnviar(socketFileSystem, 14, puntero, BLOQUE);
-	}
-	else {
-		imprimirMensaje(archivoLog,"[ERROR] El bloque no existe");
-		//mensajeEnviar(socketFileSystem, -2, NULL, NULO);
-	}
-}
-
-void dataBinSetBloque(Puntero datos) {
-	Entero numeroBloque;
-	memcpy(&numeroBloque, datos, sizeof(Entero));
-	if(numeroBloque < dataBinBloques)
-		setBloque(numeroBloque, datos+sizeof(Entero));
-	else {
-		imprimirMensaje(archivoLog,"[ERROR] El bloque no existe");
-		//mensajeEnviar(socketFileSystem, -2, NULL, NULO);
-	}
-
-}
-
 
 Puntero dataBinMapear() {
 	Puntero Puntero;
@@ -186,23 +181,23 @@ Puntero dataBinMapear() {
 	return Puntero;
 }
 
-//--------------------------------------- Funciones varias -------------------------------------
-
-Puntero getBloque(Entero numeroBloque) {
-	Puntero puntero = dataBinUbicarPuntero(numeroBloque);
-	imprimirMensajeUno(archivoLog, "[DATABIN] El bloque N°%i fue leido", (int*)numeroBloque);
-	return puntero;
-}
-
-void setBloque(Entero numeroBloque, Puntero datos) {
-	Puntero puntero = dataBinUbicarPuntero(numeroBloque);
-	memcpy(puntero, datos, BLOQUE); //TODO ver si es bloque o el largo del dato
-	imprimirMensajeUno(archivoLog, "[DATABIN] El bloque N°%i fue escrito", (int*)numeroBloque);
-}
-
 void dataBinCalcularBloques() {
 	dataBinBloques = (int)ceil((double)dataBinTamanio/(double)BLOQUE);
 	imprimirMensajeUno(archivoLog, "[DATABIN] Cantidad de bloques disponibles %i", (int*)dataBinBloques);
+}
+
+//--------------------------------------- Funciones varias -------------------------------------
+
+Bloque getBloque(Entero numeroBloque) {
+	Bloque bloque = bloqueBuscar(numeroBloque);
+	imprimirMensajeUno(archivoLog, "[DATABIN] El bloque N°%i fue leido", (int*)numeroBloque);
+	return bloque;
+}
+
+void setBloque(Entero numeroBloque, Puntero datos) {
+	Bloque bloque = bloqueBuscar(numeroBloque);
+	memcpy(bloque, datos, BLOQUE);
+	imprimirMensajeUno(archivoLog, "[DATABIN] El bloque N°%i fue escrito", (int*)numeroBloque);
 }
 
 void funcionSenial(int senial) {

@@ -589,8 +589,8 @@ String stringRepetirCaracter(char caracter, int repeticiones) {
 	return string_repeat(caracter, repeticiones);
 }
 
-void stringConcatenar(String* unString, String otroString) {
-	string_append(unString, otroString);
+void stringConcatenar(String unString, String otroString) {
+	strcat(unString, otroString);
 }
 
 String stringDuplicar(String string) {
