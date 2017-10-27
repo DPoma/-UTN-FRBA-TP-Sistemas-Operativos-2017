@@ -51,7 +51,7 @@
 #define MAX_STRING 300
 #define MAX_NOMBRE 255
 #define MAX_DIR 100
-#define MAX_COPIAS 1
+#define MAX_COPIAS 2
 
 #define ESCRIBIR 102
 
@@ -372,6 +372,6 @@ bool rutaValida(String ruta);
 bool rutaEsNumero(String ruta);
 
 //--------------------------------------- Funciones Varias -------------------------------------
-BloqueNodo* bloqueNodoCrear(Entero numeroBloque, String buffer);
+BloqueNodo* bloqueNodoCrear(Entero numeroBloque, String buffer, int tamanioUtilizado);
 void testCabecita();
 void archivoBufferCopiarEn(String rutaArchivo);

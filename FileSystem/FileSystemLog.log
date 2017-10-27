@@ -1,13 +1,11 @@
-[INFO] 01:09:33:780 FileSystem/(5992:5992): [EJECUCION] Proceso File System inicializado
-[INFO] 01:09:34:80 FileSystem/(5992:5992): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 01:09:34:91 FileSystem/(5992:5992): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 01:09:34:94 FileSystem/(5992:5992): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
-[INFO] 01:09:35:341 FileSystem/(5992:5992): [CONEXION] Un proceso Data Node se ha conectado
-[INFO] 01:09:50:123 FileSystem/(5992:5997): [ESTADO] El File System ha sido formateado
-[INFO] 01:10:26:33 FileSystem/(5992:5997): [ARCHIVO] El archivo /home/utnso/Escritorio/TODO fue copiado en File System
-[INFO] 01:11:20:32 FileSystem/(5992:5997): [ERROR] El numero de bloque no existe
-[INFO] 01:13:56:712 FileSystem/(5992:5997): [ERROR] El nodo no existe
-[INFO] 01:14:27:829 FileSystem/(5992:5997): [DIRECTORIO] El directorio /home fue creado
-[INFO] 01:14:36:427 FileSystem/(5992:5997): [DIRECTORIO] El archivo TODO fue movido a /home
-[INFO] 01:15:00:215 FileSystem/(5992:5997): [ERROR] El archivo no existe
-[INFO] 01:18:56:940 FileSystem/(5992:5992): [EJECUCION] Proceso File System finalizado
+[INFO] 10:32:27:805 FileSystem/(5972:5972): [EJECUCION] Proceso File System inicializado
+[INFO] 10:32:27:866 FileSystem/(5972:5972): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 10:32:27:868 FileSystem/(5972:5972): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 10:32:27:868 FileSystem/(5972:5972): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
+[INFO] 10:32:32:447 FileSystem/(5972:5972): [CONEXION] Un proceso Data Node se ha conectado
+[INFO] 10:32:51:751 FileSystem/(5972:5972): [CONEXION] Un proceso Data Node se ha conectado
+[INFO] 10:33:12:991 FileSystem/(5972:5972): [CONEXION] Un proceso Data Node se ha conectado
+[INFO] 10:33:38:473 FileSystem/(5972:5977): [ARCHIVO] El archivo /home/utnso/Escritorio/TODO fue copiado en File System
+[INFO] 10:36:22:153 FileSystem/(5972:5977): [ARCHIVO] El archivo /home/utnso/Escritorio/test fue copiado en File System
+[INFO] 10:39:08:521 FileSystem/(5972:5977): [ARCHIVO] El archivo /home/utnso/Escritorio/gg fue copiado en File System
+[INFO] 10:41:55:748 FileSystem/(5972:5972): [EJECUCION] Proceso File System finalizado
