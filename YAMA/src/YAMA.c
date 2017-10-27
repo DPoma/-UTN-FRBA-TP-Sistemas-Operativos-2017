@@ -159,7 +159,7 @@ void yamaAtender() {
 							servidor->maximoSocket--; //no debería romper nada
 						log_info(archivoLog, "[CONEXION] Proceso Master %d se ha desconectado",socketI);
 					}else{
-						Dir nodo=*((Dir*)mensaje->datos);//TODO puede que rompa porque no es deep copying
+						Dir nodo=*((Dir*)mensaje->datos);//puede que rompa porque no es deep copying
 						int32_t bloque=*((int32_t*)(mensaje->datos+DIRSIZE));
 						bool buscarEntrada(Entrada* entrada){
 							return stringIguales(entrada->nodo.ip,nodo.ip)&&entrada->bloque==bloque;
@@ -340,10 +340,13 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 				abortarJob();
 				return;
 			}
-			Socket respuesta=socketAceptar(servidor->listenerErrores,ID_MASTER);//supongo que esa id
+			Socket respuesta=socketAceptar(servidor->listenerErrores,ID_MASTER);
+			//debería usar una ID especifica aca?
+			//uso un listener aparte porque si uso el comun, y justo se conecta un
+			//master cuando corre este accept pasan cosas malas
 			Entrada alternativa;
 			darDatosEntrada(&alternativa);
-			alternativa.nodo=entradaA->nodoAlt;//TODO deep?
+			alternativa.nodo=entradaA->nodoAlt;//deep?
 			alternativa.bloque=entradaA->bloqueAlt;
 			char dato[DIRSIZE+INTSIZE*2]; //podría no mandarle los bytes
 			memcpy(dato,&alternativa.nodo,DIRSIZE);
