@@ -181,10 +181,10 @@ void enviarScript(Socket unSocket, char* ruta, Entero operacion){//operacion par
 
 
 
-void establecerConexionConWorker( Lista bloques){
-	WorkerTransformacion* wt = list_get(bloques,0);
+void establecerConexionConWorker(Lista bloques){
+	WorkerTransformacion* dir = list_get(bloques,0);
 
-	socketWorker = socketCrearCliente(wt->dir.ip,string_itoa(wt->dir.port), ID_MASTER);
+	socketWorker=socketCrearCliente(dir->dir.ip,string_itoa(dir->dir.port), ID_MASTER);
 
 	int i;
 	for(i=0;i<bloques->elements_count;i++){
@@ -193,30 +193,25 @@ void establecerConexionConWorker( Lista bloques){
 		imprimirMensajeDos(archivoLog,"[CONEXION] Estableciendo conexion con Worker (IP: %s | PUERTO: %d", wt->dir.ip, string_itoa(wt->dir.port));
 	}
 
-	for(i=0;i<bloques->elements_count;i++){
+
 		Mensaje* mensaje = mensajeRecibir(socketWorker);
+		//se recibe la direccion y el bloque, se lo mandas a yama
+		if(mensaje->header.operacion==EXITOTRANSFORMACION){
+			imprimirMensajeUno(archivoLog, "[TRANSFORMACION] Transformacion realizada con exito en el Worker %i", &socketWorker); //desp lo cambio
+			mensajeEnviar(socketYAMA,EXITOTRANSFORMACION,&socketWorker,sizeof(int));
+		}
+		else{
+			imprimirMensajeUno(archivoLog,"[TRANSFORMACION] Transformacion fallida en el Worker %i",&socketWorker);
+			mensajeEnviar(socketYAMA,FRACASOTRANSFORMACION,&socketWorker,sizeof(int));
 
-			//pasar dir y bloque
-			if(mensaje->header.operacion==EXITOTRANSFORMACION){
-				imprimirMensajeUno(archivoLog, "[TRANSFORMACION] Transformacion realizada con exito en el Worker %i", &socketWorker); //desp lo cambio
-				mensajeEnviar(socketYAMA,EXITOTRANSFORMACION,&socketWorker,sizeof(int));
-			}
-			else{
-				imprimirMensajeUno(archivoLog,"[TRANSFORMACION] Transformacion fallida en el Worker %i",&socketWorker);
-				mensajeEnviar(socketYAMA,FRACASOTRANSFORMACION,&socketWorker,sizeof(int));
+			//meter semaforo
+			//conectarse al canal de errores de YAMA
+			//recibir un bloque alternativo, agregar a la lista de bloques asi lo caza el for
+			//en caso de aborto YAMA se comunica directamente con el hilo principal,
+			//supongo que no se hace nada aca
+			//sacar semaforo
+		}
 
-				//hacer conexion con YAMA
-				//recibir un bloque, agregar a la lista de bloques
-
-			}
-	}
-
-	//por cada uno de la lista decirle el bloque
-	//y controlar si termino o tuvo error
-	//el worker le tiene que dar el numero de bloque
-
-	//si hubo error tiene que abrir una conexion con yama
-	//y esperar que le conteste el bloque alternativo
 
 
 
@@ -250,45 +245,46 @@ int main(int argc,char** argv) {
 	senialAsignarFuncion(SIGINT, funcionSenial);
 //	mensajeEnviar(socketYAMA, HANDSHAKE, "HOLIII", 7);
 //	mensajeEnviar(socketWorker, HANDSHAKE, "HOLIII", 7);
-	imprimirMensaje(archivoLog, "[MENSAJE] Mensaje enviado");
 
 	mensajeEnviar(socketYAMA,Solicitud,argv[3],strlen(argv[3]));
+	imprimirMensaje(archivoLog, "[MENSAJE] Solicitud enviada");
 	Mensaje* mensaje=mensajeRecibir(socketYAMA);
-		Lista workers=list_create();
-		int i;
-		for(i=0;i<mensaje->header.tamanio;i+=DIRSIZE+INTSIZE*2+TEMPSIZE){
-			WorkerTransformacion* worker=malloc(mensaje->header.tamanio);
-			memcpy(&worker->dir,mensaje->datos+i,DIRSIZE);
-			memcpy(&worker->bloque,mensaje->datos+i+DIRSIZE,INTSIZE);
-			memcpy(&worker->bytes,mensaje->datos+i+DIRSIZE+INTSIZE,INTSIZE);
-			memcpy(&worker->temp,mensaje->datos+i+DIRSIZE+INTSIZE*2,TEMPSIZE);
-			list_add(workers,worker);
-		}
-		bool mismoNodo(Dir a,Dir b){
-			return a.ip==b.ip&&a.port==b.port;//podría comparar solo ip
-		}
-		Lista listas=list_create();
-		for(i=0;i<=workers->elements_count;i++){
-			WorkerTransformacion* worker=list_get(workers,i);
-			int j;
-			for(j=0;j<=listas->elements_count;j++){
-				Lista nodo=list_get(listas,j);
-				WorkerTransformacion* cmp=list_get(nodo,0);
-				if(mismoNodo(worker->dir,cmp->dir)){
-					list_add(nodo,worker);
-				}
+	imprimirMensaje(archivoLog, "[MENSAJE] Lista de bloques recibida");
+	Lista workers=list_create();
+	int i;
+	for(i=0;i<mensaje->header.tamanio;i+=DIRSIZE+INTSIZE*2+TEMPSIZE){
+		WorkerTransformacion worker;
+		memcpy(&worker.dir,mensaje->datos+i,DIRSIZE);
+		memcpy(&worker.bloque,mensaje->datos+i+DIRSIZE,INTSIZE);
+		memcpy(&worker.bytes,mensaje->datos+i+DIRSIZE+INTSIZE,INTSIZE);
+		memcpy(&worker.temp,mensaje->datos+i+DIRSIZE+INTSIZE*2,TEMPSIZE);
+		list_addM(workers,&worker,sizeof(WorkerTransformacion));
+	}
+	bool mismoNodo(Dir a,Dir b){
+		return a.ip==b.ip&&a.port==b.port;//podría comparar solo ip
+	}
+	Lista listas=list_create();
+	for(i=0;i<=workers->elements_count;i++){
+		WorkerTransformacion* worker=list_get(workers,i);
+		int j;
+		for(j=0;j<=listas->elements_count;j++){
+			Lista nodo=list_get(listas,j);
+			WorkerTransformacion* cmp=list_get(nodo,0);
+			if(mismoNodo(worker->dir,cmp->dir)){
+				list_add(nodo,worker);
 			}
-			Lista nodo=list_create();
-			list_add(nodo, worker);
-			list_add(nodo,listas);
 		}
+		Lista nodo=list_create();
+		list_add(nodo, worker);
+		list_add(listas,nodo);//creo que no hay que alocar nada
+	}
 
-		Lista hilos=list_create();
-		for(i=0;i<=workers->elements_count;i++){
-			pthread_t hilo;
-			pthread_create(&hilo,NULL,(void*)establecerConexionConWorker,list_get(listas,i));
-			list_add(hilos,&hilo);
-		}
+	Lista hilos=list_create();
+	for(i=0;i<=listas->elements_count;i++){
+		pthread_t hilo;
+		pthread_create(&hilo,NULL,(void*)establecerConexionConWorker,list_get(listas,i));
+		list_add(hilos,&hilo);
+	}
 
 	while(masterActivado()){
 		Mensaje* m = mensajeRecibir(socketYAMA);
