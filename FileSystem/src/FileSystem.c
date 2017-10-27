@@ -982,7 +982,7 @@ void comandoCopiarArchivoDeFS(Comando* comando) {
 				break;
 			}
 			if(tamanioBuffer <= bytesDisponibles) {
-				stringConcatenar(&datos, buffer);
+				strcat(datos, buffer);
 				bytesDisponibles-= tamanioBuffer;
 			}
 			else {
@@ -990,7 +990,7 @@ void comandoCopiarArchivoDeFS(Comando* comando) {
 				bytesDisponibles = BLOQUE-1;
 				Bloque* bloque = bloqueCrear(bytesUtilizados, numeroBloqueArchivo);
 				listaAgregarElemento(archivo->listaBloques, bloque);
-				int copiasEnviadas = bloqueEnviarCopiasANodos(bloque, datos, bytesUtilizados);
+				int copiasEnviadas = bloqueEnviarCopiasANodos(bloque, datos, BLOQUE);
 				if(copiasEnviadas < MAX_COPIAS) {
 					estado = ERROR;
 					break;
@@ -998,7 +998,7 @@ void comandoCopiarArchivoDeFS(Comando* comando) {
 				numeroBloqueArchivo++;
 				memoriaLiberar(datos);
 				datos = stringCrear(BLOQUE);
-				stringConcatenar(&datos, buffer);
+				strcat(datos, buffer);
 				bytesDisponibles-= tamanioBuffer;
 			}
 		}
@@ -1006,7 +1006,7 @@ void comandoCopiarArchivoDeFS(Comando* comando) {
 			int bytesUtilizados = stringLongitud(datos)+1;
 			Bloque* bloque = bloqueCrear(bytesUtilizados, numeroBloqueArchivo);
 			listaAgregarElemento(archivo->listaBloques, bloque);
-			int copiasEnviadas = bloqueEnviarCopiasANodos(bloque, datos, bytesUtilizados);
+			int copiasEnviadas = bloqueEnviarCopiasANodos(bloque, datos, BLOQUE);
 			if(copiasEnviadas < MAX_COPIAS)
 				estado = ERROR;
 		}

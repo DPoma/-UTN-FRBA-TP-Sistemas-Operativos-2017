@@ -1,11 +1,7 @@
-[INFO] 10:32:27:805 FileSystem/(5972:5972): [EJECUCION] Proceso File System inicializado
-[INFO] 10:32:27:866 FileSystem/(5972:5972): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 10:32:27:868 FileSystem/(5972:5972): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 10:32:27:868 FileSystem/(5972:5972): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
-[INFO] 10:32:32:447 FileSystem/(5972:5972): [CONEXION] Un proceso Data Node se ha conectado
-[INFO] 10:32:51:751 FileSystem/(5972:5972): [CONEXION] Un proceso Data Node se ha conectado
-[INFO] 10:33:12:991 FileSystem/(5972:5972): [CONEXION] Un proceso Data Node se ha conectado
-[INFO] 10:33:38:473 FileSystem/(5972:5977): [ARCHIVO] El archivo /home/utnso/Escritorio/TODO fue copiado en File System
-[INFO] 10:36:22:153 FileSystem/(5972:5977): [ARCHIVO] El archivo /home/utnso/Escritorio/test fue copiado en File System
-[INFO] 10:39:08:521 FileSystem/(5972:5977): [ARCHIVO] El archivo /home/utnso/Escritorio/gg fue copiado en File System
-[INFO] 10:41:55:748 FileSystem/(5972:5972): [EJECUCION] Proceso File System finalizado
+[INFO] 16:20:01:823 FileSystem/(9744:9744): [EJECUCION] Proceso File System inicializado
+[INFO] 16:20:01:880 FileSystem/(9744:9744): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 16:20:01:882 FileSystem/(9744:9744): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 16:20:01:882 FileSystem/(9744:9744): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
+[INFO] 16:20:03:302 FileSystem/(9744:9744): [CONEXION] Un proceso Data Node se ha conectado
+[INFO] 16:20:15:545 FileSystem/(9744:9749): [ARCHIVO] El archivo /home/utnso/Escritorio/lala fue copiado en File System
+[INFO] 16:20:27:118 FileSystem/(9744:9744): [EJECUCION] Proceso File System finalizado
