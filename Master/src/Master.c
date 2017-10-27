@@ -203,13 +203,12 @@ void establecerConexionConWorker(Lista bloques){
 		else{
 			imprimirMensajeUno(archivoLog,"[TRANSFORMACION] Transformacion fallida en el Worker %i",&socketWorker);
 			mensajeEnviar(socketYAMA,FRACASOTRANSFORMACION,&socketWorker,sizeof(int));
-
-			//meter semaforo
+			//el mensaje de error se lo mandas por el canal comun, lo que esta en la linea de arriba
 			//conectarse al canal de errores de YAMA
 			//recibir un bloque alternativo, agregar a la lista de bloques asi lo caza el for
+
 			//en caso de aborto YAMA se comunica directamente con el hilo principal,
-			//supongo que no se hace nada aca
-			//sacar semaforo
+			//en este hilo va a haber un connect que no se va a responder pero no importa
 		}
 
 

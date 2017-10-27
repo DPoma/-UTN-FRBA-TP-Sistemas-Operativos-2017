@@ -28,6 +28,7 @@ typedef struct __attribute__((__packed__)){
 
 typedef struct {
 	char puertoMaster[50];
+	char puertoErrores[50];
 	char ipFileSystem[50];
 	char puertoFileSystem[50];
 	int retardoPlanificacion;
@@ -41,6 +42,7 @@ typedef struct {
 	ListaSockets listaMaster;
 	Socket maximoSocket;
 	Socket listenerMaster;
+	Socket listenerErrores;
 	Socket fileSystem;
 } Servidor;
 Servidor* servidor;
