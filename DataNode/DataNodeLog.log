@@ -1,15 +1,16 @@
-[INFO] 18:35:19:948 DataNode/(11740:11740): [CONFIGURACION] Nombre Nodo: NODO4
-[INFO] 18:35:19:967 DataNode/(11740:11740): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data2.bin
-[INFO] 18:35:19:972 DataNode/(11740:11740): [DATABIN] Cantidad de bloques disponibles 81920
-[INFO] 18:35:19:973 DataNode/(11740:11740): [CONEXION] Estableciendo conexion con File System (IP: 127.0.0.1 | Puerto 5040)
-[INFO] 18:35:36:487 DataNode/(11740:11740): [DATABIN] El bloque N°0 fue escrito
-[INFO] 18:41:46:534 DataNode/(11740:11740): [DATABIN] El bloque N°1 fue escrito
-[INFO] 18:42:38:829 DataNode/(11740:11740): [DATABIN] El bloque N°1 fue leido
-[INFO] 18:44:27:369 DataNode/(11740:11740): [DATABIN] El bloque N°2 fue escrito
-[INFO] 18:45:12:625 DataNode/(11740:11740): [DATABIN] El bloque N°2 fue leido
-[INFO] 18:45:12:644 DataNode/(11740:11740): [DATABIN] El bloque N°1 fue leido
-[INFO] 18:46:56:509 DataNode/(11740:11740): [DATABIN] El bloque N°1 fue leido
-[INFO] 18:47:15:317 DataNode/(11740:11740): [DATABIN] El bloque N°1 fue leido
-[INFO] 18:47:15:320 DataNode/(11740:11740): [DATABIN] El bloque N°3 fue escrito
-[INFO] 18:51:31:719 DataNode/(11740:11740): [CONEXION] El File System se desconecto
-[INFO] 18:51:31:720 DataNode/(11740:11740): [EJECUCION] Proceso Data Node finalizado
+[INFO] 19:15:18:537 DataNode/(12320:12320): [CONFIGURACION] Nombre Nodo: NODO4
+[INFO] 19:15:18:556 DataNode/(12320:12320): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data2.bin
+[INFO] 19:15:18:562 DataNode/(12320:12320): [DATABIN] Cantidad de bloques disponibles 81920
+[INFO] 19:15:18:563 DataNode/(12320:12320): [CONEXION] Estableciendo conexion con File System (IP: 127.0.0.1 | Puerto 5040)
+[INFO] 19:15:31:275 DataNode/(12320:12320): [DATABIN] El bloque N°0 fue escrito
+[INFO] 19:15:31:313 DataNode/(12320:12320): [DATABIN] El bloque N°1 fue escrito
+[INFO] 19:15:31:313 DataNode/(12320:12320): [DATABIN] El bloque N°2 fue escrito
+[INFO] 19:15:31:313 DataNode/(12320:12320): [DATABIN] El bloque N°3 fue escrito
+[INFO] 19:15:31:313 DataNode/(12320:12320): [DATABIN] El bloque N°4 fue escrito
+[INFO] 19:15:31:314 DataNode/(12320:12320): [DATABIN] El bloque N°5 fue escrito
+[INFO] 19:15:31:314 DataNode/(12320:12320): [DATABIN] El bloque N°6 fue escrito
+[INFO] 19:15:31:314 DataNode/(12320:12320): [DATABIN] El bloque N°7 fue escrito
+[INFO] 19:17:14:490 DataNode/(12320:12320): [DATABIN] El bloque N°0 fue leido
+[INFO] 19:17:14:496 DataNode/(12320:12320): [DATABIN] El bloque N°6 fue escrito
+[INFO] 19:17:26:284 DataNode/(12320:12320): [CONEXION] El File System se desconecto
+[INFO] 19:17:26:286 DataNode/(12320:12320): [EJECUCION] Proceso Data Node finalizado

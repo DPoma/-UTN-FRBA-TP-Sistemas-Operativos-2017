@@ -698,9 +698,11 @@ void comandoEliminarBloque(Comando* comando) {
 		imprimirMensaje(archivoLog, "[ERROR] No se puede eliminar el bloque ya que es el ultimo");
 		return;
 	}
-	archivoPersistirEliminarBloque(archivo, numeroBloque, numeroCopia);
+
+	//archivoPersistirEliminarBloque(archivo, numeroBloque, numeroCopia);
 	copiaBloqueEliminar(copia);
 	listaEliminarDestruyendoElemento(bloque->listaCopias, numeroCopia, memoriaLiberar);
+	archivoPersistirCrear(archivo);
 	imprimirMensajeTres(archivoLog, "[BLOQUE] La copia N°%i del bloque N°%i del archivo %s ha sido eliminada",(int*)numeroCopia, (int*)numeroBloque, comando->argumentos[2]);
 }
 
@@ -1041,6 +1043,7 @@ void comandoCopiarArchivoDeFS(Comando* comando) {
 		imprimirMensaje(archivoLog, ROJO"[ERROR] No hay nodos o bloques disponibles, se aborta la operacion"BLANCO);
 	} else {
 		archivoPersistirCrear(archivo);
+		archivoPersistirControlCrear(archivo);
 		listaAgregarElemento(listaArchivos, archivo);
 		nodoPersistirConectados();
 		imprimirMensajeUno(archivoLog, "[ARCHIVO] El archivo %s fue copiado en File System", comando->argumentos[2]);
@@ -1607,7 +1610,6 @@ void archivoPersistirCrear(Archivo* archivo) {
 		}
 	}
 	fileCerrar(file);
-	archivoPersistirControlCrear(archivo);
 }
 
 
