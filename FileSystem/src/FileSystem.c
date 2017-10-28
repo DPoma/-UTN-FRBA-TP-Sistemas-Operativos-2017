@@ -79,6 +79,7 @@ Configuracion* configuracionLeerArchivo(ArchivoConfig archivoConfig) {
 	Configuracion* configuracion = memoriaAlocar(sizeof(Configuracion));
 	stringCopiar(configuracion->puertoYama, archivoConfigStringDe(archivoConfig, "PUERTO_YAMA"));
 	stringCopiar(configuracion->puertoDataNode, archivoConfigStringDe(archivoConfig, "PUERTO_DATANODE"));
+	stringCopiar(configuracion->puertoWorker, archivoConfigStringDe(archivoConfig, "PUERTO_WORKER"));
 	stringCopiar(configuracion->rutaMetadata, archivoConfigStringDe(archivoConfig, "RUTA_METADATA"));
 	archivoConfigDestruir(archivoConfig);
 	return configuracion;
@@ -87,13 +88,15 @@ Configuracion* configuracionLeerArchivo(ArchivoConfig archivoConfig) {
 void configuracionImprimir(Configuracion* configuracion) {
 	imprimirMensajeUno(archivoLog, "[CONEXION] Esperando conexion de YAMA (Puerto: %s)", configuracion->puertoYama);
 	imprimirMensajeUno(archivoLog, "[CONEXION] Esperando conexiones de Data Nodes (Puerto: %s)", configuracion->puertoDataNode);
+	imprimirMensajeUno(archivoLog, "[CONEXION] Esperando conexiones de Workers (Puerto: %s)", configuracion->puertoWorker);
 	imprimirMensajeUno(archivoLog, "[INFORMACION] Ruta de metadata: %s", configuracion->rutaMetadata);
 }
 
 void configuracionIniciarCampos() {
 	campos[0] = "PUERTO_YAMA";
 	campos[1] = "PUERTO_DATANODE";
-	campos[2] = "RUTA_METADATA";
+	campos[2] = "PUERTO_WORKER";
+	campos[3] = "RUTA_METADATA";
 }
 
 void configuracionIniciar() {
@@ -195,7 +198,7 @@ void servidorRegistrarConexion(Servidor* servidor, Socket unSocket) {
 void servidorActivarListeners(Servidor* servidor) {
 	servidorActivarListenerDataNode(servidor);
 	servidorActivarListenerYama(servidor);
-	//servidorActivarListenerWorker(servidor); TODO Agregar en archivo de config sus campos
+	servidorActivarListenerWorker(servidor);
 }
 
 void servidorLimpiarListas(Servidor* servidor) {
@@ -218,7 +221,7 @@ void servidorActivarListenerDataNode(Servidor* servidor) {
 }
 
 void servidorActivarListenerWorker(Servidor* servidor) {
-	servidor->listenerWorker = socketCrearListener(configuracion->puertoDataNode);
+	servidor->listenerWorker = socketCrearListener(configuracion->puertoWorker);
 	listaSocketsAgregar(servidor->listenerWorker, &servidor->listaMaster);
 	servidorControlarContadorSocket(servidor, servidor->listenerWorker);
 }
@@ -290,31 +293,20 @@ void servidorAceptarNodo(Servidor* servidor, Nodo* nodo, Puntero datos, Socket n
 
 
 void servidorRegistrarNodoEstadoSeguro(Servidor* servidor, Socket nuevoSocket, Puntero datos) {
-	String nombre = stringCrear(10);
-	memcpy(nombre, datos, 10);
-	Nodo* nodo = nodoBuscar(nombre);
-	memoriaLiberar(nombre);
+	String* tokens = rutaSeparar(datos);
+	Nodo* nodo = nodoBuscar(tokens[0]);
+	memoriaLiberar(tokens[0]);
+	memoriaLiberar(tokens[1]);
+	memoriaLiberar(tokens[2]);
+	memoriaLiberar(tokens);
 	if(nodo == NULL) {
-		servidorFinalizarConexion(servidor, nuevoSocket);
+		socketCerrar(nuevoSocket);
 		imprimirMensaje(archivoLog, "[ERROR] No se permite conexiones de nuevos Nodos");
 		return;
 	}
 	else
 		servidorAceptarNodo(servidor, nodo, datos, nuevoSocket);
 
-}
-
-void nodoConfigurar(Nodo* nodo, Puntero datos, Socket nuevoSocket) { //TODO sacar de aqui
-	String* tokens = rutaSeparar(datos);
-	stringCopiar(nodo->nombre, tokens[0]);
-	stringCopiar(nodo->ip, tokens[1]);
-	stringCopiar(nodo->puerto, tokens[2]);
-	nodo->socket = nuevoSocket;
-	nodo->estado = ACTIVADO;
-	memoriaLiberar(tokens[0]);
-	memoriaLiberar(tokens[1]);
-	memoriaLiberar(tokens[2]);
-	memoriaLiberar(tokens);
 }
 
 void servidorRegistrarNodoEstadoInseguro(Servidor* servidor, Socket nuevoSocket, Puntero datos) {
@@ -693,8 +685,9 @@ void comandoFormatearFileSystem() {
 	metadataIniciar();
 	nodoFormatearConectados();
 	nodoPersistirConectados();
-	estadoSeguro = 1;
+	estadoSeguro = ACTIVADO;
 	//TODO Ponerlo lindo
+	/*
 	int cantidadNodos = listaCantidadElementos(listaNodos);
 	ConexionNodo nodos[cantidadNodos];
 	int indice;
@@ -704,6 +697,7 @@ void comandoFormatearFileSystem() {
 		stringCopiar(nodos[indice].puerto, nodo->puerto);
 	}
 //	mensajeEnviar(socketYama, 201, nodos, cantidadNodos*sizeof(ConexionNodo));
+	*/
 	imprimirMensaje(archivoLog, "[ESTADO] El File System ha sido formateado");
 }
 
@@ -1000,7 +994,6 @@ void comandoCrearDirectorio(Comando* comando) {
 	memoriaLiberar(control);
 }
 
-//TODO ver con archivo binario
 void comandoCopiarArchivoDeFS(Comando* comando) {
 	if(consolaflagInvalido(comando->argumentos[1])) {
 		imprimirMensaje(archivoLog, "[ERROR] Flag invalido");
@@ -1096,11 +1089,12 @@ void comandoCopiarArchivoDeFS(Comando* comando) {
 	if(estado == -2) {
 		archivoDestruir(archivo);
 		imprimirMensaje(archivoLog, ROJO"[ERROR] La linea leida es demasiado larga, se aborta la operacion"BLANCO);
-	}else if(estado == ERROR) {
+	}
+	else if(estado == ERROR) {
 		archivoDestruir(archivo);
 		imprimirMensaje(archivoLog, ROJO"[ERROR] No hay nodos o bloques disponibles, se aborta la operacion"BLANCO);
-	} else {
-
+	}
+	else {
 		listaAgregarElemento(listaArchivos, archivo);
 		archivoPersistir(archivo);
 		archivoPersistirControl();
@@ -1743,6 +1737,19 @@ Nodo* nodoBuscar(String nombre) {
 	}
 
 	return listaBuscar(listaNodos, (Puntero)buscarPorNombre);
+}
+
+void nodoConfigurar(Nodo* nodo, Puntero datos, Socket nuevoSocket) {
+	String* tokens = rutaSeparar(datos);
+	stringCopiar(nodo->nombre, tokens[0]);
+	stringCopiar(nodo->ip, tokens[1]);
+	stringCopiar(nodo->puerto, tokens[2]);
+	nodo->socket = nuevoSocket;
+	nodo->estado = ACTIVADO;
+	memoriaLiberar(tokens[0]);
+	memoriaLiberar(tokens[1]);
+	memoriaLiberar(tokens[2]);
+	memoriaLiberar(tokens);
 }
 
 //--------------------------------------- Funciones de Bloque-------------------------------------

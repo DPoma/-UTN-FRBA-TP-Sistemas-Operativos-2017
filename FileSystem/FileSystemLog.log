@@ -1,7 +1,9 @@
-[INFO] 13:30:54:780 FileSystem/(9275:9275): [EJECUCION] Proceso File System inicializado
-[INFO] 13:30:54:838 FileSystem/(9275:9275): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 13:30:54:839 FileSystem/(9275:9275): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 13:30:54:840 FileSystem/(9275:9275): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
-[INFO] 13:30:56:447 FileSystem/(9275:9275): [CONEXION] El NODO4 se ha conectado
-[INFO] 13:31:06:27 FileSystem/(9275:9275): [CONEXION] El NODO4 se ha conectado
-[INFO] 13:31:12:815 FileSystem/(9275:9275): [EJECUCION] Proceso File System finalizado
+[INFO] 14:51:47:600 FileSystem/(10406:10406): [EJECUCION] Proceso File System inicializado
+[INFO] 14:51:47:658 FileSystem/(10406:10406): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 14:51:47:659 FileSystem/(10406:10406): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 14:51:47:660 FileSystem/(10406:10406): [CONEXION] Esperando conexiones de Workers (Puerto: 5080)
+[INFO] 14:51:47:660 FileSystem/(10406:10406): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
+[INFO] 14:51:53:399 FileSystem/(10406:10411): [ESTADO] El File System ha sido formateado
+[INFO] 14:51:56:740 FileSystem/(10406:10406): [ERROR] No se permite conexiones de nuevos Nodos
+[INFO] 14:52:00:960 FileSystem/(10406:10406): [ERROR] No se permite conexiones de nuevos Nodos
+[INFO] 14:52:27:674 FileSystem/(10406:10406): [EJECUCION] Proceso File System finalizado

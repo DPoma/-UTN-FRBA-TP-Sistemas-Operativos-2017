@@ -83,6 +83,7 @@ typedef struct {
 typedef struct {
 	char puertoYama[20];
 	char puertoDataNode[20];
+	char puertoWorker[20];
 	char rutaMetadata[MAX_NOMBRE];
 } Configuracion;
 
@@ -142,7 +143,7 @@ typedef struct __attribute__((packed)) {
 
 //--------------------------------------- Variables globales -------------------------------------
 
-String campos[3];
+String campos[4];
 Configuracion* configuracion;
 ArchivoLog archivoLog;
 int estadoFileSystem;
