@@ -1245,9 +1245,15 @@ void directorioPersistir(){
 	int indice;
 	for(indice = 0; indice < listaCantidadElementos(listaDirectorios); indice++) {
 		Directorio* directorio = listaObtenerElemento(listaDirectorios, indice);
-		String entrada = string_from_format("%i;%s;%i\n",directorio->identificador, directorio->nombre, directorio->identificadorPadre);
-		fprintf(archivoDirectorio, "%s", entrada);
-		memoriaLiberar(entrada);
+		String lineaIdentificador = string_from_format("IDENTIFICADOR%i=%i\n", indice, directorio->identificador);
+		String lineaNombre = string_from_format("NOMBRE%i=%i\n", indice, directorio->nombre);
+		String lineaPadre = string_from_format("PADRE%i=%i\n", indice, directorio->identificadorPadre);
+		fprintf(archivoDirectorio, "%s", lineaIdentificador);
+		fprintf(archivoDirectorio, "%s", lineaNombre);
+		fprintf(archivoDirectorio, "%s", lineaPadre);
+		memoriaLiberar(lineaIdentificador);
+		memoriaLiberar(lineaNombre);
+		memoriaLiberar(lineaPadre);
 	}
 	fileCerrar(archivoDirectorio);
 }
@@ -1566,12 +1572,14 @@ void archivoPersistirControl(){
 	int indice;
 	for(indice = 0; indice < listaCantidadElementos(listaArchivos); indice++) {
 		Archivo* archivo = listaObtenerElemento(listaArchivos, indice);
-		String entrada = string_from_format("%s;%i\n", archivo->nombre, archivo->identificadorPadre);
-		fprintf(file, "%s", entrada);
-		memoriaLiberar(entrada);
+		String lineaNombre = string_from_format("NOMBRE%i=%i\n", indice, archivo->nombre);
+		String lineaPadre = string_from_format("PADRE%i=%i\n", indice, archivo->identificadorPadre);
+		fprintf(file, "%s", lineaNombre);
+		fprintf(file, "%s", lineaPadre);
+		memoriaLiberar(lineaNombre);
+		memoriaLiberar(lineaPadre);
 	}
 	fileCerrar(file);
-
 }
 
 bool archivoOrdenarPorNombre(Archivo* unArchivo, Archivo* otroArchivo) {
@@ -1608,37 +1616,7 @@ void nodoDestruir(Nodo* nodo) {
 	memoriaLiberar(nodo);
 }
 
-void nodoRecuperarEstadoAnterior() {
-	listaNodos = listaCrear();
-	listaArchivos = listaCrear();
-	imprimirMensaje(archivoLog, "[ESTADO] Recuperando estado anterior");
-	ArchivoConfig archivoNodo = config_create(rutaNodos);
-	int indice;
-	int nodosConectados = archivoConfigEnteroDe(archivoNodo, "NODOS_CONECTADOS");
-	for(indice = 0; indice < nodosConectados; indice++) {
-		String campo = memoriaAlocar(30);
-		stringCopiar(campo, "NOMBRE_NODO");
-		String numeroNodo = stringConvertirEntero(indice);
-		stringConcatenar(campo,numeroNodo);
-		memoriaLiberar(numeroNodo);
-		String nombreNodo = archivoConfigStringDe(archivoNodo, campo);
-		memoriaLiberar(campo);
-		campo = memoriaAlocar(30);
-		stringCopiar(campo, nombreNodo);
-		stringConcatenar(campo, "_BLOQUES_TOTALES");
-		int bloquesTotales = archivoConfigEnteroDe(archivoNodo, campo);
-		memoriaLiberar(campo);
-		campo = memoriaAlocar(30);
-		stringCopiar(campo, nombreNodo);
-		stringConcatenar(campo, "_BLOQUES_LIBRES");
-		int bloquesLibres = archivoConfigEnteroDe(archivoNodo, campo);
-		Nodo* nodo = nodoCrear(bloquesTotales, bloquesLibres, 0);
-		stringCopiar(nodo->nombre,nombreNodo);
-		memoriaLiberar(campo);
-		listaAgregarElemento(listaNodos, nodo);
-	}
-	archivoConfigDestruir(archivoNodo);
-}
+
 
 void nodoPersistirConectados() {
 	File archivo = fileAbrir(rutaNodos, "w");
@@ -1887,20 +1865,25 @@ BloqueNodo* bloqueNodoCrear(Entero numeroBloque, String buffer, int tamanioUtili
 }
 
 
-void archivoRecuperarControl() {
-	String buffer = stringCrear(MAX_STRING);
-	File file = fileAbrir(rutaArchivos, LECTURA);
-	while(fgets(buffer, MAX_STRING, file) != NULL) {
-		Puntero puntero;
-		Archivo* archivo;
-		//stringCopiar(archivo->nombre, strtok_r(buffer, ";" &puntero));
-		//archivo->identificadorPadre = atoi(strok_r(buffer, ";" &puntero));
+void archivoRecuperarPersistenciaControl() {
+	listaArchivos = listaCrear();
+	ArchivoConfig config = config_create(rutaDirectorios);
+	int cantidadArchivos = archivoConfigEnteroDe(config, "ARCHIVOS");
+	int indice;
+	for(indice = 0; indice < cantidadArchivos; indice++) {
+		String lineaNombre = string_from_format("NOMBRE%i", indice);
+		String lineaPadre = string_from_format("PADRE%i", indice);
+		Archivo* archivo = memoriaAlocar(sizeof(Archivo));
+		stringCopiar(archivo->nombre, archivoConfigStringDe(config, lineaNombre));
+		archivo->identificadorPadre = archivoConfigEnteroDe(config, lineaPadre);
 		listaAgregarElemento(listaArchivos, archivo);
+		memoriaLiberar(lineaNombre);
+		memoriaLiberar(lineaPadre);
 	}
-	fileCerrar(file);
+	archivoConfigDestruir(config);
 }
 
-void archivoRecuperar(Archivo* archivo) {
+void archivoRecuperarPersistencia(Archivo* archivo) {
 	String ruta = string_from_format("%s/%i/%s", rutaDirectorioArchivos, archivo->identificadorPadre, archivo->nombre);
 	ArchivoConfig config = config_create(ruta);
 	memoriaLiberar(ruta);
@@ -1927,14 +1910,14 @@ void archivoRecuperar(Archivo* archivo) {
 			stringCopiar(copia->nombreNodo, datosCopia[1]);
 			listaAgregarElemento(bloque->listaCopias, copia);
 		}
-		listaAgregarElemento(listaAgregar, archivo);
+		listaAgregarElemento(listaArchivos, archivo);
 		archivoConfigDestruir(config);
 	}
 
 }
 
-
-void directorioRecuperar() {
+void directorioRecuperarPersistencia() {
+	listaDirectorios = listaCrear();
 	ArchivoConfig config = config_create(rutaDirectorios);
 	int cantidadDirectorios = archivoConfigEnteroDe(config, "DIRECTORIOS");
 	int indice;
@@ -1951,9 +1934,26 @@ void directorioRecuperar() {
 		memoriaLiberar(lineaNombre);
 		memoriaLiberar(lineaPadre);
 	}
-	archivoConfigDestruir(config);;
+	archivoConfigDestruir(config);
 }
 
-void nodoRecuperar() {
-
+void nodoRecuperarEstadoAnterior() {
+	listaNodos = listaCrear();
+	ArchivoConfig config = config_create(rutaNodos);
+	int cantidadNodos = archivoConfigEnteroDe(config, "NODOS");
+	int indice;
+	for(indice = 0; indice < cantidadNodos; indice++) {
+		String lineaNombre = string_from_format("NOMBRE%i", indice);
+		String lineaTotales = string_from_format("BLOQUES_TOTALES%i", indice);
+		String lineaLibres = string_from_format("BLOQUES_LIBRES%i", indice);
+		Nodo* nodo = memoriaAlocar(sizeof(Nodo));
+		stringCopiar(nodo->nombre, archivoConfigStringDe(config, lineaNombre));
+		nodo->bloquesTotales = archivoConfigEnteroDe(config, lineaTotales);
+		nodo->bloquesLibres = archivoConfigEnteroDe(config, lineaLibres);
+		memoriaLiberar(lineaNombre);
+		memoriaLiberar(lineaTotales);
+		memoriaLiberar(lineaLibres);
+		listaAgregarElemento(listaNodos, nodo);
+	}
+	archivoConfigDestruir(config);
 }
