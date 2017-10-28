@@ -1242,11 +1242,12 @@ void directorioMostrarArchivos(int identificadorPadre) {
 void directorioPersistir(){
 	File archivoDirectorio = fileAbrir(rutaDirectorios, ESCRITURA);
 	listaOrdenar(listaDirectorios, (Puntero)directorioOrdenarPorIdentificador);
+	fprintf(archivoDirectorio, "DIRECTORIOS=%i\n", listaCantidadElementos(listaDirectorios));
 	int indice;
 	for(indice = 0; indice < listaCantidadElementos(listaDirectorios); indice++) {
 		Directorio* directorio = listaObtenerElemento(listaDirectorios, indice);
 		String lineaIdentificador = string_from_format("IDENTIFICADOR%i=%i\n", indice, directorio->identificador);
-		String lineaNombre = string_from_format("NOMBRE%i=%i\n", indice, directorio->nombre);
+		String lineaNombre = string_from_format("NOMBRE%i=%s\n", indice, directorio->nombre);
 		String lineaPadre = string_from_format("PADRE%i=%i\n", indice, directorio->identificadorPadre);
 		fprintf(archivoDirectorio, "%s", lineaIdentificador);
 		fprintf(archivoDirectorio, "%s", lineaNombre);
@@ -1553,10 +1554,12 @@ void archivoPersistir(Archivo* archivo) {
 	fprintf(file, "NOMBRE=%s\n", archivo->nombre);
 	fprintf(file, "ID_PADRE=%i\n", archivo->identificadorPadre);
 	fprintf(file, "TIPO=%s\n", archivo->tipo);
+	fprintf(file, "BLOQUES=%i\n", listaCantidadElementos(archivo->listaBloques));
 	int indice;
 	for(indice = 0; indice < listaCantidadElementos(archivo->listaBloques); indice++) {
 		Bloque* bloque = listaObtenerElemento(archivo->listaBloques, indice);
 		fprintf(file, "BLOQUE%i_BYTES=%i\n",indice, bloque->bytesUtilizados);
+		fprintf(file, "BLOQUE%i_COPIAS=%i\n",indice, listaCantidadElementos(bloque->listaCopias));
 		int indiceCopia;
 		for(indiceCopia = 0; indiceCopia < listaCantidadElementos(bloque->listaCopias); indiceCopia++) {
 			Copia* copiaBloque = listaObtenerElemento(bloque->listaCopias, indiceCopia);
@@ -1569,10 +1572,11 @@ void archivoPersistir(Archivo* archivo) {
 void archivoPersistirControl(){
 	File file = fileAbrir(rutaArchivos, ESCRITURA);
 	listaOrdenar(listaArchivos, (Puntero)archivoOrdenarPorNombre);
+	fprintf(file, "ARCHIVOS=%i\n", listaCantidadElementos(listaArchivos));
 	int indice;
 	for(indice = 0; indice < listaCantidadElementos(listaArchivos); indice++) {
 		Archivo* archivo = listaObtenerElemento(listaArchivos, indice);
-		String lineaNombre = string_from_format("NOMBRE%i=%i\n", indice, archivo->nombre);
+		String lineaNombre = string_from_format("NOMBRE%i=%s\n", indice, archivo->nombre);
 		String lineaPadre = string_from_format("PADRE%i=%i\n", indice, archivo->identificadorPadre);
 		fprintf(file, "%s", lineaNombre);
 		fprintf(file, "%s", lineaPadre);
@@ -1619,22 +1623,22 @@ void nodoDestruir(Nodo* nodo) {
 
 
 void nodoPersistirConectados() {
-	File archivo = fileAbrir(rutaNodos, "w");
+	File archivo = fileAbrir(rutaNodos, ESCRITURA);
+	fprintf(archivo, "NODOS=%i\n", listaCantidadElementos(listaNodos));
 	int indice;
 	int contadorBloquesTotales = 0;
 	int contadorBloquesLibres = 0;
 	for(indice = 0; indice < listaCantidadElementos(listaNodos); indice++) {
 		Nodo* unNodo = listaObtenerElemento(listaNodos, indice);
-		fprintf(archivo, "NOMBRE_NODO=%s\n", unNodo->nombre);
-		fprintf(archivo, "%s_BLOQUES_TOTALES=%i\n", unNodo->nombre, unNodo->bloquesTotales);
-		fprintf(archivo, "%s_BLOQUES_LIBRES=%i\n",unNodo->nombre, unNodo->bloquesLibres);
+		fprintf(archivo, "NOMBRE%i=%s\n",indice, unNodo->nombre);
+		fprintf(archivo, "BLOQUES_TOTALES%i=%i\n", indice, unNodo->bloquesTotales);
+		fprintf(archivo, "BLOQUES_LIBRES%i=%i\n",indice, unNodo->bloquesLibres);
 		contadorBloquesTotales+=unNodo->bloquesTotales;
 		contadorBloquesLibres+=unNodo->bloquesLibres;
 		nodoPersistirBitmap(listaObtenerElemento(listaNodos, indice));
 	}
-	fprintf(archivo, "NODOS_CONECTADOS=%i\n", indice);
-	fprintf(archivo, "BLOQUES_LIBRES=%i\n", contadorBloquesLibres);
 	fprintf(archivo, "BLOQUES_TOTALES=%i\n", contadorBloquesTotales);
+	fprintf(archivo, "BLOQUES_LIBRES=%i\n", contadorBloquesLibres);
 	fileCerrar(archivo);
 }
 
@@ -1774,11 +1778,12 @@ void metadataIniciar() {
 	bitmapDirectorios = bitmapCrear(13);
 	directoriosDisponibles = MAX_DIR;
 	directorioCrearConPersistencia(0, "root", -1);
-	//testCabecita();
 }
 
 void metadataRecuperar() {
-
+	archivoRecuperarPersistencia();
+	directorioRecuperarPersistencia();
+	nodoRecuperarPersistencia();
 }
 
 //--------------------------------------- Funciones de Ruta------------------------------------
@@ -1865,9 +1870,9 @@ BloqueNodo* bloqueNodoCrear(Entero numeroBloque, String buffer, int tamanioUtili
 }
 
 
-void archivoRecuperarPersistenciaControl() {
+void archivoRecuperarPersistencia() {
 	listaArchivos = listaCrear();
-	ArchivoConfig config = config_create(rutaDirectorios);
+	ArchivoConfig config = config_create(rutaArchivos);
 	int cantidadArchivos = archivoConfigEnteroDe(config, "ARCHIVOS");
 	int indice;
 	for(indice = 0; indice < cantidadArchivos; indice++) {
@@ -1879,11 +1884,12 @@ void archivoRecuperarPersistenciaControl() {
 		listaAgregarElemento(listaArchivos, archivo);
 		memoriaLiberar(lineaNombre);
 		memoriaLiberar(lineaPadre);
+		archivoRecuperarPersistenciaEspecifica(archivo);
 	}
 	archivoConfigDestruir(config);
 }
 
-void archivoRecuperarPersistencia(Archivo* archivo) {
+void archivoRecuperarPersistenciaEspecifica(Archivo* archivo) {
 	String ruta = string_from_format("%s/%i/%s", rutaDirectorioArchivos, archivo->identificadorPadre, archivo->nombre);
 	ArchivoConfig config = config_create(ruta);
 	memoriaLiberar(ruta);
@@ -1892,28 +1898,28 @@ void archivoRecuperarPersistencia(Archivo* archivo) {
 	archivo->listaBloques = listaCrear();
 	int cantidadBloques = archivoConfigEnteroDe(config, "BLOQUES");
 	for(indiceBloques = 0; indiceBloques < cantidadBloques; indiceBloques++) {
-		String lineaBloque = string_from_format("BLOQUE%i_BYTES", indiceBloques);
 		Bloque* bloque = memoriaAlocar(sizeof(Bloque));
+		String lineaBloque = string_from_format("BLOQUE%i_BYTES", indiceBloques);
 		bloque->numeroBloque = indiceBloques;
 		bloque->bytesUtilizados = archivoConfigEnteroDe(config, lineaBloque);
 		memoriaLiberar(lineaBloque);
 		listaAgregarElemento(archivo->listaBloques, bloque);
 		bloque->listaCopias = listaCrear();
-		int cantidadCopias = archivoConfigEnteroDe(config, "BLOQUE%i_COPIAS");
+		String lineaCantidadCopias = string_from_format("BLOQUE%i_COPIAS", indiceBloques);
+		int cantidadCopias = archivoConfigEnteroDe(config, lineaCantidadCopias);
+		memoriaLiberar(lineaCantidadCopias);
 		int indiceCopias;
 		for(indiceCopias=0; indiceCopias < cantidadCopias; indiceCopias++) {
 			Copia* copia = memoriaAlocar(sizeof(Copia));
 			String lineaCopia = string_from_format("BLOQUE%i_COPIA%i", indiceBloques, indiceCopias);
 			String* datosCopia = archivoConfigArrayDe(config, lineaCopia);
 			memoriaLiberar(lineaCopia);
-			copia->bloqueNodo = atoi(datosCopia[0]);
-			stringCopiar(copia->nombreNodo, datosCopia[1]);
+			stringCopiar(copia->nombreNodo, datosCopia[0]);
+			copia->bloqueNodo = atoi(datosCopia[1]);
 			listaAgregarElemento(bloque->listaCopias, copia);
 		}
-		listaAgregarElemento(listaArchivos, archivo);
-		archivoConfigDestruir(config);
 	}
-
+	archivoConfigDestruir(config);
 }
 
 void directorioRecuperarPersistencia() {
@@ -1937,7 +1943,7 @@ void directorioRecuperarPersistencia() {
 	archivoConfigDestruir(config);
 }
 
-void nodoRecuperarEstadoAnterior() {
+void nodoRecuperarPersistencia() {
 	listaNodos = listaCrear();
 	ArchivoConfig config = config_create(rutaNodos);
 	int cantidadNodos = archivoConfigEnteroDe(config, "NODOS");
@@ -1954,6 +1960,18 @@ void nodoRecuperarEstadoAnterior() {
 		memoriaLiberar(lineaTotales);
 		memoriaLiberar(lineaLibres);
 		listaAgregarElemento(listaNodos, nodo);
+		nodoRecuperarPersistenciaBitmap(nodo);
 	}
 	archivoConfigDestruir(config);
+}
+
+void nodoRecuperarPersistenciaBitmap(Nodo* nodo) {
+	String ruta = string_from_format("%s/%s", rutaDirectorioBitmaps, nodo->nombre);
+	File file = fileAbrir(ruta, LECTURA);
+	nodo->bitmap = bitmapCrear(nodo->bloquesTotales);
+	//int
+	int indice;
+	for(indice = 0; indice < nodo->bloquesTotales; indice++) {
+		//fread(buffer, sizeof(char), 1, file);
+	}
 }

@@ -308,6 +308,7 @@ void directorioCrearMetadata(Entero identificador);
 void directorioEliminarMetadata(Entero identificador);
 bool directorioEsHijoDe(Directorio* hijo, Directorio* padre);
 bool directorioOrdenarPorIdentificador(Directorio* unDirectorio, Directorio* otroDirectorio);
+void directorioRecuperarPersistencia();
 
 //--------------------------------------- Funciones de Archivo -------------------------------------
 
@@ -322,6 +323,8 @@ int archivoObtenerPosicion(Archivo* archivo);
 void archivoPersistirEliminarBloque(Archivo* archivo, int numeroBloque, int numeroCopia);
 void archivoPersistirControl();
 bool archivoOrdenarPorNombre(Archivo* unArchivo, Archivo* otroArchivo);
+void archivoRecuperarPersistencia();
+void archivoRecuperarPersistenciaEspecifica(Archivo* archivo);
 
 //--------------------------------------- Funciones de Nodo -------------------------------------
 
@@ -329,7 +332,7 @@ Nodo* nodoCrear(int bloquesTotales, int bloquesLibres, Socket unSocket);
 void nodoPersistirConectados();
 void nodoLimpiarLista();
 void nodoDestruir(Nodo* nodo);
-void nodoRecuperarEstadoAnterior();
+void nodoRecuperarPersistencia();
 void nodoPersistirBitmap(Nodo* nodo);
 void nodoFormatear(Nodo* nodo);
 void nodoFormatearConectados();
