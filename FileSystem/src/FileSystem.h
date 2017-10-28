@@ -54,9 +54,11 @@
 #define MAX_DIR 100
 #define MAX_COPIAS 2
 
+#define IDENTIFICAR_NODO 100
 #define LEER_BLOQUE 101
 #define ESCRIBIR_BLOQUE 102
 #define COPIAR_BLOQUE 103
+
 
 //--------------------------------------- Estructuras -------------------------------------
 
@@ -120,9 +122,10 @@ typedef struct {
 	char puerto[20];
 	char ip[20];
 	char nombre[10];
-	Bitmap* bitmap;
+	int estado;
 	int bloquesLibres;
 	int bloquesTotales;
+	Bitmap* bitmap;
 	Socket socket;
 } Nodo;
 

@@ -243,7 +243,7 @@ int handShakeRecepcionFallida(Socket unSocket, int idEsperada) {
 
 void handShakeError(Socket unSocket) {
 	socketCerrar(unSocket);
-	imprimirMensajeProceso("ERROR: No se pueden realizar conexiones con este proceso en este puerto");
+	imprimirMensajeProceso("[ERROR] No se pueden realizar conexiones con este proceso en este puerto");
 	exit(EXIT_FAILURE);
 }
 

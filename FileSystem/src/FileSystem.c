@@ -26,7 +26,7 @@ void fileSystemIniciar(String flag) {
 	pantallaLimpiar();
 	configuracionIniciarLog();
 	configuracionIniciar();
-	estadoSeguro = 0;
+	estadoSeguro = DESACTIVADO;
 	fileSystemActivar();
 	listaNodos = listaCrear();
 	if(!stringIguales(flag, FLAG_C))
@@ -148,23 +148,44 @@ void servidorEsperarSolicitud(Servidor* servidor) {
 	socketSelect(servidor->maximoSocket, &servidor->listaSelect);
 }
 
+void servidorFinalizarNodo(Servidor* servidor, Socket unSocket) {
 
-void servidorFinalizarConexion(Servidor* servidor, Socket unSocket) {
-
-	bool buscarNodoPorSocket(void* unNodo) {
-		Nodo* nodo = (Nodo*)unNodo;;
+	bool nodoBuscarPorSocket(Nodo* nodo) {
 		return nodo->socket == unSocket;
 	}
 
-	listaSocketsEliminar(unSocket, &servidor->listaMaster);
-	if(socketEsDataNode(servidor, unSocket)) {
-		listaSocketsEliminar(unSocket, &servidor->listaDataNodes);
-		listaEliminarDestruyendoPorCondicion(listaNodos, (Puntero)buscarNodoPorSocket, (Puntero)nodoDestruir);
-		imprimirMensaje(archivoLog, "[CONEXION] Un proceso Data Node se ha desconectado");
-	}
+	Nodo* nodo = listaBuscar(listaNodos, (Puntero)nodoBuscarPorSocket);
+	listaSocketsEliminar(unSocket, &servidor->listaDataNodes);
+	imprimirMensajeUno(archivoLog, "[CONEXION] El %s se ha desconectado", nodo->nombre);
+	if(estadoSeguro == DESACTIVADO)
+		listaEliminarDestruyendoPorCondicion(listaNodos, (Puntero)nodoBuscarPorSocket, (Puntero)nodoDestruir);
 	else
-		imprimirMensaje(archivoLog, "[CONEXION] El proceso YAMA se ha desconectado");
+		nodo->estado = DESACTIVADO;
+
+}
+
+void servidorFinalizarYama() {
+	imprimirMensaje(archivoLog, "[CONEXION] El proceso YAMA se ha desconectado");
+}
+
+void servidorFinalizarWorker() {
+
+}
+
+void servidorFinalizarProceso(Servidor* servidor, Socket unSocket) {
+	if(socketEsDataNode(servidor, unSocket))
+		servidorFinalizarNodo(servidor, unSocket);
+	else if(socketEsWorker(servidor, unSocket))
+		servidorFinalizarWorker();
+	else
+		servidorFinalizarYama();
+
+}
+
+void servidorFinalizarConexion(Servidor* servidor, Socket unSocket) {
 	socketCerrar(unSocket);
+	listaSocketsEliminar(unSocket, &servidor->listaMaster);
+	servidorFinalizarProceso(servidor, unSocket);
 }
 
 void servidorRegistrarConexion(Servidor* servidor, Socket unSocket) {
@@ -256,13 +277,42 @@ void servidorFinalizar(Servidor* servidor) {
 	memoriaLiberar(servidor);
 }
 
+void servidorRegistrarEstadoSeguro(Servidor* servidor, Socket nuevoSocket) {
+	servidorRegistrarConexion(servidor, nuevoSocket);
+	Mensaje* mensaje = mensajeRecibir(nuevoSocket);
+	servidorRecibirDatosDataNode(mensaje->datos);
+	Nodo* nodo = nodoBuscar(nombre);
+	if(nodo == NULL) {
+		servidorFinalizarConexion(nuevoSocket);
+		imprimirMensaje(archivoLog, "[ERROR] No se permite conexiones de nuevos Nodos");
+		return;
+	} else {
+		nodo->socket = nuevoSocket;
+		nodo->estado = ACTIVADO;
+	}
+}
+
+void servidorRegistrarEstadoInseguro(Servidor* servidor, Socket nuevoSocket) {
+	servidorRegistrarConexion(servidor, nuevoSocket);
+	Nodo* nodo = nodoCrear(0, 0, nuevoSocket);
+	listaAgregarElemento(listaNodos, nodo);
+}
+
 void servidorRegistrarDataNode(Servidor* servidor, Socket nuevoSocket) {
-	if(nuevoSocket != ERROR) {
 		//if(estadoSeguro == 0) { TODO POnerlo lindo y cuando hago format que no
 		//elimine de la lista en caso de que se desconecten
-			listaSocketsAgregar(nuevoSocket, &servidor->listaDataNodes);
-			Mensaje* mensaje = mensajeRecibir(nuevoSocket);
-			Nodo* nodo = nodoCrear(20480, 20480, nuevoSocket);
+		if(estadoEsSeguro())
+			servidorRegistrarEstadoSeguro(nuevoSocket);
+		else
+			servidorRegistrarEstadoInseguro(nuevoSocket);
+		servidorRegistrarConexion(servidor, nuevoSocket); // este en arriba
+
+
+			nodo->socket = nuevoSocket;
+			nodoHabilitarConexion(nodo); //Seria activar un flag
+
+
+			Nodo* nodo = nodoCrear(20480, 20480, nuevoSocket); // El nodo deberia avisar sus dtos conexion y los bloques que tiene, su nombre
 			memcpy(nodo->nombre, mensaje->datos, 10);
 			memcpy(nodo->ip, mensaje->datos+10, 20);
 			memcpy(nodo->puerto, mensaje->datos+30, 20);
@@ -278,7 +328,6 @@ void servidorRegistrarDataNode(Servidor* servidor, Socket nuevoSocket) {
 			//listaAgregarElemento(listaNodos, nodo);
 			//imprimirMensaje(archivoLog, "[CONEXION] Un proceso Data Node se ha reconectado");
 		//}
-	}
 }
 
 void servidorAtenderPedidos(Servidor* servidor) {
@@ -1597,6 +1646,7 @@ Nodo* nodoCrear(int bloquesTotales, int bloquesLibres, Socket unSocket) {
 	nodo->bloquesTotales = bloquesTotales;
 	nodo->bloquesLibres = bloquesLibres;
 	nodo->socket = unSocket;
+	nodo->estado = ACTIVADO;
 	nodo->bitmap = bitmapCrear(nodo->bloquesTotales);
 	return nodo;
 }
