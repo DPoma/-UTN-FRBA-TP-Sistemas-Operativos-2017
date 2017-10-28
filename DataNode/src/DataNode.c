@@ -21,32 +21,18 @@ int main(void) {
 //--------------------------------------- Funciones de DataNode -------------------------------------
 
 void dataNodeIniciar() {
-	pantallaLimpiar();
-	imprimirMensajeProceso("# PROCESO DATA NODE");
-	archivoLog = archivoLogCrear(RUTA_LOG, "DataNode");
-	configuracionIniciarCampos();
-	configuracion = configuracionCrear(RUTA_CONFIG, (Puntero)configuracionLeerArchivo, campos);
-	configuracionImprimir(configuracion);
-	dataBinAbrir();
-	punteroDataBin = dataBinMapear();
-	//senialAsignarFuncion(SIGINT, funcionSenial);
+	configuracionIniciar();
 	dataNodeActivar();
-	dataBinCalcularBloques();
-	imprimirMensajeDos(archivoLog, "[CONEXION] Estableciendo conexion con File System (IP: %s | Puerto %s)", configuracion->ipFileSystem, configuracion->puertoFileSystem);
-	socketFileSystem = socketCrearCliente(configuracion->ipFileSystem, configuracion->puertoFileSystem, ID_DATANODE);
-	Puntero datos = memoriaAlocar(50);
-	char ip[20] = "127.0.0.0";
-	memcpy(datos, configuracion->nombreNodo ,10);
-	memcpy(datos+10, ip , 20);
-	memcpy(datos+30, configuracion->puertoFileSystem ,20);
-	mensajeEnviar(socketFileSystem, 14, datos, 50);
-	memoriaLiberar(datos);
+	dataBinConfigurar();
+	//senialAsignarFuncion(SIGINT, funcionSenial);
+	dataNodeConectarAFS();
 }
 
 void dataNodeAtenderFileSystem(){
 	Mensaje* mensaje = mensajeRecibir(socketFileSystem);
 	switch(mensaje->header.operacion){
 		case DESCONEXION: dataNodeDesconectarFS(); break;
+		case ACEPTACION: dataNodeAceptado(); break;
 		case LEER_BLOQUE: bloqueLeer(mensaje->datos); break;
 		case ESCRIBIR_BLOQUE: bloqueEscribir(mensaje->datos); break;
 		case COPIAR_BLOQUE: bloqueCopiarEnNodo(mensaje->datos); break;
@@ -63,7 +49,7 @@ void dataNodeFinalizar(){
 }
 
 void dataNodeDesconectarFS() {
-	imprimirMensaje(archivoLog, "[CONEXION] El File System se desconecto");
+	imprimirMensaje(archivoLog, ROJO"[CONEXION] El File System se desconecto o rechazo la conexion"BLANCO);
 	dataNodeDesactivar();
 }
 
@@ -81,6 +67,22 @@ void dataNodeActivar() {
 
 void dataNodeDesactivar() {
 	estadoDataNode = DESACTIVADO;
+}
+
+void dataNodeAceptado() {
+	imprimirMensaje(archivoLog, "[CONEXION] Conexion establecida con el File System, esperando instrucciones");
+}
+
+void dataNodeConectarAFS() {
+	socketFileSystem = socketCrearCliente(configuracion->ipFileSystem, configuracion->puertoFileSystem, ID_DATANODE);
+	Puntero datos = memoriaAlocar(50);
+	char ip[20] = "127.0.0.0"; //TODO agregar campo al archivo de config
+	memcpy(datos, configuracion->nombreNodo ,10);
+	memcpy(datos+10, ip , 20);
+	memcpy(datos+30, configuracion->puertoFileSystem ,20);
+	mensajeEnviar(socketFileSystem, NULO, datos, 50);
+	memoriaLiberar(datos);
+	imprimirMensajeDos(archivoLog, "[CONEXION] Estableciendo conexion con File System (IP: %s | Puerto %s)", configuracion->ipFileSystem, configuracion->puertoFileSystem);
 }
 
 //--------------------------------------- Funciones de Configuracion -------------------------------------
@@ -108,6 +110,20 @@ void configuracionIniciarCampos() {
 	campos[3] = "PUERTO_WORKER";
 	campos[4] = "RUTA_DATABIN";
 }
+
+void configuracionIniciarLog() {
+	pantallaLimpiar();
+	imprimirMensajeProceso("# PROCESO DATA NODE");
+	archivoLog = archivoLogCrear(RUTA_LOG, "DataNode");
+}
+
+void configuracionIniciar() {
+	configuracionIniciarLog();
+	configuracionIniciarCampos();
+	configuracion = configuracionCrear(RUTA_CONFIG, (Puntero)configuracionLeerArchivo, campos);
+	configuracionImprimir(configuracion);
+}
+
 
 //--------------------------------------- Funciones de bloques -------------------------------------
 
@@ -186,6 +202,12 @@ void dataBinCalcularBloques() {
 	imprimirMensajeUno(archivoLog, "[DATABIN] Cantidad de bloques disponibles %i", (int*)dataBinBloques);
 }
 
+void dataBinConfigurar() {
+	dataBinAbrir();
+	punteroDataBin = dataBinMapear();
+	dataBinCalcularBloques();
+}
+
 //--------------------------------------- Funciones varias -------------------------------------
 
 Bloque getBloque(Entero numeroBloque) {
@@ -201,9 +223,6 @@ void setBloque(Entero numeroBloque, Puntero datos) {
 }
 
 void funcionSenial(int senial) {
-	socketCerrar(socketFileSystem);
 	dataNodeDesactivar();
-	//dataNodeFinalizar();
 	puts("");
-	//exit(1);
 }

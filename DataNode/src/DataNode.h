@@ -13,12 +13,15 @@
 #define RUTA_CONFIG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Worker/NodoConfig.conf"
 #define RUTA_LOG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/DataNode/DataNodeLog.log"
 
+#define ACEPTACION 100
 #define LEER_BLOQUE 101
 #define ESCRIBIR_BLOQUE 102
 #define COPIAR_BLOQUE 103
 
 
 //--------------------------------------- Estructuras -------------------------------------
+
+typedef void* Bloque;
 
 typedef struct {
 	char ipFileSystem[20];
@@ -28,7 +31,7 @@ typedef struct {
 	char rutaDataBin[255];
 } Configuracion;
 
-typedef void* Bloque;
+
 //--------------------------------------- Variables Globales -------------------------------------
 
 int estadoDataNode;
@@ -46,6 +49,7 @@ File dataBin;
 Configuracion* configuracionLeerArchivo(ArchivoConfig archivoConfig);
 void configuracionImprimir(Configuracion* configuracion);
 void configuracionIniciarCampos();
+void configuracionIniciar();
 
 //--------------------------------------- Funciones de DataNode -------------------------------------
 
@@ -57,18 +61,21 @@ bool dataNodeDesactivado();
 void dataNodeActivar();
 void dataNodeDesactivar();
 void dataNodeDesconectarFS();
+void dataNodeConectarAFS();
+void dataNodeAceptado();
 
 //--------------------------------------- Funciones de DataBin -------------------------------------
 
 void dataBinAbrir();
-void bloqueLeer(Puntero datos);
-void bloqueEscribir(Puntero datos);
-void bloqueCopiarEnNodo(Puntero datos);
+void dataBinCalcularBloques();
 Puntero dataBinMapear();
 Puntero dataBinUbicarPuntero(Entero numeroBloque);
+void dataBinConfigurar();
 
-//--------------------------------------- Funciones Varias -------------------------------------
+//--------------------------------------- Funciones varias -------------------------------------
 
 Puntero getBloque(Entero numeroBloque);
 void setBloque(Entero numeroBloque, Puntero datos);
-void dataBinCalcularBloques();
+void bloqueLeer(Puntero datos);
+void bloqueEscribir(Puntero datos);
+void bloqueCopiarEnNodo(Puntero datos);

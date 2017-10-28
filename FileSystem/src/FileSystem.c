@@ -24,7 +24,6 @@ int main(int argc, String* argsv) {
 
 void fileSystemIniciar(String flag) {
 	pantallaLimpiar();
-	configuracionIniciarLog();
 	configuracionIniciar();
 	estadoSeguro = DESACTIVADO;
 	fileSystemActivar();
@@ -98,6 +97,7 @@ void configuracionIniciarCampos() {
 }
 
 void configuracionIniciar() {
+	configuracionIniciarLog();
 	configuracionIniciarCampos();
 	configuracion = configuracionCrear(RUTA_CONFIG, (Puntero)configuracionLeerArchivo, campos);
 	configuracionIniciarRutas();
@@ -282,17 +282,20 @@ void servidorFinalizarDataNode(Servidor* servidor, Socket unSocket) {
 
 
 void servidorRegistrarNodoEstadoSeguro(Servidor* servidor, Socket nuevoSocket, Puntero datos) {
-	Mensaje* mensaje = mensajeRecibir(nuevoSocket);
 	String nombre = stringCrear(10);
-	memcpy(nombre, mensaje->datos, 10);
+	memcpy(nombre, datos, 10);
 	Nodo* nodo = nodoBuscar(nombre);
 	memoriaLiberar(nombre);
 	if(nodo == NULL) {
 		servidorFinalizarConexion(servidor, nuevoSocket);
 		imprimirMensaje(archivoLog, "[ERROR] No se permite conexiones de nuevos Nodos");
 		return;
-	} else
+	}
+	else {
 		nodoConfigurar(nodo, datos, nuevoSocket);
+		mensajeEnviar(nuevoSocket, ACEPTAR_NODO, NULL, NULO);
+	}
+
 }
 
 void nodoConfigurar(Nodo* nodo, Puntero datos, Socket nuevoSocket) { //TODO sacar de aqui
