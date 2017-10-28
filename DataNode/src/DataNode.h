@@ -25,6 +25,7 @@ typedef void* Bloque;
 
 typedef struct {
 	char ipFileSystem[20];
+	char ipPropia[20];
 	char puertoFileSystem[20];
 	char nombreNodo[10];
 	char puertoWorker[20];
@@ -38,7 +39,7 @@ int estadoDataNode;
 int dataBinTamanio;
 int dataBinBloques;
 Puntero punteroDataBin;
-String campos[5];
+String campos[6];
 Socket socketFileSystem;
 Configuracion* configuracion;
 ArchivoLog archivoLog;

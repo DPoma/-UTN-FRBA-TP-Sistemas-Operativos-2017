@@ -1,8 +1,7 @@
-[INFO] 01:06:59:733 FileSystem/(6700:6700): [EJECUCION] Proceso File System inicializado
-[INFO] 01:06:59:830 FileSystem/(6700:6700): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 01:06:59:833 FileSystem/(6700:6700): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 01:06:59:834 FileSystem/(6700:6700): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
-[INFO] 01:07:18:102 FileSystem/(6700:6703): [BLOQUE] La copia N°1 del bloque N°5 del archivo /TODO ha sido eliminada
-[INFO] 01:07:39:253 FileSystem/(6700:6703): [DIRECTORIO] El archivo TODO fue movido a /home
-[INFO] 01:08:14:937 FileSystem/(6700:6703): [ERROR] El archivo no existe
-[INFO] 01:08:20:896 FileSystem/(6700:6703): [BLOQUE] La copia N°0 del bloque N°0 del archivo /home/TODO ha sido eliminada
+[INFO] 13:30:54:780 FileSystem/(9275:9275): [EJECUCION] Proceso File System inicializado
+[INFO] 13:30:54:838 FileSystem/(9275:9275): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 13:30:54:839 FileSystem/(9275:9275): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 13:30:54:840 FileSystem/(9275:9275): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
+[INFO] 13:30:56:447 FileSystem/(9275:9275): [CONEXION] El NODO4 se ha conectado
+[INFO] 13:31:06:27 FileSystem/(9275:9275): [CONEXION] El NODO4 se ha conectado
+[INFO] 13:31:12:815 FileSystem/(9275:9275): [EJECUCION] Proceso File System finalizado

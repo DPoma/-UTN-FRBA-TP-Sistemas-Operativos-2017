@@ -393,4 +393,4 @@ bool rutaEsNumero(String ruta);
 
 //--------------------------------------- Funciones Varias -------------------------------------
 BloqueNodo* bloqueNodoCrear(Entero numeroBloque, String buffer, int tamanioUtilizado);
-void testCabecita();
+String* stringSeparar2(String ruta, int caracter);

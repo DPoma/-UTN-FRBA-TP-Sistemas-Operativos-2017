@@ -73,15 +73,23 @@ void dataNodeAceptado() {
 	imprimirMensaje(archivoLog, "[CONEXION] Conexion establecida con el File System, esperando instrucciones");
 }
 
+void dataNodeEnviarDatos() {
+	Puntero datos = memoriaAlocar(50);
+	int longitudNombre = stringLongitud(configuracion->nombreNodo)+1;
+	int longitudIp = stringLongitud(configuracion->ipPropia)+1;
+	int longitudPuerto = stringLongitud(configuracion->puertoFileSystem)+1;
+	memcpy(datos, configuracion->nombreNodo ,longitudNombre);
+	memcpy(datos+longitudNombre, configuracion->ipPropia , longitudIp);
+	memcpy(datos+longitudNombre+longitudIp, configuracion->puertoFileSystem , longitudPuerto);
+	mensajeEnviar(socketFileSystem, NULO, datos, longitudNombre+longitudIp+longitudPuerto);
+	memoriaLiberar(datos);
+}
+
 void dataNodeConectarAFS() {
 	socketFileSystem = socketCrearCliente(configuracion->ipFileSystem, configuracion->puertoFileSystem, ID_DATANODE);
-	Puntero datos = memoriaAlocar(50);
-	char ip[20] = "127.0.0.0"; //TODO agregar campo al archivo de config
-	memcpy(datos, configuracion->nombreNodo ,10);
-	memcpy(datos+10, ip , 20);
-	memcpy(datos+30, configuracion->puertoFileSystem ,20);
-	mensajeEnviar(socketFileSystem, NULO, datos, 50);
-	memoriaLiberar(datos);
+	String mensaje = string_from_format("/%s/%s/%s", configuracion->nombreNodo, configuracion->ipPropia, configuracion->puertoFileSystem);
+	mensajeEnviar(socketFileSystem, NULO, mensaje, stringLongitud(mensaje)+1);
+	memoriaLiberar(mensaje);
 	imprimirMensajeDos(archivoLog, "[CONEXION] Estableciendo conexion con File System (IP: %s | Puerto %s)", configuracion->ipFileSystem, configuracion->puertoFileSystem);
 }
 
@@ -94,6 +102,7 @@ Configuracion* configuracionLeerArchivo(ArchivoConfig archivoConfig) {
 	stringCopiar(configuracion->nombreNodo, archivoConfigStringDe(archivoConfig, "NOMBRE_NODO"));
 	stringCopiar(configuracion->puertoWorker, archivoConfigStringDe(archivoConfig, "PUERTO_WORKER"));
 	stringCopiar(configuracion->rutaDataBin, archivoConfigStringDe(archivoConfig, "RUTA_DATABIN"));
+	stringCopiar(configuracion->ipPropia, archivoConfigStringDe(archivoConfig, "IP_PROPIA"));
 	archivoConfigDestruir(archivoConfig);
 	return configuracion;
 }
@@ -109,6 +118,7 @@ void configuracionIniciarCampos() {
 	campos[2] = "NOMBRE_NODO";
 	campos[3] = "PUERTO_WORKER";
 	campos[4] = "RUTA_DATABIN";
+	campos[5] = "IP_PROPIA";
 }
 
 void configuracionIniciarLog() {

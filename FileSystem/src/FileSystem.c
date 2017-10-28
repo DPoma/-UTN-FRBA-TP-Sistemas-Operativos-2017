@@ -155,7 +155,6 @@ void servidorAtenderSolicitudes(Servidor* servidor) {
 					nuevoSocket = servidorRegistrarWorker(servidor, unSocket);
 				else
 					nuevoSocket = servidorRegistrarYama(servidor, unSocket);
-				servidorRegistrarConexion(servidor, nuevoSocket);
 			}
 			else
 				servidorRecibirMensaje(servidor, unSocket);
@@ -255,6 +254,7 @@ void servidorRegistrarDataNode(Servidor* servidor, Socket nuevoSocket) {
 			servidorRegistrarNodoEstadoSeguro(servidor, nuevoSocket, mensaje->datos);
 		else
 			servidorRegistrarNodoEstadoInseguro(servidor, nuevoSocket, mensaje->datos);
+	mensajeDestruir(mensaje);
 }
 
 void servidorMensajeDataNode(Mensaje* mensaje) {
@@ -280,6 +280,14 @@ void servidorFinalizarDataNode(Servidor* servidor, Socket unSocket) {
 		nodo->estado = DESACTIVADO;
 }
 
+void servidorAceptarNodo(Servidor* servidor, Nodo* nodo, Puntero datos, Socket nuevoSocket) {
+	nodoConfigurar(nodo, datos, nuevoSocket);
+	listaSocketsAgregar(nuevoSocket, &servidor->listaDataNodes);
+	servidorRegistrarConexion(servidor, nuevoSocket);
+	mensajeEnviar(nuevoSocket, ACEPTAR_NODO, &nuevoSocket, sizeof(Socket));
+	imprimirMensajeUno(archivoLog, "[CONEXION] El %s se ha conectado", nodo->nombre);
+}
+
 
 void servidorRegistrarNodoEstadoSeguro(Servidor* servidor, Socket nuevoSocket, Puntero datos) {
 	String nombre = stringCrear(10);
@@ -291,25 +299,28 @@ void servidorRegistrarNodoEstadoSeguro(Servidor* servidor, Socket nuevoSocket, P
 		imprimirMensaje(archivoLog, "[ERROR] No se permite conexiones de nuevos Nodos");
 		return;
 	}
-	else {
-		nodoConfigurar(nodo, datos, nuevoSocket);
-		mensajeEnviar(nuevoSocket, ACEPTAR_NODO, NULL, NULO);
-	}
+	else
+		servidorAceptarNodo(servidor, nodo, datos, nuevoSocket);
 
 }
 
 void nodoConfigurar(Nodo* nodo, Puntero datos, Socket nuevoSocket) { //TODO sacar de aqui
-	memcpy(nodo->nombre, datos, 10);
-	memcpy(nodo->ip, datos+10, 20);
-	memcpy(nodo->puerto, datos+30, 20);
+	String* tokens = rutaSeparar(datos);
+	stringCopiar(nodo->nombre, tokens[0]);
+	stringCopiar(nodo->ip, tokens[1]);
+	stringCopiar(nodo->puerto, tokens[2]);
 	nodo->socket = nuevoSocket;
 	nodo->estado = ACTIVADO;
+	memoriaLiberar(tokens[0]);
+	memoriaLiberar(tokens[1]);
+	memoriaLiberar(tokens[2]);
+	memoriaLiberar(tokens);
 }
 
 void servidorRegistrarNodoEstadoInseguro(Servidor* servidor, Socket nuevoSocket, Puntero datos) {
 	Nodo* nodo = nodoCrear(0, 0, nuevoSocket);
-	nodoConfigurar(nodo, datos, nuevoSocket);
 	listaAgregarElemento(listaNodos, nodo);
+	servidorAceptarNodo(servidor, nodo, datos, nuevoSocket);
 }
 
 
