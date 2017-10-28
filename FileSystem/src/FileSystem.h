@@ -72,15 +72,16 @@ typedef struct {
 	ListaSockets listaMaster;
 	ListaSockets listaWorkers;
 	ListaSockets listaDataNodes;
-	Socket maximoSocket;
-	Socket listenerYAMA;
+	Socket contadorSocket;
+	Socket listenerYama;
 	Socket listenerDataNode;
-	Socket procesoYAMA;
+	Socket listenerWorker;
+	Socket yama;
 } Servidor;
 
 
 typedef struct {
-	char puertoYAMA[20];
+	char puertoYama[20];
 	char puertoDataNode[20];
 	char rutaMetadata[MAX_NOMBRE];
 } Configuracion;
@@ -188,33 +189,40 @@ void configuracionIniciar();
 
 //--------------------------------------- Funciones de Servidor -------------------------------------
 
-bool servidorObtenerMaximoSocket(Servidor* servidor);
-void servidorSetearListaSelect(Servidor* servidor);
-void servidorControlarMaximoSocket(Servidor* servidor, Socket unSocket);
+bool servidorCantidadSockets(Servidor* servidor);
+void servidorIniciarListaSelect(Servidor* servidor);
+void servidorControlarContadorSocket(Servidor* servidor, Socket unSocket);
 void servidorEsperarSolicitud(Servidor* servidor);
 void servidorFinalizarConexion(Servidor* servidor, Socket unSocket);
-void servidorEstablecerConexion(Servidor* servidor, Socket unSocket);
-Socket servidorAceptarDataNode(Servidor* servidor, Socket unSocket);
-Socket servidorAceptarYAMA(Servidor* servidor, Socket unSocket);
-void servidorAceptarConexion(Servidor* servidor, Socket unSocket);
+Socket servidorRegistrarYama(Servidor* servidor, Socket unSocket);
 void servidorRecibirMensaje(Servidor* servidor, Socket unSocket);
-void servidorControlarSocket(Servidor* servidor, Socket unSocket);
-void servidorActivarListenerYAMA(Servidor* servidor);
+void servidorIniciarContadorSocket(Servidor* servidor);
+void servidorActivarListenerYama(Servidor* servidor);
 void servidorActivarListenerDataNode(Servidor* servidor);
+void servidorActivarListenerWorker(Servidor* servidor);
 void servidorActivarListeners(Servidor* servidor);
 void servidorInicializar(Servidor* servidor);
 void servidorFinalizar(Servidor* servidor);
-void servidorAtenderSolicitud(Servidor* servidor);
-void servidorAtenderPedidos(Servidor* servidor);
-
+void servidorAtenderSolicitudes(Servidor* servidor);
+void servidorRegistrarConexion(Servidor* servidor, Socket unSocket);
+void servidorLimpiarListas(Servidor* servidor);
+void servidorRegistrarDataNode(Servidor* servidor, Socket nuevoSocket);
+Socket servidorRegistrarWorker(Servidor* servidor, Socket unSocket);
+void servidorFinalizarYama();
+void servidorFinalizarWorker(Servidor* servidor, Socket unSocket);
+void servidorFinalizarProceso(Servidor* servidor, Socket unSocket);
+void servidorFinalizarDataNode(Servidor* servidor, Socket unSocket);
+void servidorMensajeDataNode(Mensaje* mensaje);
 //--------------------------------------- Funciones de Socket-------------------------------------
 
-bool socketEsListenerYAMA(Servidor* servidor, Socket unSocket);
+bool socketEsListenerYama(Servidor* servidor, Socket unSocket);
 bool socketEsListener(Servidor* servidor, Socket unSocket);
 bool socketRealizoSolicitud(Servidor* servidor, Socket unSocket);
 bool socketEsDataNode(Servidor* servidor, Socket unSocket);
-bool socketEsYAMA(Servidor* servidor, Socket unSocket);
+bool socketEsYama(Servidor* servidor, Socket unSocket);
 bool socketEsListenerDataNode(Servidor* servidor, Socket unSocket);
+bool socketEsWorker(Servidor* servidor, Socket unSocket);
+bool socketEsListenerWorker(Servidor* servidor, Socket unSocket);
 
 //--------------------------------------- Funciones de Consola -------------------------------------
 
@@ -355,6 +363,8 @@ void bloqueCopiarEnNodo(Bloque* bloque, Nodo* nodo, Entero numeroBloqueNodo);
 void bloqueEnviarANodo(Socket unSocket, Entero numeroBloque, String buffer);
 int bloqueEnviarCopiasANodos(Bloque* bloque, String buffer);
 bool bloqueOrdenarPorNumero(Bloque* unBloque, Bloque* otroBloque);
+void bloqueCopiar(Puntero datos);
+void bloqueLeer(Puntero datos);
 
 //--------------------------------------- Funciones de Copia Bloque -------------------------------------
 
