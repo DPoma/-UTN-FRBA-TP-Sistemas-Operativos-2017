@@ -213,6 +213,9 @@ void servidorFinalizarWorker(Servidor* servidor, Socket unSocket);
 void servidorFinalizarProceso(Servidor* servidor, Socket unSocket);
 void servidorFinalizarDataNode(Servidor* servidor, Socket unSocket);
 void servidorMensajeDataNode(Mensaje* mensaje);
+void servidorRegistrarNodoEstadoSeguro(Servidor* servidor, Socket nuevoSocket, Puntero datos);
+void servidorRegistrarNodoEstadoInseguro(Servidor* servidor, Socket nuevoSocket, Puntero datos);
+
 //--------------------------------------- Funciones de Socket-------------------------------------
 
 bool socketEsListenerYama(Servidor* servidor, Socket unSocket);
@@ -354,6 +357,7 @@ bool nodoCantidadBloquesLibres(Nodo* unNodo, Nodo* otroNodo);
 int nodoBuscarBloqueLibre(Nodo* nodo);
 Nodo* nodoBuscar(String nombre);
 void nodoRecuperarPersistenciaBitmap(Nodo* nodo);
+void nodoConfigurar(Nodo* nodo, Puntero datos, Socket nuevoSocket);
 
 //--------------------------------------- Funciones de Bloque -------------------------------------
 

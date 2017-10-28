@@ -196,7 +196,7 @@ void servidorRegistrarConexion(Servidor* servidor, Socket unSocket) {
 void servidorActivarListeners(Servidor* servidor) {
 	servidorActivarListenerDataNode(servidor);
 	servidorActivarListenerYama(servidor);
-	//servidorActivarListenerWorker(servidor);
+	//servidorActivarListenerWorker(servidor); TODO Agregar en archivo de config sus campos
 }
 
 void servidorLimpiarListas(Servidor* servidor) {
@@ -249,6 +249,13 @@ void servidorFinalizarProceso(Servidor* servidor, Socket unSocket) {
 		servidorFinalizarYama();
 }
 
+void servidorRegistrarDataNode(Servidor* servidor, Socket nuevoSocket) {
+	Mensaje* mensaje = mensajeRecibir(nuevoSocket);
+		if(estadoSeguro == ACTIVADO)
+			servidorRegistrarNodoEstadoSeguro(servidor, nuevoSocket, mensaje->datos);
+		else
+			servidorRegistrarNodoEstadoInseguro(servidor, nuevoSocket, mensaje->datos);
+}
 
 void servidorMensajeDataNode(Mensaje* mensaje) {
 	switch(mensaje->header.operacion) {
@@ -257,55 +264,6 @@ void servidorMensajeDataNode(Mensaje* mensaje) {
 	}
 }
 
-void servidorRegistrarEstadoSeguro(Servidor* servidor, Socket nuevoSocket) {
-	servidorRegistrarConexion(servidor, nuevoSocket);
-	Mensaje* mensaje = mensajeRecibir(nuevoSocket);
-	servidorRecibirDatosDataNode(mensaje->datos);
-	Nodo* nodo = nodoBuscar(nombre);
-	if(nodo == NULL) {
-		servidorFinalizarConexion(nuevoSocket);
-		imprimirMensaje(archivoLog, "[ERROR] No se permite conexiones de nuevos Nodos");
-		return;
-	} else {
-		nodo->socket = nuevoSocket;
-		nodo->estado = ACTIVADO;
-	}
-}
-
-void servidorRegistrarEstadoInseguro(Servidor* servidor, Socket nuevoSocket) {
-	servidorRegistrarConexion(servidor, nuevoSocket);
-	Nodo* nodo = nodoCrear(0, 0, nuevoSocket);
-	listaAgregarElemento(listaNodos, nodo);
-}
-
-void servidorRegistrarDataNode(Servidor* servidor, Socket nuevoSocket) {
-		if(estadoSeguro == ACTIVADO)
-			servidorRegistrarEstadoSeguro(servidor, nuevoSocket);
-		else
-			servidorRegistrarEstadoInseguro(servidor, nuevoSocket);
-		servidorRegistrarConexion(servidor, nuevoSocket); // este en arriba
-
-			nodo->socket = nuevoSocket;
-			nodoHabilitarConexion(nodo); //Seria activar un flag
-
-
-			Nodo* nodo = nodoCrear(20480, 20480, nuevoSocket); // El nodo deberia avisar sus dtos conexion y los bloques que tiene, su nombre
-			memcpy(nodo->nombre, mensaje->datos, 10);
-			memcpy(nodo->ip, mensaje->datos+10, 20);
-			memcpy(nodo->puerto, mensaje->datos+30, 20);
-			printf("IP = %s\n", nodo->ip);
-			printf("puerto = %s\n", nodo->puerto);
-			printf("nombre = %s\n", nodo->nombre);
-			mensajeDestruir(mensaje);
-			listaAgregarElemento(listaNodos, nodo);
-			imprimirMensaje(archivoLog, "[CONEXION] Un proceso Data Node se ha conectado");
-		//}
-		//else {
-			//Nodo* nodo = nodoRecuperar();
-			//listaAgregarElemento(listaNodos, nodo);
-			//imprimirMensaje(archivoLog, "[CONEXION] Un proceso Data Node se ha reconectado");
-		//}
-}
 
 void servidorFinalizarDataNode(Servidor* servidor, Socket unSocket) {
 
@@ -320,8 +278,37 @@ void servidorFinalizarDataNode(Servidor* servidor, Socket unSocket) {
 		listaEliminarDestruyendoPorCondicion(listaNodos, (Puntero)nodoBuscarPorSocket, (Puntero)nodoDestruir);
 	else
 		nodo->estado = DESACTIVADO;
-
 }
+
+
+void servidorRegistrarNodoEstadoSeguro(Servidor* servidor, Socket nuevoSocket, Puntero datos) {
+	Mensaje* mensaje = mensajeRecibir(nuevoSocket);
+	String nombre = stringCrear(10);
+	memcpy(nombre, mensaje->datos, 10);
+	Nodo* nodo = nodoBuscar(nombre);
+	memoriaLiberar(nombre);
+	if(nodo == NULL) {
+		servidorFinalizarConexion(servidor, nuevoSocket);
+		imprimirMensaje(archivoLog, "[ERROR] No se permite conexiones de nuevos Nodos");
+		return;
+	} else
+		nodoConfigurar(nodo, datos, nuevoSocket);
+}
+
+void nodoConfigurar(Nodo* nodo, Puntero datos, Socket nuevoSocket) { //TODO sacar de aqui
+	memcpy(nodo->nombre, datos, 10);
+	memcpy(nodo->ip, datos+10, 20);
+	memcpy(nodo->puerto, datos+30, 20);
+	nodo->socket = nuevoSocket;
+	nodo->estado = ACTIVADO;
+}
+
+void servidorRegistrarNodoEstadoInseguro(Servidor* servidor, Socket nuevoSocket, Puntero datos) {
+	Nodo* nodo = nodoCrear(0, 0, nuevoSocket);
+	nodoConfigurar(nodo, datos, nuevoSocket);
+	listaAgregarElemento(listaNodos, nodo);
+}
+
 
 Socket servidorRegistrarYama(Servidor* servidor, Socket unSocket) {
 	Socket nuevoSocket;
