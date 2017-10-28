@@ -299,14 +299,11 @@ void servidorRegistrarEstadoInseguro(Servidor* servidor, Socket nuevoSocket) {
 }
 
 void servidorRegistrarDataNode(Servidor* servidor, Socket nuevoSocket) {
-		//if(estadoSeguro == 0) { TODO POnerlo lindo y cuando hago format que no
-		//elimine de la lista en caso de que se desconecten
-		if(estadoEsSeguro())
-			servidorRegistrarEstadoSeguro(nuevoSocket);
+		if(estadoSeguro == ACTIVADO)
+			servidorRegistrarEstadoSeguro(servidor, nuevoSocket);
 		else
-			servidorRegistrarEstadoInseguro(nuevoSocket);
+			servidorRegistrarEstadoInseguro(servidor, nuevoSocket);
 		servidorRegistrarConexion(servidor, nuevoSocket); // este en arriba
-
 
 			nodo->socket = nuevoSocket;
 			nodoHabilitarConexion(nodo); //Seria activar un flag
@@ -345,6 +342,8 @@ void servidorAtenderPedidos(Servidor* servidor) {
 						break;
 					servidorRegistrarDataNode(servidor, nuevoSocket);
 				}
+				else if(socketEsListenerWorker(servidor, unSocket))
+					nuevoSocket = servidorAceptarWorker(servidor, unSocket);
 				else
 					nuevoSocket = servidorAceptarYAMA(servidor, unSocket);
 				servidorRegistrarConexion(servidor, nuevoSocket);
