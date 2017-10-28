@@ -1,9 +1,16 @@
-[INFO] 14:51:47:600 FileSystem/(10406:10406): [EJECUCION] Proceso File System inicializado
-[INFO] 14:51:47:658 FileSystem/(10406:10406): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 14:51:47:659 FileSystem/(10406:10406): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 14:51:47:660 FileSystem/(10406:10406): [CONEXION] Esperando conexiones de Workers (Puerto: 5080)
-[INFO] 14:51:47:660 FileSystem/(10406:10406): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
-[INFO] 14:51:53:399 FileSystem/(10406:10411): [ESTADO] El File System ha sido formateado
-[INFO] 14:51:56:740 FileSystem/(10406:10406): [ERROR] No se permite conexiones de nuevos Nodos
-[INFO] 14:52:00:960 FileSystem/(10406:10406): [ERROR] No se permite conexiones de nuevos Nodos
-[INFO] 14:52:27:674 FileSystem/(10406:10406): [EJECUCION] Proceso File System finalizado
+[INFO] 16:25:50:172 FileSystem/(11829:11829): [EJECUCION] Proceso File System inicializado
+[INFO] 16:25:50:235 FileSystem/(11829:11829): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 16:25:50:236 FileSystem/(11829:11829): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 16:25:50:237 FileSystem/(11829:11829): [CONEXION] Esperando conexiones de Workers (Puerto: 5080)
+[INFO] 16:25:50:238 FileSystem/(11829:11829): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
+[INFO] 16:25:51:871 FileSystem/(11829:11829): [CONEXION] El NODO1 se ha conectado
+[INFO] 16:25:52:858 FileSystem/(11829:11829): [ERROR] Un nodo conectado ya posee ese nombre
+[INFO] 16:25:57:377 FileSystem/(11829:11829): [33m[AVISO] El proceso Yama no pudo conectarse, el File System no es estable[0m
+[INFO] 16:26:02:52 FileSystem/(11829:11834): [ESTADO] El File System ha sido formateado
+[INFO] 16:26:03:679 FileSystem/(11829:11829): [CONEXION] El proceso Yama se ha conectado
+[INFO] 16:26:06:895 FileSystem/(11829:11829): [CONEXION] El proceso YAMA se ha desconectado
+[INFO] 16:26:08:856 FileSystem/(11829:11829): [CONEXION] El NODO1 se ha desconectado
+[INFO] 16:26:10:691 FileSystem/(11829:11829): [CONEXION] El NODO1 se ha conectado
+[INFO] 16:26:12:218 FileSystem/(11829:11829): [CONEXION] El NODO1 se ha desconectado
+[INFO] 16:26:19:815 FileSystem/(11829:11829): [31m[ERROR] No se permite conexiones de nuevos Nodos[0m
+[INFO] 16:26:27:740 FileSystem/(11829:11829): [EJECUCION] Proceso File System finalizado

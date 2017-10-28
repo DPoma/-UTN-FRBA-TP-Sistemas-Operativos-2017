@@ -35,7 +35,13 @@ void yamaIniciar() {
 	servidor = malloc(sizeof(Servidor));
 	imprimirMensajeDos(archivoLog, "[CONEXION] Realizando conexion con File System (IP: %s | Puerto %s)", configuracion->ipFileSystem, configuracion->puertoFileSystem);
 	servidor->fileSystem = socketCrearCliente(configuracion->ipFileSystem, configuracion->puertoFileSystem, ID_YAMA);
-	imprimirMensaje(archivoLog, "[CONEXION] Conexion exitosa con File System");
+	Mensaje* mensaje = mensajeRecibir(servidor->fileSystem);
+	if(mensaje->header.operacion == ACEPTACION)
+		imprimirMensaje(archivoLog, "[CONEXION] Conexion exitosa con File System");
+	else {
+		imprimirMensaje(archivoLog, ROJO"[ERROR] El File System no se encuentra estable"BLANCO);
+		exit(EXIT_FAILURE);
+	}
 	workers=list_create();
 	Mensaje* infoNodos=mensajeRecibir(servidor->fileSystem);
 	int i;

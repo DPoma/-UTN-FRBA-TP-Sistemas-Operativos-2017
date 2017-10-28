@@ -157,7 +157,7 @@ void servidorAtenderSolicitudes(Servidor* servidor) {
 				else if(socketEsListenerWorker(servidor, unSocket))
 					nuevoSocket = servidorRegistrarWorker(servidor, unSocket);
 				else
-					nuevoSocket = servidorRegistrarYama(servidor, unSocket);
+					servidorRegistrarYama(servidor, unSocket);
 			}
 			else
 				servidorRecibirMensaje(servidor, unSocket);
@@ -267,7 +267,6 @@ void servidorMensajeDataNode(Mensaje* mensaje) {
 	}
 }
 
-
 void servidorFinalizarDataNode(Servidor* servidor, Socket unSocket) {
 
 	bool nodoBuscarPorSocket(Nodo* nodo) {
@@ -284,47 +283,60 @@ void servidorFinalizarDataNode(Servidor* servidor, Socket unSocket) {
 }
 
 void servidorAceptarNodo(Servidor* servidor, Nodo* nodo, Puntero datos, Socket nuevoSocket) {
-	nodoConfigurar(nodo, datos, nuevoSocket);
 	listaSocketsAgregar(nuevoSocket, &servidor->listaDataNodes);
 	servidorRegistrarConexion(servidor, nuevoSocket);
 	mensajeEnviar(nuevoSocket, ACEPTAR_NODO, &nuevoSocket, sizeof(Socket));
 	imprimirMensajeUno(archivoLog, "[CONEXION] El %s se ha conectado", nodo->nombre);
 }
 
-
 void servidorRegistrarNodoEstadoSeguro(Servidor* servidor, Socket nuevoSocket, Puntero datos) {
-	String* tokens = rutaSeparar(datos);
-	Nodo* nodo = nodoBuscar(tokens[0]);
-	memoriaLiberar(tokens[0]);
-	memoriaLiberar(tokens[1]);
-	memoriaLiberar(tokens[2]);
-	memoriaLiberar(tokens);
-	if(nodo == NULL) {
+	Nodo* nodo = nodoConfigurarNombre(datos);
+	if(nodo == NULL ) {
 		socketCerrar(nuevoSocket);
-		imprimirMensaje(archivoLog, "[ERROR] No se permite conexiones de nuevos Nodos");
+		imprimirMensaje(archivoLog, ROJO"[ERROR] No se permite conexiones de nuevos Nodos"BLANCO);
 		return;
 	}
-	else
+	if(nodo->estado == ACTIVADO) {
+		socketCerrar(nuevoSocket);
+		imprimirMensaje(archivoLog, "[ERROR] Un nodo conectado ya posee ese nombre");
+		return;
+	}
+	else {
+		nodoConfigurar(nodo, datos, nuevoSocket);
 		servidorAceptarNodo(servidor, nodo, datos, nuevoSocket);
+	}
+
 
 }
 
 void servidorRegistrarNodoEstadoInseguro(Servidor* servidor, Socket nuevoSocket, Puntero datos) {
 	Nodo* nodo = nodoCrear(0, 0, nuevoSocket);
-	listaAgregarElemento(listaNodos, nodo);
-	servidorAceptarNodo(servidor, nodo, datos, nuevoSocket);
+	nodoConfigurar(nodo, datos, nuevoSocket);
+	if(nodoBuscar(nodo->nombre) == NULL) {
+		servidorAceptarNodo(servidor, nodo, datos, nuevoSocket);
+		listaAgregarElemento(listaNodos, nodo);
+	}
+	else {
+		socketCerrar(nuevoSocket);
+		nodoDestruir(nodo);
+		imprimirMensaje(archivoLog, "[ERROR] Un nodo conectado ya posee ese nombre");
+	}
 }
 
 
-Socket servidorRegistrarYama(Servidor* servidor, Socket unSocket) {
-	Socket nuevoSocket;
-	nuevoSocket = socketAceptar(unSocket, ID_YAMA);
-	if(nuevoSocket != ERROR) {
+void servidorRegistrarYama(Servidor* servidor, Socket unSocket) {
+	Socket nuevoSocket = socketAceptar(unSocket, ID_YAMA);
+	if(estadoSeguro == ACTIVADO) {
 		servidor->yama = nuevoSocket;
-		imprimirMensaje(archivoLog, "[CONEXION] El proceso YAMA se ha conectado");
+		socketYama = nuevoSocket;
+		servidorRegistrarConexion(servidor, nuevoSocket);
+		mensajeEnviar(nuevoSocket, ACEPTAR_YAMA, &nuevoSocket, sizeof(Socket));
+		imprimirMensaje(archivoLog, "[CONEXION] El proceso Yama se ha conectado");
 	}
-	socketYama = nuevoSocket;
-	return nuevoSocket;
+	else {
+		socketCerrar(nuevoSocket);
+		imprimirMensaje(archivoLog, AMARILLO"[AVISO] El proceso Yama no pudo conectarse, el File System no es estable"BLANCO);
+	}
 }
 
 
@@ -1750,6 +1762,16 @@ void nodoConfigurar(Nodo* nodo, Puntero datos, Socket nuevoSocket) {
 	memoriaLiberar(tokens[1]);
 	memoriaLiberar(tokens[2]);
 	memoriaLiberar(tokens);
+}
+
+Nodo* nodoConfigurarNombre(Puntero datos) {
+	String* tokens = rutaSeparar(datos);
+	Nodo* nodo = nodoBuscar(tokens[0]);
+	memoriaLiberar(tokens[0]);
+	memoriaLiberar(tokens[1]);
+	memoriaLiberar(tokens[2]);
+	memoriaLiberar(tokens);
+	return nodo;
 }
 
 //--------------------------------------- Funciones de Bloque-------------------------------------

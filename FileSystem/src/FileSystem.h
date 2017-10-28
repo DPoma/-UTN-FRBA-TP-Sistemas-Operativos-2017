@@ -59,6 +59,7 @@
 #define ESCRIBIR_BLOQUE 102
 #define COPIAR_BLOQUE 103
 
+#define ACEPTAR_YAMA 200
 
 //--------------------------------------- Estructuras -------------------------------------
 
@@ -195,7 +196,6 @@ void servidorIniciarListaSelect(Servidor* servidor);
 void servidorControlarContadorSocket(Servidor* servidor, Socket unSocket);
 void servidorEsperarSolicitud(Servidor* servidor);
 void servidorFinalizarConexion(Servidor* servidor, Socket unSocket);
-Socket servidorRegistrarYama(Servidor* servidor, Socket unSocket);
 void servidorRecibirMensaje(Servidor* servidor, Socket unSocket);
 void servidorIniciarContadorSocket(Servidor* servidor);
 void servidorActivarListenerYama(Servidor* servidor);
@@ -216,6 +216,7 @@ void servidorFinalizarDataNode(Servidor* servidor, Socket unSocket);
 void servidorMensajeDataNode(Mensaje* mensaje);
 void servidorRegistrarNodoEstadoSeguro(Servidor* servidor, Socket nuevoSocket, Puntero datos);
 void servidorRegistrarNodoEstadoInseguro(Servidor* servidor, Socket nuevoSocket, Puntero datos);
+void servidorRegistrarYama(Servidor* servidor, Socket unSocket);
 
 //--------------------------------------- Funciones de Socket-------------------------------------
 
@@ -359,6 +360,7 @@ int nodoBuscarBloqueLibre(Nodo* nodo);
 Nodo* nodoBuscar(String nombre);
 void nodoRecuperarPersistenciaBitmap(Nodo* nodo);
 void nodoConfigurar(Nodo* nodo, Puntero datos, Socket nuevoSocket);
+Nodo* nodoConfigurarNombre(Puntero datos);
 
 //--------------------------------------- Funciones de Bloque -------------------------------------
 

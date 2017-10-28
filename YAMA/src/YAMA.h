@@ -19,6 +19,8 @@
 #define TEMPSIZE 12
 #define nullptr NULL
 
+#define ACEPTACION 200
+
 typedef struct __attribute__((__packed__)){
 	char ip[20];
 	char port[20];
