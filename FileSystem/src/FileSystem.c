@@ -689,7 +689,7 @@ void comandoEliminarBloque(Comando* comando) {
 		imprimirMensaje(archivoLog, "[ERROR] El numero de bloque no existe");
 		return;
 	}
-	CopiaBloque* copia = listaObtenerElemento(bloque->listaCopias, numeroCopia);
+	Copia* copia = listaObtenerElemento(bloque->listaCopias, numeroCopia);
 	if(copia == NULL) {
 		imprimirMensaje(archivoLog, "[ERROR] El numero de copia no existe");
 		return;
@@ -747,7 +747,7 @@ void comandoEliminarArchivo(Comando* comando) {
 		Bloque* bloque = listaObtenerElemento(archivo->listaBloques, indice);
 		int indiceCopia;
 		for(indiceCopia=0; indiceCopia<listaCantidadElementos(bloque->listaCopias); indiceCopia++) {
-			CopiaBloque* copia = listaObtenerElemento(bloque->listaCopias, indiceCopia);
+			Copia* copia = listaObtenerElemento(bloque->listaCopias, indiceCopia);
 			copiaBloqueEliminar(copia);
 		}
 	}
@@ -889,7 +889,7 @@ void comandoMostrarArchivo(Comando* comando) {
 		int numeroCopia;
 		int bloqueNoFueImpreso = true;
 		for(numeroCopia=0; numeroCopia<listaCantidadElementos(bloque->listaCopias) && bloqueNoFueImpreso; numeroCopia++) {
-			CopiaBloque* copia = listaObtenerElemento(bloque->listaCopias, numeroCopia);
+			Copia* copia = listaObtenerElemento(bloque->listaCopias, numeroCopia);
 			Nodo* nodo = nodoBuscar(copia->nombreNodo);;
 			if(nodo != NULL) {
 				mensajeEnviar(nodo->socket, 101 ,&copia->bloqueNodo, sizeof(Entero));
@@ -1093,7 +1093,7 @@ void comandoCopiarBloque(Comando* comando) {
 	if(listaEstaVacia(bloqueBuffer->listaCopias)) {
 		imprimirMensaje(archivoLog, "[ERROR] El bloque no tiene copias en ningun nodo (esto nunca deberia pasar)");
 	}
-	CopiaBloque* copia = listaPrimerElemento(bloqueBuffer->listaCopias);
+	Copia* copia = listaPrimerElemento(bloqueBuffer->listaCopias);
 	Nodo* nodoConBloque = nodoBuscar(copia->nombreNodo);
 	mensajeEnviar(nodoConBloque->socket, COPIAR_BLOQUE, &copia->bloqueNodo, sizeof(Entero));
 
@@ -1185,7 +1185,7 @@ void comandoInformacionArchivo(Comando* comando) {
 		imprimirMensajeDos(archivoLog, "[ARCHIVO] Bloque %i: %i bytes", (int*)indice, (int*)bloque->bytesUtilizados);
 		int indiceCopia;
 		for(indiceCopia = 0; indiceCopia < listaCantidadElementos(bloque->listaCopias); indiceCopia++) {
-			CopiaBloque* copiaBloque = listaObtenerElemento(bloque->listaCopias, indiceCopia);
+			Copia* copiaBloque = listaObtenerElemento(bloque->listaCopias, indiceCopia);
 			imprimirMensajeCuatro(archivoLog, "[ARCHIVO] Bloque %i copia %i en: Nodo: %s | Bloque: %i", (int*)indice,
 					(int*)indiceCopia, copiaBloque->nombreNodo, (int*)copiaBloque->bloqueNodo);
 		}
@@ -1553,7 +1553,7 @@ void archivoPersistir(Archivo* archivo) {
 		fprintf(file, "BLOQUE%i_BYTES=%i\n",indice, bloque->bytesUtilizados);
 		int indiceCopia;
 		for(indiceCopia = 0; indiceCopia < listaCantidadElementos(bloque->listaCopias); indiceCopia++) {
-			CopiaBloque* copiaBloque = listaObtenerElemento(bloque->listaCopias, indiceCopia);
+			Copia* copiaBloque = listaObtenerElemento(bloque->listaCopias, indiceCopia);
 			fprintf(file, "BLOQUE%i_COPIA%i=[%s,%i]\n", indice, indiceCopia, copiaBloque->nombreNodo, copiaBloque->bloqueNodo);
 		}
 	}
@@ -1728,7 +1728,7 @@ void bloqueEnviarANodo(Socket unSocket, Entero numeroBloque, String buffer) {
 
 void bloqueCopiarEnNodo(Bloque* bloque, Nodo* nodo, Entero numeroBloqueNodo) {
 	printf("GUARDO EL BLOQUE %i DEL ARCHIVO EN EL BLOQUE %i DEL %s\n", bloque->numeroBloque, numeroBloqueNodo, nodo->nombre);
-	CopiaBloque* copia = copiaBloqueCrear(numeroBloqueNodo, nodo->nombre);
+	Copia* copia = copiaBloqueCrear(numeroBloqueNodo, nodo->nombre);
 	bitmapOcuparBit(nodo->bitmap, numeroBloqueNodo);
 	nodo->bloquesLibres--;
 	listaAgregarElemento(bloque->listaCopias, copia);
@@ -1756,14 +1756,14 @@ int bloqueEnviarCopiasANodos(Bloque* bloque, String buffer) {
 
 //--------------------------------------- Funciones de Copia Bloque-------------------------------------
 
-CopiaBloque* copiaBloqueCrear(int numeroBloqueDelNodo, String nombreNodo) {
-	CopiaBloque* copiaBloque = memoriaAlocar(sizeof(CopiaBloque));
+Copia* copiaBloqueCrear(int numeroBloqueDelNodo, String nombreNodo) {
+	Copia* copiaBloque = memoriaAlocar(sizeof(Copia));
 	copiaBloque->bloqueNodo = numeroBloqueDelNodo;
 	stringCopiar(copiaBloque->nombreNodo, nombreNodo);
 	return copiaBloque;
 }
 
-void copiaBloqueEliminar(CopiaBloque* copia) {
+void copiaBloqueEliminar(Copia* copia) {
 
 	bool buscarNodo(Nodo* nodo) {
 		return stringIguales(nodo->nombre,copia->nombreNodo);
@@ -1886,59 +1886,74 @@ BloqueNodo* bloqueNodoCrear(Entero numeroBloque, String buffer, int tamanioUtili
 	return bloqueNodo;
 }
 
-void testCabecita() {
-	Nodo* nodo1 = nodoCrear(10, 1, 99);
-	stringCopiar(nodo1->nombre, "NODO1");
-	bitmapOcuparBit(nodo1->bitmap, 4);
-	bitmapOcuparBit(nodo1->bitmap, 9);
-	Nodo* nodo2 = nodoCrear(5, 3, 99);
-	stringCopiar(nodo1->nombre, "NODO2");
-	bitmapOcuparBit(nodo2->bitmap, 0);
-	nodoPersistirBitmap(nodo1);
-	nodoPersistirBitmap(nodo2);
-	listaAgregarElemento(listaNodos, nodo1);
-	listaAgregarElemento(listaNodos, nodo2);
-	Archivo* archivo = memoriaAlocar(sizeof(Archivo));
-	archivo->identificadorPadre = 0;
-	archivo->listaBloques = listaCrear();
-	stringCopiar(archivo->nombre, "test");
-	stringCopiar(archivo->tipo, "TEXTO");
-	Bloque* bloque0 = memoriaAlocar(sizeof(Bloque));
-	bloque0->bytesUtilizados = 1014;
-	bloque0->listaCopias = listaCrear();
-	Bloque* bloque1 = memoriaAlocar(sizeof(Bloque));
-	bloque1->bytesUtilizados = 101;
-	bloque1->listaCopias = listaCrear();
-	CopiaBloque* copia0Bloque0 = memoriaAlocar(sizeof(CopiaBloque));
-	copia0Bloque0->bloqueNodo = 4;
-	stringCopiar(copia0Bloque0->nombreNodo, "NODIN1");
-	CopiaBloque* copia1Bloque0 = memoriaAlocar(sizeof(CopiaBloque));;
-	copia1Bloque0->bloqueNodo = 0;
-	stringCopiar(copia1Bloque0->nombreNodo, "NODIN2");
-	CopiaBloque* copia0Bloque1 = memoriaAlocar(sizeof(CopiaBloque));;
-	copia0Bloque1->bloqueNodo = 9;
-	stringCopiar(copia0Bloque1->nombreNodo, "NODIN1");
-	listaAgregarElemento(bloque0->listaCopias, copia0Bloque0);
-	listaAgregarElemento(bloque0->listaCopias, copia1Bloque0);
-	listaAgregarElemento(bloque1->listaCopias, copia0Bloque1);
-	listaAgregarElemento(archivo->listaBloques, bloque0);
-	listaAgregarElemento(archivo->listaBloques, bloque1);
-	listaAgregarElemento(listaArchivos, archivo);
-	archivoPersistir(archivo);
+
+void archivoRecuperarControl() {
+	String buffer = stringCrear(MAX_STRING);
+	File file = fileAbrir(rutaArchivos, LECTURA);
+	while(fgets(buffer, MAX_STRING, file) != NULL) {
+		Puntero puntero;
+		Archivo* archivo;
+		//stringCopiar(archivo->nombre, strtok_r(buffer, ";" &puntero));
+		//archivo->identificadorPadre = atoi(strok_r(buffer, ";" &puntero));
+		listaAgregarElemento(listaArchivos, archivo);
+	}
+	fileCerrar(file);
 }
 
-/*
- * diferenciar nombre de archivo y directorio
-mkdir con nombres existentes entre archivos y dire
-el rename si hay un archivo o dir igual nombre modifica el directorio
-El mover si hay un archivo y dir con el mismo nombre dice que no se puede mover un dirctorio a si mismo
+void archivoRecuperar(Archivo* archivo) {
+	String ruta = string_from_format("%s/%i/%s", rutaDirectorioArchivos, archivo->identificadorPadre, archivo->nombre);
+	ArchivoConfig config = config_create(ruta);
+	memoriaLiberar(ruta);
+	stringCopiar(archivo->tipo, archivoConfigStringDe(config, "TIPO"));
+	int indiceBloques;
+	archivo->listaBloques = listaCrear();
+	int cantidadBloques = archivoConfigEnteroDe(config, "BLOQUES");
+	for(indiceBloques = 0; indiceBloques < cantidadBloques; indiceBloques++) {
+		String lineaBloque = string_from_format("BLOQUE%i_BYTES", indiceBloques);
+		Bloque* bloque = memoriaAlocar(sizeof(Bloque));
+		bloque->numeroBloque = indiceBloques;
+		bloque->bytesUtilizados = archivoConfigEnteroDe(config, lineaBloque);
+		memoriaLiberar(lineaBloque);
+		listaAgregarElemento(archivo->listaBloques, bloque);
+		bloque->listaCopias = listaCrear();
+		int cantidadCopias = archivoConfigEnteroDe(config, "BLOQUE%i_COPIAS");
+		int indiceCopias;
+		for(indiceCopias=0; indiceCopias < cantidadCopias; indiceCopias++) {
+			Copia* copia = memoriaAlocar(sizeof(Copia));
+			String lineaCopia = string_from_format("BLOQUE%i_COPIA%i", indiceBloques, indiceCopias);
+			String* datosCopia = archivoConfigArrayDe(config, lineaCopia);
+			memoriaLiberar(lineaCopia);
+			copia->bloqueNodo = atoi(datosCopia[0]);
+			stringCopiar(copia->nombreNodo, datosCopia[1]);
+			listaAgregarElemento(bloque->listaCopias, copia);
+		}
+		listaAgregarElemento(listaAgregar, archivo);
+		archivoConfigDestruir(config);
+	}
 
-Hacer cpfrom
+}
 
-valgrind --log-file=/home/utnso/Escritorio/log --leak-check=full --show-leak-kinds=all ./FileSystem
 
-cpfrom -b /home/utnso/Escritorio/test2 /home
+void directorioRecuperar() {
+	ArchivoConfig config = config_create(rutaDirectorios);
+	int cantidadDirectorios = archivoConfigEnteroDe(config, "DIRECTORIOS");
+	int indice;
+	for(indice = 0; indice < cantidadDirectorios; indice++) {
+		String lineaIdentificador = string_from_format("IDENTIFICADOR%i", indice);
+		String lineaNombre = string_from_format("NOMBRE%i", indice);
+		String lineaPadre = string_from_format("PADRE%i", indice);
+		Directorio* directorio = memoriaAlocar(sizeof(Directorio));
+		directorio->identificador = archivoConfigEnteroDe(config, lineaIdentificador);
+		directorio->identificadorPadre = archivoConfigEnteroDe(config, lineaPadre);
+		stringCopiar(directorio->nombre, archivoConfigStringDe(config, lineaNombre));
+		listaAgregarElemento(listaDirectorios, directorio);
+		memoriaLiberar(lineaIdentificador);
+		memoriaLiberar(lineaNombre);
+		memoriaLiberar(lineaPadre);
+	}
+	archivoConfigDestruir(config);;
+}
 
-Si es con clean una vez que formateo dejo de escuchar el socket de datanodes
-Si NO es con clean una vez que recupero el estado anterior dejo de escuchar datanodes
-*/
+void nodoRecuperar() {
+
+}

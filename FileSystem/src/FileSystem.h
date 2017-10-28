@@ -113,7 +113,7 @@ typedef struct {
 typedef struct {
 	char nombreNodo[10];
 	int  bloqueNodo;
-} CopiaBloque;
+} Copia;
 
 typedef struct {
 	char puerto[20];
@@ -350,8 +350,8 @@ bool bloqueOrdenarPorNumero(Bloque* unBloque, Bloque* otroBloque);
 
 //--------------------------------------- Funciones de Copia Bloque -------------------------------------
 
-CopiaBloque* copiaBloqueCrear(int numeroBloqueDelNodo, String nombreNodo);
-void copiaBloqueEliminar(CopiaBloque* copia);
+Copia* copiaBloqueCrear(int numeroBloqueDelNodo, String nombreNodo);
+void copiaBloqueEliminar(Copia* copia);
 
 //--------------------------------------- Funciones de Metadata -------------------------------------
 
