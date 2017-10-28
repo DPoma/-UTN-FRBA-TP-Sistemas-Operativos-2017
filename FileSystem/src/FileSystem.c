@@ -1916,6 +1916,9 @@ void archivoRecuperarPersistenciaEspecifica(Archivo* archivo) {
 			memoriaLiberar(lineaCopia);
 			stringCopiar(copia->nombreNodo, datosCopia[0]);
 			copia->bloqueNodo = atoi(datosCopia[1]);
+			memoriaLiberar(datosCopia[0]);
+			memoriaLiberar(datosCopia[1]);
+			memoriaLiberar(datosCopia);
 			listaAgregarElemento(bloque->listaCopias, copia);
 		}
 	}
@@ -1941,10 +1944,13 @@ void directorioRecuperarPersistencia() {
 		memoriaLiberar(lineaPadre);
 	}
 	archivoConfigDestruir(config);
+	bitmapDirectorios = bitmapCrear(13);
+	for(indice = 0; indice < cantidadDirectorios; indice++)
+		bitmapOcuparBit(bitmapDirectorios, indice);
+	directoriosDisponibles = MAX_DIR - cantidadDirectorios;
 }
 
 void nodoRecuperarPersistencia() {
-	listaNodos = listaCrear();
 	ArchivoConfig config = config_create(rutaNodos);
 	int cantidadNodos = archivoConfigEnteroDe(config, "NODOS");
 	int indice;
@@ -1972,6 +1978,10 @@ void nodoRecuperarPersistenciaBitmap(Nodo* nodo) {
 	//int
 	int indice;
 	for(indice = 0; indice < nodo->bloquesTotales; indice++) {
-		//fread(buffer, sizeof(char), 1, file);
+		int bit = fgetc(file);
+		if(bit == OCUPADO)
+			bitmapOcuparBit(nodo->bitmap, indice);
 	}
+	memoriaLiberar(ruta);
+	fileCerrar(file);
 }

@@ -47,6 +47,7 @@
 #define FLAG_B "-b"
 #define FLAG_D "-d"
 #define FLAG_T "-t"
+#define OCUPADO '1'
 
 #define MAX_STRING 300
 #define MAX_NOMBRE 255
@@ -341,6 +342,7 @@ bool nodoTieneBloquesLibres(Nodo* nodo);
 bool nodoCantidadBloquesLibres(Nodo* unNodo, Nodo* otroNodo);
 int nodoBuscarBloqueLibre(Nodo* nodo);
 Nodo* nodoBuscar(String nombre);
+void nodoRecuperarPersistenciaBitmap(Nodo* nodo);
 
 //--------------------------------------- Funciones de Bloque -------------------------------------
 

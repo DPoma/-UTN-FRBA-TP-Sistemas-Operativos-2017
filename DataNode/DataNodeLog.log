@@ -1,18 +1,6 @@
-[INFO] 23:48:38:91 DataNode/(5136:5136): [CONFIGURACION] Nombre Nodo: NODO4
-[INFO] 23:48:39:124 DataNode/(5136:5136): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data2.bin
-[INFO] 23:48:39:145 DataNode/(5136:5136): [DATABIN] Cantidad de bloques disponibles 81920
-[INFO] 23:48:39:149 DataNode/(5136:5136): [CONEXION] Estableciendo conexion con File System (IP: 127.0.0.1 | Puerto 5040)
-[INFO] 23:49:21:438 DataNode/(5136:5136): [DATABIN] El bloque N°0 fue escrito
-[INFO] 23:49:21:469 DataNode/(5136:5136): [DATABIN] El bloque N°1 fue escrito
-[INFO] 23:49:21:470 DataNode/(5136:5136): [DATABIN] El bloque N°2 fue escrito
-[INFO] 23:49:21:471 DataNode/(5136:5136): [DATABIN] El bloque N°3 fue escrito
-[INFO] 23:49:21:471 DataNode/(5136:5136): [DATABIN] El bloque N°4 fue escrito
-[INFO] 23:49:21:472 DataNode/(5136:5136): [DATABIN] El bloque N°5 fue escrito
-[INFO] 23:49:21:472 DataNode/(5136:5136): [DATABIN] El bloque N°6 fue escrito
-[INFO] 23:49:21:479 DataNode/(5136:5136): [DATABIN] El bloque N°7 fue escrito
-[INFO] 23:49:21:482 DataNode/(5136:5136): [DATABIN] El bloque N°8 fue escrito
-[INFO] 23:49:21:489 DataNode/(5136:5136): [DATABIN] El bloque N°9 fue escrito
-[INFO] 23:49:21:499 DataNode/(5136:5136): [DATABIN] El bloque N°10 fue escrito
-[INFO] 23:49:21:501 DataNode/(5136:5136): [DATABIN] El bloque N°11 fue escrito
-[INFO] 23:51:57:991 DataNode/(5136:5136): [CONEXION] El File System se desconecto
-[INFO] 23:51:58:10 DataNode/(5136:5136): [EJECUCION] Proceso Data Node finalizado
+[INFO] 01:06:00:250 DataNode/(6692:6692): [CONFIGURACION] Nombre Nodo: NODO4
+[INFO] 01:06:00:283 DataNode/(6692:6692): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data2.bin
+[INFO] 01:06:00:305 DataNode/(6692:6692): [DATABIN] Cantidad de bloques disponibles 81920
+[INFO] 01:06:00:308 DataNode/(6692:6692): [CONEXION] Estableciendo conexion con File System (IP: 127.0.0.1 | Puerto 5040)
+[INFO] 01:06:17:0 DataNode/(6692:6692): [CONEXION] El File System se desconecto
+[INFO] 01:06:18:17 DataNode/(6692:6692): [EJECUCION] Proceso Data Node finalizado
