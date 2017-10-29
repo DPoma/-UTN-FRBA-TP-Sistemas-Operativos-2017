@@ -1,12 +1,6 @@
-[INFO] 10:00:26:154 FileSystem/(4327:4327): [EJECUCION] Proceso File System inicializado
-[INFO] 10:00:26:214 FileSystem/(4327:4327): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 10:00:26:216 FileSystem/(4327:4327): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 10:00:26:216 FileSystem/(4327:4327): [CONEXION] Esperando conexiones de Workers (Puerto: 5080)
-[INFO] 10:00:26:217 FileSystem/(4327:4327): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
-[INFO] 10:00:28:770 FileSystem/(4327:4327): [CONEXION] El NODO2 se ha conectado
-[INFO] 10:00:40:178 FileSystem/(4327:4330): [DIRECTORIO] gg (a)
-[INFO] 10:00:53:86 FileSystem/(4327:4330): [ARCHIVO] El archivo /home/utnso/Escritorio/lala fue copiado en File System
-[INFO] 10:16:21:499 FileSystem/(4327:4330): [DIRECTORIO] gg (a)
-[INFO] 10:16:21:500 FileSystem/(4327:4330): [DIRECTORIO] lala (a)
-[INFO] 10:16:30:538 FileSystem/(4327:4330): [ARCHIVO] El archivo /lala ha sido eliminado
-[INFO] 10:16:42:629 FileSystem/(4327:4330): [ARCHIVO] El archivo /home/utnso/Escritorio/lala fue copiado en File System
+[INFO] 11:58:13:868 FileSystem/(6419:6419): [EJECUCION] Proceso File System inicializado
+[INFO] 11:58:13:931 FileSystem/(6419:6419): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 11:58:13:932 FileSystem/(6419:6419): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 11:58:13:933 FileSystem/(6419:6419): [CONEXION] Esperando conexiones de Workers (Puerto: 5080)
+[INFO] 11:58:13:933 FileSystem/(6419:6419): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
+[INFO] 11:58:15:688 FileSystem/(6419:6419): [CONEXION] El NODO2 se ha conectado

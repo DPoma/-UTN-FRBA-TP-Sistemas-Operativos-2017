@@ -63,6 +63,9 @@
 
 #define ACEPTAR_YAMA 200
 
+#define ARCHIVO_BINARIO "BINARIO"
+#define ARCHIVO_TEXTO "TEXTO"
+
 //--------------------------------------- Estructuras -------------------------------------
 
 typedef struct {
@@ -276,10 +279,10 @@ void comandoEliminarDirectorio(Comando* comando);
 void comandoEliminarArchivo(Comando* comando);
 void comandoRenombrar(Comando* comando);
 void comandoMover(Comando* comando);
-void archivoLeer(Comando* comando);
+void comandoMostrarArchivo(Comando* comando);
 void comandoCrearDirectorio(Comando* comando);
-void archivoAlmacenar(Comando* comando);
-void comandoCopiarArchivoDeYamaFS(Comando* comando);
+void comandoCopiarArchivoAYamaFS(Comando* comando);
+int comandoCopiarArchivoDeYamaFS(Comando* comando);
 void comandoCopiarBloque(Comando* comando);
 void comandoObtenerMD5DeArchivo(Comando* comando);
 void comandoListarDirectorio(Comando* comando);
@@ -344,6 +347,9 @@ void archivoPersistirControl();
 bool archivoOrdenarPorNombre(Archivo* unArchivo, Archivo* otroArchivo);
 void archivoRecuperarPersistencia();
 void archivoRecuperarPersistenciaEspecifica(Archivo* archivo);
+bool archivoEsBinario(Archivo* archivo);
+int archivoLeer(Comando* comando);
+int archivoAlmacenar(Comando* comando);
 
 //--------------------------------------- Funciones de Nodo -------------------------------------
 
