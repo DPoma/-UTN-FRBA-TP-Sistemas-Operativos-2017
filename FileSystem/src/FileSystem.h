@@ -217,7 +217,7 @@ void servidorActivarListeners(Servidor* servidor);
 void servidorInicializar(Servidor* servidor);
 void servidorFinalizar(Servidor* servidor);
 void servidorAtenderSolicitudes(Servidor* servidor);
-void servidorRegistrarConexion(Servidor* servidor, Socket unSocket);
+void servidorAceptarConexion(Servidor* servidor, Socket unSocket);
 void servidorLimpiarListas(Servidor* servidor);
 void servidorRegistrarDataNode(Servidor* servidor, Socket nuevoSocket);
 void servidorRevisarDataNode(Servidor* servidor, Socket nuevoSocket, Puntero datos);
@@ -227,10 +227,10 @@ void servidorFinalizarWorker(Servidor* servidor, Socket unSocket);
 void servidorFinalizarProceso(Servidor* servidor, Socket unSocket);
 void servidorFinalizarDataNode(Servidor* servidor, Socket unSocket);
 void servidorMensajeDataNode(Mensaje* mensaje);
-void servidorControlarDataNode(Servidor* servidor, Socket nuevoSocket, Puntero datos);
-void servidorAceptarDataNode(Servidor* servidor, Socket nuevoSocket, Puntero datos);
+void servidorReconectarDataNode(Servidor* servidor, Socket nuevoSocket, Puntero datos);
+void servidorAceptarNuevoDataNode(Servidor* servidor, Socket nuevoSocket, Puntero datos);
 void servidorRegistrarYama(Servidor* servidor, Socket unSocket);
-
+void nodoDesactivar(Nodo* nodo);
 //--------------------------------------- Funciones de Socket-------------------------------------
 
 bool socketEsListenerYama(Servidor* servidor, Socket unSocket);
@@ -377,6 +377,9 @@ Nodo* nodoBuscar(String nombre);
 void nodoRecuperarPersistenciaBitmap(Nodo* nodo);
 void nodoConfigurar(Nodo* nodo, Puntero datos, Socket nuevoSocket);
 Nodo* nodoConfigurarNombre(Puntero datos);
+void nodoDesactivar(Nodo* nodo);
+Nodo* nodoBuscarPorSocket(Socket unSocket);
+int nodoPosicionEnLista(Nodo* nodo);
 
 //--------------------------------------- Funciones de Bloque -------------------------------------
 

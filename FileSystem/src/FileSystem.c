@@ -139,7 +139,7 @@ void servidorAtenderSolicitudes(Servidor* servidor) {
 					servidorRegistrarDataNode(servidor, nuevoSocket);
 				}
 				else if(socketEsListenerWorker(servidor, unSocket))
-					nuevoSocket = servidorRegistrarWorker(servidor, unSocket);
+					servidorRegistrarWorker(servidor, unSocket);
 				else
 					servidorRegistrarYama(servidor, unSocket);
 			}
@@ -173,7 +173,7 @@ void servidorControlarContadorSocket(Servidor* servidor, Socket unSocket) {
 		servidor->contadorSocket = unSocket;
 }
 
-void servidorRegistrarConexion(Servidor* servidor, Socket unSocket) {
+void servidorAceptarConexion(Servidor* servidor, Socket unSocket) {
 	listaSocketsAgregar(unSocket, &servidor->listaMaster);
 	servidorControlarContadorSocket(servidor, unSocket);
 }
@@ -234,21 +234,87 @@ void servidorFinalizarProceso(Servidor* servidor, Socket unSocket) {
 	else
 		servidorFinalizarYama();
 }
+//--------------------------------------- Servidor Data Node -------------------------------------
 
 void servidorRegistrarDataNode(Servidor* servidor, Socket nuevoSocket) {
+	//El socket fue aceptado pero no figura en la lista sockets
+	//El nodo me envia su informacion
 	Mensaje* mensaje = mensajeRecibir(nuevoSocket);
+	//Creo un nuevo nodo por si lo debo registrar
+	Nodo* nodo = nodoConfigurar(mensaje->datos, nuevoSocket); //aca guarda le socket
 	if(estadoEjecucion == NORMAL)
-		servidorControlarDataNode(servidor, nuevoSocket, mensaje->datos);
+		servidorReconectarDataNode(servidor, nodo);
 	else
 		servidorRevisarDataNode(servidor, nuevoSocket, mensaje->datos);
 	mensajeDestruir(mensaje);
 }
 
+bool servidorNodoEsNuevo(Nodo* nuevoNodo) {
+	Nodo* nodo = nodoBuscar(nuevoNodo->nombre);
+	if(nodo == NULL) {
+		imprimirMensaje(archivoLog, ROJO"[ERROR] No se permite conexiones de nuevos Nodos"BLANCO);
+		return true;
+	}
+	if(nodo->estado == ACTIVADO) {
+		imprimirMensaje(archivoLog, ROJO"[ERROR] Un nodo con ese nombre ya esta conectado"BLANCO);
+		return true;
+	}
+	return false;
+}
+
+void servidorRechazarDataNode(Nodo* nuevoNodo) {
+	socketCerrar(nuevoNodo->socket);
+	nodoDestruir(nuevoNodo);
+}
+
+void servidorReconectarDataNode(Servidor* servidor, Nodo* nuevoNodo) {
+	if(servidorNodoEsNuevo(nuevoNodo))
+		servidorRechazarDataNode(nuevoNodo);
+	else
+		servidorAceptarDataNode(servidor, nuevoNodo); //El nodo deberia ser el de la lista
+}
+
 void servidorRevisarDataNode(Servidor* servidor, Socket nuevoSocket, Puntero datos) {
 	if(estadoFileSystem == ESTABLE)
-		servidorControlarDataNode(servidor, nuevoSocket, datos);
+		servidorReconectarDataNode(servidor, nuevoSocket, datos);
 	else
-		servidorAceptarDataNode(servidor, nuevoSocket, datos);
+		servidorAceptarNuevoDataNode(servidor, nuevoSocket, datos);
+}
+
+Nodo* nodoActualizar(Nodo* nodoTemporal) {
+	Nodo* nodo = nodoBuscar(nodoTemporal->nombre);
+	nodo->estado = ACTIVADO;
+	nodo->socket = nodoTemporal->socket;
+	stringCopiar(nodo->ip, nodoTemporal->ip);
+	stringCopiar(nodo->puerto, nodoTemporal->puerto);
+	nodoDestruir(nodoTemporal);
+	return nodo;
+}
+
+void servidorAvisarDataNode(Nodo* nodo) {
+	mensajeEnviar(nodo->socket, ACEPTAR_NODO, &nodo->socket, sizeof(Socket)); //TODO debe ser nulo el msj, solo me interesa la operacion
+	imprimirMensajeUno(archivoLog, "[CONEXION] El %s se ha conectado", nodo->nombre);
+}
+
+void servidorAceptarDataNode(Servidor* servidor, Nodo* nuevoNodo) {
+	Nodo* nodo = nodoActualizar(nuevoNodo);
+	servidorAceptarConexion(servidor, nodo->socket);
+	listaSocketsAgregar(nodo->socket, &servidor->listaDataNodes);
+	servidorAvisarDataNode(nodo);
+}
+
+void servidorAceptarNuevoDataNode(Servidor* servidor, Socket nuevoSocket, Puntero datos) {
+	Nodo* nodo = nodoCrear(1000, 1000, nuevoSocket);
+	nodoConfigurar(nodo, datos, nuevoSocket);
+	if(nodoBuscar(nodo->nombre) == NULL) {
+		servidorAceptarDataNode(servidor, nodo, datos, nuevoSocket);
+		listaAgregarElemento(listaNodos, nodo);
+	}
+	else {
+		socketCerrar(nuevoSocket);
+		nodoDestruir(nodo);
+		imprimirMensaje(archivoLog, "[ERROR] Un nodo conectado ya posee ese nombre");
+	}
 }
 
 void servidorMensajeDataNode(Mensaje* mensaje) {
@@ -260,77 +326,22 @@ void servidorMensajeDataNode(Mensaje* mensaje) {
 	}
 }
 
-void servidorRevisarFinDataNode(Nodo* nodo, Socket unSocket) {
 
-	bool nodoBuscarPorSocket(Nodo* nodo) {
-		return nodo->socket == unSocket;
-	}
-
+void servidorRevisarFinDataNode(Nodo* nodo) {
 	if(estadoFileSystem == ESTABLE)
-		servidorDesactivarDataNode(nodo);
+		nodoDesactivar(nodo);
 	else
-		listaEliminarDestruyendoPorCondicion(listaNodos, (Puntero)nodoBuscarPorSocket, (Puntero)nodoDestruir);
+		listaEliminarDestruyendoElemento(listaNodos, nodoPosicionEnLista(nodo), (Puntero)nodoDestruir);
 }
 
 void servidorFinalizarDataNode(Servidor* servidor, Socket unSocket) {
-
-	bool nodoBuscarPorSocket(Nodo* nodo) {
-		return nodo->socket == unSocket;
-	}
-
-	Nodo* nodo = listaBuscar(listaNodos, (Puntero)nodoBuscarPorSocket);
 	listaSocketsEliminar(unSocket, &servidor->listaDataNodes);
+	Nodo* nodo = nodoBuscarPorSocket(unSocket);
 	imprimirMensajeUno(archivoLog, "[CONEXION] El %s se ha desconectado", nodo->nombre);
 	if(estadoEjecucion == NORMAL)
-		servidorDesactivarDataNode(nodo);
+		nodoDesactivar(nodo);
 	else
 		servidorRevisarFinDataNode(nodo);
-
-}
-
-void servidorDesactivarDataNode(Nodo* nodo) {
-	nodo->estado = DESACTIVADO;
-}
-
-void servidorAceptarNodo(Servidor* servidor, Nodo* nodo, Puntero datos, Socket nuevoSocket) {
-	listaSocketsAgregar(nuevoSocket, &servidor->listaDataNodes);
-	servidorRegistrarConexion(servidor, nuevoSocket);
-	mensajeEnviar(nuevoSocket, ACEPTAR_NODO, &nuevoSocket, sizeof(Socket));
-	imprimirMensajeUno(archivoLog, "[CONEXION] El %s se ha conectado", nodo->nombre);
-}
-
-void servidorControlarDataNode(Servidor* servidor, Socket nuevoSocket, Puntero datos) {
-	Nodo* nodo = nodoConfigurarNombre(datos);
-	if(nodo == NULL ) {
-		socketCerrar(nuevoSocket);
-		imprimirMensaje(archivoLog, ROJO"[ERROR] No se permite conexiones de nuevos Nodos"BLANCO);
-		return;
-	}
-	if(nodo->estado == ACTIVADO) {
-		socketCerrar(nuevoSocket);
-		imprimirMensaje(archivoLog, "[ERROR] Un nodo conectado ya posee ese nombre");
-		return;
-	}
-	else {
-		nodoConfigurar(nodo, datos, nuevoSocket);
-		servidorAceptarNodo(servidor, nodo, datos, nuevoSocket);
-	}
-
-
-}
-
-void servidorAceptarDataNode(Servidor* servidor, Socket nuevoSocket, Puntero datos) {
-	Nodo* nodo = nodoCrear(1000, 1000, nuevoSocket);
-	nodoConfigurar(nodo, datos, nuevoSocket);
-	if(nodoBuscar(nodo->nombre) == NULL) {
-		servidorAceptarNodo(servidor, nodo, datos, nuevoSocket);
-		listaAgregarElemento(listaNodos, nodo);
-	}
-	else {
-		socketCerrar(nuevoSocket);
-		nodoDestruir(nodo);
-		imprimirMensaje(archivoLog, "[ERROR] Un nodo conectado ya posee ese nombre");
-	}
 }
 
 
@@ -339,7 +350,7 @@ void servidorRegistrarYama(Servidor* servidor, Socket unSocket) {
 	if(estadoFileSystem == ESTABLE) {
 		servidor->yama = nuevoSocket;
 		socketYama = nuevoSocket;
-		servidorRegistrarConexion(servidor, nuevoSocket);
+		servidorAceptarConexion(servidor, nuevoSocket);
 		mensajeEnviar(nuevoSocket, ACEPTAR_YAMA, &nuevoSocket, sizeof(Socket));
 		imprimirMensaje(archivoLog, "[CONEXION] El proceso Yama se ha conectado");
 	}
@@ -1828,6 +1839,25 @@ Nodo* nodoConfigurarNombre(Puntero datos) {
 	memoriaLiberar(tokens[2]);
 	memoriaLiberar(tokens);
 	return nodo;
+}
+
+int nodoPosicionEnLista(Nodo* nodo) {
+	int posicion;
+	for(posicion = 0; nodo != listaObtenerElemento(listaNodos, posicion); posicion++);
+	return posicion;
+}
+
+Nodo* nodoBuscarPorSocket(Socket unSocket) {
+
+	bool nodoBuscarPorSocket(Nodo* nodo) {
+		return nodo->socket == unSocket;
+	}
+
+	return listaBuscar(listaNodos, (Puntero)nodoBuscarPorSocket);
+}
+
+void nodoDesactivar(Nodo* nodo) {
+	nodo->estado = DESACTIVADO;
 }
 
 //--------------------------------------- Funciones de Bloque-------------------------------------
