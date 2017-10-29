@@ -28,7 +28,7 @@ void fileSystemIniciar(String flag) {
 	configuracionIniciar();
 	estadoFileSystem = INESTABLE;
 	listaNodos = listaCrear();
-	if(!stringIguales(flag, FLAG_C))
+	if(stringIguales(flag, FLAG_C))
 		metadataIniciar();
 	else
 		metadataRecuperar();
@@ -239,7 +239,7 @@ void servidorFinalizarProceso(Servidor* servidor, Socket unSocket) {
 
 void servidorRegistrarDataNode(Servidor* servidor, Socket nuevoSocket) {
 	Mensaje* mensaje = mensajeRecibir(nuevoSocket);
-	Nodo* nodoTemporal = nodoCrear(mensaje->datos, nuevoSocket); //aca guarda le socket
+	Nodo* nodoTemporal = nodoCrear(mensaje->datos, nuevoSocket);
 	if(estadoEjecucion == NORMAL)
 		servidorReconectarDataNode(servidor, nodoTemporal);
 	else
@@ -273,7 +273,8 @@ bool nodoEstaConectado(Nodo* nuevoNodo) {
 }
 
 bool servidorNodoInvalido(Nodo* nodoTemporal) {
-	return servidorNodoEsNuevo(nodoTemporal) || nodoEstaConectado(nodoTemporal);
+	return servidorNodoEsNuevo(nodoTemporal) ||
+			nodoEstaConectado(nodoTemporal);
 }
 
 void servidorReconectarDataNode(Servidor* servidor, Nodo* nodoTemporal) {
@@ -283,11 +284,16 @@ void servidorReconectarDataNode(Servidor* servidor, Nodo* nodoTemporal) {
 		servidorAceptarReconexionDataNode(servidor, nodoTemporal);
 }
 
+void servidorHabilitarNodo(Servidor* servidor, Nodo* nodoTemporal) {
+	servidorAceptarDataNode(servidor, nodoTemporal);
+	listaAgregarElemento(listaNodos, nodoTemporal);
+}
+
 void servidorAceptarNuevoDataNode(Servidor* servidor, Nodo* nodoTemporal) {
 	if(nodoEstaConectado(nodoTemporal))
 		servidorRechazarDataNode(nodoTemporal);
 	else
-		servidorAceptarDataNode(servidor, nodoTemporal);
+		servidorHabilitarNodo(servidor, nodoTemporal);
 }
 
 void servidorRevisarDataNode(Servidor* servidor, Nodo* nodoTemporal) {
@@ -725,7 +731,7 @@ void comandoFormatearFileSystem() {
 	bitmapDestruir(bitmapDirectorios);
 	metadataIniciar();
 	nodoFormatearConectados();
-	nodoPersistirConectados();
+	nodoPersistir();
 	estadoFileSystem = ESTABLE;
 	//TODO Ponerlo lindo
 	/*
@@ -1689,7 +1695,7 @@ int archivoAlmacenar(Comando* comando) {
 		listaAgregarElemento(listaArchivos, archivo);
 		archivoPersistir(archivo);
 		archivoPersistirControl();
-		nodoPersistirConectados();
+		nodoPersistir();
 		imprimirMensajeUno(archivoLog, "[ARCHIVO] El archivo %s fue copiado en File System", comando->argumentos[2]);
 		return 0;
 	}
@@ -1734,9 +1740,9 @@ Nodo* nodoCrear(Puntero datos, Socket nuevoSocket) {
 	Nodo* nodo = memoriaAlocar(sizeof(Nodo));
 	nodo->socket = nuevoSocket;
 	nodo->estado = ACTIVADO;
-	nodo->bitmap = bitmapCrear(nodo->bloquesTotales);
 	memcpy(&nodo->bloquesTotales, datos, sizeof(Entero));
 	nodo->bloquesLibres = nodo->bloquesTotales;
+	nodo->bitmap = bitmapCrear(nodo->bloquesTotales);
 	String* tokens = rutaSeparar(datos+sizeof(Entero));
 	stringCopiar(nodo->nombre, tokens[0]);
 	stringCopiar(nodo->ip, tokens[1]);
@@ -1754,7 +1760,12 @@ void nodoFormatear(Nodo* nodo) {
 	nodo->bitmap = bitmapCrear(nodo->bloquesTotales);
 }
 
+bool nodoEliminarDesactivados(Nodo* nodo) {
+	return nodo->estado == DESACTIVADO;
+}
+
 void nodoFormatearConectados() {
+	listaEliminarDestruyendoPorCondicion(listaNodos, (Puntero)nodoEliminarDesactivados, (Puntero)nodoDestruir);
 	int indice;
 	for(indice = 0; indice < listaCantidadElementos(listaNodos); indice++) {
 		Nodo* unNodo = listaObtenerElemento(listaNodos, indice);
@@ -1769,7 +1780,7 @@ void nodoDestruir(Nodo* nodo) {
 
 
 
-void nodoPersistirConectados() {
+void nodoPersistir() {
 	File archivo = fileAbrir(rutaNodos, ESCRITURA);
 	fprintf(archivo, "NODOS=%i\n", listaCantidadElementos(listaNodos));
 	int indice;
@@ -1973,6 +1984,8 @@ void metadataIniciar() {
 	bitmapDirectorios = bitmapCrear(13);
 	directoriosDisponibles = MAX_DIR;
 	directorioCrearConPersistencia(0, "root", -1);
+	archivoPersistirControl();
+	nodoPersistir();
 	estadoEjecucion = NUEVO;
 }
 
@@ -2160,6 +2173,7 @@ void nodoRecuperarPersistencia() {
 		nodo->bloquesTotales = archivoConfigEnteroDe(config, lineaTotales);
 		nodo->bloquesLibres = archivoConfigEnteroDe(config, lineaLibres);
 		nodo->estado = DESACTIVADO;
+		nodo->socket = ERROR;
 		memoriaLiberar(lineaNombre);
 		memoriaLiberar(lineaTotales);
 		memoriaLiberar(lineaLibres);
@@ -2173,7 +2187,6 @@ void nodoRecuperarPersistenciaBitmap(Nodo* nodo) {
 	String ruta = string_from_format("%s/%s", rutaDirectorioBitmaps, nodo->nombre);
 	File file = fileAbrir(ruta, LECTURA);
 	nodo->bitmap = bitmapCrear(nodo->bloquesTotales);
-	//int
 	int indice;
 	for(indice = 0; indice < nodo->bloquesTotales; indice++) {
 		int bit = fgetc(file);

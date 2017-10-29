@@ -232,6 +232,7 @@ void servidorAvisarDataNode(Nodo* nodo);
 void servidorAceptarDataNode(Servidor* servidor, Nodo* nuevoNodo);
 void servidorAceptarNuevoDataNode(Servidor* servidor, Nodo* nuevoNodo);
 void servidorAceptarReconexionDataNode(Servidor* servidor, Nodo* nuevoNodo);
+void servidorHabilitarNodo(Servidor* servidor, Nodo* nodoTemporal);
 
 void servidorRegistrarYama(Servidor* servidor, Socket unSocket);
 void servidorFinalizarYama();
@@ -359,7 +360,6 @@ void archivoPersistir(Archivo* metadata);
 Archivo* archivoCrear(String nombreArchivo, int idPadre, String tipo);
 void archivoDestruir(Archivo* archivo);
 bool archivoExiste(int idPadre, String nombre);
-void archivoIniciarEstructura();
 int archivoObtenerPosicion(Archivo* archivo);
 void archivoPersistirEliminarBloque(Archivo* archivo, int numeroBloque, int numeroCopia);
 void archivoPersistirControl();
@@ -373,7 +373,7 @@ int archivoAlmacenar(Comando* comando);
 //--------------------------------------- Funciones de Nodo -------------------------------------
 
 Nodo* nodoCrear(Puntero datos, Socket nuevoSocket);
-void nodoPersistirConectados();
+void nodoPersistir();
 void nodoLimpiarLista();
 void nodoDestruir(Nodo* nodo);
 void nodoRecuperarPersistencia();

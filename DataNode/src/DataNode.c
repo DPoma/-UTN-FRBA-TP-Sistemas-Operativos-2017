@@ -95,6 +95,7 @@ void dataNodeConectarAFS() {
 	memcpy(puntero+sizeof(Entero), mensaje, stringLongitud(mensaje)+1);
 	mensajeEnviar(socketFileSystem, NULO, puntero, stringLongitud(mensaje)+1+sizeof(Entero));
 	memoriaLiberar(mensaje);
+	memoriaLiberar(puntero);
 	imprimirMensajeDos(archivoLog, "[CONEXION] Estableciendo conexion con File System (IP: %s | Puerto %s)", configuracion->ipFileSystem, configuracion->puertoFileSystem);
 }
 

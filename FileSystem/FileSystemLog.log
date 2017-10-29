@@ -1,7 +1,14 @@
-[INFO] 16:32:02:268 FileSystem/(10638:10638): [EJECUCION] Proceso File System inicializado
-[INFO] 16:32:02:329 FileSystem/(10638:10638): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 16:32:02:330 FileSystem/(10638:10638): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 16:32:02:331 FileSystem/(10638:10638): [CONEXION] Esperando conexiones de Workers (Puerto: 5080)
-[INFO] 16:32:02:331 FileSystem/(10638:10638): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
-[INFO] 16:32:03:81 FileSystem/(10638:10643): [ERROR] Comando invalido
-[INFO] 16:32:05:459 FileSystem/(10638:10638): [CONEXION] El NODO2 se ha conectado
+[INFO] 17:25:15:584 FileSystem/(4923:4923): [EJECUCION] Proceso File System inicializado
+[INFO] 17:25:15:697 FileSystem/(4923:4923): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 17:25:15:704 FileSystem/(4923:4923): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 17:25:15:712 FileSystem/(4923:4923): [CONEXION] Esperando conexiones de Workers (Puerto: 5080)
+[INFO] 17:25:15:717 FileSystem/(4923:4923): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
+[INFO] 17:25:17:532 FileSystem/(4923:4923): [CONEXION] El NODO3 se ha conectado
+[INFO] 17:25:28:171 FileSystem/(4923:4923): [CONEXION] El NODO5 se ha conectado
+[INFO] 17:25:43:119 FileSystem/(4923:4923): [CONEXION] El NODO5 se ha desconectado
+[INFO] 17:25:58:766 FileSystem/(4923:4928): [ESTADO] El File System ha sido formateado
+[INFO] 17:26:03:354 FileSystem/(4923:4923): [31m[ERROR] No se permite conexiones de nuevos Nodos[0m
+[INFO] 17:26:08:495 FileSystem/(4923:4923): [CONEXION] El NODO3 se ha desconectado
+[INFO] 17:26:11:650 FileSystem/(4923:4928): [ESTADO] El File System ha sido formateado
+[INFO] 17:26:13:314 FileSystem/(4923:4923): [31m[ERROR] No se permite conexiones de nuevos Nodos[0m
+[INFO] 17:26:24:402 FileSystem/(4923:4923): [EJECUCION] Proceso File System finalizado
