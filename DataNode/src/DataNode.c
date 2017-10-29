@@ -89,8 +89,11 @@ void dataNodeEnviarDatos() {
 
 void dataNodeConectarAFS() {
 	socketFileSystem = socketCrearCliente(configuracion->ipFileSystem, configuracion->puertoFileSystem, ID_DATANODE);
+	Puntero puntero = malloc(100);
 	String mensaje = string_from_format("/%s/%s/%s", configuracion->nombreNodo, configuracion->ipPropia, configuracion->puertoFileSystem);
-	mensajeEnviar(socketFileSystem, NULO, mensaje, stringLongitud(mensaje)+1);
+	memcpy(puntero, &dataBinBloques, sizeof(Entero));
+	memcpy(puntero+sizeof(Entero), mensaje, stringLongitud(mensaje)+1);
+	mensajeEnviar(socketFileSystem, NULO, puntero, stringLongitud(mensaje)+1+sizeof(Entero));
 	memoriaLiberar(mensaje);
 	imprimirMensajeDos(archivoLog, "[CONEXION] Estableciendo conexion con File System (IP: %s | Puerto %s)", configuracion->ipFileSystem, configuracion->puertoFileSystem);
 }

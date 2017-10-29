@@ -263,6 +263,8 @@ void servidorRechazarDataNode(Nodo* nuevoNodo) {
 
 bool nodoEstaConectado(Nodo* nuevoNodo) {
 	Nodo* nodo = nodoBuscar(nuevoNodo->nombre);
+	if(nodo == NULL)
+		return false;
 	if(nodo->estado == ACTIVADO) {
 		imprimirMensaje(archivoLog, ROJO"[ERROR] Un nodo con ese nombre ya esta conectado"BLANCO);
 		return true;
@@ -329,7 +331,6 @@ void servidorMensajeDataNode(Mensaje* mensaje) {
 	case COPIAR_TEXTO: bloqueCopiarTexto(mensaje->datos); break;
 	}
 }
-
 
 void servidorRevisarFinDataNode(Nodo* nodo) {
 	if(estadoFileSystem == ESTABLE)

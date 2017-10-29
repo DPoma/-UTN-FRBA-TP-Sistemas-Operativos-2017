@@ -1,10 +1,7 @@
-[INFO] 12:24:49:952 FileSystem/(6745:6745): [EJECUCION] Proceso File System inicializado
-[INFO] 12:24:50:22 FileSystem/(6745:6745): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 12:24:50:24 FileSystem/(6745:6745): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 12:24:50:24 FileSystem/(6745:6745): [CONEXION] Esperando conexiones de Workers (Puerto: 5080)
-[INFO] 12:24:50:25 FileSystem/(6745:6745): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
-[INFO] 12:24:51:631 FileSystem/(6745:6745): [CONEXION] El NODO2 se ha conectado
-[INFO] 12:25:03:385 FileSystem/(6745:6750): [ARCHIVO] El archivo /home/utnso/Escritorio/fs.c fue copiado en File System
-[INFO] 12:25:24:725 FileSystem/(6745:6750): [ARCHIVO] El MD5 del archivo es e543c4ec09b50a637f2d516e487b1070  /home/utnso/Escritorio/Metadata/fs.c
-
-[INFO] 12:25:39:85 FileSystem/(6745:6745): [EJECUCION] Proceso File System finalizado
+[INFO] 16:32:02:268 FileSystem/(10638:10638): [EJECUCION] Proceso File System inicializado
+[INFO] 16:32:02:329 FileSystem/(10638:10638): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 16:32:02:330 FileSystem/(10638:10638): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 16:32:02:331 FileSystem/(10638:10638): [CONEXION] Esperando conexiones de Workers (Puerto: 5080)
+[INFO] 16:32:02:331 FileSystem/(10638:10638): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
+[INFO] 16:32:03:81 FileSystem/(10638:10643): [ERROR] Comando invalido
+[INFO] 16:32:05:459 FileSystem/(10638:10638): [CONEXION] El NODO2 se ha conectado
