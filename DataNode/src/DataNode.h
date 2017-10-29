@@ -19,6 +19,7 @@
 #define COPIAR_BLOQUE 103
 #define COPIAR_BINARIO 104
 #define COPIAR_TEXTO 105
+#define FINALIZAR 106
 
 //--------------------------------------- Estructuras -------------------------------------
 
@@ -45,6 +46,7 @@ Socket socketFileSystem;
 Configuracion* configuracion;
 ArchivoLog archivoLog;
 File dataBin;
+Hilo hiloControl;
 
 //--------------------------------------- Funciones de Configuracion -------------------------------------
 

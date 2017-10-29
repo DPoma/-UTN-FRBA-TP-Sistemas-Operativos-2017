@@ -63,6 +63,7 @@
 #define COPIAR_BLOQUE 103
 #define COPIAR_BINARIO 104
 #define COPIAR_TEXTO 105
+#define FINALIZAR_NODO 106
 
 #define ACEPTAR_YAMA 200
 
@@ -218,7 +219,7 @@ void servidorLimpiarListas(Servidor* servidor);
 
 void servidorRegistrarDataNode(Servidor* servidor, Socket nuevoSocket);
 void servidorFinalizarDataNode(Servidor* servidor, Socket unSocket);
-void servidorMensajeDataNode(Mensaje* mensaje);
+void servidorMensajeDataNode(Mensaje* mensaje, Socket unSocket);
 void servidorReconectarDataNode(Servidor* servidor, Nodo* nodoTemporal);
 bool servidorNodoEsNuevo(Nodo* nuevoNodo);
 void servidorRevisarDataNode(Servidor* servidor, Nodo* nodoTemporal);

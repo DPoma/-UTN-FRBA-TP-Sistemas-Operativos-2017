@@ -218,7 +218,7 @@ void servidorRecibirMensaje(Servidor* servidor, Socket unSocket) {
 	if(mensajeDesconexion(mensaje))
 		servidorFinalizarConexion(servidor, unSocket);
 	else {
-		servidorMensajeDataNode(mensaje);
+		servidorMensajeDataNode(mensaje, unSocket);
 	}
 	mensajeDestruir(mensaje);
 }
@@ -332,12 +332,13 @@ void servidorAceptarDataNode(Servidor* servidor, Nodo* nodo) {
 	servidorAvisarDataNode(nodo);
 }
 
-void servidorMensajeDataNode(Mensaje* mensaje) {
+void servidorMensajeDataNode(Mensaje* mensaje, Socket unSocket) {
 	switch(mensaje->header.operacion) {
 	case LEER_BLOQUE: bloqueLeer(mensaje->datos); break;
 	case COPIAR_BLOQUE: bloqueCopiar(mensaje->datos); break;
 	case COPIAR_BINARIO: bloqueCopiarBinario(mensaje->datos); break;
 	case COPIAR_TEXTO: bloqueCopiarTexto(mensaje->datos); break;
+	case FINALIZAR_NODO: mensajeEnviar(unSocket, DESCONEXION, &unSocket, sizeof(Entero));break;
 	}
 }
 
@@ -633,7 +634,7 @@ bool consolaflagInvalido(String flag) {
 String consolaLeerEntrada() {
 	int indice;
 	int caracterLeido;
-	char* cadena = memoriaAlocar(MAX);
+	char* cadena = memoriaAlocar(MAX_STRING);
 	for(indice = 0; caracterDistintos((caracterLeido= caracterObtener()),ENTER); indice++)
 		cadena[indice] = caracterLeido;
 	cadena[indice] = FIN;

@@ -24,8 +24,8 @@ void dataNodeIniciar() {
 	configuracionIniciar();
 	dataNodeActivar();
 	dataBinConfigurar();
-	//senialAsignarFuncion(SIGINT, funcionSenial);
 	dataNodeConectarAFS();
+	senialAsignarFuncion(SIGINT, funcionSenial);
 }
 
 void dataNodeAtenderFileSystem(){
@@ -51,7 +51,7 @@ void dataNodeFinalizar(){
 }
 
 void dataNodeDesconectarFS() {
-	imprimirMensaje(archivoLog, ROJO"[CONEXION] El File System se desconecto o rechazo la conexion"BLANCO);
+	imprimirMensaje(archivoLog, ROJO"[CONEXION] Conexion finalizada con File System"BLANCO);
 	dataNodeDesactivar();
 }
 
@@ -250,6 +250,7 @@ void setBloque(Entero numeroBloque, Puntero datos) {
 }
 
 void funcionSenial(int senial) {
+	mensajeEnviar(socketFileSystem, FINALIZAR, &socketFileSystem, sizeof(Entero));
 	dataNodeDesactivar();
 	puts("");
 }
