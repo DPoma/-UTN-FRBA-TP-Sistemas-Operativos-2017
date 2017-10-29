@@ -1,6 +1,5 @@
-[INFO] 17:26:13:206 DataNode/(4952:4952): [CONFIGURACION] Nombre Nodo: NODO5
-[INFO] 17:26:13:216 DataNode/(4952:4952): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data.bin
-[INFO] 17:26:13:217 DataNode/(4952:4952): [DATABIN] Cantidad de bloques disponibles 81920
-[INFO] 17:26:13:228 DataNode/(4952:4952): [CONEXION] Estableciendo conexion con File System (IP: 127.0.0.1 | Puerto 5040)
-[INFO] 17:26:13:315 DataNode/(4952:4952): [31m[CONEXION] El File System se desconecto o rechazo la conexion[0m
-[INFO] 17:26:13:315 DataNode/(4952:4952): [EJECUCION] Proceso Data Node finalizado
+[INFO] 19:38:04:179 DataNode/(6662:6662): [CONFIGURACION] Nombre Nodo: NODO5
+[INFO] 19:38:04:181 DataNode/(6662:6662): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data2.bin
+[INFO] 19:38:04:182 DataNode/(6662:6662): [DATABIN] Cantidad de bloques disponibles 81920
+[INFO] 19:38:04:207 DataNode/(6662:6662): [CONEXION] Estableciendo conexion con File System (IP: 127.0.0.1 | Puerto 5040)
+[INFO] 19:38:04:319 DataNode/(6662:6662): [CONEXION] Conexion establecida con el File System, esperando instrucciones

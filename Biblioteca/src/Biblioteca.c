@@ -802,8 +802,8 @@ Bitmap* bitmapCrear(int cantidadBloques) {
 
 void bitmapDestruir(Bitmap* bitmap) {
 	bitarray_destroy(bitmap->controlBits);
-	free(bitmap->bits);
-	free(bitmap);
+	memoriaLiberar(bitmap->bits);
+	memoriaLiberar(bitmap);
 }
 
 void bitmapLiberarBit(Bitmap* bitmap, int posicion) {

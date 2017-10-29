@@ -26,7 +26,6 @@
 #define ID_LS 13
 #define ID_INFO 14
 #define ID_EXIT 15
-
 #define FORMAT "format"
 #define RM "rm"
 #define RMB "rm -b"
@@ -42,17 +41,21 @@
 #define LS "ls"
 #define INFO "info"
 #define EXIT "exit"
-
 #define FLAG_C "--clean"
 #define FLAG_B "-b"
 #define FLAG_D "-d"
 #define FLAG_T "-t"
 #define OCUPADO '1'
-
+#define ARCHIVO_BINARIO "BINARIO"
+#define ARCHIVO_TEXTO "TEXTO"
 #define MAX_STRING 300
 #define MAX_NOMBRE 255
 #define MAX_DIR 100
 #define MAX_COPIAS 2
+#define NUEVO 0
+#define NORMAL 1
+#define INESTABLE 0
+#define ESTABLE 1
 
 #define ACEPTAR_NODO 100
 #define LEER_BLOQUE 101
@@ -63,14 +66,6 @@
 
 #define ACEPTAR_YAMA 200
 
-#define ARCHIVO_BINARIO "BINARIO"
-#define ARCHIVO_TEXTO "TEXTO"
-
-#define NUEVO 0
-#define NORMAL 1
-
-#define INESTABLE 0
-#define ESTABLE 1
 
 //--------------------------------------- Estructuras -------------------------------------
 
@@ -365,7 +360,7 @@ void archivoPersistirEliminarBloque(Archivo* archivo, int numeroBloque, int nume
 void archivoPersistirControl();
 bool archivoOrdenarPorNombre(Archivo* unArchivo, Archivo* otroArchivo);
 void archivoRecuperarPersistencia();
-void archivoRecuperarPersistenciaEspecifica(Archivo* archivo);
+void archivoRecuperarPersistenciaEspecifica(String nombre, int padre);
 bool archivoEsBinario(Archivo* archivo);
 int archivoLeer(Comando* comando);
 int archivoAlmacenar(Comando* comando);
@@ -402,6 +397,7 @@ void bloqueCopiar(Puntero datos);
 void bloqueLeer(Puntero datos);
 void bloqueCopiarTexto(Puntero datos);
 void bloqueCopiarBinario(Puntero datos);
+BloqueNodo* bloqueNodoCrear(Entero numeroBloque, String buffer, int tamanioUtilizado);
 
 //--------------------------------------- Funciones de Copia Bloque -------------------------------------
 
@@ -423,8 +419,3 @@ String* rutaSeparar(String ruta);
 bool rutaTieneAlMenosUnaBarra(String ruta);
 bool rutaValida(String ruta);
 bool rutaEsNumero(String ruta);
-
-//--------------------------------------- Funciones Varias -------------------------------------
-
-BloqueNodo* bloqueNodoCrear(Entero numeroBloque, String buffer, int tamanioUtilizado);
-String* stringSeparar2(String ruta, int caracter);

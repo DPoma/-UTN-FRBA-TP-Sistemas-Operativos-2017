@@ -28,8 +28,11 @@ void fileSystemIniciar(String flag) {
 	configuracionIniciar();
 	estadoFileSystem = INESTABLE;
 	listaNodos = listaCrear();
-	if(stringIguales(flag, FLAG_C))
+	if(stringIguales(flag, FLAG_C)) {
 		metadataIniciar();
+		imprimirMensaje(archivoLog, AMARILLO"[AVISO] Para pasar a un estado estable primero "
+				"debe formatear el File System"BLANCO);
+	}
 	else
 		metadataRecuperar();
 }
@@ -1476,6 +1479,38 @@ bool directorioOrdenarPorIdentificador(Directorio* unDirectorio, Directorio* otr
 	return unDirectorio->identificador < otroDirectorio->identificador;
 }
 
+
+void directorioRecuperarPersistencia() {
+	File file = fileAbrir(rutaArchivos, LECTURA);
+	bitmapDirectorios = bitmapCrear(13);
+	if(file == NULL) {
+		imprimirMensajeUno(archivoLog, "[ERROR] No se encontro el archivo %s", rutaDirectorios);
+		return;
+	}
+	fileCerrar(file);
+	listaDirectorios = listaCrear();
+	ArchivoConfig config = config_create(rutaDirectorios);
+	int cantidadDirectorios = archivoConfigEnteroDe(config, "DIRECTORIOS");
+	int indice;
+	for(indice = 0; indice < cantidadDirectorios; indice++) {
+		String lineaIdentificador = string_from_format("IDENTIFICADOR%i", indice);
+		String lineaNombre = string_from_format("NOMBRE%i", indice);
+		String lineaPadre = string_from_format("PADRE%i", indice);
+		Directorio* directorio = memoriaAlocar(sizeof(Directorio));
+		directorio->identificador = archivoConfigEnteroDe(config, lineaIdentificador);
+		directorio->identificadorPadre = archivoConfigEnteroDe(config, lineaPadre);
+		stringCopiar(directorio->nombre, archivoConfigStringDe(config, lineaNombre));
+		listaAgregarElemento(listaDirectorios, directorio);
+		memoriaLiberar(lineaIdentificador);
+		memoriaLiberar(lineaNombre);
+		memoriaLiberar(lineaPadre);
+	}
+	archivoConfigDestruir(config);
+	for(indice = 0; indice < cantidadDirectorios; indice++)
+		bitmapOcuparBit(bitmapDirectorios, indice);
+	directoriosDisponibles = MAX_DIR - cantidadDirectorios;
+}
+
 //--------------------------------------- Funciones de Archivo -------------------------------------
 
 Archivo* archivoCrear(String nombreArchivo, int idPadre, String tipo) {
@@ -1721,7 +1756,7 @@ int archivoLeer(Comando* comando) {
 			Copia* copia = listaObtenerElemento(bloque->listaCopias, numeroCopia);
 			Nodo* nodo = nodoBuscar(copia->nombreNodo);;
 			if(nodo != NULL) {
-				mensajeEnviar(nodo->socket, 101 ,&copia->bloqueNodo, sizeof(Entero));
+				mensajeEnviar(nodo->socket, LEER_BLOQUE ,&copia->bloqueNodo, sizeof(Entero));
 				bloqueNoFueImpreso = false;
 			}
 		}
@@ -1733,6 +1768,79 @@ int archivoLeer(Comando* comando) {
 	return 0;
 }
 
+
+void archivoRecuperarPersistencia() {
+	File file = fileAbrir(rutaArchivos, LECTURA);
+	if(file == NULL) {
+		imprimirMensajeUno(archivoLog, "[ERROR] No se encontro el archivo %s", rutaArchivos);
+		return;
+	}
+	fileCerrar(file);
+	listaArchivos = listaCrear();
+	ArchivoConfig config = config_create(rutaArchivos);
+	int cantidadArchivos = archivoConfigEnteroDe(config, "ARCHIVOS");
+	int indice;
+	for(indice = 0; indice < cantidadArchivos; indice++) {
+		String lineaNombre = string_from_format("NOMBRE%i", indice);
+		String lineaPadre = string_from_format("PADRE%i", indice);
+		String nombre = stringCrear(MAX_NOMBRE);
+		stringCopiar(nombre, archivoConfigStringDe(config, lineaNombre));
+		int padre = archivoConfigEnteroDe(config, lineaPadre);
+		memoriaLiberar(lineaNombre);
+		memoriaLiberar(lineaPadre);
+		archivoRecuperarPersistenciaEspecifica(nombre, padre);
+	}
+	archivoConfigDestruir(config);
+}
+
+void archivoRecuperarPersistenciaEspecifica(String nombre, int padre) {
+	String ruta = string_from_format("%s/%i/%s", rutaDirectorioArchivos, padre, nombre);
+	File file = fileAbrir(ruta, LECTURA);
+	if(file == NULL) {
+		imprimirMensajeUno(archivoLog, "[ERROR] No se encontro el archivo %s", ruta);
+		memoriaLiberar(ruta);
+		memoriaLiberar(nombre);
+		return;
+	}
+	fileCerrar(file);
+	ArchivoConfig config = config_create(ruta);
+	memoriaLiberar(ruta);
+	memoriaLiberar(nombre);
+	Archivo* archivo = memoriaAlocar(sizeof(Archivo));
+	stringCopiar(archivo->nombre, archivoConfigStringDe(config, "NOMBRE"));
+	archivo->identificadorPadre = archivoConfigEnteroDe(config, "ID_PADRE");
+	stringCopiar(archivo->tipo, archivoConfigStringDe(config, "TIPO"));
+	int indiceBloques;
+	archivo->listaBloques = listaCrear();
+	int cantidadBloques = archivoConfigEnteroDe(config, "BLOQUES");
+	for(indiceBloques = 0; indiceBloques < cantidadBloques; indiceBloques++) {
+		Bloque* bloque = memoriaAlocar(sizeof(Bloque));
+		String lineaBloque = string_from_format("BLOQUE%i_BYTES", indiceBloques);
+		bloque->numeroBloque = indiceBloques;
+		bloque->bytesUtilizados = archivoConfigEnteroDe(config, lineaBloque);
+		memoriaLiberar(lineaBloque);
+		listaAgregarElemento(archivo->listaBloques, bloque);
+		bloque->listaCopias = listaCrear();
+		String lineaCantidadCopias = string_from_format("BLOQUE%i_COPIAS", indiceBloques);
+		int cantidadCopias = archivoConfigEnteroDe(config, lineaCantidadCopias);
+		memoriaLiberar(lineaCantidadCopias);
+		int indiceCopias;
+		for(indiceCopias=0; indiceCopias < cantidadCopias; indiceCopias++) {
+			Copia* copia = memoriaAlocar(sizeof(Copia));
+			String lineaCopia = string_from_format("BLOQUE%i_COPIA%i", indiceBloques, indiceCopias);
+			String* datosCopia = archivoConfigArrayDe(config, lineaCopia);
+			memoriaLiberar(lineaCopia);
+			stringCopiar(copia->nombreNodo, datosCopia[0]);
+			copia->bloqueNodo = atoi(datosCopia[1]);
+			memoriaLiberar(datosCopia[0]);
+			memoriaLiberar(datosCopia[1]);
+			memoriaLiberar(datosCopia);
+			listaAgregarElemento(bloque->listaCopias, copia);
+		}
+	}
+	listaAgregarElemento(listaArchivos, archivo);
+	archivoConfigDestruir(config);
+}
 
 //--------------------------------------- Funciones de Nodo -------------------------------------
 
@@ -1866,6 +1974,55 @@ void nodoDesactivar(Nodo* nodo) {
 	nodo->estado = DESACTIVADO;
 }
 
+
+void nodoRecuperarPersistencia() {
+	File file = fileAbrir(rutaArchivos, LECTURA);
+	if(file == NULL) {
+		imprimirMensajeUno(archivoLog, "[ERROR] No se encontro el archivo %s", rutaNodos);
+		return;
+	}
+	fileCerrar(file);
+	ArchivoConfig config = config_create(rutaNodos);
+	int cantidadNodos = archivoConfigEnteroDe(config, "NODOS");
+	int indice;
+	for(indice = 0; indice < cantidadNodos; indice++) {
+		String lineaNombre = string_from_format("NOMBRE%i", indice);
+		String lineaTotales = string_from_format("BLOQUES_TOTALES%i", indice);
+		String lineaLibres = string_from_format("BLOQUES_LIBRES%i", indice);
+		Nodo* nodo = memoriaAlocar(sizeof(Nodo));
+		stringCopiar(nodo->nombre, archivoConfigStringDe(config, lineaNombre));
+		nodo->bloquesTotales = archivoConfigEnteroDe(config, lineaTotales);
+		nodo->bloquesLibres = archivoConfigEnteroDe(config, lineaLibres);
+		nodo->estado = DESACTIVADO;
+		nodo->socket = ERROR;
+		memoriaLiberar(lineaNombre);
+		memoriaLiberar(lineaTotales);
+		memoriaLiberar(lineaLibres);
+		listaAgregarElemento(listaNodos, nodo);
+		nodoRecuperarPersistenciaBitmap(nodo);
+	}
+	archivoConfigDestruir(config);
+}
+
+void nodoRecuperarPersistenciaBitmap(Nodo* nodo) {
+	String ruta = string_from_format("%s/%s", rutaDirectorioBitmaps, nodo->nombre);
+	File file = fileAbrir(ruta, LECTURA);
+	if(file == NULL) {
+		imprimirMensajeUno(archivoLog, "[ERROR] No se encontro el archivo %s", rutaNodos);
+		memoriaLiberar(ruta);
+		return;
+	}
+	nodo->bitmap = bitmapCrear(nodo->bloquesTotales);
+	int indice;
+	for(indice = 0; indice < nodo->bloquesTotales; indice++) {
+		int bit = fgetc(file);
+		if(bit == OCUPADO)
+			bitmapOcuparBit(nodo->bitmap, indice);
+	}
+	memoriaLiberar(ruta);
+	fileCerrar(file);
+}
+
 //--------------------------------------- Funciones de Bloque-------------------------------------
 
 Bloque* bloqueCrear(int bytes, int numero) {
@@ -1941,6 +2098,12 @@ void bloqueCopiarTexto(Puntero datos) {
 	fileCerrar(file);
 }
 
+BloqueNodo* bloqueNodoCrear(Entero numeroBloque, String buffer, int tamanioUtilizado) {
+	BloqueNodo* bloqueNodo = memoriaAlocar(sizeof(BloqueNodo));
+	bloqueNodo->numeroBloque = numeroBloque;
+	memcpy(bloqueNodo->bloque, buffer, tamanioUtilizado);
+	return bloqueNodo;
+}
 
 //--------------------------------------- Funciones de Copia Bloque-------------------------------------
 
@@ -1990,10 +2153,12 @@ void metadataIniciar() {
 }
 
 void metadataRecuperar() {
-	estadoFileSystem = NORMAL;
+	estadoEjecucion = NORMAL;
+	//estadofs = estable
 	archivoRecuperarPersistencia();
 	directorioRecuperarPersistencia();
 	nodoRecuperarPersistencia();
+	imprimirMensaje(archivoLog, AMARILLO"[AVISO] Para pasar a un estado estable conecte los nodos necesarios"BLANCO);
 }
 
 //--------------------------------------- Funciones de Ruta------------------------------------
@@ -2070,135 +2235,17 @@ bool rutaEsNumero(String ruta) {
 	return true;
 }
 
-//--------------------------------------- Funciones varias ------------------------------------
+//TODO estado estable para recup estado
+//TODO si me quedo sin nodos tirar error en cpto cpfrom y cat
 
-BloqueNodo* bloqueNodoCrear(Entero numeroBloque, String buffer, int tamanioUtilizado) {
-	BloqueNodo* bloqueNodo = memoriaAlocar(sizeof(BloqueNodo));
-	bloqueNodo->numeroBloque = numeroBloque;
-	memcpy(bloqueNodo->bloque, buffer, tamanioUtilizado);
-	return bloqueNodo;
-}
+//TODO stat en datanode y ver si inicio por param
+//TODO terminar nodo felizmente
 
+//TODO algoritmo nodos
 
-void archivoRecuperarPersistencia() {
-	listaArchivos = listaCrear();
-	ArchivoConfig config = config_create(rutaArchivos);
-	int cantidadArchivos = archivoConfigEnteroDe(config, "ARCHIVOS");
-	int indice;
-	for(indice = 0; indice < cantidadArchivos; indice++) {
-		String lineaNombre = string_from_format("NOMBRE%i", indice);
-		String lineaPadre = string_from_format("PADRE%i", indice);
-		Archivo* archivo = memoriaAlocar(sizeof(Archivo));
-		stringCopiar(archivo->nombre, archivoConfigStringDe(config, lineaNombre));
-		archivo->identificadorPadre = archivoConfigEnteroDe(config, lineaPadre);
-		listaAgregarElemento(listaArchivos, archivo);
-		memoriaLiberar(lineaNombre);
-		memoriaLiberar(lineaPadre);
-		archivoRecuperarPersistenciaEspecifica(archivo);
-	}
-	archivoConfigDestruir(config);
-}
-
-void archivoRecuperarPersistenciaEspecifica(Archivo* archivo) {
-	String ruta = string_from_format("%s/%i/%s", rutaDirectorioArchivos, archivo->identificadorPadre, archivo->nombre);
-	ArchivoConfig config = config_create(ruta);
-	memoriaLiberar(ruta);
-	stringCopiar(archivo->tipo, archivoConfigStringDe(config, "TIPO"));
-	int indiceBloques;
-	archivo->listaBloques = listaCrear();
-	int cantidadBloques = archivoConfigEnteroDe(config, "BLOQUES");
-	for(indiceBloques = 0; indiceBloques < cantidadBloques; indiceBloques++) {
-		Bloque* bloque = memoriaAlocar(sizeof(Bloque));
-		String lineaBloque = string_from_format("BLOQUE%i_BYTES", indiceBloques);
-		bloque->numeroBloque = indiceBloques;
-		bloque->bytesUtilizados = archivoConfigEnteroDe(config, lineaBloque);
-		memoriaLiberar(lineaBloque);
-		listaAgregarElemento(archivo->listaBloques, bloque);
-		bloque->listaCopias = listaCrear();
-		String lineaCantidadCopias = string_from_format("BLOQUE%i_COPIAS", indiceBloques);
-		int cantidadCopias = archivoConfigEnteroDe(config, lineaCantidadCopias);
-		memoriaLiberar(lineaCantidadCopias);
-		int indiceCopias;
-		for(indiceCopias=0; indiceCopias < cantidadCopias; indiceCopias++) {
-			Copia* copia = memoriaAlocar(sizeof(Copia));
-			String lineaCopia = string_from_format("BLOQUE%i_COPIA%i", indiceBloques, indiceCopias);
-			String* datosCopia = archivoConfigArrayDe(config, lineaCopia);
-			memoriaLiberar(lineaCopia);
-			stringCopiar(copia->nombreNodo, datosCopia[0]);
-			copia->bloqueNodo = atoi(datosCopia[1]);
-			memoriaLiberar(datosCopia[0]);
-			memoriaLiberar(datosCopia[1]);
-			memoriaLiberar(datosCopia);
-			listaAgregarElemento(bloque->listaCopias, copia);
-		}
-	}
-	archivoConfigDestruir(config);
-}
-
-void directorioRecuperarPersistencia() {
-	listaDirectorios = listaCrear();
-	ArchivoConfig config = config_create(rutaDirectorios);
-	int cantidadDirectorios = archivoConfigEnteroDe(config, "DIRECTORIOS");
-	int indice;
-	for(indice = 0; indice < cantidadDirectorios; indice++) {
-		String lineaIdentificador = string_from_format("IDENTIFICADOR%i", indice);
-		String lineaNombre = string_from_format("NOMBRE%i", indice);
-		String lineaPadre = string_from_format("PADRE%i", indice);
-		Directorio* directorio = memoriaAlocar(sizeof(Directorio));
-		directorio->identificador = archivoConfigEnteroDe(config, lineaIdentificador);
-		directorio->identificadorPadre = archivoConfigEnteroDe(config, lineaPadre);
-		stringCopiar(directorio->nombre, archivoConfigStringDe(config, lineaNombre));
-		listaAgregarElemento(listaDirectorios, directorio);
-		memoriaLiberar(lineaIdentificador);
-		memoriaLiberar(lineaNombre);
-		memoriaLiberar(lineaPadre);
-	}
-	archivoConfigDestruir(config);
-	bitmapDirectorios = bitmapCrear(13);
-	for(indice = 0; indice < cantidadDirectorios; indice++)
-		bitmapOcuparBit(bitmapDirectorios, indice);
-	directoriosDisponibles = MAX_DIR - cantidadDirectorios;
-}
-
-void nodoRecuperarPersistencia() {
-	ArchivoConfig config = config_create(rutaNodos);
-	int cantidadNodos = archivoConfigEnteroDe(config, "NODOS");
-	int indice;
-	for(indice = 0; indice < cantidadNodos; indice++) {
-		String lineaNombre = string_from_format("NOMBRE%i", indice);
-		String lineaTotales = string_from_format("BLOQUES_TOTALES%i", indice);
-		String lineaLibres = string_from_format("BLOQUES_LIBRES%i", indice);
-		Nodo* nodo = memoriaAlocar(sizeof(Nodo));
-		stringCopiar(nodo->nombre, archivoConfigStringDe(config, lineaNombre));
-		nodo->bloquesTotales = archivoConfigEnteroDe(config, lineaTotales);
-		nodo->bloquesLibres = archivoConfigEnteroDe(config, lineaLibres);
-		nodo->estado = DESACTIVADO;
-		nodo->socket = ERROR;
-		memoriaLiberar(lineaNombre);
-		memoriaLiberar(lineaTotales);
-		memoriaLiberar(lineaLibres);
-		listaAgregarElemento(listaNodos, nodo);
-		nodoRecuperarPersistenciaBitmap(nodo);
-	}
-	archivoConfigDestruir(config);
-}
-
-void nodoRecuperarPersistenciaBitmap(Nodo* nodo) {
-	String ruta = string_from_format("%s/%s", rutaDirectorioBitmaps, nodo->nombre);
-	File file = fileAbrir(ruta, LECTURA);
-	nodo->bitmap = bitmapCrear(nodo->bloquesTotales);
-	int indice;
-	for(indice = 0; indice < nodo->bloquesTotales; indice++) {
-		int bit = fgetc(file);
-		if(bit == OCUPADO)
-			bitmapOcuparBit(nodo->bitmap, indice);
-	}
-	memoriaLiberar(ruta);
-	fileCerrar(file);
-}
 
 /*
- * CUANDO TIRA EL MSJ QUE NO HAY ESPACIO SE VE QUE NO dEStruye una lista filtrada NO CERRAR HASTA SOLUCIONARLOOOOOOOOOOOOOOOooOOOOOOOOOOOO
+ * CUANDO TIRA EL MSJ QUE NO HAY ESPACIO SE VE QUE NO dEStruye una lista filtrada LUCIONARLOOOOOOOOOOOOOOOooOOOOOOOOOOOO
 
 OOOOOOOOOo
 
