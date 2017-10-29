@@ -234,18 +234,16 @@ void servidorFinalizarProceso(Servidor* servidor, Socket unSocket) {
 	else
 		servidorFinalizarYama();
 }
+
 //--------------------------------------- Servidor Data Node -------------------------------------
 
 void servidorRegistrarDataNode(Servidor* servidor, Socket nuevoSocket) {
-	//El socket fue aceptado pero no figura en la lista sockets
-	//El nodo me envia su informacion
 	Mensaje* mensaje = mensajeRecibir(nuevoSocket);
-	//Creo un nuevo nodo por si lo debo registrar
-	Nodo* nodo = nodoConfigurar(mensaje->datos, nuevoSocket); //aca guarda le socket
+	Nodo* nodoTemporal = nodoCrear(mensaje->datos, nuevoSocket); //aca guarda le socket
 	if(estadoEjecucion == NORMAL)
-		servidorReconectarDataNode(servidor, nodo);
+		servidorReconectarDataNode(servidor, nodoTemporal);
 	else
-		servidorRevisarDataNode(servidor, nuevoSocket, mensaje->datos);
+		servidorRevisarDataNode(servidor, nodoTemporal);
 	mensajeDestruir(mensaje);
 }
 
@@ -253,10 +251,6 @@ bool servidorNodoEsNuevo(Nodo* nuevoNodo) {
 	Nodo* nodo = nodoBuscar(nuevoNodo->nombre);
 	if(nodo == NULL) {
 		imprimirMensaje(archivoLog, ROJO"[ERROR] No se permite conexiones de nuevos Nodos"BLANCO);
-		return true;
-	}
-	if(nodo->estado == ACTIVADO) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] Un nodo con ese nombre ya esta conectado"BLANCO);
 		return true;
 	}
 	return false;
@@ -267,18 +261,38 @@ void servidorRechazarDataNode(Nodo* nuevoNodo) {
 	nodoDestruir(nuevoNodo);
 }
 
-void servidorReconectarDataNode(Servidor* servidor, Nodo* nuevoNodo) {
-	if(servidorNodoEsNuevo(nuevoNodo))
-		servidorRechazarDataNode(nuevoNodo);
-	else
-		servidorAceptarDataNode(servidor, nuevoNodo); //El nodo deberia ser el de la lista
+bool nodoEstaConectado(Nodo* nuevoNodo) {
+	Nodo* nodo = nodoBuscar(nuevoNodo->nombre);
+	if(nodo->estado == ACTIVADO) {
+		imprimirMensaje(archivoLog, ROJO"[ERROR] Un nodo con ese nombre ya esta conectado"BLANCO);
+		return true;
+	}
+	return false;
 }
 
-void servidorRevisarDataNode(Servidor* servidor, Socket nuevoSocket, Puntero datos) {
-	if(estadoFileSystem == ESTABLE)
-		servidorReconectarDataNode(servidor, nuevoSocket, datos);
+bool servidorNodoInvalido(Nodo* nodoTemporal) {
+	return servidorNodoEsNuevo(nodoTemporal) || nodoEstaConectado(nodoTemporal);
+}
+
+void servidorReconectarDataNode(Servidor* servidor, Nodo* nodoTemporal) {
+	if(servidorNodoInvalido(nodoTemporal))
+		servidorRechazarDataNode(nodoTemporal);
 	else
-		servidorAceptarNuevoDataNode(servidor, nuevoSocket, datos);
+		servidorAceptarReconexionDataNode(servidor, nodoTemporal);
+}
+
+void servidorAceptarNuevoDataNode(Servidor* servidor, Nodo* nodoTemporal) {
+	if(nodoEstaConectado(nodoTemporal))
+		servidorRechazarDataNode(nodoTemporal);
+	else
+		servidorAceptarDataNode(servidor, nodoTemporal);
+}
+
+void servidorRevisarDataNode(Servidor* servidor, Nodo* nodoTemporal) {
+	if(estadoFileSystem == ESTABLE)
+		servidorReconectarDataNode(servidor, nodoTemporal);
+	else
+		servidorAceptarNuevoDataNode(servidor, nodoTemporal);
 }
 
 Nodo* nodoActualizar(Nodo* nodoTemporal) {
@@ -296,25 +310,15 @@ void servidorAvisarDataNode(Nodo* nodo) {
 	imprimirMensajeUno(archivoLog, "[CONEXION] El %s se ha conectado", nodo->nombre);
 }
 
-void servidorAceptarDataNode(Servidor* servidor, Nodo* nuevoNodo) {
+void servidorAceptarReconexionDataNode(Servidor* servidor, Nodo* nuevoNodo) {
 	Nodo* nodo = nodoActualizar(nuevoNodo);
+	servidorAceptarDataNode(servidor, nodo);
+}
+
+void servidorAceptarDataNode(Servidor* servidor, Nodo* nodo) {
 	servidorAceptarConexion(servidor, nodo->socket);
 	listaSocketsAgregar(nodo->socket, &servidor->listaDataNodes);
 	servidorAvisarDataNode(nodo);
-}
-
-void servidorAceptarNuevoDataNode(Servidor* servidor, Socket nuevoSocket, Puntero datos) {
-	Nodo* nodo = nodoCrear(1000, 1000, nuevoSocket);
-	nodoConfigurar(nodo, datos, nuevoSocket);
-	if(nodoBuscar(nodo->nombre) == NULL) {
-		servidorAceptarDataNode(servidor, nodo, datos, nuevoSocket);
-		listaAgregarElemento(listaNodos, nodo);
-	}
-	else {
-		socketCerrar(nuevoSocket);
-		nodoDestruir(nodo);
-		imprimirMensaje(archivoLog, "[ERROR] Un nodo conectado ya posee ese nombre");
-	}
 }
 
 void servidorMensajeDataNode(Mensaje* mensaje) {
@@ -344,6 +348,7 @@ void servidorFinalizarDataNode(Servidor* servidor, Socket unSocket) {
 		servidorRevisarFinDataNode(nodo);
 }
 
+//--------------------------------------- Servidor Yama -------------------------------------
 
 void servidorRegistrarYama(Servidor* servidor, Socket unSocket) {
 	Socket nuevoSocket = socketAceptar(unSocket, ID_YAMA);
@@ -369,8 +374,10 @@ void servidorFinalizarYama() {
 	imprimirMensaje(archivoLog, "[CONEXION] El proceso YAMA se ha desconectado");
 }
 
-Socket servidorRegistrarWorker(Servidor* servidor, Socket unSocket) {
-	return 0;
+//--------------------------------------- Servidor Worker -------------------------------------
+
+void servidorRegistrarWorker(Servidor* servidor, Socket unSocket) {
+	//TODO
 }
 
 void servidorMensajeWorker() {
@@ -1722,13 +1729,21 @@ int archivoLeer(Comando* comando) {
 
 //--------------------------------------- Funciones de Nodo -------------------------------------
 
-Nodo* nodoCrear(int bloquesTotales, int bloquesLibres, Socket unSocket) {
+Nodo* nodoCrear(Puntero datos, Socket nuevoSocket) {
 	Nodo* nodo = memoriaAlocar(sizeof(Nodo));
-	nodo->bloquesTotales = bloquesTotales;
-	nodo->bloquesLibres = bloquesLibres;
-	nodo->socket = unSocket;
+	nodo->socket = nuevoSocket;
 	nodo->estado = ACTIVADO;
 	nodo->bitmap = bitmapCrear(nodo->bloquesTotales);
+	memcpy(&nodo->bloquesTotales, datos, sizeof(Entero));
+	nodo->bloquesLibres = nodo->bloquesTotales;
+	String* tokens = rutaSeparar(datos+sizeof(Entero));
+	stringCopiar(nodo->nombre, tokens[0]);
+	stringCopiar(nodo->ip, tokens[1]);
+	stringCopiar(nodo->puerto, tokens[2]);
+	memoriaLiberar(tokens[0]);
+	memoriaLiberar(tokens[1]);
+	memoriaLiberar(tokens[2]);
+	memoriaLiberar(tokens);
 	return nodo;
 }
 
@@ -1818,28 +1833,7 @@ Nodo* nodoBuscar(String nombre) {
 	return listaBuscar(listaNodos, (Puntero)buscarPorNombre);
 }
 
-void nodoConfigurar(Nodo* nodo, Puntero datos, Socket nuevoSocket) {
-	String* tokens = rutaSeparar(datos);
-	stringCopiar(nodo->nombre, tokens[0]);
-	stringCopiar(nodo->ip, tokens[1]);
-	stringCopiar(nodo->puerto, tokens[2]);
-	nodo->socket = nuevoSocket;
-	nodo->estado = ACTIVADO;
-	memoriaLiberar(tokens[0]);
-	memoriaLiberar(tokens[1]);
-	memoriaLiberar(tokens[2]);
-	memoriaLiberar(tokens);
-}
 
-Nodo* nodoConfigurarNombre(Puntero datos) {
-	String* tokens = rutaSeparar(datos);
-	Nodo* nodo = nodoBuscar(tokens[0]);
-	memoriaLiberar(tokens[0]);
-	memoriaLiberar(tokens[1]);
-	memoriaLiberar(tokens[2]);
-	memoriaLiberar(tokens);
-	return nodo;
-}
 
 int nodoPosicionEnLista(Nodo* nodo) {
 	int posicion;
@@ -2164,6 +2158,7 @@ void nodoRecuperarPersistencia() {
 		stringCopiar(nodo->nombre, archivoConfigStringDe(config, lineaNombre));
 		nodo->bloquesTotales = archivoConfigEnteroDe(config, lineaTotales);
 		nodo->bloquesLibres = archivoConfigEnteroDe(config, lineaLibres);
+		nodo->estado = DESACTIVADO;
 		memoriaLiberar(lineaNombre);
 		memoriaLiberar(lineaTotales);
 		memoriaLiberar(lineaLibres);
@@ -2187,3 +2182,44 @@ void nodoRecuperarPersistenciaBitmap(Nodo* nodo) {
 	memoriaLiberar(ruta);
 	fileCerrar(file);
 }
+
+/*
+ * CUANDO TIRA EL MSJ QUE NO HAY ESPACIO SE VE QUE NO dEStruye una lista filtrada NO CERRAR HASTA SOLUCIONARLOOOOOOOOOOOOOOOooOOOOOOOOOOOO
+
+OOOOOOOOOo
+
+
+==6582== Memcheck, a memory error detector
+==6582== Copyright (C) 2002-2013, and GNU GPL'd, by Julian Seward et al.
+==6582== Using Valgrind-3.10.0.SVN and LibVEX; rerun with -h for copyright info
+==6582== Command: ./FileSystem
+==6582== Parent PID: 2899
+==6582==
+==6582==
+==6582== HEAP SUMMARY:
+==6582==     in use at exit: 8 bytes in 1 blocks
+==6582==   total heap usage: 10,031 allocs, 10,030 frees, 1,067,809 bytes allocated
+==6582==
+==6582== 8 bytes in 1 blocks are definitely lost in loss record 1 of 1
+==6582==    at 0x402A17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==6582==    by 0x404D6F8: list_create (in /usr/lib/libcommons.so)
+==6582==    by 0x404DE0A: list_filter (in /usr/lib/libcommons.so)
+==6582==    by 0x804B16D: listaFiltrar (Biblioteca.c:495)
+==6582==    by 0x8050930: nodoVerificarBloquesLibres (FileSystem.c:1790)
+==6582==    by 0x8050CAF: bloqueEnviarCopiasANodos (FileSystem.c:1868)
+==6582==    by 0x8050250: archivoAlmacenar (FileSystem.c:1628)
+==6582==    by 0x804D5D8: consolaEjecutarComando (FileSystem.c:665)
+==6582==    by 0x804D68E: consolaAtenderComandos (FileSystem.c:688)
+==6582==    by 0x40A1F6F: start_thread (pthread_create.c:312)
+==6582==    by 0x41A350D: clone (clone.S:129)
+==6582==
+==6582== LEAK SUMMARY:
+==6582==    definitely lost: 8 bytes in 1 blocks
+==6582==    indirectly lost: 0 bytes in 0 blocks
+==6582==      possibly lost: 0 bytes in 0 blocks
+==6582==    still reachable: 0 bytes in 0 blocks
+==6582==         suppressed: 0 bytes in 0 blocks
+==6582==
+==6582== For counts of detected and suppressed errors, rerun with: -v
+==6582== ERROR SUMMARY: 1 errors from 1 contexts (suppressed: 0 from 0)
+ */

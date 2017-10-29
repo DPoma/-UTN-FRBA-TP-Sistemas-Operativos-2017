@@ -203,6 +203,8 @@ void configuracionIniciar();
 
 //--------------------------------------- Funciones de Servidor -------------------------------------
 
+void servidorInicializar(Servidor* servidor);
+void servidorFinalizar(Servidor* servidor);
 bool servidorCantidadSockets(Servidor* servidor);
 void servidorIniciarListaSelect(Servidor* servidor);
 void servidorControlarContadorSocket(Servidor* servidor, Socket unSocket);
@@ -214,22 +216,31 @@ void servidorActivarListenerYama(Servidor* servidor);
 void servidorActivarListenerDataNode(Servidor* servidor);
 void servidorActivarListenerWorker(Servidor* servidor);
 void servidorActivarListeners(Servidor* servidor);
-void servidorInicializar(Servidor* servidor);
-void servidorFinalizar(Servidor* servidor);
 void servidorAtenderSolicitudes(Servidor* servidor);
 void servidorAceptarConexion(Servidor* servidor, Socket unSocket);
-void servidorLimpiarListas(Servidor* servidor);
-void servidorRegistrarDataNode(Servidor* servidor, Socket nuevoSocket);
-void servidorRevisarDataNode(Servidor* servidor, Socket nuevoSocket, Puntero datos);
-Socket servidorRegistrarWorker(Servidor* servidor, Socket unSocket);
-void servidorFinalizarYama();
-void servidorFinalizarWorker(Servidor* servidor, Socket unSocket);
 void servidorFinalizarProceso(Servidor* servidor, Socket unSocket);
+void servidorLimpiarListas(Servidor* servidor);
+
+void servidorRegistrarDataNode(Servidor* servidor, Socket nuevoSocket);
 void servidorFinalizarDataNode(Servidor* servidor, Socket unSocket);
 void servidorMensajeDataNode(Mensaje* mensaje);
-void servidorReconectarDataNode(Servidor* servidor, Socket nuevoSocket, Puntero datos);
-void servidorAceptarNuevoDataNode(Servidor* servidor, Socket nuevoSocket, Puntero datos);
+void servidorReconectarDataNode(Servidor* servidor, Nodo* nodoTemporal);
+bool servidorNodoEsNuevo(Nodo* nuevoNodo);
+void servidorRevisarDataNode(Servidor* servidor, Nodo* nodoTemporal);
+void servidorRechazarDataNode(Nodo* nuevoNodo);
+void servidorAvisarDataNode(Nodo* nodo);
+void servidorAceptarDataNode(Servidor* servidor, Nodo* nuevoNodo);
+void servidorAceptarNuevoDataNode(Servidor* servidor, Nodo* nuevoNodo);
+void servidorAceptarReconexionDataNode(Servidor* servidor, Nodo* nuevoNodo);
+
 void servidorRegistrarYama(Servidor* servidor, Socket unSocket);
+void servidorFinalizarYama();
+
+void servidorRegistrarWorker(Servidor* servidor, Socket unSocket);
+void servidorFinalizarWorker(Servidor* servidor, Socket unSocket);
+
+
+
 void nodoDesactivar(Nodo* nodo);
 //--------------------------------------- Funciones de Socket-------------------------------------
 
@@ -361,7 +372,7 @@ int archivoAlmacenar(Comando* comando);
 
 //--------------------------------------- Funciones de Nodo -------------------------------------
 
-Nodo* nodoCrear(int bloquesTotales, int bloquesLibres, Socket unSocket);
+Nodo* nodoCrear(Puntero datos, Socket nuevoSocket);
 void nodoPersistirConectados();
 void nodoLimpiarLista();
 void nodoDestruir(Nodo* nodo);
@@ -375,8 +386,6 @@ bool nodoCantidadBloquesLibres(Nodo* unNodo, Nodo* otroNodo);
 int nodoBuscarBloqueLibre(Nodo* nodo);
 Nodo* nodoBuscar(String nombre);
 void nodoRecuperarPersistenciaBitmap(Nodo* nodo);
-void nodoConfigurar(Nodo* nodo, Puntero datos, Socket nuevoSocket);
-Nodo* nodoConfigurarNombre(Puntero datos);
 void nodoDesactivar(Nodo* nodo);
 Nodo* nodoBuscarPorSocket(Socket unSocket);
 int nodoPosicionEnLista(Nodo* nodo);
@@ -393,6 +402,7 @@ void bloqueCopiar(Puntero datos);
 void bloqueLeer(Puntero datos);
 void bloqueCopiarTexto(Puntero datos);
 void bloqueCopiarBinario(Puntero datos);
+
 //--------------------------------------- Funciones de Copia Bloque -------------------------------------
 
 Copia* copiaBloqueCrear(int numeroBloqueDelNodo, String nombreNodo);
@@ -415,5 +425,6 @@ bool rutaValida(String ruta);
 bool rutaEsNumero(String ruta);
 
 //--------------------------------------- Funciones Varias -------------------------------------
+
 BloqueNodo* bloqueNodoCrear(Entero numeroBloque, String buffer, int tamanioUtilizado);
 String* stringSeparar2(String ruta, int caracter);
