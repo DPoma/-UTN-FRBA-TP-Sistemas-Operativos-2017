@@ -66,6 +66,12 @@
 #define ARCHIVO_BINARIO "BINARIO"
 #define ARCHIVO_TEXTO "TEXTO"
 
+#define NUEVO 0
+#define NORMAL 1
+
+#define INESTABLE 0
+#define ESTABLE 1
+
 //--------------------------------------- Estructuras -------------------------------------
 
 typedef struct {
@@ -152,9 +158,10 @@ typedef struct __attribute__((packed)) {
 String campos[4];
 Configuracion* configuracion;
 ArchivoLog archivoLog;
+int estadoControl;
+int estadoEjecucion;
 int estadoFileSystem;
 int directoriosDisponibles;
-int estadoSeguro;
 Hilo hiloConsola;
 Lista listaDirectorios;
 Lista listaArchivos;
@@ -213,14 +220,15 @@ void servidorAtenderSolicitudes(Servidor* servidor);
 void servidorRegistrarConexion(Servidor* servidor, Socket unSocket);
 void servidorLimpiarListas(Servidor* servidor);
 void servidorRegistrarDataNode(Servidor* servidor, Socket nuevoSocket);
+void servidorRevisarDataNode(Servidor* servidor, Socket nuevoSocket, Puntero datos);
 Socket servidorRegistrarWorker(Servidor* servidor, Socket unSocket);
 void servidorFinalizarYama();
 void servidorFinalizarWorker(Servidor* servidor, Socket unSocket);
 void servidorFinalizarProceso(Servidor* servidor, Socket unSocket);
 void servidorFinalizarDataNode(Servidor* servidor, Socket unSocket);
 void servidorMensajeDataNode(Mensaje* mensaje);
-void servidorRegistrarNodoEstadoSeguro(Servidor* servidor, Socket nuevoSocket, Puntero datos);
-void servidorRegistrarNodoEstadoInseguro(Servidor* servidor, Socket nuevoSocket, Puntero datos);
+void servidorControlarDataNode(Servidor* servidor, Socket nuevoSocket, Puntero datos);
+void servidorAceptarDataNode(Servidor* servidor, Socket nuevoSocket, Puntero datos);
 void servidorRegistrarYama(Servidor* servidor, Socket unSocket);
 
 //--------------------------------------- Funciones de Socket-------------------------------------

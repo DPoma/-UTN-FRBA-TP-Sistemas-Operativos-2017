@@ -24,9 +24,9 @@ int main(int argc, String* argsv) {
 
 void fileSystemIniciar(String flag) {
 	pantallaLimpiar();
+	estadoControl = ACTIVADO;
 	configuracionIniciar();
-	estadoSeguro = DESACTIVADO;
-	fileSystemActivar();
+	estadoFileSystem = INESTABLE;
 	listaNodos = listaCrear();
 	if(!stringIguales(flag, FLAG_C))
 		metadataIniciar();
@@ -41,7 +41,7 @@ void fileSystemCrearConsola() {
 void fileSystemAtenderProcesos() {
 	Servidor* servidor = memoriaAlocar(sizeof(Servidor));
 	servidorInicializar(servidor);
-	while(fileSystemActivado())
+	while(estadoControl == ACTIVADO)
 		servidorAtenderSolicitudes(servidor);
 	servidorFinalizar(servidor);
 }
@@ -55,22 +55,6 @@ void fileSystemFinalizar() {
 	listaDestruirConElementos(listaArchivos, (Puntero)archivoDestruir);
 	listaDestruirConElementos(listaNodos, (Puntero)nodoDestruir);
 	sleep(2);
-}
-
-bool fileSystemActivado() {
-	return estadoFileSystem == ACTIVADO;
-}
-
-bool fileSystemDesactivado() {
-	return estadoFileSystem == DESACTIVADO;
-}
-
-void fileSystemActivar() {
-	estadoFileSystem = ACTIVADO;
-}
-
-void fileSystemDesactivar() {
-	estadoFileSystem = DESACTIVADO;
 }
 
 //--------------------------------------- Funciones de Configuracion -------------------------------------
@@ -150,7 +134,7 @@ void servidorAtenderSolicitudes(Servidor* servidor) {
 				Socket nuevoSocket;
 				if(socketEsListenerDataNode(servidor, unSocket)) {
 					nuevoSocket = socketAceptar(unSocket, ID_DATANODE);
-					if(fileSystemDesactivado())
+					if(estadoControl == DESACTIVADO)
 						break;
 					servidorRegistrarDataNode(servidor, nuevoSocket);
 				}
@@ -253,13 +237,19 @@ void servidorFinalizarProceso(Servidor* servidor, Socket unSocket) {
 
 void servidorRegistrarDataNode(Servidor* servidor, Socket nuevoSocket) {
 	Mensaje* mensaje = mensajeRecibir(nuevoSocket);
-		if(estadoSeguro == ACTIVADO)
-			servidorRegistrarNodoEstadoSeguro(servidor, nuevoSocket, mensaje->datos);
-		else
-			servidorRegistrarNodoEstadoInseguro(servidor, nuevoSocket, mensaje->datos);
+	if(estadoEjecucion == NORMAL)
+		servidorControlarDataNode(servidor, nuevoSocket, mensaje->datos);
+	else
+		servidorRevisarDataNode(servidor, nuevoSocket, mensaje->datos);
 	mensajeDestruir(mensaje);
 }
 
+void servidorRevisarDataNode(Servidor* servidor, Socket nuevoSocket, Puntero datos) {
+	if(estadoFileSystem == ESTABLE)
+		servidorControlarDataNode(servidor, nuevoSocket, datos);
+	else
+		servidorAceptarDataNode(servidor, nuevoSocket, datos);
+}
 
 void servidorMensajeDataNode(Mensaje* mensaje) {
 	switch(mensaje->header.operacion) {
@@ -268,6 +258,18 @@ void servidorMensajeDataNode(Mensaje* mensaje) {
 	case COPIAR_BINARIO: bloqueCopiarBinario(mensaje->datos); break;
 	case COPIAR_TEXTO: bloqueCopiarTexto(mensaje->datos); break;
 	}
+}
+
+void servidorRevisarFinDataNode(Nodo* nodo, Socket unSocket) {
+
+	bool nodoBuscarPorSocket(Nodo* nodo) {
+		return nodo->socket == unSocket;
+	}
+
+	if(estadoFileSystem == ESTABLE)
+		servidorDesactivarDataNode(nodo);
+	else
+		listaEliminarDestruyendoPorCondicion(listaNodos, (Puntero)nodoBuscarPorSocket, (Puntero)nodoDestruir);
 }
 
 void servidorFinalizarDataNode(Servidor* servidor, Socket unSocket) {
@@ -279,10 +281,15 @@ void servidorFinalizarDataNode(Servidor* servidor, Socket unSocket) {
 	Nodo* nodo = listaBuscar(listaNodos, (Puntero)nodoBuscarPorSocket);
 	listaSocketsEliminar(unSocket, &servidor->listaDataNodes);
 	imprimirMensajeUno(archivoLog, "[CONEXION] El %s se ha desconectado", nodo->nombre);
-	if(estadoSeguro == DESACTIVADO)
-		listaEliminarDestruyendoPorCondicion(listaNodos, (Puntero)nodoBuscarPorSocket, (Puntero)nodoDestruir);
+	if(estadoEjecucion == NORMAL)
+		servidorDesactivarDataNode(nodo);
 	else
-		nodo->estado = DESACTIVADO;
+		servidorRevisarFinDataNode(nodo);
+
+}
+
+void servidorDesactivarDataNode(Nodo* nodo) {
+	nodo->estado = DESACTIVADO;
 }
 
 void servidorAceptarNodo(Servidor* servidor, Nodo* nodo, Puntero datos, Socket nuevoSocket) {
@@ -292,7 +299,7 @@ void servidorAceptarNodo(Servidor* servidor, Nodo* nodo, Puntero datos, Socket n
 	imprimirMensajeUno(archivoLog, "[CONEXION] El %s se ha conectado", nodo->nombre);
 }
 
-void servidorRegistrarNodoEstadoSeguro(Servidor* servidor, Socket nuevoSocket, Puntero datos) {
+void servidorControlarDataNode(Servidor* servidor, Socket nuevoSocket, Puntero datos) {
 	Nodo* nodo = nodoConfigurarNombre(datos);
 	if(nodo == NULL ) {
 		socketCerrar(nuevoSocket);
@@ -312,7 +319,7 @@ void servidorRegistrarNodoEstadoSeguro(Servidor* servidor, Socket nuevoSocket, P
 
 }
 
-void servidorRegistrarNodoEstadoInseguro(Servidor* servidor, Socket nuevoSocket, Puntero datos) {
+void servidorAceptarDataNode(Servidor* servidor, Socket nuevoSocket, Puntero datos) {
 	Nodo* nodo = nodoCrear(1000, 1000, nuevoSocket);
 	nodoConfigurar(nodo, datos, nuevoSocket);
 	if(nodoBuscar(nodo->nombre) == NULL) {
@@ -329,7 +336,7 @@ void servidorRegistrarNodoEstadoInseguro(Servidor* servidor, Socket nuevoSocket,
 
 void servidorRegistrarYama(Servidor* servidor, Socket unSocket) {
 	Socket nuevoSocket = socketAceptar(unSocket, ID_YAMA);
-	if(estadoSeguro == ACTIVADO) {
+	if(estadoFileSystem == ESTABLE) {
 		servidor->yama = nuevoSocket;
 		socketYama = nuevoSocket;
 		servidorRegistrarConexion(servidor, nuevoSocket);
@@ -680,9 +687,9 @@ void consolaDestruirComando(Comando* comando, String entrada) {
 
 void consolaAtenderComandos() {
 	hiloDetach(pthread_self());
-	while(fileSystemActivado()) {
+	while(estadoControl == ACTIVADO) {
 		char* entrada = consolaLeerEntrada();
-		if(fileSystemActivado()) {
+		if(estadoControl == ACTIVADO) {
 			Comando comando;
 			consolaConfigurarComando(&comando, entrada);
 			consolaEjecutarComando(&comando);
@@ -700,7 +707,7 @@ void comandoFormatearFileSystem() {
 	metadataIniciar();
 	nodoFormatearConectados();
 	nodoPersistirConectados();
-	estadoSeguro = ACTIVADO;
+	estadoFileSystem = ESTABLE;
 	//TODO Ponerlo lindo
 	/*
 	int cantidadNodos = listaCantidadElementos(listaNodos);
@@ -1080,15 +1087,12 @@ void comandoEliminarArchivo(Comando* comando) {
 }
 
 void comandoObtenerMD5DeArchivo(Comando* comando) {
-	String nombreArchivo = rutaObtenerUltimoNombre(comando->argumentos[1]); //TODO aca iba un 1 probar porque tira killed
+	String nombreArchivo = rutaObtenerUltimoNombre(comando->argumentos[1]);
 	String MD5Archivo = memoriaAlocar(MAX_STRING);
 	String ruta = string_from_format("%s/%s", configuracion->rutaMetadata, nombreArchivo);
-	Comando* otroComando = memoriaAlocar(sizeof(Comando));
-	otroComando->argumentos[1] = memoriaAlocar(MAX_STRING);
-	otroComando->argumentos[2] = memoriaAlocar(MAX_STRING);
-	stringCopiar(otroComando->argumentos[1], comando->argumentos[1]);
-	stringCopiar(otroComando->argumentos[2], ruta);
-	if(comandoCopiarArchivoDeYamaFS(otroComando) == ERROR) //TODO Ver los returns que tendrian que tirar un numero de estado porque si no nunca se entera el padre...
+	comando->argumentos[2] = memoriaAlocar(MAX_STRING);
+	stringCopiar(comando->argumentos[2], ruta);
+	if(comandoCopiarArchivoDeYamaFS(comando) == ERROR)
 		return;
 	sleep(1); //TODO Porque tengo que leer bloques... Semaforo?
 	int pidHijo;
@@ -1114,16 +1118,13 @@ void comandoObtenerMD5DeArchivo(Comando* comando) {
 		close(descriptores[0]);
 	}
 	memcpy(MD5Archivo+longitudMensaje, "\0", 1);
-	imprimirMensajeUno(archivoLog,"[ARCHIVO] El MD5 del archivo es %s", MD5Archivo);
+	printf("[ARCHIVO] El MD5 del archivo es %s", MD5Archivo);
+	log_info(archivoLog,"[ARCHIVO] El MD5 del archivo es %s", MD5Archivo);
 	fileLimpiar(ruta);
 	memoriaLiberar(ruta);
 	memoriaLiberar(MD5Archivo);
 	memoriaLiberar(nombreArchivo);
-	memoriaLiberar(otroComando->argumentos[1]);
-	memoriaLiberar(otroComando->argumentos[2]);
-	memoriaLiberar(otroComando);
 }
-
 
 void comandoInformacionArchivo(Comando* comando) {
 	if(!rutaValida(comando->argumentos[1])) {
@@ -1163,7 +1164,7 @@ void comandoInformacionArchivo(Comando* comando) {
 }
 
 void comandoFinalizar() {
-	 fileSystemDesactivar();
+	 estadoControl = DESACTIVADO;
 	 socketCrearCliente(IP_LOCAL, configuracion->puertoDataNode, ID_DATANODE);
 }
 
@@ -1947,10 +1948,11 @@ void metadataIniciar() {
 	bitmapDirectorios = bitmapCrear(13);
 	directoriosDisponibles = MAX_DIR;
 	directorioCrearConPersistencia(0, "root", -1);
+	estadoEjecucion = NUEVO;
 }
 
 void metadataRecuperar() {
-	estadoSeguro = ACTIVADO;
+	estadoFileSystem = NORMAL;
 	archivoRecuperarPersistencia();
 	directorioRecuperarPersistencia();
 	nodoRecuperarPersistencia();
