@@ -260,17 +260,13 @@ void servidorRegistrarDataNode(Servidor* servidor, Socket nuevoSocket) {
 	mensajeDestruir(mensaje);
 }
 
-void bloqueCopiarArchivo(Puntero datos) {
-	File file = fileAbrir(rutaBuffer, "a+");
-	fprintf(file, "%s", (String)datos);
-	fileCerrar(file);
-}
 
 void servidorMensajeDataNode(Mensaje* mensaje) {
 	switch(mensaje->header.operacion) {
 	case LEER_BLOQUE: bloqueLeer(mensaje->datos); break;
 	case COPIAR_BLOQUE: bloqueCopiar(mensaje->datos); break;
-	case COPIAR_ARCHIVO: bloqueCopiarArchivo(mensaje->datos); break;
+	case COPIAR_BINARIO: bloqueCopiarBinario(mensaje->datos); break;
+	case COPIAR_TEXTO: bloqueCopiarTexto(mensaje->datos); break;
 	}
 }
 
@@ -664,12 +660,12 @@ void consolaEjecutarComando(Comando* comando) {
 		case ID_RM: comandoEliminar(comando); break;
 		case ID_RENAME: comandoRenombrar(comando); break;
 		case ID_MV: comandoMover(comando); break;
-		case ID_CAT: comandoMostrarArchivo(comando); break;
+		case ID_CAT: archivoLeer(comando); break;
 		case ID_MKDIR: comandoCrearDirectorio(comando); break;
-		case ID_CPFROM: comandoCopiarArchivoDeFS(comando); break;
-		case ID_CPTO: comandoCopiarArchivoDeYFS(comando); break;
+		case ID_CPFROM: archivoAlmacenar(comando); break;
+		case ID_CPTO: comandoCopiarArchivoDeYamaFS(comando); break;
 		case ID_CPBLOCK: comandoCopiarBloque(comando); break;
-		case ID_MD5: comandoObtenerMD5(comando); break;
+		case ID_MD5: comandoObtenerMD5DeArchivo(comando); break;
 		case ID_LS: comandoListarDirectorio(comando); break;
 		case ID_INFO: comandoInformacionArchivo(comando); break;
 		case ID_EXIT: comandoFinalizar();break;
@@ -720,115 +716,6 @@ void comandoFormatearFileSystem() {
 	imprimirMensaje(archivoLog, "[ESTADO] El File System ha sido formateado");
 }
 
-void comandoEliminar(Comando* comando) {
-	if(stringIguales(comando->argumentos[1], FLAG_D))
-		comandoEliminarDirectorio(comando);
-	else if(stringIguales(comando->argumentos[1], FLAG_B))
-		comandoEliminarBloque(comando);
-	else
-		comandoEliminarArchivo(comando);
-}
-
-void comandoEliminarBloque(Comando* comando) {
-	if(!rutaValida(comando->argumentos[2])) {
-		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
-		return;
-	}
-	if(stringIguales(comando->argumentos[2], "/")) {
-		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
-		return;
-	}
-	if(!rutaEsNumero(comando->argumentos[3])) {
-		imprimirMensaje(archivoLog,"[ERROR] El numero de bloque no es valido");
-		return;
-	}
-	if(!rutaEsNumero(comando->argumentos[4])) {
-		imprimirMensaje(archivoLog,"[ERROR] El numero de copia del bloque no es valido");
-		return;
-	}
-	Archivo* archivo = archivoBuscar(comando->argumentos[2]);
-	if(archivo == NULL) {
-		imprimirMensaje(archivoLog, "[ERROR] El archivo no existe");
-		return;
-	}
-	int numeroBloque = atoi(comando->argumentos[3]);
-	int numeroCopia = atoi(comando->argumentos[4]);
-	Bloque* bloque = listaObtenerElemento(archivo->listaBloques, numeroBloque);
-
-	if(bloque == NULL) {
-		imprimirMensaje(archivoLog, "[ERROR] El numero de bloque no existe");
-		return;
-	}
-	Copia* copia = listaObtenerElemento(bloque->listaCopias, numeroCopia);
-	if(copia == NULL) {
-		imprimirMensaje(archivoLog, "[ERROR] El numero de copia no existe");
-		return;
-	}
-	if(listaCantidadElementos(bloque->listaCopias) == 1) {
-		imprimirMensaje(archivoLog, "[ERROR] No se puede eliminar el bloque ya que es el ultimo");
-		return;
-	}
-	copiaBloqueEliminar(copia);
-	listaEliminarDestruyendoElemento(bloque->listaCopias, numeroCopia, memoriaLiberar);
-	archivoPersistir(archivo);
-	imprimirMensajeTres(archivoLog, "[BLOQUE] La copia N°%i del bloque N°%i del archivo %s ha sido eliminada",(int*)numeroCopia, (int*)numeroBloque, comando->argumentos[2]);
-}
-
-
-void comandoEliminarDirectorio(Comando* comando) {
-	String ruta = comando->argumentos[2];
-	if(!rutaValida(ruta)) {
-		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
-		return;
-	}
-	if(stringIguales(ruta, "/")) {
-		imprimirMensaje(archivoLog,"[ERROR] El directorio raiz no puede ser eliminado");
-		return;
-	}
-	Directorio* directorio = directorioBuscar(ruta);
-	if(directorio == NULL) {
-		imprimirMensaje(archivoLog,"[ERROR] El directorio no existe");
-		return;
-	}
-	if(directorioTieneAlgo(directorio->identificador))
-		imprimirMensajeUno(archivoLog,"[ERROR] El directorio %s no esta vacio",ruta);
-	else {
-		directorioEliminar(directorio->identificador);
-		imprimirMensajeUno(archivoLog,"[DIRECTORIO] El directorio %s ha sido eliminado",ruta);
-	}
-}
-
-void comandoEliminarArchivo(Comando* comando) {
-	if(!rutaValida(comando->argumentos[1])) {
-		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
-		return;
-	}
-	if(stringIguales(comando->argumentos[1], "/")) {
-		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
-		return;
-	}
-	Archivo* archivo = archivoBuscar(comando->argumentos[1]);
-	if(archivo == NULL) {
-		imprimirMensaje(archivoLog,"[ERROR] El archivo no existe");
-		return;
-	}
-	int indice;
-	for(indice=0; indice<listaCantidadElementos(archivo->listaBloques); indice++) {
-		Bloque* bloque = listaObtenerElemento(archivo->listaBloques, indice);
-		int indiceCopia;
-		for(indiceCopia=0; indiceCopia<listaCantidadElementos(bloque->listaCopias); indiceCopia++) {
-			Copia* copia = listaObtenerElemento(bloque->listaCopias, indiceCopia);
-			copiaBloqueEliminar(copia);
-		}
-	}
-	int posicion = archivoObtenerPosicion(archivo);
-	String rutaArchivo = string_from_format("%s/%i/%s", rutaDirectorioArchivos, archivo->identificadorPadre, archivo->nombre);
-	fileLimpiar(rutaArchivo);
-	memoriaLiberar(rutaArchivo);
-	listaEliminarDestruyendoElemento(listaArchivos, posicion, (Puntero)archivoDestruir);
-	archivoPersistirControl();
-	imprimirMensajeUno(archivoLog, "[ARCHIVO] El archivo %s ha sido eliminado", comando->argumentos[1]);
-}
 
 void comandoRenombrar(Comando* comando) {
 	if(!rutaValida(comando->argumentos[1])) {
@@ -942,214 +829,13 @@ void comandoMover(Comando* comando) {
 	}
 }
 
-void comandoMostrarArchivo(Comando* comando) {
-	if(!rutaValida(comando->argumentos[1])) {
-		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
-		return;
-	}
-	Archivo* archivo = archivoBuscar(comando->argumentos[1]);
-	if(archivo == NULL) {
-		imprimirMensaje(archivoLog,"[ERROR] El archivo no existe");
-		return;
-	}
-	int numeroBloque;
-	for(numeroBloque=0; numeroBloque < listaCantidadElementos(archivo->listaBloques); numeroBloque++) {
-		listaOrdenar(archivo->listaBloques, (Puntero)bloqueOrdenarPorNumero);
-		Bloque* bloque = listaObtenerElemento(archivo->listaBloques, numeroBloque);
-		int numeroCopia;
-		int bloqueNoFueImpreso = true;
-		for(numeroCopia=0; numeroCopia<listaCantidadElementos(bloque->listaCopias) && bloqueNoFueImpreso; numeroCopia++) {
-			Copia* copia = listaObtenerElemento(bloque->listaCopias, numeroCopia);
-			Nodo* nodo = nodoBuscar(copia->nombreNodo);;
-			if(nodo != NULL) {
-				mensajeEnviar(nodo->socket, 101 ,&copia->bloqueNodo, sizeof(Entero));
-				bloqueNoFueImpreso = false;
-			}
-		}
-		if(bloqueNoFueImpreso) {
-			imprimirMensaje(archivoLog,"[ERROR] No hay nodos disponibles para obtener el bloque");
-			return;
-		}
-	}
-}
-
-void comandoCrearDirectorio(Comando* comando) {
-	if(!rutaValida(comando->argumentos[1])) {
-		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
-		return;
-	}
-	if(stringIguales(comando->argumentos[1], "/")) {
-		imprimirMensaje(archivoLog,"[ERROR] El directorio raiz no puede ser creado");
-		return;
-	}
-	Archivo* archivo = archivoBuscar(comando->argumentos[1]);
-	if(archivo != NULL) {
-		imprimirMensaje(archivoLog,"[ERROR] El archivo o directorio ya existe");
-		return;
-	}
-
-	ControlDirectorio* control = directorioControlCrear(comando->argumentos[1]);
-	while(stringValido(control->nombreDirectorio)) {
-		directorioBuscarIdentificador(control);
-		if (directorioExisteIdentificador(control->identificadorDirectorio))
-			directorioControlarEntradas(control, comando->argumentos[1]);
-		else if(directorioHaySuficientesIndices(control)) {
-			int estado = directorioCrearDirectoriosRestantes(control, comando->argumentos[1]);
-			if(estado == ERROR) {
-				imprimirMensaje(archivoLog,"[ERROR] El nombre del directorio es demasiado largo");
-				break;
-			}
-		}
-		else {
-			imprimirMensaje(archivoLog,"[ERROR] Se alcanzo el limite de directorios permitidos (100)");
-			break;
-		}
-		directorioControlSetearNombre(control);
-	}
-	int indice;
-	for(indice=0; stringValido(control->nombresDirectorios[indice]); indice++)
-		memoriaLiberar(control->nombresDirectorios[indice]);
-	memoriaLiberar(control->nombresDirectorios);
-	memoriaLiberar(control);
-}
-
-void comandoCopiarArchivoDeFS(Comando* comando) {
-	if(consolaflagInvalido(comando->argumentos[1])) {
-		imprimirMensaje(archivoLog, "[ERROR] Flag invalido");
-		return;
-	}
-	if(!rutaValida(comando->argumentos[3])) {
-		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
-		return;
-	}
-	Directorio* directorio = directorioBuscar(comando->argumentos[3]);
-	if(directorio == NULL) {
-		imprimirMensaje(archivoLog, "[ERROR] El directorio ingresado no existe");
-		return;
-	}
-	String nombreArchivo = rutaObtenerUltimoNombre(comando->argumentos[2]);
-	if(archivoExiste(directorio->identificador, nombreArchivo)) {
-		imprimirMensaje(archivoLog, "[ERROR] Un archivo con ese nombre ya existe en el directorio destino");
-		memoriaLiberar(nombreArchivo);
-		return;
-	}
-	if(directorioExiste(directorio->identificador, nombreArchivo)) {
-		imprimirMensaje(archivoLog, "[ERROR] Un directorio con ese nombre ya existe en el directorio destino");
-		memoriaLiberar(nombreArchivo);
-		return;
-	}
-	File file = fileAbrir(comando->argumentos[2], LECTURA);
-	if(file == NULL) {
-		imprimirMensaje(archivoLog, "[ERROR] El archivo a copiar no existe");
-		memoriaLiberar(nombreArchivo);
-		return;
-	}
-	Archivo* archivo = archivoCrear(nombreArchivo, directorio->identificador, comando->argumentos[1]);
-	memoriaLiberar(nombreArchivo);
-	int estado = ACTIVADO;
-	if(stringIguales(comando->argumentos[1], FLAG_B)) {
-		String buffer = stringCrear(BLOQUE);
-		int numeroBloqueArchivo;
-		for(numeroBloqueArchivo = 0; fread(buffer, sizeof(char), BLOQUE, file) == BLOQUE; numeroBloqueArchivo++) {
-			Bloque* bloque = bloqueCrear(BLOQUE, numeroBloqueArchivo);
-			listaAgregarElemento(archivo->listaBloques, bloque);
-			int copiasEnviadas = bloqueEnviarCopiasANodos(bloque, buffer);
-			if(copiasEnviadas < MAX_COPIAS) {
-				estado = ERROR;
-				break;
-			}
-		}
-		memoriaLiberar(buffer);
-	}
-	else {
-		String buffer = stringCrear(MAX_STRING);
-		String datos = stringCrear(BLOQUE);
-		int bytesDisponibles = BLOQUE-1;
-		int numeroBloqueArchivo = 0;
-		while(fgets(buffer, MAX_STRING, file) != NULL) {
-			int tamanioBuffer = stringLongitud(buffer);
-			if(tamanioBuffer > BLOQUE-1) {
-				estado = -2;
-				break;
-			}
-			if(tamanioBuffer <= bytesDisponibles) {
-				stringConcatenar(datos, buffer);
-				bytesDisponibles-= tamanioBuffer;
-			}
-			else {
-				int bytesUtilizados = stringLongitud(datos)+1;
-				bytesDisponibles = BLOQUE-1;
-				Bloque* bloque = bloqueCrear(bytesUtilizados, numeroBloqueArchivo);
-				listaAgregarElemento(archivo->listaBloques, bloque);
-				int copiasEnviadas = bloqueEnviarCopiasANodos(bloque, datos);
-				if(copiasEnviadas < MAX_COPIAS) {
-					estado = ERROR;
-					break;
-				}
-				numeroBloqueArchivo++;
-				memoriaLiberar(datos);
-				datos = stringCrear(BLOQUE);
-				stringConcatenar(datos, buffer);
-				bytesDisponibles-= tamanioBuffer;
-			}
-		}
-		if(estado == ACTIVADO && stringLongitud(datos) > 0  ) {
-			int bytesUtilizados = stringLongitud(datos)+1;
-			Bloque* bloque = bloqueCrear(bytesUtilizados, numeroBloqueArchivo);
-			listaAgregarElemento(archivo->listaBloques, bloque);
-			int copiasEnviadas = bloqueEnviarCopiasANodos(bloque, datos);
-			if(copiasEnviadas < MAX_COPIAS)
-				estado = ERROR;
-		}
-		memoriaLiberar(datos);
-		memoriaLiberar(buffer);
-	}
-	fileCerrar(file);
-	if(estado == -2) {
-		archivoDestruir(archivo);
-		imprimirMensaje(archivoLog, ROJO"[ERROR] La linea leida es demasiado larga, se aborta la operacion"BLANCO);
-	}
-	else if(estado == ERROR) {
-		archivoDestruir(archivo);
-		imprimirMensaje(archivoLog, ROJO"[ERROR] No hay nodos o bloques disponibles, se aborta la operacion"BLANCO);
-	}
-	else {
-		listaAgregarElemento(listaArchivos, archivo);
-		archivoPersistir(archivo);
-		archivoPersistirControl();
-		nodoPersistirConectados();
-		imprimirMensajeUno(archivoLog, "[ARCHIVO] El archivo %s fue copiado en File System", comando->argumentos[2]);
-	}
-}
-
-void comandoCopiarArchivoDeYFS(Comando* comando) {
-	if(!rutaValida(comando->argumentos[1])) {
-		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
-		return;
-	}
-	Archivo* archivo = archivoBuscar(comando->argumentos[1]);
-	if(archivo == NULL) {
-		imprimirMensaje(archivoLog, "[ERROR] El archivo no existe");
-		return;
-	}
-	File file = fileAbrir(comando->argumentos[2], ESCRITURA);
-	if(file == NULL) {
-		imprimirMensaje(archivoLog, "[ERROR] La ruta es invalida");
-		return;
-	}
-	fileCerrar(file);
-	stringCopiar(rutaBuffer, comando->argumentos[2]);
-	int indice;
-	for(indice=0; indice < listaCantidadElementos(archivo->listaBloques) ;indice++) {
-		Bloque* bloque = listaObtenerElemento(archivo->listaBloques, indice);
-		int indiceCopias;
-		for(indiceCopias=0; indiceCopias  < listaCantidadElementos(bloque->listaCopias); indiceCopias++) {
-			Copia* copia = listaObtenerElemento(bloque->listaCopias, indiceCopias);
-			Nodo* nodo = nodoBuscar(copia->nombreNodo);
-			mensajeEnviar(nodo->socket, COPIAR_ARCHIVO, &copia->bloqueNodo, sizeof(Entero));
-			break;
-		}
-	}
+void comandoEliminar(Comando* comando) {
+	if(stringIguales(comando->argumentos[1], FLAG_D))
+		comandoEliminarDirectorio(comando);
+	else if(stringIguales(comando->argumentos[1], FLAG_B))
+		comandoEliminarBloque(comando);
+	else
+		comandoEliminarArchivo(comando);
 }
 
 void comandoCopiarBloque(Comando* comando) {
@@ -1194,44 +880,112 @@ void comandoCopiarBloque(Comando* comando) {
 
 }
 
-void comandoObtenerMD5(Comando* comando) {
-	//TODO ver si guardar en una variable al crear el archivo (ver foro)
+void comandoEliminarBloque(Comando* comando) {
+	if(!rutaValida(comando->argumentos[2])) {
+		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
+		return;
+	}
+	if(stringIguales(comando->argumentos[2], "/")) {
+		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
+		return;
+	}
+	if(!rutaEsNumero(comando->argumentos[3])) {
+		imprimirMensaje(archivoLog,"[ERROR] El numero de bloque no es valido");
+		return;
+	}
+	if(!rutaEsNumero(comando->argumentos[4])) {
+		imprimirMensaje(archivoLog,"[ERROR] El numero de copia del bloque no es valido");
+		return;
+	}
+	Archivo* archivo = archivoBuscar(comando->argumentos[2]);
+	if(archivo == NULL) {
+		imprimirMensaje(archivoLog, "[ERROR] El archivo no existe");
+		return;
+	}
+	int numeroBloque = atoi(comando->argumentos[3]);
+	int numeroCopia = atoi(comando->argumentos[4]);
+	Bloque* bloque = listaObtenerElemento(archivo->listaBloques, numeroBloque);
+
+	if(bloque == NULL) {
+		imprimirMensaje(archivoLog, "[ERROR] El numero de bloque no existe");
+		return;
+	}
+	Copia* copia = listaObtenerElemento(bloque->listaCopias, numeroCopia);
+	if(copia == NULL) {
+		imprimirMensaje(archivoLog, "[ERROR] El numero de copia no existe");
+		return;
+	}
+	if(listaCantidadElementos(bloque->listaCopias) == 1) {
+		imprimirMensaje(archivoLog, "[ERROR] No se puede eliminar el bloque ya que es el ultimo");
+		return;
+	}
+	copiaBloqueEliminar(copia);
+	listaEliminarDestruyendoElemento(bloque->listaCopias, numeroCopia, memoriaLiberar);
+	archivoPersistir(archivo);
+	imprimirMensajeTres(archivoLog, "[BLOQUE] La copia N°%i del bloque N°%i del archivo %s ha sido eliminada",(int*)numeroCopia, (int*)numeroBloque, comando->argumentos[2]);
+}
+
+void comandoCrearDirectorio(Comando* comando) {
 	if(!rutaValida(comando->argumentos[1])) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return;
 	}
-	//if (archivoEstaEnLista(nombreArchivo)) {
-		int pidHijo;
-		int longitudMensaje;
-		int descriptores[2];
-		pipe(descriptores);
-		String md5DeArchivo = memoriaAlocar(MAX_STRING);
-		String nombreArchivo = rutaObtenerUltimoNombre(comando->argumentos[1]);
-		pidHijo = fork();
-		if(pidHijo == ERROR)
-			imprimirMensaje(archivoLog, "[ERROR] Fallo el fork (Estas en problemas amigo)");
-		else if(pidHijo == 0) {
-			close(descriptores[0]);
-			close(1);
-			dup2(descriptores[1], 1);
-			execlp("/usr/bin/md5sum", "md5sum", comando->argumentos[1], NULL);
-			close(descriptores[1]);
-		} if(pidHijo > 0) {
-			close(descriptores[1]);
-			wait(NULL);
-			int bytesLeidos;
-			while((bytesLeidos = read(descriptores[0], md5DeArchivo, MAX_STRING)) > 0)
-				if(bytesLeidos > 0)
-					longitudMensaje = bytesLeidos;
-			close(descriptores[0]);
+	if(stringIguales(comando->argumentos[1], "/")) {
+		imprimirMensaje(archivoLog,"[ERROR] El directorio raiz no puede ser creado");
+		return;
+	}
+	Archivo* archivo = archivoBuscar(comando->argumentos[1]);
+	if(archivo != NULL) {
+		imprimirMensaje(archivoLog,"[ERROR] El archivo o directorio ya existe");
+		return;
+	}
+
+	ControlDirectorio* control = directorioControlCrear(comando->argumentos[1]);
+	while(stringValido(control->nombreDirectorio)) {
+		directorioBuscarIdentificador(control);
+		if (directorioExisteIdentificador(control->identificadorDirectorio))
+			directorioControlarEntradas(control, comando->argumentos[1]);
+		else if(directorioHaySuficientesIndices(control)) {
+			int estado = directorioCrearDirectoriosRestantes(control, comando->argumentos[1]);
+			if(estado == ERROR) {
+				imprimirMensaje(archivoLog,"[ERROR] El nombre del directorio es demasiado largo");
+				break;
+			}
 		}
-		memcpy(md5DeArchivo+longitudMensaje, "\0", 1);
-		printf("[ARCHIVO] El MD5 es %s", md5DeArchivo);
-		log_info(archivoLog,"[ARCHIVO] El MD5 es %s", md5DeArchivo);
-		memoriaLiberar(md5DeArchivo);
-		memoriaLiberar(nombreArchivo);
-	//} else
-		//imprimirMensaje("[ERROR] El archivo no se encuentra en el File System YAMA");
+		else {
+			imprimirMensaje(archivoLog,"[ERROR] Se alcanzo el limite de directorios permitidos (100)");
+			break;
+		}
+		directorioControlSetearNombre(control);
+	}
+	int indice;
+	for(indice=0; stringValido(control->nombresDirectorios[indice]); indice++)
+		memoriaLiberar(control->nombresDirectorios[indice]);
+	memoriaLiberar(control->nombresDirectorios);
+	memoriaLiberar(control);
+}
+
+void comandoEliminarDirectorio(Comando* comando) {
+	String ruta = comando->argumentos[2];
+	if(!rutaValida(ruta)) {
+		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
+		return;
+	}
+	if(stringIguales(ruta, "/")) {
+		imprimirMensaje(archivoLog,"[ERROR] El directorio raiz no puede ser eliminado");
+		return;
+	}
+	Directorio* directorio = directorioBuscar(ruta);
+	if(directorio == NULL) {
+		imprimirMensaje(archivoLog,"[ERROR] El directorio no existe");
+		return;
+	}
+	if(directorioTieneAlgo(directorio->identificador))
+		imprimirMensajeUno(archivoLog,"[ERROR] El directorio %s no esta vacio",ruta);
+	else {
+		directorioEliminar(directorio->identificador);
+		imprimirMensajeUno(archivoLog,"[DIRECTORIO] El directorio %s ha sido eliminado",ruta);
+	}
 }
 
 void comandoListarDirectorio(Comando* comando) {
@@ -1249,6 +1003,137 @@ void comandoListarDirectorio(Comando* comando) {
 	else
 		imprimirMensaje(archivoLog, "[ERROR] El directorio no existe");
 }
+
+
+void comandoCopiarArchivoAYamaFS(Comando* comando) {
+	archivoAlmacenar(comando);
+}
+
+void comandoCopiarArchivoDeYamaFS(Comando* comando) {
+	if(consolaflagInvalido(comando->argumentos[1])) {
+		imprimirMensaje(archivoLog, "[ERROR] Flag invalido");
+		return;
+	}
+	if(!rutaValida(comando->argumentos[2])) {
+		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
+		return;
+	}
+	Archivo* archivo = archivoBuscar(comando->argumentos[2]);
+	if(archivo == NULL) {
+		imprimirMensaje(archivoLog, "[ERROR] El archivo no existe");
+		return;
+	}
+	File file = fileAbrir(comando->argumentos[3], LECTURA);
+	if(file == NULL) {
+		imprimirMensaje(archivoLog, "[ERROR] La ruta es invalida");
+		return;
+	}
+	fileCerrar(file);
+	stringCopiar(rutaBuffer, comando->argumentos[3]);
+	int indice;
+	for(indice = 0; indice < listaCantidadElementos(archivo->listaBloques) ;indice++) {
+		Bloque* bloque = listaObtenerElemento(archivo->listaBloques, indice);
+		int indiceCopias;
+		for(indiceCopias=0; indiceCopias  < listaCantidadElementos(bloque->listaCopias); indiceCopias++) {
+			Copia* copia = listaObtenerElemento(bloque->listaCopias, indiceCopias);
+			Nodo* nodo = nodoBuscar(copia->nombreNodo);
+			if(stringIguales(comando->argumentos[1], FLAG_B))
+				mensajeEnviar(nodo->socket, COPIAR_BINARIO, &copia->bloqueNodo, sizeof(Entero));
+			else
+				mensajeEnviar(nodo->socket, COPIAR_TEXTO, &copia->bloqueNodo, sizeof(Entero));
+			break;
+		}
+	}
+}
+
+void comandoMostrarArchivo(Comando* comando) {
+	archivoLeer(comando);
+}
+
+void comandoEliminarArchivo(Comando* comando) {
+	if(!rutaValida(comando->argumentos[1])) {
+		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
+		return;
+	}
+	if(stringIguales(comando->argumentos[1], "/")) {
+		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
+		return;
+	}
+	Archivo* archivo = archivoBuscar(comando->argumentos[1]);
+	if(archivo == NULL) {
+		imprimirMensaje(archivoLog,"[ERROR] El archivo no existe");
+		return;
+	}
+	int indice;
+	for(indice=0; indice<listaCantidadElementos(archivo->listaBloques); indice++) {
+		Bloque* bloque = listaObtenerElemento(archivo->listaBloques, indice);
+		int indiceCopia;
+		for(indiceCopia=0; indiceCopia<listaCantidadElementos(bloque->listaCopias); indiceCopia++) {
+			Copia* copia = listaObtenerElemento(bloque->listaCopias, indiceCopia);
+			copiaBloqueEliminar(copia);
+		}
+	}
+	int posicion = archivoObtenerPosicion(archivo);
+	String rutaArchivo = string_from_format("%s/%i/%s", rutaDirectorioArchivos, archivo->identificadorPadre, archivo->nombre);
+	fileLimpiar(rutaArchivo);
+	memoriaLiberar(rutaArchivo);
+	listaEliminarDestruyendoElemento(listaArchivos, posicion, (Puntero)archivoDestruir);
+	archivoPersistirControl();
+	imprimirMensajeUno(archivoLog, "[ARCHIVO] El archivo %s ha sido eliminado", comando->argumentos[1]);
+}
+
+void comandoObtenerMD5DeArchivo(Comando* comando) {
+	if(!rutaValida(comando->argumentos[1])) {
+		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
+		return;
+	}
+	Archivo* archivo = archivoBuscar(comando->argumentos[1]);
+	if(archivo == NULL) {
+		imprimirMensaje(archivoLog, "[ERROR] El archivo no existe");
+		return;
+	}
+	String nombreArchivo = rutaObtenerUltimoNombre(comando->argumentos[1]);
+	String MD5Archivo = memoriaAlocar(MAX_STRING);
+	String ruta = string_from_format("%s/%s", configuracion->rutaMetadata, nombreArchivo);
+	Comando* otroComando = memoriaAlocar(sizeof(Comando));
+	otroComando->argumentos[1] = memoriaAlocar(MAX_STRING);
+	otroComando->argumentos[2] = memoriaAlocar(MAX_STRING);
+	stringCopiar(otroComando->argumentos[1], comando->argumentos[1]);
+	stringCopiar(otroComando->argumentos[2], ruta);
+	comandoCopiarArchivoDeYamaFS(otroComando);
+	int pidHijo;
+	int longitudMensaje;
+	int descriptores[2];
+	pipe(descriptores);
+	pidHijo = fork();
+	if(pidHijo == ERROR)
+		imprimirMensaje(archivoLog, "[ERROR] Fallo el fork (Estas en problemas amigo)");
+	else if(pidHijo == 0) {
+		close(descriptores[0]);
+		close(1);
+		dup2(descriptores[1], 1);
+		execlp("/usr/bin/md5sum", "md5sum", ruta, NULL);
+		close(descriptores[1]);
+	} if(pidHijo > 0) {
+		close(descriptores[1]);
+		wait(NULL);
+		int bytesLeidos;
+		while((bytesLeidos = read(descriptores[0], MD5Archivo, MAX_STRING)) > 0)
+			if(bytesLeidos > 0)
+				longitudMensaje = bytesLeidos;
+		close(descriptores[0]);
+	}
+	memcpy(MD5Archivo+longitudMensaje, "\0", 1);
+	imprimirMensajeUno(archivoLog,"[ARCHIVO] El MD5 del archivo es es %s", MD5Archivo);
+	//fileLimpiar(ruta);
+	memoriaLiberar(ruta);
+	memoriaLiberar(MD5Archivo);
+	memoriaLiberar(nombreArchivo);
+	memoriaLiberar(otroComando->argumentos[1]);
+	memoriaLiberar(otroComando->argumentos[2]);
+	memoriaLiberar(otroComando);
+}
+
 
 void comandoInformacionArchivo(Comando* comando) {
 	if(!rutaValida(comando->argumentos[1])) {
@@ -1685,6 +1570,147 @@ bool archivoOrdenarPorNombre(Archivo* unArchivo, Archivo* otroArchivo) {
 	return unArchivo->nombre[0] < otroArchivo->nombre[0];
 }
 
+void archivoAlmacenar(Comando* comando) {
+	if(consolaflagInvalido(comando->argumentos[1])) {
+		imprimirMensaje(archivoLog, "[ERROR] Flag invalido");
+		return;
+	}
+	if(!rutaValida(comando->argumentos[3])) {
+		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
+		return;
+	}
+	Directorio* directorio = directorioBuscar(comando->argumentos[3]);
+	if(directorio == NULL) {
+		imprimirMensaje(archivoLog, "[ERROR] El directorio ingresado no existe");
+		return;
+	}
+	String nombreArchivo = rutaObtenerUltimoNombre(comando->argumentos[2]);
+	if(archivoExiste(directorio->identificador, nombreArchivo)) {
+		imprimirMensaje(archivoLog, "[ERROR] Un archivo con ese nombre ya existe en el directorio destino");
+		memoriaLiberar(nombreArchivo);
+		return;
+	}
+	if(directorioExiste(directorio->identificador, nombreArchivo)) {
+		imprimirMensaje(archivoLog, "[ERROR] Un directorio con ese nombre ya existe en el directorio destino");
+		memoriaLiberar(nombreArchivo);
+		return;
+	}
+	File file = fileAbrir(comando->argumentos[2], LECTURA);
+	if(file == NULL) {
+		imprimirMensaje(archivoLog, "[ERROR] El archivo a copiar no existe");
+		memoriaLiberar(nombreArchivo);
+		return;
+	}
+	Archivo* archivo = archivoCrear(nombreArchivo, directorio->identificador, comando->argumentos[1]);
+	memoriaLiberar(nombreArchivo);
+	int estado = ACTIVADO;
+	if(stringIguales(comando->argumentos[1], FLAG_B)) {
+		String buffer = stringCrear(BLOQUE);
+		int numeroBloqueArchivo;
+		for(numeroBloqueArchivo = 0; fread(buffer, sizeof(char), BLOQUE, file) == BLOQUE; numeroBloqueArchivo++) {
+			Bloque* bloque = bloqueCrear(BLOQUE, numeroBloqueArchivo);
+			listaAgregarElemento(archivo->listaBloques, bloque);
+			int copiasEnviadas = bloqueEnviarCopiasANodos(bloque, buffer);
+			if(copiasEnviadas < MAX_COPIAS) {
+				estado = ERROR;
+				break;
+			}
+		}
+		memoriaLiberar(buffer);
+	}
+	else {
+		String buffer = stringCrear(MAX_STRING);
+		String datos = stringCrear(BLOQUE);
+		int bytesDisponibles = BLOQUE-1;
+		int numeroBloqueArchivo = 0;
+		while(fgets(buffer, MAX_STRING, file) != NULL) {
+			int tamanioBuffer = stringLongitud(buffer);
+			if(tamanioBuffer > BLOQUE-1) {
+				estado = -2;
+				break;
+			}
+			if(tamanioBuffer <= bytesDisponibles) {
+				stringConcatenar(datos, buffer);
+				bytesDisponibles-= tamanioBuffer;
+			}
+			else {
+				int bytesUtilizados = stringLongitud(datos)+1;
+				bytesDisponibles = BLOQUE-1;
+				Bloque* bloque = bloqueCrear(bytesUtilizados, numeroBloqueArchivo);
+				listaAgregarElemento(archivo->listaBloques, bloque);
+				int copiasEnviadas = bloqueEnviarCopiasANodos(bloque, datos);
+				if(copiasEnviadas < MAX_COPIAS) {
+					estado = ERROR;
+					break;
+				}
+				numeroBloqueArchivo++;
+				memoriaLiberar(datos);
+				datos = stringCrear(BLOQUE);
+				stringConcatenar(datos, buffer);
+				bytesDisponibles-= tamanioBuffer;
+			}
+		}
+		if(estado == ACTIVADO && stringLongitud(datos) > 0  ) {
+			int bytesUtilizados = stringLongitud(datos)+1;
+			Bloque* bloque = bloqueCrear(bytesUtilizados, numeroBloqueArchivo);
+			listaAgregarElemento(archivo->listaBloques, bloque);
+			int copiasEnviadas = bloqueEnviarCopiasANodos(bloque, datos);
+			if(copiasEnviadas < MAX_COPIAS)
+				estado = ERROR;
+		}
+		memoriaLiberar(datos);
+		memoriaLiberar(buffer);
+	}
+	fileCerrar(file);
+	if(estado == -2) {
+		archivoDestruir(archivo);
+		imprimirMensaje(archivoLog, ROJO"[ERROR] La linea leida es demasiado larga, se aborta la operacion"BLANCO);
+	}
+	else if(estado == ERROR) {
+		archivoDestruir(archivo);
+		imprimirMensaje(archivoLog, ROJO"[ERROR] No hay nodos o bloques disponibles, se aborta la operacion"BLANCO);
+	}
+	else {
+		listaAgregarElemento(listaArchivos, archivo);
+		archivoPersistir(archivo);
+		archivoPersistirControl();
+		nodoPersistirConectados();
+		imprimirMensajeUno(archivoLog, "[ARCHIVO] El archivo %s fue copiado en File System", comando->argumentos[2]);
+	}
+}
+
+void archivoLeer(Comando* comando) {
+	if(!rutaValida(comando->argumentos[1])) {
+		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
+		return;
+	}
+	Archivo* archivo = archivoBuscar(comando->argumentos[1]);
+	if(archivo == NULL) {
+		imprimirMensaje(archivoLog,"[ERROR] El archivo no existe");
+		return;
+	}
+	int numeroBloque;
+	for(numeroBloque=0; numeroBloque < listaCantidadElementos(archivo->listaBloques); numeroBloque++) {
+		listaOrdenar(archivo->listaBloques, (Puntero)bloqueOrdenarPorNumero);
+		Bloque* bloque = listaObtenerElemento(archivo->listaBloques, numeroBloque);
+		int numeroCopia;
+		int bloqueNoFueImpreso = true;
+		for(numeroCopia=0; numeroCopia<listaCantidadElementos(bloque->listaCopias) && bloqueNoFueImpreso; numeroCopia++) {
+			Copia* copia = listaObtenerElemento(bloque->listaCopias, numeroCopia);
+			Nodo* nodo = nodoBuscar(copia->nombreNodo);;
+			if(nodo != NULL) {
+				mensajeEnviar(nodo->socket, 101 ,&copia->bloqueNodo, sizeof(Entero));
+				bloqueNoFueImpreso = false;
+			}
+		}
+		if(bloqueNoFueImpreso) {
+			imprimirMensaje(archivoLog,"[ERROR] No hay nodos disponibles para obtener el bloque");
+			return;
+		}
+	}
+}
+
+
 //--------------------------------------- Funciones de Nodo -------------------------------------
 
 Nodo* nodoCrear(int bloquesTotales, int bloquesLibres, Socket unSocket) {
@@ -1869,6 +1895,19 @@ void bloqueLeer(Puntero datos) {
 	printf("%s", (String)datos);
 }
 
+void bloqueCopiarBinario(Puntero datos) {
+	File file = fileAbrir(rutaBuffer, "a+");
+	fwrite(datos, sizeof(char), BLOQUE, file);
+	fileCerrar(file);
+}
+
+void bloqueCopiarTexto(Puntero datos) {
+	File file = fileAbrir(rutaBuffer, "a+");
+	fprintf(file, "%s", (String)datos);
+	fileCerrar(file);
+}
+
+
 //--------------------------------------- Funciones de Copia Bloque-------------------------------------
 
 Copia* copiaBloqueCrear(int numeroBloqueDelNodo, String nombreNodo) {
@@ -1914,6 +1953,7 @@ void metadataIniciar() {
 }
 
 void metadataRecuperar() {
+	estadoSeguro = ACTIVADO;
 	archivoRecuperarPersistencia();
 	directorioRecuperarPersistencia();
 	nodoRecuperarPersistencia();

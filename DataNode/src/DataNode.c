@@ -33,10 +33,11 @@ void dataNodeAtenderFileSystem(){
 	switch(mensaje->header.operacion){
 		case DESCONEXION: dataNodeDesconectarFS(); break;
 		case ACEPTACION: dataNodeAceptado(); break;
-		case LEER_BLOQUE: bloqueLeer(mensaje->datos); break;
+		case LEER_BLOQUE: bloqueObtenerParaLeer(mensaje->datos); break;
 		case ESCRIBIR_BLOQUE: bloqueEscribir(mensaje->datos); break;
-		case COPIAR_BLOQUE: bloqueCopiarEnNodo(mensaje->datos); break;
-		case COPIAR_ARCHIVO: bloqueCopiarArchivo(mensaje->datos); break;
+		case COPIAR_BLOQUE: bloqueObtenerParaCopiar(mensaje->datos); break;
+		case COPIAR_BINARIO: bloqueObtenerParaCopiarBinario(mensaje->datos); break;
+		case COPIAR_TEXTO: bloqueObtenerParaCopiarTexto(mensaje->datos); break;
 	}
 	mensajeDestruir(mensaje);
 }
@@ -135,7 +136,6 @@ void configuracionIniciar() {
 	configuracionImprimir(configuracion);
 }
 
-
 //--------------------------------------- Funciones de bloques -------------------------------------
 
 Bloque bloqueBuscar(Entero numeroBloque) {
@@ -143,28 +143,34 @@ Bloque bloqueBuscar(Entero numeroBloque) {
 	return bloque;
 }
 
-void bloqueLeer(Puntero datos) {
+void bloqueObtenerParaLeer(Puntero datos) {
 	Entero numeroBloque = *(Entero*)datos;
 	Bloque bloque = getBloque(numeroBloque);
 	mensajeEnviar(socketFileSystem, LEER_BLOQUE, bloque, BLOQUE);
+}
+
+void bloqueObtenerParaCopiar(Puntero datos) {
+	Entero numeroBloqueACopiar = *(Entero*)datos;
+	Bloque bloqueACopiar = getBloque(numeroBloqueACopiar);
+	mensajeEnviar(socketFileSystem, COPIAR_BLOQUE, bloqueACopiar, BLOQUE);
+}
+
+void bloqueObtenerParaCopiarBinario(Puntero datos) {
+	Entero numeroBloque = *(Entero*)datos;
+	Bloque bloque = getBloque(numeroBloque);
+	mensajeEnviar(socketFileSystem, COPIAR_BINARIO, bloque, BLOQUE);
+}
+
+void bloqueObtenerParaCopiarTexto(Puntero datos) {
+	Entero numeroBloque = *(Entero*)datos;
+	Bloque bloque = getBloque(numeroBloque);
+	mensajeEnviar(socketFileSystem, COPIAR_TEXTO, bloque, BLOQUE);
 }
 
 void bloqueEscribir(Puntero datos) {
 	Entero numeroBloque;
 	memcpy(&numeroBloque, datos, sizeof(Entero));
 	setBloque(numeroBloque, datos+sizeof(Entero));
-}
-
-void bloqueCopiarEnNodo(Puntero datos) {
-	Entero numeroBloqueACopiar = *(Entero*)datos;
-	Bloque bloqueACopiar = getBloque(numeroBloqueACopiar);
-	mensajeEnviar(socketFileSystem, COPIAR_BLOQUE, bloqueACopiar, BLOQUE);
-}
-
-void bloqueCopiarArchivo(Puntero datos) {
-	Entero numeroBloque = *(Entero*)datos;
-	Bloque bloque = getBloque(numeroBloque);
-	mensajeEnviar(socketFileSystem, COPIAR_ARCHIVO, bloque, BLOQUE);
 }
 
 //--------------------------------------- Funciones de DataBin -------------------------------------
@@ -225,7 +231,7 @@ void dataBinConfigurar() {
 	dataBinCalcularBloques();
 }
 
-//--------------------------------------- Funciones varias -------------------------------------
+//--------------------------------------- Interfaz con File System -------------------------------------
 
 Bloque getBloque(Entero numeroBloque) {
 	Bloque bloque = bloqueBuscar(numeroBloque);

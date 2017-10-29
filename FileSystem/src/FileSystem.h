@@ -58,7 +58,8 @@
 #define LEER_BLOQUE 101
 #define ESCRIBIR_BLOQUE 102
 #define COPIAR_BLOQUE 103
-#define COPIAR_ARCHIVO 104
+#define COPIAR_BINARIO 104
+#define COPIAR_TEXTO 105
 
 #define ACEPTAR_YAMA 200
 
@@ -275,12 +276,12 @@ void comandoEliminarDirectorio(Comando* comando);
 void comandoEliminarArchivo(Comando* comando);
 void comandoRenombrar(Comando* comando);
 void comandoMover(Comando* comando);
-void comandoMostrarArchivo(Comando* comando);
+void archivoLeer(Comando* comando);
 void comandoCrearDirectorio(Comando* comando);
-void comandoCopiarArchivoDeFS(Comando* comando);
-void comandoCopiarArchivoDeYFS(Comando* comando);
+void archivoAlmacenar(Comando* comando);
+void comandoCopiarArchivoDeYamaFS(Comando* comando);
 void comandoCopiarBloque(Comando* comando);
-void comandoObtenerMD5(Comando* comando);
+void comandoObtenerMD5DeArchivo(Comando* comando);
 void comandoListarDirectorio(Comando* comando);
 void comandoInformacionArchivo(Comando* comando);
 void comandoFinalizar();
@@ -373,7 +374,8 @@ int bloqueEnviarCopiasANodos(Bloque* bloque, String buffer);
 bool bloqueOrdenarPorNumero(Bloque* unBloque, Bloque* otroBloque);
 void bloqueCopiar(Puntero datos);
 void bloqueLeer(Puntero datos);
-
+void bloqueCopiarTexto(Puntero datos);
+void bloqueCopiarBinario(Puntero datos);
 //--------------------------------------- Funciones de Copia Bloque -------------------------------------
 
 Copia* copiaBloqueCrear(int numeroBloqueDelNodo, String nombreNodo);

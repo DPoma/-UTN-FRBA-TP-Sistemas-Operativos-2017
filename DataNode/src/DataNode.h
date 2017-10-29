@@ -17,8 +17,8 @@
 #define LEER_BLOQUE 101
 #define ESCRIBIR_BLOQUE 102
 #define COPIAR_BLOQUE 103
-#define COPIAR_ARCHIVO 104
-
+#define COPIAR_BINARIO 104
+#define COPIAR_TEXTO 105
 
 //--------------------------------------- Estructuras -------------------------------------
 
@@ -74,11 +74,16 @@ Puntero dataBinMapear();
 Puntero dataBinUbicarPuntero(Entero numeroBloque);
 void dataBinConfigurar();
 
-//--------------------------------------- Funciones varias -------------------------------------
+//--------------------------------------- Funciones de Bloque -------------------------------------
+
+Bloque bloqueBuscar(Entero numeroBloque);
+void bloqueEscribir(Puntero datos);
+void bloqueObtenerParaLeer(Puntero datos);
+void bloqueObtenerParaCopiar(Puntero datos);
+void bloqueObtenerParaCopiarBinario(Puntero datos);
+void bloqueObtenerParaCopiarTexto(Puntero datos);
+
+//--------------------------------------- Interfaz con File System -------------------------------------
 
 Puntero getBloque(Entero numeroBloque);
 void setBloque(Entero numeroBloque, Puntero datos);
-void bloqueLeer(Puntero datos);
-void bloqueEscribir(Puntero datos);
-void bloqueCopiarEnNodo(Puntero datos);
-void bloqueCopiarArchivo(Puntero datos);
