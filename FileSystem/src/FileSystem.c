@@ -119,17 +119,17 @@ void configuracionIniciarRutas() {
 	rutaArchivos = string_from_format("%s/Archivos.txt", configuracion->rutaMetadata);
 	rutaDirectorios = string_from_format("%s/Directorios.txt", configuracion->rutaMetadata);
 	rutaNodos = string_from_format("%s/Nodos.bin", configuracion->rutaMetadata);
-	rutaBuffer = string_from_format("%s/Buffer.txt", configuracion->rutaMetadata);
+	rutaBuffer = stringCrear(MAX_STRING);
 }
 
 void configuracionDestruirRutas() {
 	memoriaLiberar(configuracion);
 	memoriaLiberar(rutaNodos);
-	memoriaLiberar(rutaBuffer);
 	memoriaLiberar(rutaDirectorioArchivos);
 	memoriaLiberar(rutaDirectorioBitmaps);
 	memoriaLiberar(rutaDirectorios);
 	memoriaLiberar(rutaArchivos);
+	memoriaLiberar(rutaBuffer);
 }
 
 //--------------------------------------- Funciones de Servidor -------------------------------------
@@ -260,10 +260,17 @@ void servidorRegistrarDataNode(Servidor* servidor, Socket nuevoSocket) {
 	mensajeDestruir(mensaje);
 }
 
+void bloqueCopiarArchivo(Puntero datos) {
+	File file = fileAbrir(rutaBuffer, "a+");
+	fprintf(file, "%s", (String)datos);
+	fileCerrar(file);
+}
+
 void servidorMensajeDataNode(Mensaje* mensaje) {
 	switch(mensaje->header.operacion) {
 	case LEER_BLOQUE: bloqueLeer(mensaje->datos); break;
 	case COPIAR_BLOQUE: bloqueCopiar(mensaje->datos); break;
+	case COPIAR_ARCHIVO: bloqueCopiarArchivo(mensaje->datos); break;
 	}
 }
 
@@ -310,7 +317,7 @@ void servidorRegistrarNodoEstadoSeguro(Servidor* servidor, Socket nuevoSocket, P
 }
 
 void servidorRegistrarNodoEstadoInseguro(Servidor* servidor, Socket nuevoSocket, Puntero datos) {
-	Nodo* nodo = nodoCrear(0, 0, nuevoSocket);
+	Nodo* nodo = nodoCrear(1000, 1000, nuevoSocket);
 	nodoConfigurar(nodo, datos, nuevoSocket);
 	if(nodoBuscar(nodo->nombre) == NULL) {
 		servidorAceptarNodo(servidor, nodo, datos, nuevoSocket);
@@ -1115,9 +1122,34 @@ void comandoCopiarArchivoDeFS(Comando* comando) {
 	}
 }
 
-
 void comandoCopiarArchivoDeYFS(Comando* comando) {
-//TODO
+	if(!rutaValida(comando->argumentos[1])) {
+		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
+		return;
+	}
+	Archivo* archivo = archivoBuscar(comando->argumentos[1]);
+	if(archivo == NULL) {
+		imprimirMensaje(archivoLog, "[ERROR] El archivo no existe");
+		return;
+	}
+	File file = fileAbrir(comando->argumentos[2], ESCRITURA);
+	if(file == NULL) {
+		imprimirMensaje(archivoLog, "[ERROR] La ruta es invalida");
+		return;
+	}
+	fileCerrar(file);
+	stringCopiar(rutaBuffer, comando->argumentos[2]);
+	int indice;
+	for(indice=0; indice < listaCantidadElementos(archivo->listaBloques) ;indice++) {
+		Bloque* bloque = listaObtenerElemento(archivo->listaBloques, indice);
+		int indiceCopias;
+		for(indiceCopias=0; indiceCopias  < listaCantidadElementos(bloque->listaCopias); indiceCopias++) {
+			Copia* copia = listaObtenerElemento(bloque->listaCopias, indiceCopias);
+			Nodo* nodo = nodoBuscar(copia->nombreNodo);
+			mensajeEnviar(nodo->socket, COPIAR_ARCHIVO, &copia->bloqueNodo, sizeof(Entero));
+			break;
+		}
+	}
 }
 
 void comandoCopiarBloque(Comando* comando) {

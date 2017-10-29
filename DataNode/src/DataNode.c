@@ -36,6 +36,7 @@ void dataNodeAtenderFileSystem(){
 		case LEER_BLOQUE: bloqueLeer(mensaje->datos); break;
 		case ESCRIBIR_BLOQUE: bloqueEscribir(mensaje->datos); break;
 		case COPIAR_BLOQUE: bloqueCopiarEnNodo(mensaje->datos); break;
+		case COPIAR_ARCHIVO: bloqueCopiarArchivo(mensaje->datos); break;
 	}
 	mensajeDestruir(mensaje);
 }
@@ -158,6 +159,12 @@ void bloqueCopiarEnNodo(Puntero datos) {
 	Entero numeroBloqueACopiar = *(Entero*)datos;
 	Bloque bloqueACopiar = getBloque(numeroBloqueACopiar);
 	mensajeEnviar(socketFileSystem, COPIAR_BLOQUE, bloqueACopiar, BLOQUE);
+}
+
+void bloqueCopiarArchivo(Puntero datos) {
+	Entero numeroBloque = *(Entero*)datos;
+	Bloque bloque = getBloque(numeroBloque);
+	mensajeEnviar(socketFileSystem, COPIAR_ARCHIVO, bloque, BLOQUE);
 }
 
 //--------------------------------------- Funciones de DataBin -------------------------------------

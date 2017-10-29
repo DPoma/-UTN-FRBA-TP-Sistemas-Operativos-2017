@@ -17,6 +17,7 @@
 #define LEER_BLOQUE 101
 #define ESCRIBIR_BLOQUE 102
 #define COPIAR_BLOQUE 103
+#define COPIAR_ARCHIVO 104
 
 
 //--------------------------------------- Estructuras -------------------------------------
@@ -80,3 +81,4 @@ void setBloque(Entero numeroBloque, Puntero datos);
 void bloqueLeer(Puntero datos);
 void bloqueEscribir(Puntero datos);
 void bloqueCopiarEnNodo(Puntero datos);
+void bloqueCopiarArchivo(Puntero datos);

@@ -1,6 +1,23 @@
-[INFO] 16:26:19:761 DataNode/(11859:11859): [CONFIGURACION] Nombre Nodo: NODO2
-[INFO] 16:26:19:781 DataNode/(11859:11859): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data2.bin
-[INFO] 16:26:19:788 DataNode/(11859:11859): [DATABIN] Cantidad de bloques disponibles 81920
-[INFO] 16:26:19:817 DataNode/(11859:11859): [CONEXION] Estableciendo conexion con File System (IP: 127.0.0.1 | Puerto 5040)
-[INFO] 16:26:19:818 DataNode/(11859:11859): [31m[CONEXION] El File System se desconecto o rechazo la conexion[0m
-[INFO] 16:26:19:820 DataNode/(11859:11859): [EJECUCION] Proceso Data Node finalizado
+[INFO] 00:35:16:506 DataNode/(13938:13938): [CONFIGURACION] Nombre Nodo: NODO2
+[INFO] 00:35:16:526 DataNode/(13938:13938): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data2.bin
+[INFO] 00:35:16:532 DataNode/(13938:13938): [DATABIN] Cantidad de bloques disponibles 81920
+[INFO] 00:35:16:578 DataNode/(13938:13938): [CONEXION] Estableciendo conexion con File System (IP: 127.0.0.1 | Puerto 5040)
+[INFO] 00:35:16:587 DataNode/(13938:13938): [CONEXION] Conexion establecida con el File System, esperando instrucciones
+[INFO] 00:35:25:749 DataNode/(13938:13938): [DATABIN] El bloque N°0 fue escrito
+[INFO] 00:35:25:751 DataNode/(13938:13938): [DATABIN] El bloque N°1 fue escrito
+[INFO] 00:35:25:753 DataNode/(13938:13938): [DATABIN] El bloque N°2 fue escrito
+[INFO] 00:35:25:753 DataNode/(13938:13938): [DATABIN] El bloque N°3 fue escrito
+[INFO] 00:35:25:754 DataNode/(13938:13938): [DATABIN] El bloque N°4 fue escrito
+[INFO] 00:35:25:756 DataNode/(13938:13938): [DATABIN] El bloque N°5 fue escrito
+[INFO] 00:35:25:757 DataNode/(13938:13938): [DATABIN] El bloque N°6 fue escrito
+[INFO] 00:35:25:758 DataNode/(13938:13938): [DATABIN] El bloque N°7 fue escrito
+[INFO] 00:35:25:758 DataNode/(13938:13938): [DATABIN] El bloque N°8 fue escrito
+[INFO] 00:35:25:759 DataNode/(13938:13938): [DATABIN] El bloque N°9 fue escrito
+[INFO] 00:35:25:762 DataNode/(13938:13938): [DATABIN] El bloque N°10 fue escrito
+[INFO] 00:35:25:762 DataNode/(13938:13938): [DATABIN] El bloque N°11 fue escrito
+[INFO] 00:35:49:962 DataNode/(13938:13938): [DATABIN] El bloque N°0 fue leido
+[INFO] 00:35:49:967 DataNode/(13938:13938): [DATABIN] El bloque N°2 fue leido
+[INFO] 00:35:49:968 DataNode/(13938:13938): [DATABIN] El bloque N°4 fue leido
+[INFO] 00:35:49:970 DataNode/(13938:13938): [DATABIN] El bloque N°6 fue leido
+[INFO] 00:35:49:970 DataNode/(13938:13938): [DATABIN] El bloque N°8 fue leido
+[INFO] 00:35:49:971 DataNode/(13938:13938): [DATABIN] El bloque N°10 fue leido
