@@ -58,6 +58,10 @@ void fileSystemFinalizar() {
 	sleep(2);
 }
 
+bool fileSystemEstable() {
+	return listaCumplenTodos(listaArchivos, (Puntero)archivoDisponible);
+}
+
 //--------------------------------------- Funciones de Configuracion -------------------------------------
 
 Configuracion* configuracionLeerArchivo(ArchivoConfig archivoConfig) {
@@ -322,6 +326,11 @@ void servidorAvisarDataNode(Nodo* nodo) {
 void servidorAceptarReconexionDataNode(Servidor* servidor, Nodo* nuevoNodo) {
 	Nodo* nodo = nodoActualizar(nuevoNodo);
 	servidorAceptarDataNode(servidor, nodo);
+	if(estadoFileSystem == INESTABLE && fileSystemEstable()) {
+		estadoFileSystem = ESTABLE;
+		imprimirMensaje(archivoLog, "[ESTADO] El File System se encuentra estable");
+	}
+
 }
 
 void servidorAceptarDataNode(Servidor* servidor, Nodo* nodo) {
@@ -1760,16 +1769,16 @@ int archivoLeer(Comando* comando) {
 		listaOrdenar(archivo->listaBloques, (Puntero)bloqueOrdenarPorNumero);
 		Bloque* bloque = listaObtenerElemento(archivo->listaBloques, numeroBloque);
 		int numeroCopia;
-		int bloqueNoFueImpreso = true;
-		for(numeroCopia=0; numeroCopia<listaCantidadElementos(bloque->listaCopias) && bloqueNoFueImpreso; numeroCopia++) {
+		int bloqueSinImprimir = true;
+		for(numeroCopia=0; numeroCopia <listaCantidadElementos(bloque->listaCopias) && bloqueSinImprimir; numeroCopia++) {
 			Copia* copia = listaObtenerElemento(bloque->listaCopias, numeroCopia);
-			Nodo* nodo = nodoBuscar(copia->nombreNodo);;
-			if(nodo != NULL) {
+			Nodo* nodo = nodoBuscar(copia->nombreNodo);
+			if(nodo->estado == ACTIVADO) {
 				mensajeEnviar(nodo->socket, LEER_BLOQUE ,&copia->bloqueNodo, sizeof(Entero));
-				bloqueNoFueImpreso = false;
+				bloqueSinImprimir = false;
 			}
 		}
-		if(bloqueNoFueImpreso) {
+		if(bloqueSinImprimir) {
 			imprimirMensaje(archivoLog,"[ERROR] No hay nodos disponibles para obtener el bloque");
 			return ERROR;
 		}
@@ -1870,10 +1879,6 @@ bool bloqueDisponible(Bloque* bloque) {
 
 bool archivoDisponible(Archivo* archivo) {
 	return listaCumplenTodos(archivo->listaBloques, (Puntero)bloqueDisponible);
-}
-
-bool estadoEstable() {
-	return listaCumplenTodos(listaArchivos, (Puntero)archivoDisponible);
 }
 
 //--------------------------------------- Funciones de Nodo -------------------------------------
@@ -2279,45 +2284,3 @@ bool rutaEsNumero(String ruta) {
 //TODO si me quedo sin nodos tirar error en cpto cpfrom y cat
 //TODO algoritmo nodos
 //TODO Para el md5 hay que espera tiempo para que copie todo el archivo
-
-
-/*
- * CUANDO TIRA EL MSJ QUE NO HAY ESPACIO SE VE QUE NO dEStruye una lista filtrada LUCIONARLOOOOOOOOOOOOOOOooOOOOOOOOOOOO
-
-OOOOOOOOOo
-
-
-==6582== Memcheck, a memory error detector
-==6582== Copyright (C) 2002-2013, and GNU GPL'd, by Julian Seward et al.
-==6582== Using Valgrind-3.10.0.SVN and LibVEX; rerun with -h for copyright info
-==6582== Command: ./FileSystem
-==6582== Parent PID: 2899
-==6582==
-==6582==
-==6582== HEAP SUMMARY:
-==6582==     in use at exit: 8 bytes in 1 blocks
-==6582==   total heap usage: 10,031 allocs, 10,030 frees, 1,067,809 bytes allocated
-==6582==
-==6582== 8 bytes in 1 blocks are definitely lost in loss record 1 of 1
-==6582==    at 0x402A17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==6582==    by 0x404D6F8: list_create (in /usr/lib/libcommons.so)
-==6582==    by 0x404DE0A: list_filter (in /usr/lib/libcommons.so)
-==6582==    by 0x804B16D: listaFiltrar (Biblioteca.c:495)
-==6582==    by 0x8050930: nodoVerificarBloquesLibres (FileSystem.c:1790)
-==6582==    by 0x8050CAF: bloqueEnviarCopiasANodos (FileSystem.c:1868)
-==6582==    by 0x8050250: archivoAlmacenar (FileSystem.c:1628)
-==6582==    by 0x804D5D8: consolaEjecutarComando (FileSystem.c:665)
-==6582==    by 0x804D68E: consolaAtenderComandos (FileSystem.c:688)
-==6582==    by 0x40A1F6F: start_thread (pthread_create.c:312)
-==6582==    by 0x41A350D: clone (clone.S:129)
-==6582==
-==6582== LEAK SUMMARY:
-==6582==    definitely lost: 8 bytes in 1 blocks
-==6582==    indirectly lost: 0 bytes in 0 blocks
-==6582==      possibly lost: 0 bytes in 0 blocks
-==6582==    still reachable: 0 bytes in 0 blocks
-==6582==         suppressed: 0 bytes in 0 blocks
-==6582==
-==6582== For counts of detected and suppressed errors, rerun with: -v
-==6582== ERROR SUMMARY: 1 errors from 1 contexts (suppressed: 0 from 0)
- */

@@ -183,10 +183,7 @@ void fileSystemIniciar();
 void fileSystemCrearConsola();
 void fileSystemAtenderProcesos();
 void fileSystemFinalizar();
-bool fileSystemActivado();
-bool fileSystemDesactivado();
-void fileSystemActivar();
-void fileSystemDesactivar();
+bool fileSystemEstable();
 
 //--------------------------------------- Funciones de Configuracion -------------------------------------
 
@@ -238,7 +235,7 @@ void servidorFinalizarWorker(Servidor* servidor, Socket unSocket);
 
 
 
-void nodoDesactivar(Nodo* nodo);
+
 //--------------------------------------- Funciones de Socket-------------------------------------
 
 bool socketEsListenerYama(Servidor* servidor, Socket unSocket);
@@ -388,6 +385,8 @@ void nodoDesactivar(Nodo* nodo);
 Nodo* nodoBuscarPorSocket(Socket unSocket);
 int nodoPosicionEnLista(Nodo* nodo);
 int nodoBloquesLibres();
+void nodoDesactivar(Nodo* nodo);
+
 //--------------------------------------- Funciones de Bloque -------------------------------------
 
 Bloque* bloqueCrear(int bytes, int numero);
