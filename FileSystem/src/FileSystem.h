@@ -376,7 +376,7 @@ void nodoRecuperarPersistencia();
 void nodoPersistirBitmap(Nodo* nodo);
 void nodoFormatear(Nodo* nodo);
 void nodoFormatearConectados();
-void nodoVerificarBloquesLibres(Nodo* nodo, Lista nodosDisponibles);
+void nodoVerificarBloquesLibres(Nodo* nodo);
 bool nodoTieneBloquesLibres(Nodo* nodo);
 bool nodoCantidadBloquesLibres(Nodo* unNodo, Nodo* otroNodo);
 int nodoBuscarBloqueLibre(Nodo* nodo);
@@ -396,7 +396,7 @@ bool nodoConectado(Nodo* nodo);
 Bloque* bloqueCrear(int bytes, int numero);
 void bloqueDestruir(Bloque* bloque);
 void bloqueCopiarEnNodo(Bloque* bloque, Nodo* nodo, Entero numeroBloqueNodo);
-void bloqueEnviarANodo(Socket unSocket, Entero numeroBloque, String buffer);
+int bloqueEnviarANodo(Bloque* bloque, Nodo* nodo, String buffer);
 int bloqueEnviarCopiasANodos(Bloque* bloque, String buffer);
 bool bloqueOrdenarPorNumero(Bloque* unBloque, Bloque* otroBloque);
 void bloqueCopiar(Puntero datos);
@@ -407,11 +407,12 @@ bool bloqueDisponible(Bloque* bloque);
 BloqueNodo* bloqueNodoCrear(Entero numeroBloque, String buffer, int tamanioUtilizado);
 bool copiaOrdenarPorActividadDelNodo(Copia* unaCopia, Copia* otraCopia);
 
-//--------------------------------------- Funciones de Copia Bloque -------------------------------------
+//--------------------------------------- Funciones de Copia -------------------------------------
 
-Copia* copiaBloqueCrear(int numeroBloqueDelNodo, String nombreNodo);
-void copiaBloqueEliminar(Copia* copia);
+Copia* copiaCrear(int numeroBloqueDelNodo, String nombreNodo);
+void copiaEliminar(Copia* copia);
 bool copiaDisponible(Copia* copia);
+void copiaDestruir(Copia* copia);
 
 //--------------------------------------- Funciones de Metadata -------------------------------------
 

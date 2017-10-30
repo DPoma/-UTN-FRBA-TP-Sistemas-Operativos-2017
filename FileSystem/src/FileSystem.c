@@ -973,9 +973,9 @@ void comandoEliminarBloque(Comando* comando) {
 		imprimirMensaje(archivoLog, "[ERROR] No se puede eliminar el bloque ya que es el ultimo");
 		return;
 	}
-	copiaBloqueEliminar(copia);
-	listaEliminarDestruyendoElemento(bloque->listaCopias, numeroCopia, memoriaLiberar);
+	listaEliminarDestruyendoElemento(bloque->listaCopias, numeroCopia, (Puntero)copiaDestruir);
 	archivoPersistir(archivo);
+	nodoPersistir();
 	imprimirMensajeTres(archivoLog, "[BLOQUE] La copia N°%i del bloque N°%i del archivo %s ha sido eliminada",(int*)numeroCopia, (int*)numeroBloque, comando->argumentos[2]);
 }
 
@@ -1130,21 +1130,13 @@ void comandoEliminarArchivo(Comando* comando) {
 		imprimirMensaje(archivoLog,"[ERROR] El archivo no existe");
 		return;
 	}
-	int indice;
-	for(indice=0; indice<listaCantidadElementos(archivo->listaBloques); indice++) {
-		Bloque* bloque = listaObtenerElemento(archivo->listaBloques, indice);
-		int indiceCopia;
-		for(indiceCopia=0; indiceCopia<listaCantidadElementos(bloque->listaCopias); indiceCopia++) {
-			Copia* copia = listaObtenerElemento(bloque->listaCopias, indiceCopia);
-			copiaBloqueEliminar(copia);
-		}
-	}
 	int posicion = archivoObtenerPosicion(archivo);
 	String rutaArchivo = string_from_format("%s/%i/%s", rutaDirectorioArchivos, archivo->identificadorPadre, archivo->nombre);
 	fileLimpiar(rutaArchivo);
 	memoriaLiberar(rutaArchivo);
 	listaEliminarDestruyendoElemento(listaArchivos, posicion, (Puntero)archivoDestruir);
 	archivoPersistirControl();
+	nodoPersistir();
 	imprimirMensajeUno(archivoLog, "[ARCHIVO] El archivo %s ha sido eliminado", comando->argumentos[1]);
 }
 
@@ -1702,18 +1694,16 @@ int archivoAlmacenar(Comando* comando) {
 	}
 	Archivo* archivo = archivoCrear(nombreArchivo, directorio->identificador, comando->argumentos[1]);
 	memoriaLiberar(nombreArchivo);
-	int estado = ACTIVADO;
+	int copiasEnviadas = 0;
 	if(stringIguales(comando->argumentos[1], FLAG_B)) {
 		String buffer = stringCrear(BLOQUE);
 		int numeroBloqueArchivo;
 		for(numeroBloqueArchivo = 0; fread(buffer, sizeof(char), BLOQUE, file) == BLOQUE; numeroBloqueArchivo++) {
 			Bloque* bloque = bloqueCrear(BLOQUE, numeroBloqueArchivo);
 			listaAgregarElemento(archivo->listaBloques, bloque);
-			int copiasEnviadas = bloqueEnviarCopiasANodos(bloque, buffer);
-			if(copiasEnviadas < MAX_COPIAS) {
-				estado = ERROR;
+			copiasEnviadas = bloqueEnviarCopiasANodos(bloque, buffer);
+			if(copiasEnviadas == ERROR)
 				break;
-			}
 		}
 		memoriaLiberar(buffer);
 	}
@@ -1724,10 +1714,6 @@ int archivoAlmacenar(Comando* comando) {
 		int numeroBloqueArchivo = 0;
 		while(fgets(buffer, MAX_STRING, file) != NULL) {
 			int tamanioBuffer = stringLongitud(buffer);
-			if(tamanioBuffer > BLOQUE-1) {
-				estado = -2;
-				break;
-			}
 			if(tamanioBuffer <= bytesDisponibles) {
 				stringConcatenar(datos, buffer);
 				bytesDisponibles-= tamanioBuffer;
@@ -1737,11 +1723,9 @@ int archivoAlmacenar(Comando* comando) {
 				bytesDisponibles = BLOQUE-1;
 				Bloque* bloque = bloqueCrear(bytesUtilizados, numeroBloqueArchivo);
 				listaAgregarElemento(archivo->listaBloques, bloque);
-				int copiasEnviadas = bloqueEnviarCopiasANodos(bloque, datos);
-				if(copiasEnviadas < MAX_COPIAS) {
-					estado = ERROR;
+				copiasEnviadas = bloqueEnviarCopiasANodos(bloque, datos);
+				if(copiasEnviadas == ERROR)
 					break;
-				}
 				numeroBloqueArchivo++;
 				memoriaLiberar(datos);
 				datos = stringCrear(BLOQUE);
@@ -1749,26 +1733,19 @@ int archivoAlmacenar(Comando* comando) {
 				bytesDisponibles-= tamanioBuffer;
 			}
 		}
-		if(estado == ACTIVADO && stringLongitud(datos) > 0  ) {
+		if(copiasEnviadas != ERROR && stringLongitud(datos) > 0 ) {
 			int bytesUtilizados = stringLongitud(datos)+1;
 			Bloque* bloque = bloqueCrear(bytesUtilizados, numeroBloqueArchivo);
 			listaAgregarElemento(archivo->listaBloques, bloque);
-			int copiasEnviadas = bloqueEnviarCopiasANodos(bloque, datos);
-			if(copiasEnviadas < MAX_COPIAS)
-				estado = ERROR;
+			copiasEnviadas = bloqueEnviarCopiasANodos(bloque, datos);
 		}
 		memoriaLiberar(datos);
 		memoriaLiberar(buffer);
 	}
 	fileCerrar(file);
-	if(estado == -2) {
+	nodoLimpiarActividades();
+	if(copiasEnviadas == ERROR) {
 		archivoDestruir(archivo);
-		imprimirMensaje(archivoLog, ROJO"[ERROR] La linea leida es demasiado larga, se aborta la operacion"BLANCO);
-		return ERROR;
-	}
-	else if(estado == ERROR) {
-		archivoDestruir(archivo);
-		imprimirMensaje(archivoLog, ROJO"[ERROR] No hay nodos o bloques disponibles, se aborta la operacion"BLANCO);
 		return ERROR;
 	}
 	else {
@@ -2015,11 +1992,9 @@ bool nodoTieneBloquesLibres(Nodo* nodo) {
 	return nodo->bloquesLibres > 0;
 }
 
-void nodoVerificarBloquesLibres(Nodo* nodo, Lista nodosDisponibles) {
-	if(nodo->bloquesLibres == 0) {
-		imprimirMensajeUno(archivoLog, AMARILLO"[ADVERTENCIA] No hay quedan bloques libres en %s"BLANCO, nodo->nombre);
-		nodosDisponibles = listaFiltrar(listaNodos, (Puntero)nodoTieneBloquesLibres);
-	}
+void nodoVerificarBloquesLibres(Nodo* nodo) {
+	if(nodo->bloquesLibres == 0)
+		imprimirMensajeUno(archivoLog, AMARILLO"[ADVERTENCIA] El %s tiene todos sus bloques ocupados"BLANCO, nodo->nombre);
 }
 
 Nodo* nodoBuscar(String nombre) {
@@ -2118,6 +2093,10 @@ void nodoLimpiarActividades() {
 	}
 }
 
+bool nodoConectado(Nodo* nodo) {
+	return nodo->estado == ACTIVADO;
+}
+
 //--------------------------------------- Funciones de Bloque-------------------------------------
 
 Bloque* bloqueCrear(int bytes, int numero) {
@@ -2129,20 +2108,24 @@ Bloque* bloqueCrear(int bytes, int numero) {
 }
 
 void bloqueDestruir(Bloque* bloque) {
-	listaDestruirConElementos(bloque->listaCopias, memoriaLiberar);
+	listaDestruirConElementos(bloque->listaCopias, (Puntero)copiaDestruir);
 	memoriaLiberar(bloque);
 }
 
-void bloqueEnviarANodo(Socket unSocket, Entero numeroBloque, String buffer) {
-	BloqueNodo* bloqueDataBin = bloqueNodoCrear(numeroBloque, buffer, BLOQUE);
-	mensajeEnviar(unSocket, ESCRIBIR_BLOQUE, bloqueDataBin, sizeof(Entero)+BLOQUE);
-	memoriaLiberar(bloqueDataBin);
+int bloqueEnviarANodo(Bloque* bloque, Nodo* nodo, String buffer) {
+	Entero numeroBloqueNodo = nodoBuscarBloqueLibre(nodo);
+	bloqueCopiarEnNodo(bloque, nodo, numeroBloqueNodo);
+	BloqueNodo* bloqueNodo = bloqueNodoCrear(numeroBloqueNodo, buffer, BLOQUE);
+	mensajeEnviar(nodo->socket, ESCRIBIR_BLOQUE, bloqueNodo, sizeof(Entero)+BLOQUE);
+	memoriaLiberar(bloqueNodo);
+	return numeroBloqueNodo;
 }
 
 void bloqueCopiarEnNodo(Bloque* bloque, Nodo* nodo, Entero numeroBloqueNodo) {
-	Copia* copia = copiaBloqueCrear(numeroBloqueNodo, nodo->nombre);
+	Copia* copia = copiaCrear(numeroBloqueNodo, nodo->nombre);
 	bitmapOcuparBit(nodo->bitmap, numeroBloqueNodo);
 	nodo->bloquesLibres--;
+	nodoVerificarBloquesLibres(nodo);
 	listaAgregarElemento(bloque->listaCopias, copia);
 }
 
@@ -2150,28 +2133,46 @@ bool bloqueOrdenarPorNumero(Bloque* unBloque, Bloque* otroBloque) {
 	return unBloque->numeroBloque < otroBloque->numeroBloque;
 }
 
+bool nodoDisponible(Nodo* nodo) {
+	return nodoConectado(nodo) &&
+			nodoTieneBloquesLibres(nodo);
+}
+
 int bloqueEnviarCopiasANodos(Bloque* bloque, String buffer) {
-	Lista nodosDisponibles = listaFiltrar(listaNodos, (Puntero)nodoTieneBloquesLibres);
-	int copiasEnviadas;
-	for(copiasEnviadas = 0; listaTieneElementos(nodosDisponibles) && copiasEnviadas < MAX_COPIAS; copiasEnviadas++) {
-		listaOrdenar(nodosDisponibles, (Puntero)nodoCantidadBloquesLibres);
-		Nodo* nodo = listaPrimerElemento(nodosDisponibles);
-		Entero numeroBloqueNodo = nodoBuscarBloqueLibre(nodo);
-		bloqueCopiarEnNodo(bloque, nodo, numeroBloqueNodo);
-		bloqueEnviarANodo(nodo->socket, numeroBloqueNodo, buffer);
-		nodoVerificarBloquesLibres(nodo, nodosDisponibles);
+	int copiasEnviadas = 0;
+	int indice;
+	listaOrdenar(listaNodos, (Puntero)nodoOrdenarPorActividad);
+	for(indice = 0; indice < listaCantidadElementos(listaNodos) && copiasEnviadas < MAX_COPIAS; indice++) {
+		Nodo* nodo = listaObtenerElemento(listaNodos, indice);
+		if(nodoDisponible(nodo)) {
+			bloqueEnviarANodo(bloque, nodo, buffer);
+			copiasEnviadas++;
+			nodo->actividadesRealizadas++;
+		}
 	}
-	listaDestruir(nodosDisponibles);
-	return copiasEnviadas;
+	if(copiasEnviadas < MAX_COPIAS) {
+		Nodo* nodo = listaBuscar(listaNodos, (Puntero)nodoDisponible);
+		if(nodo != NULL) {
+			bloqueEnviarANodo(bloque, nodo, buffer);
+			copiasEnviadas++;
+		}
+	}
+	if(copiasEnviadas == 0) {
+		imprimirMensajeUno(archivoLog, "[ERROR] El bloque N°%i no pudo copiarse en ningun Nodo, se aborta la operacion", (int*)bloque->numeroBloque);
+		return ERROR;
+	}
+	if(copiasEnviadas < MAX_COPIAS) {
+		imprimirMensajeDos(archivoLog, "[AVISO] El bloque N°%i tiene menos copias que las establecidas (%i)", (int*)bloque->numeroBloque, (int*)MAX_COPIAS);
+		return 0;
+	}
+	return 0;
 }
 
 void bloqueCopiar(Puntero datos) {
-	Entero numeroBloqueNodo = nodoBuscarBloqueLibre(nodoBuffer);
 	if(nodoBuffer->estado == ACTIVADO) {
-		bloqueEnviarANodo(nodoBuffer->socket, numeroBloqueNodo, datos);
-		bloqueCopiarEnNodo(bloqueBuffer, nodoBuffer, numeroBloqueNodo);
+		int numeroBloqueNodo = bloqueEnviarANodo(bloqueBuffer, nodoBuffer, datos);
 		archivoPersistir(archivoBuffer);
-		nodoPersistirBitmap(nodoBuffer);
+		nodoPersistir();
 		imprimirMensajeDos(archivoLog, "[BLOQUE] El bloque fue copiado en el bloque N°%i de %s", (int*)numeroBloqueNodo, nodoBuffer->nombre);
 	}
 	else {
@@ -2208,26 +2209,17 @@ BloqueNodo* bloqueNodoCrear(Entero numeroBloque, String buffer, int tamanioUtili
 
 //--------------------------------------- Funciones de Copia Bloque-------------------------------------
 
-Copia* copiaBloqueCrear(int numeroBloqueDelNodo, String nombreNodo) {
+Copia* copiaCrear(int numeroBloqueDelNodo, String nombreNodo) {
 	Copia* copiaBloque = memoriaAlocar(sizeof(Copia));
 	copiaBloque->bloqueNodo = numeroBloqueDelNodo;
 	stringCopiar(copiaBloque->nombreNodo, nombreNodo);
 	return copiaBloque;
 }
 
-void copiaBloqueEliminar(Copia* copia) {
-
-	bool buscarNodo(Nodo* nodo) {
-		return stringIguales(nodo->nombre,copia->nombreNodo);
-	}
-
-	Nodo* nodo = listaBuscar(listaNodos, (Puntero)buscarNodo);
+void copiaEliminar(Copia* copia) {
+	Nodo* nodo = nodoBuscar(copia->nombreNodo);
 	bitmapLiberarBit(nodo->bitmap, copia->bloqueNodo);
-	nodoPersistirBitmap(nodo);
-}
-
-bool nodoConectado(Nodo* nodo) {
-	return nodo->estado == ACTIVADO;
+	nodo->bloquesLibres++;
 }
 
 bool copiaOrdenarPorActividadDelNodo(Copia* unaCopia, Copia* otraCopia) {
@@ -2236,6 +2228,10 @@ bool copiaOrdenarPorActividadDelNodo(Copia* unaCopia, Copia* otraCopia) {
 	return unNodo->actividadesRealizadas < otroNodo->actividadesRealizadas;
 }
 
+void copiaDestruir(Copia* copia) {
+	copiaEliminar(copia);
+	memoriaLiberar(copia);
+}
 
 //--------------------------------------- Funciones de Metadata------------------------------------
 
