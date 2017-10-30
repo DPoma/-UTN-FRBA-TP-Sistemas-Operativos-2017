@@ -1089,8 +1089,8 @@ int comandoCopiarArchivoDeYamaFS(Comando* comando) {
 		Bloque* bloque = listaObtenerElemento(archivo->listaBloques, indice);
 		int copiaSinEnviar = true;
 		int indiceCopias;
+		listaOrdenar(bloque->listaCopias, (Puntero)copiaOrdenarPorActividadDelNodo);
 		for(indiceCopias=0; indiceCopias<listaCantidadElementos(bloque->listaCopias) && copiaSinEnviar; indiceCopias++) {
-			listaOrdenar(bloque->listaCopias, (Puntero)copiaOrdenarPorActividadDelNodo);
 			Copia* copia = listaObtenerElemento(bloque->listaCopias, indiceCopias);
 			Nodo* nodo = nodoBuscar(copia->nombreNodo);
 			if(nodoConectado(nodo)) {
@@ -1801,8 +1801,8 @@ int archivoLeer(Comando* comando) {
 		Bloque* bloque = listaObtenerElemento(archivo->listaBloques, numeroBloque);
 		int numeroCopia;
 		int bloqueSinImprimir = true;
+		listaOrdenar(bloque->listaCopias, (Puntero)copiaOrdenarPorActividadDelNodo);
 		for(numeroCopia=0; numeroCopia <listaCantidadElementos(bloque->listaCopias) && bloqueSinImprimir; numeroCopia++) {
-			listaOrdenar(bloque->listaCopias, (Puntero)copiaOrdenarPorActividadDelNodo);
 			Copia* copia = listaObtenerElemento(bloque->listaCopias, numeroCopia);
 			Nodo* nodo = nodoBuscar(copia->nombreNodo);
 			if(nodoConectado(nodo)) {
@@ -2347,7 +2347,5 @@ bool rutaEsNumero(String ruta) {
 	return true;
 }
 
-//TODO si me quedo sin nodos tirar error en cpto cpfrom y cat
-//TODO algoritmo nodos
-//TODO cat y cpto agarren de cada uno
-//TODO Para el md5 hay que espera tiempo para que copie todo el archivo
+//TODO ver cpfrom algoritmo
+//TODO Pasar helgrind y solucionar md5

@@ -1,7 +1,13 @@
-[INFO] 00:57:47:145 DataNode/(11792:11792): [CONFIGURACION] Nombre Nodo: NODO6
-[INFO] 00:57:47:183 DataNode/(11792:11792): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data4.bin
-[INFO] 00:57:47:207 DataNode/(11792:11792): [DATABIN] Cantidad de bloques disponibles 81920
-[INFO] 00:57:47:282 DataNode/(11792:11792): [CONEXION] Estableciendo conexion con File System (IP: 127.0.0.1 | Puerto 5040)
-[INFO] 00:57:47:363 DataNode/(11792:11792): [CONEXION] Conexion establecida con el File System
-[INFO] 01:00:03:736 DataNode/(11792:11792): [31m[CONEXION] Conexion finalizada con File System[0m
-[INFO] 01:00:03:746 DataNode/(11792:11792): [EJECUCION] Proceso Data Node finalizado
+[INFO] 01:38:05:365 DataNode/(12387:12387): [CONFIGURACION] Nombre Nodo: NODO6
+[INFO] 01:38:05:366 DataNode/(12387:12387): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data4.bin
+[INFO] 01:38:05:366 DataNode/(12387:12387): [DATABIN] Cantidad de bloques disponibles 81920
+[INFO] 01:38:05:422 DataNode/(12387:12387): [CONEXION] Estableciendo conexion con File System (IP: 127.0.0.1 | Puerto 5040)
+[INFO] 01:38:05:645 DataNode/(12387:12387): [CONEXION] Conexion establecida con el File System
+[INFO] 01:38:14:132 DataNode/(12387:12387): [DATABIN] El bloque N°333 fue leido
+[INFO] 01:38:14:150 DataNode/(12387:12387): [DATABIN] El bloque N°334 fue leido
+[INFO] 01:38:14:158 DataNode/(12387:12387): [DATABIN] El bloque N°335 fue leido
+[INFO] 01:38:14:160 DataNode/(12387:12387): [DATABIN] El bloque N°336 fue leido
+[INFO] 01:38:14:162 DataNode/(12387:12387): [DATABIN] El bloque N°337 fue leido
+[INFO] 01:38:14:164 DataNode/(12387:12387): [DATABIN] El bloque N°338 fue leido
+[INFO] 01:39:12:890 DataNode/(12387:12387): [31m[CONEXION] Conexion finalizada con File System[0m
+[INFO] 01:39:12:890 DataNode/(12387:12387): [EJECUCION] Proceso Data Node finalizado
