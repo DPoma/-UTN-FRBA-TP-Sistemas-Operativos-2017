@@ -44,7 +44,6 @@ typedef struct {
 	ListaSockets listaMaster;
 	Socket maximoSocket;
 	Socket listenerMaster;
-	Socket listenerErrores;
 	Socket fileSystem;
 } Servidor;
 Servidor* servidor;
@@ -66,7 +65,7 @@ typedef struct{
 Lista workers;
 
 typedef enum {Solicitud,Transformacion,ReducLocal,ReducGlobal,Cierre,Aborto} Etapa;
-typedef enum {EnProceso=0,Error,Terminado,Abortado} Estado;
+typedef enum {Error=-1,EnProceso=0,Terminado,Abortado} Estado;
 int job=-1;
 typedef struct{
 	int job;

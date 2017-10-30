@@ -13,8 +13,8 @@
 
 typedef enum {Solicitud,Transformacion=1,ReducLocal=2,ReducGlobal=3,Almacenamiento=4,Cierre,Aborto=6} Etapa;
 
-#define EXITOTRANSFORMACION 801
-#define FRACASOTRANSFORMACION -801
+#define EXITO 1
+#define FRACASO 0
 
 #define SCRIPT_TRANSFORMACION 501
 #define SCRIPT_REDUCTOR 502
@@ -41,8 +41,10 @@ typedef struct{
 	int bytes;
 	char* temp;
 }WorkerTransformacion;
+WorkerTransformacion alternativo;
 
-
+Mutex errorBloque;
+Mutex recepcionAlternativo;
 
 String campos[2];
 Configuracion* configuracion;
@@ -50,7 +52,6 @@ ArchivoLog archivoLog;
 Socket socketYAMA;
 Socket socketWorker;
 int estadoMaster;
-
 
 Configuracion* configuracionLeerArchivo(ArchivoConfig archivoConfig);
 void archivoConfigObtenerCampos();

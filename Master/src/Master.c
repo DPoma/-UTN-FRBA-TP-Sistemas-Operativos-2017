@@ -186,39 +186,36 @@ void establecerConexionConWorker(Lista bloques){
 
 	socketWorker=socketCrearCliente(dir->dir.ip,string_itoa(dir->dir.port), ID_MASTER);
 
+	//enviar codigo de transformacion
+
 	int i;
+	enviarBloques:
 	for(i=0;i<bloques->elements_count;i++){
+		//worker se debería bancar varios bloques, mirar
 		WorkerTransformacion* wt=list_get(bloques,i);
 		serializarYEnviar(wt->bloque,wt->bytes, wt->temp,socketWorker);
 		imprimirMensajeDos(archivoLog,"[CONEXION] Estableciendo conexion con Worker (IP: %s | PUERTO: %d", wt->dir.ip, string_itoa(wt->dir.port));
 	}
-
-
-		Mensaje* mensaje = mensajeRecibir(socketWorker);
-		//se recibe la direccion y el bloque, se lo mandas a yama
-		if(mensaje->header.operacion==EXITOTRANSFORMACION){
-			imprimirMensajeUno(archivoLog, "[TRANSFORMACION] Transformacion realizada con exito en el Worker %i", &socketWorker); //desp lo cambio
-			mensajeEnviar(socketYAMA,EXITOTRANSFORMACION,&socketWorker,sizeof(int));
-		}
-		else{
-			imprimirMensajeUno(archivoLog,"[TRANSFORMACION] Transformacion fallida en el Worker %i",&socketWorker);
-			mensajeEnviar(socketYAMA,FRACASOTRANSFORMACION,&socketWorker,sizeof(int));
-			//mandar error a YAMA
-			//conectarse al canal de errores de YAMA con otro puerto para que no haya interferencia con el hilo principal
-			//recibir un bloque alternativo, agregar a la lista de bloques asi lo caza el for
-
-			//si hay varios errores al mismo tiempo se pueden usar semaforos,
-			//o se puede ocupar un puerto por cada error simultaneo.
-			//YAMA se la banca, es cuestion de meterlo aca
-
-			//en caso de aborto YAMA se comunica directamente con el hilo principal,
-			//en este hilo va a haber un connect que no se va a responder pero no importa
-		}
-
-
-
-
-
+	Mensaje* mensaje = mensajeRecibir(socketWorker);
+	//se recibe la direccion y el bloque, se lo mandas a yama
+	if(mensaje->header.operacion==EXITO){
+		imprimirMensajeUno(archivoLog, "[TRANSFORMACION] Transformacion realizada con exito en el Worker %i", &socketWorker); //desp lo cambio
+		mensajeEnviar(socketYAMA,Transformacion,&socketWorker,sizeof(int));
+	}else{
+		mutexBloquear(&errorBloque);
+		imprimirMensajeUno(archivoLog,"[TRANSFORMACION] Transformacion fallida en el Worker %i",&socketWorker);
+		mensajeEnviar(socketYAMA,ERROR,&socketWorker,sizeof(int));
+		mutexBloquear(&recepcionAlternativo);
+		list_addM(bloques,&alternativo,sizeof alternativo);
+		mutexDesbloquear(&errorBloque);
+		//se podría modificar para que se puedan procesar varios errores
+		//en paralelo, pero no vale la pena porque agrega mucho codigo
+		//y se supone que estos errores son casos raros
+		//para hacer eso se tendrian que sacar el semaforo y
+		//enviar el numero de thread en el mensaje, para diferenciar despues
+		goto enviarBloques;
+	}
+	mensajeEnviar(socketWorker,EXITO,NULL,0);
 }
 
 
@@ -248,6 +245,10 @@ int main(int argc,char** argv) {
 	senialAsignarFuncion(SIGINT, funcionSenial);
 //	mensajeEnviar(socketYAMA, HANDSHAKE, "HOLIII", 7);
 //	mensajeEnviar(socketWorker, HANDSHAKE, "HOLIII", 7);
+
+	mutexIniciar(&errorBloque);
+	mutexIniciar(&recepcionAlternativo); //necesito que arranque en 0 este
+
 
 	mensajeEnviar(socketYAMA,Solicitud,argv[3],strlen(argv[3]));
 	imprimirMensaje(archivoLog, "[MENSAJE] Solicitud enviada");
@@ -286,15 +287,25 @@ int main(int argc,char** argv) {
 	for(i=0;i<=listas->elements_count;i++){
 		pthread_t hilo;
 		pthread_create(&hilo,NULL,(void*)establecerConexionConWorker,list_get(listas,i));
-		list_add(hilos,&hilo);
+		list_addM(hilos,&hilo,sizeof(pthread_t));
 	}
 
 	while(masterActivado()){
 		Mensaje* m = mensajeRecibir(socketYAMA);
 		switch(m->header.operacion){
+		case Aborto:
+			imprimirMensaje(archivoLog,"[ABORTO] Abortando proceso");
+			return EXIT_FAILURE; //supongo que los hilos mueren aca
+			//si no se mueren matarlos
 		case Cierre:
 			imprimirMensaje(archivoLog,"[EJECUCION] Terminando proceso");
 			masterDesactivar();
+			break;
+		case Transformacion://hubo un error y se recibió un bloque alternativo
+			memcpy(&alternativo.bloque,mensaje->datos+i+DIRSIZE,INTSIZE);
+			memcpy(&alternativo.bytes,mensaje->datos+i+DIRSIZE+INTSIZE,INTSIZE);
+			memcpy(&alternativo.temp,mensaje->datos+i+DIRSIZE+INTSIZE*2,TEMPSIZE);
+			mutexDesbloquear(&recepcionAlternativo);
 			break;
 		case ReducLocal:
 			reduccionLocal(m);
