@@ -365,6 +365,8 @@ void archivoRecuperarPersistenciaEspecifica(String nombre, int padre);
 bool archivoEsBinario(Archivo* archivo);
 int archivoLeer(Comando* comando);
 int archivoAlmacenar(Comando* comando);
+int archivoCantidadBloques(String ruta);
+bool archivoDisponible(Archivo* archivo);
 
 //--------------------------------------- Funciones de Nodo -------------------------------------
 
@@ -385,7 +387,7 @@ void nodoRecuperarPersistenciaBitmap(Nodo* nodo);
 void nodoDesactivar(Nodo* nodo);
 Nodo* nodoBuscarPorSocket(Socket unSocket);
 int nodoPosicionEnLista(Nodo* nodo);
-
+int nodoBloquesLibres();
 //--------------------------------------- Funciones de Bloque -------------------------------------
 
 Bloque* bloqueCrear(int bytes, int numero);
@@ -398,12 +400,14 @@ void bloqueCopiar(Puntero datos);
 void bloqueLeer(Puntero datos);
 void bloqueCopiarTexto(Puntero datos);
 void bloqueCopiarBinario(Puntero datos);
+bool bloqueDisponible(Bloque* bloque);
 BloqueNodo* bloqueNodoCrear(Entero numeroBloque, String buffer, int tamanioUtilizado);
 
 //--------------------------------------- Funciones de Copia Bloque -------------------------------------
 
 Copia* copiaBloqueCrear(int numeroBloqueDelNodo, String nombreNodo);
 void copiaBloqueEliminar(Copia* copia);
+bool copiaDisponible(Copia* copia);
 
 //--------------------------------------- Funciones de Metadata -------------------------------------
 

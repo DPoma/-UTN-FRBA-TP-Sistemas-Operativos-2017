@@ -1,12 +1,11 @@
-[INFO] 20:29:38:200 FileSystem/(7692:7692): [EJECUCION] Proceso File System inicializado
-[INFO] 20:29:39:300 FileSystem/(7692:7692): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 20:29:39:303 FileSystem/(7692:7692): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 20:29:39:305 FileSystem/(7692:7692): [CONEXION] Esperando conexiones de Workers (Puerto: 5080)
-[INFO] 20:29:39:307 FileSystem/(7692:7692): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
-[INFO] 20:29:39:457 FileSystem/(7692:7692): [33m[AVISO] Para pasar a un estado estable conecte los nodos necesarios[0m
-[INFO] 20:29:42:581 FileSystem/(7692:7692): [CONEXION] El NODO5 se ha conectado
-[INFO] 20:29:43:870 FileSystem/(7692:7692): [CONEXION] El NODO5 se ha desconectado
-[INFO] 20:30:10:374 FileSystem/(7692:7692): [CONEXION] El NODO5 se ha conectado
-[INFO] 20:30:11:829 FileSystem/(7692:7692): [CONEXION] El NODO5 se ha desconectado
-[INFO] 20:30:17:694 FileSystem/(7692:7692): [CONEXION] El NODO5 se ha conectado
-[INFO] 20:30:18:739 FileSystem/(7692:7692): [CONEXION] El NODO5 se ha desconectado
+[INFO] 22:39:44:0 FileSystem/(9611:9611): [EJECUCION] Proceso File System inicializado
+[INFO] 22:39:45:112 FileSystem/(9611:9611): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 22:39:45:116 FileSystem/(9611:9611): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 22:39:45:118 FileSystem/(9611:9611): [CONEXION] Esperando conexiones de Workers (Puerto: 5080)
+[INFO] 22:39:45:121 FileSystem/(9611:9611): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
+[INFO] 22:39:45:341 FileSystem/(9611:9611): [33m[AVISO] Para pasar a un estado estable primero debe formatear el File System[0m
+[INFO] 22:39:49:822 FileSystem/(9611:9611): [CONEXION] El NODO4 se ha conectado
+[INFO] 22:40:00:907 FileSystem/(9611:9611): [CONEXION] El NODO6 se ha conectado
+[INFO] 22:40:06:521 FileSystem/(9611:9616): [ESTADO] El File System ha sido formateado
+[INFO] 22:40:22:996 FileSystem/(9611:9616): [ARCHIVO] El archivo /home/utnso/Escritorio/gg fue copiado en File System
+[INFO] 22:40:41:26 FileSystem/(9611:9611): [CONEXION] El NODO6 se ha desconectado

@@ -45,7 +45,6 @@ void dataNodeAtenderFileSystem(){
 void dataNodeFinalizar(){
 	socketCerrar(socketFileSystem);
 	memoriaLiberar(configuracion);
-	fileCerrar(dataBin);
 	imprimirMensaje(archivoLog, "[EJECUCION] Proceso Data Node finalizado");
 	archivoLogDestruir(archivoLog);
 }
@@ -72,19 +71,7 @@ void dataNodeDesactivar() {
 }
 
 void dataNodeAceptado() {
-	imprimirMensaje(archivoLog, "[CONEXION] Conexion establecida con el File System, esperando instrucciones");
-}
-
-void dataNodeEnviarDatos() {
-	Puntero datos = memoriaAlocar(50);
-	int longitudNombre = stringLongitud(configuracion->nombreNodo)+1;
-	int longitudIp = stringLongitud(configuracion->ipPropia)+1;
-	int longitudPuerto = stringLongitud(configuracion->puertoFileSystem)+1;
-	memcpy(datos, configuracion->nombreNodo ,longitudNombre);
-	memcpy(datos+longitudNombre, configuracion->ipPropia , longitudIp);
-	memcpy(datos+longitudNombre+longitudIp, configuracion->puertoFileSystem , longitudPuerto);
-	mensajeEnviar(socketFileSystem, NULO, datos, longitudNombre+longitudIp+longitudPuerto);
-	memoriaLiberar(datos);
+	imprimirMensaje(archivoLog, "[CONEXION] Conexion establecida con el File System");
 }
 
 void dataNodeConectarAFS() {
@@ -185,6 +172,7 @@ void dataBinAbrir() {
 		imprimirMensaje(archivoLog,"[ERROR] No se pudo abrir el archivo data.bin");
 		exit(EXIT_FAILURE);
 	}
+	fileCerrar(dataBin);
 }
 
 Puntero dataBinMapear() {
@@ -225,7 +213,7 @@ Puntero dataBinMapear() {
 }
 
 void dataBinCalcularBloques() {
-	dataBinBloques = (int)ceil((double)dataBinTamanio/(double)BLOQUE);
+	dataBinBloques = (Entero)ceil((double)dataBinTamanio/(double)BLOQUE);
 	imprimirMensajeUno(archivoLog, "[DATABIN] Cantidad de bloques disponibles %i", (int*)dataBinBloques);
 }
 

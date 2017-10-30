@@ -20,8 +20,6 @@ int main(int argc, String* argsv) {
 
 //--------------------------------------- Funciones de File System -------------------------------------
 
-//EL INICIO ESTA AL REVES PARA DEBUGEAR (SACAR ! A STRING IGUALES)
-
 void fileSystemIniciar(String flag) {
 	pantallaLimpiar();
 	estadoControl = ACTIVADO;
@@ -698,7 +696,7 @@ void consolaEjecutarComando(Comando* comando) {
 		case ID_MV: comandoMover(comando); break;
 		case ID_CAT: comandoMostrarArchivo(comando); break;
 		case ID_MKDIR: comandoCrearDirectorio(comando); break;
-		case ID_CPFROM: archivoAlmacenar(comando); break;
+		case ID_CPFROM: comandoCopiarArchivoAYamaFS(comando); break;
 		case ID_CPTO: comandoCopiarArchivoDeYamaFS(comando); break;
 		case ID_CPBLOCK: comandoCopiarBloque(comando); break;
 		case ID_MD5: comandoObtenerMD5DeArchivo(comando); break;
@@ -1656,6 +1654,12 @@ int archivoAlmacenar(Comando* comando) {
 		memoriaLiberar(nombreArchivo);
 		return ERROR;
 	}
+	if(nodoBloquesLibres() < archivoCantidadBloques(comando->argumentos[2])) {
+		imprimirMensaje(archivoLog, "[ERROR] No hay suficientes bloques libres");
+		fileCerrar(file);
+		memoriaLiberar(nombreArchivo);
+		return ERROR;
+	}
 	Archivo* archivo = archivoCrear(nombreArchivo, directorio->identificador, comando->argumentos[1]);
 	memoriaLiberar(nombreArchivo);
 	int estado = ACTIVADO;
@@ -1745,6 +1749,10 @@ int archivoLeer(Comando* comando) {
 	Archivo* archivo = archivoBuscar(comando->argumentos[1]);
 	if(archivo == NULL) {
 		imprimirMensaje(archivoLog,"[ERROR] El archivo no existe");
+		return ERROR;
+	}
+	if(!archivoDisponible(archivo)) {
+		imprimirMensaje(archivoLog, ROJO"[ERROR] El archivo no esta disponible"BLANCO);
 		return ERROR;
 	}
 	int numeroBloque;
@@ -1843,6 +1851,31 @@ void archivoRecuperarPersistenciaEspecifica(String nombre, int padre) {
 	archivoConfigDestruir(config);
 }
 
+int archivoCantidadBloques(String ruta) {
+	struct stat informacionArchivo;
+	stat(ruta, &informacionArchivo);
+	int tamanioArchivo = informacionArchivo.st_size;
+	int cantidadBloques = (int)ceil((double)tamanioArchivo/(double)BLOQUE);
+	return cantidadBloques;
+}
+
+bool copiaDisponible(Copia* copia) {
+	Nodo* nodo = nodoBuscar(copia->nombreNodo);
+	return nodo->estado == ACTIVADO;
+}
+
+bool bloqueDisponible(Bloque* bloque) {
+	return listaCumpleAlguno(bloque->listaCopias, (Puntero)copiaDisponible);
+}
+
+bool archivoDisponible(Archivo* archivo) {
+	return listaCumplenTodos(archivo->listaBloques, (Puntero)bloqueDisponible);
+}
+
+bool estadoEstable() {
+	return listaCumplenTodos(listaArchivos, (Puntero)archivoDisponible);
+}
+
 //--------------------------------------- Funciones de Nodo -------------------------------------
 
 Nodo* nodoCrear(Puntero datos, Socket nuevoSocket) {
@@ -1909,7 +1942,6 @@ void nodoPersistir() {
 	fileCerrar(archivo);
 }
 
-
 void nodoPersistirBitmap(Nodo* nodo) {
 	String ruta = string_from_format("%s/%s", rutaDirectorioBitmaps, nodo->nombre);
 	File archivo = fileAbrir(ruta, ESCRITURA);
@@ -1940,7 +1972,7 @@ bool nodoTieneBloquesLibres(Nodo* nodo) {
 
 void nodoVerificarBloquesLibres(Nodo* nodo, Lista nodosDisponibles) {
 	if(nodo->bloquesLibres == 0) {
-		imprimirMensajeUno(archivoLog, AMARILLO"[ADVERTENCIA] No hay bloques libres en %s"BLANCO, nodo->nombre);
+		imprimirMensajeUno(archivoLog, AMARILLO"[ADVERTENCIA] No hay quedan bloques libres en %s"BLANCO, nodo->nombre);
 		nodosDisponibles = listaFiltrar(listaNodos, (Puntero)nodoTieneBloquesLibres);
 	}
 }
@@ -1953,8 +1985,6 @@ Nodo* nodoBuscar(String nombre) {
 
 	return listaBuscar(listaNodos, (Puntero)buscarPorNombre);
 }
-
-
 
 int nodoPosicionEnLista(Nodo* nodo) {
 	int posicion;
@@ -2024,6 +2054,16 @@ void nodoRecuperarPersistenciaBitmap(Nodo* nodo) {
 	fileCerrar(file);
 }
 
+int nodoBloquesLibres() {
+	int bloquesLibres = 0;
+	int indice;
+	for(indice = 0; indice < listaCantidadElementos(listaNodos); indice++) {
+		Nodo* nodo = listaObtenerElemento(listaNodos, indice);
+		bloquesLibres+= nodo->bloquesLibres;
+	}
+	return bloquesLibres;
+}
+
 //--------------------------------------- Funciones de Bloque-------------------------------------
 
 Bloque* bloqueCrear(int bytes, int numero) {
@@ -2046,7 +2086,6 @@ void bloqueEnviarANodo(Socket unSocket, Entero numeroBloque, String buffer) {
 }
 
 void bloqueCopiarEnNodo(Bloque* bloque, Nodo* nodo, Entero numeroBloqueNodo) {
-	printf("GUARDO EL BLOQUE %i DEL ARCHIVO EN EL BLOQUE %i DEL %s\n", bloque->numeroBloque, numeroBloqueNodo, nodo->nombre);
 	Copia* copia = copiaBloqueCrear(numeroBloqueNodo, nodo->nombre);
 	bitmapOcuparBit(nodo->bitmap, numeroBloqueNodo);
 	nodo->bloquesLibres--;
@@ -2238,11 +2277,8 @@ bool rutaEsNumero(String ruta) {
 
 //TODO estado estable para recup estado
 //TODO si me quedo sin nodos tirar error en cpto cpfrom y cat
-
-//TODO stat en datanode y ver si inicio por param
-//TODO terminar nodo felizmente
-
 //TODO algoritmo nodos
+//TODO Para el md5 hay que espera tiempo para que copie todo el archivo
 
 
 /*

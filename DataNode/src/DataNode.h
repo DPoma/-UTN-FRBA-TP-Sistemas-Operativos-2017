@@ -39,7 +39,7 @@ typedef struct {
 
 int estadoDataNode;
 int dataBinTamanio;
-int dataBinBloques;
+Entero dataBinBloques;
 Puntero punteroDataBin;
 String campos[6];
 Socket socketFileSystem;
