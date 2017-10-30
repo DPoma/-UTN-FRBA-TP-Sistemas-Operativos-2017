@@ -24,7 +24,9 @@ void fileSystemIniciar(String flag) {
 	pantallaLimpiar();
 	semaforosCrear();
 	semaforosIniciar();
+	mutexBloquear(mutexEstadoControl);
 	estadoControl = ACTIVADO;
+	mutexDesbloquear(mutexEstadoControl);
 	configuracionIniciar();
 	mutexBloquear(mutexEstadoFileSystem);
 	estadoFileSystem = INESTABLE;
@@ -47,7 +49,7 @@ void fileSystemCrearConsola() {
 void fileSystemAtenderProcesos() {
 	Servidor* servidor = memoriaAlocar(sizeof(Servidor));
 	servidorInicializar(servidor);
-	while(estadoControl == ACTIVADO)
+	while(estadoControlIgualA(ACTIVADO))
 		servidorAtenderSolicitudes(servidor);
 	servidorFinalizar(servidor);
 }
@@ -55,7 +57,7 @@ void fileSystemAtenderProcesos() {
 void fileSystemFinalizar() {
 	imprimirMensaje(archivoLog, "[EJECUCION] Proceso File System finalizado");
 	archivoLogDestruir(archivoLog);
-	bitmapDestruir(bitmapDirectorios);
+	bitmapDirectoriosDestruir();
 	configuracionDestruirRutas();
 	directorioDestruirLista();
 	mutexBloquear(mutexListaArchivos);
@@ -157,7 +159,7 @@ void servidorAtenderSolicitudes(Servidor* servidor) {
 				Socket nuevoSocket;
 				if(socketEsListenerDataNode(servidor, unSocket)) {
 					nuevoSocket = socketAceptar(unSocket, ID_DATANODE);
-					if(estadoControl == DESACTIVADO)
+					if(estadoControlIgualA(DESACTIVADO))
 						break;
 					servidorRegistrarDataNode(servidor, nuevoSocket);
 				}
@@ -747,9 +749,9 @@ void consolaDestruirComando(Comando* comando, String entrada) {
 
 void consolaAtenderComandos() {
 	hiloDetach(pthread_self());
-	while(estadoControl == ACTIVADO) {
+	while(estadoControlIgualA(ACTIVADO)) {
 		char* entrada = consolaLeerEntrada();
-		if(estadoControl == ACTIVADO) {
+		if(estadoControlIgualA(ACTIVADO)) {
 			Comando comando;
 			consolaConfigurarComando(&comando, entrada);
 			consolaEjecutarComando(&comando);
@@ -765,7 +767,7 @@ void comandoFormatearFileSystem() {
 	mutexBloquear(mutexListaArchivos);
 	listaDestruirConElementos(listaArchivos, (Puntero)archivoDestruir);
 	mutexDesbloquear(mutexListaArchivos);
-	bitmapDestruir(bitmapDirectorios);
+	bitmapDirectoriosDestruir();
 	metadataIniciar();
 	nodoFormatearConectados();
 	nodoPersistir();
@@ -1277,7 +1279,9 @@ void comandoInformacionArchivo(Comando* comando) {
 }
 
 void comandoFinalizar() {
+	 mutexBloquear(mutexEstadoControl);
 	 estadoControl = DESACTIVADO;
+	 mutexDesbloquear(mutexEstadoControl);
 	 socketCrearCliente(IP_LOCAL, configuracion->puertoDataNode, ID_DATANODE);
 }
 
@@ -1351,7 +1355,7 @@ bool directorioIndiceRespetaLimite(int indice) {
 
 bool directorioIndiceEstaOcupado(int indice) {
 	return directorioIndiceRespetaLimite(indice) &&
-			bitmapBitOcupado(bitmapDirectorios, indice);
+			bitmapDirectoriosBitOcupado(indice);
 }
 
 bool directorioExisteIdentificador(int identificador) {
@@ -1449,7 +1453,7 @@ int directorioCrearConPersistencia(int identificador, String nombre, int identif
 	if(stringLongitud(nombre) >= MAX_NOMBRE)
 		return ERROR;
 	Directorio* directorio = directorioCrear(identificador, nombre, identificadorPadre);
-	bitmapOcuparBit(bitmapDirectorios, identificador);
+	bitmapDirectoriosOcuparBit(identificador);
 	directorioAgregar(directorio);
 	directoriosDisponibles--;
 	directorioCrearMetadata(directorio->identificador);
@@ -1561,7 +1565,9 @@ void directorioEliminar(int identificador) {
 	mutexBloquear(mutexListaDirectorios);
 	listaEliminarDestruyendoPorCondicion(listaDirectorios, (Puntero)tieneElMismoId, (Puntero)memoriaLiberar);
 	mutexDesbloquear(mutexListaDirectorios);
+	mutexBloquear(mutexBitmapDirectorios);
 	bitmapLiberarBit(bitmapDirectorios, identificador);
+	mutexDesbloquear(mutexBitmapDirectorios);
 	directoriosDisponibles++;
 	directorioEliminarMetadata(identificador);
 	directorioPersistir();
@@ -1578,7 +1584,7 @@ bool directorioOrdenarPorIdentificador(Directorio* unDirectorio, Directorio* otr
 
 void directorioRecuperarPersistencia() {
 	File file = fileAbrir(rutaArchivos, LECTURA);
-	bitmapDirectorios = bitmapCrear(13);
+	bitmapDirectoriosCrear();
 	if(file == NULL) {
 		imprimirMensajeUno(archivoLog, "[ERROR] No se encontro el archivo %s", rutaDirectorios);
 		return;
@@ -1603,7 +1609,7 @@ void directorioRecuperarPersistencia() {
 	}
 	archivoConfigDestruir(config);
 	for(indice = 0; indice < cantidadDirectorios; indice++)
-		bitmapOcuparBit(bitmapDirectorios, indice);
+		bitmapDirectoriosOcuparBit(indice);
 	directoriosDisponibles = MAX_DIR - cantidadDirectorios;
 }
 
@@ -2445,7 +2451,7 @@ void metadataIniciar() {
 	metadataCrear();
 	archivoCrearLista();
 	directorioCrearLista();
-	bitmapDirectorios = bitmapCrear(13);
+	bitmapDirectoriosCrear();
 	directoriosDisponibles = MAX_DIR;
 	directorioCrearConPersistencia(0, "root", -1);
 	archivoPersistirControl();
@@ -2553,17 +2559,51 @@ bool estadoFileSystemIgualA(int estado) {
 	return resultado;
 }
 
+bool estadoControlIgualA(int estado) {
+	mutexBloquear(mutexEstadoControl);
+	int resultado = estadoControl == estado;
+	mutexDesbloquear(mutexEstadoControl);
+	return resultado;
+}
+
+void bitmapDirectoriosDestruir() {
+	mutexBloquear(mutexBitmapDirectorios);
+	bitmapDestruir(bitmapDirectorios);
+	mutexDesbloquear(mutexBitmapDirectorios);
+}
+
+void bitmapDirectoriosCrear() {
+	mutexBloquear(mutexBitmapDirectorios);
+	bitmapDirectorios = bitmapCrear(13);
+	mutexDesbloquear(mutexBitmapDirectorios);
+}
+
+bool bitmapDirectoriosBitOcupado(int indice) {
+	mutexBloquear(mutexBitmapDirectorios);
+	int resultado = bitmapBitOcupado(bitmapDirectorios, indice);
+	mutexDesbloquear(mutexBitmapDirectorios);
+	return resultado;
+}
+
+void bitmapDirectoriosOcuparBit(int posicion) {
+	mutexBloquear(mutexBitmapDirectorios);
+	bitmapOcuparBit(bitmapDirectorios, posicion);
+	mutexDesbloquear(mutexBitmapDirectorios);
+}
+
 void semaforosCrear() {
 	semaforoMD5 = memoriaAlocar(sizeof(Semaforo));
 	mutexListaArchivos = memoriaAlocar(sizeof(Mutex));
 	mutexListaNodos = memoriaAlocar(sizeof(Mutex));
 	mutexListaDirectorios = memoriaAlocar(sizeof(Mutex));
+	mutexBitmapDirectorios = memoriaAlocar(sizeof(Mutex));
 	mutexArchivo = memoriaAlocar(sizeof(Mutex));
 	mutexNodo = memoriaAlocar(sizeof(Mutex));
 	mutexBloque = memoriaAlocar(sizeof(Mutex));
 	mutexRuta = memoriaAlocar(sizeof(Mutex));
 	mutexEstadoFileSystem = memoriaAlocar(sizeof(Mutex));
 	mutexEstadoEjecucion = memoriaAlocar(sizeof(Mutex));
+	mutexEstadoControl = memoriaAlocar(sizeof(Mutex));
 }
 
 void semaforosIniciar() {
@@ -2575,8 +2615,10 @@ void semaforosIniciar() {
 	mutexIniciar(mutexNodo);
 	mutexIniciar(mutexBloque);
 	mutexIniciar(mutexRuta);
+	mutexIniciar(mutexBitmapDirectorios);
 	mutexIniciar(mutexEstadoEjecucion);
 	mutexIniciar(mutexEstadoFileSystem);
+	mutexIniciar(mutexEstadoControl);
 }
 
 void semaforosDestruir() {
@@ -2589,11 +2631,12 @@ void semaforosDestruir() {
 	memoriaLiberar(mutexNodo);
 	memoriaLiberar(mutexBloque);
 	memoriaLiberar(mutexRuta);
+	memoriaLiberar(mutexBitmapDirectorios);
 	memoriaLiberar(mutexEstadoEjecucion);
 	memoriaLiberar(mutexEstadoFileSystem);
+	memoriaLiberar(mutexEstadoControl);
 }
 
-//TODO Pasar helgrind y solucionar md5
 //con clean no deberia borrar todo al formatear al primera vez
 //TODO si no esta disponible no deberia crear archivo en cpto
 //TODO persistir bitmap una sola vez

@@ -1,8 +1,25 @@
-[INFO] 18:49:58:171 FileSystem/(10501:10501): [EJECUCION] Proceso File System inicializado
-[INFO] 18:49:58:210 FileSystem/(10501:10501): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 18:49:58:212 FileSystem/(10501:10501): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 18:49:58:212 FileSystem/(10501:10501): [CONEXION] Esperando conexiones de Workers (Puerto: 5080)
-[INFO] 18:49:58:213 FileSystem/(10501:10501): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
-[INFO] 18:49:58:260 FileSystem/(10501:10501): [33m[AVISO] Para pasar a un estado estable primero debe formatear el File System[0m
-[INFO] 18:50:02:904 FileSystem/(10501:10506): [ESTADO] El File System ha sido formateado
-[INFO] 18:50:23:70 FileSystem/(10501:10501): [EJECUCION] Proceso File System finalizado
+[INFO] 19:20:46:40 FileSystem/(11379:11379): [EJECUCION] Proceso File System inicializado
+[INFO] 19:20:47:78 FileSystem/(11379:11379): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 19:20:47:79 FileSystem/(11379:11379): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 19:20:47:80 FileSystem/(11379:11379): [CONEXION] Esperando conexiones de Workers (Puerto: 5080)
+[INFO] 19:20:47:81 FileSystem/(11379:11379): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
+[INFO] 19:20:47:131 FileSystem/(11379:11379): [33m[AVISO] Para pasar a un estado estable primero debe formatear el File System[0m
+[INFO] 19:20:58:327 FileSystem/(11379:11379): [CONEXION] El NODO3 se ha conectado
+[INFO] 19:21:06:121 FileSystem/(11379:11379): [CONEXION] El NODO4 se ha conectado
+[INFO] 19:21:20:387 FileSystem/(11379:11379): [CONEXION] El NODO1 se ha conectado
+[INFO] 19:21:28:830 FileSystem/(11379:11384): [ESTADO] El File System ha sido formateado
+[INFO] 19:22:24:506 FileSystem/(11379:11384): [ARCHIVO] El archivo /home/utnso/Escritorio/gg fue copiado en File System
+[INFO] 19:22:30:672 FileSystem/(11379:11384): [ARCHIVO] El MD5 del archivo es f48ec9f2af8aaa40b03e93ca62011b87  /home/utnso/Escritorio/Metadata/gg
+
+[INFO] 19:22:48:192 FileSystem/(11379:11384): [ARCHIVO] El archivo /home/utnso/Escritorio/lala fue copiado en File System
+[INFO] 19:22:50:406 FileSystem/(11379:11384): [ERROR] Comando invalido
+[INFO] 19:22:53:623 FileSystem/(11379:11384): [ARCHIVO] El MD5 del archivo es 0701a72a009923eeab719430e623ef94  /home/utnso/Escritorio/Metadata/lala
+
+[INFO] 19:23:03:644 FileSystem/(11379:11384): [ERROR] Comando invalido
+[INFO] 19:23:15:817 FileSystem/(11379:11384): [ARCHIVO] El archivo /home/utnso/Escritorio/TODO fue copiado en File System
+[INFO] 19:23:18:368 FileSystem/(11379:11384): [ERROR] La ruta ingresada no es valida
+[INFO] 19:23:24:906 FileSystem/(11379:11384): [ARCHIVO] El MD5 del archivo es 36afbe93f8906e3a421052c9c7748be2  /home/utnso/Escritorio/Metadata/TODO
+
+[INFO] 19:23:32:923 FileSystem/(11379:11384): [ARCHIVO] El MD5 del archivo es 36afbe93f8906e3a421052c9c7748be2  /home/utnso/Escritorio/Metadata/TODO
+
+[INFO] 19:24:40:321 FileSystem/(11379:11379): [EJECUCION] Proceso File System finalizado

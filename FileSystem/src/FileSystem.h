@@ -185,11 +185,11 @@ Mutex* mutexArchivo;
 Mutex* mutexListaNodos;
 Mutex* mutexListaArchivos;
 Mutex* mutexListaDirectorios;
+Mutex* mutexBitmapDirectorios;
 Mutex* mutexEstadoFileSystem;
 Mutex* mutexEstadoEjecucion;
+Mutex* mutexEstadoControl;
 Semaforo* semaforoMD5;
-
-
 //--------------------------------------- Funciones de File System -------------------------------------
 
 void fileSystemIniciar();
@@ -459,3 +459,8 @@ void semaforosDestruir();
 
 bool estadoEjecucionIgualA(int estado);
 bool estadoFileSystemIgualA(int estado);
+bool estadoControlIgualA(int estado);
+void bitmapDirectoriosDestruir();
+void bitmapDirectoriosCrear();
+bool bitmapDirectoriosBitOcupado(int indice);
+void bitmapDirectoriosOcuparBit(int posicion);
