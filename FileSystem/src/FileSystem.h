@@ -174,19 +174,20 @@ String rutaDirectorioBitmaps;
 String rutaDirectorios;
 String rutaArchivos;
 String rutaNodos;
-
 String rutaBuffer;
 Nodo* nodoBuffer;
 Bloque* bloqueBuffer;
 Archivo* archivoBuffer;
-
 Mutex* mutexRuta;
 Mutex* mutexNodo;
 Mutex* mutexBloque;
 Mutex* mutexArchivo;
 Mutex* mutexListaNodos;
-Mutex* mutexListaArchivo;
-Mutex* mutexLog;
+Mutex* mutexListaArchivos;
+Mutex* mutexListaDirectorios;
+Mutex* mutexEstadoFileSystem;
+Mutex* mutexEstadoEjecucion;
+Semaforo* semaforoMD5;
 
 
 //--------------------------------------- Funciones de File System -------------------------------------
@@ -356,7 +357,11 @@ void directorioEliminarMetadata(Entero identificador);
 bool directorioEsHijoDe(Directorio* hijo, Directorio* padre);
 bool directorioOrdenarPorIdentificador(Directorio* unDirectorio, Directorio* otroDirectorio);
 void directorioRecuperarPersistencia();
-
+void directorioAgregar(Directorio* directorio);
+int directorioCantidad();
+Directorio* directorioObtener(int posicion);
+void directorioCrearLista();
+void directorioDestruirLista();
 //--------------------------------------- Funciones de Archivo -------------------------------------
 
 Archivo* archivoBuscar(String path);
@@ -376,6 +381,10 @@ int archivoLeer(Comando* comando);
 int archivoAlmacenar(Comando* comando);
 int archivoCantidadBloques(String ruta);
 bool archivoDisponible(Archivo* archivo);
+Archivo* archivoObtener(int indice);
+void archivoCrearLista();
+void archivoAgregar(Archivo* archivo);
+int archivoCantidad();
 
 //--------------------------------------- Funciones de Nodo -------------------------------------
 
@@ -401,6 +410,9 @@ void nodoDesactivar(Nodo* nodo);
 bool nodoOrdenarPorActividad(Nodo* unNodo, Nodo* otroNodo);
 void nodoLimpiarActividades();
 bool nodoConectado(Nodo* nodo);
+Nodo* nodoObtener(int posicion);
+int nodoCantidadNodos();
+void nodoAgregar(Nodo* nodo);
 
 //--------------------------------------- Funciones de Bloque -------------------------------------
 
@@ -444,3 +456,6 @@ bool rutaEsNumero(String ruta);
 void semaforosCrear();
 void semaforosIniciar();
 void semaforosDestruir();
+
+bool estadoEjecucionIgualA(int estado);
+bool estadoFileSystemIgualA(int estado);

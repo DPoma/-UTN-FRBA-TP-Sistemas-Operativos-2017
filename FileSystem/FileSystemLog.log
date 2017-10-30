@@ -1,1 +1,8 @@
-[INFO] 14:24:10:690 FileSystem/(6860:6860): [EJECUCION] Proceso File System inicializado
+[INFO] 18:49:58:171 FileSystem/(10501:10501): [EJECUCION] Proceso File System inicializado
+[INFO] 18:49:58:210 FileSystem/(10501:10501): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 18:49:58:212 FileSystem/(10501:10501): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 18:49:58:212 FileSystem/(10501:10501): [CONEXION] Esperando conexiones de Workers (Puerto: 5080)
+[INFO] 18:49:58:213 FileSystem/(10501:10501): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
+[INFO] 18:49:58:260 FileSystem/(10501:10501): [33m[AVISO] Para pasar a un estado estable primero debe formatear el File System[0m
+[INFO] 18:50:02:904 FileSystem/(10501:10506): [ESTADO] El File System ha sido formateado
+[INFO] 18:50:23:70 FileSystem/(10501:10501): [EJECUCION] Proceso File System finalizado

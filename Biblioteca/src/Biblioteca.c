@@ -378,7 +378,7 @@ void archivoLogValidar(String rutaArchivo) {
 
 //--------------------------------------- Funciones para Semaforo -------------------------------------
 
-void semaforoCrear(Semaforo* semaforo, unsigned int valor) {
+void semaforoIniciar(Semaforo* semaforo, unsigned int valor) {
 	sem_init(semaforo, NULO, valor);
 }
 

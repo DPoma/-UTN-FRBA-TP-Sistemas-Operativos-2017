@@ -191,7 +191,7 @@ void archivoLogValidar(String rutaArchivo);
 //--------------------------------------- Funciones para Semaforo -------------------------------------
 
 
-void semaforoCrear(Semaforo* semaforo, unsigned int valor);
+void semaforoIniciar(Semaforo* semaforo, unsigned int valor);
 void semaforoWait(Semaforo* semaforo);
 void semaforoSignal(Semaforo* semaforo);
 void semaforoValor(Semaforo* semaforo, int* buffer);
