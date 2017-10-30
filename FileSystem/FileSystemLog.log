@@ -1,11 +1,6 @@
-[INFO] 23:10:53:646 FileSystem/(10034:10034): [EJECUCION] Proceso File System inicializado
-[INFO] 23:10:53:749 FileSystem/(10034:10034): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 23:10:53:753 FileSystem/(10034:10034): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 23:10:53:755 FileSystem/(10034:10034): [CONEXION] Esperando conexiones de Workers (Puerto: 5080)
-[INFO] 23:10:53:764 FileSystem/(10034:10034): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
-[INFO] 23:10:54:746 FileSystem/(10034:10034): [33m[AVISO] Para pasar a un estado estable conecte los nodos necesarios[0m
-[INFO] 23:10:57:628 FileSystem/(10034:10034): [CONEXION] El NODO6 se ha conectado
-[INFO] 23:10:57:674 FileSystem/(10034:10034): [ESTADO] El File System se encuentra estable
-[INFO] 23:10:59:234 FileSystem/(10034:10034): [CONEXION] El NODO6 se ha desconectado
-[INFO] 23:11:03:316 FileSystem/(10034:10034): [CONEXION] El NODO6 se ha conectado
-[INFO] 23:12:15:797 FileSystem/(10034:10034): [EJECUCION] Proceso File System finalizado
+[INFO] 01:01:27:15 FileSystem/(11877:11877): [EJECUCION] Proceso File System inicializado
+[INFO] 01:01:27:21 FileSystem/(11877:11877): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 01:01:27:22 FileSystem/(11877:11877): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 01:01:27:22 FileSystem/(11877:11877): [CONEXION] Esperando conexiones de Workers (Puerto: 5080)
+[INFO] 01:01:27:22 FileSystem/(11877:11877): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
+[INFO] 01:01:27:113 FileSystem/(11877:11877): [33m[AVISO] Para pasar a un estado estable conecte los nodos necesarios[0m

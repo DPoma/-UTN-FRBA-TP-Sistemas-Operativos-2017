@@ -133,6 +133,7 @@ typedef struct {
 	char ip[20];
 	char nombre[10];
 	int estado;
+	int actividadesRealizadas;
 	int bloquesLibres;
 	int bloquesTotales;
 	Bitmap* bitmap;
@@ -386,6 +387,9 @@ Nodo* nodoBuscarPorSocket(Socket unSocket);
 int nodoPosicionEnLista(Nodo* nodo);
 int nodoBloquesLibres();
 void nodoDesactivar(Nodo* nodo);
+bool nodoOrdenarPorActividad(Nodo* unNodo, Nodo* otroNodo);
+void nodoLimpiarActividades();
+bool nodoConectado(Nodo* nodo);
 
 //--------------------------------------- Funciones de Bloque -------------------------------------
 
@@ -401,6 +405,7 @@ void bloqueCopiarTexto(Puntero datos);
 void bloqueCopiarBinario(Puntero datos);
 bool bloqueDisponible(Bloque* bloque);
 BloqueNodo* bloqueNodoCrear(Entero numeroBloque, String buffer, int tamanioUtilizado);
+bool copiaOrdenarPorActividadDelNodo(Copia* unaCopia, Copia* otraCopia);
 
 //--------------------------------------- Funciones de Copia Bloque -------------------------------------
 

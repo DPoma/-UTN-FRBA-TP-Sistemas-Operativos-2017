@@ -917,9 +917,20 @@ void comandoCopiarBloque(Comando* comando) {
 	if(listaEstaVacia(bloqueBuffer->listaCopias)) {
 		imprimirMensaje(archivoLog, "[ERROR] El bloque no tiene copias en ningun nodo (esto nunca deberia pasar)");
 	}
-	Copia* copia = listaPrimerElemento(bloqueBuffer->listaCopias);
-	Nodo* nodoConBloque = nodoBuscar(copia->nombreNodo);
-	mensajeEnviar(nodoConBloque->socket, COPIAR_BLOQUE, &copia->bloqueNodo, sizeof(Entero));
+	int indice;
+	int bloqueSinEnviar = true;
+	for(indice = 0; indice < listaCantidadElementos(bloqueBuffer->listaCopias) && bloqueSinEnviar; indice++) {
+		Copia* copia = listaObtenerElemento(bloqueBuffer->listaCopias, indice);
+		Nodo* nodoConBloque = nodoBuscar(copia->nombreNodo);
+		if(nodoConBloque->estado == ACTIVADO) {
+			mensajeEnviar(nodoConBloque->socket, COPIAR_BLOQUE, &copia->bloqueNodo, sizeof(Entero));
+			bloqueSinEnviar = false;
+		}
+	}
+	if(bloqueSinEnviar) {
+		imprimirMensaje(archivoLog, "[ERROR] No hay nodos disponibles para obtener la copia");
+		return;
+	}
 
 }
 
@@ -1068,21 +1079,36 @@ int comandoCopiarArchivoDeYamaFS(Comando* comando) {
 		return ERROR;
 	}
 	fileCerrar(file);
+	if(!archivoDisponible(archivo)) {
+		imprimirMensaje(archivoLog, ROJO"[ERROR] El archivo no esta disponible"BLANCO);
+		return ERROR;
+	}
 	stringCopiar(rutaBuffer, comando->argumentos[2]);
 	int indice;
 	for(indice = 0; indice < listaCantidadElementos(archivo->listaBloques) ;indice++) {
 		Bloque* bloque = listaObtenerElemento(archivo->listaBloques, indice);
+		int copiaSinEnviar = true;
 		int indiceCopias;
-		for(indiceCopias=0; indiceCopias  < listaCantidadElementos(bloque->listaCopias); indiceCopias++) {
+		for(indiceCopias=0; indiceCopias<listaCantidadElementos(bloque->listaCopias) && copiaSinEnviar; indiceCopias++) {
+			listaOrdenar(bloque->listaCopias, (Puntero)copiaOrdenarPorActividadDelNodo);
 			Copia* copia = listaObtenerElemento(bloque->listaCopias, indiceCopias);
 			Nodo* nodo = nodoBuscar(copia->nombreNodo);
-			if(archivoEsBinario(archivo))
-				mensajeEnviar(nodo->socket, COPIAR_BINARIO, &copia->bloqueNodo, sizeof(Entero));
-			else
-				mensajeEnviar(nodo->socket, COPIAR_TEXTO, &copia->bloqueNodo, sizeof(Entero));
-			break;
+			if(nodoConectado(nodo)) {
+				if(archivoEsBinario(archivo))
+					mensajeEnviar(nodo->socket, COPIAR_BINARIO, &copia->bloqueNodo, sizeof(Entero));
+				else
+					mensajeEnviar(nodo->socket, COPIAR_TEXTO, &copia->bloqueNodo, sizeof(Entero));
+				nodo->actividadesRealizadas++;
+				copiaSinEnviar = false;
+			}
+		}
+		if(copiaSinEnviar) {
+			imprimirMensaje(archivoLog, "[ERROR] Una copia no pudo ser enviada, se aborta la operacion");
+			nodoLimpiarActividades();
+			return ERROR;
 		}
 	}
+	nodoLimpiarActividades();
 	return 0;
 }
 
@@ -1128,9 +1154,14 @@ void comandoObtenerMD5DeArchivo(Comando* comando) {
 	String ruta = string_from_format("%s/%s", configuracion->rutaMetadata, nombreArchivo);
 	comando->argumentos[2] = memoriaAlocar(MAX_STRING);
 	stringCopiar(comando->argumentos[2], ruta);
-	if(comandoCopiarArchivoDeYamaFS(comando) == ERROR)
+	if(comandoCopiarArchivoDeYamaFS(comando) == ERROR) {
+		fileLimpiar(ruta);
+		memoriaLiberar(nombreArchivo);
+		memoriaLiberar(MD5Archivo);
+		memoriaLiberar(ruta);
 		return;
-	sleep(1); //TODO Porque tengo que leer bloques... Semaforo?
+	}
+	sleep(2); //TODO Porque tengo que leer bloques... Semaforo?
 	int pidHijo;
 	int longitudMensaje;
 	int descriptores[2];
@@ -1764,25 +1795,29 @@ int archivoLeer(Comando* comando) {
 		imprimirMensaje(archivoLog, ROJO"[ERROR] El archivo no esta disponible"BLANCO);
 		return ERROR;
 	}
+	listaOrdenar(archivo->listaBloques, (Puntero)bloqueOrdenarPorNumero);
 	int numeroBloque;
 	for(numeroBloque=0; numeroBloque < listaCantidadElementos(archivo->listaBloques); numeroBloque++) {
-		listaOrdenar(archivo->listaBloques, (Puntero)bloqueOrdenarPorNumero);
 		Bloque* bloque = listaObtenerElemento(archivo->listaBloques, numeroBloque);
 		int numeroCopia;
 		int bloqueSinImprimir = true;
 		for(numeroCopia=0; numeroCopia <listaCantidadElementos(bloque->listaCopias) && bloqueSinImprimir; numeroCopia++) {
+			listaOrdenar(bloque->listaCopias, (Puntero)copiaOrdenarPorActividadDelNodo);
 			Copia* copia = listaObtenerElemento(bloque->listaCopias, numeroCopia);
 			Nodo* nodo = nodoBuscar(copia->nombreNodo);
-			if(nodo->estado == ACTIVADO) {
+			if(nodoConectado(nodo)) {
 				mensajeEnviar(nodo->socket, LEER_BLOQUE ,&copia->bloqueNodo, sizeof(Entero));
+				nodo->actividadesRealizadas++;
 				bloqueSinImprimir = false;
 			}
 		}
 		if(bloqueSinImprimir) {
-			imprimirMensaje(archivoLog,"[ERROR] No hay nodos disponibles para obtener el bloque");
+			imprimirMensaje(archivoLog,"[ERROR] No hay nodos disponibles para obtener un bloque");
+			nodoLimpiarActividades();
 			return ERROR;
 		}
 	}
+	nodoLimpiarActividades();
 	return 0;
 }
 
@@ -1887,6 +1922,7 @@ Nodo* nodoCrear(Puntero datos, Socket nuevoSocket) {
 	Nodo* nodo = memoriaAlocar(sizeof(Nodo));
 	nodo->socket = nuevoSocket;
 	nodo->estado = ACTIVADO;
+	nodo->actividadesRealizadas = 0;
 	memcpy(&nodo->bloquesTotales, datos, sizeof(Entero));
 	nodo->bloquesLibres = nodo->bloquesTotales;
 	nodo->bitmap = bitmapCrear(nodo->bloquesTotales);
@@ -1971,6 +2007,10 @@ bool nodoCantidadBloquesLibres(Nodo* unNodo, Nodo* otroNodo) {
 	return unNodo->bloquesLibres > otroNodo->bloquesLibres;
 }
 
+bool nodoOrdenarPorActividad(Nodo* unNodo, Nodo* otroNodo) {
+	return unNodo->actividadesRealizadas < otroNodo->actividadesRealizadas;
+}
+
 bool nodoTieneBloquesLibres(Nodo* nodo) {
 	return nodo->bloquesLibres > 0;
 }
@@ -2031,6 +2071,7 @@ void nodoRecuperarPersistencia() {
 		nodo->bloquesLibres = archivoConfigEnteroDe(config, lineaLibres);
 		nodo->estado = DESACTIVADO;
 		nodo->socket = ERROR;
+		nodo->actividadesRealizadas = 0;
 		memoriaLiberar(lineaNombre);
 		memoriaLiberar(lineaTotales);
 		memoriaLiberar(lineaLibres);
@@ -2067,6 +2108,14 @@ int nodoBloquesLibres() {
 		bloquesLibres+= nodo->bloquesLibres;
 	}
 	return bloquesLibres;
+}
+
+void nodoLimpiarActividades() {
+	int indice;
+	for(indice = 0; indice < listaCantidadElementos(listaNodos); indice++) {
+		Nodo* nodo = listaObtenerElemento(listaNodos, indice);
+		nodo->actividadesRealizadas = 0;
+	}
 }
 
 //--------------------------------------- Funciones de Bloque-------------------------------------
@@ -2118,10 +2167,17 @@ int bloqueEnviarCopiasANodos(Bloque* bloque, String buffer) {
 
 void bloqueCopiar(Puntero datos) {
 	Entero numeroBloqueNodo = nodoBuscarBloqueLibre(nodoBuffer);
-	bloqueEnviarANodo(nodoBuffer->socket, numeroBloqueNodo, datos);
-	bloqueCopiarEnNodo(bloqueBuffer, nodoBuffer, numeroBloqueNodo);
-	archivoPersistir(archivoBuffer);
-	nodoPersistirBitmap(nodoBuffer);
+	if(nodoBuffer->estado == ACTIVADO) {
+		bloqueEnviarANodo(nodoBuffer->socket, numeroBloqueNodo, datos);
+		bloqueCopiarEnNodo(bloqueBuffer, nodoBuffer, numeroBloqueNodo);
+		archivoPersistir(archivoBuffer);
+		nodoPersistirBitmap(nodoBuffer);
+		imprimirMensajeDos(archivoLog, "[BLOQUE] El bloque fue copiado en el bloque N°%i de %s", (int*)numeroBloqueNodo, nodoBuffer->nombre);
+	}
+	else {
+		imprimirMensaje(archivoLog, "[ERROR] El nodo que va a guardar la nueva copia no esta disponible");
+		return;
+	}
 	archivoBuffer = NULL;
 	nodoBuffer = NULL;
 	bloqueBuffer = NULL;
@@ -2169,6 +2225,17 @@ void copiaBloqueEliminar(Copia* copia) {
 	bitmapLiberarBit(nodo->bitmap, copia->bloqueNodo);
 	nodoPersistirBitmap(nodo);
 }
+
+bool nodoConectado(Nodo* nodo) {
+	return nodo->estado == ACTIVADO;
+}
+
+bool copiaOrdenarPorActividadDelNodo(Copia* unaCopia, Copia* otraCopia) {
+	Nodo* unNodo = nodoBuscar(unaCopia->nombreNodo);
+	Nodo* otroNodo = nodoBuscar(otraCopia->nombreNodo);
+	return unNodo->actividadesRealizadas < otroNodo->actividadesRealizadas;
+}
+
 
 //--------------------------------------- Funciones de Metadata------------------------------------
 
@@ -2280,7 +2347,7 @@ bool rutaEsNumero(String ruta) {
 	return true;
 }
 
-//TODO estado estable para recup estado
 //TODO si me quedo sin nodos tirar error en cpto cpfrom y cat
 //TODO algoritmo nodos
+//TODO cat y cpto agarren de cada uno
 //TODO Para el md5 hay que espera tiempo para que copie todo el archivo
