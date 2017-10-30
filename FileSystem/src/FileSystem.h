@@ -154,7 +154,9 @@ typedef struct __attribute__((packed)) {
 
 String campos[4];
 Configuracion* configuracion;
+
 ArchivoLog archivoLog;
+
 int estadoControl;
 int estadoEjecucion;
 int estadoFileSystem;
@@ -163,7 +165,6 @@ Hilo hiloConsola;
 Lista listaDirectorios;
 Lista listaArchivos;
 Lista listaNodos;
-Lista listaNodosDisponibles;
 Bitmap* bitmapDirectorios;
 Socket socketYama;
 Socket socketDataNode;
@@ -173,10 +174,20 @@ String rutaDirectorioBitmaps;
 String rutaDirectorios;
 String rutaArchivos;
 String rutaNodos;
+
 String rutaBuffer;
 Nodo* nodoBuffer;
 Bloque* bloqueBuffer;
 Archivo* archivoBuffer;
+
+Mutex* mutexRuta;
+Mutex* mutexNodo;
+Mutex* mutexBloque;
+Mutex* mutexArchivo;
+Mutex* mutexListaNodos;
+Mutex* mutexListaArchivo;
+Mutex* mutexLog;
+
 
 //--------------------------------------- Funciones de File System -------------------------------------
 
@@ -429,3 +440,7 @@ String* rutaSeparar(String ruta);
 bool rutaTieneAlMenosUnaBarra(String ruta);
 bool rutaValida(String ruta);
 bool rutaEsNumero(String ruta);
+
+void semaforosCrear();
+void semaforosIniciar();
+void semaforosDestruir();

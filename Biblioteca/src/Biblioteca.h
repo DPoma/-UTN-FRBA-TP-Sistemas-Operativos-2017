@@ -199,7 +199,7 @@ void semaforoDestruir(Semaforo* semaforo);
 
 //--------------------------------------- Funciones para Mutex -------------------------------------
 
-void mutexCrear(Mutex* mutex);
+void mutexIniciar(Mutex* mutex);
 void mutexBloquear(Mutex* mutex);
 void mutexDesbloquear(Mutex* mutex);
 

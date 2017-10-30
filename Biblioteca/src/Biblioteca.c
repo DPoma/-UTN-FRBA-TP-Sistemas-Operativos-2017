@@ -400,7 +400,7 @@ void semaforoValor(Semaforo* semaforo, int* buffer) {
 
 //--------------------------------------- Funciones Mutex -------------------------------------
 
-void mutexCrear(Mutex* mutex) {
+void mutexIniciar(Mutex* mutex) {
 	pthread_mutex_init(mutex, NULL);
 }
 

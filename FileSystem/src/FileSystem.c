@@ -24,12 +24,13 @@ void fileSystemIniciar(String flag) {
 	pantallaLimpiar();
 	estadoControl = ACTIVADO;
 	configuracionIniciar();
+	semaforosCrear();
+	semaforosIniciar();
 	estadoFileSystem = INESTABLE;
 	listaNodos = listaCrear();
 	if(stringIguales(flag, FLAG_C)) {
 		metadataIniciar();
-		imprimirMensaje(archivoLog, AMARILLO"[AVISO] Para pasar a un estado estable primero "
-				"debe formatear el File System"BLANCO);
+		imprimirMensaje(archivoLog, AMARILLO"[AVISO] Para pasar a un estado estable primero ""debe formatear el File System"BLANCO);
 	}
 	else
 		metadataRecuperar();
@@ -55,6 +56,7 @@ void fileSystemFinalizar() {
 	listaDestruirConElementos(listaDirectorios, memoriaLiberar);
 	listaDestruirConElementos(listaArchivos, (Puntero)archivoDestruir);
 	listaDestruirConElementos(listaNodos, (Puntero)nodoDestruir);
+	semaforosDestruir();
 	sleep(2);
 }
 
@@ -108,7 +110,10 @@ void configuracionIniciarRutas() {
 	rutaArchivos = string_from_format("%s/Archivos.txt", configuracion->rutaMetadata);
 	rutaDirectorios = string_from_format("%s/Directorios.txt", configuracion->rutaMetadata);
 	rutaNodos = string_from_format("%s/Nodos.bin", configuracion->rutaMetadata);
+	mutexBloquear(mutexRuta);
 	rutaBuffer = stringCrear(MAX_STRING);
+	mutexDesbloquear(mutexRuta);
+
 }
 
 void configuracionDestruirRutas() {
@@ -118,7 +123,9 @@ void configuracionDestruirRutas() {
 	memoriaLiberar(rutaDirectorioBitmaps);
 	memoriaLiberar(rutaDirectorios);
 	memoriaLiberar(rutaArchivos);
+	mutexBloquear(mutexRuta);
 	memoriaLiberar(rutaBuffer);
+	mutexDesbloquear(mutexRuta);
 }
 
 //--------------------------------------- Funciones de Servidor -------------------------------------
@@ -890,37 +897,59 @@ void comandoCopiarBloque(Comando* comando) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return;
 	}
+	mutexBloquear(mutexArchivo);
 	archivoBuffer = archivoBuscar(comando->argumentos[1]);
 	if(archivoBuffer == NULL) {
+		mutexDesbloquear(mutexArchivo);
 		imprimirMensaje(archivoLog, "[ERROR] El archivo no existe");
 		return;
 	}
+	mutexDesbloquear(mutexArchivo);
 	if(!rutaEsNumero(comando->argumentos[2])) {
 		imprimirMensaje(archivoLog,"[ERROR] El numero de bloque no es valido");
 		return;
 	}
+	mutexBloquear(mutexNodo);
 	nodoBuffer = nodoBuscar(comando->argumentos[3]);
 	if(nodoBuffer == NULL) {
+		mutexDesbloquear(mutexNodo);
 		imprimirMensaje(archivoLog,"[ERROR] El nodo no existe");
 		return;
 	}
+	mutexDesbloquear(mutexNodo);
 	Entero numeroBloque = atoi(comando->argumentos[2]);
+	mutexBloquear(mutexArchivo);
+	mutexBloquear(mutexBloque);
 	bloqueBuffer = listaObtenerElemento(archivoBuffer->listaBloques, numeroBloque);
+	mutexDesbloquear(mutexArchivo);
 	if(bloqueBuffer == NULL) {
+		mutexDesbloquear(mutexBloque);
 		imprimirMensaje(archivoLog, "[ERROR] El numero de bloque no existe");
 		return;
 	}
+	mutexDesbloquear(mutexBloque);
+	mutexBloquear(mutexNodo);
 	if(nodoBuscarBloqueLibre(nodoBuffer) == ERROR) {
+		mutexDesbloquear(mutexNodo);
 		imprimirMensaje(archivoLog, "[ERROR] No hay bloques libres en el nodo");
 		return;
 	}
+	mutexDesbloquear(mutexNodo);
+	mutexBloquear(mutexBloque);
 	if(listaEstaVacia(bloqueBuffer->listaCopias)) {
+		mutexDesbloquear(mutexBloque);
 		imprimirMensaje(archivoLog, "[ERROR] El bloque no tiene copias en ningun nodo (esto nunca deberia pasar)");
 	}
+	mutexDesbloquear(mutexBloque);
 	int indice;
 	int bloqueSinEnviar = true;
-	for(indice = 0; indice < listaCantidadElementos(bloqueBuffer->listaCopias) && bloqueSinEnviar; indice++) {
+	mutexBloquear(mutexBloque);
+	int cantidadCopias = listaCantidadElementos(bloqueBuffer->listaCopias);
+	mutexDesbloquear(mutexBloque);
+	for(indice = 0; indice < cantidadCopias && bloqueSinEnviar; indice++) {
+		mutexBloquear(mutexBloque);
 		Copia* copia = listaObtenerElemento(bloqueBuffer->listaCopias, indice);
+		mutexDesbloquear(mutexBloque);
 		Nodo* nodoConBloque = nodoBuscar(copia->nombreNodo);
 		if(nodoConBloque->estado == ACTIVADO) {
 			mensajeEnviar(nodoConBloque->socket, COPIAR_BLOQUE, &copia->bloqueNodo, sizeof(Entero));
@@ -1083,7 +1112,9 @@ int comandoCopiarArchivoDeYamaFS(Comando* comando) {
 		imprimirMensaje(archivoLog, ROJO"[ERROR] El archivo no esta disponible"BLANCO);
 		return ERROR;
 	}
+	mutexBloquear(mutexRuta);
 	stringCopiar(rutaBuffer, comando->argumentos[2]);
+	mutexDesbloquear(mutexRuta);
 	int indice;
 	for(indice = 0; indice < listaCantidadElementos(archivo->listaBloques) ;indice++) {
 		Bloque* bloque = listaObtenerElemento(archivo->listaBloques, indice);
@@ -2169,19 +2200,35 @@ int bloqueEnviarCopiasANodos(Bloque* bloque, String buffer) {
 }
 
 void bloqueCopiar(Puntero datos) {
+	mutexBloquear(mutexNodo);
 	if(nodoBuffer->estado == ACTIVADO) {
+		mutexBloquear(mutexBloque);
 		int numeroBloqueNodo = bloqueEnviarANodo(bloqueBuffer, nodoBuffer, datos);
+		mutexDesbloquear(mutexBloque);
+		mutexDesbloquear(mutexNodo);
+		mutexBloquear(mutexArchivo);
 		archivoPersistir(archivoBuffer);
+		mutexDesbloquear(mutexArchivo);
 		nodoPersistir();
+		mutexBloquear(mutexNodo);
 		imprimirMensajeDos(archivoLog, "[BLOQUE] El bloque fue copiado en el bloque N°%i de %s", (int*)numeroBloqueNodo, nodoBuffer->nombre);
+		mutexDesbloquear(mutexNodo);
 	}
 	else {
+		mutexDesbloquear(mutexNodo);
 		imprimirMensaje(archivoLog, "[ERROR] El nodo que va a guardar la nueva copia no esta disponible");
+
 		return;
 	}
+	mutexBloquear(mutexArchivo);
 	archivoBuffer = NULL;
+	mutexDesbloquear(mutexArchivo);
+	mutexBloquear(mutexNodo);
 	nodoBuffer = NULL;
+	mutexDesbloquear(mutexNodo);
+	mutexBloquear(mutexBloque);
 	bloqueBuffer = NULL;
+	mutexDesbloquear(mutexBloque);
 }
 
 void bloqueLeer(Puntero datos) {
@@ -2189,15 +2236,19 @@ void bloqueLeer(Puntero datos) {
 }
 
 void bloqueCopiarBinario(Puntero datos) {
+	mutexBloquear(mutexRuta);
 	File file = fileAbrir(rutaBuffer, "a+");
 	fwrite(datos, sizeof(char), BLOQUE, file);
 	fileCerrar(file);
+	mutexDesbloquear(mutexRuta);
 }
 
 void bloqueCopiarTexto(Puntero datos) {
+	mutexBloquear(mutexRuta);
 	File file = fileAbrir(rutaBuffer, "a+");
 	fprintf(file, "%s", (String)datos);
 	fileCerrar(file);
+	mutexDesbloquear(mutexRuta);
 }
 
 BloqueNodo* bloqueNodoCrear(Entero numeroBloque, String buffer, int tamanioUtilizado) {
@@ -2343,5 +2394,40 @@ bool rutaEsNumero(String ruta) {
 	return true;
 }
 
-//TODO ver cpfrom algoritmo
+void semaforosCrear() {
+	mutexListaArchivo = memoriaAlocar(sizeof(Mutex));
+	mutexListaNodos = memoriaAlocar(sizeof(Mutex));
+	mutexArchivo = memoriaAlocar(sizeof(Mutex));
+	mutexNodo = memoriaAlocar(sizeof(Mutex));
+	mutexBloque = memoriaAlocar(sizeof(Mutex));
+	mutexRuta = memoriaAlocar(sizeof(Mutex));
+	mutexLog = memoriaAlocar(sizeof(Mutex));
+}
+
+void semaforosIniciar() {
+	mutexIniciar(mutexListaArchivo);
+	mutexIniciar(mutexListaNodos);
+	mutexIniciar(mutexArchivo);
+	mutexIniciar(mutexNodo);
+	mutexIniciar(mutexBloque);
+	mutexIniciar(mutexRuta);
+	mutexIniciar(mutexLog);
+}
+
+void semaforosDestruir() {
+	memoriaLiberar(mutexListaArchivo);
+	memoriaLiberar(mutexListaNodos);
+	memoriaLiberar(mutexArchivo);
+	memoriaLiberar(mutexNodo);
+	memoriaLiberar(mutexBloque);
+	memoriaLiberar(mutexRuta);
+	memoriaLiberar(mutexLog);
+}
+
 //TODO Pasar helgrind y solucionar md5
+//con clean no deberia borrar todo al formatear al primera vez
+//TODO si no esta disponible no deberia crear archivo en cpto
+//TODO persistir bitmap una sola vez
+//TODO ver si las persistencias coinciden
+//TODO persistir siempre al final de un comando
+//TODO
