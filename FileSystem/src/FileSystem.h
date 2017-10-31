@@ -25,7 +25,9 @@
 #define ID_MD5 12
 #define ID_LS 13
 #define ID_INFO 14
-#define ID_EXIT 15
+#define ID_NODES 15
+#define ID_HELP 16
+#define ID_EXIT 17
 #define FORMAT "format"
 #define RM "rm"
 #define RMB "rm -b"
@@ -40,6 +42,8 @@
 #define MD5 "md5"
 #define LS "ls"
 #define INFO "info"
+#define NODES "nodes"
+#define HELP "help"
 #define EXIT "exit"
 #define FLAG_C "--clean"
 #define FLAG_B "-b"
@@ -51,7 +55,7 @@
 #define MAX_STRING 300
 #define MAX_NOMBRE 255
 #define MAX_DIR 100
-#define MAX_COPIAS 4
+#define MAX_COPIAS 2
 #define NUEVO 0
 #define NORMAL 1
 #define INESTABLE 0
@@ -313,6 +317,8 @@ void comandoCopiarBloque(Comando* comando);
 void comandoObtenerMD5DeArchivo(Comando* comando);
 void comandoListarDirectorio(Comando* comando);
 void comandoInformacionArchivo(Comando* comando);
+void comandoInformacionNodos();
+void comandoAyuda();
 void comandoFinalizar();
 void comandoError();
 

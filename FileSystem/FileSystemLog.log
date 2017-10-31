@@ -1,24 +1,6 @@
-[INFO] 13:30:32:577 FileSystem/(7608:7608): [EJECUCION] Proceso File System inicializado
-[INFO] 13:30:32:636 FileSystem/(7608:7608): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 13:30:32:637 FileSystem/(7608:7608): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 13:30:32:638 FileSystem/(7608:7608): [CONEXION] Esperando conexiones de Workers (Puerto: 5080)
-[INFO] 13:30:32:638 FileSystem/(7608:7608): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
-[INFO] 13:30:33:787 FileSystem/(7608:7608): [33m[AVISO] Para pasar a un estado estable conecte los nodos necesarios[0m
-[INFO] 13:30:35:10 FileSystem/(7608:7608): [33m[CONEXION] NODO4 conectado[0m
-[INFO] 13:30:35:71 FileSystem/(7608:7608): [ESTADO] El File System se encuentra estable
-[INFO] 13:30:52:446 FileSystem/(7608:7608): [33m[CONEXION] NODO3 conectado[0m
-[INFO] 13:31:06:244 FileSystem/(7608:7608): [BLOQUE] El bloque fue copiado en el bloque N°1446 de NODO3
-[INFO] 13:31:18:788 FileSystem/(7608:7608): [BLOQUE] El bloque fue copiado en el bloque N°2550 de NODO4
-[INFO] 13:33:47:346 FileSystem/(7608:7608): [BLOQUE] El bloque fue copiado en el bloque N°2551 de NODO4
-[INFO] 13:33:47:351 FileSystem/(7608:7608): [33m[CONEXION] NODO4 desconectado[0m
-[INFO] 13:34:22:256 FileSystem/(7608:7608): [33m[CONEXION] NODO4 conectado[0m
-[INFO] 13:34:36:976 FileSystem/(7608:7608): [BLOQUE] El bloque fue copiado en el bloque N°2552 de NODO4
-[INFO] 13:34:36:977 FileSystem/(7608:7608): [33m[CONEXION] NODO4 desconectado[0m
-[INFO] 13:35:53:968 FileSystem/(7608:7608): [33m[CONEXION] NODO4 conectado[0m
-[INFO] 13:36:14:633 FileSystem/(7608:7608): [BLOQUE] El bloque fue copiado en el bloque N°1447 de NODO3
-[INFO] 13:36:14:635 FileSystem/(7608:7608): [33m[CONEXION] NODO4 desconectado[0m
-[INFO] 13:36:22:639 FileSystem/(7608:7608): [33m[CONEXION] NODO4 conectado[0m
-[INFO] 13:36:27:776 FileSystem/(7608:7608): [BLOQUE] El bloque fue copiado en el bloque N°2553 de NODO4
-[INFO] 13:36:27:778 FileSystem/(7608:7608): [33m[CONEXION] NODO4 desconectado[0m
-[INFO] 13:36:27:786 FileSystem/(7608:7608): [33m[CONEXION] NODO3 desconectado[0m
-[INFO] 13:36:33:641 FileSystem/(7608:7608): [EJECUCION] Proceso File System finalizado
+[INFO] 19:18:04:68 FileSystem/(13185:13185): [EJECUCION] Proceso File System inicializado
+[INFO] 19:18:04:129 FileSystem/(13185:13185): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 19:18:04:130 FileSystem/(13185:13185): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 19:18:04:131 FileSystem/(13185:13185): [CONEXION] Esperando conexiones de Workers (Puerto: 5080)
+[INFO] 19:18:04:131 FileSystem/(13185:13185): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
+[INFO] 19:18:04:300 FileSystem/(13185:13185): [33m[AVISO] Para pasar a un estado estable conecte los nodos necesarios[0m
