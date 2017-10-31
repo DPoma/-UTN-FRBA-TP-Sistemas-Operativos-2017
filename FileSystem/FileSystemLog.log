@@ -1,7 +1,13 @@
-[INFO] 09:40:19:817 FileSystem/(4660:4660): [EJECUCION] Proceso File System inicializado
-[INFO] 09:40:19:877 FileSystem/(4660:4660): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 09:40:19:878 FileSystem/(4660:4660): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 09:40:19:878 FileSystem/(4660:4660): [CONEXION] Esperando conexiones de Workers (Puerto: 5080)
-[INFO] 09:40:19:879 FileSystem/(4660:4660): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
-[INFO] 09:40:20:719 FileSystem/(4660:4660): [33m[AVISO] Para pasar a un estado estable conecte los nodos necesarios[0m
-[INFO] 09:40:21:22 FileSystem/(4660:4660): [EJECUCION] Proceso File System finalizado
+[INFO] 11:12:03:81 FileSystem/(5896:5896): [EJECUCION] Proceso File System inicializado
+[INFO] 11:12:03:149 FileSystem/(5896:5896): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 11:12:03:150 FileSystem/(5896:5896): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 11:12:03:150 FileSystem/(5896:5896): [CONEXION] Esperando conexiones de Workers (Puerto: 5080)
+[INFO] 11:12:03:151 FileSystem/(5896:5896): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
+[INFO] 11:12:04:248 FileSystem/(5896:5896): [33m[AVISO] Para pasar a un estado estable conecte los nodos necesarios[0m
+[INFO] 11:12:07:606 FileSystem/(5896:5899): [DIRECTORIO] gg (a)
+[INFO] 11:12:11:82 FileSystem/(5896:5899): [ARCHIVO] El archivo /gg ha sido eliminado
+[INFO] 11:12:25:949 FileSystem/(5896:5899): [ERROR] El bloque N°0 no pudo copiarse en ningun Nodo
+[INFO] 11:14:38:775 FileSystem/(5896:5899): [ARCHIVO] El archivo /home/utnso/Escritorio fue copiado en File System
+[INFO] 11:15:08:409 FileSystem/(5896:5899): [ERROR] El bloque N°0 no pudo copiarse en ningun Nodo
+[INFO] 11:15:28:766 FileSystem/(5896:5899): [ERROR] El bloque N°0 no pudo copiarse en ningun Nodo
+[INFO] 11:15:32:748 FileSystem/(5896:5896): [EJECUCION] Proceso File System finalizado

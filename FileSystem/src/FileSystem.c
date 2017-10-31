@@ -56,19 +56,14 @@ void fileSystemAtenderProcesos() {
 
 void fileSystemFinalizar() {
 	semaforoWait(semaforoFinal);
-	imprimirMensaje(archivoLog, "[EJECUCION] Proceso File System finalizado");
 	archivoLogDestruir(archivoLog);
-	bitmapDirectoriosDestruir();
 	configuracionDestruirRutas();
+	bitmapDirectoriosDestruir();
+	archivoDestruirLista();
 	directorioDestruirLista();
-	mutexBloquear(mutexListaArchivos);
-	listaDestruirConElementos(listaArchivos, (Puntero)archivoDestruir);
-	mutexDesbloquear(mutexListaArchivos);
-	mutexBloquear(mutexListaNodos);
-	listaDestruirConElementos(listaNodos, (Puntero)nodoDestruir);
-	mutexDesbloquear(mutexListaNodos);
+	nodoDestruirLista();
 	semaforosDestruir();
-	//sleep(2);
+	sleep(2);
 }
 //--------------------------------------- Funciones de Configuracion -------------------------------------
 
@@ -143,6 +138,7 @@ void servidorIniciar(Servidor* servidor) {
 }
 
 void servidorFinalizar(Servidor* servidor) {
+	imprimirMensaje(archivoLog, "[EJECUCION] Proceso File System finalizado");
 	memoriaLiberar(servidor);
 }
 
@@ -300,6 +296,7 @@ void servidorRechazarDataNode(Nodo* nuevoNodo) {
 }
 
 void servidorAceptarReconexionDataNode(Servidor* servidor, Nodo* nuevoNodo) {
+	mutexBloquear(mutexTarea);
 	Nodo* nodo = nodoActualizar(nuevoNodo);
 	servidorRegistrarDataNode(servidor, nodo);
 	if(estadoFileSystemIgualA(INESTABLE) && archivoTodosDisponibles()) {
@@ -308,17 +305,13 @@ void servidorAceptarReconexionDataNode(Servidor* servidor, Nodo* nuevoNodo) {
 		mutexDesbloquear(mutexEstadoFileSystem);
 		imprimirMensaje(archivoLog, "[ESTADO] El File System se encuentra estable");
 	}
+	mutexDesbloquear(mutexTarea);
 }
 
 void servidorRegistrarDataNode(Servidor* servidor, Nodo* nodo) {
 	servidorAceptarConexion(servidor, nodo->socket);
 	listaSocketsAgregar(nodo->socket, &servidor->listaDataNodes);
-	servidorAvisarDataNode(nodo);
-}
-
-void servidorAvisarDataNode(Nodo* nodo) {
-	mensajeEnviar(nodo->socket, ACEPTAR_NODO, &nodo->socket, sizeof(Socket)); //TODO debe ser nulo el msj, solo me interesa la operacion
-	imprimirMensajeUno(archivoLog, AMARILLO"[CONEXION] %s conectado"BLANCO, nodo->nombre);
+	nodoAceptar(nodo);
 }
 
 void servidorMensajeDataNode(Servidor* servidor, Mensaje* mensaje, Socket unSocket) {
@@ -331,17 +324,18 @@ void servidorMensajeDataNode(Servidor* servidor, Mensaje* mensaje, Socket unSock
 	}
 }
 
-void servidorDesactivarDataNode(Nodo* nodo, Servidor* servidor) {
+void servidorDesactivarDataNode(Servidor* servidor, Nodo* nodo) {
 	socketCerrar(nodo->socket);
 	listaSocketsEliminar(nodo->socket, &servidor->listaDataNodes);
 	listaSocketsEliminar(nodo->socket, &servidor->listaMaster);
 	nodo->estado = DESACTIVADO;
+	nodo->socket = ERROR;
 	imprimirMensajeUno(archivoLog, AMARILLO"[CONEXION] %s desconectado"BLANCO, nodo->nombre);
 }
 
-void servidorControlarFinalizacionDataNode(Nodo* nodo, Servidor* servidor) {
+void servidorControlarFinalizacionDataNode(Servidor* servidor, Nodo* nodo) {
 	if(estadoFileSystemIgualA(ESTABLE))
-		servidorDesactivarDataNode(nodo, servidor);
+		servidorDesactivarDataNode(servidor, nodo);
 	else
 		nodoDestruirDeLista(nodo);
 }
@@ -350,9 +344,9 @@ void servidorFinalizarDataNode(Servidor* servidor, Socket unSocket) {
 	mutexBloquear(mutexTarea);
 	Nodo* nodo = nodoBuscarPorSocket(unSocket);
 	if(estadoEjecucionIgualA(NORMAL))
-		servidorDesactivarDataNode(nodo, servidor);
+		servidorDesactivarDataNode(servidor, nodo);
 	else
-		servidorControlarFinalizacionDataNode(nodo, servidor);
+		servidorControlarFinalizacionDataNode(servidor, nodo);
 	mutexDesbloquear(mutexTarea);
 }
 
@@ -1995,6 +1989,12 @@ bool archivoTodosDisponibles() {
 	return resultado;
 }
 
+void archivoDestruirLista() {
+	mutexBloquear(mutexListaArchivos);
+	listaDestruirConElementos(listaArchivos, (Puntero)archivoDestruir);
+	mutexDesbloquear(mutexListaArchivos);
+}
+
 //--------------------------------------- Funciones de Nodo -------------------------------------
 
 Nodo* nodoCrear(Puntero datos, Socket nuevoSocket) {
@@ -2276,6 +2276,30 @@ void nodoDestruirDeLista(Nodo* nodo) {
 	mutexDesbloquear(mutexListaNodos);
 }
 
+void nodoDestruirLista() {
+	mutexBloquear(mutexListaNodos);
+	listaDestruirConElementos(listaNodos, (Puntero)nodoDestruir);
+	mutexDesbloquear(mutexListaNodos);
+}
+
+void nodoOrdenarListaPorActividad() {
+	mutexBloquear(mutexListaNodos);
+	listaOrdenar(listaNodos, (Puntero)nodoOrdenarPorActividad);
+	mutexDesbloquear(mutexListaNodos);
+}
+
+bool nodoHayAlgunoDisponible() {
+	mutexBloquear(mutexListaNodos);
+	int resultado = listaCumpleAlguno(listaNodos, (Puntero)nodoDisponible);
+	mutexDesbloquear(mutexListaNodos);
+	return resultado;
+}
+
+void nodoAceptar(Nodo* nodo) {
+	mensajeEnviar(nodo->socket, ACEPTAR_NODO, &nodo->socket, sizeof(Socket)); //TODO debe ser nulo el msj, solo me interesa la operacion
+	imprimirMensajeUno(archivoLog, AMARILLO"[CONEXION] %s conectado"BLANCO, nodo->nombre);
+}
+
 //--------------------------------------- Funciones de Bloque-------------------------------------
 
 Bloque* bloqueCrear(int bytes, int numero) {
@@ -2296,6 +2320,7 @@ int bloqueEnviarANodo(Bloque* bloque, Nodo* nodo, String buffer) {
 	bloqueCopiarEnNodo(bloque, nodo, numeroBloqueNodo);
 	BloqueNodo* bloqueNodo = bloqueNodoCrear(numeroBloqueNodo, buffer, BLOQUE);
 	mensajeEnviar(nodo->socket, ESCRIBIR_BLOQUE, bloqueNodo, sizeof(Entero)+BLOQUE);
+	nodo->actividadesRealizadas++;
 	memoriaLiberar(bloqueNodo);
 	return numeroBloqueNodo;
 }
@@ -2313,42 +2338,36 @@ bool bloqueOrdenarPorNumero(Bloque* unBloque, Bloque* otroBloque) {
 }
 
 int bloqueEnviarCopiasANodos(Bloque* bloque, String buffer) {
-	mutexBloquear(mutexRuta);
 	int copiasEnviadas = 0;
-	int indice;
-	mutexBloquear(mutexListaNodos);
-	listaOrdenar(listaNodos, (Puntero)nodoOrdenarPorActividad);
-	mutexDesbloquear(mutexListaNodos);
+	int indice = 0;
+
+	bool bloqueForzarCopiado() {
+		return indice == (nodoCantidadNodos()-1) && nodoHayAlgunoDisponible() && copiasEnviadas < MAX_COPIAS;
+	}
+
+	mutexBloquear(mutexTarea);
+	nodoOrdenarListaPorActividad();
 	for(indice = 0; indice < nodoCantidadNodos() && copiasEnviadas < MAX_COPIAS; indice++) {
 		Nodo* nodo = nodoObtener(indice);
 		if(nodoDisponible(nodo)) {
-			printf("ENTRE Y EL ESTADO SIEMPRE DEBERIA SER 1 = %i\n", nodo->estado);
-			bloqueEnviarANodo(bloque, nodo, buffer);
-			copiasEnviadas++;
-			nodo->actividadesRealizadas++;
-		}
-	}
-	if(copiasEnviadas < MAX_COPIAS) {
-		mutexBloquear(mutexListaNodos);
-		Nodo* nodo = listaBuscar(listaNodos, (Puntero)nodoDisponible);
-		mutexDesbloquear(mutexListaNodos);
-		if(nodo != NULL) {
-			printf("ENTRE Y EL ESTADO SIEMPRE DEBERIA SER 1 = %i\n", nodo->estado);
 			bloqueEnviarANodo(bloque, nodo, buffer);
 			copiasEnviadas++;
 		}
-
+		if(bloqueForzarCopiado()) {
+			nodoOrdenarListaPorActividad();
+			indice = -1;
+		}
 	}
-	mutexDesbloquear(mutexRuta);
+	mutexDesbloquear(mutexTarea);
 	if(copiasEnviadas == 0) {
-		imprimirMensajeUno(archivoLog, "[ERROR] El bloque N°%i no pudo copiarse en ningun Nodo, se aborta la operacion", (int*)bloque->numeroBloque);
+		imprimirMensajeUno(archivoLog, "[ERROR] El bloque N°%i no pudo copiarse en ningun Nodo", (int*)bloque->numeroBloque);
 		return ERROR;
 	}
 	if(copiasEnviadas < MAX_COPIAS) {
-		//imprimirMensajeDos(archivoLog, "[AVISO] El bloque N°%i tiene menos copias que las establecidas (%i)", (int*)bloque->numeroBloque, (int*)MAX_COPIAS);
-		return 0;
+		imprimirMensajeDos(archivoLog, "[AVISO] El bloque N°%i no pudo copiarse %i veces ", (int*)bloque->numeroBloque, (int*)MAX_COPIAS);
+		return NULO;
 	}
-	return 0;
+	return NULO;
 }
 
 void bloqueCopiar(Puntero datos) {

@@ -236,12 +236,11 @@ void servidorReconectarDataNode(Servidor* servidor, Nodo* nodoTemporal);
 bool nodoEsNuevo(Nodo* nuevoNodo);
 void servidorControlarDataNode(Servidor* servidor, Nodo* nodoTemporal);
 void servidorRechazarDataNode(Nodo* nuevoNodo);
-void servidorAvisarDataNode(Nodo* nodo);
 void servidorRegistrarDataNode(Servidor* servidor, Nodo* nuevoNodo);
 void servidorAdmitirDataNode(Servidor* servidor, Nodo* nuevoNodo);
 void servidorAceptarReconexionDataNode(Servidor* servidor, Nodo* nuevoNodo);
 void servidorAceptarDataNode(Servidor* servidor, Nodo* nodoTemporal);
-void servidorDesactivarDataNode(Nodo* nodo, Servidor* servidor);
+void servidorDesactivarDataNode(Servidor* servidor, Nodo* nodo);
 
 void servidorSolicitudYama(Servidor* servidor, Socket unSocket);
 void servidorFinalizarYama();
@@ -250,6 +249,7 @@ void servidorMensajeYama();
 void servidorSolicitudWorker(Servidor* servidor, Socket unSocket);
 void servidorFinalizarWorker(Servidor* servidor, Socket unSocket);
 void servidorMensajeWorker();
+
 //--------------------------------------- Funciones de Socket-------------------------------------
 
 bool socketEsListenerYama(Servidor* servidor, Socket unSocket);
@@ -388,6 +388,7 @@ void archivoCrearLista();
 void archivoAgregar(Archivo* archivo);
 int archivoCantidad();
 bool archivoTodosDisponibles();
+void archivoDestruirLista();
 
 //--------------------------------------- Funciones de Nodo -------------------------------------
 
@@ -418,6 +419,10 @@ Nodo* nodoActualizar(Nodo* nodoTemporal);
 bool nodoInvalido(Nodo* nodoTemporal);
 bool nodoEstaConectado(Nodo* nuevoNodo);
 void nodoDestruirDeLista(Nodo* nodo);
+void nodoDestruirLista();
+void nodoOrdenarListaPorActividad();
+bool nodoHayAlgunoDisponible();
+void nodoAceptar(Nodo* nodo);
 
 //--------------------------------------- Funciones de Bloque -------------------------------------
 
