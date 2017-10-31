@@ -62,7 +62,6 @@ void configurar(){
 	char* campos[8] = {"IP_PROPIO","PUERTO_MASTER","PUERTO_ERRORES","IP_FILESYSTEM","PUERTO_FILESYSTEM","RETARDO_PLANIFICACION","ALGORITMO_BALANCEO","DISPONIBILIDAD_BASE"};
 	ArchivoConfig archivoConfig = archivoConfigCrear(RUTA_CONFIG, campos);
 	stringCopiar(configuracion->puertoMaster, archivoConfigStringDe(archivoConfig, "PUERTO_MASTER"));
-	stringCopiar(configuracion->puertoErrores,archivoConfigStringDe(archivoConfig,"PUERTO_ERRORES"));
 	stringCopiar(configuracion->ipFileSystem, archivoConfigStringDe(archivoConfig, "IP_FILESYSTEM"));
 	stringCopiar(configuracion->puertoFileSystem, archivoConfigStringDe(archivoConfig, "PUERTO_FILESYSTEM"));
 	configuracion->retardoPlanificacion = archivoConfigEnteroDe(archivoConfig, "RETARDO_PLANIFICACION");
@@ -84,7 +83,6 @@ void yamaAtender() {
 
 	imprimirMensajeUno(archivoLog, "[CONEXION] Esperando conexiones de un Master (Puerto %s)", configuracion->puertoMaster);
 	servidor->listenerMaster = socketCrearListener(configuracion->puertoMaster);
-	servidor->listenerErrores=socketCrearListener(configuracion->puertoErrores);
 	listaSocketsAgregar(servidor->listenerMaster, &servidor->listaMaster);
 	listaSocketsAgregar(servidor->fileSystem,&servidor->listaMaster);
 	void servidorControlarMaximoSocket(Socket unSocket) {
@@ -346,10 +344,6 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 				abortarJob();
 				return;
 			}
-			Socket respuesta=socketAceptar(servidor->listenerErrores,ID_MASTER);
-			//debería usar una ID especifica aca?
-			//uso un listener aparte porque si uso el comun, y justo se conecta un
-			//master cuando corre este accept pasan cosas malas
 			Entrada alternativa;
 			darDatosEntrada(&alternativa);
 			alternativa.nodo=entradaA->nodoAlt;//deep?
@@ -358,13 +352,12 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 			memcpy(dato,&alternativa.nodo,DIRSIZE);
 			memcpy(dato+DIRSIZE,&alternativa.bloque,INTSIZE);
 			memcpy(dato+DIRSIZE+INTSIZE,&alternativa.bytes,INTSIZE);
-			mensajeEnviar(respuesta,Transformacion,dato,sizeof dato);
+			mensajeEnviar(alternativa.masterid,Transformacion,dato,sizeof dato);
 			list_addM(tablaEstados,&alternativa,sizeof(Entrada));
 			bool buscarError(Entrada* entrada){
 				return entrada->estado==Error;
 			}
 			list_add(tablaUsados,list_remove_by_condition(tablaEstados,buscarError));//mutex
-			socketCerrar(respuesta);
 		}else{
 			abortarJob();
 		}

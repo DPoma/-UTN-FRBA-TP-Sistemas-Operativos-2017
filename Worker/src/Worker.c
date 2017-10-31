@@ -29,7 +29,7 @@ void workerCrearHijo(Socket unSocket) {
 	int sizeCodigo;
 	char* origen;
 	int sizeOrigen;
-	char* destino;
+	char* destino; //los temporales siempre miden 12, le podes mandar un char[12] aca y listo
 	int sizeDestino;
 	switch(mensaje->header.operacion){
 			case -1:
@@ -42,6 +42,24 @@ void workerCrearHijo(Socket unSocket) {
 				int origenB; //si el origen es un numero de bloque esto lo facilitaria, revisar
 				memcpy(&sizeCodigo, mensaje->datos, sizeof(int32_t));
 				memcpy(&codigo,mensaje->datos + sizeof(int32_t), sizeCodigo);
+				/*
+				como esta armado master ahora primero te manda solo el script
+				de transformacion, y despues te va tirando todos los
+				bloques uno por uno (suponiendo que haya mas de un bloque
+				en un nodo que te tenga que mandar)
+				Si lo seguimos asi, en esta parte del codigo tendrias que
+				recibir los bloques y forkear devuelta por cada uno,
+				algo como
+
+				while(true){
+					Mensaje* mensaje = mensajeRecibir(unSocket);
+					if(mensaje->operacion==EXITO)
+						break;
+					//hacer fork
+					}
+				}
+				y en cada proceso hijo recien harias la transformacion
+				*/
 				memcpy(&origen,mensaje->datos + sizeof(int32_t)+sizeCodigo, sizeof(int32_t));
 				memcpy(&sizeDestino, mensaje->datos + sizeof(int32_t)*2 + sizeCodigo , sizeof(int32_t));
 				memcpy(&destino,mensaje->datos + sizeof(int32_t)*3+sizeCodigo, sizeDestino);
