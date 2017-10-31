@@ -205,7 +205,7 @@ void configuracionIniciar();
 
 //--------------------------------------- Funciones de Servidor -------------------------------------
 
-void servidorInicializar(Servidor* servidor);
+void servidorIniciar(Servidor* servidor);
 void servidorFinalizar(Servidor* servidor);
 bool servidorCantidadSockets(Servidor* servidor);
 void servidorIniciarListaSelect(Servidor* servidor);
@@ -220,11 +220,15 @@ void servidorActivarListenerWorker(Servidor* servidor);
 void servidorActivarListeners(Servidor* servidor);
 void servidorAtenderSolicitudes(Servidor* servidor);
 void servidorAceptarConexion(Servidor* servidor, Socket unSocket);
-void servidorFinalizarProceso(Servidor* servidor, Socket unSocket);
 void servidorLimpiarListas(Servidor* servidor);
-void servidorRegistrarDataNode(Servidor* servidor, Socket nuevoSocket);
+int servidorRegistrarProceso(Servidor* servidor, Socket unSocket);
+int servidorAtenderSolicitud(Servidor* servidor, Socket unSocket);
+int servidorAtenderSocket(Servidor* servidor, Socket unSocket);
+
+int servidorRegistrarDataNode(Servidor* servidor, Socket unSocket);
+void servidorAtenderDataNode(Servidor* servidor, Socket nuevoSocket);
 void servidorFinalizarDataNode(Servidor* servidor, Socket unSocket);
-void servidorMensajeDataNode(Mensaje* mensaje, Socket unSocket, Servidor* servidor);
+void servidorMensajeDataNode(Servidor* servidor, Mensaje* mensaje, Socket unSocket);
 void servidorReconectarDataNode(Servidor* servidor, Nodo* nodoTemporal);
 bool servidorNodoEsNuevo(Nodo* nuevoNodo);
 void servidorRevisarDataNode(Servidor* servidor, Nodo* nodoTemporal);
@@ -234,11 +238,14 @@ void servidorAceptarDataNode(Servidor* servidor, Nodo* nuevoNodo);
 void servidorAceptarNuevoDataNode(Servidor* servidor, Nodo* nuevoNodo);
 void servidorAceptarReconexionDataNode(Servidor* servidor, Nodo* nuevoNodo);
 void servidorHabilitarNodo(Servidor* servidor, Nodo* nodoTemporal);
+
 void servidorRegistrarYama(Servidor* servidor, Socket unSocket);
 void servidorFinalizarYama();
+void servidorMensajeYama();
+
 void servidorRegistrarWorker(Servidor* servidor, Socket unSocket);
 void servidorFinalizarWorker(Servidor* servidor, Socket unSocket);
-
+void servidorMensajeWorker();
 //--------------------------------------- Funciones de Socket-------------------------------------
 
 bool socketEsListenerYama(Servidor* servidor, Socket unSocket);

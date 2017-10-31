@@ -36,7 +36,7 @@ void fileSystemIniciar(String flag) {
 	mutexDesbloquear(mutexListaNodos);
 	if(stringIguales(flag, FLAG_C)) {
 		metadataIniciar();
-		imprimirMensaje(archivoLog, AMARILLO"[AVISO] Para pasar a un estado estable primero ""debe formatear el File System"BLANCO);
+		imprimirMensaje(archivoLog, AMARILLO"[AVISO] Para pasar a un estado estable primero debe formatear el File System"BLANCO);
 	}
 	else
 		metadataRecuperar();
@@ -48,7 +48,7 @@ void fileSystemCrearConsola() {
 
 void fileSystemAtenderProcesos() {
 	Servidor* servidor = memoriaAlocar(sizeof(Servidor));
-	servidorInicializar(servidor);
+	servidorIniciar(servidor);
 	while(estadoControlIgualA(ACTIVADO))
 		servidorAtenderSolicitudes(servidor);
 	servidorFinalizar(servidor);
@@ -143,34 +143,10 @@ void configuracionDestruirRutas() {
 
 //--------------------------------------- Funciones de Servidor -------------------------------------
 
-void servidorInicializar(Servidor* servidor) {
+void servidorIniciar(Servidor* servidor) {
 	servidorIniciarContadorSocket(servidor);
 	servidorLimpiarListas(servidor);
 	servidorActivarListeners(servidor);
-}
-
-void servidorAtenderSolicitudes(Servidor* servidor) {
-	servidorIniciarListaSelect(servidor);
-	servidorEsperarSolicitud(servidor);
-	Socket unSocket;
-	for(unSocket = 0; unSocket <= servidor->contadorSocket ; unSocket++)
-		if (socketRealizoSolicitud(servidor, unSocket)) {
-			if(socketEsListener(servidor, unSocket)) {
-				Socket nuevoSocket;
-				if(socketEsListenerDataNode(servidor, unSocket)) {
-					nuevoSocket = socketAceptar(unSocket, ID_DATANODE);
-					if(estadoControlIgualA(DESACTIVADO))
-						break;
-					servidorRegistrarDataNode(servidor, nuevoSocket);
-				}
-				else if(socketEsListenerWorker(servidor, unSocket))
-					servidorRegistrarWorker(servidor, unSocket);
-				else
-					servidorRegistrarYama(servidor, unSocket);
-			}
-			else
-				servidorRecibirMensaje(servidor, unSocket);
-		}
 }
 
 void servidorFinalizar(Servidor* servidor) {
@@ -234,33 +210,61 @@ void servidorActivarListenerWorker(Servidor* servidor) {
 	servidorControlarContadorSocket(servidor, servidor->listenerWorker);
 }
 
+void servidorAtenderSolicitudes(Servidor* servidor) {
+	servidorIniciarListaSelect(servidor);
+	servidorEsperarSolicitud(servidor);
+	Socket unSocket;
+	for(unSocket = 0; unSocket <= servidor->contadorSocket ; unSocket++)
+		if(servidorAtenderSocket(servidor, unSocket) == ID_EXIT)
+			break;
+}
+
+int servidorAtenderSocket(Servidor* servidor, Socket unSocket) {
+	if(socketRealizoSolicitud(servidor, unSocket))
+		return servidorAtenderSolicitud(servidor, unSocket);
+	return NULO;
+}
+
+int servidorAtenderSolicitud(Servidor* servidor, Socket unSocket) {
+	if(socketEsListener(servidor, unSocket))
+		return servidorRegistrarProceso(servidor, unSocket);
+	else
+		servidorRecibirMensaje(servidor, unSocket);
+	return NULO;
+}
+
+int servidorRegistrarProceso(Servidor* servidor, Socket unSocket) {
+	if(socketEsListenerDataNode(servidor, unSocket))
+		return servidorRegistrarDataNode(servidor, unSocket);
+	else if(socketEsListenerYama(servidor, unSocket))
+		servidorRegistrarYama(servidor, unSocket);
+	else
+		servidorRegistrarWorker(servidor, unSocket);
+	return NULO;
+}
+
 void servidorRecibirMensaje(Servidor* servidor, Socket unSocket) {
 	Mensaje* mensaje = mensajeRecibir(unSocket);
-	if(mensajeDesconexion(mensaje))
-		servidorFinalizarConexion(servidor, unSocket);
-	else {
-		servidorMensajeDataNode(mensaje, unSocket, servidor);
-	}
-	mensajeDestruir(mensaje);
-}
-
-void servidorFinalizarConexion(Servidor* servidor, Socket unSocket) {
-
-	servidorFinalizarProceso(servidor, unSocket);
-}
-
-void servidorFinalizarProceso(Servidor* servidor, Socket unSocket) {
 	if(socketEsDataNode(servidor, unSocket))
-		servidorFinalizarDataNode(servidor, unSocket);
-	else if(socketEsWorker(servidor, unSocket))
-		servidorFinalizarWorker(servidor, unSocket);
+		servidorMensajeDataNode(servidor, mensaje, unSocket);
+	else if(socketEsYama(servidor, unSocket))
+		servidorMensajeYama();
 	else
-		servidorFinalizarYama();
+		servidorMensajeWorker();
+	mensajeDestruir(mensaje);
 }
 
 //--------------------------------------- Servidor Data Node -------------------------------------
 
-void servidorRegistrarDataNode(Servidor* servidor, Socket nuevoSocket) {
+int servidorRegistrarDataNode(Servidor* servidor, Socket unSocket) {
+	Socket nuevoSocket = socketAceptar(unSocket, ID_DATANODE);
+	if(estadoControlIgualA(ACTIVADO))
+		servidorAtenderDataNode(servidor, nuevoSocket);
+	else
+		return ID_EXIT;
+	return NULO;
+}
+void servidorAtenderDataNode(Servidor* servidor, Socket nuevoSocket) {
 	Mensaje* mensaje = mensajeRecibir(nuevoSocket);
 	Nodo* nodoTemporal = nodoCrear(mensaje->datos, nuevoSocket);
 	if(estadoEjecucionIgualA(NORMAL))
@@ -359,7 +363,7 @@ void servidorAceptarDataNode(Servidor* servidor, Nodo* nodo) {
 	servidorAvisarDataNode(nodo);
 }
 
-void servidorMensajeDataNode(Mensaje* mensaje, Socket unSocket, Servidor* servidor) {
+void servidorMensajeDataNode(Servidor* servidor, Mensaje* mensaje, Socket unSocket) {
 	switch(mensaje->header.operacion) {
 	case LEER_BLOQUE: bloqueLeer(mensaje->datos); break;
 	case COPIAR_BLOQUE: bloqueCopiar(mensaje->datos); break;
@@ -1989,7 +1993,6 @@ int archivoCantidadBloques(String ruta) {
 }
 
 
-
 bool archivoDisponible(Archivo* archivo) {
 	return listaCumplenTodos(archivo->listaBloques, (Puntero)bloqueDisponible);
 }
@@ -2260,6 +2263,12 @@ bool nodoConectado(Nodo* nodo) {
 	return nodo->estado == ACTIVADO;
 }
 
+
+bool nodoDisponible(Nodo* nodo) {
+	return nodoConectado(nodo) &&
+			nodoTieneBloquesLibres(nodo);
+}
+
 //--------------------------------------- Funciones de Bloque-------------------------------------
 
 Bloque* bloqueCrear(int bytes, int numero) {
@@ -2294,11 +2303,6 @@ void bloqueCopiarEnNodo(Bloque* bloque, Nodo* nodo, Entero numeroBloqueNodo) {
 
 bool bloqueOrdenarPorNumero(Bloque* unBloque, Bloque* otroBloque) {
 	return unBloque->numeroBloque < otroBloque->numeroBloque;
-}
-
-bool nodoDisponible(Nodo* nodo) {
-	return nodoConectado(nodo) &&
-			nodoTieneBloquesLibres(nodo);
 }
 
 int bloqueEnviarCopiasANodos(Bloque* bloque, String buffer) {
@@ -2394,8 +2398,6 @@ void bloqueCopiarTexto(Puntero datos) {
 	fileCerrar(file);
 	semaforoSignal(semaforoMD5);
 }
-
-
 
 bool bloqueDisponible(Bloque* bloque) {
 	return listaCumpleAlguno(bloque->listaCopias, (Puntero)copiaDisponible);
@@ -2553,6 +2555,8 @@ bool rutaEsNumero(String ruta) {
 	return true;
 }
 
+//--------------------------------------- Funciones de Estado ------------------------------------
+
 bool estadoEjecucionIgualA(int estado) {
 	mutexBloquear(mutexEstadoEjecucion);
 	int resultado = estadoEjecucion == estado;
@@ -2573,6 +2577,8 @@ bool estadoControlIgualA(int estado) {
 	mutexDesbloquear(mutexEstadoControl);
 	return resultado;
 }
+
+//--------------------------------------- Funciones de Bitmap de Directorios------------------------------------
 
 void bitmapDirectoriosDestruir() {
 	mutexBloquear(mutexBitmapDirectorios);
@@ -2598,6 +2604,8 @@ void bitmapDirectoriosOcuparBit(int posicion) {
 	bitmapOcuparBit(bitmapDirectorios, posicion);
 	mutexDesbloquear(mutexBitmapDirectorios);
 }
+
+//--------------------------------------- Funciones de Semaforo ------------------------------------
 
 void semaforosCrear() {
 	semaforoMD5 = memoriaAlocar(sizeof(Semaforo));
