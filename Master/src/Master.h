@@ -43,6 +43,14 @@ typedef struct{
 }WorkerTransformacion;
 WorkerTransformacion alternativo;
 
+typedef struct{
+	Dir dir;
+	Entero list_size;
+	Lista tmps;
+	char* nombretemp;
+}WorkerReduccion;
+
+
 Mutex errorBloque;
 Mutex recepcionAlternativo;
 
@@ -53,6 +61,9 @@ Socket socketYAMA;
 Socket socketWorker;
 int estadoMaster;
 
+FILE* scriptTransformacion;
+FILE* scriptReductor;
+
 Configuracion* configuracionLeerArchivo(ArchivoConfig archivoConfig);
 void archivoConfigObtenerCampos();
 void establecerConexiones();
@@ -62,6 +73,7 @@ void funcionSenial();
 
 int hayWorkersParaConectar();
 WorkerTransformacion* deserializarTransformacion(Mensaje* mensaje);
+WorkerReduccion* deserializarReduccion(Mensaje* mensaje);
 void confirmacionWorker(Socket unSocket);
 void serializarYEnviar(Entero nroBloque, Entero nroBytes, char* nombretemp, Socket unSocket);
 void establecerConexionConWorker(Lista);
@@ -69,7 +81,7 @@ void transformacion(Mensaje* mensaje);
 Lista workersAConectar();
 ListaSockets sockets();
 void serializarYEnviar();
-void enviarScript(Socket unSocket, char* ruta, Entero operacion);
+void enviarScript(Socket unSocket, FILE* script, Entero operacion);
 
 
 bool masterActivado();

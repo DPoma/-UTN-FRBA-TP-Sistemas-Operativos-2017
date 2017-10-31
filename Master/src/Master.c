@@ -86,7 +86,7 @@ WorkerTransformacion* deserializarTransformacion(Mensaje* mensaje){
 	char* nombretemporal;
 	WorkerTransformacion* wt= malloc(size);
 
-	memcpy(&numeroip, mensaje->datos,20);
+	memcpy(&numeroip, mensaje->datos,20);// habria que cambiarlo? porque el 20 esta harcodeado
 	memcpy(&numeropuerto, mensaje->datos + 20, sizeof(int));
 	memcpy(&numeroBloque, mensaje->datos + sizeof(int)+20 , sizeof(int));
 	memcpy(&numeroBytes, mensaje->datos + sizeof(int)*2 + 20 , sizeof(int));
@@ -96,11 +96,38 @@ WorkerTransformacion* deserializarTransformacion(Mensaje* mensaje){
 	wt->dir.port = numeropuerto;
 	wt->bloque = numeropuerto;
 	wt->bytes = numeroBytes;
-	wt->temp = nombretemporal;
+	strcpy(wt->temp, nombretemporal);
 
 	return wt;
 
 }
+
+WorkerReduccion* deserializarReduccion(Mensaje* mensaje){
+	int size = mensaje->header.tamanio;
+	char* numeroip;
+	int numeropuerto;
+	int tamaniolista;
+	Lista list;
+	char* nombretemporalreduccion;
+	WorkerReduccion* wr = malloc(size);
+
+	memcpy(&numeroip, mensaje->datos, 20);
+	memcpy(&numeropuerto,mensaje->datos + 20, sizeof(int));
+	memcpy(&tamaniolista, mensaje->datos + 20 + sizeof(int), sizeof(int));
+	memcpy(&list, mensaje->datos + 20 + sizeof(int)*2 , tamaniolista);// no se si se puede esto
+	memcpy(&nombretemporalreduccion, mensaje->datos + 20 + sizeof(int)*2 + tamaniolista, 12);
+
+	strcpy(wr->dir.ip, numeroip);
+	wr->dir.port = numeropuerto;
+	wr->list_size = tamaniolista;
+	wr->tmps = list;
+	strcpy(wr->nombretemp,nombretemporalreduccion);
+
+	return wr;
+
+}
+
+
 
 Lista workersAConectar(){
 	Lista workers = list_create();
@@ -155,15 +182,13 @@ void serializarYEnviar(Entero nroBloque, Entero nroBytes, char* nombretemp, Sock
 
 }
 
-void enviarScript(Socket unSocket, char* ruta, Entero operacion){//operacion para ver si es el script transformacion o reductor
+void enviarScript(Socket unSocket, FILE* script, Entero operacion){//operacion para ver si es el script transformacion o reductor
 	char* buffer;
 	int len;
 	char* data;
 
-	FILE* f =fopen(ruta, "r+");
-
-	while(!feof(f)){
-	 fread(&buffer, sizeof(char), 1, f);
+	while(!feof(script)){
+	 fread(&buffer, sizeof(char), 1, script);
 
 	}
 
@@ -176,7 +201,7 @@ void enviarScript(Socket unSocket, char* ruta, Entero operacion){//operacion par
 
 	mensajeEnviar(unSocket,operacion, data, len);
 
-	fclose(f);
+
 }
 
 
@@ -186,7 +211,8 @@ void establecerConexionConWorker(Lista bloques){
 
 	socketWorker=socketCrearCliente(dir->dir.ip,string_itoa(dir->dir.port), ID_MASTER);
 
-	//enviar codigo de transformacion
+	enviarScript(socketWorker, scriptTransformacion, SCRIPT_TRANSFORMACION);
+	enviarScript(socketWorker, scriptReductor, SCRIPT_REDUCTOR);
 
 	int i;
 	enviarBloques:
@@ -219,7 +245,11 @@ void establecerConexionConWorker(Lista bloques){
 }
 
 
-void reduccionLocal(){
+void reduccionLocal(Mensaje* m){
+	//WorkerReduccion* wr= deserializarReduccion(m);
+
+	//conectar con worker
+
 
 }
 
@@ -235,7 +265,6 @@ int main(int argc,char** argv) {
 //		return -1;
 //	}
 
-	//FILE* de transformacion global
 
 	pantallaLimpiar();
 	leerArchivoConfig();
@@ -248,6 +277,9 @@ int main(int argc,char** argv) {
 
 	mutexIniciar(&errorBloque);
 	mutexIniciar(&recepcionAlternativo); //necesito que arranque en 0 este
+
+	scriptTransformacion = fopen(argv[1],"r+");
+	scriptReductor = fopen(argv[2], "r+");
 
 
 	mensajeEnviar(socketYAMA,Solicitud,argv[3],strlen(argv[3]));
@@ -321,6 +353,8 @@ int main(int argc,char** argv) {
 	archivoLogDestruir(archivoLog);
 	memoriaLiberar(configuracion);
 
+	fclose(scriptReductor);
+	fclose(scriptTransformacion);
 
 	return EXIT_SUCCESS;
 
