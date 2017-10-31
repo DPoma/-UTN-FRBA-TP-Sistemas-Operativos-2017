@@ -515,6 +515,10 @@ int consolaIdentificarComando(String comando) {
 		return ID_INFO;
 	if(stringIguales(comando, RENAME))
 		return ID_RENAME;
+	if(stringIguales(comando, NODES))
+		return ID_NODES;
+	if(stringIguales(comando, HELP))
+		return ID_HELP;
 	if(stringIguales(comando, EXIT))
 		return ID_EXIT;
 	else
@@ -546,7 +550,9 @@ bool consolaComandoExiste(String comando) {
 			consolaComandoTipoDos(comando) ||
 			consolaComandoTipoTres(comando) ||
 			stringIguales(comando, FORMAT) ||
-			stringIguales(comando, EXIT);
+			stringIguales(comando, EXIT) ||
+			stringIguales(comando, HELP) ||
+			stringIguales(comando, NODES);
 }
 
 bool consolaValidarComandoSinTipo(String* subcadenas) {
@@ -695,6 +701,8 @@ void consolaEjecutarComando(Comando* comando) {
 		case ID_MD5: comandoObtenerMD5DeArchivo(comando); break;
 		case ID_LS: comandoListarDirectorio(comando); break;
 		case ID_INFO: comandoInformacionArchivo(comando); break;
+		case ID_NODES: comandoInformacionNodos(); break;
+		case ID_HELP: comandoAyuda(); break;
 		case ID_EXIT: comandoFinalizar();break;
 		default: comandoError(); break;
 	}
@@ -1111,11 +1119,9 @@ void comandoCopiarBloque(Comando* comando) {
 		return;
 	}
 	mutexDesbloquear(mutexBloque);
-	semaforoWait(semaforoTarea); //SI ESTA CONECTADO SE COPIA SI O SI
 	if(!nodoConectado(nodoBuffer)) {
 		mutexDesbloquear(mutexNodo);
-		semaforoSignal(semaforoTarea);
-		imprimirMensaje(archivoLog, "[ERROR] El nodo que va a guardar la nueva copia no esta disponible");
+		imprimirMensaje(archivoLog, "[ERROR] El nodo que va a guardar la nueva copia no esta conectado");
 		return;
 	}
 	int indice;
@@ -1127,15 +1133,17 @@ void comandoCopiarBloque(Comando* comando) {
 		mutexBloquear(mutexBloque);
 		Copia* copia = listaObtenerElemento(bloqueBuffer->listaCopias, indice);
 		mutexDesbloquear(mutexBloque);
+		semaforoWait(semaforoTarea);
 		Nodo* nodoConBloque = nodoBuscar(copia->nombreNodo);
 		if(nodoConectado(nodoConBloque)) {
 			mensajeEnviar(nodoConBloque->socket, COPIAR_BLOQUE, &copia->bloqueNodo, sizeof(Entero));
 			bloqueSinEnviar = false;
 		}
+		semaforoSignal(semaforoTarea);
 	}
 	if(bloqueSinEnviar) {
 		imprimirMensaje(archivoLog, "[ERROR] No hay nodos conectados para obtener la copia");
-		semaforoSignal(semaforoTarea);
+
 		return;
 	}
 
@@ -1156,16 +1164,16 @@ int comandoCopiarArchivoDeYamaFS(Comando* comando) {
 		imprimirMensaje(archivoLog, "[ERROR] El archivo no existe");
 		return ERROR;
 	}
+	if(!archivoDisponible(archivo)) {
+		imprimirMensaje(archivoLog, ROJO"[ERROR] El archivo no esta disponible"BLANCO);
+		return ERROR;
+	}
 	File file = fileAbrir(comando->argumentos[2], ESCRITURA);
 	if(file == NULL) {
 		imprimirMensaje(archivoLog, "[ERROR] La ruta es invalida");
 		return ERROR;
 	}
 	fileCerrar(file);
-	if(!archivoDisponible(archivo)) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] El archivo no esta disponible"BLANCO);
-		return ERROR;
-	}
 	mutexBloquear(mutexRuta);
 	stringCopiar(rutaBuffer, comando->argumentos[2]);
 	mutexDesbloquear(mutexRuta);
@@ -1195,7 +1203,8 @@ int comandoCopiarArchivoDeYamaFS(Comando* comando) {
 		}
 	}
 	nodoLimpiarActividades();
-	return 0;
+	imprimirMensajeDos(archivoLog, "[ARCHIVO] El archivo %s se copio en %s", archivo->nombre, comando->argumentos[2]);
+	return NULO;
 }
 
 void comandoMostrarArchivo(Comando* comando) {
@@ -1251,6 +1260,42 @@ void comandoFinalizar() {
 	 estadoControl = DESACTIVADO;
 	 mutexDesbloquear(mutexEstadoControl);
 	 socketCrearCliente(IP_LOCAL, configuracion->puertoDataNode, ID_DATANODE);
+}
+
+void comandoInformacionNodos() {
+	int indice;
+	for(indice = 0; indice < nodoCantidadNodos(); indice++) {
+		Nodo* nodo = nodoObtener(indice);
+		puts("------------------------------------------");
+		printf("Nombre: %s\n", nodo->nombre);
+		printf("IP: %s | Puerto: %s\n", nodo->ip, nodo->puerto);
+		printf("Bloques totales %i\n", nodo->bloquesTotales);
+		printf("Bloques libres %i\n", nodo->bloquesLibres);
+		if(nodoConectado(nodo))
+			puts("Estado: Conectado");
+		else
+			puts("Estado: Desconectado");
+	}
+}
+
+void comandoAyuda() {
+	puts("-------------------------------");
+	puts("1)  format | Formatea YamaFS");
+	puts("2)  mkdir <Path-dir> | Crea un directorio");
+	puts("3)  ls <Path-dir> | Lista un directorio");
+	puts("4)  rename <Path-dir> <Nuevo-nombre> | Renombra un archivo o directorio");
+	puts("5)  mv <Path-dir> <Path-nuevo-dir> | Renombra un archivo o directorio");
+	puts("6)  rm <Path-arch> | Elimina un archivo");
+	puts("7)  rm -b <Path-arch> <N°bloque> <N°copia> | Elimina un bloque de un archivo");
+	puts("8)  rm -d <Path-dir> | Elimina un directorio");
+	puts("9)  cpto <Path-Yama> <Path-FS> | Copia un archivo de YamaFS al FS local");
+	puts("10) cpfrom -t  <Path-arch-local> <Path-dir> | Copia un archivo de texto a YamaFS");
+	puts("11) cpfrom -b <Path-arch-local> <Path-dir> | Copia un archivo binario a YamaFS");
+	puts("12) md5 <Path-arch> | Retorna el MD5 del archivo");
+	puts("13) cat <Path-arch> | Muestra el contenido de un archivo");
+	puts("14) info <Path-Arch> | Muestra la informacion de un archivo");
+	puts("15) nodes | Muestra la informacion de los nodos");
+	puts("16) exit | Finaliza YamaFS");
 }
 
 void comandoError() {
@@ -1763,7 +1808,9 @@ int archivoAlmacenar(Comando* comando) {
 		memoriaLiberar(nombreArchivo);
 		return ERROR;
 	}
-	if(nodoBloquesLibres() < archivoCantidadBloques(comando->argumentos[2])) {
+	int cantidadBloques = nodoBloquesLibres();
+	int bloquesArchivo = archivoCantidadBloques(comando->argumentos[2]) * MAX_COPIAS;
+	if(cantidadBloques < bloquesArchivo) {
 		imprimirMensaje(archivoLog, "[ERROR] No hay suficientes bloques libres");
 		fileCerrar(file);
 		memoriaLiberar(nombreArchivo);
@@ -1859,11 +1906,13 @@ int archivoLeer(Comando* comando) {
 		for(numeroCopia=0; numeroCopia <listaCantidadElementos(bloque->listaCopias) && bloqueSinImprimir; numeroCopia++) {
 			Copia* copia = listaObtenerElemento(bloque->listaCopias, numeroCopia);
 			Nodo* nodo = nodoBuscar(copia->nombreNodo);
+			semaforoWait(semaforoTarea);
 			if(nodoConectado(nodo)) {
 				mensajeEnviar(nodo->socket, LEER_BLOQUE ,&copia->bloqueNodo, sizeof(Entero));
 				nodo->actividadesRealizadas++;
 				bloqueSinImprimir = false;
 			}
+			semaforoSignal(semaforoTarea);
 		}
 		if(bloqueSinImprimir) {
 			imprimirMensaje(archivoLog,"[ERROR] No hay nodos disponibles para obtener un bloque");
@@ -1953,7 +2002,7 @@ int archivoCantidadBloques(String ruta) {
 	struct stat informacionArchivo;
 	stat(ruta, &informacionArchivo);
 	int tamanioArchivo = informacionArchivo.st_size;
-	int cantidadBloques = (int)ceil((double)tamanioArchivo/(double)BLOQUE);
+	int cantidadBloques = (int)ceil((double)(tamanioArchivo)/(double)BLOQUE);
 	return cantidadBloques;
 }
 
@@ -2400,6 +2449,7 @@ void bloqueCopiar(Puntero datos) {
 
 void bloqueLeer(Puntero datos) {
 	printf("%s", (String)datos);
+
 }
 
 void bloqueCopiarBinario(Puntero datos) {
@@ -2409,7 +2459,6 @@ void bloqueCopiarBinario(Puntero datos) {
 	fwrite(datos, sizeof(char), BLOQUE, file);
 	fileCerrar(file);
 	semaforoSignal(semaforoTarea);
-
 }
 
 void bloqueCopiarTexto(Puntero datos) {
@@ -2679,10 +2728,10 @@ void semaforosDestruir() {
 	memoriaLiberar(mutexEstadoControl);
 }
 
-//TODO cpblock, cpto, md5, cpfrom, cat (md5 se traba)
-//TODO persistir siempre al final de un comando
-//TODO avisar que el archivo termino de copiarse
-//TODO si no esta disponible no deberia crear archivo en cpto
-//TODO info nodos, help y listar todos los archivos y directorios
-//TODO ver limit directorios
 
+//TODO el data bin cambia o solo cambia la primera vez (VER)
+//TODO cpblock, cpto, md5, cpfrom, cat (funcionan si no se matan los nodos)
+//TODO ver si hay que borrar todo con clean ya que luego tengo que tirar el format
+//TODO ver cpfrom cantidad de bloques nose si importa el numero de bloques
+//TODO si hay espacios para una copia de cada bloque se admite o no el archivo
+//TODO Esta prohibido dos copias en un mismo nodo
