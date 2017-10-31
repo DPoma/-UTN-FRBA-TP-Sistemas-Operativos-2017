@@ -183,16 +183,11 @@ void serializarYEnviar(Entero nroBloque, Entero nroBytes, char* nombretemp, Sock
 }
 
 void enviarScript(Socket unSocket, FILE* script, Entero operacion){//operacion para ver si es el script transformacion o reductor
-	char* buffer;
+	char* buffer = leerArchivo(script);
 	int len;
 	char* data;
 
-	while(!feof(script)){
-	 fread(&buffer, sizeof(char), 1, script);
-
-	}
-
-	len = strlen(buffer) + 1;
+	len = strlen(buffer); // ya esta el barra cero
 
 	data = malloc(len + sizeof(int));
 
