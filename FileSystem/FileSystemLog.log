@@ -1,14 +1,7 @@
-[INFO] 00:22:26:854 FileSystem/(14561:14561): [EJECUCION] Proceso File System inicializado
-[INFO] 00:22:26:915 FileSystem/(14561:14561): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 00:22:26:916 FileSystem/(14561:14561): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 00:22:26:917 FileSystem/(14561:14561): [CONEXION] Esperando conexiones de Workers (Puerto: 5080)
-[INFO] 00:22:26:918 FileSystem/(14561:14561): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
-[INFO] 00:22:27:797 FileSystem/(14561:14561): [33m[AVISO] Para pasar a un estado estable conecte los nodos necesarios[0m
-[INFO] 00:22:31:766 FileSystem/(14561:14561): [CONEXION] El NODO1 se ha conectado
-[INFO] 00:22:52:903 FileSystem/(14561:14561): [CONEXION] El NODO2 se ha conectado
-[INFO] 00:22:52:948 FileSystem/(14561:14561): [ESTADO] El File System se encuentra estable
-[INFO] 00:23:01:566 FileSystem/(14561:14561): [CONEXION] El NODO3 se ha conectado
-[INFO] 00:23:08:567 FileSystem/(14561:14565): [ARCHIVO] El archivo /gg ha sido eliminado
-[INFO] 00:23:17:589 FileSystem/(14561:14561): [CONEXION] El NODO3 se ha desconectado
-[INFO] 00:23:18:820 FileSystem/(14561:14561): [CONEXION] El NODO2 se ha desconectado
-[INFO] 00:23:21:710 FileSystem/(14561:14565): [ARCHIVO] El archivo /home/utnso/Escritorio/gg fue copiado en File System
+[INFO] 09:40:19:817 FileSystem/(4660:4660): [EJECUCION] Proceso File System inicializado
+[INFO] 09:40:19:877 FileSystem/(4660:4660): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 09:40:19:878 FileSystem/(4660:4660): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 09:40:19:878 FileSystem/(4660:4660): [CONEXION] Esperando conexiones de Workers (Puerto: 5080)
+[INFO] 09:40:19:879 FileSystem/(4660:4660): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
+[INFO] 09:40:20:719 FileSystem/(4660:4660): [33m[AVISO] Para pasar a un estado estable conecte los nodos necesarios[0m
+[INFO] 09:40:21:22 FileSystem/(4660:4660): [EJECUCION] Proceso File System finalizado

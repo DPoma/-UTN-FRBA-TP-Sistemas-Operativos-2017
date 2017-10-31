@@ -185,14 +185,17 @@ Mutex* mutexBitmapDirectorios;
 Mutex* mutexEstadoFileSystem;
 Mutex* mutexEstadoEjecucion;
 Mutex* mutexEstadoControl;
-Semaforo* semaforoMD5;
+Mutex* mutexTarea;
+Semaforo* semaforoCopia;
+Semaforo* semaforoFinal;
+
+
 //--------------------------------------- Funciones de File System -------------------------------------
 
 void fileSystemIniciar();
 void fileSystemCrearConsola();
 void fileSystemAtenderProcesos();
 void fileSystemFinalizar();
-bool fileSystemEstable();
 
 //--------------------------------------- Funciones de Configuracion -------------------------------------
 
@@ -212,7 +215,7 @@ void servidorIniciarListaSelect(Servidor* servidor);
 void servidorControlarContadorSocket(Servidor* servidor, Socket unSocket);
 void servidorEsperarSolicitud(Servidor* servidor);
 void servidorFinalizarConexion(Servidor* servidor, Socket unSocket);
-void servidorRecibirMensaje(Servidor* servidor, Socket unSocket);
+void servidorSolicitudMensaje(Servidor* servidor, Socket unSocket);
 void servidorIniciarContadorSocket(Servidor* servidor);
 void servidorActivarListenerYama(Servidor* servidor);
 void servidorActivarListenerDataNode(Servidor* servidor);
@@ -221,29 +224,30 @@ void servidorActivarListeners(Servidor* servidor);
 void servidorAtenderSolicitudes(Servidor* servidor);
 void servidorAceptarConexion(Servidor* servidor, Socket unSocket);
 void servidorLimpiarListas(Servidor* servidor);
-int servidorRegistrarProceso(Servidor* servidor, Socket unSocket);
+int servidorSolicitudProceso(Servidor* servidor, Socket unSocket);
 int servidorAtenderSolicitud(Servidor* servidor, Socket unSocket);
 int servidorAtenderSocket(Servidor* servidor, Socket unSocket);
 
-int servidorRegistrarDataNode(Servidor* servidor, Socket unSocket);
+int servidorSolicitudDataNode(Servidor* servidor, Socket unSocket);
 void servidorAtenderDataNode(Servidor* servidor, Socket nuevoSocket);
 void servidorFinalizarDataNode(Servidor* servidor, Socket unSocket);
 void servidorMensajeDataNode(Servidor* servidor, Mensaje* mensaje, Socket unSocket);
 void servidorReconectarDataNode(Servidor* servidor, Nodo* nodoTemporal);
-bool servidorNodoEsNuevo(Nodo* nuevoNodo);
-void servidorRevisarDataNode(Servidor* servidor, Nodo* nodoTemporal);
+bool nodoEsNuevo(Nodo* nuevoNodo);
+void servidorControlarDataNode(Servidor* servidor, Nodo* nodoTemporal);
 void servidorRechazarDataNode(Nodo* nuevoNodo);
 void servidorAvisarDataNode(Nodo* nodo);
-void servidorAceptarDataNode(Servidor* servidor, Nodo* nuevoNodo);
-void servidorAceptarNuevoDataNode(Servidor* servidor, Nodo* nuevoNodo);
+void servidorRegistrarDataNode(Servidor* servidor, Nodo* nuevoNodo);
+void servidorAdmitirDataNode(Servidor* servidor, Nodo* nuevoNodo);
 void servidorAceptarReconexionDataNode(Servidor* servidor, Nodo* nuevoNodo);
-void servidorHabilitarNodo(Servidor* servidor, Nodo* nodoTemporal);
+void servidorAceptarDataNode(Servidor* servidor, Nodo* nodoTemporal);
+void servidorDesactivarDataNode(Nodo* nodo, Servidor* servidor);
 
-void servidorRegistrarYama(Servidor* servidor, Socket unSocket);
+void servidorSolicitudYama(Servidor* servidor, Socket unSocket);
 void servidorFinalizarYama();
 void servidorMensajeYama();
 
-void servidorRegistrarWorker(Servidor* servidor, Socket unSocket);
+void servidorSolicitudWorker(Servidor* servidor, Socket unSocket);
 void servidorFinalizarWorker(Servidor* servidor, Socket unSocket);
 void servidorMensajeWorker();
 //--------------------------------------- Funciones de Socket-------------------------------------
@@ -383,6 +387,7 @@ Archivo* archivoObtener(int indice);
 void archivoCrearLista();
 void archivoAgregar(Archivo* archivo);
 int archivoCantidad();
+bool archivoTodosDisponibles();
 
 //--------------------------------------- Funciones de Nodo -------------------------------------
 
@@ -400,7 +405,6 @@ bool nodoCantidadBloquesLibres(Nodo* unNodo, Nodo* otroNodo);
 int nodoBuscarBloqueLibre(Nodo* nodo);
 Nodo* nodoBuscar(String nombre);
 void nodoRecuperarPersistenciaBitmap(Nodo* nodo);
-void nodoDesactivar(Nodo* nodo, Servidor* servidor);
 Nodo* nodoBuscarPorSocket(Socket unSocket);
 int nodoPosicionEnLista(Nodo* nodo);
 int nodoBloquesLibres();
@@ -410,6 +414,10 @@ bool nodoConectado(Nodo* nodo);
 Nodo* nodoObtener(int posicion);
 int nodoCantidadNodos();
 void nodoAgregar(Nodo* nodo);
+Nodo* nodoActualizar(Nodo* nodoTemporal);
+bool nodoInvalido(Nodo* nodoTemporal);
+bool nodoEstaConectado(Nodo* nuevoNodo);
+void nodoDestruirDeLista(Nodo* nodo);
 
 //--------------------------------------- Funciones de Bloque -------------------------------------
 

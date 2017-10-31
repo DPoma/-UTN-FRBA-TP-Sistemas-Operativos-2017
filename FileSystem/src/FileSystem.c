@@ -55,6 +55,7 @@ void fileSystemAtenderProcesos() {
 }
 
 void fileSystemFinalizar() {
+	semaforoWait(semaforoFinal);
 	imprimirMensaje(archivoLog, "[EJECUCION] Proceso File System finalizado");
 	archivoLogDestruir(archivoLog);
 	bitmapDirectoriosDestruir();
@@ -67,16 +68,8 @@ void fileSystemFinalizar() {
 	listaDestruirConElementos(listaNodos, (Puntero)nodoDestruir);
 	mutexDesbloquear(mutexListaNodos);
 	semaforosDestruir();
-	sleep(2);
+	//sleep(2);
 }
-
-bool fileSystemEstable() {
-	mutexBloquear(mutexListaArchivos);
-	int resultado = listaCumplenTodos(listaArchivos, (Puntero)archivoDisponible);
-	mutexDesbloquear(mutexListaArchivos);
-	return resultado;
-}
-
 //--------------------------------------- Funciones de Configuracion -------------------------------------
 
 Configuracion* configuracionLeerArchivo(ArchivoConfig archivoConfig) {
@@ -227,23 +220,23 @@ int servidorAtenderSocket(Servidor* servidor, Socket unSocket) {
 
 int servidorAtenderSolicitud(Servidor* servidor, Socket unSocket) {
 	if(socketEsListener(servidor, unSocket))
-		return servidorRegistrarProceso(servidor, unSocket);
+		return servidorSolicitudProceso(servidor, unSocket);
 	else
-		servidorRecibirMensaje(servidor, unSocket);
+		servidorSolicitudMensaje(servidor, unSocket);
 	return NULO;
 }
 
-int servidorRegistrarProceso(Servidor* servidor, Socket unSocket) {
+int servidorSolicitudProceso(Servidor* servidor, Socket unSocket) {
 	if(socketEsListenerDataNode(servidor, unSocket))
-		return servidorRegistrarDataNode(servidor, unSocket);
+		return servidorSolicitudDataNode(servidor, unSocket);
 	else if(socketEsListenerYama(servidor, unSocket))
-		servidorRegistrarYama(servidor, unSocket);
+		servidorSolicitudYama(servidor, unSocket);
 	else
-		servidorRegistrarWorker(servidor, unSocket);
+		servidorSolicitudWorker(servidor, unSocket);
 	return NULO;
 }
 
-void servidorRecibirMensaje(Servidor* servidor, Socket unSocket) {
+void servidorSolicitudMensaje(Servidor* servidor, Socket unSocket) {
 	Mensaje* mensaje = mensajeRecibir(unSocket);
 	if(socketEsDataNode(servidor, unSocket))
 		servidorMensajeDataNode(servidor, mensaje, unSocket);
@@ -256,7 +249,7 @@ void servidorRecibirMensaje(Servidor* servidor, Socket unSocket) {
 
 //--------------------------------------- Servidor Data Node -------------------------------------
 
-int servidorRegistrarDataNode(Servidor* servidor, Socket unSocket) {
+int servidorSolicitudDataNode(Servidor* servidor, Socket unSocket) {
 	Socket nuevoSocket = socketAceptar(unSocket, ID_DATANODE);
 	if(estadoControlIgualA(ACTIVADO))
 		servidorAtenderDataNode(servidor, nuevoSocket);
@@ -264,23 +257,41 @@ int servidorRegistrarDataNode(Servidor* servidor, Socket unSocket) {
 		return ID_EXIT;
 	return NULO;
 }
+
 void servidorAtenderDataNode(Servidor* servidor, Socket nuevoSocket) {
 	Mensaje* mensaje = mensajeRecibir(nuevoSocket);
 	Nodo* nodoTemporal = nodoCrear(mensaje->datos, nuevoSocket);
 	if(estadoEjecucionIgualA(NORMAL))
 		servidorReconectarDataNode(servidor, nodoTemporal);
 	else
-		servidorRevisarDataNode(servidor, nodoTemporal);
+		servidorControlarDataNode(servidor, nodoTemporal);
 	mensajeDestruir(mensaje);
 }
 
-bool servidorNodoEsNuevo(Nodo* nuevoNodo) {
-	Nodo* nodo = nodoBuscar(nuevoNodo->nombre);
-	if(nodo == NULL) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] No se permite conexiones de nuevos Nodos"BLANCO);
-		return true;
-	}
-	return false;
+void servidorReconectarDataNode(Servidor* servidor, Nodo* nodoTemporal) {
+	if(nodoInvalido(nodoTemporal))
+		servidorRechazarDataNode(nodoTemporal);
+	else
+		servidorAceptarReconexionDataNode(servidor, nodoTemporal);
+}
+
+void servidorControlarDataNode(Servidor* servidor, Nodo* nodoTemporal) {
+	if(estadoFileSystemIgualA(ESTABLE))
+		servidorReconectarDataNode(servidor, nodoTemporal);
+	else
+		servidorAdmitirDataNode(servidor, nodoTemporal);
+}
+
+void servidorAdmitirDataNode(Servidor* servidor, Nodo* nodoTemporal) {
+	if(nodoEstaConectado(nodoTemporal))
+		servidorRechazarDataNode(nodoTemporal);
+	else
+		servidorAceptarDataNode(servidor, nodoTemporal);
+}
+
+void servidorAceptarDataNode(Servidor* servidor, Nodo* nodoTemporal) {
+	servidorRegistrarDataNode(servidor, nodoTemporal);
+	nodoAgregar(nodoTemporal);
 }
 
 void servidorRechazarDataNode(Nodo* nuevoNodo) {
@@ -288,79 +299,26 @@ void servidorRechazarDataNode(Nodo* nuevoNodo) {
 	nodoDestruir(nuevoNodo);
 }
 
-bool nodoEstaConectado(Nodo* nuevoNodo) {
-	Nodo* nodo = nodoBuscar(nuevoNodo->nombre);
-	if(nodo == NULL)
-		return false;
-	if(nodo->estado == ACTIVADO) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] Un nodo con ese nombre ya esta conectado"BLANCO);
-		return true;
-	}
-	return false;
-}
-
-bool servidorNodoInvalido(Nodo* nodoTemporal) {
-	return servidorNodoEsNuevo(nodoTemporal) ||
-			nodoEstaConectado(nodoTemporal);
-}
-
-void servidorReconectarDataNode(Servidor* servidor, Nodo* nodoTemporal) {
-	if(servidorNodoInvalido(nodoTemporal))
-		servidorRechazarDataNode(nodoTemporal);
-	else
-		servidorAceptarReconexionDataNode(servidor, nodoTemporal);
-}
-
-void servidorHabilitarNodo(Servidor* servidor, Nodo* nodoTemporal) {
-	servidorAceptarDataNode(servidor, nodoTemporal);
-	nodoAgregar(nodoTemporal);
-}
-
-void servidorAceptarNuevoDataNode(Servidor* servidor, Nodo* nodoTemporal) {
-	if(nodoEstaConectado(nodoTemporal))
-		servidorRechazarDataNode(nodoTemporal);
-	else
-		servidorHabilitarNodo(servidor, nodoTemporal);
-}
-
-void servidorRevisarDataNode(Servidor* servidor, Nodo* nodoTemporal) {
-	if(estadoFileSystemIgualA(ESTABLE))
-		servidorReconectarDataNode(servidor, nodoTemporal);
-	else
-		servidorAceptarNuevoDataNode(servidor, nodoTemporal);
-}
-
-Nodo* nodoActualizar(Nodo* nodoTemporal) {
-	Nodo* nodo = nodoBuscar(nodoTemporal->nombre);
-	nodo->estado = ACTIVADO;
-	nodo->socket = nodoTemporal->socket;
-	stringCopiar(nodo->ip, nodoTemporal->ip);
-	stringCopiar(nodo->puerto, nodoTemporal->puerto);
-	nodoDestruir(nodoTemporal);
-	return nodo;
-}
-
-void servidorAvisarDataNode(Nodo* nodo) {
-	mensajeEnviar(nodo->socket, ACEPTAR_NODO, &nodo->socket, sizeof(Socket)); //TODO debe ser nulo el msj, solo me interesa la operacion
-	imprimirMensajeUno(archivoLog, "[CONEXION] El %s se ha conectado", nodo->nombre);
-}
-
 void servidorAceptarReconexionDataNode(Servidor* servidor, Nodo* nuevoNodo) {
 	Nodo* nodo = nodoActualizar(nuevoNodo);
-	servidorAceptarDataNode(servidor, nodo);
-	if(estadoFileSystemIgualA(INESTABLE) && fileSystemEstable()) {
+	servidorRegistrarDataNode(servidor, nodo);
+	if(estadoFileSystemIgualA(INESTABLE) && archivoTodosDisponibles()) {
 		mutexBloquear(mutexEstadoFileSystem);
 		estadoFileSystem = ESTABLE;
 		mutexDesbloquear(mutexEstadoFileSystem);
 		imprimirMensaje(archivoLog, "[ESTADO] El File System se encuentra estable");
 	}
-
 }
 
-void servidorAceptarDataNode(Servidor* servidor, Nodo* nodo) {
+void servidorRegistrarDataNode(Servidor* servidor, Nodo* nodo) {
 	servidorAceptarConexion(servidor, nodo->socket);
 	listaSocketsAgregar(nodo->socket, &servidor->listaDataNodes);
 	servidorAvisarDataNode(nodo);
+}
+
+void servidorAvisarDataNode(Nodo* nodo) {
+	mensajeEnviar(nodo->socket, ACEPTAR_NODO, &nodo->socket, sizeof(Socket)); //TODO debe ser nulo el msj, solo me interesa la operacion
+	imprimirMensajeUno(archivoLog, AMARILLO"[CONEXION] %s conectado"BLANCO, nodo->nombre);
 }
 
 void servidorMensajeDataNode(Servidor* servidor, Mensaje* mensaje, Socket unSocket) {
@@ -373,31 +331,34 @@ void servidorMensajeDataNode(Servidor* servidor, Mensaje* mensaje, Socket unSock
 	}
 }
 
-void servidorRevisarFinDataNode(Nodo* nodo, Servidor* servidor) {
+void servidorDesactivarDataNode(Nodo* nodo, Servidor* servidor) {
+	socketCerrar(nodo->socket);
+	listaSocketsEliminar(nodo->socket, &servidor->listaDataNodes);
+	listaSocketsEliminar(nodo->socket, &servidor->listaMaster);
+	nodo->estado = DESACTIVADO;
+	imprimirMensajeUno(archivoLog, AMARILLO"[CONEXION] %s desconectado"BLANCO, nodo->nombre);
+}
+
+void servidorControlarFinalizacionDataNode(Nodo* nodo, Servidor* servidor) {
 	if(estadoFileSystemIgualA(ESTABLE))
-		nodoDesactivar(nodo, servidor);
-	else {
-		int posicion = nodoPosicionEnLista(nodo);
-		mutexBloquear(mutexListaNodos);
-		listaEliminarDestruyendoElemento(listaNodos, posicion , (Puntero)nodoDestruir);
-		mutexDesbloquear(mutexListaNodos);
-	}
+		servidorDesactivarDataNode(nodo, servidor);
+	else
+		nodoDestruirDeLista(nodo);
 }
 
 void servidorFinalizarDataNode(Servidor* servidor, Socket unSocket) {
-	mutexBloquear(mutexRuta);
+	mutexBloquear(mutexTarea);
 	Nodo* nodo = nodoBuscarPorSocket(unSocket);
-	imprimirMensajeUno(archivoLog, "[CONEXION] El %s se ha desconectado", nodo->nombre);
 	if(estadoEjecucionIgualA(NORMAL))
-		nodoDesactivar(nodo, servidor);
+		servidorDesactivarDataNode(nodo, servidor);
 	else
-		servidorRevisarFinDataNode(nodo, servidor);
-	mutexDesbloquear(mutexRuta);
+		servidorControlarFinalizacionDataNode(nodo, servidor);
+	mutexDesbloquear(mutexTarea);
 }
 
 //--------------------------------------- Servidor Yama -------------------------------------
 
-void servidorRegistrarYama(Servidor* servidor, Socket unSocket) {
+void servidorSolicitudYama(Servidor* servidor, Socket unSocket) {
 	Socket nuevoSocket = socketAceptar(unSocket, ID_YAMA);
 	if(estadoFileSystemIgualA(ESTABLE)) {
 		servidor->yama = nuevoSocket;
@@ -423,7 +384,7 @@ void servidorFinalizarYama() {
 
 //--------------------------------------- Servidor Worker -------------------------------------
 
-void servidorRegistrarWorker(Servidor* servidor, Socket unSocket) {
+void servidorSolicitudWorker(Servidor* servidor, Socket unSocket) {
 	//TODO
 }
 
@@ -750,17 +711,21 @@ void consolaDestruirComando(Comando* comando, String entrada) {
 	memoriaLiberar(entrada);
 }
 
+void consolaLaburar() {
+	char* entrada = consolaLeerEntrada();
+	if(estadoControlIgualA(ACTIVADO)) {
+		Comando comando;
+		consolaConfigurarComando(&comando, entrada);
+		consolaEjecutarComando(&comando);
+		consolaDestruirComando(&comando, entrada);
+	}
+}
+
 void consolaAtenderComandos() {
 	hiloDetach(pthread_self());
-	while(estadoControlIgualA(ACTIVADO)) {
-		char* entrada = consolaLeerEntrada();
-		if(estadoControlIgualA(ACTIVADO)) {
-			Comando comando;
-			consolaConfigurarComando(&comando, entrada);
-			consolaEjecutarComando(&comando);
-			consolaDestruirComando(&comando, entrada);
-		}
-	}
+	while(estadoControlIgualA(ACTIVADO))
+		consolaLaburar();
+	semaforoSignal(semaforoFinal);
 }
 
 //--------------------------------------- Funciones de Comando -------------------------------------
@@ -1148,7 +1113,7 @@ int comandoCopiarArchivoDeYamaFS(Comando* comando) {
 		int indiceCopias;
 		listaOrdenar(bloque->listaCopias, (Puntero)copiaOrdenarPorActividadDelNodo);
 		for(indiceCopias=0; indiceCopias<listaCantidadElementos(bloque->listaCopias) && copiaSinEnviar; indiceCopias++) {
-			semaforoWait(semaforoMD5);
+			semaforoWait(semaforoCopia);
 			Copia* copia = listaObtenerElemento(bloque->listaCopias, indiceCopias);
 			Nodo* nodo = nodoBuscar(copia->nombreNodo);
 			if(nodoConectado(nodo)) {
@@ -2022,6 +1987,14 @@ void archivoCrearLista() {
 	listaArchivos = listaCrear();
 	mutexDesbloquear(mutexListaArchivos);
 }
+
+bool archivoTodosDisponibles() {
+	mutexBloquear(mutexListaArchivos);
+	int resultado = listaCumplenTodos(listaArchivos, (Puntero)archivoDisponible);
+	mutexDesbloquear(mutexListaArchivos);
+	return resultado;
+}
+
 //--------------------------------------- Funciones de Nodo -------------------------------------
 
 Nodo* nodoCrear(Puntero datos, Socket nuevoSocket) {
@@ -2171,14 +2144,6 @@ Nodo* nodoBuscarPorSocket(Socket unSocket) {
 	return nodo;
 }
 
-void nodoDesactivar(Nodo* nodo, Servidor* servidor) {
-	socketCerrar(nodo->socket);
-	nodo->estado = DESACTIVADO;
-	puts("DESACTIVANDO NODO");
-	listaSocketsEliminar(nodo->socket, &servidor->listaDataNodes);
-	listaSocketsEliminar(nodo->socket, &servidor->listaMaster);
-}
-
 void nodoAgregar(Nodo* nodo) {
 	mutexBloquear(mutexListaNodos);
 	listaAgregarElemento(listaNodos, nodo);
@@ -2267,6 +2232,48 @@ bool nodoConectado(Nodo* nodo) {
 bool nodoDisponible(Nodo* nodo) {
 	return nodoConectado(nodo) &&
 			nodoTieneBloquesLibres(nodo);
+}
+
+bool nodoEsNuevo(Nodo* nuevoNodo) {
+	Nodo* nodo = nodoBuscar(nuevoNodo->nombre);
+	if(nodo == NULL) {
+		imprimirMensaje(archivoLog, ROJO"[ERROR] No se permite conexiones de nuevos Nodos"BLANCO);
+		return true;
+	}
+	return false;
+}
+
+bool nodoEstaConectado(Nodo* nuevoNodo) {
+	Nodo* nodo = nodoBuscar(nuevoNodo->nombre);
+	if(nodo == NULL)
+		return false;
+	if(nodo->estado == ACTIVADO) {
+		imprimirMensaje(archivoLog, ROJO"[ERROR] Un nodo con ese nombre ya esta conectado"BLANCO);
+		return true;
+	}
+	return false;
+}
+
+bool nodoInvalido(Nodo* nodoTemporal) {
+	return nodoEsNuevo(nodoTemporal) ||
+			nodoEstaConectado(nodoTemporal);
+}
+
+Nodo* nodoActualizar(Nodo* nodoTemporal) {
+	Nodo* nodo = nodoBuscar(nodoTemporal->nombre);
+	nodo->estado = ACTIVADO;
+	nodo->socket = nodoTemporal->socket;
+	stringCopiar(nodo->ip, nodoTemporal->ip);
+	stringCopiar(nodo->puerto, nodoTemporal->puerto);
+	nodoDestruir(nodoTemporal);
+	return nodo;
+}
+
+void nodoDestruirDeLista(Nodo* nodo) {
+	int posicion = nodoPosicionEnLista(nodo);
+	mutexBloquear(mutexListaNodos);
+	listaEliminarDestruyendoElemento(listaNodos, posicion , (Puntero)nodoDestruir);
+	mutexDesbloquear(mutexListaNodos);
 }
 
 //--------------------------------------- Funciones de Bloque-------------------------------------
@@ -2386,7 +2393,7 @@ void bloqueCopiarBinario(Puntero datos) {
 	mutexDesbloquear(mutexRuta);
 	fwrite(datos, sizeof(char), BLOQUE, file);
 	fileCerrar(file);
-	semaforoSignal(semaforoMD5);
+	semaforoSignal(semaforoCopia);
 
 }
 
@@ -2396,7 +2403,7 @@ void bloqueCopiarTexto(Puntero datos) {
 	mutexDesbloquear(mutexRuta);
 	fprintf(file, "%s", (String)datos);
 	fileCerrar(file);
-	semaforoSignal(semaforoMD5);
+	semaforoSignal(semaforoCopia);
 }
 
 bool bloqueDisponible(Bloque* bloque) {
@@ -2608,7 +2615,8 @@ void bitmapDirectoriosOcuparBit(int posicion) {
 //--------------------------------------- Funciones de Semaforo ------------------------------------
 
 void semaforosCrear() {
-	semaforoMD5 = memoriaAlocar(sizeof(Semaforo));
+	semaforoCopia = memoriaAlocar(sizeof(Semaforo));
+	semaforoFinal = memoriaAlocar(sizeof(Semaforo));
 	mutexListaArchivos = memoriaAlocar(sizeof(Mutex));
 	mutexListaNodos = memoriaAlocar(sizeof(Mutex));
 	mutexListaDirectorios = memoriaAlocar(sizeof(Mutex));
@@ -2620,10 +2628,12 @@ void semaforosCrear() {
 	mutexEstadoFileSystem = memoriaAlocar(sizeof(Mutex));
 	mutexEstadoEjecucion = memoriaAlocar(sizeof(Mutex));
 	mutexEstadoControl = memoriaAlocar(sizeof(Mutex));
+	mutexTarea = memoriaAlocar(sizeof(Mutex));
 }
 
 void semaforosIniciar() {
-	semaforoIniciar(semaforoMD5, 1);
+	semaforoIniciar(semaforoCopia, 1);
+	semaforoIniciar(semaforoFinal, 0);
 	mutexIniciar(mutexListaArchivos);
 	mutexIniciar(mutexListaNodos);
 	mutexIniciar(mutexListaDirectorios);
@@ -2635,11 +2645,14 @@ void semaforosIniciar() {
 	mutexIniciar(mutexEstadoEjecucion);
 	mutexIniciar(mutexEstadoFileSystem);
 	mutexIniciar(mutexEstadoControl);
+	mutexIniciar(mutexTarea);
 }
 
 void semaforosDestruir() {
-	semaforoDestruir(semaforoMD5);
-	memoriaLiberar(semaforoMD5);
+	semaforoDestruir(semaforoCopia);
+	semaforoDestruir(semaforoFinal);
+	memoriaLiberar(semaforoFinal);
+	memoriaLiberar(semaforoCopia);
 	memoriaLiberar(mutexListaArchivos);
 	memoriaLiberar(mutexListaNodos);
 	memoriaLiberar(mutexListaDirectorios);
@@ -2651,6 +2664,7 @@ void semaforosDestruir() {
 	memoriaLiberar(mutexEstadoEjecucion);
 	memoriaLiberar(mutexEstadoFileSystem);
 	memoriaLiberar(mutexEstadoControl);
+	memoriaLiberar(mutexTarea);
 }
 
 //con clean no deberia borrar todo al formatear al primera vez
