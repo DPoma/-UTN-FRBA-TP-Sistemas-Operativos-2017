@@ -51,7 +51,7 @@
 #define MAX_STRING 300
 #define MAX_NOMBRE 255
 #define MAX_DIR 100
-#define MAX_COPIAS 2
+#define MAX_COPIAS 4
 #define NUEVO 0
 #define NORMAL 1
 #define INESTABLE 0
@@ -87,14 +87,12 @@ typedef struct {
 	Socket yama;
 } Servidor;
 
-
 typedef struct {
 	char puertoYama[20];
 	char puertoDataNode[20];
 	char puertoWorker[20];
 	char rutaMetadata[MAX_NOMBRE];
 } Configuracion;
-
 
 typedef struct {
 	int identificador;
@@ -154,9 +152,7 @@ typedef struct __attribute__((packed)) {
 
 String campos[4];
 Configuracion* configuracion;
-
 ArchivoLog archivoLog;
-
 int estadoControl;
 int estadoEjecucion;
 int estadoFileSystem;
@@ -226,10 +222,9 @@ void servidorAtenderSolicitudes(Servidor* servidor);
 void servidorAceptarConexion(Servidor* servidor, Socket unSocket);
 void servidorFinalizarProceso(Servidor* servidor, Socket unSocket);
 void servidorLimpiarListas(Servidor* servidor);
-
 void servidorRegistrarDataNode(Servidor* servidor, Socket nuevoSocket);
 void servidorFinalizarDataNode(Servidor* servidor, Socket unSocket);
-void servidorMensajeDataNode(Mensaje* mensaje, Socket unSocket);
+void servidorMensajeDataNode(Mensaje* mensaje, Socket unSocket, Servidor* servidor);
 void servidorReconectarDataNode(Servidor* servidor, Nodo* nodoTemporal);
 bool servidorNodoEsNuevo(Nodo* nuevoNodo);
 void servidorRevisarDataNode(Servidor* servidor, Nodo* nodoTemporal);
@@ -239,15 +234,10 @@ void servidorAceptarDataNode(Servidor* servidor, Nodo* nuevoNodo);
 void servidorAceptarNuevoDataNode(Servidor* servidor, Nodo* nuevoNodo);
 void servidorAceptarReconexionDataNode(Servidor* servidor, Nodo* nuevoNodo);
 void servidorHabilitarNodo(Servidor* servidor, Nodo* nodoTemporal);
-
 void servidorRegistrarYama(Servidor* servidor, Socket unSocket);
 void servidorFinalizarYama();
-
 void servidorRegistrarWorker(Servidor* servidor, Socket unSocket);
 void servidorFinalizarWorker(Servidor* servidor, Socket unSocket);
-
-
-
 
 //--------------------------------------- Funciones de Socket-------------------------------------
 
@@ -362,6 +352,7 @@ int directorioCantidad();
 Directorio* directorioObtener(int posicion);
 void directorioCrearLista();
 void directorioDestruirLista();
+
 //--------------------------------------- Funciones de Archivo -------------------------------------
 
 Archivo* archivoBuscar(String path);
@@ -402,11 +393,10 @@ bool nodoCantidadBloquesLibres(Nodo* unNodo, Nodo* otroNodo);
 int nodoBuscarBloqueLibre(Nodo* nodo);
 Nodo* nodoBuscar(String nombre);
 void nodoRecuperarPersistenciaBitmap(Nodo* nodo);
-void nodoDesactivar(Nodo* nodo);
+void nodoDesactivar(Nodo* nodo, Servidor* servidor);
 Nodo* nodoBuscarPorSocket(Socket unSocket);
 int nodoPosicionEnLista(Nodo* nodo);
 int nodoBloquesLibres();
-void nodoDesactivar(Nodo* nodo);
 bool nodoOrdenarPorActividad(Nodo* unNodo, Nodo* otroNodo);
 void nodoLimpiarActividades();
 bool nodoConectado(Nodo* nodo);
@@ -428,7 +418,6 @@ void bloqueCopiarTexto(Puntero datos);
 void bloqueCopiarBinario(Puntero datos);
 bool bloqueDisponible(Bloque* bloque);
 BloqueNodo* bloqueNodoCrear(Entero numeroBloque, String buffer, int tamanioUtilizado);
-bool copiaOrdenarPorActividadDelNodo(Copia* unaCopia, Copia* otraCopia);
 
 //--------------------------------------- Funciones de Copia -------------------------------------
 
@@ -436,6 +425,7 @@ Copia* copiaCrear(int numeroBloqueDelNodo, String nombreNodo);
 void copiaEliminar(Copia* copia);
 bool copiaDisponible(Copia* copia);
 void copiaDestruir(Copia* copia);
+bool copiaOrdenarPorActividadDelNodo(Copia* unaCopia, Copia* otraCopia);
 
 //--------------------------------------- Funciones de Metadata -------------------------------------
 
@@ -444,7 +434,7 @@ void metadataEliminar();
 void metadataIniciar();
 void metadataRecuperar();
 
-//--------------------------------------- Funciones de Ruta------------------------------------
+//--------------------------------------- Funciones de Ruta ------------------------------------
 
 String rutaObtenerUltimoNombre(String ruta);
 bool rutaBarrasEstanSeparadas(String ruta);
@@ -453,13 +443,20 @@ bool rutaTieneAlMenosUnaBarra(String ruta);
 bool rutaValida(String ruta);
 bool rutaEsNumero(String ruta);
 
+//--------------------------------------- Funciones de Semaforo ------------------------------------
+
 void semaforosCrear();
 void semaforosIniciar();
 void semaforosDestruir();
 
+//--------------------------------------- Funciones de Estado ------------------------------------
+
 bool estadoEjecucionIgualA(int estado);
 bool estadoFileSystemIgualA(int estado);
 bool estadoControlIgualA(int estado);
+
+//--------------------------------------- Funciones de Ruta ------------------------------------
+
 void bitmapDirectoriosDestruir();
 void bitmapDirectoriosCrear();
 bool bitmapDirectoriosBitOcupado(int indice);

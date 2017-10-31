@@ -203,7 +203,6 @@ void servidorAceptarConexion(Servidor* servidor, Socket unSocket) {
 	servidorControlarContadorSocket(servidor, unSocket);
 }
 
-
 void servidorActivarListeners(Servidor* servidor) {
 	servidorActivarListenerDataNode(servidor);
 	servidorActivarListenerYama(servidor);
@@ -240,14 +239,13 @@ void servidorRecibirMensaje(Servidor* servidor, Socket unSocket) {
 	if(mensajeDesconexion(mensaje))
 		servidorFinalizarConexion(servidor, unSocket);
 	else {
-		servidorMensajeDataNode(mensaje, unSocket);
+		servidorMensajeDataNode(mensaje, unSocket, servidor);
 	}
 	mensajeDestruir(mensaje);
 }
 
 void servidorFinalizarConexion(Servidor* servidor, Socket unSocket) {
-	socketCerrar(unSocket);
-	listaSocketsEliminar(unSocket, &servidor->listaMaster);
+
 	servidorFinalizarProceso(servidor, unSocket);
 }
 
@@ -361,19 +359,19 @@ void servidorAceptarDataNode(Servidor* servidor, Nodo* nodo) {
 	servidorAvisarDataNode(nodo);
 }
 
-void servidorMensajeDataNode(Mensaje* mensaje, Socket unSocket) {
+void servidorMensajeDataNode(Mensaje* mensaje, Socket unSocket, Servidor* servidor) {
 	switch(mensaje->header.operacion) {
 	case LEER_BLOQUE: bloqueLeer(mensaje->datos); break;
 	case COPIAR_BLOQUE: bloqueCopiar(mensaje->datos); break;
 	case COPIAR_BINARIO: bloqueCopiarBinario(mensaje->datos); break;
 	case COPIAR_TEXTO: bloqueCopiarTexto(mensaje->datos); break;
-	case FINALIZAR_NODO: mensajeEnviar(unSocket, DESCONEXION, &unSocket, sizeof(Entero));break;
+	case FINALIZAR_NODO: servidorFinalizarDataNode(servidor, unSocket); break;
 	}
 }
 
-void servidorRevisarFinDataNode(Nodo* nodo) {
+void servidorRevisarFinDataNode(Nodo* nodo, Servidor* servidor) {
 	if(estadoFileSystemIgualA(ESTABLE))
-		nodoDesactivar(nodo);
+		nodoDesactivar(nodo, servidor);
 	else {
 		int posicion = nodoPosicionEnLista(nodo);
 		mutexBloquear(mutexListaNodos);
@@ -383,13 +381,14 @@ void servidorRevisarFinDataNode(Nodo* nodo) {
 }
 
 void servidorFinalizarDataNode(Servidor* servidor, Socket unSocket) {
-	listaSocketsEliminar(unSocket, &servidor->listaDataNodes);
+	mutexBloquear(mutexRuta);
 	Nodo* nodo = nodoBuscarPorSocket(unSocket);
 	imprimirMensajeUno(archivoLog, "[CONEXION] El %s se ha desconectado", nodo->nombre);
 	if(estadoEjecucionIgualA(NORMAL))
-		nodoDesactivar(nodo);
+		nodoDesactivar(nodo, servidor);
 	else
-		servidorRevisarFinDataNode(nodo);
+		servidorRevisarFinDataNode(nodo, servidor);
+	mutexDesbloquear(mutexRuta);
 }
 
 //--------------------------------------- Servidor Yama -------------------------------------
@@ -2169,8 +2168,12 @@ Nodo* nodoBuscarPorSocket(Socket unSocket) {
 	return nodo;
 }
 
-void nodoDesactivar(Nodo* nodo) {
+void nodoDesactivar(Nodo* nodo, Servidor* servidor) {
+	socketCerrar(nodo->socket);
 	nodo->estado = DESACTIVADO;
+	puts("DESACTIVANDO NODO");
+	listaSocketsEliminar(nodo->socket, &servidor->listaDataNodes);
+	listaSocketsEliminar(nodo->socket, &servidor->listaMaster);
 }
 
 void nodoAgregar(Nodo* nodo) {
@@ -2299,6 +2302,7 @@ bool nodoDisponible(Nodo* nodo) {
 }
 
 int bloqueEnviarCopiasANodos(Bloque* bloque, String buffer) {
+	mutexBloquear(mutexRuta);
 	int copiasEnviadas = 0;
 	int indice;
 	mutexBloquear(mutexListaNodos);
@@ -2307,6 +2311,7 @@ int bloqueEnviarCopiasANodos(Bloque* bloque, String buffer) {
 	for(indice = 0; indice < nodoCantidadNodos() && copiasEnviadas < MAX_COPIAS; indice++) {
 		Nodo* nodo = nodoObtener(indice);
 		if(nodoDisponible(nodo)) {
+			printf("ENTRE Y EL ESTADO SIEMPRE DEBERIA SER 1 = %i\n", nodo->estado);
 			bloqueEnviarANodo(bloque, nodo, buffer);
 			copiasEnviadas++;
 			nodo->actividadesRealizadas++;
@@ -2317,16 +2322,19 @@ int bloqueEnviarCopiasANodos(Bloque* bloque, String buffer) {
 		Nodo* nodo = listaBuscar(listaNodos, (Puntero)nodoDisponible);
 		mutexDesbloquear(mutexListaNodos);
 		if(nodo != NULL) {
+			printf("ENTRE Y EL ESTADO SIEMPRE DEBERIA SER 1 = %i\n", nodo->estado);
 			bloqueEnviarANodo(bloque, nodo, buffer);
 			copiasEnviadas++;
 		}
+
 	}
+	mutexDesbloquear(mutexRuta);
 	if(copiasEnviadas == 0) {
 		imprimirMensajeUno(archivoLog, "[ERROR] El bloque N°%i no pudo copiarse en ningun Nodo, se aborta la operacion", (int*)bloque->numeroBloque);
 		return ERROR;
 	}
 	if(copiasEnviadas < MAX_COPIAS) {
-		imprimirMensajeDos(archivoLog, "[AVISO] El bloque N°%i tiene menos copias que las establecidas (%i)", (int*)bloque->numeroBloque, (int*)MAX_COPIAS);
+		//imprimirMensajeDos(archivoLog, "[AVISO] El bloque N°%i tiene menos copias que las establecidas (%i)", (int*)bloque->numeroBloque, (int*)MAX_COPIAS);
 		return 0;
 	}
 	return 0;
