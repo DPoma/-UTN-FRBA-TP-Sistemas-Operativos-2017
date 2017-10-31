@@ -185,8 +185,7 @@ Mutex* mutexBitmapDirectorios;
 Mutex* mutexEstadoFileSystem;
 Mutex* mutexEstadoEjecucion;
 Mutex* mutexEstadoControl;
-Mutex* mutexTarea;
-Semaforo* semaforoCopia;
+Semaforo* semaforoTarea;
 Semaforo* semaforoFinal;
 
 
@@ -301,7 +300,7 @@ String consolaLeerEntrada();
 
 void comandoFormatearFileSystem();
 void comandoEliminar(Comando* comando);
-void comandoEliminarBloque(Comando* comando);
+void comandoEliminarCopia(Comando* comando);
 void comandoEliminarDirectorio(Comando* comando);
 void comandoEliminarArchivo(Comando* comando);
 void comandoRenombrar(Comando* comando);

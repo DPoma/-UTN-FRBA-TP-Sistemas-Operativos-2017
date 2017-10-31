@@ -296,7 +296,7 @@ void servidorRechazarDataNode(Nodo* nuevoNodo) {
 }
 
 void servidorAceptarReconexionDataNode(Servidor* servidor, Nodo* nuevoNodo) {
-	mutexBloquear(mutexTarea);
+	semaforoWait(semaforoTarea);
 	Nodo* nodo = nodoActualizar(nuevoNodo);
 	servidorRegistrarDataNode(servidor, nodo);
 	if(estadoFileSystemIgualA(INESTABLE) && archivoTodosDisponibles()) {
@@ -305,7 +305,7 @@ void servidorAceptarReconexionDataNode(Servidor* servidor, Nodo* nuevoNodo) {
 		mutexDesbloquear(mutexEstadoFileSystem);
 		imprimirMensaje(archivoLog, "[ESTADO] El File System se encuentra estable");
 	}
-	mutexDesbloquear(mutexTarea);
+	semaforoSignal(semaforoTarea);
 }
 
 void servidorRegistrarDataNode(Servidor* servidor, Nodo* nodo) {
@@ -341,13 +341,13 @@ void servidorControlarFinalizacionDataNode(Servidor* servidor, Nodo* nodo) {
 }
 
 void servidorFinalizarDataNode(Servidor* servidor, Socket unSocket) {
-	mutexBloquear(mutexTarea);
+	semaforoWait(semaforoTarea);
 	Nodo* nodo = nodoBuscarPorSocket(unSocket);
 	if(estadoEjecucionIgualA(NORMAL))
 		servidorDesactivarDataNode(servidor, nodo);
 	else
 		servidorControlarFinalizacionDataNode(servidor, nodo);
-	mutexDesbloquear(mutexTarea);
+	semaforoSignal(semaforoTarea);
 }
 
 //--------------------------------------- Servidor Yama -------------------------------------
@@ -725,14 +725,11 @@ void consolaAtenderComandos() {
 //--------------------------------------- Funciones de Comando -------------------------------------
 
 void comandoFormatearFileSystem() {
+	archivoDestruirLista();
 	directorioDestruirLista();
-	mutexBloquear(mutexListaArchivos);
-	listaDestruirConElementos(listaArchivos, (Puntero)archivoDestruir);
-	mutexDesbloquear(mutexListaArchivos);
 	bitmapDirectoriosDestruir();
 	metadataIniciar();
 	nodoFormatearConectados();
-	nodoPersistir();
 	mutexBloquear(mutexEstadoFileSystem);
 	estadoFileSystem = ESTABLE;
 	mutexDesbloquear(mutexEstadoFileSystem);
@@ -751,6 +748,45 @@ void comandoFormatearFileSystem() {
 	imprimirMensaje(archivoLog, "[ESTADO] El File System ha sido formateado");
 }
 
+
+void comandoCrearDirectorio(Comando* comando) {
+	if(!rutaValida(comando->argumentos[1])) {
+		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
+		return;
+	}
+	if(stringIguales(comando->argumentos[1], "/")) {
+		imprimirMensaje(archivoLog,"[ERROR] El directorio raiz no puede ser creado");
+		return;
+	}
+	Archivo* archivo = archivoBuscar(comando->argumentos[1]);
+	if(archivo != NULL) {
+		imprimirMensaje(archivoLog,"[ERROR] El archivo o directorio ya existe");
+		return;
+	}
+	ControlDirectorio* control = directorioControlCrear(comando->argumentos[1]);
+	while(stringValido(control->nombreDirectorio)) {
+		directorioBuscarIdentificador(control);
+		if (directorioExisteIdentificador(control->identificadorDirectorio))
+			directorioControlarEntradas(control, comando->argumentos[1]);
+		else if(directorioHaySuficientesIndices(control)) {
+			int estado = directorioCrearDirectoriosRestantes(control, comando->argumentos[1]);
+			if(estado == ERROR) {
+				imprimirMensaje(archivoLog,"[ERROR] El nombre del directorio es demasiado largo");
+				break;
+			}
+		}
+		else {
+			imprimirMensaje(archivoLog,"[ERROR] Se alcanzo el limite de directorios permitidos (100)");
+			break;
+		}
+		directorioControlSetearNombre(control);
+	}
+	int indice;
+	for(indice=0; stringValido(control->nombresDirectorios[indice]); indice++)
+		memoriaLiberar(control->nombresDirectorios[indice]);
+	memoriaLiberar(control->nombresDirectorios);
+	memoriaLiberar(control);
+}
 
 void comandoRenombrar(Comando* comando) {
 	if(!rutaValida(comando->argumentos[1])) {
@@ -795,7 +831,6 @@ void comandoRenombrar(Comando* comando) {
 
 	}
 }
-
 
 void comandoMover(Comando* comando) {
 	if(!rutaValida(comando->argumentos[1])) {
@@ -868,10 +903,159 @@ void comandoEliminar(Comando* comando) {
 	if(stringIguales(comando->argumentos[1], FLAG_D))
 		comandoEliminarDirectorio(comando);
 	else if(stringIguales(comando->argumentos[1], FLAG_B))
-		comandoEliminarBloque(comando);
+		comandoEliminarCopia(comando);
 	else
 		comandoEliminarArchivo(comando);
 }
+
+void comandoEliminarCopia(Comando* comando) {
+	if(!rutaValida(comando->argumentos[2])) {
+		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
+		return;
+	}
+	if(stringIguales(comando->argumentos[2], "/")) {
+		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
+		return;
+	}
+	if(!rutaEsNumero(comando->argumentos[3])) {
+		imprimirMensaje(archivoLog,"[ERROR] El numero de bloque no es valido");
+		return;
+	}
+	if(!rutaEsNumero(comando->argumentos[4])) {
+		imprimirMensaje(archivoLog,"[ERROR] El numero de copia del bloque no es valido");
+		return;
+	}
+	Archivo* archivo = archivoBuscar(comando->argumentos[2]);
+	if(archivo == NULL) {
+		imprimirMensaje(archivoLog, "[ERROR] El archivo no existe");
+		return;
+	}
+	int numeroBloque = atoi(comando->argumentos[3]);
+	int numeroCopia = atoi(comando->argumentos[4]);
+	Bloque* bloque = listaObtenerElemento(archivo->listaBloques, numeroBloque);
+
+	if(bloque == NULL) {
+		imprimirMensaje(archivoLog, "[ERROR] El numero de bloque no existe");
+		return;
+	}
+	Copia* copia = listaObtenerElemento(bloque->listaCopias, numeroCopia);
+	if(copia == NULL) {
+		imprimirMensaje(archivoLog, "[ERROR] El numero de copia no existe");
+		return;
+	}
+	if(listaCantidadElementos(bloque->listaCopias) == 1) {
+		imprimirMensaje(archivoLog, "[ERROR] No se puede eliminar la copia ya que es la ultima");
+		return;
+	}
+	listaEliminarDestruyendoElemento(bloque->listaCopias, numeroCopia, (Puntero)copiaDestruir);
+	archivoPersistir(archivo);
+	nodoPersistir();
+	imprimirMensajeTres(archivoLog, "[BLOQUE] La copia N°%i del bloque N°%i del archivo %s ha sido eliminada",(int*)numeroCopia, (int*)numeroBloque, comando->argumentos[2]);
+}
+
+
+void comandoEliminarDirectorio(Comando* comando) {
+	String ruta = comando->argumentos[2];
+	if(!rutaValida(ruta)) {
+		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
+		return;
+	}
+	if(stringIguales(ruta, "/")) {
+		imprimirMensaje(archivoLog,"[ERROR] El directorio raiz no puede ser eliminado");
+		return;
+	}
+	Directorio* directorio = directorioBuscar(ruta);
+	if(directorio == NULL) {
+		imprimirMensaje(archivoLog,"[ERROR] El directorio no existe");
+		return;
+	}
+	if(directorioTieneAlgo(directorio->identificador))
+		imprimirMensajeUno(archivoLog,"[ERROR] El directorio %s no esta vacio",ruta);
+	else {
+		directorioEliminar(directorio->identificador);
+		imprimirMensajeUno(archivoLog,"[DIRECTORIO] El directorio %s ha sido eliminado",ruta);
+	}
+}
+
+void comandoEliminarArchivo(Comando* comando) {
+	if(!rutaValida(comando->argumentos[1])) {
+		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
+		return;
+	}
+	if(stringIguales(comando->argumentos[1], "/")) {
+		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
+		return;
+	}
+	Archivo* archivo = archivoBuscar(comando->argumentos[1]);
+	if(archivo == NULL) {
+		imprimirMensaje(archivoLog,"[ERROR] El archivo no existe");
+		return;
+	}
+	int posicion = archivoObtenerPosicion(archivo);
+	String rutaArchivo = string_from_format("%s/%i/%s", rutaDirectorioArchivos, archivo->identificadorPadre, archivo->nombre);
+	fileLimpiar(rutaArchivo);
+	memoriaLiberar(rutaArchivo);
+	mutexBloquear(mutexListaArchivos);
+	listaEliminarDestruyendoElemento(listaArchivos, posicion, (Puntero)archivoDestruir);
+	mutexDesbloquear(mutexListaArchivos);
+	archivoPersistirControl();
+	nodoPersistir();
+	imprimirMensajeUno(archivoLog, "[ARCHIVO] El archivo %s ha sido eliminado", comando->argumentos[1]);
+}
+
+void comandoListarDirectorio(Comando* comando) {
+	if(!rutaValida(comando->argumentos[1])) {
+		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
+		return;
+	}
+	if(stringIguales(comando->argumentos[1], "/")) {
+		directorioMostrarArchivos(0);
+		return;
+	}
+	Directorio* directorio = directorioBuscar(comando->argumentos[1]);
+	if(directorio != NULL)
+		directorioMostrarArchivos(directorio->identificador);
+	else
+		imprimirMensaje(archivoLog, "[ERROR] El directorio no existe");
+}
+
+void comandoInformacionArchivo(Comando* comando) {
+	if(!rutaValida(comando->argumentos[1])) {
+		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
+		return;
+	}
+	if(stringIguales(comando->argumentos[1], "/")) {
+		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
+		return;
+	}
+	Archivo* archivo = archivoBuscar(comando->argumentos[1]);
+	if(archivo == NULL) {
+		imprimirMensaje(archivoLog, "[ERROR] El archivo no existe");
+		return;
+	}
+	imprimirMensajeUno(archivoLog, "[ARCHIVO] Nombre: %s", archivo->nombre);
+	imprimirMensajeUno(archivoLog, "[ARCHIVO] Tipo: %s", archivo->tipo);
+	imprimirMensajeUno(archivoLog, "[ARCHIVO] Ubicacion: %s", comando->argumentos[1]);
+	imprimirMensajeUno(archivoLog, "[ARCHIVO] ID Padre: %i", (int*)archivo->identificadorPadre);
+	int indice;
+	int tamanio = 0;
+	for(indice = 0; indice < listaCantidadElementos(archivo->listaBloques); indice++) {
+		Bloque* bloque = listaObtenerElemento(archivo->listaBloques, indice);
+		tamanio+= bloque->bytesUtilizados;
+	}
+	imprimirMensajeUno(archivoLog, "[ARCHIVO] Tamanio: %i bytes", (int*)tamanio);
+	imprimirMensajeUno(archivoLog, "[ARCHIVO] Bloques: %i", (int*)listaCantidadElementos(archivo->listaBloques));
+	for(indice = 0; indice < listaCantidadElementos(archivo->listaBloques); indice++) {
+		Bloque* bloque = listaObtenerElemento(archivo->listaBloques, indice);
+		imprimirMensajeDos(archivoLog, "[ARCHIVO] Bloque %i: %i bytes", (int*)indice, (int*)bloque->bytesUtilizados);
+		int indiceCopia;
+		for(indiceCopia = 0; indiceCopia < listaCantidadElementos(bloque->listaCopias); indiceCopia++) {
+			Copia* copiaBloque = listaObtenerElemento(bloque->listaCopias, indiceCopia);
+			imprimirMensajeTres(archivoLog, "[ARCHIVO] Copia %i en: Nodo: %s | Bloque: %i", (int*)indiceCopia, copiaBloque->nombreNodo, (int*)copiaBloque->bloqueNodo);
+		}
+	}
+}
+//TODO
 
 void comandoCopiarBloque(Comando* comando) {
 	if(!rutaValida(comando->argumentos[1])) {
@@ -923,9 +1107,17 @@ void comandoCopiarBloque(Comando* comando) {
 	mutexBloquear(mutexBloque);
 	if(listaEstaVacia(bloqueBuffer->listaCopias)) {
 		mutexDesbloquear(mutexBloque);
-		imprimirMensaje(archivoLog, "[ERROR] El bloque no tiene copias en ningun nodo (esto nunca deberia pasar)");
+		imprimirMensaje(archivoLog, "[ERROR] El bloque no tiene copias en ningun nodo (NUNCA deberia pasar)");
+		return;
 	}
 	mutexDesbloquear(mutexBloque);
+	semaforoWait(semaforoTarea); //SI ESTA CONECTADO SE COPIA SI O SI
+	if(!nodoConectado(nodoBuffer)) {
+		mutexDesbloquear(mutexNodo);
+		semaforoSignal(semaforoTarea);
+		imprimirMensaje(archivoLog, "[ERROR] El nodo que va a guardar la nueva copia no esta disponible");
+		return;
+	}
 	int indice;
 	int bloqueSinEnviar = true;
 	mutexBloquear(mutexBloque);
@@ -936,142 +1128,19 @@ void comandoCopiarBloque(Comando* comando) {
 		Copia* copia = listaObtenerElemento(bloqueBuffer->listaCopias, indice);
 		mutexDesbloquear(mutexBloque);
 		Nodo* nodoConBloque = nodoBuscar(copia->nombreNodo);
-		if(nodoConBloque->estado == ACTIVADO) {
+		if(nodoConectado(nodoConBloque)) {
 			mensajeEnviar(nodoConBloque->socket, COPIAR_BLOQUE, &copia->bloqueNodo, sizeof(Entero));
 			bloqueSinEnviar = false;
 		}
 	}
 	if(bloqueSinEnviar) {
-		imprimirMensaje(archivoLog, "[ERROR] No hay nodos disponibles para obtener la copia");
+		imprimirMensaje(archivoLog, "[ERROR] No hay nodos conectados para obtener la copia");
+		semaforoSignal(semaforoTarea);
 		return;
 	}
+
 
 }
-
-void comandoEliminarBloque(Comando* comando) {
-	if(!rutaValida(comando->argumentos[2])) {
-		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
-		return;
-	}
-	if(stringIguales(comando->argumentos[2], "/")) {
-		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
-		return;
-	}
-	if(!rutaEsNumero(comando->argumentos[3])) {
-		imprimirMensaje(archivoLog,"[ERROR] El numero de bloque no es valido");
-		return;
-	}
-	if(!rutaEsNumero(comando->argumentos[4])) {
-		imprimirMensaje(archivoLog,"[ERROR] El numero de copia del bloque no es valido");
-		return;
-	}
-	Archivo* archivo = archivoBuscar(comando->argumentos[2]);
-	if(archivo == NULL) {
-		imprimirMensaje(archivoLog, "[ERROR] El archivo no existe");
-		return;
-	}
-	int numeroBloque = atoi(comando->argumentos[3]);
-	int numeroCopia = atoi(comando->argumentos[4]);
-	Bloque* bloque = listaObtenerElemento(archivo->listaBloques, numeroBloque);
-
-	if(bloque == NULL) {
-		imprimirMensaje(archivoLog, "[ERROR] El numero de bloque no existe");
-		return;
-	}
-	Copia* copia = listaObtenerElemento(bloque->listaCopias, numeroCopia);
-	if(copia == NULL) {
-		imprimirMensaje(archivoLog, "[ERROR] El numero de copia no existe");
-		return;
-	}
-	if(listaCantidadElementos(bloque->listaCopias) == 1) {
-		imprimirMensaje(archivoLog, "[ERROR] No se puede eliminar el bloque ya que es el ultimo");
-		return;
-	}
-	listaEliminarDestruyendoElemento(bloque->listaCopias, numeroCopia, (Puntero)copiaDestruir);
-	archivoPersistir(archivo);
-	nodoPersistir();
-	imprimirMensajeTres(archivoLog, "[BLOQUE] La copia N°%i del bloque N°%i del archivo %s ha sido eliminada",(int*)numeroCopia, (int*)numeroBloque, comando->argumentos[2]);
-}
-
-void comandoCrearDirectorio(Comando* comando) {
-	if(!rutaValida(comando->argumentos[1])) {
-		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
-		return;
-	}
-	if(stringIguales(comando->argumentos[1], "/")) {
-		imprimirMensaje(archivoLog,"[ERROR] El directorio raiz no puede ser creado");
-		return;
-	}
-	Archivo* archivo = archivoBuscar(comando->argumentos[1]);
-	if(archivo != NULL) {
-		imprimirMensaje(archivoLog,"[ERROR] El archivo o directorio ya existe");
-		return;
-	}
-
-	ControlDirectorio* control = directorioControlCrear(comando->argumentos[1]);
-	while(stringValido(control->nombreDirectorio)) {
-		directorioBuscarIdentificador(control);
-		if (directorioExisteIdentificador(control->identificadorDirectorio))
-			directorioControlarEntradas(control, comando->argumentos[1]);
-		else if(directorioHaySuficientesIndices(control)) {
-			int estado = directorioCrearDirectoriosRestantes(control, comando->argumentos[1]);
-			if(estado == ERROR) {
-				imprimirMensaje(archivoLog,"[ERROR] El nombre del directorio es demasiado largo");
-				break;
-			}
-		}
-		else {
-			imprimirMensaje(archivoLog,"[ERROR] Se alcanzo el limite de directorios permitidos (100)");
-			break;
-		}
-		directorioControlSetearNombre(control);
-	}
-	int indice;
-	for(indice=0; stringValido(control->nombresDirectorios[indice]); indice++)
-		memoriaLiberar(control->nombresDirectorios[indice]);
-	memoriaLiberar(control->nombresDirectorios);
-	memoriaLiberar(control);
-}
-
-void comandoEliminarDirectorio(Comando* comando) {
-	String ruta = comando->argumentos[2];
-	if(!rutaValida(ruta)) {
-		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
-		return;
-	}
-	if(stringIguales(ruta, "/")) {
-		imprimirMensaje(archivoLog,"[ERROR] El directorio raiz no puede ser eliminado");
-		return;
-	}
-	Directorio* directorio = directorioBuscar(ruta);
-	if(directorio == NULL) {
-		imprimirMensaje(archivoLog,"[ERROR] El directorio no existe");
-		return;
-	}
-	if(directorioTieneAlgo(directorio->identificador))
-		imprimirMensajeUno(archivoLog,"[ERROR] El directorio %s no esta vacio",ruta);
-	else {
-		directorioEliminar(directorio->identificador);
-		imprimirMensajeUno(archivoLog,"[DIRECTORIO] El directorio %s ha sido eliminado",ruta);
-	}
-}
-
-void comandoListarDirectorio(Comando* comando) {
-	if(!rutaValida(comando->argumentos[1])) {
-		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
-		return;
-	}
-	if(stringIguales(comando->argumentos[1], "/")) {
-		directorioMostrarArchivos(0);
-		return;
-	}
-	Directorio* directorio = directorioBuscar(comando->argumentos[1]);
-	if(directorio != NULL)
-		directorioMostrarArchivos(directorio->identificador);
-	else
-		imprimirMensaje(archivoLog, "[ERROR] El directorio no existe");
-}
-
 
 void comandoCopiarArchivoAYamaFS(Comando* comando) {
 	archivoAlmacenar(comando);
@@ -1107,7 +1176,7 @@ int comandoCopiarArchivoDeYamaFS(Comando* comando) {
 		int indiceCopias;
 		listaOrdenar(bloque->listaCopias, (Puntero)copiaOrdenarPorActividadDelNodo);
 		for(indiceCopias=0; indiceCopias<listaCantidadElementos(bloque->listaCopias) && copiaSinEnviar; indiceCopias++) {
-			semaforoWait(semaforoCopia);
+			semaforoWait(semaforoTarea);
 			Copia* copia = listaObtenerElemento(bloque->listaCopias, indiceCopias);
 			Nodo* nodo = nodoBuscar(copia->nombreNodo);
 			if(nodoConectado(nodo)) {
@@ -1131,32 +1200,6 @@ int comandoCopiarArchivoDeYamaFS(Comando* comando) {
 
 void comandoMostrarArchivo(Comando* comando) {
 	archivoLeer(comando);
-}
-
-void comandoEliminarArchivo(Comando* comando) {
-	if(!rutaValida(comando->argumentos[1])) {
-		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
-		return;
-	}
-	if(stringIguales(comando->argumentos[1], "/")) {
-		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
-		return;
-	}
-	Archivo* archivo = archivoBuscar(comando->argumentos[1]);
-	if(archivo == NULL) {
-		imprimirMensaje(archivoLog,"[ERROR] El archivo no existe");
-		return;
-	}
-	int posicion = archivoObtenerPosicion(archivo);
-	String rutaArchivo = string_from_format("%s/%i/%s", rutaDirectorioArchivos, archivo->identificadorPadre, archivo->nombre);
-	fileLimpiar(rutaArchivo);
-	memoriaLiberar(rutaArchivo);
-	mutexBloquear(mutexListaArchivos);
-	listaEliminarDestruyendoElemento(listaArchivos, posicion, (Puntero)archivoDestruir);
-	mutexDesbloquear(mutexListaArchivos);
-	archivoPersistirControl();
-	nodoPersistir();
-	imprimirMensajeUno(archivoLog, "[ARCHIVO] El archivo %s ha sido eliminado", comando->argumentos[1]);
 }
 
 void comandoObtenerMD5DeArchivo(Comando* comando) {
@@ -1201,43 +1244,6 @@ void comandoObtenerMD5DeArchivo(Comando* comando) {
 	memoriaLiberar(ruta);
 	memoriaLiberar(MD5Archivo);
 	memoriaLiberar(nombreArchivo);
-}
-
-void comandoInformacionArchivo(Comando* comando) {
-	if(!rutaValida(comando->argumentos[1])) {
-		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
-		return;
-	}
-	if(stringIguales(comando->argumentos[1], "/")) {
-		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
-		return;
-	}
-	Archivo* archivo = archivoBuscar(comando->argumentos[1]);
-	if(archivo == NULL) {
-		imprimirMensaje(archivoLog, "[ERROR] El archivo no existe");
-		return;
-	}
-	imprimirMensajeUno(archivoLog, "[ARCHIVO] Nombre: %s", archivo->nombre);
-	imprimirMensajeUno(archivoLog, "[ARCHIVO] Tipo: %s", archivo->tipo);
-	imprimirMensajeUno(archivoLog, "[ARCHIVO] Ubicacion: %s", comando->argumentos[1]);
-	int indice;
-	int tamanio = 0;
-	for(indice = 0; indice < listaCantidadElementos(archivo->listaBloques); indice++) {
-		Bloque* bloque = listaObtenerElemento(archivo->listaBloques, indice);
-		tamanio+= bloque->bytesUtilizados;
-	}
-	imprimirMensajeUno(archivoLog, "[ARCHIVO] Tamanio: %i bytes", (int*)tamanio);
-	imprimirMensajeUno(archivoLog, "[ARCHIVO] Bloques utilizados: %i", (int*)listaCantidadElementos(archivo->listaBloques));
-	for(indice = 0; indice < listaCantidadElementos(archivo->listaBloques); indice++) {
-		Bloque* bloque = listaObtenerElemento(archivo->listaBloques, indice);
-		imprimirMensajeDos(archivoLog, "[ARCHIVO] Bloque %i: %i bytes", (int*)indice, (int*)bloque->bytesUtilizados);
-		int indiceCopia;
-		for(indiceCopia = 0; indiceCopia < listaCantidadElementos(bloque->listaCopias); indiceCopia++) {
-			Copia* copiaBloque = listaObtenerElemento(bloque->listaCopias, indiceCopia);
-			imprimirMensajeCuatro(archivoLog, "[ARCHIVO] Bloque %i copia %i en: Nodo: %s | Bloque: %i", (int*)indice,
-					(int*)indiceCopia, copiaBloque->nombreNodo, (int*)copiaBloque->bloqueNodo);
-		}
-	}
 }
 
 void comandoFinalizar() {
@@ -2320,7 +2326,6 @@ int bloqueEnviarANodo(Bloque* bloque, Nodo* nodo, String buffer) {
 	bloqueCopiarEnNodo(bloque, nodo, numeroBloqueNodo);
 	BloqueNodo* bloqueNodo = bloqueNodoCrear(numeroBloqueNodo, buffer, BLOQUE);
 	mensajeEnviar(nodo->socket, ESCRIBIR_BLOQUE, bloqueNodo, sizeof(Entero)+BLOQUE);
-	nodo->actividadesRealizadas++;
 	memoriaLiberar(bloqueNodo);
 	return numeroBloqueNodo;
 }
@@ -2344,21 +2349,21 @@ int bloqueEnviarCopiasANodos(Bloque* bloque, String buffer) {
 	bool bloqueForzarCopiado() {
 		return indice == (nodoCantidadNodos()-1) && nodoHayAlgunoDisponible() && copiasEnviadas < MAX_COPIAS;
 	}
-
-	mutexBloquear(mutexTarea);
+	semaforoWait(semaforoTarea);
 	nodoOrdenarListaPorActividad();
 	for(indice = 0; indice < nodoCantidadNodos() && copiasEnviadas < MAX_COPIAS; indice++) {
 		Nodo* nodo = nodoObtener(indice);
 		if(nodoDisponible(nodo)) {
 			bloqueEnviarANodo(bloque, nodo, buffer);
 			copiasEnviadas++;
+			nodo->actividadesRealizadas++;
 		}
 		if(bloqueForzarCopiado()) {
 			nodoOrdenarListaPorActividad();
 			indice = -1;
 		}
 	}
-	mutexDesbloquear(mutexTarea);
+	semaforoSignal(semaforoTarea);
 	if(copiasEnviadas == 0) {
 		imprimirMensajeUno(archivoLog, "[ERROR] El bloque N°%i no pudo copiarse en ningun Nodo", (int*)bloque->numeroBloque);
 		return ERROR;
@@ -2372,11 +2377,12 @@ int bloqueEnviarCopiasANodos(Bloque* bloque, String buffer) {
 
 void bloqueCopiar(Puntero datos) {
 	mutexBloquear(mutexNodo);
-	if(nodoBuffer->estado == ACTIVADO) {
+	if(nodoConectado(nodoBuffer)) {
 		mutexBloquear(mutexBloque);
 		int numeroBloqueNodo = bloqueEnviarANodo(bloqueBuffer, nodoBuffer, datos);
 		mutexDesbloquear(mutexBloque);
 		mutexDesbloquear(mutexNodo);
+		semaforoSignal(semaforoTarea);
 		mutexBloquear(mutexArchivo);
 		archivoPersistir(archivoBuffer);
 		mutexDesbloquear(mutexArchivo);
@@ -2387,19 +2393,9 @@ void bloqueCopiar(Puntero datos) {
 	}
 	else {
 		mutexDesbloquear(mutexNodo);
-		imprimirMensaje(archivoLog, "[ERROR] El nodo que va a guardar la nueva copia no esta disponible");
-
-		return;
+		semaforoSignal(semaforoTarea);
+		imprimirMensaje(archivoLog, ROJO"[BLOQUE] No pudo copiarse el bloque, el nodo receptor no esta conectado (FALLO EL SEMAFORO, NUNCA DEBERIA PASAR)"BLANCO);
 	}
-	mutexBloquear(mutexArchivo);
-	archivoBuffer = NULL;
-	mutexDesbloquear(mutexArchivo);
-	mutexBloquear(mutexNodo);
-	nodoBuffer = NULL;
-	mutexDesbloquear(mutexNodo);
-	mutexBloquear(mutexBloque);
-	bloqueBuffer = NULL;
-	mutexDesbloquear(mutexBloque);
 }
 
 void bloqueLeer(Puntero datos) {
@@ -2412,7 +2408,7 @@ void bloqueCopiarBinario(Puntero datos) {
 	mutexDesbloquear(mutexRuta);
 	fwrite(datos, sizeof(char), BLOQUE, file);
 	fileCerrar(file);
-	semaforoSignal(semaforoCopia);
+	semaforoSignal(semaforoTarea);
 
 }
 
@@ -2422,7 +2418,7 @@ void bloqueCopiarTexto(Puntero datos) {
 	mutexDesbloquear(mutexRuta);
 	fprintf(file, "%s", (String)datos);
 	fileCerrar(file);
-	semaforoSignal(semaforoCopia);
+	semaforoSignal(semaforoTarea);
 }
 
 bool bloqueDisponible(Bloque* bloque) {
@@ -2634,7 +2630,7 @@ void bitmapDirectoriosOcuparBit(int posicion) {
 //--------------------------------------- Funciones de Semaforo ------------------------------------
 
 void semaforosCrear() {
-	semaforoCopia = memoriaAlocar(sizeof(Semaforo));
+	semaforoTarea = memoriaAlocar(sizeof(Semaforo));
 	semaforoFinal = memoriaAlocar(sizeof(Semaforo));
 	mutexListaArchivos = memoriaAlocar(sizeof(Mutex));
 	mutexListaNodos = memoriaAlocar(sizeof(Mutex));
@@ -2647,11 +2643,10 @@ void semaforosCrear() {
 	mutexEstadoFileSystem = memoriaAlocar(sizeof(Mutex));
 	mutexEstadoEjecucion = memoriaAlocar(sizeof(Mutex));
 	mutexEstadoControl = memoriaAlocar(sizeof(Mutex));
-	mutexTarea = memoriaAlocar(sizeof(Mutex));
 }
 
 void semaforosIniciar() {
-	semaforoIniciar(semaforoCopia, 1);
+	semaforoIniciar(semaforoTarea, 1);
 	semaforoIniciar(semaforoFinal, 0);
 	mutexIniciar(mutexListaArchivos);
 	mutexIniciar(mutexListaNodos);
@@ -2664,14 +2659,13 @@ void semaforosIniciar() {
 	mutexIniciar(mutexEstadoEjecucion);
 	mutexIniciar(mutexEstadoFileSystem);
 	mutexIniciar(mutexEstadoControl);
-	mutexIniciar(mutexTarea);
 }
 
 void semaforosDestruir() {
-	semaforoDestruir(semaforoCopia);
+	semaforoDestruir(semaforoTarea);
 	semaforoDestruir(semaforoFinal);
 	memoriaLiberar(semaforoFinal);
-	memoriaLiberar(semaforoCopia);
+	memoriaLiberar(semaforoTarea);
 	memoriaLiberar(mutexListaArchivos);
 	memoriaLiberar(mutexListaNodos);
 	memoriaLiberar(mutexListaDirectorios);
@@ -2683,12 +2677,12 @@ void semaforosDestruir() {
 	memoriaLiberar(mutexEstadoEjecucion);
 	memoriaLiberar(mutexEstadoFileSystem);
 	memoriaLiberar(mutexEstadoControl);
-	memoriaLiberar(mutexTarea);
 }
 
-//con clean no deberia borrar todo al formatear al primera vez
-//TODO si no esta disponible no deberia crear archivo en cpto
-//TODO persistir bitmap una sola vez
-//TODO ver si las persistencias coinciden
+//TODO cpblock, cpto, md5, cpfrom, cat (md5 se traba)
 //TODO persistir siempre al final de un comando
 //TODO avisar que el archivo termino de copiarse
+//TODO si no esta disponible no deberia crear archivo en cpto
+//TODO info nodos, help y listar todos los archivos y directorios
+//TODO ver limit directorios
+
