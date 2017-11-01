@@ -59,7 +59,7 @@ void yamaIniciar() {
 }
 
 void configurar(){
-	char* campos[8] = {"IP_PROPIO","PUERTO_MASTER","PUERTO_ERRORES","IP_FILESYSTEM","PUERTO_FILESYSTEM","RETARDO_PLANIFICACION","ALGORITMO_BALANCEO","DISPONIBILIDAD_BASE"};
+	char* campos[8] = {"IP_PROPIO","PUERTO_MASTER","IP_FILESYSTEM","PUERTO_FILESYSTEM","RETARDO_PLANIFICACION","ALGORITMO_BALANCEO","DISPONIBILIDAD_BASE"};
 	ArchivoConfig archivoConfig = archivoConfigCrear(RUTA_CONFIG, campos);
 	stringCopiar(configuracion->puertoMaster, archivoConfigStringDe(archivoConfig, "PUERTO_MASTER"));
 	stringCopiar(configuracion->ipFileSystem, archivoConfigStringDe(archivoConfig, "IP_FILESYSTEM"));

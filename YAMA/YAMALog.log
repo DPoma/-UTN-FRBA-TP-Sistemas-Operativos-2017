@@ -1,2 +1,3 @@
-[INFO] 16:26:03:669 YAMA/(11850:11850): [CONEXION] Realizando conexion con File System (IP: 127.0.0.1 | Puerto 5060)
-[INFO] 16:26:03:677 YAMA/(11850:11850): [CONEXION] Conexion exitosa con File System
+[INFO] 11:23:44:921 YAMA/(2822:2822): [CONEXION] Realizando conexion con File System (IP: 127.0.0.1 | Puerto 5060)
+[INFO] 11:23:44:921 YAMA/(2822:2822): [CONEXION] Conexion exitosa con File System
+[INFO] 12:14:24:739 YAMA/(2822:2822): [CONEXION] Esperando conexiones de un Master (Puerto 5070)

@@ -4,11 +4,172 @@
  Author      : Dario Poma
  Version     : 1.0
  Copyright   : Todos los derechos reservados papu
- Description : Proceso YAMA
+ Description : Proceso Master
  ============================================================================
  */
 
 #include "Master.h"
+
+int main(int argc,char** argv) {
+//	if(argc!=5){
+//		puts("mal numero de argumentos");
+//		return -1;
+//	}
+	masterIniciar();
+	masterAtender();
+	masterFinalizar();
+	return EXIT_SUCCESS;
+}
+
+//--------------------------------------- Funciones de Master -------------------------------------
+
+void masterIniciar() {
+	configuracionIniciar();
+	establecerConexiones();
+	senialAsignarFuncion(SIGINT, configuracionSenial);
+	mutexIniciar(&errorBloque);
+	mutexIniciar(&recepcionAlternativo); //necesito que arranque en 0 este
+}
+
+void masterAtender() {
+
+}
+
+void masterFinalizar() {
+
+}
+
+bool masterActivado() {
+	return estadoMaster == ACTIVADO;
+}
+
+bool masterDesactivado() {
+	return estadoMaster == DESACTIVADO;
+}
+
+void masterActivar() {
+	estadoMaster= ACTIVADO;
+}
+
+void masterDesactivar() {
+	estadoMaster = DESACTIVADO;
+}
+
+//--------------------------------------- Funciones de Configuracion -------------------------------------
+
+void configuracionIniciar() {
+	configuracionIniciarLog();
+	configuracionIniciarCampos();
+	configuracion = configuracionCrear(RUTA_CONFIG, (Puntero)configuracionLeerArchivo, campos);
+	configuracionImprimir(configuracion);
+}
+
+Configuracion* configuracionLeerArchivo(ArchivoConfig archivoConfig) {
+	Configuracion* configuracion = memoriaAlocar(sizeof(Configuracion));
+	stringCopiar(configuracion->ipYama, archivoConfigStringDe(archivoConfig, "IP_YAMA"));
+	stringCopiar(configuracion->puertoYama, archivoConfigStringDe(archivoConfig, "PUERTO_YAMA"));
+	archivoConfigDestruir(archivoConfig);
+	return configuracion;
+}
+
+void configuracionImprimir(Configuracion* configuracion) {
+	imprimirMensajeDos(archivoLog, "[CONEXION] Configuracion para conexion con YAMA (IP: %s | Puerto: %s)", configuracion->ipYama, configuracion->puertoYama);
+}
+
+void configuracionIniciarLog() {
+	pantallaLimpiar();
+	archivoLog = archivoLogCrear(RUTA_LOG, "Master");
+	imprimirMensajeProceso("# PROCESO MASTER");
+}
+
+void configuracionIniciarCampos() {
+	campos[0] = "IP_YAMA";
+	campos[1] = "PUERTO_YAMA";
+}
+
+void configuracionSenial(int senial) {
+	masterDesactivar();
+	puts("");
+}
+
+//--------------------------------------- Funciones de algo -------------------------------------
+
+void algo() {
+	scriptTransformacion = fopen(argv[1],"r+");
+	scriptReductor = fopen(argv[2], "r+");
+	mensajeEnviar(socketYAMA,Solicitud,argv[3],strlen(argv[3]));
+	imprimirMensaje(archivoLog, "[MENSAJE] Solicitud enviada");
+	Mensaje* mensaje=mensajeRecibir(socketYAMA);
+	imprimirMensaje(archivoLog, "[MENSAJE] Lista de bloques recibida");
+	Lista workers=list_create();
+	int i;
+	for(i=0;i<mensaje->header.tamanio;i+=DIRSIZE+INTSIZE*2+TEMPSIZE){
+		WorkerTransformacion worker;
+		memcpy(&worker.dir,mensaje->datos+i,DIRSIZE);
+		memcpy(&worker.bloque,mensaje->datos+i+DIRSIZE,INTSIZE);
+		memcpy(&worker.bytes,mensaje->datos+i+DIRSIZE+INTSIZE,INTSIZE);
+		memcpy(&worker.temp,mensaje->datos+i+DIRSIZE+INTSIZE*2,TEMPSIZE);
+		list_addM(workers,&worker,sizeof(WorkerTransformacion));
+	}
+	bool mismoNodo(Dir a,Dir b){
+		return a.ip==b.ip&&a.port==b.port;//podría comparar solo ip
+	}
+	Lista listas=list_create();
+	for(i=0;i<=workers->elements_count;i++){
+		WorkerTransformacion* worker=list_get(workers,i);
+		int j;
+		for(j=0;j<=listas->elements_count;j++){
+			Lista nodo=list_get(listas,j);
+			WorkerTransformacion* cmp=list_get(nodo,0);
+			if(mismoNodo(worker->dir,cmp->dir)){
+				list_add(nodo,worker);
+			}
+		}
+		Lista nodo=list_create();
+		list_add(nodo, worker);
+		list_add(listas,nodo);//creo que no hay que alocar nada
+	}
+
+	Lista hilos=list_create();
+	for(i=0;i<=listas->elements_count;i++){
+		pthread_t hilo;
+		pthread_create(&hilo,NULL,(void*)establecerConexionConWorker,list_get(listas,i));
+		list_addM(hilos,&hilo,sizeof(pthread_t));
+	}
+
+	while(masterActivado()){
+		Mensaje* m = mensajeRecibir(socketYAMA);
+		switch(m->header.operacion){
+		case Aborto:
+			imprimirMensaje(archivoLog,"[ABORTO] Abortando proceso");
+			return EXIT_FAILURE; //supongo que los hilos mueren aca
+			//si no se mueren matarlos
+		case Cierre:
+			imprimirMensaje(archivoLog,"[EJECUCION] Terminando proceso");
+			masterDesactivar();
+			break;
+		case Transformacion://hubo un error y se recibió un bloque alternativo
+			memcpy(&alternativo.bloque,mensaje->datos+i+DIRSIZE,INTSIZE);
+			memcpy(&alternativo.bytes,mensaje->datos+i+DIRSIZE+INTSIZE,INTSIZE);
+			memcpy(&alternativo.temp,mensaje->datos+i+DIRSIZE+INTSIZE*2,TEMPSIZE);
+			mutexDesbloquear(&recepcionAlternativo);
+			break;
+		case ReducLocal:
+			reduccionLocal(m);
+			break;
+		case ReducGlobal:
+			reduccionGlobal(m);
+			break;
+		}
+	}
+	socketCerrar(socketYAMA);
+	socketCerrar(socketWorker);
+	archivoLogDestruir(archivoLog);
+	memoriaLiberar(configuracion);
+	fclose(scriptReductor);
+	fclose(scriptTransformacion);
+}
+
 
 char* leerArchivo(FILE* archivo) {
 	fseek(archivo, 0, SEEK_END);
@@ -58,11 +219,7 @@ void establecerConexiones(){
 }
 
 void leerArchivoConfig(){
-	archivoConfigObtenerCampos();
-	configuracion = configuracionCrear(RUTA_CONFIG, (Puntero)configuracionLeerArchivo, campos);
-	stringCopiar(configuracion->ipWorker, IP_LOCAL);
-	stringCopiar(configuracion->puertoWorker, "5050");
-	imprimirMensajeDos(archivoLog,"[CONEXION] Estableciendo Conexion con YAMA (IP: %s | Puerto %s)", configuracion->ipYama, configuracion->puertoYama);
+
 }
 
 int hayWorkersParaConectar(){
@@ -163,7 +320,6 @@ ListaSockets sockets(){
 	}
 
 	return sockets;
-
 }
 
 
@@ -203,12 +359,9 @@ void enviarScript(Socket unSocket, FILE* script, Entero operacion){//operacion p
 
 void establecerConexionConWorker(Lista bloques){
 	WorkerTransformacion* dir = list_get(bloques,0);
-
 	socketWorker=socketCrearCliente(dir->dir.ip,string_itoa(dir->dir.port), ID_MASTER);
-
 	enviarScript(socketWorker, scriptTransformacion, SCRIPT_TRANSFORMACION);
 	enviarScript(socketWorker, scriptReductor, SCRIPT_REDUCTOR);
-
 	int i;
 	enviarBloques:
 	for(i=0;i<bloques->elements_count;i++){
@@ -254,140 +407,5 @@ void reduccionGlobal(){
 
 
 
-int main(int argc,char** argv) {
-//	if(argc!=5){
-//		puts("mal numero de argumentos");
-//		return -1;
-//	}
 
-
-	pantallaLimpiar();
-	leerArchivoConfig();
-	establecerConexiones();
-
-	masterActivar();
-	senialAsignarFuncion(SIGINT, funcionSenial);
-//	mensajeEnviar(socketYAMA, HANDSHAKE, "HOLIII", 7);
-//	mensajeEnviar(socketWorker, HANDSHAKE, "HOLIII", 7);
-
-	mutexIniciar(&errorBloque);
-	mutexIniciar(&recepcionAlternativo); //necesito que arranque en 0 este
-
-	scriptTransformacion = fopen(argv[1],"r+");
-	scriptReductor = fopen(argv[2], "r+");
-
-
-	mensajeEnviar(socketYAMA,Solicitud,argv[3],strlen(argv[3]));
-	imprimirMensaje(archivoLog, "[MENSAJE] Solicitud enviada");
-	Mensaje* mensaje=mensajeRecibir(socketYAMA);
-	imprimirMensaje(archivoLog, "[MENSAJE] Lista de bloques recibida");
-	Lista workers=list_create();
-	int i;
-	for(i=0;i<mensaje->header.tamanio;i+=DIRSIZE+INTSIZE*2+TEMPSIZE){
-		WorkerTransformacion worker;
-		memcpy(&worker.dir,mensaje->datos+i,DIRSIZE);
-		memcpy(&worker.bloque,mensaje->datos+i+DIRSIZE,INTSIZE);
-		memcpy(&worker.bytes,mensaje->datos+i+DIRSIZE+INTSIZE,INTSIZE);
-		memcpy(&worker.temp,mensaje->datos+i+DIRSIZE+INTSIZE*2,TEMPSIZE);
-		list_addM(workers,&worker,sizeof(WorkerTransformacion));
-	}
-	bool mismoNodo(Dir a,Dir b){
-		return a.ip==b.ip&&a.port==b.port;//podría comparar solo ip
-	}
-	Lista listas=list_create();
-	for(i=0;i<=workers->elements_count;i++){
-		WorkerTransformacion* worker=list_get(workers,i);
-		int j;
-		for(j=0;j<=listas->elements_count;j++){
-			Lista nodo=list_get(listas,j);
-			WorkerTransformacion* cmp=list_get(nodo,0);
-			if(mismoNodo(worker->dir,cmp->dir)){
-				list_add(nodo,worker);
-			}
-		}
-		Lista nodo=list_create();
-		list_add(nodo, worker);
-		list_add(listas,nodo);//creo que no hay que alocar nada
-	}
-
-	Lista hilos=list_create();
-	for(i=0;i<=listas->elements_count;i++){
-		pthread_t hilo;
-		pthread_create(&hilo,NULL,(void*)establecerConexionConWorker,list_get(listas,i));
-		list_addM(hilos,&hilo,sizeof(pthread_t));
-	}
-
-	while(masterActivado()){
-		Mensaje* m = mensajeRecibir(socketYAMA);
-		switch(m->header.operacion){
-		case Aborto:
-			imprimirMensaje(archivoLog,"[ABORTO] Abortando proceso");
-			return EXIT_FAILURE; //supongo que los hilos mueren aca
-			//si no se mueren matarlos
-		case Cierre:
-			imprimirMensaje(archivoLog,"[EJECUCION] Terminando proceso");
-			masterDesactivar();
-			break;
-		case Transformacion://hubo un error y se recibió un bloque alternativo
-			memcpy(&alternativo.bloque,mensaje->datos+i+DIRSIZE,INTSIZE);
-			memcpy(&alternativo.bytes,mensaje->datos+i+DIRSIZE+INTSIZE,INTSIZE);
-			memcpy(&alternativo.temp,mensaje->datos+i+DIRSIZE+INTSIZE*2,TEMPSIZE);
-			mutexDesbloquear(&recepcionAlternativo);
-			break;
-		case ReducLocal:
-			reduccionLocal(m);
-			break;
-		case ReducGlobal:
-			reduccionGlobal(m);
-			break;
-		}
-	}
-
-	socketCerrar(socketYAMA);
-	socketCerrar(socketWorker);
-	archivoLogDestruir(archivoLog);
-	memoriaLiberar(configuracion);
-
-	fclose(scriptReductor);
-	fclose(scriptTransformacion);
-
-	return EXIT_SUCCESS;
-
-}
-
-Configuracion* configuracionLeerArchivo(ArchivoConfig archivoConfig) {
-	Configuracion* configuracion = memoriaAlocar(sizeof(Configuracion));
-	stringCopiar(configuracion->ipYama, archivoConfigStringDe(archivoConfig, "IP_YAMA"));
-	stringCopiar(configuracion->puertoYama, archivoConfigStringDe(archivoConfig, "PUERTO_YAMA"));
-	archivoConfigDestruir(archivoConfig);
-	return configuracion;
-}
-
-void archivoConfigObtenerCampos() {
-	campos[0] = "IP_YAMA";
-	campos[1] = "PUERTO_YAMA";
-}
-
-void funcionSenial(int senial) {
-	masterDesactivar();
-	puts("");
-}
-
-
-
-bool masterActivado() {
-	return estadoMaster == ACTIVADO;
-}
-
-bool masterDesactivado() {
-	return estadoMaster == DESACTIVADO;
-}
-
-void masterActivar() {
-	estadoMaster= ACTIVADO;
-}
-
-void masterDesactivar() {
-	estadoMaster = DESACTIVADO;
-}
 

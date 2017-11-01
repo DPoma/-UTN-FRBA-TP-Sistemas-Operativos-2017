@@ -25,7 +25,7 @@ void dataNodeIniciar() {
 	dataNodeActivar();
 	dataBinConfigurar();
 	dataNodeConectarAFS();
-	senialAsignarFuncion(SIGINT, funcionSenial);
+	senialAsignarFuncion(SIGINT, configuracionSenial);
 }
 
 void dataNodeAtenderFileSystem(){
@@ -237,7 +237,7 @@ void setBloque(Entero numeroBloque, Puntero datos) {
 	imprimirMensajeUno(archivoLog, "[DATABIN] El bloque N°%i fue escrito", (int*)numeroBloque);
 }
 
-void funcionSenial(int senial) {
+void configuracionSenial(int senial) {
 	mensajeEnviar(socketFileSystem, FINALIZAR, &socketFileSystem, sizeof(Entero));
 	dataNodeDesactivar();
 	puts("");

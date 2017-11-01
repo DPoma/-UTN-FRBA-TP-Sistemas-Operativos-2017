@@ -1,8 +1,11 @@
-[INFO] 01:18:19:361 FileSystem/(4607:4607): [EJECUCION] Proceso File System inicializado
-[INFO] 01:18:19:428 FileSystem/(4607:4607): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 01:18:19:431 FileSystem/(4607:4607): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 01:18:19:434 FileSystem/(4607:4607): [CONEXION] Esperando conexiones de Workers (Puerto: 5080)
-[INFO] 01:18:19:437 FileSystem/(4607:4607): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
-[INFO] 01:18:21:329 FileSystem/(4607:4607): [33m[AVISO] Para pasar a un estado estable conecte los nodos necesarios[0m
-[INFO] 01:18:22:109 FileSystem/(4607:4607): [33m[CONEXION] NODO1 conectado[0m
-[INFO] 01:18:22:481 FileSystem/(4607:4607): [ESTADO] El File System se encuentra estable
+[INFO] 11:22:11:870 FileSystem/(2762:2762): [EJECUCION] Proceso File System inicializado
+[INFO] 11:22:11:891 FileSystem/(2762:2762): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 11:22:11:891 FileSystem/(2762:2762): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 11:22:11:891 FileSystem/(2762:2762): [CONEXION] Esperando conexiones de Workers (Puerto: 5080)
+[INFO] 11:22:11:891 FileSystem/(2762:2762): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
+[INFO] 11:22:11:904 FileSystem/(2762:2762): [33m[AVISO] Para pasar a un estado estable primero debe formatear el File System[0m
+[INFO] 11:23:28:167 FileSystem/(2762:2762): [33m[AVISO] El proceso Yama no pudo conectarse, el File System no es estable[0m
+[INFO] 11:23:30:526 FileSystem/(2762:2762): [33m[AVISO] El proceso Yama no pudo conectarse, el File System no es estable[0m
+[INFO] 11:23:43:36 FileSystem/(2762:2767): [ESTADO] El File System ha sido formateado
+[INFO] 11:23:44:921 FileSystem/(2762:2762): [CONEXION] El proceso Yama se ha conectado
+[INFO] 12:14:22:739 FileSystem/(2762:2762): [EJECUCION] Proceso File System finalizado

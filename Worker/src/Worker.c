@@ -860,7 +860,7 @@ void archivoConfigObtenerCampos() {
 	campos[5] = "RUTA_DATABIN";
 }
 
-void funcionSenial(int senial) {
+void configuracionSenial(int senial) {
 	puts("");
 	imprimirMensaje(archivoLog, "[EJECUCION] Proceso Worker finalizado");
 	exit(0);
@@ -871,7 +871,7 @@ void workerIniciar() {
 	imprimirMensajeProceso("# PROCESO WORKER");
 	archivoLog = archivoLogCrear(RUTA_LOG, "Worker");
 	archivoConfigObtenerCampos();
-	senialAsignarFuncion(SIGINT, funcionSenial);
+	senialAsignarFuncion(SIGINT, configuracionSenial);
 	configuracion = configuracionCrear(RUTA_CONFIG, (void*)configuracionLeerArchivoConfig, campos);
 	char* texto;
 	strcat(texto,"stat -c%s ");
