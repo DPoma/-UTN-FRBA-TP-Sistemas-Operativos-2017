@@ -1,3 +1,78 @@
-[INFO] 18:17:41:765 DataNode/(11909:11909): [CONFIGURACION] Nombre Nodo: NODO2
-[INFO] 18:17:41:765 DataNode/(11909:11909): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data2.bin
-[INFO] 18:17:41:766 DataNode/(11909:11909): [DATABIN] Cantidad de bloques disponibles 81920
+[INFO] 01:18:21:834 DataNode/(4612:4612): [CONFIGURACION] Nombre Nodo: NODO1
+[INFO] 01:18:21:841 DataNode/(4612:4612): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data.bin
+[INFO] 01:18:21:842 DataNode/(4612:4612): [DATABIN] Cantidad de bloques disponibles 81920
+[INFO] 01:18:21:884 DataNode/(4612:4612): [CONEXION] Estableciendo conexion con File System (IP: 127.0.0.1 | Puerto 5040)
+[INFO] 01:18:22:102 DataNode/(4612:4612): [CONEXION] Conexion establecida con el File System
+[INFO] 01:18:28:839 DataNode/(4612:4612): [DATABIN] El bloque N°0 fue leido
+[INFO] 01:18:28:884 DataNode/(4612:4612): [DATABIN] El bloque N°1 fue leido
+[INFO] 01:18:28:898 DataNode/(4612:4612): [DATABIN] El bloque N°2 fue leido
+[INFO] 01:18:28:954 DataNode/(4612:4612): [DATABIN] El bloque N°3 fue leido
+[INFO] 01:18:28:971 DataNode/(4612:4612): [DATABIN] El bloque N°4 fue leido
+[INFO] 01:18:28:991 DataNode/(4612:4612): [DATABIN] El bloque N°5 fue leido
+[INFO] 01:18:28:4 DataNode/(4612:4612): [DATABIN] El bloque N°6 fue leido
+[INFO] 01:18:29:26 DataNode/(4612:4612): [DATABIN] El bloque N°7 fue leido
+[INFO] 01:18:29:42 DataNode/(4612:4612): [DATABIN] El bloque N°8 fue leido
+[INFO] 01:18:29:61 DataNode/(4612:4612): [DATABIN] El bloque N°9 fue leido
+[INFO] 01:18:29:86 DataNode/(4612:4612): [DATABIN] El bloque N°10 fue leido
+[INFO] 01:18:29:103 DataNode/(4612:4612): [DATABIN] El bloque N°11 fue leido
+[INFO] 01:18:29:119 DataNode/(4612:4612): [DATABIN] El bloque N°12 fue leido
+[INFO] 01:18:29:137 DataNode/(4612:4612): [DATABIN] El bloque N°13 fue leido
+[INFO] 01:18:29:160 DataNode/(4612:4612): [DATABIN] El bloque N°14 fue leido
+[INFO] 01:18:29:174 DataNode/(4612:4612): [DATABIN] El bloque N°15 fue leido
+[INFO] 01:18:29:192 DataNode/(4612:4612): [DATABIN] El bloque N°16 fue leido
+[INFO] 01:18:29:212 DataNode/(4612:4612): [DATABIN] El bloque N°17 fue leido
+[INFO] 01:18:29:228 DataNode/(4612:4612): [DATABIN] El bloque N°18 fue leido
+[INFO] 01:18:29:247 DataNode/(4612:4612): [DATABIN] El bloque N°19 fue leido
+[INFO] 01:18:29:443 DataNode/(4612:4612): [DATABIN] El bloque N°20 fue leido
+[INFO] 01:18:29:447 DataNode/(4612:4612): [DATABIN] El bloque N°21 fue leido
+[INFO] 01:18:29:448 DataNode/(4612:4612): [DATABIN] El bloque N°22 fue leido
+[INFO] 01:18:29:451 DataNode/(4612:4612): [DATABIN] El bloque N°23 fue leido
+[INFO] 01:18:29:455 DataNode/(4612:4612): [DATABIN] El bloque N°24 fue leido
+[INFO] 01:18:29:455 DataNode/(4612:4612): [DATABIN] El bloque N°25 fue leido
+[INFO] 01:18:29:456 DataNode/(4612:4612): [DATABIN] El bloque N°26 fue leido
+[INFO] 01:18:29:456 DataNode/(4612:4612): [DATABIN] El bloque N°27 fue leido
+[INFO] 01:18:29:457 DataNode/(4612:4612): [DATABIN] El bloque N°28 fue leido
+[INFO] 01:18:29:464 DataNode/(4612:4612): [DATABIN] El bloque N°29 fue leido
+[INFO] 01:18:29:464 DataNode/(4612:4612): [DATABIN] El bloque N°30 fue leido
+[INFO] 01:18:29:465 DataNode/(4612:4612): [DATABIN] El bloque N°31 fue leido
+[INFO] 01:18:29:465 DataNode/(4612:4612): [DATABIN] El bloque N°32 fue leido
+[INFO] 01:18:29:465 DataNode/(4612:4612): [DATABIN] El bloque N°33 fue leido
+[INFO] 01:18:29:466 DataNode/(4612:4612): [DATABIN] El bloque N°34 fue leido
+[INFO] 01:18:29:470 DataNode/(4612:4612): [DATABIN] El bloque N°35 fue leido
+[INFO] 01:18:29:484 DataNode/(4612:4612): [DATABIN] El bloque N°36 fue leido
+[INFO] 01:18:29:539 DataNode/(4612:4612): [DATABIN] El bloque N°37 fue leido
+[INFO] 01:18:29:554 DataNode/(4612:4612): [DATABIN] El bloque N°38 fue leido
+[INFO] 01:18:29:582 DataNode/(4612:4612): [DATABIN] El bloque N°39 fue leido
+[INFO] 01:18:29:607 DataNode/(4612:4612): [DATABIN] El bloque N°40 fue leido
+[INFO] 01:18:29:635 DataNode/(4612:4612): [DATABIN] El bloque N°41 fue leido
+[INFO] 01:18:29:651 DataNode/(4612:4612): [DATABIN] El bloque N°42 fue leido
+[INFO] 01:18:29:679 DataNode/(4612:4612): [DATABIN] El bloque N°43 fue leido
+[INFO] 01:18:29:715 DataNode/(4612:4612): [DATABIN] El bloque N°44 fue leido
+[INFO] 01:18:29:768 DataNode/(4612:4612): [DATABIN] El bloque N°45 fue leido
+[INFO] 01:18:29:801 DataNode/(4612:4612): [DATABIN] El bloque N°46 fue leido
+[INFO] 01:18:30:42 DataNode/(4612:4612): [DATABIN] El bloque N°47 fue leido
+[INFO] 01:18:30:47 DataNode/(4612:4612): [DATABIN] El bloque N°48 fue leido
+[INFO] 01:18:30:61 DataNode/(4612:4612): [DATABIN] El bloque N°49 fue leido
+[INFO] 01:18:30:126 DataNode/(4612:4612): [DATABIN] El bloque N°50 fue leido
+[INFO] 01:18:30:129 DataNode/(4612:4612): [DATABIN] El bloque N°51 fue leido
+[INFO] 01:18:30:136 DataNode/(4612:4612): [DATABIN] El bloque N°52 fue leido
+[INFO] 01:18:30:143 DataNode/(4612:4612): [DATABIN] El bloque N°53 fue leido
+[INFO] 01:18:30:160 DataNode/(4612:4612): [DATABIN] El bloque N°54 fue leido
+[INFO] 01:18:30:169 DataNode/(4612:4612): [DATABIN] El bloque N°55 fue leido
+[INFO] 01:18:30:184 DataNode/(4612:4612): [DATABIN] El bloque N°56 fue leido
+[INFO] 01:18:30:196 DataNode/(4612:4612): [DATABIN] El bloque N°57 fue leido
+[INFO] 01:18:30:210 DataNode/(4612:4612): [DATABIN] El bloque N°58 fue leido
+[INFO] 01:18:30:220 DataNode/(4612:4612): [DATABIN] El bloque N°59 fue leido
+[INFO] 01:18:30:230 DataNode/(4612:4612): [DATABIN] El bloque N°60 fue leido
+[INFO] 01:18:30:241 DataNode/(4612:4612): [DATABIN] El bloque N°61 fue leido
+[INFO] 01:18:30:249 DataNode/(4612:4612): [DATABIN] El bloque N°62 fue leido
+[INFO] 01:18:30:262 DataNode/(4612:4612): [DATABIN] El bloque N°63 fue leido
+[INFO] 01:18:30:269 DataNode/(4612:4612): [DATABIN] El bloque N°64 fue leido
+[INFO] 01:18:30:277 DataNode/(4612:4612): [DATABIN] El bloque N°65 fue leido
+[INFO] 01:18:30:281 DataNode/(4612:4612): [DATABIN] El bloque N°66 fue leido
+[INFO] 01:18:30:295 DataNode/(4612:4612): [DATABIN] El bloque N°67 fue leido
+[INFO] 01:18:30:308 DataNode/(4612:4612): [DATABIN] El bloque N°68 fue leido
+[INFO] 01:18:30:320 DataNode/(4612:4612): [DATABIN] El bloque N°69 fue leido
+[INFO] 01:18:30:335 DataNode/(4612:4612): [DATABIN] El bloque N°70 fue leido
+[INFO] 01:18:30:362 DataNode/(4612:4612): [DATABIN] El bloque N°71 fue leido
+[INFO] 01:18:30:363 DataNode/(4612:4612): [EJECUCION] Proceso Data Node finalizado

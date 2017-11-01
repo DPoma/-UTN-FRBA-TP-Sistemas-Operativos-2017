@@ -160,11 +160,13 @@ ArchivoLog archivoLog;
 int estadoControl;
 int estadoEjecucion;
 int estadoFileSystem;
+int flagMensaje;
 int directoriosDisponibles;
 Hilo hiloConsola;
 Lista listaDirectorios;
 Lista listaArchivos;
 Lista listaNodos;
+Lista listaSockets;
 Bitmap* bitmapDirectorios;
 Socket socketYama;
 Socket socketDataNode;
@@ -185,13 +187,13 @@ Mutex* mutexArchivo;
 Mutex* mutexListaNodos;
 Mutex* mutexListaArchivos;
 Mutex* mutexListaDirectorios;
+Mutex* mutexListaSockets;
 Mutex* mutexBitmapDirectorios;
 Mutex* mutexEstadoFileSystem;
 Mutex* mutexEstadoEjecucion;
 Mutex* mutexEstadoControl;
 Semaforo* semaforoTarea;
 Semaforo* semaforoFinal;
-
 
 //--------------------------------------- Funciones de File System -------------------------------------
 
@@ -263,6 +265,11 @@ bool socketEsYama(Servidor* servidor, Socket unSocket);
 bool socketEsListenerDataNode(Servidor* servidor, Socket unSocket);
 bool socketEsWorker(Servidor* servidor, Socket unSocket);
 bool socketEsListenerWorker(Servidor* servidor, Socket unSocket);
+void socketAgregar(Socket* unSocket);
+int socketCantidad();
+void socketEliminar(int posicion);
+void socketDestruir();
+Socket* socketObtener(int posicion);
 
 //--------------------------------------- Funciones de Consola -------------------------------------
 
@@ -438,7 +445,7 @@ int bloqueEnviarANodo(Bloque* bloque, Nodo* nodo, String buffer);
 int bloqueEnviarCopiasANodos(Bloque* bloque, String buffer);
 bool bloqueOrdenarPorNumero(Bloque* unBloque, Bloque* otroBloque);
 void bloqueCopiar(Puntero datos);
-void bloqueLeer(Puntero datos);
+void bloqueLeer(Servidor* servidor, Puntero datos);
 void bloqueCopiarTexto(Puntero datos);
 void bloqueCopiarBinario(Puntero datos);
 bool bloqueDisponible(Bloque* bloque);

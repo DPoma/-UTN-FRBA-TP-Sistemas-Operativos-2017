@@ -24,6 +24,7 @@ void fileSystemIniciar(String flag) {
 	pantallaLimpiar();
 	semaforosCrear();
 	semaforosIniciar();
+	flagMensaje = DESACTIVADO;
 	mutexBloquear(mutexEstadoControl);
 	estadoControl = ACTIVADO;
 	mutexDesbloquear(mutexEstadoControl);
@@ -32,6 +33,7 @@ void fileSystemIniciar(String flag) {
 	estadoFileSystem = INESTABLE;
 	mutexDesbloquear(mutexEstadoFileSystem);
 	mutexBloquear(mutexListaNodos);
+	listaSockets = listaCrear(); //TODO GLOBAL
 	listaNodos = listaCrear();
 	mutexDesbloquear(mutexListaNodos);
 	if(stringIguales(flag, FLAG_C)) {
@@ -316,21 +318,31 @@ void servidorRegistrarDataNode(Servidor* servidor, Nodo* nodo) {
 
 void servidorMensajeDataNode(Servidor* servidor, Mensaje* mensaje, Socket unSocket) {
 	switch(mensaje->header.operacion) {
-	case LEER_BLOQUE: bloqueLeer(mensaje->datos); break;
+	case LEER_BLOQUE: bloqueLeer(servidor, mensaje->datos); break;
 	case COPIAR_BLOQUE: bloqueCopiar(mensaje->datos); break;
 	case COPIAR_BINARIO: bloqueCopiarBinario(mensaje->datos); break;
 	case COPIAR_TEXTO: bloqueCopiarTexto(mensaje->datos); break;
-	case FINALIZAR_NODO: servidorFinalizarDataNode(servidor, unSocket); break;
+	case FINALIZAR_NODO:
+		mutexBloquear(mutexRuta); puts("finalizar entre");servidorFinalizarDataNode(servidor, unSocket);
+	mutexDesbloquear(mutexRuta); puts("finalizar sali");
+	break;
 	}
 }
 
 void servidorDesactivarDataNode(Servidor* servidor, Nodo* nodo) {
-	socketCerrar(nodo->socket);
-	listaSocketsEliminar(nodo->socket, &servidor->listaDataNodes);
-	listaSocketsEliminar(nodo->socket, &servidor->listaMaster);
-	nodo->estado = DESACTIVADO;
-	nodo->socket = ERROR;
-	imprimirMensajeUno(archivoLog, AMARILLO"[CONEXION] %s desconectado"BLANCO, nodo->nombre);
+	if(flagMensaje == DESACTIVADO) {
+		socketCerrar(nodo->socket);
+		listaSocketsEliminar(nodo->socket, &servidor->listaDataNodes);
+		listaSocketsEliminar(nodo->socket, &servidor->listaMaster);
+		nodo->estado = DESACTIVADO;
+		nodo->socket = ERROR;
+		imprimirMensajeUno(archivoLog, AMARILLO"[CONEXION] %s desconectado"BLANCO, nodo->nombre);
+	}
+	else {
+		Socket* unSocket = memoriaAlocar(sizeof(Socket));
+		*unSocket = nodo->socket;
+		socketAgregar(unSocket);
+	}
 }
 
 void servidorControlarFinalizacionDataNode(Servidor* servidor, Nodo* nodo) {
@@ -341,13 +353,11 @@ void servidorControlarFinalizacionDataNode(Servidor* servidor, Nodo* nodo) {
 }
 
 void servidorFinalizarDataNode(Servidor* servidor, Socket unSocket) {
-	semaforoWait(semaforoTarea);
 	Nodo* nodo = nodoBuscarPorSocket(unSocket);
 	if(estadoEjecucionIgualA(NORMAL))
 		servidorDesactivarDataNode(servidor, nodo);
 	else
 		servidorControlarFinalizacionDataNode(servidor, nodo);
-	semaforoSignal(semaforoTarea);
 }
 
 //--------------------------------------- Servidor Yama -------------------------------------
@@ -424,6 +434,38 @@ bool socketEsListener(Servidor* servidor, Socket unSocket) {
 	return socketEsListenerDataNode(servidor, unSocket) ||
 			socketEsListenerYama(servidor, unSocket) ||
 			socketEsListenerWorker(servidor, unSocket);
+}
+
+void socketAgregar(Socket* unSocket) {
+	mutexBloquear(mutexListaSockets);
+	listaAgregarElemento(listaSockets, unSocket);
+	mutexDesbloquear(mutexListaSockets);
+}
+
+int socketCantidad() {
+	mutexBloquear(mutexListaSockets);
+	int cantidad = listaCantidadElementos(listaSockets);
+	mutexDesbloquear(mutexListaSockets);
+	return cantidad;
+}
+
+void socketDestruir() {
+	mutexBloquear(mutexListaSockets);
+	listaDestruirConElementos(listaSockets, memoriaLiberar);
+	mutexDesbloquear(mutexListaSockets);
+}
+
+Socket* socketObtener(int indice) {
+	mutexBloquear(mutexListaSockets);
+	Socket* unSocket = listaObtenerElemento(listaSockets, indice);
+	mutexDesbloquear(mutexListaSockets);
+	return unSocket;
+}
+
+void socketEliminar(int posicion) {
+	mutexBloquear(mutexListaSockets);
+	listaEliminarDestruyendoElemento(listaSockets, posicion, memoriaLiberar);
+	mutexDesbloquear(mutexListaSockets);
 }
 
 
@@ -1906,13 +1948,16 @@ int archivoLeer(Comando* comando) {
 		for(numeroCopia=0; numeroCopia <listaCantidadElementos(bloque->listaCopias) && bloqueSinImprimir; numeroCopia++) {
 			Copia* copia = listaObtenerElemento(bloque->listaCopias, numeroCopia);
 			Nodo* nodo = nodoBuscar(copia->nombreNodo);
-			semaforoWait(semaforoTarea);
+			mutexBloquear(mutexRuta);
+			puts("envio entre");
 			if(nodoConectado(nodo)) {
 				mensajeEnviar(nodo->socket, LEER_BLOQUE ,&copia->bloqueNodo, sizeof(Entero));
+				flagMensaje = ACTIVADO;
 				nodo->actividadesRealizadas++;
 				bloqueSinImprimir = false;
 			}
-			semaforoSignal(semaforoTarea);
+			mutexDesbloquear(mutexRuta);
+			puts("envio sali");
 		}
 		if(bloqueSinImprimir) {
 			imprimirMensaje(archivoLog,"[ERROR] No hay nodos disponibles para obtener un bloque");
@@ -2447,9 +2492,23 @@ void bloqueCopiar(Puntero datos) {
 	}
 }
 
-void bloqueLeer(Puntero datos) {
-	printf("%s", (String)datos);
+void servidorDestruirSockets(Servidor* servidor) {
+	int indice;
+	for(indice=0; indice < socketCantidad(); indice++) {
+		Socket* unSocket = socketObtener(indice);
+		servidorFinalizarDataNode(servidor, *unSocket);
+		socketEliminar(indice);
+	}
+}
 
+void bloqueLeer(Servidor* servidor, Puntero datos) {
+	mutexBloquear(mutexRuta);
+	puts("bloque leer entre");
+	//printf("%s", (String)datos);
+	flagMensaje = DESACTIVADO;
+	servidorDestruirSockets(servidor);
+	mutexDesbloquear(mutexRuta);
+	puts("bloque leer sali");
 }
 
 void bloqueCopiarBinario(Puntero datos) {
@@ -2692,11 +2751,13 @@ void semaforosCrear() {
 	mutexEstadoFileSystem = memoriaAlocar(sizeof(Mutex));
 	mutexEstadoEjecucion = memoriaAlocar(sizeof(Mutex));
 	mutexEstadoControl = memoriaAlocar(sizeof(Mutex));
+	mutexListaSockets = memoriaAlocar(sizeof(Mutex));
 }
 
 void semaforosIniciar() {
 	semaforoIniciar(semaforoTarea, 1);
 	semaforoIniciar(semaforoFinal, 0);
+	mutexIniciar(mutexListaSockets);
 	mutexIniciar(mutexListaArchivos);
 	mutexIniciar(mutexListaNodos);
 	mutexIniciar(mutexListaDirectorios);
@@ -2715,6 +2776,7 @@ void semaforosDestruir() {
 	semaforoDestruir(semaforoFinal);
 	memoriaLiberar(semaforoFinal);
 	memoriaLiberar(semaforoTarea);
+	memoriaLiberar(mutexListaSockets);
 	memoriaLiberar(mutexListaArchivos);
 	memoriaLiberar(mutexListaNodos);
 	memoriaLiberar(mutexListaDirectorios);
