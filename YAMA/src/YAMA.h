@@ -45,13 +45,6 @@ typedef struct {
 } Servidor;
 Servidor* servidor;
 
-typedef struct {
-	Direccion nodo;
-	int32_t bloque;
-	//no pongo los bytes aca porque estan dos veces en bloques gemelos,
-	//los manejo aparte
-} Bloque;
-
 typedef struct{
 	bool conectado;
 	uint32_t carga; //son uint32_t porque lo pide el tp, yo usaria ints

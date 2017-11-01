@@ -200,13 +200,17 @@ void yamaAtender() {
 }
 
 void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
+	typedef struct __attribute__((__packed__)){
+		Direccion nodo;
+		int32_t bloque;
+	}Bloque;
 	int i;
 	Lista bloques=list_create();
 	Lista byteses=list_create();
-	for(i=0;i<=tamanio;i+=sizeof(Bloque)*2+INTSIZE){
-		list_add(bloques,(Bloque*)(listaBloques+i));
-		list_add(bloques,(Bloque*)(listaBloques+i+sizeof(Bloque)));
-		list_add(byteses,(int32_t*)(listaBloques+i+sizeof(Bloque)*2));
+	for(i=0;i<=tamanio;i+=(DIRSIZE+INTSIZE)*2+INTSIZE){
+		list_add(bloques,listaBloques+i);
+		list_add(bloques,listaBloques+i+sizeof(Bloque));
+		list_add(byteses,listaBloques+i+sizeof(Bloque)*2);
 	}
 	Lista tablaEstadosJob;
 	job++;//mutex (supongo que las variables globales se comparten entre hilos)
