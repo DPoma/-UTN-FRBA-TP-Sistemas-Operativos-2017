@@ -70,7 +70,7 @@ typedef struct{
 	Estado estado;
 } Entrada;
 
-typedef struct __attribute__((packed)) {
+typedef struct __attribute__((packed)) { //TODO borrar esta cosa
 	Direccion direccionCopia1;
 	Entero numeroBloqueCopia1;
 	Direccion direccionCopia2;

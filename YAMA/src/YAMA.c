@@ -149,11 +149,9 @@ void yamaAtender() {
 				}else{ //master
 					Mensaje* mensaje = mensajeRecibir(socketI);
 					if(mensaje->header.operacion==Solicitud){
-
-						String path = mensaje->datos;
-						//TODO test borrar los printf
+						//TODO test borrar
 						//Para probar el fs tiene que tener guardado el archivo a enviar
-						mensajeEnviar(servidor->fileSystem, SOLICITAR_BLOQUES, path, stringLongitud(path)+1);
+						mensajeEnviar(servidor->fileSystem, SOLICITAR_BLOQUES, mensaje->datos, stringLongitud(mensaje->datos)+1);
 						mensaje = mensajeRecibir(servidor->fileSystem);
 						int indice;
 						int cantidadBloques =  mensaje->header.tamanio / sizeof(BloqueYama);
@@ -168,7 +166,7 @@ void yamaAtender() {
 						}
 						//TODO test borrar
 /*
-						int32_t masterid = socketI;
+						int32_t masterid = socketI; //para pasarlo a 32, por las dudas
 						//el mensaje es el path del archivo
 						//aca le acoplo el numero de master y se lo mando al fileSystem
 						//lo de acoplar esta por si uso hilos, sino esta al pedo
@@ -207,7 +205,7 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 	int i;
 	Lista bloques=list_create();
 	Lista byteses=list_create();
-	for(i=0;i<=tamanio;i+=(DIRSIZE+INTSIZE)*2+INTSIZE){
+	for(i=0;i<=tamanio;i+=sizeof(Bloque)*2+INTSIZE){
 		list_add(bloques,listaBloques+i);
 		list_add(bloques,listaBloques+i+sizeof(Bloque));
 		list_add(byteses,listaBloques+i+sizeof(Bloque)*2);
