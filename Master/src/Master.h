@@ -25,8 +25,8 @@
 typedef enum {Solicitud,Transformacion=1,ReduccionLocal=2,ReduccionGlobal=3,Almacenamiento=4,Finalizacion,Aborto=6} Etapa;
 
 typedef struct {
-	char ipYama[50];
-	char puertoYama[50];
+	char ipYama[20];
+	char puertoYama[20];
 } Configuracion;
 
 typedef struct{
@@ -37,11 +37,13 @@ typedef struct{
 }WorkerTransformacion;
 
 typedef struct{
-	Direccion dir;
-	Entero list_size;
+	Entero dirs_size;
+	Lista dirs;
+	Entero tmps_size;
 	Lista tmps;
-	char* nombretemp;
-}WorkerReduccion;
+	Entero nombretemp_size;
+	Lista nombretempsreduccion;
+} WorkerReduccion;
 
 //--------------------------------------- Globales -------------------------------------
 
@@ -76,7 +78,7 @@ bool masterActivado();
 bool masterDesactivado();
 void masterActivar();
 void masterDesactivar();
-
+void masterAtender();
 //--------------------------------------- Funciones de algo -------------------------------------
 
 void etapaTransformacion();

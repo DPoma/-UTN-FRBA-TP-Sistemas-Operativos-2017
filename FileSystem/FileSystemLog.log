@@ -1,10 +1,10 @@
-[INFO] 17:24:46:845 FileSystem/(7479:7479): [EJECUCION] Proceso File System inicializado
-[INFO] 17:24:46:845 FileSystem/(7479:7479): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 17:24:46:845 FileSystem/(7479:7479): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 17:24:46:845 FileSystem/(7479:7479): [CONEXION] Esperando conexiones de Workers (Puerto: 5080)
-[INFO] 17:24:46:845 FileSystem/(7479:7479): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
-[INFO] 17:24:46:850 FileSystem/(7479:7479): [33m[AVISO] Para pasar a un estado estable conecte los nodos necesarios[0m
-[INFO] 17:24:51:704 FileSystem/(7479:7479): [33m[CONEXION] NODO1 conectado[0m
-[INFO] 17:24:51:705 FileSystem/(7479:7479): [ESTADO] El File System se encuentra estable
-[INFO] 17:25:01:289 FileSystem/(7479:7479): [CONEXION] El proceso Yama se ha conectado
-[INFO] 17:25:29:374 FileSystem/(7479:7479): [33m[CONEXION] NODO1 desconectado[0m
+[INFO] 17:35:41:495 FileSystem/(7663:7663): [EJECUCION] Proceso File System inicializado
+[INFO] 17:35:41:495 FileSystem/(7663:7663): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 17:35:41:495 FileSystem/(7663:7663): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 17:35:41:495 FileSystem/(7663:7663): [CONEXION] Esperando conexiones de Workers (Puerto: 5080)
+[INFO] 17:35:41:495 FileSystem/(7663:7663): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
+[INFO] 17:35:41:507 FileSystem/(7663:7663): [33m[AVISO] Para pasar a un estado estable conecte los nodos necesarios[0m
+[INFO] 17:35:50:866 FileSystem/(7663:7663): [33m[CONEXION] NODO1 conectado[0m
+[INFO] 17:35:50:867 FileSystem/(7663:7663): [ESTADO] El File System se encuentra estable
+[INFO] 17:35:55:487 FileSystem/(7663:7663): [CONEXION] El proceso Yama se ha conectado
+[INFO] 17:36:11:284 FileSystem/(7663:7663): [33m[CONEXION] NODO1 desconectado[0m

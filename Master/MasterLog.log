@@ -1,3 +1,3 @@
-[INFO] 17:25:13:844 Master/(7493:7493): [CONEXION] Configuracion para conexion con YAMA (IP: 127.0.0.1 | Puerto: 5070)
-[INFO] 17:25:13:844 Master/(7493:7493): [CONEXION] Estableciendo Conexion con YAMA...
-[INFO] 17:25:13:845 Master/(7493:7493): [CONEXION] Conexion establecida con YAMA, esperando instrucciones
+[INFO] 17:36:07:5 Master/(7675:7675): [CONEXION] Configuracion para conexion con YAMA (IP: 127.0.0.1 | Puerto: 5070)
+[INFO] 17:36:07:5 Master/(7675:7675): [CONEXION] Estableciendo Conexion con YAMA...
+[INFO] 17:36:07:6 Master/(7675:7675): [CONEXION] Conexion establecida con YAMA, esperando instrucciones

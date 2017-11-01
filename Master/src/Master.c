@@ -15,7 +15,6 @@ int main(int argc, String* argv) { //TODO controlar arguemntos
 	masterConectarAYama(argv[3]);
 	while(masterActivado())
 		masterAtenderYama();
-	masterFinalizar();
 	return EXIT_SUCCESS;
 }
 
@@ -45,14 +44,6 @@ void masterAtenderYama() {
 	//case ReduccionLocal: etapaReduccionLocal(mensaje); break;
 	//case ReduccionGlobal: etapaReduccionGlobal(mensaje); break;
 	}
-}
-
-void masterFinalizar() {
-	socketCerrar(socketYama);
-	socketCerrar(socketWorker);
-	archivoLogDestruir(archivoLog);
-	memoriaLiberar(configuracion);
-	imprimirMensaje(archivoLog,"[EJECUCION] Terminando proceso");
 }
 
 bool masterActivado() {
@@ -116,6 +107,44 @@ void etapaTransformacion() {
 	//scriptReductor = fopen(argv[2], "r+");
 	mensajeEnviar(socketYama,Solicitud, argv[3], strlen(argv[3])+1);
 	imprimirMensaje(archivoLog, "[MENSAJE] Solicitud enviada");
+=======
+void conectarConWorkerReduccionL(){
+
+}
+
+
+
+
+void reduccionLocal(Mensaje* m){
+	WorkerReduccion* wr= deserializarReduccion(m);
+	int i;
+	Lista list = wr->tmps;
+	pthread_t hilo;
+	pthread_create(&hilo,NULL,&conectarConWorkerReduccionL, NULL);
+
+	for(i=1;i<list_size(list);i++){
+
+		if(strcmp(list_get(list,i) , list_get(list,i++))){//comparo los nombres de los temporales donde se guarda la reduccion (uno por nodo)
+			//crear otro hilo
+		}else{
+
+
+		}
+
+	}
+
+
+}
+
+void reduccionGlobal(Mensaje* mensaje){
+
+}
+
+
+
+void masterAtender(){
+
+>>>>>>> origin/master
 	Mensaje* mensaje=mensajeRecibir(socketYAMA);
 	imprimirMensaje(archivoLog, "[MENSAJE] Lista de bloques recibida");
 	Lista workers=list_create();
@@ -154,6 +183,39 @@ void etapaTransformacion() {
 		list_addM(hilos,&hilo,sizeof(pthread_t));
 	}
 
+<<<<<<< HEAD
+=======
+	while(masterActivado()){
+		Mensaje* m = mensajeRecibir(socketYAMA);
+		switch(m->header.operacion){
+		case Aborto:
+			imprimirMensaje(archivoLog,"[ABORTO] Abortando proceso");
+	//		return EXIT_FAILURE; //supongo que los hilos mueren aca
+			//si no se mueren matarlos
+			break;
+		case Cierre:
+			imprimirMensaje(archivoLog,"[EJECUCION] Terminando proceso");
+			masterDesactivar();
+			break;
+		case Transformacion://hubo un error y se recibió un bloque alternativo
+			memcpy(&alternativo.bloque,mensaje->datos+i+DIRSIZE,INTSIZE);
+			memcpy(&alternativo.bytes,mensaje->datos+i+DIRSIZE+INTSIZE,INTSIZE);
+			memcpy(&alternativo.temp,mensaje->datos+i+DIRSIZE+INTSIZE*2,TEMPSIZE);
+			mutexDesbloquear(&recepcionAlternativo);
+			break;
+		case ReducLocal:
+			reduccionLocal(m);
+			break;
+		case ReducGlobal:
+			reduccionGlobal(m);
+			break;
+		}
+	}
+	socketCerrar(socketYAMA);
+	socketCerrar(socketWorker);
+	archivoLogDestruir(archivoLog);
+	memoriaLiberar(configuracion);
+>>>>>>> origin/master
 	fclose(scriptReductor);
 	fclose(scriptTransformacion);
 
@@ -208,6 +270,13 @@ char* leerCaracteresEntrantes() {
 
 void establecerConexiones(){
 
+<<<<<<< HEAD
+=======
+	//TODO se conecta con un worker al azar?
+	//imprimirMensajeDos(archivoLog, "[CONEXION] Estableciendo Conexion con Worker (IP: %s | Puerto: %s)", configuracion->ipWorker, configuracion->puertoWorker);
+	//socketWorker = socketCrearCliente(configuracion->ipWorker, configuracion->puertoWorker, ID_MASTER);
+	imprimirMensaje(archivoLog, "[CONEXION] Conexion existosa con Worker");
+>>>>>>> origin/master
 
 }
 
@@ -254,24 +323,28 @@ WorkerTransformacion* deserializarTransformacion(Mensaje* mensaje){
 
 WorkerReduccion* deserializarReduccion(Mensaje* mensaje){
 	int size = mensaje->header.tamanio;
-	char* numeroip;
-	int numeropuerto;
+	int tamanio_dirs;
+	Lista direcciones;
 	int tamaniolista;
-	Lista list;
-	char* nombretemporalreduccion;
+	Lista temporales;
+	int tamanionombrestemps;
+	Lista nombretemps;
 	WorkerReduccion* wr = malloc(size);
 
-	memcpy(&numeroip, mensaje->datos, 20);
-	memcpy(&numeropuerto,mensaje->datos + 20, sizeof(int));
-	memcpy(&tamaniolista, mensaje->datos + 20 + sizeof(int), sizeof(int));
-	memcpy(&list, mensaje->datos + 20 + sizeof(int)*2 , tamaniolista);// no se si se puede esto
-	memcpy(&nombretemporalreduccion, mensaje->datos + 20 + sizeof(int)*2 + tamaniolista, 12);
+	memcpy(&tamanio_dirs, mensaje->datos, sizeof(int));
+	memcpy(&direcciones,mensaje->datos + sizeof(int), tamanio_dirs);
+	memcpy(&tamaniolista, mensaje->datos + tamanio_dirs + sizeof(int), sizeof(int));
+	memcpy(&temporales, mensaje->datos + tamanio_dirs + sizeof(int)*2, tamaniolista);// no se si se puede esto
+	memcpy(&tamanionombrestemps, mensaje->datos + tamanio_dirs + sizeof(int)*3, sizeof(int));
+	memcpy(&nombretemps, mensaje->datos + tamanio_dirs + sizeof(int)*3 + tamanionombrestemps, tamanionombrestemps);
 
-	strcpy(wr->dir.ip, numeroip);
-	wr->dir.port = numeropuerto;
-	wr->list_size = tamaniolista;
-	wr->tmps = list;
-	strcpy(wr->nombretemp,nombretemporalreduccion);
+
+	wr->dirs_size = tamaniolista;
+	wr->dirs = direcciones;
+	wr->tmps_size = tamaniolista;
+	wr->tmps = temporales;
+	wr->nombretemp_size = tamanionombrestemps;
+	wr-> nombretempsreduccion = nombretemps;
 
 	return wr;
 
@@ -372,13 +445,18 @@ void establecerConexionConWorker(Lista bloques){
 	mensajeEnviar(socketWorker,EXITO,NULL,0);
 }
 
+<<<<<<< HEAD
 
 void reduccionLocal(Mensaje* m){
 	//WorkerReduccion* wr= deserializarReduccion(m);
 	//conectar con worker
+=======
+bool mismoNodo(Dir a,Dir b){
+	return stringIguales(a.ip,b.ip) && stringIguales(a.port,b.port);
+>>>>>>> origin/master
 }
 
-void reduccionGlobal(){
 
+<<<<<<< HEAD
 }
 */

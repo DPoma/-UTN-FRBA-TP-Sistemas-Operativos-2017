@@ -1,4 +1,4 @@
-[INFO] 17:25:01:288 YAMA/(7490:7490): [CONEXION] Realizando conexion con File System (IP: 127.0.0.1 | Puerto 5060)
-[INFO] 17:25:01:298 YAMA/(7490:7490): [CONEXION] Conexion exitosa con File System
-[INFO] 17:25:01:298 YAMA/(7490:7490): [CONEXION] Esperando conexiones de un Master (Puerto 5070)
-[INFO] 17:25:13:845 YAMA/(7490:7490): [CONEXION] Proceso Master 6 conectado exitosamente
+[INFO] 17:35:55:487 YAMA/(7672:7672): [CONEXION] Realizando conexion con File System (IP: 127.0.0.1 | Puerto 5060)
+[INFO] 17:35:55:487 YAMA/(7672:7672): [CONEXION] Conexion exitosa con File System
+[INFO] 17:35:55:487 YAMA/(7672:7672): [CONEXION] Esperando conexiones de un Master (Puerto 5070)
+[INFO] 17:36:07:5 YAMA/(7672:7672): [CONEXION] Proceso Master 6 conectado exitosamente
