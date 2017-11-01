@@ -29,13 +29,6 @@ typedef struct {
 	char puertoYama[50];
 } Configuracion;
 
-typedef struct{
-	Dir dir;
-	int bloque;
-	int bytes;
-	char* temp;
-}WorkerTransformacion;
-
 typedef struct __attribute__((__packed__)){
 	char ip[20];
 	int32_t port;
@@ -43,9 +36,19 @@ typedef struct __attribute__((__packed__)){
 
 typedef struct{
 	Dir dir;
-	Entero list_size;
+	int bloque;
+	int bytes;
+	char* temp;
+}WorkerTransformacion;
+
+
+typedef struct{
+	Entero dirs_size;
+	Lista dirs;
+	Entero tmps_size;
 	Lista tmps;
-	char* nombretemp;
+	Entero nombretemp_size;
+	Lista nombretempsreduccion;
 }WorkerReduccion;
 
 //--------------------------------------- Globales -------------------------------------
@@ -74,13 +77,13 @@ void configuracionSenial();
 //--------------------------------------- Funciones de Configuracion -------------------------------------
 
 void masterIniciar();
-void masterAtender();
+
 void masterFinalizar();
 bool masterActivado();
 bool masterDesactivado();
 void masterActivar();
 void masterDesactivar();
-
+void masterAtender();
 //--------------------------------------- Funciones de algo -------------------------------------
 
 int hayWorkersParaConectar();
