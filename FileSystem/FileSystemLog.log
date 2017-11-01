@@ -1,11 +1,10 @@
-[INFO] 11:22:11:870 FileSystem/(2762:2762): [EJECUCION] Proceso File System inicializado
-[INFO] 11:22:11:891 FileSystem/(2762:2762): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 11:22:11:891 FileSystem/(2762:2762): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 11:22:11:891 FileSystem/(2762:2762): [CONEXION] Esperando conexiones de Workers (Puerto: 5080)
-[INFO] 11:22:11:891 FileSystem/(2762:2762): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
-[INFO] 11:22:11:904 FileSystem/(2762:2762): [33m[AVISO] Para pasar a un estado estable primero debe formatear el File System[0m
-[INFO] 11:23:28:167 FileSystem/(2762:2762): [33m[AVISO] El proceso Yama no pudo conectarse, el File System no es estable[0m
-[INFO] 11:23:30:526 FileSystem/(2762:2762): [33m[AVISO] El proceso Yama no pudo conectarse, el File System no es estable[0m
-[INFO] 11:23:43:36 FileSystem/(2762:2767): [ESTADO] El File System ha sido formateado
-[INFO] 11:23:44:921 FileSystem/(2762:2762): [CONEXION] El proceso Yama se ha conectado
-[INFO] 12:14:22:739 FileSystem/(2762:2762): [EJECUCION] Proceso File System finalizado
+[INFO] 17:24:46:845 FileSystem/(7479:7479): [EJECUCION] Proceso File System inicializado
+[INFO] 17:24:46:845 FileSystem/(7479:7479): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 17:24:46:845 FileSystem/(7479:7479): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 17:24:46:845 FileSystem/(7479:7479): [CONEXION] Esperando conexiones de Workers (Puerto: 5080)
+[INFO] 17:24:46:845 FileSystem/(7479:7479): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
+[INFO] 17:24:46:850 FileSystem/(7479:7479): [33m[AVISO] Para pasar a un estado estable conecte los nodos necesarios[0m
+[INFO] 17:24:51:704 FileSystem/(7479:7479): [33m[CONEXION] NODO1 conectado[0m
+[INFO] 17:24:51:705 FileSystem/(7479:7479): [ESTADO] El File System se encuentra estable
+[INFO] 17:25:01:289 FileSystem/(7479:7479): [CONEXION] El proceso Yama se ha conectado
+[INFO] 17:25:29:374 FileSystem/(7479:7479): [33m[CONEXION] NODO1 desconectado[0m

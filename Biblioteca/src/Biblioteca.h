@@ -113,6 +113,11 @@ typedef struct __attribute__((packed)){
 	BitArray controlBits;
 } Bitmap;
 
+typedef struct __attribute__((__packed__)){
+	char ip[20];
+	char puerto[20];
+} Direccion;
+
 
 //--------------------------------------- Funciones para Socket -------------------------------------
 

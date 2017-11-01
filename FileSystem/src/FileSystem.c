@@ -239,7 +239,7 @@ void servidorSolicitudMensaje(Servidor* servidor, Socket unSocket) {
 	if(socketEsDataNode(servidor, unSocket))
 		servidorMensajeDataNode(servidor, mensaje, unSocket);
 	else if(socketEsYama(servidor, unSocket))
-		servidorMensajeYama();
+		servidorMensajeYama(mensaje);
 	else
 		servidorMensajeWorker();
 	mensajeDestruir(mensaje);
@@ -378,8 +378,10 @@ void servidorSolicitudYama(Servidor* servidor, Socket unSocket) {
 }
 
 
-void servidorMensajeYama() {
-	//TODO
+void servidorMensajeYama(Mensaje* mensaje) {
+	switch(mensaje->header.operacion) {
+		case ENVIAR_BLOQUES: archivoEnviarBloques(mensaje->datos);
+	}
 }
 
 void servidorFinalizarYama() {
@@ -2789,6 +2791,64 @@ void semaforosDestruir() {
 	memoriaLiberar(mutexEstadoFileSystem);
 	memoriaLiberar(mutexEstadoControl);
 }
+
+
+
+//TODO para yama
+
+Direccion nodoObtenerDireccion(String nombreNodo) {
+	Nodo* nodo = nodoBuscar(nombreNodo);
+	Direccion direccion;
+	stringLimpiar(direccion.ip, 20);
+	stringLimpiar(direccion.puerto, 20);
+	stringCopiar(direccion.ip, nodo->ip);
+	stringCopiar(direccion.puerto, nodo->puerto);
+	return direccion;
+}
+
+BloqueYama bloqueConvertirParaYama(Bloque* bloque) {
+	BloqueYama bloqueYama;
+	Copia* copia1 = listaObtenerElemento(bloque->listaCopias, 0);
+	Copia* copia2 = listaObtenerElemento(bloque->listaCopias, 1);
+	Direccion direccion1 = nodoObtenerDireccion(copia1->nombreNodo);
+	Direccion direccion2 = nodoObtenerDireccion(copia2->nombreNodo);
+	memcpy(&bloqueYama.direccionCopia1, &direccion1, sizeof(Direccion));
+	memcpy(&bloqueYama.direccionCopia2, &direccion2, sizeof(Direccion));
+	bloqueYama.numeroBloqueCopia1 = copia1->bloqueNodo;
+	bloqueYama.numeroBloqueCopia2 = copia2->bloqueNodo;
+	bloqueYama.bytesUtilizados = bloque->bytesUtilizados;
+	return bloqueYama;
+}
+
+BloqueYama* archivoConvertirYama(Archivo* archivo) {
+	int indice;
+	int cantidad = listaCantidadElementos(archivo->listaBloques);
+	BloqueYama* bloques = memoriaAlocar(sizeof(BloqueYama)*cantidad);
+	listaOrdenar(archivo->listaBloques, (Puntero)bloqueOrdenarPorNumero);
+	for(indice = 0; indice < cantidad; indice++) {
+		Bloque* bloque = listaObtenerElemento(archivo->listaBloques, indice);
+		bloques[indice] = bloqueConvertirParaYama(bloque);
+	}
+	return bloques;
+}
+
+void archivoEnviarBloques(String path) {
+	Archivo* archivo = archivoBuscar(path);
+	int cantidad = listaCantidadElementos(archivo->listaBloques);
+	BloqueYama* bloques = archivoConvertirYama(archivo);
+	//TODO test
+	int indice;
+	for(indice = 0; indice < cantidad; indice++) {
+		printf("bytes: %i\n",bloques[indice].bytesUtilizados);
+		printf("ip copia1 %s\n",bloques[indice].direccionCopia1.ip);
+		printf("dir copia1: %s\n", bloques[indice].direccionCopia1.puerto);
+		printf("ip copia2 %s\n",bloques[indice].direccionCopia2.ip);
+		printf("dir copia2: %s\n", bloques[indice].direccionCopia2.puerto);
+	}
+	mensajeEnviar(socketYama, ENVIAR_BLOQUES, bloques, sizeof(BloqueYama)*cantidad);
+}
+
+
 
 
 //TODO el data bin cambia o solo cambia la primera vez (VER)

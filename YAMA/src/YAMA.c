@@ -42,6 +42,7 @@ void yamaIniciar() {
 		imprimirMensaje(archivoLog, ROJO"[ERROR] El File System no se encuentra estable"BLANCO);
 		exit(EXIT_FAILURE);
 	}
+/*
 	workers=list_create();
 	Mensaje* infoNodos=mensajeRecibir(servidor->fileSystem);
 	int i;
@@ -50,12 +51,13 @@ void yamaIniciar() {
 		worker.conectado=true;
 		worker.carga=0;
 		worker.tareasRealizadas=0;
-		worker.nodo=*(Dir*)(infoNodos->datos+sizeof(Dir)*i);
+		worker.nodo=*(Direccion*)(infoNodos->datos+sizeof(Direccion)*i);
 		printf("IP = %s\n", worker.nodo.ip);
-		printf("Puerto = %s\n", worker.nodo.port);
+		printf("Puerto = %s\n", worker.nodo.puerto);
 		list_addM(workers,&worker,sizeof(Worker));
 	}
 	mensajeDestruir(infoNodos);
+*/
 }
 
 void configurar(){
@@ -71,8 +73,8 @@ void configurar(){
 	archivoConfigDestruir(archivoConfig);
 }
 
-bool mismoNodo(Dir a,Dir b){
-	return stringIguales(a.ip,b.ip)&&stringIguales(a.port,b.port);//podría comparar solo ip
+bool mismoNodo(Direccion a,Direccion b){
+	return stringIguales(a.ip,b.ip)&&stringIguales(a.puerto,b.puerto);//podría comparar solo ip
 }
 
 void yamaAtender() {
@@ -147,6 +149,25 @@ void yamaAtender() {
 				}else{ //master
 					Mensaje* mensaje = mensajeRecibir(socketI);
 					if(mensaje->header.operacion==Solicitud){
+
+						String path = mensaje->datos;
+						//TODO test borrar los printf
+						//Para probar el fs tiene que tener guardado el archivo a enviar
+						mensajeEnviar(servidor->fileSystem, SOLICITAR_BLOQUES, path, stringLongitud(path)+1);
+						mensaje = mensajeRecibir(servidor->fileSystem);
+						int indice;
+						int cantidadBloques =  mensaje->header.tamanio / sizeof(BloqueYama);
+						BloqueYama bloque;
+						for(indice = 0; indice < cantidadBloques; indice++) {
+							memcpy(&bloque, mensaje->datos+indice*sizeof(BloqueYama), sizeof(BloqueYama));
+							printf("bytes: %i\n", bloque.bytesUtilizados);
+							printf("ip copia1 %s\n",bloque.direccionCopia1.ip);
+							printf("dir copia1: %s\n", bloque.direccionCopia1.puerto);
+							printf("ip copia2 %s\n",bloque.direccionCopia2.ip);
+							printf("dir copia2: %s\n", bloque.direccionCopia2.puerto);
+						}
+						//TODO test borrar
+/*
 						int32_t masterid = socketI;
 						//el mensaje es el path del archivo
 						//aca le acoplo el numero de master y se lo mando al fileSystem
@@ -156,14 +177,15 @@ void yamaAtender() {
 						memcpy(mensaje->datos,&masterid,INTSIZE);
 						mensajeEnviar(servidor->fileSystem,Solicitud,mensaje->datos,mensaje->header.tamanio+INTSIZE);
 						log_info(archivoLog, "[ENVIO] path de master #%d enviado al fileSystem",&socketI);
-					}else if(mensaje->header.operacion==DESCONEXION){
+*/
+					} else if(mensaje->header.operacion==DESCONEXION){
 						listaSocketsEliminar(socketI, &servidor->listaMaster);
 						socketCerrar(socketI);
 						if(socketI==servidor->maximoSocket)
 							servidor->maximoSocket--; //no debería romper nada
 						log_info(archivoLog, "[CONEXION] Proceso Master %d se ha desconectado",socketI);
 					}else{
-						Dir nodo=*((Dir*)mensaje->datos);//puede que rompa porque no es deep copying
+						Direccion nodo=*((Direccion*)mensaje->datos);//puede que rompa porque no es deep copying
 						int32_t bloque=*((int32_t*)(mensaje->datos+DIRSIZE));
 						bool buscarEntrada(Entrada* entrada){
 							return stringIguales(entrada->nodo.ip,nodo.ip)&&entrada->bloque==bloque;
@@ -403,7 +425,7 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 			darDatosEntrada(&reducGlobal);
 			darPathTemporal(&reducGlobal.pathTemporal,'g');
 			reducGlobal.etapa=ReducGlobal;
-			Dir nodoMenorCarga=entradaA->nodo;//deep
+			Direccion nodoMenorCarga=entradaA->nodo;//deep
 			int menorCargaI=100; //
 			void menorCarga(Worker* worker){
 				if(worker->carga<menorCargaI)

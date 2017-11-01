@@ -16,13 +16,13 @@
 #define FRACASO 0
 #define SCRIPT_TRANSFORMACION 501
 #define SCRIPT_REDUCTOR 502
-#define DIRSIZE sizeof(Dir)
+#define DIRSIZE sizeof(Direccion)
 #define INTSIZE sizeof(int32_t)
 #define TEMPSIZE 12
 
 //--------------------------------------- Estructuras -------------------------------------
 
-typedef enum {Solicitud,Transformacion=1,ReducLocal=2,ReducGlobal=3,Almacenamiento=4,Cierre,Aborto=6} Etapa;
+typedef enum {Solicitud,Transformacion=1,ReduccionLocal=2,ReduccionGlobal=3,Almacenamiento=4,Finalizacion,Aborto=6} Etapa;
 
 typedef struct {
 	char ipYama[50];
@@ -30,19 +30,14 @@ typedef struct {
 } Configuracion;
 
 typedef struct{
-	Dir dir;
+	Direccion direccion;
 	int bloque;
 	int bytes;
 	char* temp;
 }WorkerTransformacion;
 
-typedef struct __attribute__((__packed__)){
-	char ip[20];
-	int32_t port;
-} Dir;
-
 typedef struct{
-	Dir dir;
+	Direccion dir;
 	Entero list_size;
 	Lista tmps;
 	char* nombretemp;
@@ -55,7 +50,7 @@ Mutex recepcionAlternativo;
 String campos[2];
 Configuracion* configuracion;
 ArchivoLog archivoLog;
-Socket socketYAMA;
+Socket socketYama;
 Socket socketWorker;
 int estadoMaster;
 FILE* scriptTransformacion;
@@ -74,7 +69,8 @@ void configuracionSenial();
 //--------------------------------------- Funciones de Configuracion -------------------------------------
 
 void masterIniciar();
-void masterAtender();
+void masterConectarAYama(String path);
+void masterAtenderYama();
 void masterFinalizar();
 bool masterActivado();
 bool masterDesactivado();
@@ -82,6 +78,11 @@ void masterActivar();
 void masterDesactivar();
 
 //--------------------------------------- Funciones de algo -------------------------------------
+
+void etapaTransformacion();
+void aborto();
+void reduccionLocal(Mensaje* m);
+void reduccionGlobal();
 
 int hayWorkersParaConectar();
 WorkerTransformacion* deserializarTransformacion(Mensaje* mensaje);

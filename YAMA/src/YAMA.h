@@ -20,12 +20,9 @@
 #define nullptr NULL
 
 #define ACEPTACION 200
+#define SOLICITAR_BLOQUES 201
 
-typedef struct __attribute__((__packed__)){
-	char ip[20];
-	char port[20];
-} Dir;
-#define DIRSIZE sizeof(Dir)
+#define DIRSIZE sizeof(Direccion)
 
 
 typedef struct {
@@ -49,7 +46,7 @@ typedef struct {
 Servidor* servidor;
 
 typedef struct {
-	Dir nodo;
+	Direccion nodo;
 	int32_t bloque;
 	//no pongo los bytes aca porque estan dos veces en bloques gemelos,
 	//los manejo aparte
@@ -60,7 +57,7 @@ typedef struct{
 	uint32_t carga; //son uint32_t porque lo pide el tp, yo usaria ints
 	uint32_t tareasRealizadas;
 	uint32_t disponibilidad;
-	Dir nodo; //no me lo reconoce, por ahi estan mal los paths?
+	Direccion nodo; //no me lo reconoce, por ahi estan mal los paths?
 } Worker;
 Lista workers;
 
@@ -70,15 +67,24 @@ int job=-1;
 typedef struct{
 	int job;
 	Socket masterid;
-	Dir nodo;
+	Direccion nodo;
 	int32_t bloque;
 	int32_t bytes;
-	Dir nodoAlt;
+	Direccion nodoAlt;
 	int32_t bloqueAlt;
 	Etapa etapa;
 	char* pathTemporal; //podría usar char[12] y no usar memoria dinamica, despues ver
 	Estado estado;
 } Entrada;
+
+typedef struct __attribute__((packed)) {
+	Direccion direccionCopia1;
+	Entero numeroBloqueCopia1;
+	Direccion direccionCopia2;
+	Entero numeroBloqueCopia2;
+	Entero bytesUtilizados;
+} BloqueYama;
+
 Lista tablaEstados;
 Lista tablaUsados; //entradas Abortadas, Error, o Terminadas que ya
 //no se necesitan procesar, solo se dibujan

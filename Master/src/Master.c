@@ -10,13 +10,11 @@
 
 #include "Master.h"
 
-int main(int argc,char** argv) {
-//	if(argc!=5){
-//		puts("mal numero de argumentos");
-//		return -1;
-//	}
+int main(int argc, String* argv) { //TODO controlar arguemntos
 	masterIniciar();
-	masterAtender();
+	masterConectarAYama(argv[3]);
+	while(masterActivado())
+		masterAtenderYama();
 	masterFinalizar();
 	return EXIT_SUCCESS;
 }
@@ -25,18 +23,36 @@ int main(int argc,char** argv) {
 
 void masterIniciar() {
 	configuracionIniciar();
-	establecerConexiones();
+	//establecerConexiones();
 	senialAsignarFuncion(SIGINT, configuracionSenial);
 	mutexIniciar(&errorBloque);
-	mutexIniciar(&recepcionAlternativo); //necesito que arranque en 0 este
+	mutexIniciar(&recepcionAlternativo); //TODO necesito que arranque en 0 este
 }
 
-void masterAtender() {
+void masterConectarAYama(String path) {
+	imprimirMensajeDos(archivoLog,"[CONEXION] Estableciendo Conexion con YAMA...", configuracion->ipYama, configuracion->puertoYama);
+	socketYama = socketCrearCliente(configuracion->ipYama, configuracion->puertoYama, ID_MASTER);
+	imprimirMensaje(archivoLog, "[CONEXION] Conexion establecida con YAMA, esperando instrucciones");
+	mensajeEnviar(socketYama, Solicitud, path, stringLongitud(path)+1);
+}
 
+void masterAtenderYama() {
+	Mensaje* mensaje = mensajeRecibir(socketYama);
+	switch(mensaje->header.operacion){
+	//case Aborto: aborto(); break;
+	//case Finalizacion: masterDesactivar(); break;
+	//case Transformacion: etapaTransformacion(mensaje); break;
+	//case ReduccionLocal: etapaReduccionLocal(mensaje); break;
+	//case ReduccionGlobal: etapaReduccionGlobal(mensaje); break;
+	}
 }
 
 void masterFinalizar() {
-
+	socketCerrar(socketYama);
+	socketCerrar(socketWorker);
+	archivoLogDestruir(archivoLog);
+	memoriaLiberar(configuracion);
+	imprimirMensaje(archivoLog,"[EJECUCION] Terminando proceso");
 }
 
 bool masterActivado() {
@@ -94,10 +110,11 @@ void configuracionSenial(int senial) {
 
 //--------------------------------------- Funciones de algo -------------------------------------
 
-void algo() {
-	scriptTransformacion = fopen(argv[1],"r+");
-	scriptReductor = fopen(argv[2], "r+");
-	mensajeEnviar(socketYAMA,Solicitud,argv[3],strlen(argv[3]));
+/*
+void etapaTransformacion() {
+	//scriptTransformacion = fopen(argv[1],"r+");
+	//scriptReductor = fopen(argv[2], "r+");
+	mensajeEnviar(socketYama,Solicitud, argv[3], strlen(argv[3])+1);
 	imprimirMensaje(archivoLog, "[MENSAJE] Solicitud enviada");
 	Mensaje* mensaje=mensajeRecibir(socketYAMA);
 	imprimirMensaje(archivoLog, "[MENSAJE] Lista de bloques recibida");
@@ -111,7 +128,7 @@ void algo() {
 		memcpy(&worker.temp,mensaje->datos+i+DIRSIZE+INTSIZE*2,TEMPSIZE);
 		list_addM(workers,&worker,sizeof(WorkerTransformacion));
 	}
-	bool mismoNodo(Dir a,Dir b){
+	bool mismoNodo(Direccion a,Direccion b){
 		return a.ip==b.ip&&a.port==b.port;//podría comparar solo ip
 	}
 	Lista listas=list_create();
@@ -137,39 +154,22 @@ void algo() {
 		list_addM(hilos,&hilo,sizeof(pthread_t));
 	}
 
-	while(masterActivado()){
-		Mensaje* m = mensajeRecibir(socketYAMA);
-		switch(m->header.operacion){
-		case Aborto:
-			imprimirMensaje(archivoLog,"[ABORTO] Abortando proceso");
-			return EXIT_FAILURE; //supongo que los hilos mueren aca
-			//si no se mueren matarlos
-		case Cierre:
-			imprimirMensaje(archivoLog,"[EJECUCION] Terminando proceso");
-			masterDesactivar();
-			break;
-		case Transformacion://hubo un error y se recibió un bloque alternativo
-			memcpy(&alternativo.bloque,mensaje->datos+i+DIRSIZE,INTSIZE);
-			memcpy(&alternativo.bytes,mensaje->datos+i+DIRSIZE+INTSIZE,INTSIZE);
-			memcpy(&alternativo.temp,mensaje->datos+i+DIRSIZE+INTSIZE*2,TEMPSIZE);
-			mutexDesbloquear(&recepcionAlternativo);
-			break;
-		case ReducLocal:
-			reduccionLocal(m);
-			break;
-		case ReducGlobal:
-			reduccionGlobal(m);
-			break;
-		}
-	}
-	socketCerrar(socketYAMA);
-	socketCerrar(socketWorker);
-	archivoLogDestruir(archivoLog);
-	memoriaLiberar(configuracion);
 	fclose(scriptReductor);
 	fclose(scriptTransformacion);
+
+	//hubo un error y se recibió un bloque alternativo
+	memcpy(&alternativo.bloque,mensaje->datos+i+DIRSIZE,INTSIZE);
+	memcpy(&alternativo.bytes,mensaje->datos+i+DIRSIZE+INTSIZE,INTSIZE);
+	memcpy(&alternativo.temp,mensaje->datos+i+DIRSIZE+INTSIZE*2,TEMPSIZE);
+	mutexDesbloquear(&recepcionAlternativo);
+}
 }
 
+void aborto() {
+	imprimirMensaje(archivoLog,"[ABORTO] Abortando proceso");
+		return EXIT_FAILURE; //supongo que los hilos mueren aca
+		//si no se mueren matarlos
+}
 
 char* leerArchivo(FILE* archivo) {
 	fseek(archivo, 0, SEEK_END);
@@ -192,7 +192,7 @@ bool esUnArchivo(char* c) {
 void enviarArchivo(FILE* archivo) {
 	char* texto = leerArchivo(archivo);
 	fileCerrar(archivo);
-	mensajeEnviar(socketYAMA, 4, texto, strlen(texto)+1);
+	mensajeEnviar(socketYama, 4, texto, strlen(texto)+1);
 	mensajeEnviar(socketWorker, 4, texto, strlen(texto)+1);
 	free(texto);
 }
@@ -207,14 +207,7 @@ char* leerCaracteresEntrantes() {
 }
 
 void establecerConexiones(){
-	imprimirMensajeDos(archivoLog,"[CONEXION] Estableciendo Conexion con YAMA (IP: %s | Puerto %s)", configuracion->ipYama, configuracion->puertoYama);
-	socketYAMA = socketCrearCliente(configuracion->ipYama, configuracion->puertoYama, ID_MASTER);
-	imprimirMensaje(archivoLog, "[CONEXION] Conexion existosa con YAMA");
 
-	//TODO se conecta con un worker al azar?
-	imprimirMensajeDos(archivoLog, "[CONEXION] Estableciendo Conexion con Worker (IP: %s | Puerto: %s)", configuracion->ipWorker, configuracion->puertoWorker);
-	socketWorker = socketCrearCliente(configuracion->ipWorker, configuracion->puertoWorker, ID_MASTER);
-	imprimirMensaje(archivoLog, "[CONEXION] Conexion existosa con Worker");
 
 }
 
@@ -223,7 +216,7 @@ void leerArchivoConfig(){
 }
 
 int hayWorkersParaConectar(){
-	Mensaje* m = mensajeRecibir(socketYAMA);
+	Mensaje* m = mensajeRecibir(socketYama);
 	if(m->header.operacion==-1){
 		imprimirMensaje(archivoLog,"No hay mas workers por conectar");
 		return -1;
@@ -284,24 +277,19 @@ WorkerReduccion* deserializarReduccion(Mensaje* mensaje){
 
 }
 
-
-
 Lista workersAConectar(){
 	Lista workers = list_create();
 	int pos=0;
 	Mensaje* mens;
 	WorkerTransformacion* wt;
-	while(hayWorkersParaConectar(socketYAMA)){
-		mens=mensajeRecibir(socketYAMA);
+	while(hayWorkersParaConectar(socketYama)){
+		mens=mensajeRecibir(socketYama);
 		wt= deserializarTransformacion(mens);
 		listaAgregarEnPosicion(workers,(WorkerTransformacion*)wt, pos);
 		pos++;
-
 	}
-
 	return workers;
 }
-
 
 ListaSockets sockets(){
 	Lista workers = workersAConectar();
@@ -342,20 +330,12 @@ void enviarScript(Socket unSocket, FILE* script, Entero operacion){//operacion p
 	char* buffer = leerArchivo(script);
 	int len;
 	char* data;
-
 	len = strlen(buffer); // ya esta el barra cero
-
 	data = malloc(len + sizeof(int));
-
 	memcpy(data, &len, sizeof(int));
 	memcpy(data + sizeof(int),buffer, len);
-
 	mensajeEnviar(unSocket,operacion, data, len);
-
-
 }
-
-
 
 void establecerConexionConWorker(Lista bloques){
 	WorkerTransformacion* dir = list_get(bloques,0);
@@ -374,11 +354,11 @@ void establecerConexionConWorker(Lista bloques){
 	//se recibe la direccion y el bloque, se lo mandas a yama
 	if(mensaje->header.operacion==EXITO){
 		imprimirMensajeUno(archivoLog, "[TRANSFORMACION] Transformacion realizada con exito en el Worker %i", &socketWorker); //desp lo cambio
-		mensajeEnviar(socketYAMA,Transformacion,&socketWorker,sizeof(int));
+		mensajeEnviar(socketYama,Transformacion,&socketWorker,sizeof(int));
 	}else{
 		mutexBloquear(&errorBloque);
 		imprimirMensajeUno(archivoLog,"[TRANSFORMACION] Transformacion fallida en el Worker %i",&socketWorker);
-		mensajeEnviar(socketYAMA,ERROR,&socketWorker,sizeof(int));
+		mensajeEnviar(socketYama,ERROR,&socketWorker,sizeof(int));
 		mutexBloquear(&recepcionAlternativo);
 		list_addM(bloques,&alternativo,sizeof alternativo);
 		mutexDesbloquear(&errorBloque);
@@ -395,17 +375,10 @@ void establecerConexionConWorker(Lista bloques){
 
 void reduccionLocal(Mensaje* m){
 	//WorkerReduccion* wr= deserializarReduccion(m);
-
 	//conectar con worker
-
-
 }
 
 void reduccionGlobal(){
 
 }
-
-
-
-
-
+*/

@@ -70,7 +70,7 @@
 #define FINALIZAR_NODO 106
 
 #define ACEPTAR_YAMA 200
-
+#define ENVIAR_BLOQUES 201
 
 //--------------------------------------- Estructuras -------------------------------------
 
@@ -151,6 +151,15 @@ typedef struct __attribute__((packed)) {
 	char ip[20];
 	char puerto[20];
 } ConexionNodo;
+
+
+typedef struct __attribute__((packed)) {
+	Direccion direccionCopia1;
+	Entero numeroBloqueCopia1;
+	Direccion direccionCopia2;
+	Entero numeroBloqueCopia2;
+	Entero bytesUtilizados;
+} BloqueYama;
 
 //--------------------------------------- Variables globales -------------------------------------
 
@@ -401,6 +410,8 @@ void archivoAgregar(Archivo* archivo);
 int archivoCantidad();
 bool archivoTodosDisponibles();
 void archivoDestruirLista();
+
+void archivoEnviarBloques(String path);
 
 //--------------------------------------- Funciones de Nodo -------------------------------------
 
