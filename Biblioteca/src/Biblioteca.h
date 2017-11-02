@@ -106,7 +106,7 @@ typedef struct __attribute__((packed)){//si no lo envias es al pedo empaquetarlo
 
 typedef struct __attribute__((__packed__)){
 	char ip[20];
-	char puerto[20];
+	char port[20];
 } Dir;
 
 
@@ -283,5 +283,3 @@ void imprimirMensajeProceso(String mensaje);
 void fileLimpiar(String ruta);
 int bitmapCalculo(int cantidadBloques);
 void bitmapDestruir(Bitmap* bitmap);
-
-

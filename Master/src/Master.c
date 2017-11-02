@@ -41,7 +41,7 @@ void masterIniciar(String* argv) {
 	semaforoIniciar(errorBloque,1);
 	semaforoIniciar(recepcionAlternativo,0);
 
-	void leerArchivo(File* archScript,char** script,int* len){ //ni idea por que se queja
+	void leerArchivo(File archScript,char** script,int* len){ //ni idea por que se queja TODO (Se queja porque el tipo "File" es igual a "FILE*" (Borre el asterisco)
 		//habría que validar
 		fseek(archScript, 0, SEEK_END);
 		long posicion = ftell(archScript);
@@ -75,7 +75,7 @@ void masterAtender(){
 		list_addM(workers,&worker,sizeof(WorkerTransformacion));
 	}
 	bool mismoNodo(Dir a,Dir b){
-		return a.ip==b.ip&&a.puerto==b.puerto;//podría comparar solo ip
+		return a.ip==b.ip&&a.port==b.port;//podría comparar solo ip
 	}
 	Lista listas=list_create();
 	for(i=0;i<=workers->elements_count;i++){
@@ -127,7 +127,7 @@ void masterAtender(){
 
 void transformaciones(Lista bloques){
 	WorkerTransformacion* dir = list_get(bloques,0);
-	socketWorker=socketCrearCliente(dir->dir.ip,dir->dir.puerto,ID_MASTER);
+	socketWorker=socketCrearCliente(dir->dir.ip,dir->dir.port,ID_MASTER);
 	mensajeEnviar(socketWorker,Transformacion,scriptTransformacion,lenTransformacion);
 	int enviados=0,respondidos=0;
 	enviarBloques:
@@ -139,7 +139,7 @@ void transformaciones(Lista bloques){
 		memcpy(data+INTSIZE,&wt->bytes,INTSIZE); //a worker le interesan los bytes?
 		memcpy(data+INTSIZE*2,&wt->temp,TEMPSIZE);
 		mensajeEnviar(socketWorker,Transformacion,data,tamanio);
-		imprimirMensajeDos(archivoLog,"[CONEXION] Estableciendo conexion con Worker (IP: %s | PUERTO: %d",wt->dir.ip,wt->dir.puerto);
+		imprimirMensajeDos(archivoLog,"[CONEXION] Estableciendo conexion con Worker (IP: %s | PUERTO: %d",wt->dir.ip,wt->dir.port);
 	}
 	for(;respondidos<enviados;respondidos++){
 		Mensaje* mensaje = mensajeRecibir(socketWorker);

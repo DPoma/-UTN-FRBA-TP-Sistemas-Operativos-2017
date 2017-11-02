@@ -463,6 +463,7 @@ bool nodoListaAlgunoDisponible();
 void nodoAceptar(Nodo* nodo);
 void nodoListaCrear();
 bool nodoDisponible(Nodo* nodo);
+
 //--------------------------------------- Funciones de Bloque -------------------------------------
 
 Bloque* bloqueCrear(int bytes, int numero);
