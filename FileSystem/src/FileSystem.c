@@ -26,10 +26,12 @@ void fileSystemIniciar(String flag) {
 	semaforosIniciar();
 	flagMensaje = DESACTIVADO;
 	configuracionIniciar();
+	nodoListaCrear();
+
+	listaSockets = listaCrear(); //TODO GLOBAL
+
 	estadoControlActivar();
 	estadoFileSystemInestable();
-	listaSockets = listaCrear(); //TODO GLOBAL
-	nodoListaCrear();
 	if(stringIguales(flag, FLAG_C)) {
 		metadataIniciar();
 		imprimirMensaje(archivoLog, AMARILLO"[AVISO] Para pasar a un estado estable primero debe formatear el File System"BLANCO);
@@ -53,7 +55,7 @@ void fileSystemAtenderProcesos() {
 void fileSystemFinalizar() {
 	semaforoWait(semaforoFinal);
 	archivoLogDestruir(archivoLog);
-	configuracionDestruirRutas();
+	configuracionRutasDestruir();
 	bitmapDirectoriosDestruir();
 	archivoListaDestruir();
 	directorioListaDestruir();
@@ -107,22 +109,17 @@ void configuracionIniciarRutas() {
 	rutaArchivos = string_from_format("%s/Archivos.txt", configuracion->rutaMetadata);
 	rutaDirectorios = string_from_format("%s/Directorios.txt", configuracion->rutaMetadata);
 	rutaNodos = string_from_format("%s/Nodos.bin", configuracion->rutaMetadata);
-	mutexBloquear(mutexRuta);
-	rutaBuffer = stringCrear(MAX_STRING);
-	mutexDesbloquear(mutexRuta);
-
+	rutaBufferCrear();
 }
 
-void configuracionDestruirRutas() {
+void configuracionRutasDestruir() {
 	memoriaLiberar(configuracion);
 	memoriaLiberar(rutaNodos);
 	memoriaLiberar(rutaDirectorioArchivos);
 	memoriaLiberar(rutaDirectorioBitmaps);
 	memoriaLiberar(rutaDirectorios);
 	memoriaLiberar(rutaArchivos);
-	mutexBloquear(mutexRuta);
-	memoriaLiberar(rutaBuffer);
-	mutexDesbloquear(mutexRuta);
+	rutaBufferDestruir();
 }
 
 //--------------------------------------- Funciones de Servidor -------------------------------------
@@ -207,7 +204,7 @@ void servidorAtenderSolicitudes(Servidor* servidor) {
 int servidorAtenderSocket(Servidor* servidor, Socket unSocket) {
 	if(socketRealizoSolicitud(servidor, unSocket))
 		return servidorAtenderSolicitud(servidor, unSocket);
-	return NULO;
+	return OK;
 }
 
 int servidorAtenderSolicitud(Servidor* servidor, Socket unSocket) {
@@ -215,7 +212,7 @@ int servidorAtenderSolicitud(Servidor* servidor, Socket unSocket) {
 		return servidorSolicitudProceso(servidor, unSocket);
 	else
 		servidorSolicitudMensaje(servidor, unSocket);
-	return NULO;
+	return OK;
 }
 
 int servidorSolicitudProceso(Servidor* servidor, Socket unSocket) {
@@ -225,7 +222,7 @@ int servidorSolicitudProceso(Servidor* servidor, Socket unSocket) {
 		servidorSolicitudYama(servidor, unSocket);
 	else
 		servidorSolicitudWorker(servidor, unSocket);
-	return NULO;
+	return OK;
 }
 
 void servidorSolicitudMensaje(Servidor* servidor, Socket unSocket) {
@@ -247,7 +244,7 @@ int servidorSolicitudDataNode(Servidor* servidor, Socket unSocket) {
 		servidorAtenderDataNode(servidor, nuevoSocket);
 	else
 		return ID_EXIT;
-	return NULO;
+	return OK;
 }
 
 void servidorAtenderDataNode(Servidor* servidor, Socket nuevoSocket) {
@@ -317,13 +314,18 @@ void servidorMensajeDataNode(Servidor* servidor, Mensaje* mensaje, Socket unSock
 	case COPIAR_BINARIO: bloqueCopiarBinario(mensaje->datos); break;
 	case COPIAR_TEXTO: bloqueCopiarTexto(mensaje->datos); break;
 	case FINALIZAR_NODO:
-		mutexBloquear(mutexRuta); puts("finalizar entre");servidorFinalizarDataNode(servidor, unSocket);
-	mutexDesbloquear(mutexRuta); puts("finalizar sali");
-	break;
+		//TODO test borrar
+		mutexBloquear(mutexRuta);
+		puts("finalizar entre");
+		servidorFinalizarDataNode(servidor, unSocket);
+		mutexDesbloquear(mutexRuta);
+		puts("finalizar sali");
+		break;
 	}
 }
 
 void servidorDesactivarDataNode(Servidor* servidor, Nodo* nodo) {
+	//TODO ver
 	if(flagMensaje == DESACTIVADO) {
 		socketCerrar(nodo->socket);
 		listaSocketsEliminar(nodo->socket, &servidor->listaDataNodes);
@@ -374,7 +376,7 @@ void servidorSolicitudYama(Servidor* servidor, Socket unSocket) {
 
 void servidorMensajeYama(Mensaje* mensaje) {
 	switch(mensaje->header.operacion) {
-		case ENVIAR_BLOQUES: archivoEnviarBloques(mensaje->datos);
+		case ENVIAR_BLOQUES: archivoEnviarBloquesYama(mensaje->datos);
 	}
 }
 
@@ -503,8 +505,16 @@ bool consolaEntradaSinTabs(String entrada) {
 	int indice;
 	for(indice = 0; caracterDistintos(entrada[indice], FIN); indice++)
 		if(caracterIguales(entrada[indice],TAB))
-			return 0;
-	return 1;
+			return false;
+	return true;
+}
+
+bool consolaArgumentoEsNumero(String ruta) {
+	int indice;
+	for(indice=0; indice<stringLongitud(ruta); indice++)
+		if(ruta[indice] < 48 || ruta[indice] > 57)
+			return false;
+	return true;
 }
 
 bool consolaEntradaTieneEspaciosNecesarios(String entrada) {
@@ -777,18 +787,6 @@ void comandoFormatearFileSystem() {
 	metadataIniciar();
 	nodoFormatearConectados();
 	estadoFileSystemEstable();
-	//TODO Ponerlo lindo
-	/*
-	int cantidadNodos = listaCantidadElementos(listaNodos);
-	ConexionNodo nodos[cantidadNodos];
-	int indice;
-	for(indice=0; indice<cantidadNodos; indice++) {
-		Nodo* nodo = listaObtenerElemento(listaNodos, indice);
-		stringCopiar(nodos[indice].ip, nodo->ip);
-		stringCopiar(nodos[indice].puerto, nodo->puerto);
-	}
-//	mensajeEnviar(socketYama, 201, nodos, cantidadNodos*sizeof(ConexionNodo));
-	*/
 	imprimirMensaje(archivoLog, "[ESTADO] El File System ha sido formateado");
 }
 
@@ -797,7 +795,7 @@ void comandoCrearDirectorio(Comando* comando) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return;
 	}
-	if(stringIguales(comando->argumentos[1], "/")) {
+	if(stringIguales(comando->argumentos[1], RAIZ)) {
 		imprimirMensaje(archivoLog,"[ERROR] El directorio raiz no puede ser creado");
 		return;
 	}
@@ -836,7 +834,7 @@ void comandoRenombrar(Comando* comando) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return;
 	}
-	if(stringIguales(comando->argumentos[1], "/")) {
+	if(stringIguales(comando->argumentos[1], RAIZ)) {
 		imprimirMensaje(archivoLog,"[ERROR] El directorio raiz no puede ser renombrado");
 		return;
 	}
@@ -884,12 +882,12 @@ void comandoMover(Comando* comando) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return;
 	}
-	if(stringIguales(comando->argumentos[1], "/")) {
+	if(stringIguales(comando->argumentos[1], RAIZ)) {
 		imprimirMensaje(archivoLog,"[ERROR] El directorio raiz no puede ser movido");
 		return;
 	}
 	Directorio* directorioNuevoPadre;
-	if(stringIguales(comando->argumentos[2], "/"))
+	if(stringIguales(comando->argumentos[2], RAIZ))
 		directorioNuevoPadre = directorioBuscarEnLista(0);
 	else
 		directorioNuevoPadre = directorioBuscar(comando->argumentos[2]);
@@ -956,15 +954,15 @@ void comandoEliminarCopia(Comando* comando) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return;
 	}
-	if(stringIguales(comando->argumentos[2], "/")) {
+	if(stringIguales(comando->argumentos[2], RAIZ)) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return;
 	}
-	if(!rutaEsNumero(comando->argumentos[3])) {
+	if(!consolaArgumentoEsNumero(comando->argumentos[3])) {
 		imprimirMensaje(archivoLog,"[ERROR] El numero de bloque no es valido");
 		return;
 	}
-	if(!rutaEsNumero(comando->argumentos[4])) {
+	if(!consolaArgumentoEsNumero(comando->argumentos[4])) {
 		imprimirMensaje(archivoLog,"[ERROR] El numero de copia del bloque no es valido");
 		return;
 	}
@@ -1003,7 +1001,7 @@ void comandoEliminarDirectorio(Comando* comando) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return;
 	}
-	if(stringIguales(ruta, "/")) {
+	if(stringIguales(ruta, RAIZ)) {
 		imprimirMensaje(archivoLog,"[ERROR] El directorio raiz no puede ser eliminado");
 		return;
 	}
@@ -1025,7 +1023,7 @@ void comandoEliminarArchivo(Comando* comando) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return;
 	}
-	if(stringIguales(comando->argumentos[1], "/")) {
+	if(stringIguales(comando->argumentos[1], RAIZ)) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return;
 	}
@@ -1051,7 +1049,7 @@ void comandoListarDirectorio(Comando* comando) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return;
 	}
-	if(stringIguales(comando->argumentos[1], "/")) {
+	if(stringIguales(comando->argumentos[1], RAIZ)) {
 		directorioMostrarArchivos(0);
 		return;
 	}
@@ -1067,7 +1065,7 @@ void comandoInformacionArchivo(Comando* comando) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return;
 	}
-	if(stringIguales(comando->argumentos[1], "/")) {
+	if(stringIguales(comando->argumentos[1], RAIZ)) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return;
 	}
@@ -1104,7 +1102,7 @@ void comandoCopiarBloque(Comando* comando) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return;
 	}
-	if(stringIguales(comando->argumentos[1], "/")) {
+	if(stringIguales(comando->argumentos[1], RAIZ)) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return;
 	}
@@ -1116,7 +1114,7 @@ void comandoCopiarBloque(Comando* comando) {
 		return;
 	}
 	mutexDesbloquear(mutexArchivo);
-	if(!rutaEsNumero(comando->argumentos[2])) {
+	if(!consolaArgumentoEsNumero(comando->argumentos[2])) {
 		imprimirMensaje(archivoLog,"[ERROR] El numero de bloque no es valido");
 		return;
 	}
@@ -1236,7 +1234,7 @@ int comandoCopiarArchivoDeYamaFS(Comando* comando) {
 	}
 	nodoLimpiarActividades();
 	imprimirMensajeDos(archivoLog, "[ARCHIVO] El archivo %s se copio en %s", archivo->nombre, comando->argumentos[2]);
-	return NULO;
+	return OK;
 }
 
 void comandoMostrarArchivo(Comando* comando) {
@@ -1287,13 +1285,6 @@ void comandoObtenerMD5DeArchivo(Comando* comando) {
 	memoriaLiberar(nombreArchivo);
 }
 
-void comandoFinalizar() {
-	 mutexBloquear(mutexEstadoControl);
-	 estadoControl = DESACTIVADO;
-	 mutexDesbloquear(mutexEstadoControl);
-	 socketCrearCliente(IP_LOCAL, configuracion->puertoDataNode, ID_DATANODE);
-}
-
 void comandoInformacionNodos() {
 	int indice;
 	for(indice = 0; indice < nodoListaCantidad(); indice++) {
@@ -1328,6 +1319,11 @@ void comandoAyuda() {
 	puts("14) info <Path-Arch> | Muestra la informacion de un archivo");
 	puts("15) nodes | Muestra la informacion de los nodos");
 	puts("16) exit | Finaliza YamaFS");
+}
+
+void comandoFinalizar() {
+	estadoControlDesactivar();
+	socketCrearCliente(IP_LOCAL, configuracion->puertoDataNode, ID_DATANODE);
 }
 
 void comandoError() {
@@ -1374,7 +1370,7 @@ void directorioMostrarArchivos(int identificadorPadre) {
 int directorioBuscarIdentificadorLibre() {
 	int indice;
 	for(indice = 0; directorioIndiceEstaOcupado(indice); indice++);
-	if(indice < 100)
+	if(indice < MAX_DIR)
 		return indice;
 	else
 		return ERROR;
@@ -1430,6 +1426,12 @@ void directorioControlarEntradas(ControlDirectorio* control, String path) {
 	control->indiceNombresDirectorios++;
 }
 
+void directorioIniciarControl() {
+	bitmapDirectoriosCrear();
+	directoriosDisponibles = MAX_DIR;
+	directorioCrearConPersistencia(0, "root", -1);
+}
+
 void directorioCrearMetadata(Entero identificador) {
 	String directorio = string_from_format("%s/%i", rutaDirectorioArchivos, identificador);
 	mkdir(directorio, 0777);
@@ -1451,7 +1453,7 @@ int directorioCrearConPersistencia(int identificador, String nombre, int identif
 	directoriosDisponibles--;
 	directorioCrearMetadata(directorio->identificador);
 	directorioPersistir();
-	return 0;
+	return OK;
 }
 
 int directorioCrearDirectoriosRestantes(ControlDirectorio* control, String rutaDirectorio) {
@@ -1464,7 +1466,7 @@ int directorioCrearDirectoriosRestantes(ControlDirectorio* control, String rutaD
 		control->indiceNombresDirectorios++;
 	}
 	imprimirMensajeUno(archivoLog, "[DIRECTORIO] El directorio %s fue creado", rutaDirectorio);
-	return 0;
+	return OK;
 }
 
 bool directorioExiste(int idPadre, String nuevoNombre) {
@@ -1480,8 +1482,8 @@ bool directorioExiste(int idPadre, String nuevoNombre) {
 }
 
 int directorioObtenerIdentificador(String path) {
-	if(stringIguales(path, "/"))
-		return 0;
+	if(stringIguales(path, RAIZ))
+		return ID_RAIZ;
 	int id = ERROR;
 	int indice;
 	ControlDirectorio* control = directorioControlCrear(path);
@@ -1568,7 +1570,7 @@ bool directorioIndiceEstaOcupado(int indice) {
 }
 
 bool directorioIndiceRespetaLimite(int indice) {
-	return indice < 100;
+	return indice < MAX_DIR;
 }
 
 bool directorioExisteIdentificador(int identificador) {
@@ -1758,6 +1760,27 @@ int archivoCantidadBloques(String ruta) {
 	return cantidadBloques;
 }
 
+void archivoEnviarBloquesYama(String path) {
+	Archivo* archivo = archivoBuscarPorRuta(path);
+	int cantidad = listaCantidadElementos(archivo->listaBloques);
+	BloqueYama* bloques = archivoConvertirParaYama(archivo);
+	mensajeEnviar(socketYama, ENVIAR_BLOQUES, bloques, sizeof(BloqueYama)*cantidad);
+}
+
+BloqueYama* archivoConvertirParaYama(Archivo* archivo) {
+	int indice;
+	int cantidad = listaCantidadElementos(archivo->listaBloques);
+	BloqueYama* bloques = memoriaAlocar(sizeof(BloqueYama)*cantidad);
+	listaOrdenar(archivo->listaBloques, (Puntero)bloqueOrdenarPorNumero);
+	for(indice = 0; indice < cantidad; indice++) {
+		Bloque* bloque = listaObtenerElemento(archivo->listaBloques, indice);
+		bloques[indice] = bloqueConvertirParaYama(bloque);
+	}
+	return bloques;
+}
+
+
+
 bool archivoOrdenarPorNombre(Archivo* unArchivo, Archivo* otroArchivo) {
 	return unArchivo->nombre[0] < otroArchivo->nombre[0];
 }
@@ -1871,7 +1894,7 @@ int archivoAlmacenar(Comando* comando) {
 		archivoPersistirControl();
 		nodoPersistir();
 		imprimirMensajeUno(archivoLog, "[ARCHIVO] El archivo %s fue copiado en File System", comando->argumentos[2]);
-		return 0;
+		return OK;
 	}
 }
 
@@ -1900,6 +1923,7 @@ int archivoLeer(Comando* comando) {
 			Copia* copia = listaObtenerElemento(bloque->listaCopias, numeroCopia);
 			Nodo* nodo = nodoBuscarPorNombre(copia->nombreNodo);
 			mutexBloquear(mutexRuta);
+			//TODO ver
 			puts("envio entre");
 			if(nodoConectado(nodo)) {
 				mensajeEnviar(nodo->socket, LEER_BLOQUE ,&copia->bloqueNodo, sizeof(Entero));
@@ -1917,9 +1941,8 @@ int archivoLeer(Comando* comando) {
 		}
 	}
 	nodoLimpiarActividades();
-	return 0;
+	return OK;
 }
-
 
 void archivoListaCrear() {
 	mutexBloquear(mutexListaArchivos);
@@ -2270,6 +2293,16 @@ int nodoBloquesLibresTotales() {
 	return bloquesLibres;
 }
 
+Direccion nodoObtenerDireccion(String nombreNodo) {
+	Nodo* nodo = nodoBuscarPorNombre(nombreNodo);
+	Direccion direccion;
+	stringLimpiar(direccion.ip, 20);
+	stringLimpiar(direccion.puerto, 20);
+	stringCopiar(direccion.ip, nodo->ip);
+	stringCopiar(direccion.puerto, nodo->puerto);
+	return direccion;
+}
+
 void nodoFormatear(Nodo* nodo) {
 	nodo->bloquesLibres = nodo->bloquesTotales;
 	bitmapDestruir(nodo->bitmap);
@@ -2298,7 +2331,7 @@ Nodo* nodoActualizar(Nodo* nodoTemporal) {
 }
 
 void nodoAceptar(Nodo* nodo) {
-	mensajeEnviar(nodo->socket, ACEPTAR_NODO, &nodo->socket, sizeof(Socket)); //TODO debe ser nulo el msj, solo me interesa la operacion
+	mensajeEnviar(nodo->socket, ACEPTAR_DATANODE, &nodo->socket, sizeof(Socket)); //TODO debe ser nulo el msj, solo me interesa la operacion
 	imprimirMensajeUno(archivoLog, AMARILLO"[CONEXION] %s conectado"BLANCO, nodo->nombre);
 }
 
@@ -2442,9 +2475,9 @@ int bloqueEnviarCopiasANodos(Bloque* bloque, String buffer) {
 	}
 	if(copiasEnviadas < MAX_COPIAS) {
 		imprimirMensajeDos(archivoLog, "[AVISO] El bloque N°%i no pudo copiarse %i veces ", (int*)bloque->numeroBloque, (int*)MAX_COPIAS);
-		return NULO;
+		return OK;
 	}
-	return NULO;
+	return OK;
 }
 
 void bloqueCopiar(Puntero datos) {
@@ -2506,6 +2539,22 @@ void bloqueCopiarTexto(Puntero datos) {
 	fileCerrar(file);
 	semaforoSignal(semaforoTarea);
 }
+
+BloqueYama bloqueConvertirParaYama(Bloque* bloque) {
+	BloqueYama bloqueYama;
+	Copia* copia1 = listaObtenerElemento(bloque->listaCopias, 0);
+	Copia* copia2 = listaObtenerElemento(bloque->listaCopias, 1);
+	Direccion direccion1 = nodoObtenerDireccion(copia1->nombreNodo);
+	Direccion direccion2 = nodoObtenerDireccion(copia2->nombreNodo);
+	memcpy(&bloqueYama.direccionCopia1, &direccion1, sizeof(Dir));
+	memcpy(&bloqueYama.direccionCopia2, &direccion2, sizeof(Dir));
+	bloqueYama.numeroBloqueCopia1 = copia1->bloqueNodo;
+	bloqueYama.numeroBloqueCopia2 = copia2->bloqueNodo;
+	bloqueYama.bytesUtilizados = bloque->bytesUtilizados;
+	return bloqueYama;
+}
+
+
 
 bool bloqueOrdenarPorNumero(Bloque* unBloque, Bloque* otroBloque) {
 	return unBloque->numeroBloque < otroBloque->numeroBloque;
@@ -2572,23 +2621,16 @@ void metadataIniciar() {
 	metadataCrear();
 	archivoListaCrear();
 	directorioListaCrear();
-	bitmapDirectoriosCrear();
-	directoriosDisponibles = MAX_DIR;
-	directorioCrearConPersistencia(0, "root", -1);
+	directorioIniciarControl();
 	archivoPersistirControl();
 	nodoPersistir();
-	mutexBloquear(mutexEstadoEjecucion);
-	estadoEjecucion = NUEVO;
-	mutexDesbloquear(mutexEstadoEjecucion);
 }
 
 void metadataRecuperar() {
-	mutexBloquear(mutexEstadoEjecucion);
-	estadoEjecucion = NORMAL;
-	mutexDesbloquear(mutexEstadoEjecucion);
 	archivoRecuperarPersistencia();
 	directorioRecuperarPersistencia();
 	nodoRecuperarPersistencia();
+	estadoEjecucionNormal();
 	imprimirMensaje(archivoLog, AMARILLO"[AVISO] Para pasar a un estado estable conecte los nodos necesarios"BLANCO);
 }
 
@@ -2598,30 +2640,30 @@ String rutaObtenerUltimoNombre(String ruta) {
 	int indice;
 	int ultimaBarra;
 	for(indice=0; ruta[indice] != FIN; indice++)
-		if(caracterIguales(ruta[indice], '/'))
+		if(caracterIguales(ruta[indice], BARRA))
 			ultimaBarra = indice;
 	String directorio = stringTomarDesdePosicion(ruta+1, ultimaBarra);
 	return directorio;
 }
 
 bool rutaTieneAlMenosUnaBarra(String ruta) {
-	return stringContiene(ruta, "/");
+	return stringContiene(ruta, RAIZ);
 }
 
 bool rutaBarrasEstanSeparadas(String ruta) {
 	int indice;
 	for(indice=0; indice<stringLongitud(ruta); indice++) {
-		if(caracterIguales(ruta[indice], '/')) {
+		if(caracterIguales(ruta[indice], BARRA)) {
 			if(indice==0) {
-				if(caracterIguales(ruta[indice+1], '/'))
+				if(caracterIguales(ruta[indice+1], BARRA))
 					return false;
 			}
 			else {
 				if(indice==stringLongitud(ruta)-1)
 					return false;
 				else
-					if(caracterIguales(ruta[indice-1], '/') ||
-						caracterIguales(ruta[indice+1], '/'))
+					if(caracterIguales(ruta[indice-1], BARRA) ||
+						caracterIguales(ruta[indice+1], BARRA))
 						return false;
 			}
 
@@ -2631,7 +2673,7 @@ bool rutaBarrasEstanSeparadas(String ruta) {
 }
 
 bool rutaValida(String ruta) {
-	return caracterIguales(ruta[0], '/') &&
+	return caracterIguales(ruta[0], BARRA) &&
 			rutaTieneAlMenosUnaBarra(ruta) &&
 			rutaBarrasEstanSeparadas(ruta);
 }
@@ -2656,22 +2698,19 @@ String* rutaSeparar(String ruta) {
 	return directorios;
 }
 
-bool rutaEsNumero(String ruta) {
-	int indice;
-	for(indice=0; indice<stringLongitud(ruta); indice++)
-		if(ruta[indice] < 48 || ruta[indice] > 57)
-			return false;
-	return true;
+void rutaBufferCrear() {
+	mutexBloquear(mutexRuta);
+	rutaBuffer = stringCrear(MAX_STRING);
+	mutexDesbloquear(mutexRuta);
+}
+
+void rutaBufferDestruir() {
+	mutexBloquear(mutexRuta);
+	memoriaLiberar(rutaBuffer);
+	mutexDesbloquear(mutexRuta);
 }
 
 //--------------------------------------- Funciones de Estado ------------------------------------
-
-bool estadoEjecucionIgualA(int estado) {
-	mutexBloquear(mutexEstadoEjecucion);
-	int resultado = estadoEjecucion == estado;
-	mutexDesbloquear(mutexEstadoEjecucion);
-	return resultado;
-}
 
 void estadoFileSystemEstable() {
 	mutexBloquear(mutexEstadoFileSystem);
@@ -2698,12 +2737,38 @@ void estadoControlActivar() {
 	mutexDesbloquear(mutexEstadoControl);
 }
 
+void estadoControlDesactivar() {
+	 mutexBloquear(mutexEstadoControl);
+	 estadoControl = DESACTIVADO;
+	 mutexDesbloquear(mutexEstadoControl);
+}
+
 bool estadoControlIgualA(int estado) {
 	mutexBloquear(mutexEstadoControl);
 	int resultado = estadoControl == estado;
 	mutexDesbloquear(mutexEstadoControl);
 	return resultado;
 }
+
+void estadoEjecucionNuevo() {
+	mutexBloquear(mutexEstadoEjecucion);
+	estadoEjecucion = NUEVO;
+	mutexDesbloquear(mutexEstadoEjecucion);
+}
+
+void estadoEjecucionNormal() {
+	mutexBloquear(mutexEstadoEjecucion);
+	estadoEjecucion = NORMAL;
+	mutexDesbloquear(mutexEstadoEjecucion);
+}
+
+bool estadoEjecucionIgualA(int estado) {
+	mutexBloquear(mutexEstadoEjecucion);
+	int resultado = estadoEjecucion == estado;
+	mutexDesbloquear(mutexEstadoEjecucion);
+	return resultado;
+}
+
 
 //--------------------------------------- Funciones de Bitmap de Directorios------------------------------------
 
@@ -2786,65 +2851,6 @@ void semaforosDestruir() {
 	memoriaLiberar(mutexEstadoFileSystem);
 	memoriaLiberar(mutexEstadoControl);
 }
-
-
-
-//TODO para yama
-
-Dir nodoObtenerDireccion(String nombreNodo) {
-	Nodo* nodo = nodoBuscarPorNombre(nombreNodo);
-	Dir direccion;
-	stringLimpiar(direccion.ip, 20);
-	stringLimpiar(direccion.port, 20);
-	stringCopiar(direccion.ip, nodo->ip);
-	stringCopiar(direccion.port, nodo->puerto);
-	return direccion;
-}
-
-BloqueYama bloqueConvertirParaYama(Bloque* bloque) {
-	BloqueYama bloqueYama;
-	Copia* copia1 = listaObtenerElemento(bloque->listaCopias, 0);
-	Copia* copia2 = listaObtenerElemento(bloque->listaCopias, 1);
-	Dir direccion1 = nodoObtenerDireccion(copia1->nombreNodo);
-	Dir direccion2 = nodoObtenerDireccion(copia2->nombreNodo);
-	memcpy(&bloqueYama.direccionCopia1, &direccion1, sizeof(Dir));
-	memcpy(&bloqueYama.direccionCopia2, &direccion2, sizeof(Dir));
-	bloqueYama.numeroBloqueCopia1 = copia1->bloqueNodo;
-	bloqueYama.numeroBloqueCopia2 = copia2->bloqueNodo;
-	bloqueYama.bytesUtilizados = bloque->bytesUtilizados;
-	return bloqueYama;
-}
-
-BloqueYama* archivoConvertirYama(Archivo* archivo) {
-	int indice;
-	int cantidad = listaCantidadElementos(archivo->listaBloques);
-	BloqueYama* bloques = memoriaAlocar(sizeof(BloqueYama)*cantidad);
-	listaOrdenar(archivo->listaBloques, (Puntero)bloqueOrdenarPorNumero);
-	for(indice = 0; indice < cantidad; indice++) {
-		Bloque* bloque = listaObtenerElemento(archivo->listaBloques, indice);
-		bloques[indice] = bloqueConvertirParaYama(bloque);
-	}
-	return bloques;
-}
-
-void archivoEnviarBloques(String path) {
-	Archivo* archivo = archivoBuscarPorRuta(path);
-	int cantidad = listaCantidadElementos(archivo->listaBloques);
-	BloqueYama* bloques = archivoConvertirYama(archivo);
-	//TODO test
-	int indice;
-	for(indice = 0; indice < cantidad; indice++) {
-		printf("bytes: %i\n",bloques[indice].bytesUtilizados);
-		printf("ip copia1 %s\n",bloques[indice].direccionCopia1.ip);
-		printf("dir copia1: %s\n", bloques[indice].direccionCopia1.port);
-		printf("ip copia2 %s\n",bloques[indice].direccionCopia2.ip);
-		printf("dir copia2: %s\n", bloques[indice].direccionCopia2.port);
-	}
-	mensajeEnviar(socketYama, ENVIAR_BLOQUES, bloques, sizeof(BloqueYama)*cantidad);
-}
-
-
-
 
 //TODO el data bin cambia o solo cambia la primera vez (VER)
 //TODO cpblock, cpto, md5, cpfrom, cat (funcionan si no se matan los nodos)

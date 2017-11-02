@@ -38,22 +38,14 @@
 //--------------------------------------- Constantes -------------------------------------
 
 #define IP_LOCAL "127.0.0.1"
-#define VACIO ""
-#define MAX 1024
-#define FIN '\0'
-#define ENTER '\n'
-#define ESPACIO ' '
-#define TAB '\t'
-#define BARRA '/'
 #define LISTEN 10
-#define NULO 0
-#define DESCONEXION 0
-#define TERMINADO 1
-#define SOLICITUD 2
 #define ERROR -1
+#define DESCONEXION 0
+#define NULO 0
+#define OK 1
+#define HANDSHAKE 1
 #define ACTIVADO 1
 #define DESACTIVADO 0
-#define HANDSHAKE 1
 #define ID_FILESYSTEM 1
 #define ID_YAMA 2
 #define ID_MASTER 3
@@ -62,7 +54,6 @@
 #define ESCRITURA "w"
 #define LECTURA "r"
 #define BLOQUE 256//1048576
-
 #define ROJO "\x1b[31m"
 #define AMARILLO "\x1b[33m"
 #define BLANCO "\x1b[0m"

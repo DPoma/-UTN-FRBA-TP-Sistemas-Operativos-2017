@@ -19,7 +19,8 @@
 #define COPIAR_BLOQUE 103
 #define COPIAR_BINARIO 104
 #define COPIAR_TEXTO 105
-#define FINALIZAR 106
+#define SOLICITAR_CONEXION 106
+#define FINALIZAR 107
 
 //--------------------------------------- Estructuras -------------------------------------
 

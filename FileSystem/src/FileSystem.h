@@ -15,19 +15,19 @@
 
 #define ID_FORMAT 1
 #define ID_RM 2
-#define ID_RENAME 5
-#define ID_MV 6
-#define ID_CAT 7
-#define ID_MKDIR 8
-#define ID_CPFROM 9
-#define ID_CPTO 10
-#define ID_CPBLOCK 11
-#define ID_MD5 12
-#define ID_LS 13
-#define ID_INFO 14
-#define ID_NODES 15
-#define ID_HELP 16
-#define ID_EXIT 17
+#define ID_RENAME 3
+#define ID_MV 4
+#define ID_CAT 5
+#define ID_MKDIR 6
+#define ID_CPFROM 7
+#define ID_CPTO 8
+#define ID_CPBLOCK 9
+#define ID_MD5 10
+#define ID_LS 11
+#define ID_INFO 12
+#define ID_NODES 13
+#define ID_HELP 14
+#define ID_EXIT 15
 #define FORMAT "format"
 #define RM "rm"
 #define RMB "rm -b"
@@ -50,18 +50,32 @@
 #define FLAG_D "-d"
 #define FLAG_T "-t"
 #define OCUPADO '1'
+#define VACIO ""
+#define FIN '\0'
+#define ENTER '\n'
+#define ESPACIO ' '
+#define TAB '\t'
+#define BARRA '/'
+#define RAIZ "/"
+#define ID_RAIZ 0
 #define ARCHIVO_BINARIO "BINARIO"
 #define ARCHIVO_TEXTO "TEXTO"
 #define MAX_STRING 300
 #define MAX_NOMBRE 255
 #define MAX_DIR 100
+#define MAX_IP 20
+#define MAX_PUERTO 20
+#define MAX_NODO 10
 #define MAX_COPIAS 2
+#define MAX_TIPOS 10
+#define MAX_ARGS 5
+#define MAX_CAMPOS 4
 #define NUEVO 0
 #define NORMAL 1
 #define INESTABLE 0
 #define ESTABLE 1
 
-#define ACEPTAR_NODO 100
+#define ACEPTAR_DATANODE 100
 #define LEER_BLOQUE 101
 #define ESCRIBIR_BLOQUE 102
 #define COPIAR_BLOQUE 103
@@ -76,7 +90,7 @@
 
 typedef struct {
 	int identificador;
-	String argumentos[5];
+	String argumentos[MAX_ARGS];
 } Comando;
 
 typedef struct {
@@ -92,9 +106,9 @@ typedef struct {
 } Servidor;
 
 typedef struct {
-	char puertoYama[20];
-	char puertoDataNode[20];
-	char puertoWorker[20];
+	char puertoYama[MAX_PUERTO];
+	char puertoDataNode[MAX_PUERTO];
+	char puertoWorker[MAX_PUERTO];
 	char rutaMetadata[MAX_NOMBRE];
 } Configuracion;
 
@@ -114,7 +128,7 @@ typedef struct {
 
 typedef struct {
 	int identificadorPadre;
-	char tipo[10];
+	char tipo[MAX_TIPOS];
 	char nombre[MAX_NOMBRE];
 	Lista listaBloques;
 } Archivo;
@@ -126,14 +140,14 @@ typedef struct {
 } Bloque;
 
 typedef struct {
-	char nombreNodo[10];
+	char nombreNodo[MAX_NODO];
 	int  bloqueNodo;
 } Copia;
 
 typedef struct {
-	char puerto[20];
-	char ip[20];
-	char nombre[10];
+	char puerto[MAX_PUERTO];
+	char ip[MAX_IP];
+	char nombre[MAX_NODO];
 	int estado;
 	int actividadesRealizadas;
 	int bloquesLibres;
@@ -148,10 +162,9 @@ typedef struct __attribute__((packed)) {
 } BloqueNodo;
 
 typedef struct __attribute__((packed)) {
-	char ip[20];
-	char puerto[20];
-} ConexionNodo;
-
+	char ip[MAX_IP];
+	char puerto[MAX_PUERTO];
+} Direccion;
 
 typedef struct __attribute__((packed)) {
 	Dir direccionCopia1;
@@ -161,9 +174,9 @@ typedef struct __attribute__((packed)) {
 	Entero bytesUtilizados;
 } BloqueYama;
 
-//--------------------------------------- Variables globales -------------------------------------
+//--------------------------------------- Globales -------------------------------------
 
-String campos[4];
+String campos[MAX_CAMPOS];
 Configuracion* configuracion;
 ArchivoLog archivoLog;
 int estadoControl;
@@ -216,7 +229,7 @@ void fileSystemFinalizar();
 void configuracionImprimir(Configuracion* configuracion);
 Configuracion* configuracionLeerArchivo(ArchivoConfig archivoConfig);
 void configuracionIniciarRutas();
-void configuracionDestruirRutas();
+void configuracionRutasDestruir();
 void configuracionIniciarLog();
 void configuracionIniciar();
 
@@ -315,6 +328,7 @@ void consolaDestruirComando(Comando* comando, String entrada);
 void consolaAtenderComandos();
 int consolaIdentificarComando(String comando);
 String consolaLeerEntrada();
+bool consolaArgumentoEsNumero(String ruta);
 
 //--------------------------------------- Funciones de Comando -------------------------------------
 
@@ -384,6 +398,7 @@ int directorioListaCantidad();
 Directorio* directorioListaObtener(int posicion);
 void directorioListaCrear();
 void directorioListaDestruir();
+void directorioIniciarControl();
 
 //--------------------------------------- Funciones de Archivo -------------------------------------
 
@@ -410,8 +425,8 @@ void archivoListaAgregar(Archivo* archivo);
 int archivoListaCantidad();
 bool archivoListaTodosDisponibles();
 void archivoListaDestruir();
-
-void archivoEnviarBloques(String path);
+BloqueYama* archivoConvertirParaYama(Archivo* archivo);
+void archivoEnviarBloquesYama(String path);
 
 //--------------------------------------- Funciones de Nodo -------------------------------------
 
@@ -462,6 +477,7 @@ void bloqueCopiarTexto(Puntero datos);
 void bloqueCopiarBinario(Puntero datos);
 bool bloqueDisponible(Bloque* bloque);
 BloqueNodo* bloqueNodoCrear(Entero numeroBloque, String buffer, int tamanioUtilizado);
+BloqueYama bloqueConvertirParaYama(Bloque* bloque);
 
 //--------------------------------------- Funciones de Copia -------------------------------------
 
@@ -485,7 +501,8 @@ bool rutaBarrasEstanSeparadas(String ruta);
 String* rutaSeparar(String ruta);
 bool rutaTieneAlMenosUnaBarra(String ruta);
 bool rutaValida(String ruta);
-bool rutaEsNumero(String ruta);
+void rutaBufferCrear();
+void rutaBufferDestruir();
 
 //--------------------------------------- Funciones de Estado ------------------------------------
 
@@ -495,6 +512,8 @@ bool estadoControlIgualA(int estado);
 void estadoControlActivar();
 void estadoFileSystemEstable();
 void estadoFileSystemInestable();
+void estadoEjecucionNormal();
+void estadoControlDesactivar();
 
 //--------------------------------------- Funciones de Bitmaps de directorios ------------------------------------
 

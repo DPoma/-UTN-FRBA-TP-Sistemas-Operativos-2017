@@ -80,7 +80,7 @@ void dataNodeConectarAFS() {
 	String mensaje = string_from_format("/%s/%s/%s", configuracion->nombreNodo, configuracion->ipPropia, configuracion->puertoFileSystem);
 	memcpy(puntero, &dataBinBloques, sizeof(Entero));
 	memcpy(puntero+sizeof(Entero), mensaje, stringLongitud(mensaje)+1);
-	mensajeEnviar(socketFileSystem, NULO, puntero, stringLongitud(mensaje)+1+sizeof(Entero));
+	mensajeEnviar(socketFileSystem, SOLICITAR_CONEXION, puntero, stringLongitud(mensaje)+1+sizeof(Entero));
 	memoriaLiberar(mensaje);
 	memoriaLiberar(puntero);
 	imprimirMensajeDos(archivoLog, "[CONEXION] Estableciendo conexion con File System (IP: %s | Puerto %s)", configuracion->ipFileSystem, configuracion->puertoFileSystem);
