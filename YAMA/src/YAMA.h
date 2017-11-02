@@ -22,7 +22,7 @@
 #define ACEPTACION 200
 #define SOLICITAR_BLOQUES 201
 
-#define DIRSIZE sizeof(Direccion)
+#define DIRSIZE sizeof(Dir)
 
 
 typedef struct {
@@ -50,7 +50,7 @@ typedef struct{
 	uint32_t carga; //son uint32_t porque lo pide el tp, yo usaria ints
 	uint32_t tareasRealizadas;
 	uint32_t disponibilidad;
-	Direccion nodo; //no me lo reconoce, por ahi estan mal los paths?
+	Dir nodo;
 } Worker;
 Lista workers;
 
@@ -60,23 +60,15 @@ int job=-1;
 typedef struct{
 	int job;
 	Socket masterid;
-	Direccion nodo;
+	Dir nodo;
 	int32_t bloque;
 	int32_t bytes;
-	Direccion nodoAlt;
+	Dir nodoAlt;
 	int32_t bloqueAlt;
 	Etapa etapa;
 	char* pathTemporal; //podría usar char[12] y no usar memoria dinamica, despues ver
 	Estado estado;
 } Entrada;
-
-typedef struct __attribute__((packed)) { //TODO borrar esta cosa
-	Direccion direccionCopia1;
-	Entero numeroBloqueCopia1;
-	Direccion direccionCopia2;
-	Entero numeroBloqueCopia2;
-	Entero bytesUtilizados;
-} BloqueYama;
 
 Lista tablaEstados;
 Lista tablaUsados; //entradas Abortadas, Error, o Terminadas que ya

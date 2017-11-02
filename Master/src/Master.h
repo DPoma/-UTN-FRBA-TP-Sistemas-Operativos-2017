@@ -14,15 +14,13 @@
 #define RUTA_LOG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Master/MasterLog.log"
 #define EXITO 1
 #define FRACASO 0
-#define SCRIPT_TRANSFORMACION 501
-#define SCRIPT_REDUCTOR 502
-#define DIRSIZE sizeof(Direccion)
+#define DIRSIZE sizeof(Dir)
 #define INTSIZE sizeof(int32_t)
 #define TEMPSIZE 12
 
 //--------------------------------------- Estructuras -------------------------------------
 
-typedef enum {Solicitud,Transformacion=1,ReduccionLocal=2,ReduccionGlobal=3,Almacenamiento=4,Finalizacion,Aborto=6} Etapa;
+typedef enum {Solicitud,Transformacion,ReducLocal,ReducGlobal,Almacenamiento,Cierre,Aborto} Etapa;
 
 typedef struct {
 	char ipYama[20];
@@ -30,33 +28,32 @@ typedef struct {
 } Configuracion;
 
 typedef struct{
-	Direccion direccion;
+	Dir dir;
 	int bloque;
 	int bytes;
 	char* temp;
 }WorkerTransformacion;
 
-typedef struct{
-	Entero dirs_size;
-	Lista dirs;
-	Entero tmps_size;
-	Lista tmps;
-	Entero nombretemp_size;
-	Lista nombretempsreduccion;
+typedef struct{ //no se hasta que punto es util este struct
+	Dir dir;
+	char* temp;
+	char* listaTemps;
 } WorkerReduccion;
 
 //--------------------------------------- Globales -------------------------------------
 
-Mutex errorBloque;
-Mutex recepcionAlternativo;
+Semaforo* errorBloque;
+Semaforo* recepcionAlternativo;
 String campos[2];
 Configuracion* configuracion;
 ArchivoLog archivoLog;
 Socket socketYama;
 Socket socketWorker;
 int estadoMaster;
-FILE* scriptTransformacion;
-FILE* scriptReductor;
+char* scriptTransformacion;
+int32_t lenTransformacion;
+char* scriptReduccion;
+int32_t lenReduccion;
 WorkerTransformacion alternativo;
 
 //--------------------------------------- Funciones de Master -------------------------------------
@@ -91,7 +88,7 @@ WorkerTransformacion* deserializarTransformacion(Mensaje* mensaje);
 WorkerReduccion* deserializarReduccion(Mensaje* mensaje);
 void confirmacionWorker(Socket unSocket);
 void serializarYEnviar(Entero nroBloque, Entero nroBytes, char* nombretemp, Socket unSocket);
-void establecerConexionConWorker(Lista);
+void transformaciones(Lista);
 void transformacion(Mensaje* mensaje);
 Lista workersAConectar();
 ListaSockets sockets();

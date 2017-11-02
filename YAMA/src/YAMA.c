@@ -42,7 +42,6 @@ void yamaIniciar() {
 		imprimirMensaje(archivoLog, ROJO"[ERROR] El File System no se encuentra estable"BLANCO);
 		exit(EXIT_FAILURE);
 	}
-/*
 	workers=list_create();
 	Mensaje* infoNodos=mensajeRecibir(servidor->fileSystem);
 	int i;
@@ -51,13 +50,12 @@ void yamaIniciar() {
 		worker.conectado=true;
 		worker.carga=0;
 		worker.tareasRealizadas=0;
-		worker.nodo=*(Direccion*)(infoNodos->datos+sizeof(Direccion)*i);
+		worker.nodo=*(Dir*)(infoNodos->datos+DIRSIZE*i);
 		printf("IP = %s\n", worker.nodo.ip);
 		printf("Puerto = %s\n", worker.nodo.puerto);
 		list_addM(workers,&worker,sizeof(Worker));
 	}
 	mensajeDestruir(infoNodos);
-*/
 }
 
 void configurar(){
@@ -73,7 +71,7 @@ void configurar(){
 	archivoConfigDestruir(archivoConfig);
 }
 
-bool mismoNodo(Direccion a,Direccion b){
+bool mismoNodo(Dir a,Dir b){
 	return stringIguales(a.ip,b.ip)&&stringIguales(a.puerto,b.puerto);//podría comparar solo ip
 }
 
@@ -135,9 +133,6 @@ void yamaAtender() {
 						list_iterate(tablaEstados,cazarEntradasDesconectadas);
 						//podría romper por estar recorriendo una lista con una funcion
 						//que puede modificar la lista, pero no deberia
-
-						//podría haber un mensaje de reconexion
-						//si es que los nodos pueden reconectarse
 					}else{
 						Socket masterid;
 						memcpy(&masterid,mensaje->datos,INTSIZE);
@@ -149,41 +144,23 @@ void yamaAtender() {
 				}else{ //master
 					Mensaje* mensaje = mensajeRecibir(socketI);
 					if(mensaje->header.operacion==Solicitud){
-						//TODO test borrar
-						//Para probar el fs tiene que tener guardado el archivo a enviar
-						mensajeEnviar(servidor->fileSystem, SOLICITAR_BLOQUES, mensaje->datos, stringLongitud(mensaje->datos)+1);
-						mensaje = mensajeRecibir(servidor->fileSystem);
-						int indice;
-						int cantidadBloques =  mensaje->header.tamanio / sizeof(BloqueYama);
-						BloqueYama bloque;
-						for(indice = 0; indice < cantidadBloques; indice++) {
-							memcpy(&bloque, mensaje->datos+indice*sizeof(BloqueYama), sizeof(BloqueYama));
-							printf("bytes: %i\n", bloque.bytesUtilizados);
-							printf("ip copia1 %s\n",bloque.direccionCopia1.ip);
-							printf("dir copia1: %s\n", bloque.direccionCopia1.puerto);
-							printf("ip copia2 %s\n",bloque.direccionCopia2.ip);
-							printf("dir copia2: %s\n", bloque.direccionCopia2.puerto);
-						}
-						//TODO test borrar
-/*
 						int32_t masterid = socketI; //para pasarlo a 32, por las dudas
 						//el mensaje es el path del archivo
 						//aca le acoplo el numero de master y se lo mando al fileSystem
 						//lo de acoplar esta por si uso hilos, sino esta al pedo
-						mensaje=realloc(mensaje->datos,mensaje->header.tamanio+INTSIZE);
-						memmove(mensaje->datos+INTSIZE,mensaje,mensaje->header.tamanio);
+						mensaje=realloc(mensaje,mensaje->header.tamanio+INTSIZE);
+						memmove(mensaje->datos+INTSIZE,mensaje->datos,mensaje->header.tamanio);
 						memcpy(mensaje->datos,&masterid,INTSIZE);
 						mensajeEnviar(servidor->fileSystem,Solicitud,mensaje->datos,mensaje->header.tamanio+INTSIZE);
 						log_info(archivoLog, "[ENVIO] path de master #%d enviado al fileSystem",&socketI);
-*/
-					} else if(mensaje->header.operacion==DESCONEXION){
+					}else if(mensaje->header.operacion==DESCONEXION){
 						listaSocketsEliminar(socketI, &servidor->listaMaster);
 						socketCerrar(socketI);
 						if(socketI==servidor->maximoSocket)
 							servidor->maximoSocket--; //no debería romper nada
 						log_info(archivoLog, "[CONEXION] Proceso Master %d se ha desconectado",socketI);
 					}else{
-						Direccion nodo=*((Direccion*)mensaje->datos);//puede que rompa porque no es deep copying
+						Dir nodo=*((Dir*)mensaje->datos);//puede que rompa porque no es deep copying
 						int32_t bloque=*((int32_t*)(mensaje->datos+DIRSIZE));
 						bool buscarEntrada(Entrada* entrada){
 							return stringIguales(entrada->nodo.ip,nodo.ip)&&entrada->bloque==bloque;
@@ -199,7 +176,7 @@ void yamaAtender() {
 
 void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 	typedef struct __attribute__((__packed__)){
-		Direccion nodo;
+		Dir nodo;
 		int32_t bloque;
 	}Bloque;
 	int i;
@@ -427,7 +404,7 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 			darDatosEntrada(&reducGlobal);
 			darPathTemporal(&reducGlobal.pathTemporal,'g');
 			reducGlobal.etapa=ReducGlobal;
-			Direccion nodoMenorCarga=entradaA->nodo;//deep
+			Dir nodoMenorCarga=entradaA->nodo;//deep
 			int menorCargaI=100; //
 			void menorCarga(Worker* worker){
 				if(worker->carga<menorCargaI)
