@@ -52,7 +52,7 @@ void yamaIniciar() {
 		worker.tareasRealizadas=0;
 		worker.nodo=*(Dir*)(infoNodos->datos+DIRSIZE*i);
 		printf("IP = %s\n", worker.nodo.ip);
-		printf("Puerto = %s\n", worker.nodo.puerto);
+		printf("Puerto = %s\n", worker.nodo.port);
 		list_addM(workers,&worker,sizeof(Worker));
 	}
 	mensajeDestruir(infoNodos);
@@ -72,7 +72,7 @@ void configurar(){
 }
 
 bool mismoNodo(Dir a,Dir b){
-	return stringIguales(a.ip,b.ip)&&stringIguales(a.puerto,b.puerto);//podría comparar solo ip
+	return stringIguales(a.ip,b.ip)&&stringIguales(a.port,b.port);//podría comparar solo ip
 }
 
 void yamaAtender() {
@@ -148,7 +148,7 @@ void yamaAtender() {
 						//el mensaje es el path del archivo
 						//aca le acoplo el numero de master y se lo mando al fileSystem
 						//lo de acoplar esta por si uso hilos, sino esta al pedo
-						mensaje=realloc(mensaje,mensaje->header.tamanio+INTSIZE);
+						mensaje=realloc(mensaje,mensaje->header.tamanio+INTSIZE+sizeof(Header));
 						memmove(mensaje->datos+INTSIZE,mensaje->datos,mensaje->header.tamanio);
 						memcpy(mensaje->datos,&masterid,INTSIZE);
 						mensajeEnviar(servidor->fileSystem,Solicitud,mensaje->datos,mensaje->header.tamanio+INTSIZE);

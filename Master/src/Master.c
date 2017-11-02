@@ -31,7 +31,6 @@ void masterIniciar(String* argv) {
 	}
 	configuracion = configuracionCrear(RUTA_CONFIG, (Puntero)configuracionLeerArchivo, campos);
 	imprimirMensajeDos(archivoLog, "[CONEXION] Configuracion para conexion con YAMA (IP: %s | Puerto: %s)", configuracion->ipYama, configuracion->puertoYama);
-	//establecerConexiones();
 	void configuracionSenial(int senial) {
 		estadoMaster=DESACTIVADO;
 	}
@@ -41,7 +40,7 @@ void masterIniciar(String* argv) {
 	semaforoIniciar(errorBloque,1);
 	semaforoIniciar(recepcionAlternativo,0);
 
-	void leerArchivo(File archScript,char** script,int* len){ //ni idea por que se queja TODO (Se queja porque el tipo "File" es igual a "FILE*" (Borre el asterisco)
+	void leerArchivo(File archScript,char** script,int* len){
 		//habría que validar
 		fseek(archScript, 0, SEEK_END);
 		long posicion = ftell(archScript);
@@ -64,32 +63,27 @@ void masterIniciar(String* argv) {
 void masterAtender(){
 	Mensaje* mensaje=mensajeRecibir(socketYama);
 	imprimirMensaje(archivoLog, "[MENSAJE] Lista de bloques recibida");
-	Lista workers=list_create();
 	int i;
-	for(i=0;i<mensaje->header.tamanio;i+=DIRSIZE+INTSIZE*2+TEMPSIZE){
-		WorkerTransformacion worker;
-		memcpy(&worker.dir,mensaje->datos+i,DIRSIZE);
-		memcpy(&worker.bloque,mensaje->datos+i+DIRSIZE,INTSIZE);
-		memcpy(&worker.bytes,mensaje->datos+i+DIRSIZE+INTSIZE,INTSIZE);
-		memcpy(&worker.temp,mensaje->datos+i+DIRSIZE+INTSIZE*2,TEMPSIZE);
-		list_addM(workers,&worker,sizeof(WorkerTransformacion));
-	}
 	bool mismoNodo(Dir a,Dir b){
 		return a.ip==b.ip&&a.port==b.port;//podría comparar solo ip
 	}
 	Lista listas=list_create();
-	for(i=0;i<=workers->elements_count;i++){
-		WorkerTransformacion* worker=list_get(workers,i);
+	for(i=0;i<mensaje->header.tamanio;i+=DIRSIZE+INTSIZE*2+TEMPSIZE){
+		WorkerTransformacion bloque;
+		memcpy(&bloque.dir,mensaje->datos+i,DIRSIZE);
+		memcpy(&bloque.bloque,mensaje->datos+i+DIRSIZE,INTSIZE);
+		memcpy(&bloque.bytes,mensaje->datos+i+DIRSIZE+INTSIZE,INTSIZE);
+		memcpy(&bloque.temp,mensaje->datos+i+DIRSIZE+INTSIZE*2,TEMPSIZE);
 		int j;
 		for(j=0;j<=listas->elements_count;j++){
 			Lista nodo=list_get(listas,j);
 			WorkerTransformacion* cmp=list_get(nodo,0);
-			if(mismoNodo(worker->dir,cmp->dir)){
-				list_add(nodo,worker);
+			if(mismoNodo(bloque.dir,cmp->dir)){
+				list_addM(nodo,&bloque,sizeof bloque);
 			}
 		}
 		Lista nodo=list_create();
-		list_add(nodo, worker);
+		list_addM(nodo, &bloque,sizeof bloque);
 		list_add(listas,nodo);//creo que no hay que alocar nada
 	}
 
@@ -145,7 +139,7 @@ void transformaciones(Lista bloques){
 		Mensaje* mensaje = mensajeRecibir(socketWorker);
 		//a demas de decir exito o fracaso devuelve el numero de bloque
 		void enviarActualizacion(){
-			realloc(mensaje,mensaje->header.tamanio+DIRSIZE);
+			mensaje=realloc(mensaje,mensaje->header.tamanio+DIRSIZE+sizeof(Header));
 			memmove(mensaje->datos+DIRSIZE,mensaje->datos,mensaje->header.tamanio);
 			memcpy(mensaje->datos,&dir->dir,DIRSIZE);
 			mensajeEnviar(socketYama,mensaje->header.operacion,mensaje->datos,mensaje->header.tamanio+DIRSIZE);
@@ -171,6 +165,7 @@ void transformaciones(Lista bloques){
 		}
 	}
 	mensajeEnviar(socketWorker, EXITO, NULL, 0);
+	socketCerrar(socketWorker);
 }
 
 
