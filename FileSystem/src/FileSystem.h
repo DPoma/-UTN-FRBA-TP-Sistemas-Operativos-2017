@@ -154,9 +154,9 @@ typedef struct __attribute__((packed)) {
 
 
 typedef struct __attribute__((packed)) {
-	Direccion direccionCopia1;
+	Dir direccionCopia1;
 	Entero numeroBloqueCopia1;
-	Direccion direccionCopia2;
+	Dir direccionCopia2;
 	Entero numeroBloqueCopia2;
 	Entero bytesUtilizados;
 } BloqueYama;

@@ -2796,13 +2796,13 @@ void semaforosDestruir() {
 
 //TODO para yama
 
-Direccion nodoObtenerDireccion(String nombreNodo) {
+Dir nodoObtenerDireccion(String nombreNodo) {
 	Nodo* nodo = nodoBuscar(nombreNodo);
-	Direccion direccion;
+	Dir direccion;
 	stringLimpiar(direccion.ip, 20);
-	stringLimpiar(direccion.puerto, 20);
+	stringLimpiar(direccion.port, 20);
 	stringCopiar(direccion.ip, nodo->ip);
-	stringCopiar(direccion.puerto, nodo->puerto);
+	stringCopiar(direccion.port, nodo->puerto);
 	return direccion;
 }
 
@@ -2810,10 +2810,10 @@ BloqueYama bloqueConvertirParaYama(Bloque* bloque) {
 	BloqueYama bloqueYama;
 	Copia* copia1 = listaObtenerElemento(bloque->listaCopias, 0);
 	Copia* copia2 = listaObtenerElemento(bloque->listaCopias, 1);
-	Direccion direccion1 = nodoObtenerDireccion(copia1->nombreNodo);
-	Direccion direccion2 = nodoObtenerDireccion(copia2->nombreNodo);
-	memcpy(&bloqueYama.direccionCopia1, &direccion1, sizeof(Direccion));
-	memcpy(&bloqueYama.direccionCopia2, &direccion2, sizeof(Direccion));
+	Dir direccion1 = nodoObtenerDireccion(copia1->nombreNodo);
+	Dir direccion2 = nodoObtenerDireccion(copia2->nombreNodo);
+	memcpy(&bloqueYama.direccionCopia1, &direccion1, sizeof(Dir));
+	memcpy(&bloqueYama.direccionCopia2, &direccion2, sizeof(Dir));
 	bloqueYama.numeroBloqueCopia1 = copia1->bloqueNodo;
 	bloqueYama.numeroBloqueCopia2 = copia2->bloqueNodo;
 	bloqueYama.bytesUtilizados = bloque->bytesUtilizados;
@@ -2841,9 +2841,9 @@ void archivoEnviarBloques(String path) {
 	for(indice = 0; indice < cantidad; indice++) {
 		printf("bytes: %i\n",bloques[indice].bytesUtilizados);
 		printf("ip copia1 %s\n",bloques[indice].direccionCopia1.ip);
-		printf("dir copia1: %s\n", bloques[indice].direccionCopia1.puerto);
+		printf("dir copia1: %s\n", bloques[indice].direccionCopia1.port);
 		printf("ip copia2 %s\n",bloques[indice].direccionCopia2.ip);
-		printf("dir copia2: %s\n", bloques[indice].direccionCopia2.puerto);
+		printf("dir copia2: %s\n", bloques[indice].direccionCopia2.port);
 	}
 	mensajeEnviar(socketYama, ENVIAR_BLOQUES, bloques, sizeof(BloqueYama)*cantidad);
 }

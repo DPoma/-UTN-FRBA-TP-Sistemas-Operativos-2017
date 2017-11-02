@@ -104,7 +104,7 @@ typedef struct __attribute__((packed)){
 	AddrInfo informacion;
 	SockAddrIn address;
 	Socklen tamanioAddress;
-	String puerto;
+	String port;
 	String ip;
 } Conexion;
 
@@ -115,8 +115,8 @@ typedef struct __attribute__((packed)){
 
 typedef struct __attribute__((__packed__)){
 	char ip[20];
-	char puerto[20];
-} Direccion;
+	char port[20];
+} Dir;
 
 
 //--------------------------------------- Funciones para Socket -------------------------------------

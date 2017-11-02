@@ -73,8 +73,8 @@ void configurar(){
 	archivoConfigDestruir(archivoConfig);
 }
 
-bool mismoNodo(Direccion a,Direccion b){
-	return stringIguales(a.ip,b.ip)&&stringIguales(a.puerto,b.puerto);//podría comparar solo ip
+bool mismoNodo(Dir a,Dir b){
+	return stringIguales(a.ip,b.ip)&&stringIguales(a.port,b.port);//podría comparar solo ip
 }
 
 void yamaAtender() {
@@ -160,9 +160,9 @@ void yamaAtender() {
 							memcpy(&bloque, mensaje->datos+indice*sizeof(BloqueYama), sizeof(BloqueYama));
 							printf("bytes: %i\n", bloque.bytesUtilizados);
 							printf("ip copia1 %s\n",bloque.direccionCopia1.ip);
-							printf("dir copia1: %s\n", bloque.direccionCopia1.puerto);
+							printf("dir copia1: %s\n", bloque.direccionCopia1.port);
 							printf("ip copia2 %s\n",bloque.direccionCopia2.ip);
-							printf("dir copia2: %s\n", bloque.direccionCopia2.puerto);
+							printf("dir copia2: %s\n", bloque.direccionCopia2.port);
 						}
 						//TODO test borrar
 /*
@@ -183,7 +183,7 @@ void yamaAtender() {
 							servidor->maximoSocket--; //no debería romper nada
 						log_info(archivoLog, "[CONEXION] Proceso Master %d se ha desconectado",socketI);
 					}else{
-						Direccion nodo=*((Direccion*)mensaje->datos);//puede que rompa porque no es deep copying
+						Dir nodo=*((Dir*)mensaje->datos);//puede que rompa porque no es deep copying
 						int32_t bloque=*((int32_t*)(mensaje->datos+DIRSIZE));
 						bool buscarEntrada(Entrada* entrada){
 							return stringIguales(entrada->nodo.ip,nodo.ip)&&entrada->bloque==bloque;
@@ -199,7 +199,7 @@ void yamaAtender() {
 
 void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 	typedef struct __attribute__((__packed__)){
-		Direccion nodo;
+		Dir nodo;
 		int32_t bloque;
 	}Bloque;
 	int i;
@@ -427,7 +427,7 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 			darDatosEntrada(&reducGlobal);
 			darPathTemporal(&reducGlobal.pathTemporal,'g');
 			reducGlobal.etapa=ReducGlobal;
-			Direccion nodoMenorCarga=entradaA->nodo;//deep
+			Dir nodoMenorCarga=entradaA->nodo;//deep
 			int menorCargaI=100; //
 			void menorCarga(Worker* worker){
 				if(worker->carga<menorCargaI)
