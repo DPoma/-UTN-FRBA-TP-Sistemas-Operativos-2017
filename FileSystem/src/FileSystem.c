@@ -1253,6 +1253,8 @@ int comandoCopiarArchivoDeYamaFS(Comando* comando) {
 				nodo->actividadesRealizadas++;
 				copiaSinEnviar = false;
 			}
+			else
+				semaforoSignal(semaforoTarea);
 		}
 		if(copiaSinEnviar) {
 			imprimirMensaje(archivoLog, "[ERROR] Una copia no pudo ser enviada, se aborta la operacion");
@@ -1952,7 +1954,6 @@ int archivoLeer(Comando* comando) {
 			Nodo* nodo = nodoBuscarPorNombre(copia->nombreNodo);
 			mutexBloquear(mutexRuta);
 			//TODO ver
-			puts("envio entre");
 			if(nodoConectado(nodo)) {
 				mensajeEnviar(nodo->socket, LEER_BLOQUE ,&copia->bloqueNodo, sizeof(Entero));
 				flagMensaje = ACTIVADO;
@@ -1960,7 +1961,6 @@ int archivoLeer(Comando* comando) {
 				bloqueSinImprimir = false;
 			}
 			mutexDesbloquear(mutexRuta);
-			puts("envio sali");
 		}
 		if(bloqueSinImprimir) {
 			imprimirMensaje(archivoLog,"[ERROR] No hay nodos disponibles para obtener un bloque");
@@ -2534,13 +2534,12 @@ void servidorDestruirSockets(Servidor* servidor) {
 }
 
 void bloqueLeer(Servidor* servidor, Puntero datos) {
+	//TODO ver y los de abajo tambien
 	mutexBloquear(mutexRuta);
-	puts("bloque leer entre");
-	//printf("%s", (String)datos);
-	flagMensaje = DESACTIVADO;
-	servidorDestruirSockets(servidor);
+	printf("%s", (String)datos);
+	//flagMensaje = DESACTIVADO;
+	//servidorDestruirSockets(servidor);
 	mutexDesbloquear(mutexRuta);
-	puts("bloque leer sali");
 }
 
 void bloqueCopiarBinario(Puntero datos) {
@@ -2878,11 +2877,15 @@ void semaforosDestruir() {
 //TODO ver si hay que borrar todo con clean ya que luego tengo que tirar el format
 //TODO controlan la cantidad de bloques de un archivo
 //TODO si hay espacios para una copia de cada bloque se admite o no el archivo (dejar rollback o no)
-//TODO Esta prohibido dos copias en un mismo nodo//TODO el data bin cambia o solo cambia la primera vez (VER)
+//TODO Esta prohibido dos copias en un mismo nodo
+//TODO el data bin cambia o solo cambia la primera vez ejemplo inicio normal y con un nodo valido le cambio el data.bin (VER)
 //TODO el data bin cambia solo cuando hay que iniciar de cero el FS no cuando recupera estado
 //TODO el numero de copia tiene valor
+//TODO los txt se copian mas lento que los binarios?
+//TODO el bitmap se actualiza al final o al principio
 
 //TODO directorios con muchos subdirectorios rompe
 //TODO deberia crear al menos algunos directorios y parar cuando se alcance el limite no tirar de una que se excede el limite
 //TODO nodes muestre bloques totales
 //TODO nodes mostrar "no hay nodos"
+//TODO md5 poner sleep algo
