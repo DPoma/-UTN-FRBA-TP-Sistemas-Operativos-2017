@@ -28,16 +28,14 @@ void fileSystemIniciar(String flag) {
 	configuracionIniciar();
 	nodoListaCrear();
 
-	listaSockets = listaCrear(); //TODO GLOBAL
+	//listaSockets = listaCrear(); //TODO ver
 
 	estadoControlActivar();
 	estadoFileSystemInestable();
-	if(stringIguales(flag, FLAG_C)) {
-		metadataIniciar();
-		imprimirMensaje(archivoLog, AMARILLO"[AVISO] Para pasar a un estado estable primero debe formatear el File System"BLANCO);
-	}
+	if(stringIguales(flag, FLAG_C))
+		fileSystemReiniciar();
 	else
-		metadataRecuperar();
+		fileSystemRecuperar();
 }
 
 void fileSystemCrearConsola() {
@@ -63,6 +61,18 @@ void fileSystemFinalizar() {
 	semaforosDestruir();
 	sleep(2);
 }
+
+void fileSystemReiniciar() {
+	metadataIniciar();
+	imprimirMensaje(archivoLog, AMARILLO"[AVISO] Conecte los nodos y formatee el File System para estabilizarlo"BLANCO);
+}
+
+void fileSystemRecuperar() {
+	metadataRecuperar();
+	imprimirMensaje(archivoLog, AMARILLO"[AVISO] Conecte los nodos necesarios al File System para estabilizarlo"BLANCO);
+}
+
+
 //--------------------------------------- Funciones de Configuracion -------------------------------------
 
 Configuracion* configuracionLeerArchivo(ArchivoConfig archivoConfig) {
@@ -76,10 +86,10 @@ Configuracion* configuracionLeerArchivo(ArchivoConfig archivoConfig) {
 }
 
 void configuracionImprimir(Configuracion* configuracion) {
-	imprimirMensajeUno(archivoLog, "[CONEXION] Esperando conexion de YAMA (Puerto: %s)", configuracion->puertoYama);
-	imprimirMensajeUno(archivoLog, "[CONEXION] Esperando conexiones de Data Nodes (Puerto: %s)", configuracion->puertoDataNode);
-	imprimirMensajeUno(archivoLog, "[CONEXION] Esperando conexiones de Workers (Puerto: %s)", configuracion->puertoWorker);
-	imprimirMensajeUno(archivoLog, "[INFORMACION] Ruta de metadata: %s", configuracion->rutaMetadata);
+	imprimirMensajeUno(archivoLog, "[CONFIGURACION] Esperando conexion de YAMA (Puerto: %s)", configuracion->puertoYama);
+	imprimirMensajeUno(archivoLog, "[CONFIGURACION] Esperando conexiones de Data Nodes (Puerto: %s)", configuracion->puertoDataNode);
+	imprimirMensajeUno(archivoLog, "[CONFIGURACION] Esperando conexiones de Workers (Puerto: %s)", configuracion->puertoWorker);
+	imprimirMensajeUno(archivoLog, "[CONFIGURACION] Ruta de metadata: %s", configuracion->rutaMetadata);
 }
 
 void configuracionIniciarCampos() {
@@ -100,7 +110,7 @@ void configuracionIniciar() {
 void configuracionIniciarLog() {
 	imprimirMensajeProceso("# PROCESO FILE SYSTEM");
 	archivoLog = archivoLogCrear(RUTA_LOG, "FileSystem");
-	imprimirMensaje(archivoLog, "[EJECUCION] Proceso File System inicializado");
+	imprimirMensaje(archivoLog, "[EJECUCION] Proceso File System iniciado");
 }
 
 void configuracionIniciarRutas() {
@@ -296,7 +306,7 @@ void servidorAceptarReconexionDataNode(Servidor* servidor, Nodo* nuevoNodo) {
 		mutexBloquear(mutexEstadoFileSystem);
 		estadoFileSystem = ESTABLE;
 		mutexDesbloquear(mutexEstadoFileSystem);
-		imprimirMensaje(archivoLog, "[ESTADO] El File System se encuentra estable");
+		imprimirMensaje(archivoLog, AMARILLO"[ESTADO] El File System esta estable"BLANCO);
 	}
 	semaforoSignal(semaforoTarea);
 }
@@ -315,37 +325,47 @@ void servidorMensajeDataNode(Servidor* servidor, Mensaje* mensaje, Socket unSock
 	case COPIAR_TEXTO: bloqueCopiarTexto(mensaje->datos); break;
 	case FINALIZAR_NODO:
 		//TODO test borrar
-		mutexBloquear(mutexRuta);
-		puts("finalizar entre");
+		//mutexBloquear(mutexRuta);
+		//puts("finalizar entre");
 		servidorFinalizarDataNode(servidor, unSocket);
-		mutexDesbloquear(mutexRuta);
-		puts("finalizar sali");
+		//mutexDesbloquear(mutexRuta);
+		//puts("finalizar sali");
 		break;
 	}
 }
 
+
+void servidorDestruirDataNode(Servidor* servidor, Nodo* nodo) {
+	servidorDesactivarDataNode(servidor, nodo);
+	int posicion = nodoListaPosicion(nodo);
+	mutexBloquear(mutexListaNodos);
+	listaEliminarDestruyendoElemento(listaNodos, posicion , (Puntero)nodoDestruir);
+	mutexDesbloquear(mutexListaNodos);
+}
+
+
 void servidorDesactivarDataNode(Servidor* servidor, Nodo* nodo) {
 	//TODO ver
-	if(flagMensaje == DESACTIVADO) {
+//	if(flagMensaje == DESACTIVADO) {
 		socketCerrar(nodo->socket);
 		listaSocketsEliminar(nodo->socket, &servidor->listaDataNodes);
 		listaSocketsEliminar(nodo->socket, &servidor->listaMaster);
 		nodo->estado = DESACTIVADO;
 		nodo->socket = ERROR;
 		imprimirMensajeUno(archivoLog, AMARILLO"[CONEXION] %s desconectado"BLANCO, nodo->nombre);
-	}
-	else {
-		Socket* unSocket = memoriaAlocar(sizeof(Socket));
-		*unSocket = nodo->socket;
-		socketAgregar(unSocket);
-	}
+	//}
+//	else {
+	//	Socket* unSocket = memoriaAlocar(sizeof(Socket));
+		//*unSocket = nodo->socket;
+		//ocketAgregar(unSocket);
+	//}
 }
 
 void servidorControlarFinalizacionDataNode(Servidor* servidor, Nodo* nodo) {
 	if(estadoFileSystemIgualA(ESTABLE))
 		servidorDesactivarDataNode(servidor, nodo);
 	else
-		nodoListaEliminar(nodo);
+		servidorDestruirDataNode(servidor, nodo);
 }
 
 void servidorFinalizarDataNode(Servidor* servidor, Socket unSocket) {
@@ -676,16 +696,6 @@ bool consolaflagInvalido(String flag) {
 			stringDistintos(flag, FLAG_B);
 }
 
-String consolaLeerEntrada() {
-	int indice;
-	int caracterLeido;
-	char* cadena = memoriaAlocar(MAX_STRING);
-	for(indice = 0; caracterDistintos((caracterLeido= caracterObtener()),ENTER); indice++)
-		cadena[indice] = caracterLeido;
-	cadena[indice] = FIN;
-	return cadena;
-}
-
 void consolaIniciarArgumentos(String* argumentos) {
 	argumentos[0] = NULL;
 	argumentos[1] = NULL;
@@ -761,8 +771,25 @@ void consolaDestruirComando(Comando* comando, String entrada) {
 	memoriaLiberar(entrada);
 }
 
+String consolaLeerEntrada() {
+	int indice;
+	int caracterLeido;
+	char* cadena = memoriaAlocar(MAX_STRING);
+	for(indice = 0; caracterDistintos((caracterLeido= caracterObtener()),ENTER) && indice < MAX_STRING; indice++)
+		cadena[indice] = caracterLeido;
+	if(indice == MAX_STRING) {
+		imprimirMensaje(archivoLog, "[ERROR] Entrada demasiado larga");
+		return NULL;
+	}
+	else
+		cadena[indice] = FIN;
+	return cadena;
+}
+
 void consolaLaburar() {
 	char* entrada = consolaLeerEntrada();
+	if(entrada == NULL)
+		return;
 	if(estadoControlIgualA(ACTIVADO)) {
 		Comando comando;
 		consolaConfigurarComando(&comando, entrada);
@@ -784,10 +811,11 @@ void comandoFormatearFileSystem() {
 	archivoListaDestruir();
 	directorioListaDestruir();
 	bitmapDirectoriosDestruir();
-	metadataIniciar();
 	nodoFormatearConectados();
+	metadataIniciar();
 	estadoFileSystemEstable();
-	imprimirMensaje(archivoLog, "[ESTADO] El File System ha sido formateado");
+	imprimirMensaje(archivoLog, "[FORMATEO] El File System fue formateado");
+	imprimirMensaje(archivoLog, AMARILLO"[ESTADO] El File System esta estable"BLANCO);
 }
 
 void comandoCrearDirectorio(Comando* comando) {
@@ -801,7 +829,7 @@ void comandoCrearDirectorio(Comando* comando) {
 	}
 	Archivo* archivo = archivoBuscarPorRuta(comando->argumentos[1]);
 	if(archivo != NULL) {
-		imprimirMensaje(archivoLog,"[ERROR] El archivo o directorio ya existe");
+		imprimirMensaje(archivoLog,"[ERROR] Un archivo o directorio posee el mismo nombre");
 		return;
 	}
 	ControlDirectorio* control = directorioControlCrear(comando->argumentos[1]);
@@ -904,7 +932,7 @@ void comandoMover(Comando* comando) {
 	if(directorio != NULL) {
 		int existeArchivo = archivoExiste(directorioNuevoPadre->identificador, directorio->nombre);
 		if(directorioExiste(directorioNuevoPadre->identificador, directorio->nombre) || existeArchivo)  {
-			imprimirMensaje(archivoLog, "[ERROR] La nueva ubicacion del archivo o directorio ya existe");
+			imprimirMensaje(archivoLog, "[ERROR] El directorio destino  ya tiene un archivo o directorio con el mismo nombre");
 			return;
 		}
 		if(directorioEsHijoDe(directorioNuevoPadre, directorio)) {
@@ -925,7 +953,7 @@ void comandoMover(Comando* comando) {
 	else {
 		int existeDirectorio = directorioExiste(directorioNuevoPadre->identificador, archivo->nombre);
 		if(archivoExiste(directorioNuevoPadre->identificador, archivo->nombre) || existeDirectorio) {
-			imprimirMensaje(archivoLog, "[ERROR] La nueva ubicacion del archivo o directorio ya existe");
+			imprimirMensaje(archivoLog, "[ERROR] El directorio destino  ya tiene un archivo o directorio con el mismo nombre");
 			return;
 		}
 		String rutaArchivo = string_from_format("%s/%i/%s", rutaDirectorioArchivos, archivo->identificadorPadre, archivo->nombre);
@@ -1024,7 +1052,7 @@ void comandoEliminarArchivo(Comando* comando) {
 		return;
 	}
 	if(stringIguales(comando->argumentos[1], RAIZ)) {
-		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
+		imprimirMensaje(archivoLog,"[ERROR] El directorio raiz no puede ser eliminado");
 		return;
 	}
 	Archivo* archivo = archivoBuscarPorRuta(comando->argumentos[1]);
@@ -2147,13 +2175,6 @@ void nodoListaAgregar(Nodo* nodo) {
 	mutexDesbloquear(mutexListaNodos);
 }
 
-void nodoListaEliminar(Nodo* nodo) {
-	int posicion = nodoListaPosicion(nodo);
-	mutexBloquear(mutexListaNodos);
-	listaEliminarDestruyendoElemento(listaNodos, posicion , (Puntero)nodoDestruir);
-	mutexDesbloquear(mutexListaNodos);
-}
-
 int nodoListaCantidad() {
 	mutexBloquear(mutexListaNodos);
 	int cantidadNodos = listaCantidadElementos(listaNodos);
@@ -2331,7 +2352,7 @@ Nodo* nodoActualizar(Nodo* nodoTemporal) {
 }
 
 void nodoAceptar(Nodo* nodo) {
-	mensajeEnviar(nodo->socket, ACEPTAR_DATANODE, &nodo->socket, sizeof(Socket)); //TODO debe ser nulo el msj, solo me interesa la operacion
+	mensajeEnviar(nodo->socket, ACEPTAR_DATANODE, VACIO, OK); //TODO debe ser nulo el msj, solo me interesa la operacion
 	imprimirMensajeUno(archivoLog, AMARILLO"[CONEXION] %s conectado"BLANCO, nodo->nombre);
 }
 
@@ -2631,7 +2652,6 @@ void metadataRecuperar() {
 	directorioRecuperarPersistencia();
 	nodoRecuperarPersistencia();
 	estadoEjecucionNormal();
-	imprimirMensaje(archivoLog, AMARILLO"[AVISO] Para pasar a un estado estable conecte los nodos necesarios"BLANCO);
 }
 
 //--------------------------------------- Funciones de Ruta------------------------------------
@@ -2852,9 +2872,17 @@ void semaforosDestruir() {
 	memoriaLiberar(mutexEstadoControl);
 }
 
-//TODO el data bin cambia o solo cambia la primera vez (VER)
-//TODO cpblock, cpto, md5, cpfrom, cat (funcionan si no se matan los nodos)
+//TODO Cuando se matan los nodos (cpblock, cpto, md5, cpfrom, cat, solo funciona con cpfrom por solo enviar)
+//TODO con el nodo desconectado puedo borrar archivo y todo eso, no es que el nodo tiene que estar conectado porque no seria logico blabla
+//TODO Que pasa si inicio con --clean y no tiro el format puedo usar los comandos y que pasa con eso
 //TODO ver si hay que borrar todo con clean ya que luego tengo que tirar el format
-//TODO ver cpfrom cantidad de bloques nose si importa el numero de bloques
-//TODO si hay espacios para una copia de cada bloque se admite o no el archivo
-//TODO Esta prohibido dos copias en un mismo nodo
+//TODO controlan la cantidad de bloques de un archivo
+//TODO si hay espacios para una copia de cada bloque se admite o no el archivo (dejar rollback o no)
+//TODO Esta prohibido dos copias en un mismo nodo//TODO el data bin cambia o solo cambia la primera vez (VER)
+//TODO el data bin cambia solo cuando hay que iniciar de cero el FS no cuando recupera estado
+//TODO el numero de copia tiene valor
+
+//TODO directorios con muchos subdirectorios rompe
+//TODO deberia crear al menos algunos directorios y parar cuando se alcance el limite no tirar de una que se excede el limite
+//TODO nodes muestre bloques totales
+//TODO nodes mostrar "no hay nodos"

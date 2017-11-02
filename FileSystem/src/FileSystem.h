@@ -223,6 +223,8 @@ void fileSystemIniciar();
 void fileSystemCrearConsola();
 void fileSystemAtenderProcesos();
 void fileSystemFinalizar();
+void fileSystemReiniciar();
+void fileSystemRecuperar();
 
 //--------------------------------------- Funciones de Configuracion -------------------------------------
 
@@ -268,6 +270,7 @@ void servidorAdmitirDataNode(Servidor* servidor, Nodo* nuevoNodo);
 void servidorAceptarReconexionDataNode(Servidor* servidor, Nodo* nuevoNodo);
 void servidorAceptarDataNode(Servidor* servidor, Nodo* nodoTemporal);
 void servidorDesactivarDataNode(Servidor* servidor, Nodo* nodo);
+void servidorDestruirDataNode(Servidor* servidor, Nodo* nodo);
 
 void servidorSolicitudYama(Servidor* servidor, Socket unSocket);
 void servidorFinalizarYama();

@@ -1,10 +1,215 @@
-[INFO] 17:35:41:495 FileSystem/(7663:7663): [EJECUCION] Proceso File System inicializado
-[INFO] 17:35:41:495 FileSystem/(7663:7663): [CONEXION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 17:35:41:495 FileSystem/(7663:7663): [CONEXION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 17:35:41:495 FileSystem/(7663:7663): [CONEXION] Esperando conexiones de Workers (Puerto: 5080)
-[INFO] 17:35:41:495 FileSystem/(7663:7663): [INFORMACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
-[INFO] 17:35:41:507 FileSystem/(7663:7663): [33m[AVISO] Para pasar a un estado estable conecte los nodos necesarios[0m
-[INFO] 17:35:50:866 FileSystem/(7663:7663): [33m[CONEXION] NODO1 conectado[0m
-[INFO] 17:35:50:867 FileSystem/(7663:7663): [ESTADO] El File System se encuentra estable
-[INFO] 17:35:55:487 FileSystem/(7663:7663): [CONEXION] El proceso Yama se ha conectado
-[INFO] 17:36:11:284 FileSystem/(7663:7663): [33m[CONEXION] NODO1 desconectado[0m
+[INFO] 12:13:53:781 FileSystem/(8185:8185): [EJECUCION] Proceso File System iniciado
+[INFO] 12:13:53:844 FileSystem/(8185:8185): [CONFIGURACION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 12:13:53:845 FileSystem/(8185:8185): [CONFIGURACION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 12:13:53:845 FileSystem/(8185:8185): [CONFIGURACION] Esperando conexiones de Workers (Puerto: 5080)
+[INFO] 12:13:53:846 FileSystem/(8185:8185): [CONFIGURACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
+[INFO] 12:13:53:890 FileSystem/(8185:8185): [33m[AVISO] Conecte los nodos y formatee el File System para estabilizarlo[0m
+[INFO] 12:13:57:444 FileSystem/(8185:8185): [33m[CONEXION] NODO1 conectado[0m
+[INFO] 12:14:08:958 FileSystem/(8185:8185): [33m[CONEXION] NODO2 conectado[0m
+[INFO] 12:14:23:364 FileSystem/(8185:8190): [ERROR] Comando invalido
+[INFO] 12:14:23:366 FileSystem/(8185:8190): [ERROR] Comando invalido
+[INFO] 12:14:23:366 FileSystem/(8185:8190): [ERROR] Comando invalido
+[INFO] 12:14:23:367 FileSystem/(8185:8190): [ERROR] Comando invalido
+[INFO] 12:14:43:321 FileSystem/(8185:8190): [FORMATEO] El File System fue formateado
+[INFO] 12:14:43:321 FileSystem/(8185:8190): [33m[ESTADO] El File System esta estable[0m
+[INFO] 12:15:46:763 FileSystem/(8185:8190): [ERROR] No hay suficientes bloques libres
+[INFO] 12:16:12:503 FileSystem/(8185:8190): [33m[ADVERTENCIA] El NODO1 tiene todos sus bloques ocupados[0m
+[INFO] 12:16:12:505 FileSystem/(8185:8190): [33m[ADVERTENCIA] El NODO2 tiene todos sus bloques ocupados[0m
+[INFO] 12:16:12:521 FileSystem/(8185:8190): [ARCHIVO] El archivo /home/utnso/Escritorio/fs fue copiado en File System
+[INFO] 12:17:09:449 FileSystem/(8185:8190): [ARCHIVO] El archivo /fs ha sido eliminado
+[INFO] 12:17:28:943 FileSystem/(8185:8190): [33m[ADVERTENCIA] El NODO1 tiene todos sus bloques ocupados[0m
+[INFO] 12:17:28:945 FileSystem/(8185:8190): [33m[ADVERTENCIA] El NODO2 tiene todos sus bloques ocupados[0m
+[INFO] 12:17:28:957 FileSystem/(8185:8190): [ARCHIVO] El archivo /home/utnso/Escritorio/fs fue copiado en File System
+[INFO] 12:17:41:897 FileSystem/(8185:8190): [ARCHIVO] El archivo /fs ha sido eliminado
+[INFO] 12:17:48:109 FileSystem/(8185:8190): [33m[ADVERTENCIA] El NODO1 tiene todos sus bloques ocupados[0m
+[INFO] 12:17:48:111 FileSystem/(8185:8190): [33m[ADVERTENCIA] El NODO2 tiene todos sus bloques ocupados[0m
+[INFO] 12:17:48:136 FileSystem/(8185:8190): [ARCHIVO] El archivo /home/utnso/Escritorio/fs fue copiado en File System
+[INFO] 12:19:21:769 FileSystem/(8185:8190): [ERROR] La ruta ingresada no es valida
+[INFO] 12:19:23:187 FileSystem/(8185:8190): [ERROR] El directorio no existe
+[INFO] 12:19:24:491 FileSystem/(8185:8190): [DIRECTORIO] fs (a)
+[INFO] 12:19:25:799 FileSystem/(8185:8190): [ERROR] El directorio no existe
+[INFO] 12:19:30:562 FileSystem/(8185:8190): [DIRECTORIO] fs (a)
+[INFO] 12:19:32:252 FileSystem/(8185:8190): [DIRECTORIO] El directorio /sdf fue creado
+[INFO] 12:19:35:329 FileSystem/(8185:8190): [DIRECTORIO] El directorio esta vacio
+[INFO] 12:20:19:210 FileSystem/(8185:8190): [DIRECTORIO] sdf (d)
+[INFO] 12:20:19:213 FileSystem/(8185:8190): [DIRECTORIO] fs (a)
+[INFO] 12:20:23:157 FileSystem/(8185:8190): [DIRECTORIO] El directorio esta vacio
+[INFO] 12:20:28:418 FileSystem/(8185:8190): [ERROR] El archivo no existe
+[INFO] 12:20:35:506 FileSystem/(8185:8190): [ERROR] El archivo no existe
+[INFO] 12:20:38:564 FileSystem/(8185:8190): [ERROR] La ruta ingresada no es valida
+[INFO] 12:20:43:206 FileSystem/(8185:8190): [ERROR] La ruta ingresada no es valida
+[INFO] 12:20:47:916 FileSystem/(8185:8190): [ARCHIVO] Nombre: fs
+[INFO] 12:20:47:918 FileSystem/(8185:8190): [ARCHIVO] Tipo: TEXTO
+[INFO] 12:20:47:921 FileSystem/(8185:8190): [ARCHIVO] Ubicacion: /fs
+[INFO] 12:20:47:924 FileSystem/(8185:8190): [ARCHIVO] ID Padre: 0
+[INFO] 12:20:47:946 FileSystem/(8185:8190): [ARCHIVO] Tamanio: 934 bytes
+[INFO] 12:20:47:949 FileSystem/(8185:8190): [ARCHIVO] Bloques: 4
+[INFO] 12:20:47:951 FileSystem/(8185:8190): [ARCHIVO] Bloque 0: 198 bytes
+[INFO] 12:20:47:953 FileSystem/(8185:8190): [ARCHIVO] Copia 0 en: Nodo: NODO2 | Bloque: 0
+[INFO] 12:20:47:954 FileSystem/(8185:8190): [ARCHIVO] Copia 1 en: Nodo: NODO1 | Bloque: 0
+[INFO] 12:20:47:954 FileSystem/(8185:8190): [ARCHIVO] Bloque 1: 246 bytes
+[INFO] 12:20:47:955 FileSystem/(8185:8190): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 1
+[INFO] 12:20:47:955 FileSystem/(8185:8190): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 1
+[INFO] 12:20:47:956 FileSystem/(8185:8190): [ARCHIVO] Bloque 2: 245 bytes
+[INFO] 12:20:47:956 FileSystem/(8185:8190): [ARCHIVO] Copia 0 en: Nodo: NODO2 | Bloque: 2
+[INFO] 12:20:47:957 FileSystem/(8185:8190): [ARCHIVO] Copia 1 en: Nodo: NODO1 | Bloque: 2
+[INFO] 12:20:47:957 FileSystem/(8185:8190): [ARCHIVO] Bloque 3: 245 bytes
+[INFO] 12:20:47:957 FileSystem/(8185:8190): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 3
+[INFO] 12:20:47:958 FileSystem/(8185:8190): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 3
+[INFO] 12:21:59:389 FileSystem/(8185:8190): [DIRECTORIO] sdf (d)
+[INFO] 12:21:59:390 FileSystem/(8185:8190): [DIRECTORIO] fs (a)
+[INFO] 12:22:10:54 FileSystem/(8185:8190): [DIRECTORIO] El archivo fs fue movido a /sdf
+[INFO] 12:22:20:530 FileSystem/(8185:8190): [DIRECTORIO] El directorio /sdf fue renombrado por home
+[INFO] 12:22:28:647 FileSystem/(8185:8190): [DIRECTORIO] fs (a)
+[INFO] 12:22:34:681 FileSystem/(8185:8190): [ERROR] El archivo no existe
+[INFO] 12:22:37:991 FileSystem/(8185:8190): [ARCHIVO] Nombre: fs
+[INFO] 12:22:37:992 FileSystem/(8185:8190): [ARCHIVO] Tipo: TEXTO
+[INFO] 12:22:37:993 FileSystem/(8185:8190): [ARCHIVO] Ubicacion: /home/fs
+[INFO] 12:22:37:994 FileSystem/(8185:8190): [ARCHIVO] ID Padre: 1
+[INFO] 12:22:37:996 FileSystem/(8185:8190): [ARCHIVO] Tamanio: 934 bytes
+[INFO] 12:22:37:997 FileSystem/(8185:8190): [ARCHIVO] Bloques: 4
+[INFO] 12:22:37:998 FileSystem/(8185:8190): [ARCHIVO] Bloque 0: 198 bytes
+[INFO] 12:22:37:999 FileSystem/(8185:8190): [ARCHIVO] Copia 0 en: Nodo: NODO2 | Bloque: 0
+[INFO] 12:22:37:5 FileSystem/(8185:8190): [ARCHIVO] Copia 1 en: Nodo: NODO1 | Bloque: 0
+[INFO] 12:22:37:5 FileSystem/(8185:8190): [ARCHIVO] Bloque 1: 246 bytes
+[INFO] 12:22:38:6 FileSystem/(8185:8190): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 1
+[INFO] 12:22:38:6 FileSystem/(8185:8190): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 1
+[INFO] 12:22:38:6 FileSystem/(8185:8190): [ARCHIVO] Bloque 2: 245 bytes
+[INFO] 12:22:38:7 FileSystem/(8185:8190): [ARCHIVO] Copia 0 en: Nodo: NODO2 | Bloque: 2
+[INFO] 12:22:38:7 FileSystem/(8185:8190): [ARCHIVO] Copia 1 en: Nodo: NODO1 | Bloque: 2
+[INFO] 12:22:38:8 FileSystem/(8185:8190): [ARCHIVO] Bloque 3: 245 bytes
+[INFO] 12:22:38:8 FileSystem/(8185:8190): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 3
+[INFO] 12:22:38:9 FileSystem/(8185:8190): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 3
+[INFO] 12:24:04:262 FileSystem/(8185:8190): [DIRECTORIO] home (d)
+[INFO] 12:24:10:878 FileSystem/(8185:8190): [DIRECTORIO] El archivo fs fue movido a /
+[INFO] 12:24:12:408 FileSystem/(8185:8190): [DIRECTORIO] home (d)
+[INFO] 12:24:12:409 FileSystem/(8185:8190): [DIRECTORIO] fs (a)
+[INFO] 12:24:15:481 FileSystem/(8185:8190): [ARCHIVO] Nombre: fs
+[INFO] 12:24:15:482 FileSystem/(8185:8190): [ARCHIVO] Tipo: TEXTO
+[INFO] 12:24:15:483 FileSystem/(8185:8190): [ARCHIVO] Ubicacion: /fs
+[INFO] 12:24:15:486 FileSystem/(8185:8190): [ARCHIVO] ID Padre: 0
+[INFO] 12:24:15:489 FileSystem/(8185:8190): [ARCHIVO] Tamanio: 934 bytes
+[INFO] 12:24:15:492 FileSystem/(8185:8190): [ARCHIVO] Bloques: 4
+[INFO] 12:24:15:500 FileSystem/(8185:8190): [ARCHIVO] Bloque 0: 198 bytes
+[INFO] 12:24:15:503 FileSystem/(8185:8190): [ARCHIVO] Copia 0 en: Nodo: NODO2 | Bloque: 0
+[INFO] 12:24:15:503 FileSystem/(8185:8190): [ARCHIVO] Copia 1 en: Nodo: NODO1 | Bloque: 0
+[INFO] 12:24:15:505 FileSystem/(8185:8190): [ARCHIVO] Bloque 1: 246 bytes
+[INFO] 12:24:15:505 FileSystem/(8185:8190): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 1
+[INFO] 12:24:15:506 FileSystem/(8185:8190): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 1
+[INFO] 12:24:15:506 FileSystem/(8185:8190): [ARCHIVO] Bloque 2: 245 bytes
+[INFO] 12:24:15:507 FileSystem/(8185:8190): [ARCHIVO] Copia 0 en: Nodo: NODO2 | Bloque: 2
+[INFO] 12:24:15:507 FileSystem/(8185:8190): [ARCHIVO] Copia 1 en: Nodo: NODO1 | Bloque: 2
+[INFO] 12:24:15:507 FileSystem/(8185:8190): [ARCHIVO] Bloque 3: 245 bytes
+[INFO] 12:24:15:514 FileSystem/(8185:8190): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 3
+[INFO] 12:24:15:515 FileSystem/(8185:8190): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 3
+[INFO] 12:24:34:661 FileSystem/(8185:8190): [ERROR] La ruta ingresada no es valida
+[INFO] 12:24:39:451 FileSystem/(8185:8190): [ERROR] El archivo no existe
+[INFO] 12:24:45:625 FileSystem/(8185:8190): [ERROR] La ruta ingresada no es valida
+[INFO] 12:25:00:997 FileSystem/(8185:8190): [ERROR] El numero de bloque no existe
+[INFO] 12:25:22:552 FileSystem/(8185:8190): [ERROR] El numero de copia no existe
+[INFO] 12:25:41:734 FileSystem/(8185:8190): [ERROR] El numero de bloque no es valido
+[INFO] 12:25:48:725 FileSystem/(8185:8190): [ERROR] El numero de copia del bloque no es valido
+[INFO] 12:26:13:355 FileSystem/(8185:8190): [ARCHIVO] Nombre: fs
+[INFO] 12:26:13:357 FileSystem/(8185:8190): [ARCHIVO] Tipo: TEXTO
+[INFO] 12:26:13:359 FileSystem/(8185:8190): [ARCHIVO] Ubicacion: /fs
+[INFO] 12:26:13:360 FileSystem/(8185:8190): [ARCHIVO] ID Padre: 0
+[INFO] 12:26:13:362 FileSystem/(8185:8190): [ARCHIVO] Tamanio: 934 bytes
+[INFO] 12:26:13:363 FileSystem/(8185:8190): [ARCHIVO] Bloques: 4
+[INFO] 12:26:13:364 FileSystem/(8185:8190): [ARCHIVO] Bloque 0: 198 bytes
+[INFO] 12:26:13:365 FileSystem/(8185:8190): [ARCHIVO] Copia 0 en: Nodo: NODO2 | Bloque: 0
+[INFO] 12:26:13:366 FileSystem/(8185:8190): [ARCHIVO] Copia 1 en: Nodo: NODO1 | Bloque: 0
+[INFO] 12:26:13:378 FileSystem/(8185:8190): [ARCHIVO] Bloque 1: 246 bytes
+[INFO] 12:26:13:382 FileSystem/(8185:8190): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 1
+[INFO] 12:26:13:387 FileSystem/(8185:8190): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 1
+[INFO] 12:26:13:394 FileSystem/(8185:8190): [ARCHIVO] Bloque 2: 245 bytes
+[INFO] 12:26:13:396 FileSystem/(8185:8190): [ARCHIVO] Copia 0 en: Nodo: NODO2 | Bloque: 2
+[INFO] 12:26:13:396 FileSystem/(8185:8190): [ARCHIVO] Copia 1 en: Nodo: NODO1 | Bloque: 2
+[INFO] 12:26:13:396 FileSystem/(8185:8190): [ARCHIVO] Bloque 3: 245 bytes
+[INFO] 12:26:13:397 FileSystem/(8185:8190): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 3
+[INFO] 12:26:13:397 FileSystem/(8185:8190): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 3
+[INFO] 12:27:22:919 FileSystem/(8185:8190): [BLOQUE] La copia N°0 del bloque N°3 del archivo /fs ha sido eliminada
+[INFO] 12:27:37:937 FileSystem/(8185:8190): [ARCHIVO] Nombre: fs
+[INFO] 12:27:37:938 FileSystem/(8185:8190): [ARCHIVO] Tipo: TEXTO
+[INFO] 12:27:37:939 FileSystem/(8185:8190): [ARCHIVO] Ubicacion: /fs
+[INFO] 12:27:37:940 FileSystem/(8185:8190): [ARCHIVO] ID Padre: 0
+[INFO] 12:27:37:941 FileSystem/(8185:8190): [ARCHIVO] Tamanio: 934 bytes
+[INFO] 12:27:37:941 FileSystem/(8185:8190): [ARCHIVO] Bloques: 4
+[INFO] 12:27:37:943 FileSystem/(8185:8190): [ARCHIVO] Bloque 0: 198 bytes
+[INFO] 12:27:37:944 FileSystem/(8185:8190): [ARCHIVO] Copia 0 en: Nodo: NODO2 | Bloque: 0
+[INFO] 12:27:37:946 FileSystem/(8185:8190): [ARCHIVO] Copia 1 en: Nodo: NODO1 | Bloque: 0
+[INFO] 12:27:37:947 FileSystem/(8185:8190): [ARCHIVO] Bloque 1: 246 bytes
+[INFO] 12:27:37:948 FileSystem/(8185:8190): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 1
+[INFO] 12:27:37:949 FileSystem/(8185:8190): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 1
+[INFO] 12:27:37:950 FileSystem/(8185:8190): [ARCHIVO] Bloque 2: 245 bytes
+[INFO] 12:27:37:951 FileSystem/(8185:8190): [ARCHIVO] Copia 0 en: Nodo: NODO2 | Bloque: 2
+[INFO] 12:27:37:953 FileSystem/(8185:8190): [ARCHIVO] Copia 1 en: Nodo: NODO1 | Bloque: 2
+[INFO] 12:27:37:959 FileSystem/(8185:8190): [ARCHIVO] Bloque 3: 245 bytes
+[INFO] 12:27:37:959 FileSystem/(8185:8190): [ARCHIVO] Copia 0 en: Nodo: NODO2 | Bloque: 3
+[INFO] 12:32:12:881 FileSystem/(8185:8190): [ERROR] El numero de copia no existe
+[INFO] 12:32:20:207 FileSystem/(8185:8190): [ERROR] No se puede eliminar la copia ya que es la ultima
+[INFO] 12:32:34:55 FileSystem/(8185:8190): [BLOQUE] La copia N°1 del bloque N°1 del archivo /fs ha sido eliminada
+[INFO] 12:33:50:266 FileSystem/(8185:8190): [BLOQUE] La copia N°0 del bloque N°2 del archivo /fs ha sido eliminada
+[INFO] 12:33:53:865 FileSystem/(8185:8190): [ERROR] El numero de copia no existe
+[INFO] 12:33:57:792 FileSystem/(8185:8190): [ERROR] No se puede eliminar la copia ya que es la ultima
+[INFO] 12:34:36:233 FileSystem/(8185:8190): [BLOQUE] La copia N°0 del bloque N°0 del archivo /fs ha sido eliminada
+[INFO] 12:34:40:164 FileSystem/(8185:8190): [ARCHIVO] Nombre: fs
+[INFO] 12:34:40:165 FileSystem/(8185:8190): [ARCHIVO] Tipo: TEXTO
+[INFO] 12:34:40:166 FileSystem/(8185:8190): [ARCHIVO] Ubicacion: /fs
+[INFO] 12:34:40:167 FileSystem/(8185:8190): [ARCHIVO] ID Padre: 0
+[INFO] 12:34:40:171 FileSystem/(8185:8190): [ARCHIVO] Tamanio: 934 bytes
+[INFO] 12:34:40:172 FileSystem/(8185:8190): [ARCHIVO] Bloques: 4
+[INFO] 12:34:40:175 FileSystem/(8185:8190): [ARCHIVO] Bloque 0: 198 bytes
+[INFO] 12:34:40:177 FileSystem/(8185:8190): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 0
+[INFO] 12:34:40:178 FileSystem/(8185:8190): [ARCHIVO] Bloque 1: 246 bytes
+[INFO] 12:34:40:187 FileSystem/(8185:8190): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 1
+[INFO] 12:34:40:188 FileSystem/(8185:8190): [ARCHIVO] Bloque 2: 245 bytes
+[INFO] 12:34:40:188 FileSystem/(8185:8190): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 2
+[INFO] 12:34:40:189 FileSystem/(8185:8190): [ARCHIVO] Bloque 3: 245 bytes
+[INFO] 12:34:40:189 FileSystem/(8185:8190): [ARCHIVO] Copia 0 en: Nodo: NODO2 | Bloque: 3
+[INFO] 12:35:59:224 FileSystem/(8185:8190): [DIRECTORIO] El archivo fs fue movido a /home
+[INFO] 12:37:00:761 FileSystem/(8185:8185): [33m[CONEXION] NODO1 desconectado[0m
+[INFO] 12:37:10:22 FileSystem/(8185:8185): [31m[ERROR] Un nodo con ese nombre ya esta conectado[0m
+[INFO] 12:37:40:498 FileSystem/(8185:8185): [33m[CONEXION] NODO1 conectado[0m
+[INFO] 12:38:02:909 FileSystem/(8185:8190): [DIRECTORIO] home (d)
+[INFO] 12:38:08:922 FileSystem/(8185:8190): [ARCHIVO] El archivo /home/fs ha sido eliminado
+[INFO] 12:38:19:527 FileSystem/(8185:8190): [33m[ADVERTENCIA] El NODO1 tiene todos sus bloques ocupados[0m
+[INFO] 12:38:19:528 FileSystem/(8185:8190): [33m[ADVERTENCIA] El NODO2 tiene todos sus bloques ocupados[0m
+[INFO] 12:38:19:532 FileSystem/(8185:8190): [ARCHIVO] El archivo /home/utnso/Escritorio/fs fue copiado en File System
+[INFO] 12:38:25:279 FileSystem/(8185:8185): [33m[CONEXION] NODO1 desconectado[0m
+[INFO] 12:38:38:621 FileSystem/(8185:8190): [ARCHIVO] Nombre: fs
+[INFO] 12:38:38:623 FileSystem/(8185:8190): [ARCHIVO] Tipo: TEXTO
+[INFO] 12:38:38:624 FileSystem/(8185:8190): [ARCHIVO] Ubicacion: /fs
+[INFO] 12:38:38:625 FileSystem/(8185:8190): [ARCHIVO] ID Padre: 0
+[INFO] 12:38:38:627 FileSystem/(8185:8190): [ARCHIVO] Tamanio: 934 bytes
+[INFO] 12:38:38:628 FileSystem/(8185:8190): [ARCHIVO] Bloques: 4
+[INFO] 12:38:38:630 FileSystem/(8185:8190): [ARCHIVO] Bloque 0: 198 bytes
+[INFO] 12:38:38:631 FileSystem/(8185:8190): [ARCHIVO] Copia 0 en: Nodo: NODO2 | Bloque: 0
+[INFO] 12:38:38:642 FileSystem/(8185:8190): [ARCHIVO] Copia 1 en: Nodo: NODO1 | Bloque: 0
+[INFO] 12:38:38:642 FileSystem/(8185:8190): [ARCHIVO] Bloque 1: 246 bytes
+[INFO] 12:38:38:643 FileSystem/(8185:8190): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 1
+[INFO] 12:38:38:643 FileSystem/(8185:8190): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 1
+[INFO] 12:38:38:644 FileSystem/(8185:8190): [ARCHIVO] Bloque 2: 245 bytes
+[INFO] 12:38:38:644 FileSystem/(8185:8190): [ARCHIVO] Copia 0 en: Nodo: NODO2 | Bloque: 2
+[INFO] 12:38:38:645 FileSystem/(8185:8190): [ARCHIVO] Copia 1 en: Nodo: NODO1 | Bloque: 2
+[INFO] 12:38:38:645 FileSystem/(8185:8190): [ARCHIVO] Bloque 3: 245 bytes
+[INFO] 12:38:38:646 FileSystem/(8185:8190): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 3
+[INFO] 12:38:38:646 FileSystem/(8185:8190): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 3
+[INFO] 12:38:52:101 FileSystem/(8185:8190): [BLOQUE] La copia N°0 del bloque N°3 del archivo /fs ha sido eliminada
+[INFO] 12:38:54:786 FileSystem/(8185:8190): [ARCHIVO] Nombre: fs
+[INFO] 12:38:54:787 FileSystem/(8185:8190): [ARCHIVO] Tipo: TEXTO
+[INFO] 12:38:54:788 FileSystem/(8185:8190): [ARCHIVO] Ubicacion: /fs
+[INFO] 12:38:54:789 FileSystem/(8185:8190): [ARCHIVO] ID Padre: 0
+[INFO] 12:38:54:790 FileSystem/(8185:8190): [ARCHIVO] Tamanio: 934 bytes
+[INFO] 12:38:54:791 FileSystem/(8185:8190): [ARCHIVO] Bloques: 4
+[INFO] 12:38:54:793 FileSystem/(8185:8190): [ARCHIVO] Bloque 0: 198 bytes
+[INFO] 12:38:54:794 FileSystem/(8185:8190): [ARCHIVO] Copia 0 en: Nodo: NODO2 | Bloque: 0
+[INFO] 12:38:54:795 FileSystem/(8185:8190): [ARCHIVO] Copia 1 en: Nodo: NODO1 | Bloque: 0
+[INFO] 12:38:54:796 FileSystem/(8185:8190): [ARCHIVO] Bloque 1: 246 bytes
+[INFO] 12:38:54:798 FileSystem/(8185:8190): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 1
+[INFO] 12:38:54:799 FileSystem/(8185:8190): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 1
+[INFO] 12:38:54:811 FileSystem/(8185:8190): [ARCHIVO] Bloque 2: 245 bytes
+[INFO] 12:38:54:813 FileSystem/(8185:8190): [ARCHIVO] Copia 0 en: Nodo: NODO2 | Bloque: 2
+[INFO] 12:38:54:825 FileSystem/(8185:8190): [ARCHIVO] Copia 1 en: Nodo: NODO1 | Bloque: 2
+[INFO] 12:38:54:826 FileSystem/(8185:8190): [ARCHIVO] Bloque 3: 245 bytes
+[INFO] 12:38:54:826 FileSystem/(8185:8190): [ARCHIVO] Copia 0 en: Nodo: NODO2 | Bloque: 3
+[INFO] 12:39:39:237 FileSystem/(8185:8185): [33m[CONEXION] NODO1 conectado[0m

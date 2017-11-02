@@ -19,9 +19,8 @@
 #define COPIAR_BLOQUE 103
 #define COPIAR_BINARIO 104
 #define COPIAR_TEXTO 105
-#define SOLICITAR_CONEXION 106
-#define FINALIZAR 107
-
+#define FINALIZAR 106
+#define SOLICITAR_CONEXION 107
 //--------------------------------------- Estructuras -------------------------------------
 
 typedef void* Bloque;
