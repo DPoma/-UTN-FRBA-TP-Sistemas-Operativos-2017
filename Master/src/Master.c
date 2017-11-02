@@ -1,10 +1,10 @@
 /*
  ============================================================================
- Name        : Master.c
- Author      : Dario Poma
- Version     : 1.0
- Copyright   : Todos los derechos reservados papu
- Description : Proceso Master
+ Name : Master.c
+ Author : Dario Poma
+ Version : 1.0
+ Copyright : Todos los derechos reservados papu
+ Description : Proceso YAMA
  ============================================================================
  */
 
@@ -170,7 +170,7 @@ void transformaciones(Lista bloques){
 			goto enviarBloques;
 		}
 	}
-	mensajeEnviar(socketWorker,EXITO,NULL,0);
+	mensajeEnviar(socketWorker, EXITO, NULL, 0);
 }
 
 
@@ -285,5 +285,3 @@ void transformaciones(Lista bloques){
 //
 //	return sockets;
 //}
-
-

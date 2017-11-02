@@ -104,7 +104,7 @@ typedef struct{
 	AddrInfo informacion;
 	SockAddrIn address;
 	Socklen tamanioAddress;
-	String puerto;
+	String port;
 	String ip;
 } Conexion;
 

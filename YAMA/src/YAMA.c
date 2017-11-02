@@ -236,8 +236,6 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 			return worker;
 		*pos=*pos+1%workers->elements_count;
 		return obtenerWorker(pos);
-		//bucle infinito si todos los workers se desconectan.
-		//Supongo que el control de eso debería estar en otro lado
 	}
 	Worker* workerClock=obtenerWorker(&clock);
 	for(i=0;i<bloques->elements_count;i+=2){

@@ -50,7 +50,11 @@ typedef struct{
 	uint32_t carga; //son uint32_t porque lo pide el tp, yo usaria ints
 	uint32_t tareasRealizadas;
 	uint32_t disponibilidad;
+<<<<<<< HEAD
 	Dir nodo;
+=======
+	Dir nodo; //no me lo reconoce, por ahi estan mal los paths?
+>>>>>>> f30a534f431fa690c5c68a363e9af413c5f55eec
 } Worker;
 Lista workers;
 
@@ -70,6 +74,17 @@ typedef struct{
 	Estado estado;
 } Entrada;
 
+<<<<<<< HEAD
+=======
+typedef struct __attribute__((packed)) { //TODO borrar esta cosa
+	Dir direccionCopia1;
+	Entero numeroBloqueCopia1;
+	Dir direccionCopia2;
+	Entero numeroBloqueCopia2;
+	Entero bytesUtilizados;
+} BloqueYama;
+
+>>>>>>> f30a534f431fa690c5c68a363e9af413c5f55eec
 Lista tablaEstados;
 Lista tablaUsados; //entradas Abortadas, Error, o Terminadas que ya
 //no se necesitan procesar, solo se dibujan

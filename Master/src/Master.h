@@ -1,30 +1,30 @@
 /*
- * Master.h
+* Master.h
 
- *
- *  Created on: 15/9/2017
- *      Author: Dario Poma
- */
+
+*
+* Created on: 15/9/2017
+* Author: Dario Poma
+*/
 
 #include "../../Biblioteca/src/Biblioteca.c"
 
-//--------------------------------------- Constantes -------------------------------------
-
 #define RUTA_CONFIG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Master/MasterConfig.conf"
 #define RUTA_LOG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Master/MasterLog.log"
+
 #define EXITO 1
 #define FRACASO 0
 #define DIRSIZE sizeof(Dir)
 #define INTSIZE sizeof(int32_t)
 #define TEMPSIZE 12
 
-//--------------------------------------- Estructuras -------------------------------------
-
 typedef enum {Solicitud,Transformacion,ReducLocal,ReducGlobal,Almacenamiento,Cierre,Aborto} Etapa;
 
 typedef struct {
-	char ipYama[20];
-	char puertoYama[20];
+	char ipYama[50];
+	char puertoYama[50];
+	char ipWorker[50];
+	char puertoWorker[50];
 } Configuracion;
 
 typedef struct{
@@ -32,7 +32,8 @@ typedef struct{
 	int bloque;
 	int bytes;
 	char* temp;
-}WorkerTransformacion;
+} WorkerTransformacion;
+WorkerTransformacion alternativo;
 
 typedef struct{ //no se hasta que punto es util este struct
 	Dir dir;
@@ -44,6 +45,7 @@ typedef struct{ //no se hasta que punto es util este struct
 
 Semaforo* errorBloque;
 Semaforo* recepcionAlternativo;
+
 String campos[2];
 Configuracion* configuracion;
 ArchivoLog archivoLog;
@@ -58,31 +60,16 @@ WorkerTransformacion alternativo;
 
 //--------------------------------------- Funciones de Master -------------------------------------
 
+void masterIniciar(char**);
+void masterAtender();
+
 void configuracionIniciar();
 Configuracion* configuracionLeerArchivo(ArchivoConfig archivoConfig);
-void configuracionImprimir(Configuracion* configuracion);
-void configuracionIniciarLog();
-void configuracionIniciarCampos();
-void configuracionSenial();
-
-//--------------------------------------- Funciones de Configuracion -------------------------------------
-
-void masterIniciar();
-void masterConectarAYama(String path);
-void masterAtenderYama();
-void masterFinalizar();
-bool masterActivado();
-bool masterDesactivado();
-void masterActivar();
-void masterDesactivar();
-void masterAtender();
-//--------------------------------------- Funciones de algo -------------------------------------
-
-void etapaTransformacion();
-void aborto();
-void reduccionLocal(Mensaje* m);
-void reduccionGlobal();
-
+void archivoConfigObtenerCampos();
+void establecerConexiones();
+void leerArchivoConfig();
+void archivoConfigObtenerCampos();
+void funcionSenial();
 int hayWorkersParaConectar();
 WorkerTransformacion* deserializarTransformacion(Mensaje* mensaje);
 WorkerReduccion* deserializarReduccion(Mensaje* mensaje);
@@ -94,9 +81,12 @@ Lista workersAConectar();
 ListaSockets sockets();
 void serializarYEnviar();
 void enviarScript(Socket unSocket, FILE* script, Entero operacion);
+bool masterActivado();
+bool masterDesactivado();
+void masterActivar();
+void masterDesactivar();
 char* leerArchivo(FILE* f);
 int archivoValido(FILE* f);
 bool esUnArchivo(char* c);
 void enviarArchivo(FILE* f);
 char* leerCaracteresEntrantes();
-void establecerConexiones();
