@@ -10,8 +10,8 @@
 
 #include "FileSystem.h"
 
-int main(int argc, String* argsv) {
-	fileSystemIniciar(argsv[1]);
+int main(int contadorArgumentos, String* argumentos) {
+	fileSystemIniciar(argumentos[1]);
 	fileSystemCrearConsola();
 	fileSystemAtenderProcesos();
 	fileSystemFinalizar();
@@ -25,17 +25,11 @@ void fileSystemIniciar(String flag) {
 	semaforosCrear();
 	semaforosIniciar();
 	flagMensaje = DESACTIVADO;
-	mutexBloquear(mutexEstadoControl);
-	estadoControl = ACTIVADO;
-	mutexDesbloquear(mutexEstadoControl);
 	configuracionIniciar();
-	mutexBloquear(mutexEstadoFileSystem);
-	estadoFileSystem = INESTABLE;
-	mutexDesbloquear(mutexEstadoFileSystem);
-	mutexBloquear(mutexListaNodos);
+	estadoControlActivar();
+	estadoFileSystemInestable();
 	listaSockets = listaCrear(); //TODO GLOBAL
-	listaNodos = listaCrear();
-	mutexDesbloquear(mutexListaNodos);
+	nodoListaCrear();
 	if(stringIguales(flag, FLAG_C)) {
 		metadataIniciar();
 		imprimirMensaje(archivoLog, AMARILLO"[AVISO] Para pasar a un estado estable primero debe formatear el File System"BLANCO);
@@ -61,9 +55,9 @@ void fileSystemFinalizar() {
 	archivoLogDestruir(archivoLog);
 	configuracionDestruirRutas();
 	bitmapDirectoriosDestruir();
-	archivoDestruirLista();
-	directorioDestruirLista();
-	nodoDestruirLista();
+	archivoListaDestruir();
+	directorioListaDestruir();
+	nodoListaDestruir();
 	semaforosDestruir();
 	sleep(2);
 }
@@ -102,8 +96,8 @@ void configuracionIniciar() {
 }
 
 void configuracionIniciarLog() {
-	archivoLog = archivoLogCrear(RUTA_LOG, "FileSystem");
 	imprimirMensajeProceso("# PROCESO FILE SYSTEM");
+	archivoLog = archivoLogCrear(RUTA_LOG, "FileSystem");
 	imprimirMensaje(archivoLog, "[EJECUCION] Proceso File System inicializado");
 }
 
@@ -289,7 +283,7 @@ void servidorAdmitirDataNode(Servidor* servidor, Nodo* nodoTemporal) {
 
 void servidorAceptarDataNode(Servidor* servidor, Nodo* nodoTemporal) {
 	servidorRegistrarDataNode(servidor, nodoTemporal);
-	nodoAgregar(nodoTemporal);
+	nodoListaAgregar(nodoTemporal);
 }
 
 void servidorRechazarDataNode(Nodo* nuevoNodo) {
@@ -301,7 +295,7 @@ void servidorAceptarReconexionDataNode(Servidor* servidor, Nodo* nuevoNodo) {
 	semaforoWait(semaforoTarea);
 	Nodo* nodo = nodoActualizar(nuevoNodo);
 	servidorRegistrarDataNode(servidor, nodo);
-	if(estadoFileSystemIgualA(INESTABLE) && archivoTodosDisponibles()) {
+	if(estadoFileSystemIgualA(INESTABLE) && archivoListaTodosDisponibles()) {
 		mutexBloquear(mutexEstadoFileSystem);
 		estadoFileSystem = ESTABLE;
 		mutexDesbloquear(mutexEstadoFileSystem);
@@ -349,7 +343,7 @@ void servidorControlarFinalizacionDataNode(Servidor* servidor, Nodo* nodo) {
 	if(estadoFileSystemIgualA(ESTABLE))
 		servidorDesactivarDataNode(servidor, nodo);
 	else
-		nodoDestruirDeLista(nodo);
+		nodoListaEliminar(nodo);
 }
 
 void servidorFinalizarDataNode(Servidor* servidor, Socket unSocket) {
@@ -777,14 +771,12 @@ void consolaAtenderComandos() {
 //--------------------------------------- Funciones de Comando -------------------------------------
 
 void comandoFormatearFileSystem() {
-	archivoDestruirLista();
-	directorioDestruirLista();
+	archivoListaDestruir();
+	directorioListaDestruir();
 	bitmapDirectoriosDestruir();
 	metadataIniciar();
 	nodoFormatearConectados();
-	mutexBloquear(mutexEstadoFileSystem);
-	estadoFileSystem = ESTABLE;
-	mutexDesbloquear(mutexEstadoFileSystem);
+	estadoFileSystemEstable();
 	//TODO Ponerlo lindo
 	/*
 	int cantidadNodos = listaCantidadElementos(listaNodos);
@@ -800,7 +792,6 @@ void comandoFormatearFileSystem() {
 	imprimirMensaje(archivoLog, "[ESTADO] El File System ha sido formateado");
 }
 
-
 void comandoCrearDirectorio(Comando* comando) {
 	if(!rutaValida(comando->argumentos[1])) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
@@ -810,7 +801,7 @@ void comandoCrearDirectorio(Comando* comando) {
 		imprimirMensaje(archivoLog,"[ERROR] El directorio raiz no puede ser creado");
 		return;
 	}
-	Archivo* archivo = archivoBuscar(comando->argumentos[1]);
+	Archivo* archivo = archivoBuscarPorRuta(comando->argumentos[1]);
 	if(archivo != NULL) {
 		imprimirMensaje(archivoLog,"[ERROR] El archivo o directorio ya existe");
 		return;
@@ -850,7 +841,7 @@ void comandoRenombrar(Comando* comando) {
 		return;
 	}
 	Directorio* directorio = directorioBuscar(comando->argumentos[1]);
-	Archivo* archivo = archivoBuscar(comando->argumentos[1]);
+	Archivo* archivo = archivoBuscarPorRuta(comando->argumentos[1]);
 	if(archivo == NULL && directorio == NULL) {
 		imprimirMensaje(archivoLog, "[ERROR] El archivo o directorio no existe");
 		return;
@@ -906,7 +897,7 @@ void comandoMover(Comando* comando) {
 		imprimirMensaje(archivoLog,"[ERROR] El directorio destino no existe");
 		return;
 	}
-	Archivo* archivo = archivoBuscar(comando->argumentos[1]);
+	Archivo* archivo = archivoBuscarPorRuta(comando->argumentos[1]);
 	Directorio* directorio = directorioBuscar(comando->argumentos[1]);
 	if(archivo == NULL && directorio == NULL) {
 		imprimirMensaje(archivoLog,"[ERROR] El archivo o directorio no existe");
@@ -977,7 +968,7 @@ void comandoEliminarCopia(Comando* comando) {
 		imprimirMensaje(archivoLog,"[ERROR] El numero de copia del bloque no es valido");
 		return;
 	}
-	Archivo* archivo = archivoBuscar(comando->argumentos[2]);
+	Archivo* archivo = archivoBuscarPorRuta(comando->argumentos[2]);
 	if(archivo == NULL) {
 		imprimirMensaje(archivoLog, "[ERROR] El archivo no existe");
 		return;
@@ -1038,12 +1029,12 @@ void comandoEliminarArchivo(Comando* comando) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return;
 	}
-	Archivo* archivo = archivoBuscar(comando->argumentos[1]);
+	Archivo* archivo = archivoBuscarPorRuta(comando->argumentos[1]);
 	if(archivo == NULL) {
 		imprimirMensaje(archivoLog,"[ERROR] El archivo no existe");
 		return;
 	}
-	int posicion = archivoObtenerPosicion(archivo);
+	int posicion = archivoListaPosicion(archivo);
 	String rutaArchivo = string_from_format("%s/%i/%s", rutaDirectorioArchivos, archivo->identificadorPadre, archivo->nombre);
 	fileLimpiar(rutaArchivo);
 	memoriaLiberar(rutaArchivo);
@@ -1080,7 +1071,7 @@ void comandoInformacionArchivo(Comando* comando) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return;
 	}
-	Archivo* archivo = archivoBuscar(comando->argumentos[1]);
+	Archivo* archivo = archivoBuscarPorRuta(comando->argumentos[1]);
 	if(archivo == NULL) {
 		imprimirMensaje(archivoLog, "[ERROR] El archivo no existe");
 		return;
@@ -1107,7 +1098,6 @@ void comandoInformacionArchivo(Comando* comando) {
 		}
 	}
 }
-//TODO
 
 void comandoCopiarBloque(Comando* comando) {
 	if(!rutaValida(comando->argumentos[1])) {
@@ -1119,7 +1109,7 @@ void comandoCopiarBloque(Comando* comando) {
 		return;
 	}
 	mutexBloquear(mutexArchivo);
-	archivoBuffer = archivoBuscar(comando->argumentos[1]);
+	archivoBuffer = archivoBuscarPorRuta(comando->argumentos[1]);
 	if(archivoBuffer == NULL) {
 		mutexDesbloquear(mutexArchivo);
 		imprimirMensaje(archivoLog, "[ERROR] El archivo no existe");
@@ -1131,7 +1121,7 @@ void comandoCopiarBloque(Comando* comando) {
 		return;
 	}
 	mutexBloquear(mutexNodo);
-	nodoBuffer = nodoBuscar(comando->argumentos[3]);
+	nodoBuffer = nodoBuscarPorNombre(comando->argumentos[3]);
 	if(nodoBuffer == NULL) {
 		mutexDesbloquear(mutexNodo);
 		imprimirMensaje(archivoLog,"[ERROR] El nodo no existe");
@@ -1178,7 +1168,7 @@ void comandoCopiarBloque(Comando* comando) {
 		Copia* copia = listaObtenerElemento(bloqueBuffer->listaCopias, indice);
 		mutexDesbloquear(mutexBloque);
 		semaforoWait(semaforoTarea);
-		Nodo* nodoConBloque = nodoBuscar(copia->nombreNodo);
+		Nodo* nodoConBloque = nodoBuscarPorNombre(copia->nombreNodo);
 		if(nodoConectado(nodoConBloque)) {
 			mensajeEnviar(nodoConBloque->socket, COPIAR_BLOQUE, &copia->bloqueNodo, sizeof(Entero));
 			bloqueSinEnviar = false;
@@ -1190,8 +1180,6 @@ void comandoCopiarBloque(Comando* comando) {
 
 		return;
 	}
-
-
 }
 
 void comandoCopiarArchivoAYamaFS(Comando* comando) {
@@ -1203,7 +1191,7 @@ int comandoCopiarArchivoDeYamaFS(Comando* comando) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return ERROR;
 	}
-	Archivo* archivo = archivoBuscar(comando->argumentos[1]);
+	Archivo* archivo = archivoBuscarPorRuta(comando->argumentos[1]);
 	if(archivo == NULL) {
 		imprimirMensaje(archivoLog, "[ERROR] El archivo no existe");
 		return ERROR;
@@ -1230,9 +1218,9 @@ int comandoCopiarArchivoDeYamaFS(Comando* comando) {
 		for(indiceCopias=0; indiceCopias<listaCantidadElementos(bloque->listaCopias) && copiaSinEnviar; indiceCopias++) {
 			semaforoWait(semaforoTarea);
 			Copia* copia = listaObtenerElemento(bloque->listaCopias, indiceCopias);
-			Nodo* nodo = nodoBuscar(copia->nombreNodo);
+			Nodo* nodo = nodoBuscarPorNombre(copia->nombreNodo);
 			if(nodoConectado(nodo)) {
-				if(archivoEsBinario(archivo))
+				if(archivoBinario(archivo))
 					mensajeEnviar(nodo->socket, COPIAR_BINARIO, &copia->bloqueNodo, sizeof(Entero));
 				else
 					mensajeEnviar(nodo->socket, COPIAR_TEXTO, &copia->bloqueNodo, sizeof(Entero));
@@ -1308,8 +1296,8 @@ void comandoFinalizar() {
 
 void comandoInformacionNodos() {
 	int indice;
-	for(indice = 0; indice < nodoCantidadNodos(); indice++) {
-		Nodo* nodo = nodoObtener(indice);
+	for(indice = 0; indice < nodoListaCantidad(); indice++) {
+		Nodo* nodo = nodoListaObtener(indice);
 		puts("------------------------------------------");
 		printf("Nombre: %s\n", nodo->nombre);
 		printf("IP: %s | Puerto: %s\n", nodo->ip, nodo->puerto);
@@ -1364,67 +1352,23 @@ Directorio* directorioBuscar(String path) {
 
 void directorioMostrarArchivos(int identificadorPadre) {
 	int indice;
-	int flag = 0;
-	for(indice=0; indice<directorioCantidad(); indice++) {
-		Directorio* directorio = directorioObtener(indice);
+	int flag = DESACTIVADO;
+	for(indice=0; indice<directorioListaCantidad(); indice++) {
+		Directorio* directorio = directorioListaObtener(indice);
 		if(directorio->identificadorPadre == identificadorPadre) {
 			imprimirMensajeUno(archivoLog, "[DIRECTORIO] %s (d)", directorio->nombre);
-			flag = 1;
+			flag = ACTIVADO;
 		}
 	}
-	for(indice=0; indice < archivoCantidad(); indice++) {
-		Archivo* archivo = archivoObtener(indice);
+	for(indice=0; indice < archivoListaCantidad(); indice++) {
+		Archivo* archivo = archivoListaObtener(indice);
 		if(archivo->identificadorPadre == identificadorPadre) {
 			imprimirMensajeUno(archivoLog, "[DIRECTORIO] %s (a)", archivo->nombre);
-			flag = 1;
+			flag = ACTIVADO;
 		}
 	}
-
-	if(flag == 0)
+	if(flag == DESACTIVADO)
 		imprimirMensaje(archivoLog, "[DIRECTORIO] El directorio esta vacio");
-}
-
-void directorioPersistir(){
-	File archivoDirectorio = fileAbrir(rutaDirectorios, ESCRITURA);
-	mutexBloquear(mutexListaDirectorios);
-	listaOrdenar(listaDirectorios, (Puntero)directorioOrdenarPorIdentificador);
-	mutexDesbloquear(mutexListaDirectorios);
-	fprintf(archivoDirectorio, "DIRECTORIOS=%i\n", directorioCantidad());
-	int indice;
-	for(indice = 0; indice < directorioCantidad(); indice++) {
-		Directorio* directorio = directorioObtener(indice);
-		String lineaIdentificador = string_from_format("IDENTIFICADOR%i=%i\n", indice, directorio->identificador);
-		String lineaNombre = string_from_format("NOMBRE%i=%s\n", indice, directorio->nombre);
-		String lineaPadre = string_from_format("PADRE%i=%i\n", indice, directorio->identificadorPadre);
-		fprintf(archivoDirectorio, "%s", lineaIdentificador);
-		fprintf(archivoDirectorio, "%s", lineaNombre);
-		fprintf(archivoDirectorio, "%s", lineaPadre);
-		memoriaLiberar(lineaIdentificador);
-		memoriaLiberar(lineaNombre);
-		memoriaLiberar(lineaPadre);
-	}
-	fileCerrar(archivoDirectorio);
-}
-
-bool directorioIndiceRespetaLimite(int indice) {
-	return indice < 100;
-}
-
-bool directorioIndiceEstaOcupado(int indice) {
-	return directorioIndiceRespetaLimite(indice) &&
-			bitmapDirectoriosBitOcupado(indice);
-}
-
-bool directorioExisteIdentificador(int identificador) {
-	return identificador != ERROR;
-}
-
-bool directorioIndicesIguales(int unIndice, int otroIndice) {
-	return unIndice == otroIndice;
-}
-
-bool directorioSonIguales(Directorio* directorio, String nombreDirectorio, int idPadre) {
-	return stringIguales(directorio->nombre, nombreDirectorio) && directorioIndicesIguales(directorio->identificadorPadre, idPadre);
 }
 
 int directorioBuscarIdentificadorLibre() {
@@ -1450,8 +1394,8 @@ String directorioConfigurarEntradaArchivo(String indice, String nombre, String p
 void directorioBuscarIdentificador(ControlDirectorio* control) {
 	Directorio* directorio;
 	int indice;
-	for(indice = 0; indice < directorioCantidad(); indice++) {
-		directorio = directorioObtener(indice);
+	for(indice = 0; indice < directorioListaCantidad(); indice++) {
+		directorio = directorioListaObtener(indice);
 		if(directorioSonIguales(directorio, control->nombreDirectorio, control->identificadorPadre)) {
 			control->identificadorDirectorio = directorio->identificador;
 			return;
@@ -1466,14 +1410,6 @@ int directorioIndicesACrear(String* nombresDirectorios, int indiceDirectorios) {
 	for(indiceDirectoriosNuevos = indiceDirectorios; stringValido(nombresDirectorios[indiceDirectoriosNuevos]); indiceDirectoriosNuevos++)
 		directoriosACrear++;
 	return directoriosACrear;
-}
-
-bool directorioHaySuficientesIndices(ControlDirectorio* control) {
-	return directorioIndicesACrear(control->nombresDirectorios, control->indiceNombresDirectorios) <= directoriosDisponibles;
-}
-
-void directorioControlSetearNombre(ControlDirectorio* control) {
-	control->nombreDirectorio = control->nombresDirectorios[control->indiceNombresDirectorios];
 }
 
 ControlDirectorio* directorioControlCrear(String rutaDirectorio) {
@@ -1511,7 +1447,7 @@ int directorioCrearConPersistencia(int identificador, String nombre, int identif
 		return ERROR;
 	Directorio* directorio = directorioCrear(identificador, nombre, identificadorPadre);
 	bitmapDirectoriosOcuparBit(identificador);
-	directorioAgregar(directorio);
+	directorioListaAgregar(directorio);
 	directoriosDisponibles--;
 	directorioCrearMetadata(directorio->identificador);
 	directorioPersistir();
@@ -1530,7 +1466,6 @@ int directorioCrearDirectoriosRestantes(ControlDirectorio* control, String rutaD
 	imprimirMensajeUno(archivoLog, "[DIRECTORIO] El directorio %s fue creado", rutaDirectorio);
 	return 0;
 }
-
 
 bool directorioExiste(int idPadre, String nuevoNombre) {
 
@@ -1572,7 +1507,6 @@ int directorioObtenerIdentificador(String path) {
 	return id;
 }
 
-
 Directorio* directorioBuscarEnLista(int identificadorDirectorio) {
 
 	bool buscarPorId(Directorio* directorio) {
@@ -1596,7 +1530,6 @@ bool directorioTieneAlgunArchivo(int identificador) {
 	return resultado;
 }
 
-
 bool directorioTieneAlgunDirectorio(int identificador) {
 
 	bool directorioEsHijo(Directorio* directorio) {
@@ -1612,7 +1545,6 @@ bool directorioTieneAlgo(int identificador) {
 	return directorioTieneAlgunDirectorio(identificador) ||
 			directorioTieneAlgunArchivo(identificador);
 }
-
 
 void directorioEliminar(int identificador) {
 
@@ -1630,6 +1562,35 @@ void directorioEliminar(int identificador) {
 	directorioPersistir();
 }
 
+bool directorioIndiceEstaOcupado(int indice) {
+	return directorioIndiceRespetaLimite(indice) &&
+			bitmapDirectoriosBitOcupado(indice);
+}
+
+bool directorioIndiceRespetaLimite(int indice) {
+	return indice < 100;
+}
+
+bool directorioExisteIdentificador(int identificador) {
+	return identificador != ERROR;
+}
+
+bool directorioIndicesIguales(int unIndice, int otroIndice) {
+	return unIndice == otroIndice;
+}
+
+bool directorioSonIguales(Directorio* directorio, String nombreDirectorio, int idPadre) {
+	return stringIguales(directorio->nombre, nombreDirectorio) && directorioIndicesIguales(directorio->identificadorPadre, idPadre);
+}
+
+bool directorioHaySuficientesIndices(ControlDirectorio* control) {
+	return directorioIndicesACrear(control->nombresDirectorios, control->indiceNombresDirectorios) <= directoriosDisponibles;
+}
+
+void directorioControlSetearNombre(ControlDirectorio* control) {
+	control->nombreDirectorio = control->nombresDirectorios[control->indiceNombresDirectorios];
+}
+
 bool directorioEsHijoDe(Directorio* hijo, Directorio* padre) {
 	return hijo->identificadorPadre == padre->identificador;
 }
@@ -1638,6 +1599,59 @@ bool directorioOrdenarPorIdentificador(Directorio* unDirectorio, Directorio* otr
 	return unDirectorio->identificador < otroDirectorio->identificador;
 }
 
+void directorioListaAgregar(Directorio* directorio) {
+	mutexBloquear(mutexListaDirectorios);
+	listaAgregarElemento(listaDirectorios, directorio);
+	mutexDesbloquear(mutexListaDirectorios);
+}
+
+int directorioListaCantidad() {
+	mutexBloquear(mutexListaDirectorios);
+	int cantidad = listaCantidadElementos(listaDirectorios);
+	mutexDesbloquear(mutexListaDirectorios);
+	return cantidad;
+}
+
+Directorio* directorioListaObtener(int posicion) {
+	mutexBloquear(mutexListaDirectorios);
+	Directorio* directorio = listaObtenerElemento(listaDirectorios, posicion);
+	mutexDesbloquear(mutexListaDirectorios);
+	return directorio;
+}
+
+void directorioListaCrear() {
+	mutexBloquear(mutexListaDirectorios);
+	listaDirectorios = listaCrear();
+	mutexDesbloquear(mutexListaDirectorios);
+}
+
+void directorioListaDestruir() {
+	mutexBloquear(mutexListaDirectorios);
+	listaDestruirConElementos(listaDirectorios, memoriaLiberar);
+	mutexDesbloquear(mutexListaDirectorios);
+}
+
+void directorioPersistir(){
+	File archivoDirectorio = fileAbrir(rutaDirectorios, ESCRITURA);
+	mutexBloquear(mutexListaDirectorios);
+	listaOrdenar(listaDirectorios, (Puntero)directorioOrdenarPorIdentificador);
+	mutexDesbloquear(mutexListaDirectorios);
+	fprintf(archivoDirectorio, "DIRECTORIOS=%i\n", directorioListaCantidad());
+	int indice;
+	for(indice = 0; indice < directorioListaCantidad(); indice++) {
+		Directorio* directorio = directorioListaObtener(indice);
+		String lineaIdentificador = string_from_format("IDENTIFICADOR%i=%i\n", indice, directorio->identificador);
+		String lineaNombre = string_from_format("NOMBRE%i=%s\n", indice, directorio->nombre);
+		String lineaPadre = string_from_format("PADRE%i=%i\n", indice, directorio->identificadorPadre);
+		fprintf(archivoDirectorio, "%s", lineaIdentificador);
+		fprintf(archivoDirectorio, "%s", lineaNombre);
+		fprintf(archivoDirectorio, "%s", lineaPadre);
+		memoriaLiberar(lineaIdentificador);
+		memoriaLiberar(lineaNombre);
+		memoriaLiberar(lineaPadre);
+	}
+	fileCerrar(archivoDirectorio);
+}
 
 void directorioRecuperarPersistencia() {
 	File file = fileAbrir(rutaArchivos, LECTURA);
@@ -1647,7 +1661,7 @@ void directorioRecuperarPersistencia() {
 		return;
 	}
 	fileCerrar(file);
-	directorioCrearLista();
+	directorioListaCrear();
 	ArchivoConfig config = config_create(rutaDirectorios);
 	int cantidadDirectorios = archivoConfigEnteroDe(config, "DIRECTORIOS");
 	int indice;
@@ -1659,7 +1673,7 @@ void directorioRecuperarPersistencia() {
 		directorio->identificador = archivoConfigEnteroDe(config, lineaIdentificador);
 		directorio->identificadorPadre = archivoConfigEnteroDe(config, lineaPadre);
 		stringCopiar(directorio->nombre, archivoConfigStringDe(config, lineaNombre));
-		directorioAgregar(directorio);
+		directorioListaAgregar(directorio);
 		memoriaLiberar(lineaIdentificador);
 		memoriaLiberar(lineaNombre);
 		memoriaLiberar(lineaPadre);
@@ -1670,37 +1684,6 @@ void directorioRecuperarPersistencia() {
 	directoriosDisponibles = MAX_DIR - cantidadDirectorios;
 }
 
-void directorioAgregar(Directorio* directorio) {
-	mutexBloquear(mutexListaDirectorios);
-	listaAgregarElemento(listaDirectorios, directorio);
-	mutexDesbloquear(mutexListaDirectorios);
-}
-
-int directorioCantidad() {
-	mutexBloquear(mutexListaDirectorios);
-	int cantidad = listaCantidadElementos(listaDirectorios);
-	mutexDesbloquear(mutexListaDirectorios);
-	return cantidad;
-}
-
-Directorio* directorioObtener(int posicion) {
-	mutexBloquear(mutexListaDirectorios);
-	Directorio* directorio = listaObtenerElemento(listaDirectorios, posicion);
-	mutexDesbloquear(mutexListaDirectorios);
-	return directorio;
-}
-
-void directorioCrearLista() {
-	mutexBloquear(mutexListaDirectorios);
-	listaDirectorios = listaCrear();
-	mutexDesbloquear(mutexListaDirectorios);
-}
-
-void directorioDestruirLista() {
-	mutexBloquear(mutexListaDirectorios);
-	listaDestruirConElementos(listaDirectorios, memoriaLiberar);
-	mutexDesbloquear(mutexListaDirectorios);
-}
 //--------------------------------------- Funciones de Archivo -------------------------------------
 
 Archivo* archivoCrear(String nombreArchivo, int idPadre, String tipo) {
@@ -1720,11 +1703,11 @@ void archivoDestruir(Archivo* archivo) {
 	memoriaLiberar(archivo);
 }
 
-Archivo* archivoBuscar(String path) {
+Archivo* archivoBuscarPorRuta(String ruta) {
 	Archivo* archivo = NULL;
-	String ultimo = rutaObtenerUltimoNombre(path);
+	String ultimo = rutaObtenerUltimoNombre(ruta);
 	int indice;
-	ControlDirectorio* control = directorioControlCrear(path);
+	ControlDirectorio* control = directorioControlCrear(ruta);
 	while(stringValido(control->nombreDirectorio)) {
 		directorioBuscarIdentificador(control);
 		if(control->identificadorDirectorio != ERROR) {
@@ -1736,15 +1719,16 @@ Archivo* archivoBuscar(String path) {
 			break;
 	}
 
-	bool buscar(Archivo* archivo) {
+	bool buscarArchivo(Archivo* archivo) {
 		return control->identificadorPadre == archivo->identificadorPadre &&
 				stringIguales(control->nombreDirectorio, archivo->nombre);
 	}
 
-	if(stringIguales(control->nombreDirectorio, ultimo))
+	if(stringIguales(control->nombreDirectorio, ultimo)) {
 		mutexBloquear(mutexListaArchivos);
-		archivo = listaBuscar(listaArchivos, (Puntero)buscar);
+		archivo = listaBuscar(listaArchivos, (Puntero)buscarArchivo);
 		mutexDesbloquear(mutexListaArchivos);
+	}
 	for(indice=0; stringValido(control->nombresDirectorios[indice]); indice++)
 		memoriaLiberar(control->nombresDirectorios[indice]);
 	memoriaLiberar(control->nombresDirectorios);
@@ -1755,70 +1739,35 @@ Archivo* archivoBuscar(String path) {
 
 bool archivoExiste(int idPadre, String nombre) {
 
-	bool existeNuevoNombre(Archivo* archivo) {
+	bool existeNombre(Archivo* archivo) {
 		return idPadre == archivo->identificadorPadre &&
 				stringIguales(nombre, archivo->nombre);
 	}
 
 	mutexBloquear(mutexListaArchivos);
-	int resultado = listaCumpleAlguno(listaArchivos, (Puntero)existeNuevoNombre);
+	int resultado = listaCumpleAlguno(listaArchivos, (Puntero)existeNombre);
 	mutexDesbloquear(mutexListaArchivos);
 	return resultado;
 }
 
-int archivoObtenerPosicion(Archivo* archivo) {
-	int indice;
-	for(indice=0; archivo != archivoObtener(indice); indice++);
-	return indice;
-}
-
-void archivoPersistir(Archivo* archivo) {
-	String ruta = string_from_format("%s/%i/%s", rutaDirectorioArchivos, archivo->identificadorPadre, archivo->nombre);
-	File file = fileAbrir(ruta, ESCRITURA);
-	memoriaLiberar(ruta);
-	fprintf(file, "NOMBRE=%s\n", archivo->nombre);
-	fprintf(file, "ID_PADRE=%i\n", archivo->identificadorPadre);
-	fprintf(file, "TIPO=%s\n", archivo->tipo);
-	fprintf(file, "BLOQUES=%i\n", listaCantidadElementos(archivo->listaBloques));
-	int indice;
-	for(indice = 0; indice < listaCantidadElementos(archivo->listaBloques); indice++) {
-		Bloque* bloque = listaObtenerElemento(archivo->listaBloques, indice);
-		fprintf(file, "BLOQUE%i_BYTES=%i\n",indice, bloque->bytesUtilizados);
-		fprintf(file, "BLOQUE%i_COPIAS=%i\n",indice, listaCantidadElementos(bloque->listaCopias));
-		int indiceCopia;
-		for(indiceCopia = 0; indiceCopia < listaCantidadElementos(bloque->listaCopias); indiceCopia++) {
-			Copia* copiaBloque = listaObtenerElemento(bloque->listaCopias, indiceCopia);
-			fprintf(file, "BLOQUE%i_COPIA%i=[%s,%i]\n", indice, indiceCopia, copiaBloque->nombreNodo, copiaBloque->bloqueNodo);
-		}
-	}
-	fileCerrar(file);
-}
-
-void archivoPersistirControl(){
-	File file = fileAbrir(rutaArchivos, ESCRITURA);
-	mutexBloquear(mutexListaArchivos);
-	listaOrdenar(listaArchivos, (Puntero)archivoOrdenarPorNombre);
-	mutexDesbloquear(mutexListaArchivos);
-	fprintf(file, "ARCHIVOS=%i\n", archivoCantidad());
-	int indice;
-	for(indice = 0; indice < archivoCantidad(); indice++) {
-		Archivo* archivo = archivoObtener(indice);
-		String lineaNombre = string_from_format("NOMBRE%i=%s\n", indice, archivo->nombre);
-		String lineaPadre = string_from_format("PADRE%i=%i\n", indice, archivo->identificadorPadre);
-		fprintf(file, "%s", lineaNombre);
-		fprintf(file, "%s", lineaPadre);
-		memoriaLiberar(lineaNombre);
-		memoriaLiberar(lineaPadre);
-	}
-	fileCerrar(file);
+int archivoCantidadBloques(String ruta) {
+	struct stat informacionArchivo;
+	stat(ruta, &informacionArchivo);
+	int tamanioArchivo = informacionArchivo.st_size;
+	int cantidadBloques = (int)ceil((double)(tamanioArchivo)/(double)BLOQUE);
+	return cantidadBloques;
 }
 
 bool archivoOrdenarPorNombre(Archivo* unArchivo, Archivo* otroArchivo) {
 	return unArchivo->nombre[0] < otroArchivo->nombre[0];
 }
 
-bool archivoEsBinario(Archivo* archivo) {
+bool archivoBinario(Archivo* archivo) {
 	return stringIguales(archivo->tipo, ARCHIVO_BINARIO);
+}
+
+bool archivoDisponible(Archivo* archivo) {
+	return listaCumplenTodos(archivo->listaBloques, (Puntero)bloqueDisponible);
 }
 
 int archivoAlmacenar(Comando* comando) {
@@ -1852,7 +1801,7 @@ int archivoAlmacenar(Comando* comando) {
 		memoriaLiberar(nombreArchivo);
 		return ERROR;
 	}
-	int cantidadBloques = nodoBloquesLibres();
+	int cantidadBloques = nodoBloquesLibresTotales();
 	int bloquesArchivo = archivoCantidadBloques(comando->argumentos[2]) * MAX_COPIAS;
 	if(cantidadBloques < bloquesArchivo) {
 		imprimirMensaje(archivoLog, "[ERROR] No hay suficientes bloques libres");
@@ -1917,7 +1866,7 @@ int archivoAlmacenar(Comando* comando) {
 		return ERROR;
 	}
 	else {
-		archivoAgregar(archivo);
+		archivoListaAgregar(archivo);
 		archivoPersistir(archivo);
 		archivoPersistirControl();
 		nodoPersistir();
@@ -1931,7 +1880,7 @@ int archivoLeer(Comando* comando) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return ERROR;
 	}
-	Archivo* archivo = archivoBuscar(comando->argumentos[1]);
+	Archivo* archivo = archivoBuscarPorRuta(comando->argumentos[1]);
 	if(archivo == NULL) {
 		imprimirMensaje(archivoLog,"[ERROR] El archivo no existe");
 		return ERROR;
@@ -1949,7 +1898,7 @@ int archivoLeer(Comando* comando) {
 		listaOrdenar(bloque->listaCopias, (Puntero)copiaOrdenarPorActividadDelNodo);
 		for(numeroCopia=0; numeroCopia <listaCantidadElementos(bloque->listaCopias) && bloqueSinImprimir; numeroCopia++) {
 			Copia* copia = listaObtenerElemento(bloque->listaCopias, numeroCopia);
-			Nodo* nodo = nodoBuscar(copia->nombreNodo);
+			Nodo* nodo = nodoBuscarPorNombre(copia->nombreNodo);
 			mutexBloquear(mutexRuta);
 			puts("envio entre");
 			if(nodoConectado(nodo)) {
@@ -1972,6 +1921,92 @@ int archivoLeer(Comando* comando) {
 }
 
 
+void archivoListaCrear() {
+	mutexBloquear(mutexListaArchivos);
+	listaArchivos = listaCrear();
+	mutexDesbloquear(mutexListaArchivos);
+}
+
+void archivoListaDestruir() {
+	mutexBloquear(mutexListaArchivos);
+	listaDestruirConElementos(listaArchivos, (Puntero)archivoDestruir);
+	mutexDesbloquear(mutexListaArchivos);
+}
+
+void archivoListaAgregar(Archivo* archivo) {
+	mutexBloquear(mutexListaArchivos);
+	listaAgregarElemento(listaArchivos, archivo);
+	mutexDesbloquear(mutexListaArchivos);
+}
+
+int archivoListaCantidad() {
+	mutexBloquear(mutexListaArchivos);
+	int cantidad = listaCantidadElementos(listaArchivos);
+	mutexDesbloquear(mutexListaArchivos);
+	return cantidad;
+}
+
+int archivoListaPosicion(Archivo* archivo) {
+	int indice;
+	for(indice=0; archivo != archivoListaObtener(indice); indice++);
+	return indice;
+}
+
+Archivo* archivoListaObtener(int indice) {
+	mutexBloquear(mutexListaArchivos);
+	Archivo* archivo = listaObtenerElemento(listaArchivos, indice);
+	mutexDesbloquear(mutexListaArchivos);
+	return archivo;
+}
+
+bool archivoListaTodosDisponibles() {
+	mutexBloquear(mutexListaArchivos);
+	int resultado = listaCumplenTodos(listaArchivos, (Puntero)archivoDisponible);
+	mutexDesbloquear(mutexListaArchivos);
+	return resultado;
+}
+
+void archivoPersistir(Archivo* archivo) {
+	String ruta = string_from_format("%s/%i/%s", rutaDirectorioArchivos, archivo->identificadorPadre, archivo->nombre);
+	File file = fileAbrir(ruta, ESCRITURA);
+	memoriaLiberar(ruta);
+	fprintf(file, "NOMBRE=%s\n", archivo->nombre);
+	fprintf(file, "ID_PADRE=%i\n", archivo->identificadorPadre);
+	fprintf(file, "TIPO=%s\n", archivo->tipo);
+	fprintf(file, "BLOQUES=%i\n", listaCantidadElementos(archivo->listaBloques));
+	int indice;
+	for(indice = 0; indice < listaCantidadElementos(archivo->listaBloques); indice++) {
+		Bloque* bloque = listaObtenerElemento(archivo->listaBloques, indice);
+		fprintf(file, "BLOQUE%i_BYTES=%i\n",indice, bloque->bytesUtilizados);
+		fprintf(file, "BLOQUE%i_COPIAS=%i\n",indice, listaCantidadElementos(bloque->listaCopias));
+		int indiceCopia;
+		for(indiceCopia = 0; indiceCopia < listaCantidadElementos(bloque->listaCopias); indiceCopia++) {
+			Copia* copiaBloque = listaObtenerElemento(bloque->listaCopias, indiceCopia);
+			fprintf(file, "BLOQUE%i_COPIA%i=[%s,%i]\n", indice, indiceCopia, copiaBloque->nombreNodo, copiaBloque->bloqueNodo);
+		}
+	}
+	fileCerrar(file);
+}
+
+void archivoPersistirControl(){
+	File file = fileAbrir(rutaArchivos, ESCRITURA);
+	mutexBloquear(mutexListaArchivos);
+	listaOrdenar(listaArchivos, (Puntero)archivoOrdenarPorNombre);
+	mutexDesbloquear(mutexListaArchivos);
+	fprintf(file, "ARCHIVOS=%i\n", archivoListaCantidad());
+	int indice;
+	for(indice = 0; indice < archivoListaCantidad(); indice++) {
+		Archivo* archivo = archivoListaObtener(indice);
+		String lineaNombre = string_from_format("NOMBRE%i=%s\n", indice, archivo->nombre);
+		String lineaPadre = string_from_format("PADRE%i=%i\n", indice, archivo->identificadorPadre);
+		fprintf(file, "%s", lineaNombre);
+		fprintf(file, "%s", lineaPadre);
+		memoriaLiberar(lineaNombre);
+		memoriaLiberar(lineaPadre);
+	}
+	fileCerrar(file);
+}
+
 void archivoRecuperarPersistencia() {
 	File file = fileAbrir(rutaArchivos, LECTURA);
 	if(file == NULL) {
@@ -1979,7 +2014,7 @@ void archivoRecuperarPersistencia() {
 		return;
 	}
 	fileCerrar(file);
-	archivoCrearLista();
+	archivoListaCrear();
 	ArchivoConfig config = config_create(rutaArchivos);
 	int cantidadArchivos = archivoConfigEnteroDe(config, "ARCHIVOS");
 	int indice;
@@ -1991,12 +2026,12 @@ void archivoRecuperarPersistencia() {
 		int padre = archivoConfigEnteroDe(config, lineaPadre);
 		memoriaLiberar(lineaNombre);
 		memoriaLiberar(lineaPadre);
-		archivoRecuperarPersistenciaEspecifica(nombre, padre);
+		archivoRecuperarPersistenciaDetallada(nombre, padre);
 	}
 	archivoConfigDestruir(config);
 }
 
-void archivoRecuperarPersistenciaEspecifica(String nombre, int padre) {
+void archivoRecuperarPersistenciaDetallada(String nombre, int padre) {
 	String ruta = string_from_format("%s/%i/%s", rutaDirectorioArchivos, padre, nombre);
 	File file = fileAbrir(ruta, LECTURA);
 	if(file == NULL) {
@@ -2041,60 +2076,8 @@ void archivoRecuperarPersistenciaEspecifica(String nombre, int padre) {
 			listaAgregarElemento(bloque->listaCopias, copia);
 		}
 	}
-	archivoAgregar(archivo);
+	archivoListaAgregar(archivo);
 	archivoConfigDestruir(config);
-}
-
-int archivoCantidadBloques(String ruta) {
-	struct stat informacionArchivo;
-	stat(ruta, &informacionArchivo);
-	int tamanioArchivo = informacionArchivo.st_size;
-	int cantidadBloques = (int)ceil((double)(tamanioArchivo)/(double)BLOQUE);
-	return cantidadBloques;
-}
-
-
-bool archivoDisponible(Archivo* archivo) {
-	return listaCumplenTodos(archivo->listaBloques, (Puntero)bloqueDisponible);
-}
-
-int archivoCantidad() {
-	mutexBloquear(mutexListaArchivos);
-	int cantidad = listaCantidadElementos(listaArchivos);
-	mutexDesbloquear(mutexListaArchivos);
-	return cantidad;
-}
-
-Archivo* archivoObtener(int indice) {
-	mutexBloquear(mutexListaArchivos);
-	Archivo* archivo = listaObtenerElemento(listaArchivos, indice);
-	mutexDesbloquear(mutexListaArchivos);
-	return archivo;
-}
-
-void archivoAgregar(Archivo* archivo) {
-	mutexBloquear(mutexListaArchivos);
-	listaAgregarElemento(listaArchivos, archivo);
-	mutexDesbloquear(mutexListaArchivos);
-}
-
-void archivoCrearLista() {
-	mutexBloquear(mutexListaArchivos);
-	listaArchivos = listaCrear();
-	mutexDesbloquear(mutexListaArchivos);
-}
-
-bool archivoTodosDisponibles() {
-	mutexBloquear(mutexListaArchivos);
-	int resultado = listaCumplenTodos(listaArchivos, (Puntero)archivoDisponible);
-	mutexDesbloquear(mutexListaArchivos);
-	return resultado;
-}
-
-void archivoDestruirLista() {
-	mutexBloquear(mutexListaArchivos);
-	listaDestruirConElementos(listaArchivos, (Puntero)archivoDestruir);
-	mutexDesbloquear(mutexListaArchivos);
 }
 
 //--------------------------------------- Funciones de Nodo -------------------------------------
@@ -2118,55 +2101,215 @@ Nodo* nodoCrear(Puntero datos, Socket nuevoSocket) {
 	return nodo;
 }
 
-void nodoFormatear(Nodo* nodo) {
-	nodo->bloquesLibres = nodo->bloquesTotales;
-	bitmapDestruir(nodo->bitmap);
-	nodo->bitmap = bitmapCrear(nodo->bloquesTotales);
-}
-
-bool nodoEliminarDesactivados(Nodo* nodo) {
-	return nodo->estado == DESACTIVADO;
-}
-
-void nodoFormatearConectados() {
-	mutexBloquear(mutexListaNodos);
-	listaEliminarDestruyendoPorCondicion(listaNodos, (Puntero)nodoEliminarDesactivados, (Puntero)nodoDestruir);
-	mutexDesbloquear(mutexListaNodos);
-	int indice;
-	for(indice = 0; indice < nodoCantidadNodos(); indice++) {
-		Nodo* unNodo = nodoObtener(indice);
-		nodoFormatear(unNodo);
-	}
-}
-
 void nodoDestruir(Nodo* nodo) {
 	bitmapDestruir(nodo->bitmap);
 	memoriaLiberar(nodo);
 }
 
-int nodoCantidadNodos() {
+void nodoListaCrear() {
+	mutexBloquear(mutexListaNodos);
+	listaNodos = listaCrear();
+	mutexDesbloquear(mutexListaNodos);
+}
+
+void nodoListaDestruir() {
+	mutexBloquear(mutexListaNodos);
+	listaDestruirConElementos(listaNodos, (Puntero)nodoDestruir);
+	mutexDesbloquear(mutexListaNodos);
+}
+
+void nodoListaAgregar(Nodo* nodo) {
+	mutexBloquear(mutexListaNodos);
+	listaAgregarElemento(listaNodos, nodo);
+	mutexDesbloquear(mutexListaNodos);
+}
+
+void nodoListaEliminar(Nodo* nodo) {
+	int posicion = nodoListaPosicion(nodo);
+	mutexBloquear(mutexListaNodos);
+	listaEliminarDestruyendoElemento(listaNodos, posicion , (Puntero)nodoDestruir);
+	mutexDesbloquear(mutexListaNodos);
+}
+
+int nodoListaCantidad() {
 	mutexBloquear(mutexListaNodos);
 	int cantidadNodos = listaCantidadElementos(listaNodos);
 	mutexDesbloquear(mutexListaNodos);
 	return cantidadNodos;
 }
 
-Nodo* nodoObtnener(int posicion) {
+Nodo* nodoListaObtener(int posicion) {
 	mutexBloquear(mutexListaNodos);
 	Nodo* nodo = listaObtenerElemento(listaNodos, posicion);
 	mutexDesbloquear(mutexListaNodos);
 	return nodo;
+}
 
+int nodoListaPosicion(Nodo* nodo) {
+	int posicion;
+	for(posicion = 0; nodo != nodoListaObtener(posicion); posicion++);
+	return posicion;
+}
+
+void nodoListaOrdenarPorActividad() {
+	mutexBloquear(mutexListaNodos);
+	listaOrdenar(listaNodos, (Puntero)nodoOrdenarPorActividad);
+	mutexDesbloquear(mutexListaNodos);
+}
+
+bool nodoListaAlgunoDisponible() {
+	mutexBloquear(mutexListaNodos);
+	int resultado = listaCumpleAlguno(listaNodos, (Puntero)nodoDisponible);
+	mutexDesbloquear(mutexListaNodos);
+	return resultado;
+}
+
+Nodo* nodoBuscarPorNombre(String nombre) {
+
+	bool buscarPorNombre(Nodo* nodo) {
+		return stringIguales(nodo->nombre, nombre);
+	}
+
+	mutexBloquear(mutexListaNodos);
+	Nodo* nodo = listaBuscar(listaNodos, (Puntero)buscarPorNombre);
+	mutexDesbloquear(mutexListaNodos);
+	return nodo;
+}
+
+Nodo* nodoBuscarPorSocket(Socket unSocket) {
+
+	bool buscarPorSocket(Nodo* nodo) {
+		return nodo->socket == unSocket;
+	}
+
+	mutexBloquear(mutexListaNodos);
+	Nodo* nodo = listaBuscar(listaNodos, (Puntero)buscarPorSocket);
+	mutexDesbloquear(mutexListaNodos);
+	return nodo;
+}
+
+int nodoBuscarBloqueLibre(Nodo* nodo) {
+	int indice;
+	for(indice = 0; bitmapBitOcupado(nodo->bitmap, indice); indice++);
+		if(indice < nodo->bloquesTotales)
+			return indice;
+		else
+			return ERROR;
+}
+
+bool nodoListaOrdenarBloquesLibres(Nodo* unNodo, Nodo* otroNodo) {
+	return unNodo->bloquesLibres > otroNodo->bloquesLibres;
+}
+
+bool nodoOrdenarPorActividad(Nodo* unNodo, Nodo* otroNodo) {
+	return unNodo->actividadesRealizadas < otroNodo->actividadesRealizadas;
+}
+
+bool nodoTieneBloquesLibres(Nodo* nodo) {
+	return nodo->bloquesLibres > 0;
+}
+
+bool nodoConectado(Nodo* nodo) {
+	return nodo->estado == ACTIVADO;
+}
+
+bool nodoDesconectado(Nodo* nodo) {
+	return nodo->estado == DESACTIVADO;
+}
+
+void nodoVerificarBloquesLibres(Nodo* nodo) {
+	if(nodo->bloquesLibres == 0)
+		imprimirMensajeUno(archivoLog, AMARILLO"[ADVERTENCIA] El %s tiene todos sus bloques ocupados"BLANCO, nodo->nombre);
+}
+
+bool nodoDisponible(Nodo* nodo) {
+	return nodoConectado(nodo) &&
+			nodoTieneBloquesLibres(nodo);
+}
+
+bool nodoNuevo(Nodo* nuevoNodo) {
+	Nodo* nodo = nodoBuscarPorNombre(nuevoNodo->nombre);
+	if(nodo == NULL) {
+		imprimirMensaje(archivoLog, ROJO"[ERROR] No se permite conexiones de nuevos Nodos"BLANCO);
+		return true;
+	}
+	return false;
+}
+
+bool nodoEstaConectado(Nodo* nuevoNodo) { //TODO ver
+	Nodo* nodo = nodoBuscarPorNombre(nuevoNodo->nombre);
+	if(nodo == NULL)
+		return false;
+	if(nodo->estado == ACTIVADO) {
+		imprimirMensaje(archivoLog, ROJO"[ERROR] Un nodo con ese nombre ya esta conectado"BLANCO);
+		return true;
+	}
+	return false;
+}
+
+bool nodoInvalido(Nodo* nodoTemporal) {
+	return nodoNuevo(nodoTemporal) ||
+			nodoEstaConectado(nodoTemporal);
+}
+
+void nodoLimpiarActividades() {
+	int indice;
+	for(indice = 0; indice < nodoListaCantidad(); indice++) {
+		Nodo* nodo = nodoListaObtener(indice);
+		nodo->actividadesRealizadas = 0;
+	}
+}
+
+int nodoBloquesLibresTotales() {
+	int bloquesLibres = 0;
+	int indice;
+	for(indice = 0; indice < nodoListaCantidad(); indice++) {
+		Nodo* nodo = nodoListaObtener(indice);
+		bloquesLibres+= nodo->bloquesLibres;
+	}
+	return bloquesLibres;
+}
+
+void nodoFormatear(Nodo* nodo) {
+	nodo->bloquesLibres = nodo->bloquesTotales;
+	bitmapDestruir(nodo->bitmap);
+	nodo->bitmap = bitmapCrear(nodo->bloquesTotales);
+}
+
+void nodoFormatearConectados() {
+	mutexBloquear(mutexListaNodos);
+	listaEliminarDestruyendoPorCondicion(listaNodos, (Puntero)nodoDesconectado, (Puntero)nodoDestruir);
+	mutexDesbloquear(mutexListaNodos);
+	int indice;
+	for(indice = 0; indice < nodoListaCantidad(); indice++) {
+		Nodo* unNodo = nodoListaObtener(indice);
+		nodoFormatear(unNodo);
+	}
+}
+
+Nodo* nodoActualizar(Nodo* nodoTemporal) {
+	Nodo* nodo = nodoBuscarPorNombre(nodoTemporal->nombre);
+	nodo->estado = ACTIVADO;
+	nodo->socket = nodoTemporal->socket;
+	stringCopiar(nodo->ip, nodoTemporal->ip);
+	stringCopiar(nodo->puerto, nodoTemporal->puerto);
+	nodoDestruir(nodoTemporal);
+	return nodo;
+}
+
+void nodoAceptar(Nodo* nodo) {
+	mensajeEnviar(nodo->socket, ACEPTAR_NODO, &nodo->socket, sizeof(Socket)); //TODO debe ser nulo el msj, solo me interesa la operacion
+	imprimirMensajeUno(archivoLog, AMARILLO"[CONEXION] %s conectado"BLANCO, nodo->nombre);
 }
 
 void nodoPersistir() {
 	File archivo = fileAbrir(rutaNodos, ESCRITURA);
-	fprintf(archivo, "NODOS=%i\n", nodoCantidadNodos());
+	fprintf(archivo, "NODOS=%i\n", nodoListaCantidad());
 	int indice;
 	int contadorBloquesTotales = 0;
 	int contadorBloquesLibres = 0;
-	for(indice = 0; indice < nodoCantidadNodos(); indice++) {
-		Nodo* unNodo = nodoObtener(indice);
+	for(indice = 0; indice < nodoListaCantidad(); indice++) {
+		Nodo* unNodo = nodoListaObtener(indice);
 		fprintf(archivo, "NOMBRE%i=%s\n",indice, unNodo->nombre);
 		fprintf(archivo, "BLOQUES_TOTALES%i=%i\n", indice, unNodo->bloquesTotales);
 		fprintf(archivo, "BLOQUES_LIBRES%i=%i\n",indice, unNodo->bloquesLibres);
@@ -2188,75 +2331,6 @@ void nodoPersistirBitmap(Nodo* nodo) {
 		fprintf(archivo, "%i", bitmapBitOcupado(nodo->bitmap, indice));
 	fprintf(archivo, "\n");
 	fileCerrar(archivo);
-}
-
-int nodoBuscarBloqueLibre(Nodo* nodo) {
-	int indice;
-		for(indice = 0; bitmapBitOcupado(nodo->bitmap, indice); indice++);
-		if(indice < nodo->bloquesTotales)
-			return indice;
-		else
-			return ERROR;
-}
-
-bool nodoCantidadBloquesLibres(Nodo* unNodo, Nodo* otroNodo) {
-	return unNodo->bloquesLibres > otroNodo->bloquesLibres;
-}
-
-bool nodoOrdenarPorActividad(Nodo* unNodo, Nodo* otroNodo) {
-	return unNodo->actividadesRealizadas < otroNodo->actividadesRealizadas;
-}
-
-bool nodoTieneBloquesLibres(Nodo* nodo) {
-	return nodo->bloquesLibres > 0;
-}
-
-void nodoVerificarBloquesLibres(Nodo* nodo) {
-	if(nodo->bloquesLibres == 0)
-		imprimirMensajeUno(archivoLog, AMARILLO"[ADVERTENCIA] El %s tiene todos sus bloques ocupados"BLANCO, nodo->nombre);
-}
-
-Nodo* nodoBuscar(String nombre) {
-
-	bool buscarPorNombre(Nodo* nodo) {
-		return stringIguales(nodo->nombre, nombre);
-	}
-
-	mutexBloquear(mutexListaNodos);
-	Nodo* nodo = listaBuscar(listaNodos, (Puntero)buscarPorNombre);
-	mutexDesbloquear(mutexListaNodos);
-	return nodo;
-}
-
-int nodoPosicionEnLista(Nodo* nodo) {
-	int posicion;
-	for(posicion = 0; nodo != nodoObtener(posicion); posicion++);
-	return posicion;
-}
-
-Nodo* nodoBuscarPorSocket(Socket unSocket) {
-
-	bool nodoBuscarPorSocket(Nodo* nodo) {
-		return nodo->socket == unSocket;
-	}
-
-	mutexBloquear(mutexListaNodos);
-	Nodo* nodo = listaBuscar(listaNodos, (Puntero)nodoBuscarPorSocket);
-	mutexDesbloquear(mutexListaNodos);
-	return nodo;
-}
-
-void nodoAgregar(Nodo* nodo) {
-	mutexBloquear(mutexListaNodos);
-	listaAgregarElemento(listaNodos, nodo);
-	mutexDesbloquear(mutexListaNodos);
-}
-
-Nodo* nodoObtener(int indice) {
-	mutexBloquear(mutexListaNodos);
-	Nodo* nodo = listaObtenerElemento(listaNodos, indice);
-	mutexDesbloquear(mutexListaNodos);
-	return nodo;
 }
 
 void nodoRecuperarPersistencia() {
@@ -2283,7 +2357,7 @@ void nodoRecuperarPersistencia() {
 		memoriaLiberar(lineaNombre);
 		memoriaLiberar(lineaTotales);
 		memoriaLiberar(lineaLibres);
-		nodoAgregar(nodo);
+		nodoListaAgregar(nodo);
 		nodoRecuperarPersistenciaBitmap(nodo);
 	}
 	archivoConfigDestruir(config);
@@ -2306,100 +2380,6 @@ void nodoRecuperarPersistenciaBitmap(Nodo* nodo) {
 	}
 	memoriaLiberar(ruta);
 	fileCerrar(file);
-}
-
-int nodoBloquesLibres() {
-	int bloquesLibres = 0;
-	int indice;
-	for(indice = 0; indice < nodoCantidadNodos(); indice++) {
-		Nodo* nodo = nodoObtener(indice);
-		bloquesLibres+= nodo->bloquesLibres;
-	}
-	return bloquesLibres;
-}
-
-void nodoLimpiarActividades() {
-	int indice;
-	for(indice = 0; indice < nodoCantidadNodos(); indice++) {
-		Nodo* nodo = nodoObtener(indice);
-		nodo->actividadesRealizadas = 0;
-	}
-}
-
-bool nodoConectado(Nodo* nodo) {
-	return nodo->estado == ACTIVADO;
-}
-
-
-bool nodoDisponible(Nodo* nodo) {
-	return nodoConectado(nodo) &&
-			nodoTieneBloquesLibres(nodo);
-}
-
-bool nodoEsNuevo(Nodo* nuevoNodo) {
-	Nodo* nodo = nodoBuscar(nuevoNodo->nombre);
-	if(nodo == NULL) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] No se permite conexiones de nuevos Nodos"BLANCO);
-		return true;
-	}
-	return false;
-}
-
-bool nodoEstaConectado(Nodo* nuevoNodo) {
-	Nodo* nodo = nodoBuscar(nuevoNodo->nombre);
-	if(nodo == NULL)
-		return false;
-	if(nodo->estado == ACTIVADO) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] Un nodo con ese nombre ya esta conectado"BLANCO);
-		return true;
-	}
-	return false;
-}
-
-bool nodoInvalido(Nodo* nodoTemporal) {
-	return nodoEsNuevo(nodoTemporal) ||
-			nodoEstaConectado(nodoTemporal);
-}
-
-Nodo* nodoActualizar(Nodo* nodoTemporal) {
-	Nodo* nodo = nodoBuscar(nodoTemporal->nombre);
-	nodo->estado = ACTIVADO;
-	nodo->socket = nodoTemporal->socket;
-	stringCopiar(nodo->ip, nodoTemporal->ip);
-	stringCopiar(nodo->puerto, nodoTemporal->puerto);
-	nodoDestruir(nodoTemporal);
-	return nodo;
-}
-
-void nodoDestruirDeLista(Nodo* nodo) {
-	int posicion = nodoPosicionEnLista(nodo);
-	mutexBloquear(mutexListaNodos);
-	listaEliminarDestruyendoElemento(listaNodos, posicion , (Puntero)nodoDestruir);
-	mutexDesbloquear(mutexListaNodos);
-}
-
-void nodoDestruirLista() {
-	mutexBloquear(mutexListaNodos);
-	listaDestruirConElementos(listaNodos, (Puntero)nodoDestruir);
-	mutexDesbloquear(mutexListaNodos);
-}
-
-void nodoOrdenarListaPorActividad() {
-	mutexBloquear(mutexListaNodos);
-	listaOrdenar(listaNodos, (Puntero)nodoOrdenarPorActividad);
-	mutexDesbloquear(mutexListaNodos);
-}
-
-bool nodoHayAlgunoDisponible() {
-	mutexBloquear(mutexListaNodos);
-	int resultado = listaCumpleAlguno(listaNodos, (Puntero)nodoDisponible);
-	mutexDesbloquear(mutexListaNodos);
-	return resultado;
-}
-
-void nodoAceptar(Nodo* nodo) {
-	mensajeEnviar(nodo->socket, ACEPTAR_NODO, &nodo->socket, sizeof(Socket)); //TODO debe ser nulo el msj, solo me interesa la operacion
-	imprimirMensajeUno(archivoLog, AMARILLO"[CONEXION] %s conectado"BLANCO, nodo->nombre);
 }
 
 //--------------------------------------- Funciones de Bloque-------------------------------------
@@ -2434,28 +2414,24 @@ void bloqueCopiarEnNodo(Bloque* bloque, Nodo* nodo, Entero numeroBloqueNodo) {
 	listaAgregarElemento(bloque->listaCopias, copia);
 }
 
-bool bloqueOrdenarPorNumero(Bloque* unBloque, Bloque* otroBloque) {
-	return unBloque->numeroBloque < otroBloque->numeroBloque;
-}
-
 int bloqueEnviarCopiasANodos(Bloque* bloque, String buffer) {
 	int copiasEnviadas = 0;
 	int indice = 0;
 
 	bool bloqueForzarCopiado() {
-		return indice == (nodoCantidadNodos()-1) && nodoHayAlgunoDisponible() && copiasEnviadas < MAX_COPIAS;
+		return indice == (nodoListaCantidad()-1) && nodoListaAlgunoDisponible() && copiasEnviadas < MAX_COPIAS;
 	}
 	semaforoWait(semaforoTarea);
-	nodoOrdenarListaPorActividad();
-	for(indice = 0; indice < nodoCantidadNodos() && copiasEnviadas < MAX_COPIAS; indice++) {
-		Nodo* nodo = nodoObtener(indice);
+	nodoListaOrdenarPorActividad();
+	for(indice = 0; indice < nodoListaCantidad() && copiasEnviadas < MAX_COPIAS; indice++) {
+		Nodo* nodo = nodoListaObtener(indice);
 		if(nodoDisponible(nodo)) {
 			bloqueEnviarANodo(bloque, nodo, buffer);
 			copiasEnviadas++;
 			nodo->actividadesRealizadas++;
 		}
 		if(bloqueForzarCopiado()) {
-			nodoOrdenarListaPorActividad();
+			nodoListaOrdenarPorActividad();
 			indice = -1;
 		}
 	}
@@ -2531,6 +2507,10 @@ void bloqueCopiarTexto(Puntero datos) {
 	semaforoSignal(semaforoTarea);
 }
 
+bool bloqueOrdenarPorNumero(Bloque* unBloque, Bloque* otroBloque) {
+	return unBloque->numeroBloque < otroBloque->numeroBloque;
+}
+
 bool bloqueDisponible(Bloque* bloque) {
 	return listaCumpleAlguno(bloque->listaCopias, (Puntero)copiaDisponible);
 }
@@ -2542,8 +2522,7 @@ BloqueNodo* bloqueNodoCrear(Entero numeroBloque, String buffer, int tamanioUtili
 	return bloqueNodo;
 }
 
-
-//--------------------------------------- Funciones de Copia Bloque-------------------------------------
+//--------------------------------------- Funciones de Copia -------------------------------------
 
 Copia* copiaCrear(int numeroBloqueDelNodo, String nombreNodo) {
 	Copia* copiaBloque = memoriaAlocar(sizeof(Copia));
@@ -2553,15 +2532,9 @@ Copia* copiaCrear(int numeroBloqueDelNodo, String nombreNodo) {
 }
 
 void copiaEliminar(Copia* copia) {
-	Nodo* nodo = nodoBuscar(copia->nombreNodo);
+	Nodo* nodo = nodoBuscarPorNombre(copia->nombreNodo);
 	bitmapLiberarBit(nodo->bitmap, copia->bloqueNodo);
 	nodo->bloquesLibres++;
-}
-
-bool copiaOrdenarPorActividadDelNodo(Copia* unaCopia, Copia* otraCopia) {
-	Nodo* unNodo = nodoBuscar(unaCopia->nombreNodo);
-	Nodo* otroNodo = nodoBuscar(otraCopia->nombreNodo);
-	return unNodo->actividadesRealizadas < otroNodo->actividadesRealizadas;
 }
 
 void copiaDestruir(Copia* copia) {
@@ -2570,8 +2543,14 @@ void copiaDestruir(Copia* copia) {
 }
 
 bool copiaDisponible(Copia* copia) {
-	Nodo* nodo = nodoBuscar(copia->nombreNodo);
+	Nodo* nodo = nodoBuscarPorNombre(copia->nombreNodo);
 	return nodo->estado == ACTIVADO;
+}
+
+bool copiaOrdenarPorActividadDelNodo(Copia* unaCopia, Copia* otraCopia) {
+	Nodo* unNodo = nodoBuscarPorNombre(unaCopia->nombreNodo);
+	Nodo* otroNodo = nodoBuscarPorNombre(otraCopia->nombreNodo);
+	return unNodo->actividadesRealizadas < otroNodo->actividadesRealizadas;
 }
 
 //--------------------------------------- Funciones de Metadata------------------------------------
@@ -2591,8 +2570,8 @@ void metadataEliminar() {
 void metadataIniciar() {
 	metadataEliminar();
 	metadataCrear();
-	archivoCrearLista();
-	directorioCrearLista();
+	archivoListaCrear();
+	directorioListaCrear();
 	bitmapDirectoriosCrear();
 	directoriosDisponibles = MAX_DIR;
 	directorioCrearConPersistencia(0, "root", -1);
@@ -2633,7 +2612,6 @@ bool rutaBarrasEstanSeparadas(String ruta) {
 	int indice;
 	for(indice=0; indice<stringLongitud(ruta); indice++) {
 		if(caracterIguales(ruta[indice], '/')) {
-
 			if(indice==0) {
 				if(caracterIguales(ruta[indice+1], '/'))
 					return false;
@@ -2680,10 +2658,9 @@ String* rutaSeparar(String ruta) {
 
 bool rutaEsNumero(String ruta) {
 	int indice;
-	for(indice=0; indice<stringLongitud(ruta); indice++) {
+	for(indice=0; indice<stringLongitud(ruta); indice++)
 		if(ruta[indice] < 48 || ruta[indice] > 57)
 			return false;
-	}
 	return true;
 }
 
@@ -2696,11 +2673,29 @@ bool estadoEjecucionIgualA(int estado) {
 	return resultado;
 }
 
+void estadoFileSystemEstable() {
+	mutexBloquear(mutexEstadoFileSystem);
+	estadoFileSystem = ESTABLE;
+	mutexDesbloquear(mutexEstadoFileSystem);
+}
+
+void estadoFileSystemInestable() {
+	mutexBloquear(mutexEstadoFileSystem);
+	estadoFileSystem = INESTABLE;
+	mutexDesbloquear(mutexEstadoFileSystem);
+}
+
 bool estadoFileSystemIgualA(int estado) {
 	mutexBloquear(mutexEstadoFileSystem);
 	int resultado = estadoFileSystem == estado;
 	mutexDesbloquear(mutexEstadoFileSystem);
 	return resultado;
+}
+
+void estadoControlActivar() {
+	mutexBloquear(mutexEstadoControl);
+	estadoControl = ACTIVADO;
+	mutexDesbloquear(mutexEstadoControl);
 }
 
 bool estadoControlIgualA(int estado) {
@@ -2712,15 +2707,15 @@ bool estadoControlIgualA(int estado) {
 
 //--------------------------------------- Funciones de Bitmap de Directorios------------------------------------
 
-void bitmapDirectoriosDestruir() {
-	mutexBloquear(mutexBitmapDirectorios);
-	bitmapDestruir(bitmapDirectorios);
-	mutexDesbloquear(mutexBitmapDirectorios);
-}
-
 void bitmapDirectoriosCrear() {
 	mutexBloquear(mutexBitmapDirectorios);
 	bitmapDirectorios = bitmapCrear(13);
+	mutexDesbloquear(mutexBitmapDirectorios);
+}
+
+void bitmapDirectoriosDestruir() {
+	mutexBloquear(mutexBitmapDirectorios);
+	bitmapDestruir(bitmapDirectorios);
 	mutexDesbloquear(mutexBitmapDirectorios);
 }
 
@@ -2797,7 +2792,7 @@ void semaforosDestruir() {
 //TODO para yama
 
 Dir nodoObtenerDireccion(String nombreNodo) {
-	Nodo* nodo = nodoBuscar(nombreNodo);
+	Nodo* nodo = nodoBuscarPorNombre(nombreNodo);
 	Dir direccion;
 	stringLimpiar(direccion.ip, 20);
 	stringLimpiar(direccion.port, 20);
@@ -2833,7 +2828,7 @@ BloqueYama* archivoConvertirYama(Archivo* archivo) {
 }
 
 void archivoEnviarBloques(String path) {
-	Archivo* archivo = archivoBuscar(path);
+	Archivo* archivo = archivoBuscarPorRuta(path);
 	int cantidad = listaCantidadElementos(archivo->listaBloques);
 	BloqueYama* bloques = archivoConvertirYama(archivo);
 	//TODO test

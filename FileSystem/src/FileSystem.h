@@ -247,7 +247,7 @@ void servidorAtenderDataNode(Servidor* servidor, Socket nuevoSocket);
 void servidorFinalizarDataNode(Servidor* servidor, Socket unSocket);
 void servidorMensajeDataNode(Servidor* servidor, Mensaje* mensaje, Socket unSocket);
 void servidorReconectarDataNode(Servidor* servidor, Nodo* nodoTemporal);
-bool nodoEsNuevo(Nodo* nuevoNodo);
+bool nodoNuevo(Nodo* nuevoNodo);
 void servidorControlarDataNode(Servidor* servidor, Nodo* nodoTemporal);
 void servidorRechazarDataNode(Nodo* nuevoNodo);
 void servidorRegistrarDataNode(Servidor* servidor, Nodo* nuevoNodo);
@@ -379,37 +379,37 @@ void directorioEliminarMetadata(Entero identificador);
 bool directorioEsHijoDe(Directorio* hijo, Directorio* padre);
 bool directorioOrdenarPorIdentificador(Directorio* unDirectorio, Directorio* otroDirectorio);
 void directorioRecuperarPersistencia();
-void directorioAgregar(Directorio* directorio);
-int directorioCantidad();
-Directorio* directorioObtener(int posicion);
-void directorioCrearLista();
-void directorioDestruirLista();
+void directorioListaAgregar(Directorio* directorio);
+int directorioListaCantidad();
+Directorio* directorioListaObtener(int posicion);
+void directorioListaCrear();
+void directorioListaDestruir();
 
 //--------------------------------------- Funciones de Archivo -------------------------------------
 
-Archivo* archivoBuscar(String path);
+Archivo* archivoBuscarPorRuta(String path);
 void archivoDestruir(Archivo* archivo);
 void archivoPersistir(Archivo* metadata);
 Archivo* archivoCrear(String nombreArchivo, int idPadre, String tipo);
 void archivoDestruir(Archivo* archivo);
 bool archivoExiste(int idPadre, String nombre);
-int archivoObtenerPosicion(Archivo* archivo);
+int archivoListaPosicion(Archivo* archivo);
 void archivoPersistirEliminarBloque(Archivo* archivo, int numeroBloque, int numeroCopia);
 void archivoPersistirControl();
 bool archivoOrdenarPorNombre(Archivo* unArchivo, Archivo* otroArchivo);
 void archivoRecuperarPersistencia();
-void archivoRecuperarPersistenciaEspecifica(String nombre, int padre);
-bool archivoEsBinario(Archivo* archivo);
+void archivoRecuperarPersistenciaDetallada(String nombre, int padre);
+bool archivoBinario(Archivo* archivo);
 int archivoLeer(Comando* comando);
 int archivoAlmacenar(Comando* comando);
 int archivoCantidadBloques(String ruta);
 bool archivoDisponible(Archivo* archivo);
-Archivo* archivoObtener(int indice);
-void archivoCrearLista();
-void archivoAgregar(Archivo* archivo);
-int archivoCantidad();
-bool archivoTodosDisponibles();
-void archivoDestruirLista();
+Archivo* archivoListaObtener(int indice);
+void archivoListaCrear();
+void archivoListaAgregar(Archivo* archivo);
+int archivoListaCantidad();
+bool archivoListaTodosDisponibles();
+void archivoListaDestruir();
 
 void archivoEnviarBloques(String path);
 
@@ -425,28 +425,29 @@ void nodoFormatear(Nodo* nodo);
 void nodoFormatearConectados();
 void nodoVerificarBloquesLibres(Nodo* nodo);
 bool nodoTieneBloquesLibres(Nodo* nodo);
-bool nodoCantidadBloquesLibres(Nodo* unNodo, Nodo* otroNodo);
+bool nodoListaOrdenarBloquesLibres(Nodo* unNodo, Nodo* otroNodo);
 int nodoBuscarBloqueLibre(Nodo* nodo);
-Nodo* nodoBuscar(String nombre);
+Nodo* nodoBuscarPorNombre(String nombre);
 void nodoRecuperarPersistenciaBitmap(Nodo* nodo);
 Nodo* nodoBuscarPorSocket(Socket unSocket);
-int nodoPosicionEnLista(Nodo* nodo);
-int nodoBloquesLibres();
+int nodoListaPosicion(Nodo* nodo);
+int nodoBloquesLibresTotales();
 bool nodoOrdenarPorActividad(Nodo* unNodo, Nodo* otroNodo);
 void nodoLimpiarActividades();
 bool nodoConectado(Nodo* nodo);
-Nodo* nodoObtener(int posicion);
-int nodoCantidadNodos();
-void nodoAgregar(Nodo* nodo);
+Nodo* nodoListaObtener(int posicion);
+int nodoListaCantidad();
+void nodoListaAgregar(Nodo* nodo);
 Nodo* nodoActualizar(Nodo* nodoTemporal);
 bool nodoInvalido(Nodo* nodoTemporal);
 bool nodoEstaConectado(Nodo* nuevoNodo);
-void nodoDestruirDeLista(Nodo* nodo);
-void nodoDestruirLista();
-void nodoOrdenarListaPorActividad();
-bool nodoHayAlgunoDisponible();
+void nodoListaEliminar(Nodo* nodo);
+void nodoListaDestruir();
+void nodoListaOrdenarPorActividad();
+bool nodoListaAlgunoDisponible();
 void nodoAceptar(Nodo* nodo);
-
+void nodoListaCrear();
+bool nodoDisponible(Nodo* nodo);
 //--------------------------------------- Funciones de Bloque -------------------------------------
 
 Bloque* bloqueCrear(int bytes, int numero);
@@ -466,8 +467,8 @@ BloqueNodo* bloqueNodoCrear(Entero numeroBloque, String buffer, int tamanioUtili
 
 Copia* copiaCrear(int numeroBloqueDelNodo, String nombreNodo);
 void copiaEliminar(Copia* copia);
-bool copiaDisponible(Copia* copia);
 void copiaDestruir(Copia* copia);
+bool copiaDisponible(Copia* copia);
 bool copiaOrdenarPorActividadDelNodo(Copia* unaCopia, Copia* otraCopia);
 
 //--------------------------------------- Funciones de Metadata -------------------------------------
@@ -486,21 +487,24 @@ bool rutaTieneAlMenosUnaBarra(String ruta);
 bool rutaValida(String ruta);
 bool rutaEsNumero(String ruta);
 
-//--------------------------------------- Funciones de Semaforo ------------------------------------
-
-void semaforosCrear();
-void semaforosIniciar();
-void semaforosDestruir();
-
 //--------------------------------------- Funciones de Estado ------------------------------------
 
 bool estadoEjecucionIgualA(int estado);
 bool estadoFileSystemIgualA(int estado);
 bool estadoControlIgualA(int estado);
+void estadoControlActivar();
+void estadoFileSystemEstable();
+void estadoFileSystemInestable();
 
-//--------------------------------------- Funciones de Ruta ------------------------------------
+//--------------------------------------- Funciones de Bitmaps de directorios ------------------------------------
 
 void bitmapDirectoriosDestruir();
 void bitmapDirectoriosCrear();
 bool bitmapDirectoriosBitOcupado(int indice);
 void bitmapDirectoriosOcuparBit(int posicion);
+
+//--------------------------------------- Funciones de Semaforo ------------------------------------
+
+void semaforosCrear();
+void semaforosIniciar();
+void semaforosDestruir();
