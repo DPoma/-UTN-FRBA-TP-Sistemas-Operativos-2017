@@ -41,6 +41,7 @@ void masterIniciar(String* argv) {
 	semaforoIniciar(recepcionAlternativo,0);
 
 	void leerArchivo(File archScript,char** script,int* len){
+		//cambiar por mmap, me había olvidado que existia eso todo
 		//habría que validar
 		fseek(archScript, 0, SEEK_END);
 		long posicion = ftell(archScript);
