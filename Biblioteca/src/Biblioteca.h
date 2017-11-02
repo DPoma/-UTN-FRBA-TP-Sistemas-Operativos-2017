@@ -100,7 +100,7 @@ typedef struct __attribute__((packed)){
 	Puntero datos;
 } Mensaje;
 
-typedef struct __attribute__((packed)){
+typedef struct{
 	AddrInfo informacion;
 	SockAddrIn address;
 	Socklen tamanioAddress;
@@ -108,7 +108,7 @@ typedef struct __attribute__((packed)){
 	String ip;
 } Conexion;
 
-typedef struct __attribute__((packed)){
+typedef struct __attribute__((packed)){//si no lo envias es al pedo empaquetarlo
 	String bits;
 	BitArray controlBits;
 } Bitmap;
