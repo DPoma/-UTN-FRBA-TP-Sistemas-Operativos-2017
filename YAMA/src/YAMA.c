@@ -403,7 +403,7 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 			darPathTemporal(&reducGlobal.pathTemporal,'g');
 			reducGlobal.etapa=ReducGlobal;
 			Dir nodoMenorCarga=entradaA->nodo;//deep
-			int menorCargaI=100; //
+			int menorCargaI=1000; //
 			void menorCarga(Worker* worker){
 				if(worker->carga<menorCargaI)
 					nodoMenorCarga=worker->nodo;
@@ -424,15 +424,25 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 			moverAUsados(mismoJob);
 			list_addM(tablaEstados,&reducGlobal,sizeof(Entrada));//mutex
 		}
-	}else{
+	}else if(entradaA->etapa==ReducGlobal){
+		//no le veo sentido a que yama participe del almacenado final
+		//master lo podría hacer solo,  ya esta grande
 		Entrada* reducGlobal=list_find(tablaEstados,mismoJob);
+		Entrada almacenado;
+		darDatosEntrada(&almacenado);
+		almacenado.pathTemporal=nullptr;
+		//aca podría ponerle el nombre de archivo final, pero no lo tengo
+		//y pedirselo a master no pinta nada (habría que meter este pedazo
+		//de codigo en otra funcion o meterlo por variable global, con semaforos)
 		char dato[DIRSIZE+TEMPSIZE];
-		//TODO creo que estoy haciendo cualquier cosa aca, mirar bien
 		memcpy(dato,&reducGlobal->nodo,DIRSIZE);
 		memcpy(dato+DIRSIZE,reducGlobal->pathTemporal,TEMPSIZE);
 		mensajeEnviar(entradaA->masterid,Cierre,dato,sizeof dato);
 		list_add(tablaUsados,list_remove_by_condition(tablaEstados,mismoJob));
-	}
+		list_addM(tablaEstados,&almacenado,sizeof(Entrada));
+	}else
+		list_add(tablaUsados,list_remove_by_condition(tablaEstados,mismoJob));
+
 }
 
 void dibujarTablaEstados(){
@@ -453,8 +463,8 @@ void dibujarTablaEstados(){
 		default: estado="terminado";
 		}
 		printf("%d     %d     %d     %d     %s     %s    %s",
-				entrada->job,entrada->masterid-2,ipToNum(entrada->nodo.ip),entrada->bloque,
-				etapa,entrada->pathTemporal,estado);
+				entrada->job,entrada->masterid-2,ipToNum(entrada->nodo.ip),(entrada->bloque!=-1)?:"-",
+				etapa,entrada->pathTemporal?:"-",estado);
 	}
 	list_iterate(tablaUsados,dibujarEntrada);
 	list_iterate(tablaEstados,dibujarEntrada);
