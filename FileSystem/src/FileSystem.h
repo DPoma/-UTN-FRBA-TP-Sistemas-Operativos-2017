@@ -184,6 +184,7 @@ int estadoEjecucion;
 int estadoFileSystem;
 int flagMensaje;
 int directoriosDisponibles;
+int flagSocket;
 Hilo hiloConsola;
 Lista listaDirectorios;
 Lista listaArchivos;
@@ -290,11 +291,11 @@ bool socketEsYama(Servidor* servidor, Socket unSocket);
 bool socketEsListenerDataNode(Servidor* servidor, Socket unSocket);
 bool socketEsWorker(Servidor* servidor, Socket unSocket);
 bool socketEsListenerWorker(Servidor* servidor, Socket unSocket);
-void socketAgregar(Socket* unSocket);
-int socketCantidad();
-void socketEliminar(int posicion);
-void socketDestruir();
-Socket* socketObtener(int posicion);
+void socketListaAgregar(Socket* unSocket);
+int socketListaCantidad();
+void socketListaEliminar(int posicion);
+void socketListaDestruir();
+Socket* socketListaObtener(int posicion);
 
 //--------------------------------------- Funciones de Consola -------------------------------------
 
@@ -477,6 +478,7 @@ int bloqueEnviarCopiasANodos(Bloque* bloque, String buffer);
 bool bloqueOrdenarPorNumero(Bloque* unBloque, Bloque* otroBloque);
 void bloqueCopiar(Puntero datos);
 void bloqueLeer(Servidor* servidor, Puntero datos);
+//void bloqueLeer(Servidor* servidor, Puntero datos, Socket unSocket);
 void bloqueCopiarTexto(Puntero datos);
 void bloqueCopiarBinario(Puntero datos);
 bool bloqueDisponible(Bloque* bloque);

@@ -28,7 +28,7 @@ void fileSystemIniciar(String flag) {
 	configuracionIniciar();
 	nodoListaCrear();
 
-	//listaSockets = listaCrear(); //TODO ver
+	listaSockets = listaCrear(); //TODO ver
 
 	estadoControlActivar();
 	estadoFileSystemInestable();
@@ -323,14 +323,7 @@ void servidorMensajeDataNode(Servidor* servidor, Mensaje* mensaje, Socket unSock
 	case COPIAR_BLOQUE: bloqueCopiar(mensaje->datos); break;
 	case COPIAR_BINARIO: bloqueCopiarBinario(mensaje->datos); break;
 	case COPIAR_TEXTO: bloqueCopiarTexto(mensaje->datos); break;
-	case FINALIZAR_NODO:
-		//TODO test borrar
-		//mutexBloquear(mutexRuta);
-		//puts("finalizar entre");
-		servidorFinalizarDataNode(servidor, unSocket);
-		//mutexDesbloquear(mutexRuta);
-		//puts("finalizar sali");
-		break;
+	case FINALIZAR_NODO: servidorFinalizarDataNode(servidor, unSocket); break;
 	}
 }
 
@@ -345,20 +338,18 @@ void servidorDestruirDataNode(Servidor* servidor, Nodo* nodo) {
 
 
 void servidorDesactivarDataNode(Servidor* servidor, Nodo* nodo) {
-	//TODO ver
-//	if(flagMensaje == DESACTIVADO) {
+	mutexBloquear(mutexRuta);
+	if(flagMensaje == DESACTIVADO) {
 		socketCerrar(nodo->socket);
 		listaSocketsEliminar(nodo->socket, &servidor->listaDataNodes);
 		listaSocketsEliminar(nodo->socket, &servidor->listaMaster);
 		nodo->estado = DESACTIVADO;
 		nodo->socket = ERROR;
 		imprimirMensajeUno(archivoLog, AMARILLO"[CONEXION] %s desconectado"BLANCO, nodo->nombre);
-	//}
-//	else {
-	//	Socket* unSocket = memoriaAlocar(sizeof(Socket));
-		//*unSocket = nodo->socket;
-		//ocketAgregar(unSocket);
-	//}
+	}
+	else
+		socketListaAgregar(&nodo->socket);
+	mutexDesbloquear(mutexRuta);
 }
 
 void servidorControlarFinalizacionDataNode(Servidor* servidor, Nodo* nodo) {
@@ -454,38 +445,64 @@ bool socketEsListener(Servidor* servidor, Socket unSocket) {
 			socketEsListenerWorker(servidor, unSocket);
 }
 
-void socketAgregar(Socket* unSocket) {
+void socketListaAgregar(Socket* unSocket) {
 	mutexBloquear(mutexListaSockets);
 	listaAgregarElemento(listaSockets, unSocket);
 	mutexDesbloquear(mutexListaSockets);
 }
 
-int socketCantidad() {
+bool socketListaVacia() {
+	mutexBloquear(mutexListaSockets);
+	int resultado = listaEstaVacia(listaSockets);
+	printf("Si hay un socket esto deberia ser 0 -->  %i\n", resultado);
+	mutexDesbloquear(mutexListaSockets);
+	return resultado;
+}
+
+void socketDesactivarNodos(Servidor* servidor) {
+
+	void desactivarNodo(Socket* socket) {
+		Nodo* nodo = nodoBuscarPorSocket(*socket);
+		servidorDesactivarDataNode(servidor, nodo);
+		printf("Nodo estado %i\n", nodo->estado);
+	}
+
+	mutexBloquear(mutexListaSockets);
+	listaIterar(listaSockets, (Puntero)desactivarNodo);
+	mutexDesbloquear(mutexListaSockets);
+}
+
+int socketListaCantidad() {
 	mutexBloquear(mutexListaSockets);
 	int cantidad = listaCantidadElementos(listaSockets);
 	mutexDesbloquear(mutexListaSockets);
 	return cantidad;
 }
 
-void socketDestruir() {
+void socketListaDestruir() {
 	mutexBloquear(mutexListaSockets);
 	listaDestruirConElementos(listaSockets, memoriaLiberar);
 	mutexDesbloquear(mutexListaSockets);
 }
 
-Socket* socketObtener(int indice) {
+Socket* socketListaObtener(int indice) {
 	mutexBloquear(mutexListaSockets);
 	Socket* unSocket = listaObtenerElemento(listaSockets, indice);
 	mutexDesbloquear(mutexListaSockets);
 	return unSocket;
 }
 
-void socketEliminar(int posicion) {
+void socketListaEliminar(int posicion) {
 	mutexBloquear(mutexListaSockets);
 	listaEliminarDestruyendoElemento(listaSockets, posicion, memoriaLiberar);
 	mutexDesbloquear(mutexListaSockets);
 }
 
+void socketListaLimpiar() {
+	mutexBloquear(mutexListaSockets);
+	listaLimpiar(listaSockets);
+	mutexDesbloquear(mutexListaSockets);
+}
 
 //--------------------------------------- Funciones de Consola -------------------------------------
 
@@ -1949,22 +1966,23 @@ int archivoLeer(Comando* comando) {
 		int numeroCopia;
 		int bloqueSinImprimir = true;
 		listaOrdenar(bloque->listaCopias, (Puntero)copiaOrdenarPorActividadDelNodo);
+		semaforoWait(semaforoTarea);
+		mutexBloquear(mutexRuta);
 		for(numeroCopia=0; numeroCopia <listaCantidadElementos(bloque->listaCopias) && bloqueSinImprimir; numeroCopia++) {
 			Copia* copia = listaObtenerElemento(bloque->listaCopias, numeroCopia);
 			Nodo* nodo = nodoBuscarPorNombre(copia->nombreNodo);
-			mutexBloquear(mutexRuta);
-			//TODO ver
 			if(nodoConectado(nodo)) {
 				mensajeEnviar(nodo->socket, LEER_BLOQUE ,&copia->bloqueNodo, sizeof(Entero));
 				flagMensaje = ACTIVADO;
 				nodo->actividadesRealizadas++;
 				bloqueSinImprimir = false;
 			}
-			mutexDesbloquear(mutexRuta);
 		}
+		mutexDesbloquear(mutexRuta);
 		if(bloqueSinImprimir) {
 			imprimirMensaje(archivoLog,"[ERROR] No hay nodos disponibles para obtener un bloque");
 			nodoLimpiarActividades();
+			semaforoSignal(semaforoTarea);
 			return ERROR;
 		}
 	}
@@ -2526,20 +2544,22 @@ void bloqueCopiar(Puntero datos) {
 
 void servidorDestruirSockets(Servidor* servidor) {
 	int indice;
-	for(indice=0; indice < socketCantidad(); indice++) {
-		Socket* unSocket = socketObtener(indice);
+	for(indice=0; indice < socketListaCantidad(); indice++) {
+		Socket* unSocket = socketListaObtener(indice);
 		servidorFinalizarDataNode(servidor, *unSocket);
-		socketEliminar(indice);
+		socketListaEliminar(indice);
 	}
 }
 
 void bloqueLeer(Servidor* servidor, Puntero datos) {
-	//TODO ver y los de abajo tambien
-	mutexBloquear(mutexRuta);
-	printf("%s", (String)datos);
-	//flagMensaje = DESACTIVADO;
-	//servidorDestruirSockets(servidor);
-	mutexDesbloquear(mutexRuta);
+	puts("DATOS");
+	//printf("%s", (String)datos);
+	flagMensaje = DESACTIVADO;
+	if(!socketListaVacia()) {
+		socketDesactivarNodos(servidor);
+		socketListaLimpiar();
+	}
+	semaforoSignal(semaforoTarea);
 }
 
 void bloqueCopiarBinario(Puntero datos) {
@@ -2883,6 +2903,7 @@ void semaforosDestruir() {
 //TODO el numero de copia tiene valor
 //TODO los txt se copian mas lento que los binarios?
 //TODO el bitmap se actualiza al final o al principio
+//TODO archivo maximo data.bin aprox
 
 //TODO directorios con muchos subdirectorios rompe
 //TODO deberia crear al menos algunos directorios y parar cuando se alcance el limite no tirar de una que se excede el limite

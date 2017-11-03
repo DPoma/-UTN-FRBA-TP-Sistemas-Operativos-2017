@@ -1,58 +1,16 @@
-[INFO] 14:03:38:293 FileSystem/(10897:10897): [EJECUCION] Proceso File System iniciado
-[INFO] 14:03:38:355 FileSystem/(10897:10897): [CONFIGURACION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 14:03:38:356 FileSystem/(10897:10897): [CONFIGURACION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 14:03:38:357 FileSystem/(10897:10897): [CONFIGURACION] Esperando conexiones de Workers (Puerto: 5080)
-[INFO] 14:03:38:357 FileSystem/(10897:10897): [CONFIGURACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
-[INFO] 14:03:38:403 FileSystem/(10897:10897): [33m[AVISO] Conecte los nodos y formatee el File System para estabilizarlo[0m
-[INFO] 14:03:41:175 FileSystem/(10897:10897): [33m[CONEXION] NODO1 conectado[0m
-[INFO] 14:03:45:318 FileSystem/(10897:10902): [FORMATEO] El File System fue formateado
-[INFO] 14:03:45:318 FileSystem/(10897:10902): [33m[ESTADO] El File System esta estable[0m
-[INFO] 14:06:32:526 FileSystem/(10897:10902): [ARCHIVO] El archivo /home/utnso/Escritorio/lala fue copiado en File System
-[INFO] 14:06:48:846 FileSystem/(10897:10902): [ARCHIVO] El archivo lala se copio en /home/utnso/Escritorio/Metadata/lala
-[INFO] 14:06:48:899 FileSystem/(10897:10902): [ARCHIVO] El MD5 del archivo es dd3ff876c45f2d1e1c95bf09f0e219de  /home/utnso/Escritorio/Metadata/lala
-
-[INFO] 14:06:53:593 FileSystem/(10897:10902): [ARCHIVO] El archivo lala se copio en /home/utnso/Escritorio/Metadata/lala
-[INFO] 14:06:53:640 FileSystem/(10897:10902): [ARCHIVO] El MD5 del archivo es 4c89a7d0035f3ccf4c2f964a49efe733  /home/utnso/Escritorio/Metadata/lala
-
-[INFO] 14:06:57:590 FileSystem/(10897:10902): [ARCHIVO] El archivo lala se copio en /home/utnso/Escritorio/Metadata/lala
-[INFO] 14:06:57:641 FileSystem/(10897:10902): [ARCHIVO] El MD5 del archivo es 4c89a7d0035f3ccf4c2f964a49efe733  /home/utnso/Escritorio/Metadata/lala
-
-[INFO] 14:07:31:582 FileSystem/(10897:10902): [ARCHIVO] El archivo lala se copio en /home/utnso/Escritorio/lala2
-[INFO] 14:07:57:165 FileSystem/(10897:10902): [ARCHIVO] El archivo lala se copio en /home/utnso/Escritorio/lala2
-[INFO] 14:10:06:455 FileSystem/(10897:10902): [ERROR] El archivo no existe
-[INFO] 14:10:08:372 FileSystem/(10897:10902): [ARCHIVO] El archivo /lala ha sido eliminado
-[INFO] 14:10:18:80 FileSystem/(10897:10902): [ARCHIVO] El archivo /home/utnso/Escritorio/lala fue copiado en File System
-[INFO] 14:10:25:192 FileSystem/(10897:10902): [ARCHIVO] El archivo lala se copio en /home/utnso/Escritorio/Metadata/lala
-[INFO] 14:10:25:255 FileSystem/(10897:10902): [ARCHIVO] El MD5 del archivo es cdf02743e038608690cf63b3bd8db67d  /home/utnso/Escritorio/Metadata/lala
-
-[INFO] 14:10:30:837 FileSystem/(10897:10902): [ARCHIVO] El archivo lala se copio en /home/utnso/Escritorio/Metadata/lala
-[INFO] 14:10:30:887 FileSystem/(10897:10902): [ARCHIVO] El MD5 del archivo es cdf02743e038608690cf63b3bd8db67d  /home/utnso/Escritorio/Metadata/lala
-
-[INFO] 14:10:34:651 FileSystem/(10897:10902): [ARCHIVO] El archivo lala se copio en /home/utnso/Escritorio/Metadata/lala
-[INFO] 14:10:34:707 FileSystem/(10897:10902): [ARCHIVO] El MD5 del archivo es cdf02743e038608690cf63b3bd8db67d  /home/utnso/Escritorio/Metadata/lala
-
-[INFO] 14:10:54:705 FileSystem/(10897:10902): [ARCHIVO] El archivo lala se copio en /home/utnso/Escritorio/Metadata/lala
-[INFO] 14:10:54:762 FileSystem/(10897:10902): [ARCHIVO] El MD5 del archivo es cdf02743e038608690cf63b3bd8db67d  /home/utnso/Escritorio/Metadata/lala
-
-[INFO] 14:11:08:582 FileSystem/(10897:10902): [ARCHIVO] El archivo lala se copio en /home/utnso/Escritorio/lala2
-[INFO] 14:13:34:746 FileSystem/(10897:10902): [ARCHIVO] El archivo /home/utnso/Escritorio/gg fue copiado en File System
-[INFO] 14:15:30:448 FileSystem/(10897:10902): [ARCHIVO] Nombre: gg
-[INFO] 14:15:30:451 FileSystem/(10897:10902): [ARCHIVO] Tipo: TEXTO
-[INFO] 14:15:30:463 FileSystem/(10897:10902): [ARCHIVO] Ubicacion: /gg
-[INFO] 14:15:30:473 FileSystem/(10897:10902): [ARCHIVO] ID Padre: 0
-[INFO] 14:15:30:482 FileSystem/(10897:10902): [ARCHIVO] Tamanio: 1633106 bytes
-[INFO] 14:15:30:484 FileSystem/(10897:10902): [ARCHIVO] Bloques: 2
-[INFO] 14:15:30:485 FileSystem/(10897:10902): [ARCHIVO] Bloque 0: 1048543 bytes
-[INFO] 14:15:30:487 FileSystem/(10897:10902): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 6
-[INFO] 14:15:30:488 FileSystem/(10897:10902): [ARCHIVO] Copia 1 en: Nodo: NODO1 | Bloque: 7
-[INFO] 14:15:30:489 FileSystem/(10897:10902): [ARCHIVO] Bloque 1: 584563 bytes
-[INFO] 14:15:30:489 FileSystem/(10897:10902): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 8
-[INFO] 14:15:30:490 FileSystem/(10897:10902): [ARCHIVO] Copia 1 en: Nodo: NODO1 | Bloque: 9
-[INFO] 14:16:29:101 FileSystem/(10897:10902): [ARCHIVO] El archivo gg se copio en /home/utnso/Escritorio/gg2
-[INFO] 14:16:45:557 FileSystem/(10897:10902): [ARCHIVO] El archivo gg se copio en /home/utnso/Escritorio/Metadata/gg
-[INFO] 14:16:45:612 FileSystem/(10897:10902): [ARCHIVO] El MD5 del archivo es ac09f6b0ecde1fb249f7e4ca4a62708c  /home/utnso/Escritorio/Metadata/gg
-
-[INFO] 14:16:51:317 FileSystem/(10897:10902): [ARCHIVO] El archivo gg se copio en /home/utnso/Escritorio/Metadata/gg
-[INFO] 14:16:51:374 FileSystem/(10897:10902): [ARCHIVO] El MD5 del archivo es ac09f6b0ecde1fb249f7e4ca4a62708c  /home/utnso/Escritorio/Metadata/gg
-
-[INFO] 14:17:56:84 FileSystem/(10897:10902): [ERROR] Comando invalido
+[INFO] 11:58:49:63 FileSystem/(5448:5448): [EJECUCION] Proceso File System iniciado
+[INFO] 11:58:49:104 FileSystem/(5448:5448): [CONFIGURACION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 11:58:49:105 FileSystem/(5448:5448): [CONFIGURACION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 11:58:49:105 FileSystem/(5448:5448): [CONFIGURACION] Esperando conexiones de Workers (Puerto: 5080)
+[INFO] 11:58:49:106 FileSystem/(5448:5448): [CONFIGURACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
+[INFO] 11:58:49:156 FileSystem/(5448:5448): [33m[AVISO] Conecte los nodos y formatee el File System para estabilizarlo[0m
+[INFO] 11:58:50:438 FileSystem/(5448:5448): [33m[CONEXION] NODO2 conectado[0m
+[INFO] 11:58:59:560 FileSystem/(5448:5448): [33m[CONEXION] NODO1 conectado[0m
+[INFO] 11:59:04:403 FileSystem/(5448:5453): [FORMATEO] El File System fue formateado
+[INFO] 11:59:04:404 FileSystem/(5448:5453): [33m[ESTADO] El File System esta estable[0m
+[INFO] 11:59:54:201 FileSystem/(5448:5453): [ARCHIVO] El archivo /home/utnso/Escritorio/todo fue copiado en File System
+[INFO] 12:00:57:926 FileSystem/(5448:5448): [33m[CONEXION] NODO1 desconectado[0m
+[INFO] 12:01:09:778 FileSystem/(5448:5448): [33m[CONEXION] NODO1 conectado[0m
+[INFO] 12:01:23:196 FileSystem/(5448:5448): [33m[CONEXION] NODO2 desconectado[0m
+[INFO] 12:01:24:287 FileSystem/(5448:5448): [33m[CONEXION] NODO1 desconectado[0m
+[INFO] 12:01:24:292 FileSystem/(5448:5453): [ERROR] No hay nodos disponibles para obtener un bloque
