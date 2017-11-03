@@ -203,6 +203,7 @@ String rutaBuffer;
 Nodo* nodoBuffer;
 Bloque* bloqueBuffer;
 Archivo* archivoBuffer;
+Mutex* mutexTarea;
 Mutex* mutexRuta;
 Mutex* mutexNodo;
 Mutex* mutexBloque;
@@ -296,6 +297,7 @@ int socketListaCantidad();
 void socketListaEliminar(int posicion);
 void socketListaDestruir();
 Socket* socketListaObtener(int posicion);
+void socketListaLimpiar();
 
 //--------------------------------------- Funciones de Consola -------------------------------------
 
@@ -520,6 +522,7 @@ void estadoFileSystemEstable();
 void estadoFileSystemInestable();
 void estadoEjecucionNormal();
 void estadoControlDesactivar();
+void estadoMensaje(int estado);
 
 //--------------------------------------- Funciones de Bitmaps de directorios ------------------------------------
 

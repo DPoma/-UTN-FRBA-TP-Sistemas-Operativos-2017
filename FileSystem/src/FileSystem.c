@@ -58,6 +58,7 @@ void fileSystemFinalizar() {
 	archivoListaDestruir();
 	directorioListaDestruir();
 	nodoListaDestruir();
+	socketListaDestruir();
 	semaforosDestruir();
 	sleep(2);
 }
@@ -299,7 +300,7 @@ void servidorRechazarDataNode(Nodo* nuevoNodo) {
 }
 
 void servidorAceptarReconexionDataNode(Servidor* servidor, Nodo* nuevoNodo) {
-	semaforoWait(semaforoTarea);
+	mutexBloquear(mutexTarea);
 	Nodo* nodo = nodoActualizar(nuevoNodo);
 	servidorRegistrarDataNode(servidor, nodo);
 	if(estadoFileSystemIgualA(INESTABLE) && archivoListaTodosDisponibles()) {
@@ -308,7 +309,7 @@ void servidorAceptarReconexionDataNode(Servidor* servidor, Nodo* nuevoNodo) {
 		mutexDesbloquear(mutexEstadoFileSystem);
 		imprimirMensaje(archivoLog, AMARILLO"[ESTADO] El File System esta estable"BLANCO);
 	}
-	semaforoSignal(semaforoTarea);
+	mutexDesbloquear(mutexTarea);
 }
 
 void servidorRegistrarDataNode(Servidor* servidor, Nodo* nodo) {
@@ -338,7 +339,7 @@ void servidorDestruirDataNode(Servidor* servidor, Nodo* nodo) {
 
 
 void servidorDesactivarDataNode(Servidor* servidor, Nodo* nodo) {
-	mutexBloquear(mutexRuta);
+	mutexBloquear(mutexTarea);
 	if(flagMensaje == DESACTIVADO) {
 		socketCerrar(nodo->socket);
 		listaSocketsEliminar(nodo->socket, &servidor->listaDataNodes);
@@ -349,7 +350,7 @@ void servidorDesactivarDataNode(Servidor* servidor, Nodo* nodo) {
 	}
 	else
 		socketListaAgregar(&nodo->socket);
-	mutexDesbloquear(mutexRuta);
+	mutexDesbloquear(mutexTarea);
 }
 
 void servidorControlarFinalizacionDataNode(Servidor* servidor, Nodo* nodo) {
@@ -460,16 +461,14 @@ bool socketListaVacia() {
 }
 
 void socketDesactivarNodos(Servidor* servidor) {
-
-	void desactivarNodo(Socket* socket) {
+	int indice;
+	int cantidad = socketListaCantidad();
+	for(indice = 0; indice < cantidad; indice++) {
+		Socket* socket = socketListaObtener(indice);
 		Nodo* nodo = nodoBuscarPorSocket(*socket);
 		servidorDesactivarDataNode(servidor, nodo);
 		printf("Nodo estado %i\n", nodo->estado);
 	}
-
-	mutexBloquear(mutexListaSockets);
-	listaIterar(listaSockets, (Puntero)desactivarNodo);
-	mutexDesbloquear(mutexListaSockets);
 }
 
 int socketListaCantidad() {
@@ -1206,21 +1205,20 @@ void comandoCopiarBloque(Comando* comando) {
 	mutexBloquear(mutexBloque);
 	int cantidadCopias = listaCantidadElementos(bloqueBuffer->listaCopias);
 	mutexDesbloquear(mutexBloque);
+	semaforoWait(semaforoTarea);
 	for(indice = 0; indice < cantidadCopias && bloqueSinEnviar; indice++) {
 		mutexBloquear(mutexBloque);
 		Copia* copia = listaObtenerElemento(bloqueBuffer->listaCopias, indice);
 		mutexDesbloquear(mutexBloque);
-		semaforoWait(semaforoTarea);
 		Nodo* nodoConBloque = nodoBuscarPorNombre(copia->nombreNodo);
 		if(nodoConectado(nodoConBloque)) {
 			mensajeEnviar(nodoConBloque->socket, COPIAR_BLOQUE, &copia->bloqueNodo, sizeof(Entero));
 			bloqueSinEnviar = false;
 		}
-		semaforoSignal(semaforoTarea);
 	}
 	if(bloqueSinEnviar) {
 		imprimirMensaje(archivoLog, "[ERROR] No hay nodos conectados para obtener la copia");
-
+		semaforoSignal(semaforoTarea);
 		return;
 	}
 }
@@ -1258,8 +1256,8 @@ int comandoCopiarArchivoDeYamaFS(Comando* comando) {
 		int copiaSinEnviar = true;
 		int indiceCopias;
 		listaOrdenar(bloque->listaCopias, (Puntero)copiaOrdenarPorActividadDelNodo);
+		semaforoWait(semaforoTarea);
 		for(indiceCopias=0; indiceCopias<listaCantidadElementos(bloque->listaCopias) && copiaSinEnviar; indiceCopias++) {
-			semaforoWait(semaforoTarea);
 			Copia* copia = listaObtenerElemento(bloque->listaCopias, indiceCopias);
 			Nodo* nodo = nodoBuscarPorNombre(copia->nombreNodo);
 			if(nodoConectado(nodo)) {
@@ -1270,11 +1268,10 @@ int comandoCopiarArchivoDeYamaFS(Comando* comando) {
 				nodo->actividadesRealizadas++;
 				copiaSinEnviar = false;
 			}
-			else
-				semaforoSignal(semaforoTarea);
 		}
 		if(copiaSinEnviar) {
 			imprimirMensaje(archivoLog, "[ERROR] Una copia no pudo ser enviada, se aborta la operacion");
+			semaforoSignal(semaforoTarea);
 			nodoLimpiarActividades();
 			return ERROR;
 		}
@@ -1967,18 +1964,18 @@ int archivoLeer(Comando* comando) {
 		int bloqueSinImprimir = true;
 		listaOrdenar(bloque->listaCopias, (Puntero)copiaOrdenarPorActividadDelNodo);
 		semaforoWait(semaforoTarea);
-		mutexBloquear(mutexRuta);
+		mutexBloquear(mutexTarea);
 		for(numeroCopia=0; numeroCopia <listaCantidadElementos(bloque->listaCopias) && bloqueSinImprimir; numeroCopia++) {
 			Copia* copia = listaObtenerElemento(bloque->listaCopias, numeroCopia);
 			Nodo* nodo = nodoBuscarPorNombre(copia->nombreNodo);
 			if(nodoConectado(nodo)) {
+				estadoMensaje(ACTIVADO);
 				mensajeEnviar(nodo->socket, LEER_BLOQUE ,&copia->bloqueNodo, sizeof(Entero));
-				flagMensaje = ACTIVADO;
 				nodo->actividadesRealizadas++;
 				bloqueSinImprimir = false;
 			}
 		}
-		mutexDesbloquear(mutexRuta);
+		mutexDesbloquear(mutexTarea);
 		if(bloqueSinImprimir) {
 			imprimirMensaje(archivoLog,"[ERROR] No hay nodos disponibles para obtener un bloque");
 			nodoLimpiarActividades();
@@ -2493,7 +2490,7 @@ int bloqueEnviarCopiasANodos(Bloque* bloque, String buffer) {
 	bool bloqueForzarCopiado() {
 		return indice == (nodoListaCantidad()-1) && nodoListaAlgunoDisponible() && copiasEnviadas < MAX_COPIAS;
 	}
-	semaforoWait(semaforoTarea);
+	mutexBloquear(mutexTarea);
 	nodoListaOrdenarPorActividad();
 	for(indice = 0; indice < nodoListaCantidad() && copiasEnviadas < MAX_COPIAS; indice++) {
 		Nodo* nodo = nodoListaObtener(indice);
@@ -2507,7 +2504,7 @@ int bloqueEnviarCopiasANodos(Bloque* bloque, String buffer) {
 			indice = -1;
 		}
 	}
-	semaforoSignal(semaforoTarea);
+	mutexDesbloquear(mutexTarea);
 	if(copiasEnviadas == 0) {
 		imprimirMensajeUno(archivoLog, "[ERROR] El bloque N°%i no pudo copiarse en ningun Nodo", (int*)bloque->numeroBloque);
 		return ERROR;
@@ -2554,7 +2551,7 @@ void servidorDestruirSockets(Servidor* servidor) {
 void bloqueLeer(Servidor* servidor, Puntero datos) {
 	puts("DATOS");
 	//printf("%s", (String)datos);
-	flagMensaje = DESACTIVADO;
+	estadoMensaje(DESACTIVADO);
 	if(!socketListaVacia()) {
 		socketDesactivarNodos(servidor);
 		socketListaLimpiar();
@@ -2808,6 +2805,11 @@ bool estadoEjecucionIgualA(int estado) {
 	return resultado;
 }
 
+void estadoMensaje(int estado) {
+	mutexBloquear(mutexEstadoEjecucion);
+	flagMensaje = estado ;
+	mutexDesbloquear(mutexEstadoEjecucion);
+}
 
 //--------------------------------------- Funciones de Bitmap de Directorios------------------------------------
 
@@ -2841,6 +2843,7 @@ void bitmapDirectoriosOcuparBit(int posicion) {
 void semaforosCrear() {
 	semaforoTarea = memoriaAlocar(sizeof(Semaforo));
 	semaforoFinal = memoriaAlocar(sizeof(Semaforo));
+	mutexTarea = memoriaAlocar(sizeof(Mutex));
 	mutexListaArchivos = memoriaAlocar(sizeof(Mutex));
 	mutexListaNodos = memoriaAlocar(sizeof(Mutex));
 	mutexListaDirectorios = memoriaAlocar(sizeof(Mutex));
@@ -2858,6 +2861,7 @@ void semaforosCrear() {
 void semaforosIniciar() {
 	semaforoIniciar(semaforoTarea, 1);
 	semaforoIniciar(semaforoFinal, 0);
+	mutexIniciar(mutexTarea);
 	mutexIniciar(mutexListaSockets);
 	mutexIniciar(mutexListaArchivos);
 	mutexIniciar(mutexListaNodos);
@@ -2877,6 +2881,7 @@ void semaforosDestruir() {
 	semaforoDestruir(semaforoFinal);
 	memoriaLiberar(semaforoFinal);
 	memoriaLiberar(semaforoTarea);
+	memoriaLiberar(mutexTarea);
 	memoriaLiberar(mutexListaSockets);
 	memoriaLiberar(mutexListaArchivos);
 	memoriaLiberar(mutexListaNodos);

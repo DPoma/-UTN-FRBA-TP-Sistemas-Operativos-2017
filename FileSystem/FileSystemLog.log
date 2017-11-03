@@ -1,16 +1,19 @@
-[INFO] 11:58:49:63 FileSystem/(5448:5448): [EJECUCION] Proceso File System iniciado
-[INFO] 11:58:49:104 FileSystem/(5448:5448): [CONFIGURACION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 11:58:49:105 FileSystem/(5448:5448): [CONFIGURACION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 11:58:49:105 FileSystem/(5448:5448): [CONFIGURACION] Esperando conexiones de Workers (Puerto: 5080)
-[INFO] 11:58:49:106 FileSystem/(5448:5448): [CONFIGURACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
-[INFO] 11:58:49:156 FileSystem/(5448:5448): [33m[AVISO] Conecte los nodos y formatee el File System para estabilizarlo[0m
-[INFO] 11:58:50:438 FileSystem/(5448:5448): [33m[CONEXION] NODO2 conectado[0m
-[INFO] 11:58:59:560 FileSystem/(5448:5448): [33m[CONEXION] NODO1 conectado[0m
-[INFO] 11:59:04:403 FileSystem/(5448:5453): [FORMATEO] El File System fue formateado
-[INFO] 11:59:04:404 FileSystem/(5448:5453): [33m[ESTADO] El File System esta estable[0m
-[INFO] 11:59:54:201 FileSystem/(5448:5453): [ARCHIVO] El archivo /home/utnso/Escritorio/todo fue copiado en File System
-[INFO] 12:00:57:926 FileSystem/(5448:5448): [33m[CONEXION] NODO1 desconectado[0m
-[INFO] 12:01:09:778 FileSystem/(5448:5448): [33m[CONEXION] NODO1 conectado[0m
-[INFO] 12:01:23:196 FileSystem/(5448:5448): [33m[CONEXION] NODO2 desconectado[0m
-[INFO] 12:01:24:287 FileSystem/(5448:5448): [33m[CONEXION] NODO1 desconectado[0m
-[INFO] 12:01:24:292 FileSystem/(5448:5453): [ERROR] No hay nodos disponibles para obtener un bloque
+[INFO] 14:39:26:883 FileSystem/(7317:7317): [EJECUCION] Proceso File System iniciado
+[INFO] 14:39:26:948 FileSystem/(7317:7317): [CONFIGURACION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 14:39:26:949 FileSystem/(7317:7317): [CONFIGURACION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 14:39:26:950 FileSystem/(7317:7317): [CONFIGURACION] Esperando conexiones de Workers (Puerto: 5080)
+[INFO] 14:39:26:950 FileSystem/(7317:7317): [CONFIGURACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
+[INFO] 14:39:26:996 FileSystem/(7317:7317): [33m[AVISO] Conecte los nodos y formatee el File System para estabilizarlo[0m
+[INFO] 14:39:29:113 FileSystem/(7317:7317): [33m[CONEXION] NODO2 conectado[0m
+[INFO] 14:39:42:391 FileSystem/(7317:7317): [33m[CONEXION] NODO1 conectado[0m
+[INFO] 14:39:51:627 FileSystem/(7317:7317): [33m[CONEXION] NODO3 conectado[0m
+[INFO] 14:39:57:476 FileSystem/(7317:7317): [33m[CONEXION] NODO4 conectado[0m
+[INFO] 14:40:01:592 FileSystem/(7317:7322): [FORMATEO] El File System fue formateado
+[INFO] 14:40:01:594 FileSystem/(7317:7322): [33m[ESTADO] El File System esta estable[0m
+[INFO] 14:40:29:609 FileSystem/(7317:7322): [ARCHIVO] El archivo /home/utnso/Escritorio/todo fue copiado en File System
+[INFO] 14:40:34:861 FileSystem/(7317:7317): [33m[CONEXION] NODO2 desconectado[0m
+[INFO] 14:40:35:911 FileSystem/(7317:7317): [33m[CONEXION] NODO3 desconectado[0m
+[INFO] 14:40:37:216 FileSystem/(7317:7317): [33m[CONEXION] NODO4 desconectado[0m
+[INFO] 14:40:37:217 FileSystem/(7317:7322): [ERROR] No hay nodos disponibles para obtener un bloque
+[INFO] 14:40:37:888 FileSystem/(7317:7317): [33m[CONEXION] NODO4 conectado[0m
+[INFO] 14:43:37:181 FileSystem/(7317:7317): [EJECUCION] Proceso File System finalizado
