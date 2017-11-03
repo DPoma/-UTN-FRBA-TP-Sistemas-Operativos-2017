@@ -80,7 +80,6 @@ void workerCrearHijo(Socket unSocket) {
 									free(path);*/
 									mensajeEnviar(unSocket, 801, origen, sizeof(int32_t));
 									free(codigo);
-									free(origen);
 									free(destino);
 									free(mensaje);
 									break;
@@ -278,6 +277,11 @@ int transformar(char* codigo,int origen,char* destino){
 	if (origen>tamanioArchData){
 		return -1;
 	}
+	char* patharchdes;
+	patharchdes = realloc(patharchdes,sizeof(RUTA_TEMPS)+16);
+	strcat(patharchdes,RUTA_TEMPS);
+	strcat(patharchdes,destino);
+	strcat(patharchdes,".bin");
 	char* buffer=NULL;
 	FILE* arch;
 	arch = fopen(configuracion->rutaDataBin,"r");
@@ -316,9 +320,10 @@ int transformar(char* codigo,int origen,char* destino){
 	strcat(command,"|");
 	strcat(command,codigo);
 	strcat(command,"| sort >");
-	strcat(command,destino);
+	strcat(command,patharchdes);
 	system(command);
 	free (command);
+	free(patharchdes);
 	//resuelto por parametro en vez de cat
 	/*strcat(command,codigo);
 	strcat(command,buffer);//suponiendo que el script requiere un buffer como parametro
@@ -336,6 +341,11 @@ int reduccionLocal(char* codigo,char* origen,char* destino){
 	char* apendado;
 	int i;
 	apendado = appendL(listaOri);
+	char* patharchdes;
+	patharchdes = realloc(patharchdes,sizeof(RUTA_TEMPS)+16);
+	strcat(patharchdes,RUTA_TEMPS);
+	strcat(patharchdes,destino);
+	strcat(patharchdes,".bin");
 	//doy privilegios a script
 	char commando [500];
 	for(i=0;i==500;i++){
@@ -355,9 +365,10 @@ int reduccionLocal(char* codigo,char* origen,char* destino){
 	strcat(command,"|");
 	strcat(command,codigo);
 	strcat(command,">");
-	strcat(command,destino);
+	strcat(command,patharchdes);
 	system(command);
 	free (command);
+	free(patharchdes);
 	free (apendado);
 	i=0;
 	while(listaOri->ruta[i]!=NULL){
@@ -373,14 +384,21 @@ locOri* getOrigenesLocales(char* origen){
 	locOri* origenes;
 	memcpy(&origenes->cant, origen, sizeof(int32_t));
 	char* oris [origenes->cant];
+	char temporis[12];
 	int i;
 	int size = sizeof(int32_t);
 	int sizeOri=0;
 	for(i=0;(i+1)==origenes->cant;i++){
+		oris[i]=NULL;
 		memcpy(&sizeOri, origen + size , sizeof(int32_t));
 		size= size + sizeof(int32_t);
-		memcpy(&oris[i],origen + size, sizeOri);
+		//memcpy(&oris[i],origen + size, sizeOri);
+		memcpy(&temporis,origen + size, sizeOri);
 		size= size + sizeOri;
+		oris[i] = realloc(oris[i],sizeof(RUTA_TEMPS)+16);
+		strcat(oris[i],RUTA_TEMPS);
+		strcat(oris[i],temporis);
+		strcat(oris[i],".bin");
 		origenes->ruta[i] =oris[i];
 	}
 	return origenes;
@@ -527,6 +545,11 @@ int reduccionGlobal(char* codigo,char* origen,char* destino){
 	char* apendado;
 	apendado = appendG(listaOri);
 	int i=0;
+	char* patharchdes;
+	patharchdes = realloc(patharchdes,sizeof(RUTA_TEMPS)+16);
+	strcat(patharchdes,RUTA_TEMPS);
+	strcat(patharchdes,destino);
+	strcat(patharchdes,".bin");
 	//doy privilegios a script
 	char commando [500];
 	for(i=0;i==500;i++){
@@ -546,10 +569,11 @@ int reduccionGlobal(char* codigo,char* origen,char* destino){
 	strcat(command,"|");
 	strcat(command,codigo);
 	strcat(command,">");
-	strcat(command,destino);
+	strcat(command,patharchdes);
 	system(command);
 	free (command);
 	free (apendado);
+	free(patharchdes);
 	i=0;
 	while(((globOri*)listaOri->oris[i])->ruta!=NULL){
 		free(((globOri*)listaOri->oris[i])->ruta);
@@ -571,14 +595,19 @@ lGlobOri* getOrigenesGlobales(char* origen){
 	memcpy(&origenes->cant, origen, sizeof(int32_t));
 	globOri** oris [origenes->cant];
 	int i;
+	char temporis[12];
 	int size = sizeof(int32_t);
 	int sizeOri=0;
 	int sizeIP=0;
 	for(i=0;(i-1)==origenes->cant;i++){
 		memcpy(&sizeOri, origen + size , sizeof(int32_t));
 		size= size + sizeof(int32_t);
-		memcpy(((globOri*) oris[i])->ruta,origen + size, sizeOri);
+		memcpy&temporis,origen + size, sizeOri);
 		size= size + sizeOri;
+		((globOri*) oris[i])->ruta = realloc(((globOri*) oris[i])->ruta,sizeof(RUTA_TEMPS)+16);
+		strcat(((globOri*) oris[i])->ruta,RUTA_TEMPS);
+		strcat(((globOri*) oris[i])->ruta,temporis);
+		strcat(((globOri*) oris[i])->ruta,".bin");
 		memcpy(&sizeIP, origen + size , sizeof(int32_t));
 		size= size + sizeof(int32_t);
 		memcpy(((globOri*) oris[i])->ip,origen + size, sizeOri);
