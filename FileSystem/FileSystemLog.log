@@ -1,19 +1,316 @@
-[INFO] 14:39:26:883 FileSystem/(7317:7317): [EJECUCION] Proceso File System iniciado
-[INFO] 14:39:26:948 FileSystem/(7317:7317): [CONFIGURACION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 14:39:26:949 FileSystem/(7317:7317): [CONFIGURACION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 14:39:26:950 FileSystem/(7317:7317): [CONFIGURACION] Esperando conexiones de Workers (Puerto: 5080)
-[INFO] 14:39:26:950 FileSystem/(7317:7317): [CONFIGURACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
-[INFO] 14:39:26:996 FileSystem/(7317:7317): [33m[AVISO] Conecte los nodos y formatee el File System para estabilizarlo[0m
-[INFO] 14:39:29:113 FileSystem/(7317:7317): [33m[CONEXION] NODO2 conectado[0m
-[INFO] 14:39:42:391 FileSystem/(7317:7317): [33m[CONEXION] NODO1 conectado[0m
-[INFO] 14:39:51:627 FileSystem/(7317:7317): [33m[CONEXION] NODO3 conectado[0m
-[INFO] 14:39:57:476 FileSystem/(7317:7317): [33m[CONEXION] NODO4 conectado[0m
-[INFO] 14:40:01:592 FileSystem/(7317:7322): [FORMATEO] El File System fue formateado
-[INFO] 14:40:01:594 FileSystem/(7317:7322): [33m[ESTADO] El File System esta estable[0m
-[INFO] 14:40:29:609 FileSystem/(7317:7322): [ARCHIVO] El archivo /home/utnso/Escritorio/todo fue copiado en File System
-[INFO] 14:40:34:861 FileSystem/(7317:7317): [33m[CONEXION] NODO2 desconectado[0m
-[INFO] 14:40:35:911 FileSystem/(7317:7317): [33m[CONEXION] NODO3 desconectado[0m
-[INFO] 14:40:37:216 FileSystem/(7317:7317): [33m[CONEXION] NODO4 desconectado[0m
-[INFO] 14:40:37:217 FileSystem/(7317:7322): [ERROR] No hay nodos disponibles para obtener un bloque
-[INFO] 14:40:37:888 FileSystem/(7317:7317): [33m[CONEXION] NODO4 conectado[0m
-[INFO] 14:43:37:181 FileSystem/(7317:7317): [EJECUCION] Proceso File System finalizado
+[INFO] 17:33:08:581 FileSystem/(8774:8774): [EJECUCION] Proceso File System iniciado
+[INFO] 17:33:08:644 FileSystem/(8774:8774): [CONFIGURACION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 17:33:08:645 FileSystem/(8774:8774): [CONFIGURACION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 17:33:08:645 FileSystem/(8774:8774): [CONFIGURACION] Esperando conexiones de Workers (Puerto: 5080)
+[INFO] 17:33:08:646 FileSystem/(8774:8774): [CONFIGURACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
+[INFO] 17:33:10:801 FileSystem/(8774:8774): [33m[AVISO] Conecte los nodos necesarios al File System para estabilizarlo[0m
+[INFO] 17:33:13:957 FileSystem/(8774:8774): [33m[AVISO] NODO1 conectado[0m
+[INFO] 17:33:19:349 FileSystem/(8774:8774): [33m[AVISO] NODO2 conectado[0m
+[INFO] 17:33:24:540 FileSystem/(8774:8774): [33m[AVISO] NODO3 conectado[0m
+[INFO] 17:33:24:728 FileSystem/(8774:8774): [33m[AVISO] El File System esta estable[0m
+[INFO] 17:33:29:77 FileSystem/(8774:8774): [33m[AVISO] NODO4 conectado[0m
+[INFO] 17:33:54:126 FileSystem/(8774:8777): [DIRECTORIO] asco (a)
+[INFO] 17:33:54:127 FileSystem/(8774:8777): [DIRECTORIO] fs (a)
+[INFO] 17:33:54:127 FileSystem/(8774:8777): [DIRECTORIO] todo (a)
+[INFO] 17:33:56:933 FileSystem/(8774:8777): [ARCHIVO] Nombre: asco
+[INFO] 17:33:56:936 FileSystem/(8774:8777): [ARCHIVO] Tipo: TEXTO
+[INFO] 17:33:56:937 FileSystem/(8774:8777): [ARCHIVO] Ubicacion: /asco
+[INFO] 17:33:56:938 FileSystem/(8774:8777): [ARCHIVO] ID Padre: 0
+[INFO] 17:33:56:940 FileSystem/(8774:8777): [ARCHIVO] Tamanio: 8684 bytes
+[INFO] 17:33:56:941 FileSystem/(8774:8777): [ARCHIVO] Bloques: 41
+[INFO] 17:33:56:943 FileSystem/(8774:8777): [ARCHIVO] Bloque 0: 223 bytes
+[INFO] 17:33:56:944 FileSystem/(8774:8777): [ARCHIVO] Copia 0 en: Nodo: NODO2 | Bloque: 1417
+[INFO] 17:33:56:945 FileSystem/(8774:8777): [ARCHIVO] Copia 1 en: Nodo: NODO4 | Bloque: 1417
+[INFO] 17:33:56:946 FileSystem/(8774:8777): [ARCHIVO] Bloque 1: 225 bytes
+[INFO] 17:33:56:946 FileSystem/(8774:8777): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 1392
+[INFO] 17:33:56:946 FileSystem/(8774:8777): [ARCHIVO] Copia 1 en: Nodo: NODO3 | Bloque: 1418
+[INFO] 17:33:56:947 FileSystem/(8774:8777): [ARCHIVO] Bloque 2: 200 bytes
+[INFO] 17:33:56:947 FileSystem/(8774:8777): [ARCHIVO] Copia 0 en: Nodo: NODO2 | Bloque: 1418
+[INFO] 17:33:56:947 FileSystem/(8774:8777): [ARCHIVO] Copia 1 en: Nodo: NODO4 | Bloque: 1418
+[INFO] 17:33:56:947 FileSystem/(8774:8777): [ARCHIVO] Bloque 3: 253 bytes
+[INFO] 17:33:56:948 FileSystem/(8774:8777): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 1393
+[INFO] 17:33:56:948 FileSystem/(8774:8777): [ARCHIVO] Copia 1 en: Nodo: NODO3 | Bloque: 1419
+[INFO] 17:33:56:948 FileSystem/(8774:8777): [ARCHIVO] Bloque 4: 214 bytes
+[INFO] 17:33:56:949 FileSystem/(8774:8777): [ARCHIVO] Copia 0 en: Nodo: NODO2 | Bloque: 1419
+[INFO] 17:33:56:949 FileSystem/(8774:8777): [ARCHIVO] Copia 1 en: Nodo: NODO4 | Bloque: 1419
+[INFO] 17:33:56:954 FileSystem/(8774:8777): [ARCHIVO] Bloque 5: 232 bytes
+[INFO] 17:33:56:954 FileSystem/(8774:8777): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 1394
+[INFO] 17:33:56:955 FileSystem/(8774:8777): [ARCHIVO] Copia 1 en: Nodo: NODO3 | Bloque: 1420
+[INFO] 17:33:56:955 FileSystem/(8774:8777): [ARCHIVO] Bloque 6: 197 bytes
+[INFO] 17:33:56:955 FileSystem/(8774:8777): [ARCHIVO] Copia 0 en: Nodo: NODO2 | Bloque: 1420
+[INFO] 17:33:56:956 FileSystem/(8774:8777): [ARCHIVO] Copia 1 en: Nodo: NODO4 | Bloque: 1420
+[INFO] 17:33:56:956 FileSystem/(8774:8777): [ARCHIVO] Bloque 7: 184 bytes
+[INFO] 17:33:56:956 FileSystem/(8774:8777): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 1395
+[INFO] 17:33:56:956 FileSystem/(8774:8777): [ARCHIVO] Copia 1 en: Nodo: NODO3 | Bloque: 1421
+[INFO] 17:33:56:957 FileSystem/(8774:8777): [ARCHIVO] Bloque 8: 214 bytes
+[INFO] 17:33:56:957 FileSystem/(8774:8777): [ARCHIVO] Copia 0 en: Nodo: NODO2 | Bloque: 1421
+[INFO] 17:33:56:957 FileSystem/(8774:8777): [ARCHIVO] Copia 1 en: Nodo: NODO4 | Bloque: 1421
+[INFO] 17:33:56:958 FileSystem/(8774:8777): [ARCHIVO] Bloque 9: 233 bytes
+[INFO] 17:33:56:958 FileSystem/(8774:8777): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 1396
+[INFO] 17:33:56:958 FileSystem/(8774:8777): [ARCHIVO] Copia 1 en: Nodo: NODO3 | Bloque: 1422
+[INFO] 17:33:56:958 FileSystem/(8774:8777): [ARCHIVO] Bloque 10: 197 bytes
+[INFO] 17:33:56:959 FileSystem/(8774:8777): [ARCHIVO] Copia 0 en: Nodo: NODO2 | Bloque: 1422
+[INFO] 17:33:56:959 FileSystem/(8774:8777): [ARCHIVO] Copia 1 en: Nodo: NODO4 | Bloque: 1422
+[INFO] 17:33:56:959 FileSystem/(8774:8777): [ARCHIVO] Bloque 11: 185 bytes
+[INFO] 17:33:56:960 FileSystem/(8774:8777): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 1397
+[INFO] 17:33:56:960 FileSystem/(8774:8777): [ARCHIVO] Copia 1 en: Nodo: NODO3 | Bloque: 1423
+[INFO] 17:33:56:960 FileSystem/(8774:8777): [ARCHIVO] Bloque 12: 214 bytes
+[INFO] 17:33:56:960 FileSystem/(8774:8777): [ARCHIVO] Copia 0 en: Nodo: NODO2 | Bloque: 1423
+[INFO] 17:33:56:961 FileSystem/(8774:8777): [ARCHIVO] Copia 1 en: Nodo: NODO4 | Bloque: 1423
+[INFO] 17:33:56:961 FileSystem/(8774:8777): [ARCHIVO] Bloque 13: 234 bytes
+[INFO] 17:33:56:961 FileSystem/(8774:8777): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 1398
+[INFO] 17:33:56:962 FileSystem/(8774:8777): [ARCHIVO] Copia 1 en: Nodo: NODO3 | Bloque: 1424
+[INFO] 17:33:56:962 FileSystem/(8774:8777): [ARCHIVO] Bloque 14: 197 bytes
+[INFO] 17:33:56:962 FileSystem/(8774:8777): [ARCHIVO] Copia 0 en: Nodo: NODO2 | Bloque: 1424
+[INFO] 17:33:56:962 FileSystem/(8774:8777): [ARCHIVO] Copia 1 en: Nodo: NODO4 | Bloque: 1424
+[INFO] 17:33:56:963 FileSystem/(8774:8777): [ARCHIVO] Bloque 15: 184 bytes
+[INFO] 17:33:56:963 FileSystem/(8774:8777): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 1399
+[INFO] 17:33:56:963 FileSystem/(8774:8777): [ARCHIVO] Copia 1 en: Nodo: NODO3 | Bloque: 1425
+[INFO] 17:33:56:963 FileSystem/(8774:8777): [ARCHIVO] Bloque 16: 214 bytes
+[INFO] 17:33:56:964 FileSystem/(8774:8777): [ARCHIVO] Copia 0 en: Nodo: NODO2 | Bloque: 1425
+[INFO] 17:33:56:964 FileSystem/(8774:8777): [ARCHIVO] Copia 1 en: Nodo: NODO4 | Bloque: 1425
+[INFO] 17:33:56:964 FileSystem/(8774:8777): [ARCHIVO] Bloque 17: 246 bytes
+[INFO] 17:33:56:965 FileSystem/(8774:8777): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 1400
+[INFO] 17:33:56:965 FileSystem/(8774:8777): [ARCHIVO] Copia 1 en: Nodo: NODO3 | Bloque: 1426
+[INFO] 17:33:56:965 FileSystem/(8774:8777): [ARCHIVO] Bloque 18: 200 bytes
+[INFO] 17:33:56:965 FileSystem/(8774:8777): [ARCHIVO] Copia 0 en: Nodo: NODO2 | Bloque: 1426
+[INFO] 17:33:56:966 FileSystem/(8774:8777): [ARCHIVO] Copia 1 en: Nodo: NODO4 | Bloque: 1426
+[INFO] 17:33:56:966 FileSystem/(8774:8777): [ARCHIVO] Bloque 19: 185 bytes
+[INFO] 17:33:56:966 FileSystem/(8774:8777): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 1401
+[INFO] 17:33:56:967 FileSystem/(8774:8777): [ARCHIVO] Copia 1 en: Nodo: NODO3 | Bloque: 1427
+[INFO] 17:33:56:967 FileSystem/(8774:8777): [ARCHIVO] Bloque 20: 214 bytes
+[INFO] 17:33:56:967 FileSystem/(8774:8777): [ARCHIVO] Copia 0 en: Nodo: NODO2 | Bloque: 1427
+[INFO] 17:33:56:968 FileSystem/(8774:8777): [ARCHIVO] Copia 1 en: Nodo: NODO4 | Bloque: 1427
+[INFO] 17:33:56:968 FileSystem/(8774:8777): [ARCHIVO] Bloque 21: 247 bytes
+[INFO] 17:33:56:968 FileSystem/(8774:8777): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 1402
+[INFO] 17:33:56:968 FileSystem/(8774:8777): [ARCHIVO] Copia 1 en: Nodo: NODO3 | Bloque: 1428
+[INFO] 17:33:56:969 FileSystem/(8774:8777): [ARCHIVO] Bloque 22: 200 bytes
+[INFO] 17:33:56:969 FileSystem/(8774:8777): [ARCHIVO] Copia 0 en: Nodo: NODO2 | Bloque: 1428
+[INFO] 17:33:56:969 FileSystem/(8774:8777): [ARCHIVO] Copia 1 en: Nodo: NODO4 | Bloque: 1428
+[INFO] 17:33:56:969 FileSystem/(8774:8777): [ARCHIVO] Bloque 23: 184 bytes
+[INFO] 17:33:56:970 FileSystem/(8774:8777): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 1403
+[INFO] 17:33:56:970 FileSystem/(8774:8777): [ARCHIVO] Copia 1 en: Nodo: NODO3 | Bloque: 1429
+[INFO] 17:33:56:970 FileSystem/(8774:8777): [ARCHIVO] Bloque 24: 214 bytes
+[INFO] 17:33:56:971 FileSystem/(8774:8777): [ARCHIVO] Copia 0 en: Nodo: NODO2 | Bloque: 1429
+[INFO] 17:33:56:971 FileSystem/(8774:8777): [ARCHIVO] Copia 1 en: Nodo: NODO4 | Bloque: 1429
+[INFO] 17:33:56:971 FileSystem/(8774:8777): [ARCHIVO] Bloque 25: 246 bytes
+[INFO] 17:33:56:972 FileSystem/(8774:8777): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 1404
+[INFO] 17:33:56:972 FileSystem/(8774:8777): [ARCHIVO] Copia 1 en: Nodo: NODO3 | Bloque: 1430
+[INFO] 17:33:56:972 FileSystem/(8774:8777): [ARCHIVO] Bloque 26: 200 bytes
+[INFO] 17:33:56:972 FileSystem/(8774:8777): [ARCHIVO] Copia 0 en: Nodo: NODO2 | Bloque: 1430
+[INFO] 17:33:56:973 FileSystem/(8774:8777): [ARCHIVO] Copia 1 en: Nodo: NODO4 | Bloque: 1430
+[INFO] 17:33:56:973 FileSystem/(8774:8777): [ARCHIVO] Bloque 27: 185 bytes
+[INFO] 17:33:56:973 FileSystem/(8774:8777): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 1405
+[INFO] 17:33:56:974 FileSystem/(8774:8777): [ARCHIVO] Copia 1 en: Nodo: NODO3 | Bloque: 1431
+[INFO] 17:33:56:974 FileSystem/(8774:8777): [ARCHIVO] Bloque 28: 214 bytes
+[INFO] 17:33:56:974 FileSystem/(8774:8777): [ARCHIVO] Copia 0 en: Nodo: NODO2 | Bloque: 1431
+[INFO] 17:33:56:974 FileSystem/(8774:8777): [ARCHIVO] Copia 1 en: Nodo: NODO4 | Bloque: 1431
+[INFO] 17:33:56:975 FileSystem/(8774:8777): [ARCHIVO] Bloque 29: 246 bytes
+[INFO] 17:33:56:975 FileSystem/(8774:8777): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 1406
+[INFO] 17:33:56:975 FileSystem/(8774:8777): [ARCHIVO] Copia 1 en: Nodo: NODO3 | Bloque: 1432
+[INFO] 17:33:56:976 FileSystem/(8774:8777): [ARCHIVO] Bloque 30: 200 bytes
+[INFO] 17:33:56:976 FileSystem/(8774:8777): [ARCHIVO] Copia 0 en: Nodo: NODO2 | Bloque: 1432
+[INFO] 17:33:56:976 FileSystem/(8774:8777): [ARCHIVO] Copia 1 en: Nodo: NODO4 | Bloque: 1432
+[INFO] 17:33:56:976 FileSystem/(8774:8777): [ARCHIVO] Bloque 31: 184 bytes
+[INFO] 17:33:56:977 FileSystem/(8774:8777): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 1407
+[INFO] 17:33:56:977 FileSystem/(8774:8777): [ARCHIVO] Copia 1 en: Nodo: NODO3 | Bloque: 1433
+[INFO] 17:33:56:977 FileSystem/(8774:8777): [ARCHIVO] Bloque 32: 214 bytes
+[INFO] 17:33:56:977 FileSystem/(8774:8777): [ARCHIVO] Copia 0 en: Nodo: NODO2 | Bloque: 1433
+[INFO] 17:33:56:978 FileSystem/(8774:8777): [ARCHIVO] Copia 1 en: Nodo: NODO4 | Bloque: 1433
+[INFO] 17:33:56:978 FileSystem/(8774:8777): [ARCHIVO] Bloque 33: 212 bytes
+[INFO] 17:33:56:978 FileSystem/(8774:8777): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 1408
+[INFO] 17:33:56:979 FileSystem/(8774:8777): [ARCHIVO] Copia 1 en: Nodo: NODO3 | Bloque: 1434
+[INFO] 17:33:56:979 FileSystem/(8774:8777): [ARCHIVO] Bloque 34: 237 bytes
+[INFO] 17:33:56:979 FileSystem/(8774:8777): [ARCHIVO] Copia 0 en: Nodo: NODO2 | Bloque: 1434
+[INFO] 17:33:56:979 FileSystem/(8774:8777): [ARCHIVO] Copia 1 en: Nodo: NODO4 | Bloque: 1434
+[INFO] 17:33:56:980 FileSystem/(8774:8777): [ARCHIVO] Bloque 35: 232 bytes
+[INFO] 17:33:56:980 FileSystem/(8774:8777): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 1409
+[INFO] 17:33:56:980 FileSystem/(8774:8777): [ARCHIVO] Copia 1 en: Nodo: NODO3 | Bloque: 1435
+[INFO] 17:33:56:981 FileSystem/(8774:8777): [ARCHIVO] Bloque 36: 240 bytes
+[INFO] 17:33:56:981 FileSystem/(8774:8777): [ARCHIVO] Copia 0 en: Nodo: NODO2 | Bloque: 1435
+[INFO] 17:33:56:981 FileSystem/(8774:8777): [ARCHIVO] Copia 1 en: Nodo: NODO4 | Bloque: 1435
+[INFO] 17:33:56:981 FileSystem/(8774:8777): [ARCHIVO] Bloque 37: 206 bytes
+[INFO] 17:33:56:981 FileSystem/(8774:8777): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 1410
+[INFO] 17:33:56:982 FileSystem/(8774:8777): [ARCHIVO] Copia 1 en: Nodo: NODO3 | Bloque: 1436
+[INFO] 17:33:56:982 FileSystem/(8774:8777): [ARCHIVO] Bloque 38: 163 bytes
+[INFO] 17:33:56:982 FileSystem/(8774:8777): [ARCHIVO] Copia 0 en: Nodo: NODO2 | Bloque: 1436
+[INFO] 17:33:56:982 FileSystem/(8774:8777): [ARCHIVO] Copia 1 en: Nodo: NODO4 | Bloque: 1436
+[INFO] 17:33:56:983 FileSystem/(8774:8777): [ARCHIVO] Bloque 39: 233 bytes
+[INFO] 17:33:56:983 FileSystem/(8774:8777): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 1411
+[INFO] 17:33:56:983 FileSystem/(8774:8777): [ARCHIVO] Copia 1 en: Nodo: NODO3 | Bloque: 1437
+[INFO] 17:33:56:983 FileSystem/(8774:8777): [ARCHIVO] Bloque 40: 182 bytes
+[INFO] 17:33:56:983 FileSystem/(8774:8777): [ARCHIVO] Copia 0 en: Nodo: NODO2 | Bloque: 1437
+[INFO] 17:33:56:984 FileSystem/(8774:8777): [ARCHIVO] Copia 1 en: Nodo: NODO4 | Bloque: 1437
+[INFO] 17:34:22:490 FileSystem/(8774:8777): [ARCHIVO] El archivo asco se copio en /home/utnso/Escritorio/ascoc
+[INFO] 17:34:27:312 FileSystem/(8774:8777): [ARCHIVO] El archivo asco se copio en /home/utnso/Escritorio/Metadata/asco
+[INFO] 17:34:27:380 FileSystem/(8774:8777): [ARCHIVO] El MD5 del archivo es 498a59e699aad46107c6bd3f3c30763c  /home/utnso/Escritorio/Metadata/asco
+
+[INFO] 17:34:33:439 FileSystem/(8774:8777): [ARCHIVO] El archivo asco se copio en /home/utnso/Escritorio/Metadata/asco
+[INFO] 17:34:33:501 FileSystem/(8774:8777): [ARCHIVO] El MD5 del archivo es 498a59e699aad46107c6bd3f3c30763c  /home/utnso/Escritorio/Metadata/asco
+
+[INFO] 17:34:40:740 FileSystem/(8774:8777): [ARCHIVO] El archivo asco se copio en /home/utnso/Escritorio/Metadata/asco
+[INFO] 17:34:40:799 FileSystem/(8774:8777): [ARCHIVO] El MD5 del archivo es 498a59e699aad46107c6bd3f3c30763c  /home/utnso/Escritorio/Metadata/asco
+
+[INFO] 17:35:26:812 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:813 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:814 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:814 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:819 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:820 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:820 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:821 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:822 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:824 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:825 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:825 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:825 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:826 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:826 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:826 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:827 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:827 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:827 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:827 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:828 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:828 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:828 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:828 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:829 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:829 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:829 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:830 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:831 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:831 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:831 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:831 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:832 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:832 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:832 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:833 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:833 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:833 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:838 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:839 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:839 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:840 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:840 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:841 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:841 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:841 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:842 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:842 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:842 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:843 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:843 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:844 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:844 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:844 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:845 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:845 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:846 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:846 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:847 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:848 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:848 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:848 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:855 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:855 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:855 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:856 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:856 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:857 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:857 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:857 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:858 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:858 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:858 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:859 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:859 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:860 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:860 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:860 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:861 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:861 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:861 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:862 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:862 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:863 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:863 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:864 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:864 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:864 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:864 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:865 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:865 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:865 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:866 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:866 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:866 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:867 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:867 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:867 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:868 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:868 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:868 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:869 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:869 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:869 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:870 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:870 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:870 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:871 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:872 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:872 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:872 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:873 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:873 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:873 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:874 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:874 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:874 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:875 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:875 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:875 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:878 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:879 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:879 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:879 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:880 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:880 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:880 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:881 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:881 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:881 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:882 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:882 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:883 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:883 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:883 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:884 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:890 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:890 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:891 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:891 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:891 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:892 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:901 FileSystem/(8774:8777): [ERROR] El archivo a copiar no existe
+[INFO] 17:35:26:903 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:903 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:903 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:904 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:904 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:904 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:905 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:905 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:905 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:26:906 FileSystem/(8774:8777): [ERROR] Comando invalido
+[INFO] 17:35:44:642 FileSystem/(8774:8777): [ARCHIVO] El archivo todo se copio en /home/utnso/Escritorio/todoc
+[INFO] 17:35:58:761 FileSystem/(8774:8777): [ARCHIVO] El archivo todo se copio en /home/utnso/Escritorio/Metadata/todo
+[INFO] 17:35:58:807 FileSystem/(8774:8777): [ARCHIVO] El MD5 del archivo es 436db9dd8ab11b6849f68b0ab3e1ff37  /home/utnso/Escritorio/Metadata/todo
+
+[INFO] 17:36:04:821 FileSystem/(8774:8777): [ARCHIVO] El archivo todo se copio en /home/utnso/Escritorio/Metadata/todo
+[INFO] 17:36:04:885 FileSystem/(8774:8777): [ARCHIVO] El MD5 del archivo es f33257594587fda51c4e0b6aa68cb685  /home/utnso/Escritorio/Metadata/todo
+
+[INFO] 17:36:11:453 FileSystem/(8774:8777): [ARCHIVO] El archivo todo se copio en /home/utnso/Escritorio/Metadata/todo
+[INFO] 17:36:11:503 FileSystem/(8774:8777): [ARCHIVO] El MD5 del archivo es 436db9dd8ab11b6849f68b0ab3e1ff37  /home/utnso/Escritorio/Metadata/todo
+

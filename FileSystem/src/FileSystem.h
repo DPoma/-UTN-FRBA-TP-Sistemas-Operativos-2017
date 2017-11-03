@@ -218,6 +218,7 @@ Mutex* mutexEstadoEjecucion;
 Mutex* mutexEstadoControl;
 Semaforo* semaforoTarea;
 Semaforo* semaforoFinal;
+File fileg;
 
 //--------------------------------------- Funciones de File System -------------------------------------
 
@@ -481,8 +482,8 @@ bool bloqueOrdenarPorNumero(Bloque* unBloque, Bloque* otroBloque);
 void bloqueCopiar(Puntero datos);
 void bloqueLeer(Servidor* servidor, Puntero datos);
 //void bloqueLeer(Servidor* servidor, Puntero datos, Socket unSocket);
-void bloqueCopiarTexto(Puntero datos);
-void bloqueCopiarBinario(Puntero datos);
+void bloqueCopiarTexto(Servidor* servidor, Puntero datos);
+void bloqueCopiarBinario(Servidor* servidor, Puntero datos);
 bool bloqueDisponible(Bloque* bloque);
 BloqueNodo* bloqueNodoCrear(Entero numeroBloque, String buffer, int tamanioUtilizado);
 BloqueYama bloqueConvertirParaYama(Bloque* bloque);

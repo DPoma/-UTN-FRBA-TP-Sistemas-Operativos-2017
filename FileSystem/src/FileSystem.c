@@ -27,9 +27,7 @@ void fileSystemIniciar(String flag) {
 	flagMensaje = DESACTIVADO;
 	configuracionIniciar();
 	nodoListaCrear();
-
-	listaSockets = listaCrear(); //TODO ver
-
+	listaSockets = listaCrear();
 	estadoControlActivar();
 	estadoFileSystemInestable();
 	if(stringIguales(flag, FLAG_C))
@@ -307,7 +305,7 @@ void servidorAceptarReconexionDataNode(Servidor* servidor, Nodo* nuevoNodo) {
 		mutexBloquear(mutexEstadoFileSystem);
 		estadoFileSystem = ESTABLE;
 		mutexDesbloquear(mutexEstadoFileSystem);
-		imprimirMensaje(archivoLog, AMARILLO"[ESTADO] El File System esta estable"BLANCO);
+		imprimirMensaje(archivoLog, AMARILLO"[AVISO] El File System esta estable"BLANCO);
 	}
 	mutexDesbloquear(mutexTarea);
 }
@@ -322,8 +320,8 @@ void servidorMensajeDataNode(Servidor* servidor, Mensaje* mensaje, Socket unSock
 	switch(mensaje->header.operacion) {
 	case LEER_BLOQUE: bloqueLeer(servidor, mensaje->datos); break;
 	case COPIAR_BLOQUE: bloqueCopiar(mensaje->datos); break;
-	case COPIAR_BINARIO: bloqueCopiarBinario(mensaje->datos); break;
-	case COPIAR_TEXTO: bloqueCopiarTexto(mensaje->datos); break;
+	case COPIAR_BINARIO: bloqueCopiarBinario(servidor, mensaje->datos); break;
+	case COPIAR_TEXTO: bloqueCopiarTexto(servidor, mensaje->datos); break;
 	case FINALIZAR_NODO: servidorFinalizarDataNode(servidor, unSocket); break;
 	}
 }
@@ -346,7 +344,7 @@ void servidorDesactivarDataNode(Servidor* servidor, Nodo* nodo) {
 		listaSocketsEliminar(nodo->socket, &servidor->listaMaster);
 		nodo->estado = DESACTIVADO;
 		nodo->socket = ERROR;
-		imprimirMensajeUno(archivoLog, AMARILLO"[CONEXION] %s desconectado"BLANCO, nodo->nombre);
+		imprimirMensajeUno(archivoLog, AMARILLO"[AVISO] %s desconectado"BLANCO, nodo->nombre);
 	}
 	else
 		socketListaAgregar(&nodo->socket);
@@ -455,20 +453,8 @@ void socketListaAgregar(Socket* unSocket) {
 bool socketListaVacia() {
 	mutexBloquear(mutexListaSockets);
 	int resultado = listaEstaVacia(listaSockets);
-	printf("Si hay un socket esto deberia ser 0 -->  %i\n", resultado);
 	mutexDesbloquear(mutexListaSockets);
 	return resultado;
-}
-
-void socketDesactivarNodos(Servidor* servidor) {
-	int indice;
-	int cantidad = socketListaCantidad();
-	for(indice = 0; indice < cantidad; indice++) {
-		Socket* socket = socketListaObtener(indice);
-		Nodo* nodo = nodoBuscarPorSocket(*socket);
-		servidorDesactivarDataNode(servidor, nodo);
-		printf("Nodo estado %i\n", nodo->estado);
-	}
 }
 
 int socketListaCantidad() {
@@ -501,6 +487,24 @@ void socketListaLimpiar() {
 	mutexBloquear(mutexListaSockets);
 	listaLimpiar(listaSockets);
 	mutexDesbloquear(mutexListaSockets);
+}
+
+void socketDesactivarNodos(Servidor* servidor) {
+	int indice;
+	int cantidad = socketListaCantidad();
+	for(indice = 0; indice < cantidad; indice++) {
+		Socket* socket = socketListaObtener(indice);
+		Nodo* nodo = nodoBuscarPorSocket(*socket);
+		servidorDesactivarDataNode(servidor, nodo);
+	}
+	socketListaLimpiar();
+}
+
+void socketPrevenirDesconexion(Servidor* servidor) {
+	estadoMensaje(DESACTIVADO);
+	if(!socketListaVacia())
+		socketDesactivarNodos(servidor);
+	semaforoSignal(semaforoTarea);
 }
 
 //--------------------------------------- Funciones de Consola -------------------------------------
@@ -831,7 +835,7 @@ void comandoFormatearFileSystem() {
 	metadataIniciar();
 	estadoFileSystemEstable();
 	imprimirMensaje(archivoLog, "[FORMATEO] El File System fue formateado");
-	imprimirMensaje(archivoLog, AMARILLO"[ESTADO] El File System esta estable"BLANCO);
+	imprimirMensaje(archivoLog, AMARILLO"[AVISO] El File System esta estable"BLANCO);
 }
 
 void comandoCrearDirectorio(Comando* comando) {
@@ -1257,10 +1261,12 @@ int comandoCopiarArchivoDeYamaFS(Comando* comando) {
 		int indiceCopias;
 		listaOrdenar(bloque->listaCopias, (Puntero)copiaOrdenarPorActividadDelNodo);
 		semaforoWait(semaforoTarea);
+		mutexBloquear(mutexTarea);
 		for(indiceCopias=0; indiceCopias<listaCantidadElementos(bloque->listaCopias) && copiaSinEnviar; indiceCopias++) {
 			Copia* copia = listaObtenerElemento(bloque->listaCopias, indiceCopias);
 			Nodo* nodo = nodoBuscarPorNombre(copia->nombreNodo);
 			if(nodoConectado(nodo)) {
+				estadoMensaje(ACTIVADO);
 				if(archivoBinario(archivo))
 					mensajeEnviar(nodo->socket, COPIAR_BINARIO, &copia->bloqueNodo, sizeof(Entero));
 				else
@@ -1269,6 +1275,7 @@ int comandoCopiarArchivoDeYamaFS(Comando* comando) {
 				copiaSinEnviar = false;
 			}
 		}
+		mutexDesbloquear(mutexTarea);
 		if(copiaSinEnviar) {
 			imprimirMensaje(archivoLog, "[ERROR] Una copia no pudo ser enviada, se aborta la operacion");
 			semaforoSignal(semaforoTarea);
@@ -2278,7 +2285,7 @@ bool nodoDesconectado(Nodo* nodo) {
 
 void nodoVerificarBloquesLibres(Nodo* nodo) {
 	if(nodo->bloquesLibres == 0)
-		imprimirMensajeUno(archivoLog, AMARILLO"[ADVERTENCIA] El %s tiene todos sus bloques ocupados"BLANCO, nodo->nombre);
+		imprimirMensajeUno(archivoLog, AMARILLO"[AVISO] El %s tiene todos sus bloques ocupados"BLANCO, nodo->nombre);
 }
 
 bool nodoDisponible(Nodo* nodo) {
@@ -2295,7 +2302,7 @@ bool nodoNuevo(Nodo* nuevoNodo) {
 	return false;
 }
 
-bool nodoEstaConectado(Nodo* nuevoNodo) { //TODO ver
+bool nodoEstaConectado(Nodo* nuevoNodo) {
 	Nodo* nodo = nodoBuscarPorNombre(nuevoNodo->nombre);
 	if(nodo == NULL)
 		return false;
@@ -2367,8 +2374,8 @@ Nodo* nodoActualizar(Nodo* nodoTemporal) {
 }
 
 void nodoAceptar(Nodo* nodo) {
-	mensajeEnviar(nodo->socket, ACEPTAR_DATANODE, VACIO, OK); //TODO debe ser nulo el msj, solo me interesa la operacion
-	imprimirMensajeUno(archivoLog, AMARILLO"[CONEXION] %s conectado"BLANCO, nodo->nombre);
+	mensajeEnviar(nodo->socket, ACEPTAR_DATANODE, VACIO, OK);
+	imprimirMensajeUno(archivoLog, AMARILLO"[AVISO] %s conectado"BLANCO, nodo->nombre);
 }
 
 void nodoPersistir() {
@@ -2549,32 +2556,26 @@ void servidorDestruirSockets(Servidor* servidor) {
 }
 
 void bloqueLeer(Servidor* servidor, Puntero datos) {
-	puts("DATOS");
-	//printf("%s", (String)datos);
-	estadoMensaje(DESACTIVADO);
-	if(!socketListaVacia()) {
-		socketDesactivarNodos(servidor);
-		socketListaLimpiar();
-	}
-	semaforoSignal(semaforoTarea);
+	printf("%s", (String)datos);
+	socketPrevenirDesconexion(servidor);
 }
 
-void bloqueCopiarBinario(Puntero datos) {
+void bloqueCopiarBinario(Servidor* servidor, Puntero datos) {
 	mutexBloquear(mutexRuta);
 	File file = fileAbrir(rutaBuffer, "a+");
 	mutexDesbloquear(mutexRuta);
 	fwrite(datos, sizeof(char), BLOQUE, file);
 	fileCerrar(file);
-	semaforoSignal(semaforoTarea);
+	socketPrevenirDesconexion(servidor);
 }
 
-void bloqueCopiarTexto(Puntero datos) {
+void bloqueCopiarTexto(Servidor* servidor, Puntero datos) {
 	mutexBloquear(mutexRuta);
 	File file = fileAbrir(rutaBuffer, "a+");
 	mutexDesbloquear(mutexRuta);
 	fprintf(file, "%s", (String)datos);
 	fileCerrar(file);
-	semaforoSignal(semaforoTarea);
+	socketPrevenirDesconexion(servidor);
 }
 
 BloqueYama bloqueConvertirParaYama(Bloque* bloque) {
@@ -2909,9 +2910,13 @@ void semaforosDestruir() {
 //TODO los txt se copian mas lento que los binarios?
 //TODO el bitmap se actualiza al final o al principio
 //TODO archivo maximo data.bin aprox
+//TODO el archivo mientras en mas nodo este repartido mejor no es que en 2 solo tiene que estar
+//TODO Hay que priorizar que trabajen todos al mismo tiempo o puede se por actividad
+
 
 //TODO directorios con muchos subdirectorios rompe
 //TODO deberia crear al menos algunos directorios y parar cuando se alcance el limite no tirar de una que se excede el limite
 //TODO nodes muestre bloques totales
 //TODO nodes mostrar "no hay nodos"
 //TODO md5 poner sleep algo
+//TODO mostrar empieza a ejecutar hasta que igaule en actividades al otro
