@@ -218,7 +218,6 @@ Mutex* mutexEstadoEjecucion;
 Mutex* mutexEstadoControl;
 Semaforo* semaforoTarea;
 Semaforo* semaforoFinal;
-File fileg;
 
 //--------------------------------------- Funciones de File System -------------------------------------
 

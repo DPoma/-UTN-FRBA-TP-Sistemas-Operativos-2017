@@ -53,7 +53,7 @@
 #define ID_DATANODE 5
 #define ESCRITURA "w"
 #define LECTURA "r"
-#define BLOQUE 256 // 1048576
+#define BLOQUE 1048576
 #define ROJO "\x1b[31m"
 #define AMARILLO "\x1b[33m"
 #define BLANCO "\x1b[0m"

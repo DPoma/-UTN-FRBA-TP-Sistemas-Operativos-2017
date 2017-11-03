@@ -1338,6 +1338,8 @@ void comandoObtenerMD5DeArchivo(Comando* comando) {
 
 void comandoInformacionNodos() {
 	int indice;
+	int bloquesTotales = 0;
+	int bloquesLibres = 0;
 	for(indice = 0; indice < nodoListaCantidad(); indice++) {
 		Nodo* nodo = nodoListaObtener(indice);
 		puts("------------------------------------------");
@@ -1345,11 +1347,21 @@ void comandoInformacionNodos() {
 		printf("IP: %s | Puerto: %s\n", nodo->ip, nodo->puerto);
 		printf("Bloques totales %i\n", nodo->bloquesTotales);
 		printf("Bloques libres %i\n", nodo->bloquesLibres);
+		bloquesTotales += nodo->bloquesTotales;
+		bloquesLibres += nodo->bloquesLibres;
 		if(nodoConectado(nodo))
 			puts("Estado: Conectado");
 		else
 			puts("Estado: Desconectado");
 	}
+	if(indice == 0) {
+		puts("No hay nodos conectados");
+		return;
+	}
+	puts("------------------------------------------");
+	printf("Bloques totales %i\n", bloquesTotales);
+	printf("Bloques libres %i\n", bloquesLibres);
+
 }
 
 void comandoAyuda() {
@@ -2897,26 +2909,25 @@ void semaforosDestruir() {
 	memoriaLiberar(mutexEstadoControl);
 }
 
-//TODO Cuando se matan los nodos (cpblock, cpto, md5, cpfrom, cat, solo funciona con cpfrom por solo enviar)
-//TODO con el nodo desconectado puedo borrar archivo y todo eso, no es que el nodo tiene que estar conectado porque no seria logico blabla
-//TODO Que pasa si inicio con --clean y no tiro el format puedo usar los comandos y que pasa con eso
-//TODO ver si hay que borrar todo con clean ya que luego tengo que tirar el format
-//TODO controlan la cantidad de bloques de un archivo
-//TODO si hay espacios para una copia de cada bloque se admite o no el archivo (dejar rollback o no)
-//TODO Esta prohibido dos copias en un mismo nodo
-//TODO el data bin cambia o solo cambia la primera vez ejemplo inicio normal y con un nodo valido le cambio el data.bin (VER)
-//TODO el data bin cambia solo cuando hay que iniciar de cero el FS no cuando recupera estado
-//TODO el numero de copia tiene valor
+//TODO Cuando se van a matar los nodos
 //TODO los txt se copian mas lento que los binarios?
-//TODO el bitmap se actualiza al final o al principio
-//TODO archivo maximo data.bin aprox
-//TODO el archivo mientras en mas nodo este repartido mejor no es que en 2 solo tiene que estar
-//TODO Hay que priorizar que trabajen todos al mismo tiempo o puede se por actividad
+//TODO Que pasa si inicio con --clean y no tiro el format puedo usar los comandos (yo diria que no porque esto rompe sino)
+//TODO el md5 (por lo tanto el cpto) hasta ahora lo muestra bien pero cuando bajo eltamaño del bloques 256
+//80% de las veces, esto importa o tiene que ser 100% si o si
 
+//TODO utilizo algoritmo de actividades que se reinicia cuando termina, si se desconecta uno trabaja hasta empatar al otro (explicar algoritmo)
+//TODO Hay que priorizar que trabajen todos al mismo tiempo o puede se como mi algoritmo de actividades
+//TODO Esta prohibido dos copias en un mismo nodo (aca se adapta)
+//TODO lo ideal es que el archivo este repartido en la mayor cantidad de nodos posible
+
+//TODO si hay espacios para una copia de cada bloque se admite o no el archivo (dejar rollback o no)
+//TODO controlan la cantidad de bloques de un archivo (explicar la parte del \0 que descuento, ya que uso strcat, el md5 da bien md5 > bloques ?)
+//TODO el numero de copia tiene valor (como uso lista la posicion 1 se vuelve 0)
+
+//TODO cuando se reconecta el nodo lo hace con el mismo databin, no es que hay que fijarse. Y si cambia el databin y tiro format deberia tomarlo el nuevo dbin
+//TODO archivo maximo data.bin aprox
+
+//TODO con el nodo desconectado puedo borrar archivo y todo eso, no es que el nodo tiene que estar conectado porque no seria logico blabla
 
 //TODO directorios con muchos subdirectorios rompe
 //TODO deberia crear al menos algunos directorios y parar cuando se alcance el limite no tirar de una que se excede el limite
-//TODO nodes muestre bloques totales
-//TODO nodes mostrar "no hay nodos"
-//TODO md5 poner sleep algo
-//TODO mostrar empieza a ejecutar hasta que igaule en actividades al otro
