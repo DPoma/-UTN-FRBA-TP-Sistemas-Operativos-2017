@@ -602,7 +602,7 @@ lGlobOri* getOrigenesGlobales(char* origen){
 	for(i=0;(i-1)==origenes->cant;i++){
 		memcpy(&sizeOri, origen + size , sizeof(int32_t));
 		size= size + sizeof(int32_t);
-		memcpy&temporis,origen + size, sizeOri);
+		memcpy(&temporis,origen + size, sizeOri);
 		size= size + sizeOri;
 		((globOri*) oris[i])->ruta = realloc(((globOri*) oris[i])->ruta,sizeof(RUTA_TEMPS)+16);
 		strcat(((globOri*) oris[i])->ruta,RUTA_TEMPS);

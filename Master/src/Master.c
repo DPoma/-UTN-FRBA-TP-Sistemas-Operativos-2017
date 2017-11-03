@@ -169,6 +169,9 @@ void transformaciones(Lista bloques){
 	socketCerrar(socketWorker);
 }
 
+void reduccionLocal(Mensaje* m){
+
+}
 
 //void reduccionLocal(Mensaje* m){
 //	WorkerReduccion* wr= deserializarReduccion(m);
