@@ -442,13 +442,21 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 			/////////////////////////////////////////FIN SERIALIZACION DANIEL
 
 			/////////////////////////////////////////INICIO SERIALIZACION NICOLAS
+			Dir* nodofalso;
+			nodofalso->ip[0]="0";
+			nodofalso->port[0]="0";
 			int tamanio=(DIRSIZE+TEMPSIZE)*(nodosReducidos->elements_count+1)+sizeof(int32_t);
 			void* dato=malloc(tamanio);
 			memcpy(dato+TEMPSIZE,&nodoMenorCarga,DIRSIZE);
 			memcpy(dato,&nodosReducidos->elements_count,sizeof(int32_t));
 			int i,j;
 			for(i=sizeof(int32_t)+DIRSIZE,j=0;i<tamanio-TEMPSIZE;i+=DIRSIZE+TEMPSIZE,j++){
-				memcpy(dato+i,&((Entrada*)list_get(nodosReducidos,j))->nodo,DIRSIZE);
+				if (nodoMenorCarga==((Entrada*)list_get(nodosReducidos,j))->nodo){
+					memcpy(dato+i,nodofalso,DIRSIZE);
+				}
+				else{
+					memcpy(dato+i,&((Entrada*)list_get(nodosReducidos,j))->nodo,DIRSIZE);
+				}
 				memcpy(dato+i+DIRSIZE,((Entrada*)list_get(nodosReducidos,j))->pathTemporal,TEMPSIZE);
 			}
 			memcpy(dato+i,reducGlobal.pathTemporal,TEMPSIZE);

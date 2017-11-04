@@ -183,6 +183,19 @@ void reduccionLocal(Mensaje* m){
 	mensajeEnviar(sWorker,ReducLocal,nuevoBuffer,tamanio);
 }
 
+void reduccionGlobal(Mensaje* m){
+	Dir* NODO;
+	int canttemps;
+	memcpy(NODO->ip, m->datos, sizeof(char)*20);
+	memcpy(NODO->port,m->datos + sizeof(char)*20, sizeof(char)*20);
+	memcpy(&canttemps, m->datos + sizeof(char)*40, sizeof(int32_t));
+	int tamanio=TEMPSIZE*(canttemps+1)+sizeof(int32_t)+lenReduccion;
+	char* nuevoBuffer =malloc(tamanio);
+	memcpy(&nuevoBuffer, scriptReduccion, lenReduccion);
+	memcpy(&nuevoBuffer + lenReduccion, m->datos+ sizeof(char)*40, tamanio - lenReduccion);
+	Socket sWorker =socketCrearCliente(NODO->ip, NODO->port, ID_MASTER);
+	mensajeEnviar(sWorker,ReducLocal,nuevoBuffer,tamanio);
+}
 //void reduccionLocal(Mensaje* m){
 //	WorkerReduccion* wr= deserializarReduccion(m);
 //	int i;
