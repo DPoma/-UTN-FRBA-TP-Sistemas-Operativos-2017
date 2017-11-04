@@ -451,7 +451,7 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 			memcpy(dato,&nodosReducidos->elements_count,sizeof(int32_t));
 			int i,j;
 			for(i=sizeof(int32_t)+DIRSIZE,j=0;i<tamanio-TEMPSIZE;i+=DIRSIZE+TEMPSIZE,j++){
-				if (nodoMenorCarga==((Entrada*)list_get(nodosReducidos,j))->nodo){
+				if (nodoMenorCarga.ip==((Entrada*)list_get(nodosReducidos,j))->nodo.ip){
 					memcpy(dato+i,nodofalso,DIRSIZE);
 				}
 				else{
