@@ -106,6 +106,7 @@ void yamaAtender() {
 		Socket socketI;
 		Socket maximoSocket = servidor->maximoSocket;
 		for(socketI = 0; socketI <= maximoSocket; socketI++){
+			retardo();
 			if (listaSocketsContiene(socketI, &servidor->listaSelect)){ //se recibio algo
 				//podría disparar el thread aca o antes de planificar
 				if(socketI==servidor->listenerMaster){
@@ -442,7 +443,6 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 		list_addM(tablaEstados,&almacenado,sizeof(Entrada));
 	}else
 		list_add(tablaUsados,list_remove_by_condition(tablaEstados,mismoJob));
-
 }
 
 void dibujarTablaEstados(){
@@ -470,29 +470,7 @@ void dibujarTablaEstados(){
 	list_iterate(tablaEstados,dibujarEntrada);
 }
 
-void darPathTemporal(char** ret,char pre){
-	//mutex
-	static char* anterior;
-	static char agregado;
-	char* temp=temporal_get_string_time();
-	*ret=malloc(TEMPSIZE); //12
-	int i,j=1;
-	*ret[0]=pre; //creo que la precedencia esta bien
-	for(i=0;i<12;i++){
-		if(temp[i]==':')
-			continue;
-		*ret[j]=temp[i];
-		j++;
-	}
-	*ret[10]='0';
-	*ret[11]='\0';
-	if(stringIguales(*ret,anterior))
-		agregado++;
-	else
-		agregado='0';
-	*ret[10]=agregado;
-	anterior=string_duplicate(*ret); //leak?
-}
+
 
 int ipToNum(char* ip){//no se si puede pasar un array a pointer asi nomas
 	int index,i=0;
@@ -505,3 +483,50 @@ int ipToNum(char* ip){//no se si puede pasar un array a pointer asi nomas
 	return index;
 }
 //lo mismo con socketMasters a menos que -2 funcione
+
+void darPathTemporal(char** ret,char pre){
+	//mutex
+	static char* anterior;
+	static char agregado;
+	char* temp=temporal_get_string_time();
+	*ret=malloc(TEMPSIZE); //12
+	int i,j=1;
+	(*ret)[0]=pre; //creo que la precedencia esta bien
+	for(i=0;i<12;i++){
+		if(temp[i]==':')
+			continue;
+		(*ret)[j]=temp[i];
+		j++;
+	}
+	(*ret)[10]='0';
+	(*ret)[11]='\0';
+	if(stringIguales(*ret,anterior))
+		agregado++;
+	else
+		agregado='0';
+	(*ret)[10]=agregado;
+	free(anterior);
+	anterior=string_duplicate(*ret);
+}
+
+void retardo(){usleep(configuracion->retardoPlanificacion);}
+
+//version mas eficiente, negada y olvidada
+//int64_t darPathTemporal(int64_t ret){ //debería ser != 0
+//	//mutex
+//	static int64_t anterior;
+//	static int agregado;
+//	char* temp=temporal_get_string_time();
+//	int i;
+//	for(i=0;i<12;i++){
+//		if(temp[i]==':')
+//			continue;
+//		ret=ret*10+temp[i]-'0';
+//	}
+//	int64_t anteriorTemp=ret;
+//	if(anterior==ret) agregado++;
+//	else agregado=0;
+//	ret=ret*10+agregado;
+//	anterior=anteriorTemp;
+//	return ret;
+//}
