@@ -385,14 +385,30 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 			darPathTemporal(&reducLocal.pathTemporal,'l');
 			reducLocal.etapa=ReducLocal;
 			Lista nodos=list_filter(tablaEstados,mismoNodoJob);
-			int tamanio=TEMPSIZE*(nodos->elements_count+1)+DIRSIZE;
+
+			/////////////////////////////////////////INICIO SERIALIZACION DANIEL
+			/*int tamanio=TEMPSIZE*(nodos->elements_count+1)+DIRSIZE;
 			void* dato=malloc(tamanio);
 			memcpy(dato,&reducLocal.nodo,DIRSIZE);
 			memcpy(dato+DIRSIZE,reducLocal.pathTemporal,TEMPSIZE);
 			int i,j;
 			for(i=TEMPSIZE+DIRSIZE,j=0;i<tamanio;i+=TEMPSIZE,j++)
 				memcpy(dato+i,((Entrada*)list_get(nodos,j))->pathTemporal,TEMPSIZE);
+			mensajeEnviar(reducLocal.masterid,ReducLocal,dato,tamanio);*/
+			/////////////////////////////////////////FIN SERIALIZACION DANIEL
+
+			/////////////////////////////////////////INICIO SERIALIZACION NICOLAS
+			int tamanio=TEMPSIZE*(nodos->elements_count+1)+DIRSIZE+sizeof(int32_t);
+			void* dato=malloc(tamanio);
+			memcpy(dato,&reducLocal.nodo,DIRSIZE);
+			memcpy(dato,&nodos->elements_count,sizeof(int32_t));
+			int i,j;
+			for(i=sizeof(int32_t)+DIRSIZE,j=0;i<tamanio-TEMPSIZE;i+=TEMPSIZE,j++)
+				memcpy(dato+i,((Entrada*)list_get(nodos,j))->pathTemporal,TEMPSIZE);
+			memcpy(dato+i,reducLocal.pathTemporal,TEMPSIZE);
 			mensajeEnviar(reducLocal.masterid,ReducLocal,dato,tamanio);
+			/////////////////////////////////////////FIN SERIALIZACION NICOLAS
+
 			moverAUsados(mismoNodoJob);
 			list_addM(tablaEstados,&reducLocal,sizeof(Entrada));//mutex
 		}
@@ -412,7 +428,9 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 			}
 			list_iterate(workers,menorCarga);
 			Lista nodosReducidos=list_filter(tablaEstados,mismoJob);
-			int tamanio=(DIRSIZE+TEMPSIZE)*(nodosReducidos->elements_count+1);
+
+			/////////////////////////////////////////INICIO SERIALIZACION DANIEL
+			/*int tamanio=(DIRSIZE+TEMPSIZE)*(nodosReducidos->elements_count+1);
 			void* dato=malloc(tamanio);
 			memcpy(dato,reducGlobal.pathTemporal,TEMPSIZE);
 			memcpy(dato+TEMPSIZE,&nodoMenorCarga,DIRSIZE);
@@ -420,10 +438,36 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 			for(i=TEMPSIZE+DIRSIZE,j=0;i<tamanio;i+=DIRSIZE+TEMPSIZE,j++){
 				memcpy(dato+i,&((Entrada*)list_get(nodosReducidos,j))->nodo,DIRSIZE);
 				memcpy(dato+i+DIRSIZE,((Entrada*)list_get(nodosReducidos,j))->pathTemporal,TEMPSIZE);
+				mensajeEnviar(reducGlobal.masterid,ReducGlobal,dato,tamanio);
+			}*/
+			/////////////////////////////////////////FIN SERIALIZACION DANIEL
+
+			/////////////////////////////////////////INICIO SERIALIZACION NICOLAS
+			Dir* nodofalso;
+			nodofalso->ip[0]="0";
+			nodofalso->port[0]="0";
+			int tamanio=(DIRSIZE+TEMPSIZE)*(nodosReducidos->elements_count+1)+sizeof(int32_t);
+			void* dato=malloc(tamanio);
+			memcpy(dato+TEMPSIZE,&nodoMenorCarga,DIRSIZE);
+			memcpy(dato,&nodosReducidos->elements_count,sizeof(int32_t));
+			int i,j;
+			for(i=sizeof(int32_t)+DIRSIZE,j=0;i<tamanio-TEMPSIZE;i+=DIRSIZE+TEMPSIZE,j++){
+				if (nodoMenorCarga.ip==((Entrada*)list_get(nodosReducidos,j))->nodo.ip){
+					memcpy(dato+i,nodofalso,DIRSIZE);
+				}
+				else{
+					memcpy(dato+i,&((Entrada*)list_get(nodosReducidos,j))->nodo,DIRSIZE);
+				}
+				memcpy(dato+i+DIRSIZE,((Entrada*)list_get(nodosReducidos,j))->pathTemporal,TEMPSIZE);
 			}
+			memcpy(dato+i,reducGlobal.pathTemporal,TEMPSIZE);
 			mensajeEnviar(reducGlobal.masterid,ReducGlobal,dato,tamanio);
+			//////////////////////////////////////////FIN SERIALIZACION NICOLAS
+
 			moverAUsados(mismoJob);
 			list_addM(tablaEstados,&reducGlobal,sizeof(Entrada));//mutex
+
+
 		}
 	}else if(entradaA->etapa==ReducGlobal){
 		//no le veo sentido a que yama participe del almacenado final

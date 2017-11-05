@@ -184,6 +184,7 @@ int estadoEjecucion;
 int estadoFileSystem;
 int flagMensaje;
 int directoriosDisponibles;
+int flagSocket;
 Hilo hiloConsola;
 Lista listaDirectorios;
 Lista listaArchivos;
@@ -202,6 +203,7 @@ String rutaBuffer;
 Nodo* nodoBuffer;
 Bloque* bloqueBuffer;
 Archivo* archivoBuffer;
+Mutex* mutexTarea;
 Mutex* mutexRuta;
 Mutex* mutexNodo;
 Mutex* mutexBloque;
@@ -290,11 +292,12 @@ bool socketEsYama(Servidor* servidor, Socket unSocket);
 bool socketEsListenerDataNode(Servidor* servidor, Socket unSocket);
 bool socketEsWorker(Servidor* servidor, Socket unSocket);
 bool socketEsListenerWorker(Servidor* servidor, Socket unSocket);
-void socketAgregar(Socket* unSocket);
-int socketCantidad();
-void socketEliminar(int posicion);
-void socketDestruir();
-Socket* socketObtener(int posicion);
+void socketListaAgregar(Socket* unSocket);
+int socketListaCantidad();
+void socketListaEliminar(int posicion);
+void socketListaDestruir();
+Socket* socketListaObtener(int posicion);
+void socketListaLimpiar();
 
 //--------------------------------------- Funciones de Consola -------------------------------------
 
@@ -477,8 +480,9 @@ int bloqueEnviarCopiasANodos(Bloque* bloque, String buffer);
 bool bloqueOrdenarPorNumero(Bloque* unBloque, Bloque* otroBloque);
 void bloqueCopiar(Puntero datos);
 void bloqueLeer(Servidor* servidor, Puntero datos);
-void bloqueCopiarTexto(Puntero datos);
-void bloqueCopiarBinario(Puntero datos);
+//void bloqueLeer(Servidor* servidor, Puntero datos, Socket unSocket);
+void bloqueCopiarTexto(Servidor* servidor, Puntero datos);
+void bloqueCopiarBinario(Servidor* servidor, Puntero datos);
 bool bloqueDisponible(Bloque* bloque);
 BloqueNodo* bloqueNodoCrear(Entero numeroBloque, String buffer, int tamanioUtilizado);
 BloqueYama bloqueConvertirParaYama(Bloque* bloque);
@@ -518,6 +522,7 @@ void estadoFileSystemEstable();
 void estadoFileSystemInestable();
 void estadoEjecucionNormal();
 void estadoControlDesactivar();
+void estadoMensaje(int estado);
 
 //--------------------------------------- Funciones de Bitmaps de directorios ------------------------------------
 

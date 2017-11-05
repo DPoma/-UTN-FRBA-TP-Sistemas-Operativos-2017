@@ -1,58 +1,264 @@
-[INFO] 14:03:38:293 FileSystem/(10897:10897): [EJECUCION] Proceso File System iniciado
-[INFO] 14:03:38:355 FileSystem/(10897:10897): [CONFIGURACION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 14:03:38:356 FileSystem/(10897:10897): [CONFIGURACION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 14:03:38:357 FileSystem/(10897:10897): [CONFIGURACION] Esperando conexiones de Workers (Puerto: 5080)
-[INFO] 14:03:38:357 FileSystem/(10897:10897): [CONFIGURACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
-[INFO] 14:03:38:403 FileSystem/(10897:10897): [33m[AVISO] Conecte los nodos y formatee el File System para estabilizarlo[0m
-[INFO] 14:03:41:175 FileSystem/(10897:10897): [33m[CONEXION] NODO1 conectado[0m
-[INFO] 14:03:45:318 FileSystem/(10897:10902): [FORMATEO] El File System fue formateado
-[INFO] 14:03:45:318 FileSystem/(10897:10902): [33m[ESTADO] El File System esta estable[0m
-[INFO] 14:06:32:526 FileSystem/(10897:10902): [ARCHIVO] El archivo /home/utnso/Escritorio/lala fue copiado en File System
-[INFO] 14:06:48:846 FileSystem/(10897:10902): [ARCHIVO] El archivo lala se copio en /home/utnso/Escritorio/Metadata/lala
-[INFO] 14:06:48:899 FileSystem/(10897:10902): [ARCHIVO] El MD5 del archivo es dd3ff876c45f2d1e1c95bf09f0e219de  /home/utnso/Escritorio/Metadata/lala
+[INFO] 18:51:43:159 FileSystem/(9814:9814): [EJECUCION] Proceso File System iniciado
+[INFO] 18:51:43:221 FileSystem/(9814:9814): [CONFIGURACION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 18:51:43:222 FileSystem/(9814:9814): [CONFIGURACION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 18:51:43:223 FileSystem/(9814:9814): [CONFIGURACION] Esperando conexiones de Workers (Puerto: 5080)
+[INFO] 18:51:43:223 FileSystem/(9814:9814): [CONFIGURACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
+[INFO] 18:51:43:271 FileSystem/(9814:9814): [33m[AVISO] Conecte los nodos y formatee el File System para estabilizarlo[0m
+[INFO] 18:52:14:35 FileSystem/(9814:9814): [33m[AVISO] NODO1 conectado[0m
+[INFO] 18:52:21:811 FileSystem/(9814:9814): [33m[AVISO] NODO2 conectado[0m
+[INFO] 18:52:26:352 FileSystem/(9814:9814): [33m[AVISO] NODO3 conectado[0m
+[INFO] 18:52:30:956 FileSystem/(9814:9814): [33m[AVISO] NODO4 conectado[0m
+[INFO] 18:52:34:142 FileSystem/(9814:9819): [FORMATEO] El File System fue formateado
+[INFO] 18:52:34:142 FileSystem/(9814:9819): [33m[AVISO] El File System esta estable[0m
+[INFO] 18:52:38:981 FileSystem/(9814:9819): [DIRECTORIO] El directorio esta vacio
+[INFO] 18:54:02:473 FileSystem/(9814:9814): [33m[AVISO] NODO4 desconectado[0m
+[INFO] 18:54:02:994 FileSystem/(9814:9814): [33m[AVISO] NODO3 desconectado[0m
+[INFO] 18:54:03:774 FileSystem/(9814:9814): [33m[AVISO] NODO4 conectado[0m
+[INFO] 18:54:05:181 FileSystem/(9814:9814): [33m[AVISO] NODO4 desconectado[0m
+[INFO] 18:54:05:188 FileSystem/(9814:9819): [ARCHIVO] El archivo /home/utnso/Escritorio/lala fue copiado en File System
+[INFO] 18:54:05:807 FileSystem/(9814:9814): [33m[AVISO] NODO4 conectado[0m
+[INFO] 18:54:11:994 FileSystem/(9814:9819): [ARCHIVO] Nombre: lala
+[INFO] 18:54:11:995 FileSystem/(9814:9819): [ARCHIVO] Tipo: BINARIO
+[INFO] 18:54:11:996 FileSystem/(9814:9819): [ARCHIVO] Ubicacion: /lala
+[INFO] 18:54:11:996 FileSystem/(9814:9819): [ARCHIVO] ID Padre: 0
+[INFO] 18:54:11:999 FileSystem/(9814:9819): [ARCHIVO] Tamanio: 79691776 bytes
+[INFO] 18:54:12:7 FileSystem/(9814:9819): [ARCHIVO] Bloques: 76
+[INFO] 18:54:12:8 FileSystem/(9814:9819): [ARCHIVO] Bloque 0: 1048576 bytes
+[INFO] 18:54:12:10 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO4 | Bloque: 0
+[INFO] 18:54:12:11 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO3 | Bloque: 0
+[INFO] 18:54:12:11 FileSystem/(9814:9819): [ARCHIVO] Bloque 1: 1048576 bytes
+[INFO] 18:54:12:11 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 0
+[INFO] 18:54:12:12 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 0
+[INFO] 18:54:12:12 FileSystem/(9814:9819): [ARCHIVO] Bloque 2: 1048576 bytes
+[INFO] 18:54:12:12 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO4 | Bloque: 1
+[INFO] 18:54:12:12 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO3 | Bloque: 1
+[INFO] 18:54:12:13 FileSystem/(9814:9819): [ARCHIVO] Bloque 3: 1048576 bytes
+[INFO] 18:54:12:13 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 1
+[INFO] 18:54:12:13 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 1
+[INFO] 18:54:12:14 FileSystem/(9814:9819): [ARCHIVO] Bloque 4: 1048576 bytes
+[INFO] 18:54:12:14 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO4 | Bloque: 2
+[INFO] 18:54:12:14 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO3 | Bloque: 2
+[INFO] 18:54:12:14 FileSystem/(9814:9819): [ARCHIVO] Bloque 5: 1048576 bytes
+[INFO] 18:54:12:15 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 2
+[INFO] 18:54:12:15 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 2
+[INFO] 18:54:12:15 FileSystem/(9814:9819): [ARCHIVO] Bloque 6: 1048576 bytes
+[INFO] 18:54:12:16 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO4 | Bloque: 3
+[INFO] 18:54:12:16 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO3 | Bloque: 3
+[INFO] 18:54:12:16 FileSystem/(9814:9819): [ARCHIVO] Bloque 7: 1048576 bytes
+[INFO] 18:54:12:16 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 3
+[INFO] 18:54:12:17 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 3
+[INFO] 18:54:12:17 FileSystem/(9814:9819): [ARCHIVO] Bloque 8: 1048576 bytes
+[INFO] 18:54:12:17 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO4 | Bloque: 4
+[INFO] 18:54:12:18 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO3 | Bloque: 4
+[INFO] 18:54:12:18 FileSystem/(9814:9819): [ARCHIVO] Bloque 9: 1048576 bytes
+[INFO] 18:54:12:18 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 4
+[INFO] 18:54:12:18 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 4
+[INFO] 18:54:12:19 FileSystem/(9814:9819): [ARCHIVO] Bloque 10: 1048576 bytes
+[INFO] 18:54:12:19 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO4 | Bloque: 5
+[INFO] 18:54:12:19 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO3 | Bloque: 5
+[INFO] 18:54:12:20 FileSystem/(9814:9819): [ARCHIVO] Bloque 11: 1048576 bytes
+[INFO] 18:54:12:20 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 5
+[INFO] 18:54:12:20 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 5
+[INFO] 18:54:12:20 FileSystem/(9814:9819): [ARCHIVO] Bloque 12: 1048576 bytes
+[INFO] 18:54:12:21 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO4 | Bloque: 6
+[INFO] 18:54:12:21 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO3 | Bloque: 6
+[INFO] 18:54:12:21 FileSystem/(9814:9819): [ARCHIVO] Bloque 13: 1048576 bytes
+[INFO] 18:54:12:22 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 6
+[INFO] 18:54:12:22 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 6
+[INFO] 18:54:12:22 FileSystem/(9814:9819): [ARCHIVO] Bloque 14: 1048576 bytes
+[INFO] 18:54:12:22 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO4 | Bloque: 7
+[INFO] 18:54:12:23 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO3 | Bloque: 7
+[INFO] 18:54:12:23 FileSystem/(9814:9819): [ARCHIVO] Bloque 15: 1048576 bytes
+[INFO] 18:54:12:23 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 7
+[INFO] 18:54:12:24 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 7
+[INFO] 18:54:12:24 FileSystem/(9814:9819): [ARCHIVO] Bloque 16: 1048576 bytes
+[INFO] 18:54:12:24 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO3 | Bloque: 8
+[INFO] 18:54:12:24 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 8
+[INFO] 18:54:12:25 FileSystem/(9814:9819): [ARCHIVO] Bloque 17: 1048576 bytes
+[INFO] 18:54:12:25 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 8
+[INFO] 18:54:12:25 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 9
+[INFO] 18:54:12:26 FileSystem/(9814:9819): [ARCHIVO] Bloque 18: 1048576 bytes
+[INFO] 18:54:12:26 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO3 | Bloque: 9
+[INFO] 18:54:12:26 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO1 | Bloque: 9
+[INFO] 18:54:12:26 FileSystem/(9814:9819): [ARCHIVO] Bloque 19: 1048576 bytes
+[INFO] 18:54:12:27 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO2 | Bloque: 10
+[INFO] 18:54:12:27 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO1 | Bloque: 10
+[INFO] 18:54:12:27 FileSystem/(9814:9819): [ARCHIVO] Bloque 20: 1048576 bytes
+[INFO] 18:54:12:28 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO3 | Bloque: 10
+[INFO] 18:54:12:28 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO1 | Bloque: 11
+[INFO] 18:54:12:28 FileSystem/(9814:9819): [ARCHIVO] Bloque 21: 1048576 bytes
+[INFO] 18:54:12:28 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO2 | Bloque: 11
+[INFO] 18:54:12:29 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO3 | Bloque: 11
+[INFO] 18:54:12:29 FileSystem/(9814:9819): [ARCHIVO] Bloque 22: 1048576 bytes
+[INFO] 18:54:12:29 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 12
+[INFO] 18:54:12:30 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO3 | Bloque: 12
+[INFO] 18:54:12:30 FileSystem/(9814:9819): [ARCHIVO] Bloque 23: 1048576 bytes
+[INFO] 18:54:12:30 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO2 | Bloque: 12
+[INFO] 18:54:12:30 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO3 | Bloque: 13
+[INFO] 18:54:12:31 FileSystem/(9814:9819): [ARCHIVO] Bloque 24: 1048576 bytes
+[INFO] 18:54:12:31 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 13
+[INFO] 18:54:12:31 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 13
+[INFO] 18:54:12:32 FileSystem/(9814:9819): [ARCHIVO] Bloque 25: 1048576 bytes
+[INFO] 18:54:12:32 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO3 | Bloque: 14
+[INFO] 18:54:12:32 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 14
+[INFO] 18:54:12:32 FileSystem/(9814:9819): [ARCHIVO] Bloque 26: 1048576 bytes
+[INFO] 18:54:12:33 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 14
+[INFO] 18:54:12:33 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 15
+[INFO] 18:54:12:33 FileSystem/(9814:9819): [ARCHIVO] Bloque 27: 1048576 bytes
+[INFO] 18:54:12:34 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 15
+[INFO] 18:54:12:34 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 16
+[INFO] 18:54:12:34 FileSystem/(9814:9819): [ARCHIVO] Bloque 28: 1048576 bytes
+[INFO] 18:54:12:35 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 16
+[INFO] 18:54:12:35 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 17
+[INFO] 18:54:12:35 FileSystem/(9814:9819): [ARCHIVO] Bloque 29: 1048576 bytes
+[INFO] 18:54:12:35 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 17
+[INFO] 18:54:12:36 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 18
+[INFO] 18:54:12:42 FileSystem/(9814:9819): [ARCHIVO] Bloque 30: 1048576 bytes
+[INFO] 18:54:12:42 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 18
+[INFO] 18:54:12:43 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 19
+[INFO] 18:54:12:43 FileSystem/(9814:9819): [ARCHIVO] Bloque 31: 1048576 bytes
+[INFO] 18:54:12:43 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 19
+[INFO] 18:54:12:43 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 20
+[INFO] 18:54:12:44 FileSystem/(9814:9819): [ARCHIVO] Bloque 32: 1048576 bytes
+[INFO] 18:54:12:44 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 20
+[INFO] 18:54:12:44 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 21
+[INFO] 18:54:12:45 FileSystem/(9814:9819): [ARCHIVO] Bloque 33: 1048576 bytes
+[INFO] 18:54:12:45 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 21
+[INFO] 18:54:12:45 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 22
+[INFO] 18:54:12:45 FileSystem/(9814:9819): [ARCHIVO] Bloque 34: 1048576 bytes
+[INFO] 18:54:12:46 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 22
+[INFO] 18:54:12:46 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 23
+[INFO] 18:54:12:46 FileSystem/(9814:9819): [ARCHIVO] Bloque 35: 1048576 bytes
+[INFO] 18:54:12:47 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 23
+[INFO] 18:54:12:47 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 24
+[INFO] 18:54:12:47 FileSystem/(9814:9819): [ARCHIVO] Bloque 36: 1048576 bytes
+[INFO] 18:54:12:48 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 24
+[INFO] 18:54:12:48 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 25
+[INFO] 18:54:12:48 FileSystem/(9814:9819): [ARCHIVO] Bloque 37: 1048576 bytes
+[INFO] 18:54:12:48 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 25
+[INFO] 18:54:12:49 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 26
+[INFO] 18:54:12:49 FileSystem/(9814:9819): [ARCHIVO] Bloque 38: 1048576 bytes
+[INFO] 18:54:12:49 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 26
+[INFO] 18:54:12:50 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 27
+[INFO] 18:54:12:50 FileSystem/(9814:9819): [ARCHIVO] Bloque 39: 1048576 bytes
+[INFO] 18:54:12:50 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 27
+[INFO] 18:54:12:50 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 28
+[INFO] 18:54:12:51 FileSystem/(9814:9819): [ARCHIVO] Bloque 40: 1048576 bytes
+[INFO] 18:54:12:51 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 28
+[INFO] 18:54:12:51 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 29
+[INFO] 18:54:12:52 FileSystem/(9814:9819): [ARCHIVO] Bloque 41: 1048576 bytes
+[INFO] 18:54:12:52 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 29
+[INFO] 18:54:12:52 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 30
+[INFO] 18:54:12:53 FileSystem/(9814:9819): [ARCHIVO] Bloque 42: 1048576 bytes
+[INFO] 18:54:12:53 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 30
+[INFO] 18:54:12:53 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 31
+[INFO] 18:54:12:53 FileSystem/(9814:9819): [ARCHIVO] Bloque 43: 1048576 bytes
+[INFO] 18:54:12:54 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO4 | Bloque: 8
+[INFO] 18:54:12:54 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO1 | Bloque: 31
+[INFO] 18:54:12:54 FileSystem/(9814:9819): [ARCHIVO] Bloque 44: 1048576 bytes
+[INFO] 18:54:12:55 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO4 | Bloque: 9
+[INFO] 18:54:12:55 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 32
+[INFO] 18:54:12:55 FileSystem/(9814:9819): [ARCHIVO] Bloque 45: 1048576 bytes
+[INFO] 18:54:12:55 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO4 | Bloque: 10
+[INFO] 18:54:12:56 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO1 | Bloque: 32
+[INFO] 18:54:12:56 FileSystem/(9814:9819): [ARCHIVO] Bloque 46: 1048576 bytes
+[INFO] 18:54:12:56 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO4 | Bloque: 11
+[INFO] 18:54:12:56 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 33
+[INFO] 18:54:12:57 FileSystem/(9814:9819): [ARCHIVO] Bloque 47: 1048576 bytes
+[INFO] 18:54:12:57 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO4 | Bloque: 12
+[INFO] 18:54:12:57 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO1 | Bloque: 33
+[INFO] 18:54:12:58 FileSystem/(9814:9819): [ARCHIVO] Bloque 48: 1048576 bytes
+[INFO] 18:54:12:58 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO4 | Bloque: 13
+[INFO] 18:54:12:58 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 34
+[INFO] 18:54:12:59 FileSystem/(9814:9819): [ARCHIVO] Bloque 49: 1048576 bytes
+[INFO] 18:54:12:59 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO4 | Bloque: 14
+[INFO] 18:54:12:59 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO1 | Bloque: 34
+[INFO] 18:54:12:59 FileSystem/(9814:9819): [ARCHIVO] Bloque 50: 1048576 bytes
+[INFO] 18:54:12:60 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO4 | Bloque: 15
+[INFO] 18:54:12:60 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 35
+[INFO] 18:54:12:60 FileSystem/(9814:9819): [ARCHIVO] Bloque 51: 1048576 bytes
+[INFO] 18:54:12:61 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO4 | Bloque: 16
+[INFO] 18:54:12:61 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO1 | Bloque: 35
+[INFO] 18:54:12:61 FileSystem/(9814:9819): [ARCHIVO] Bloque 52: 1048576 bytes
+[INFO] 18:54:12:61 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO4 | Bloque: 17
+[INFO] 18:54:12:62 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 36
+[INFO] 18:54:12:62 FileSystem/(9814:9819): [ARCHIVO] Bloque 53: 1048576 bytes
+[INFO] 18:54:12:62 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO4 | Bloque: 18
+[INFO] 18:54:12:62 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO1 | Bloque: 36
+[INFO] 18:54:12:63 FileSystem/(9814:9819): [ARCHIVO] Bloque 54: 1048576 bytes
+[INFO] 18:54:12:63 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO4 | Bloque: 19
+[INFO] 18:54:12:63 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 37
+[INFO] 18:54:12:64 FileSystem/(9814:9819): [ARCHIVO] Bloque 55: 1048576 bytes
+[INFO] 18:54:12:64 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO4 | Bloque: 20
+[INFO] 18:54:12:64 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO1 | Bloque: 37
+[INFO] 18:54:12:65 FileSystem/(9814:9819): [ARCHIVO] Bloque 56: 1048576 bytes
+[INFO] 18:54:12:72 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO4 | Bloque: 21
+[INFO] 18:54:12:72 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 38
+[INFO] 18:54:12:73 FileSystem/(9814:9819): [ARCHIVO] Bloque 57: 1048576 bytes
+[INFO] 18:54:12:73 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO4 | Bloque: 22
+[INFO] 18:54:12:73 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO1 | Bloque: 38
+[INFO] 18:54:12:74 FileSystem/(9814:9819): [ARCHIVO] Bloque 58: 1048576 bytes
+[INFO] 18:54:12:74 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO4 | Bloque: 23
+[INFO] 18:54:12:74 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 39
+[INFO] 18:54:12:74 FileSystem/(9814:9819): [ARCHIVO] Bloque 59: 1048576 bytes
+[INFO] 18:54:12:75 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO4 | Bloque: 24
+[INFO] 18:54:12:75 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO1 | Bloque: 39
+[INFO] 18:54:12:75 FileSystem/(9814:9819): [ARCHIVO] Bloque 60: 1048576 bytes
+[INFO] 18:54:12:76 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO4 | Bloque: 25
+[INFO] 18:54:12:76 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 40
+[INFO] 18:54:12:76 FileSystem/(9814:9819): [ARCHIVO] Bloque 61: 1048576 bytes
+[INFO] 18:54:12:76 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO4 | Bloque: 26
+[INFO] 18:54:12:77 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO1 | Bloque: 40
+[INFO] 18:54:12:77 FileSystem/(9814:9819): [ARCHIVO] Bloque 62: 1048576 bytes
+[INFO] 18:54:12:77 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO4 | Bloque: 27
+[INFO] 18:54:12:78 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 41
+[INFO] 18:54:12:78 FileSystem/(9814:9819): [ARCHIVO] Bloque 63: 1048576 bytes
+[INFO] 18:54:12:78 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO4 | Bloque: 28
+[INFO] 18:54:12:78 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO1 | Bloque: 41
+[INFO] 18:54:12:79 FileSystem/(9814:9819): [ARCHIVO] Bloque 64: 1048576 bytes
+[INFO] 18:54:12:79 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO4 | Bloque: 29
+[INFO] 18:54:12:79 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 42
+[INFO] 18:54:12:80 FileSystem/(9814:9819): [ARCHIVO] Bloque 65: 1048576 bytes
+[INFO] 18:54:12:80 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO4 | Bloque: 30
+[INFO] 18:54:12:80 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO1 | Bloque: 42
+[INFO] 18:54:12:81 FileSystem/(9814:9819): [ARCHIVO] Bloque 66: 1048576 bytes
+[INFO] 18:54:12:81 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO4 | Bloque: 31
+[INFO] 18:54:12:81 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 43
+[INFO] 18:54:12:81 FileSystem/(9814:9819): [ARCHIVO] Bloque 67: 1048576 bytes
+[INFO] 18:54:12:82 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO4 | Bloque: 32
+[INFO] 18:54:12:82 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO1 | Bloque: 43
+[INFO] 18:54:12:82 FileSystem/(9814:9819): [ARCHIVO] Bloque 68: 1048576 bytes
+[INFO] 18:54:12:83 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO4 | Bloque: 33
+[INFO] 18:54:12:83 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 44
+[INFO] 18:54:12:83 FileSystem/(9814:9819): [ARCHIVO] Bloque 69: 1048576 bytes
+[INFO] 18:54:12:83 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO4 | Bloque: 34
+[INFO] 18:54:12:84 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO1 | Bloque: 44
+[INFO] 18:54:12:84 FileSystem/(9814:9819): [ARCHIVO] Bloque 70: 1048576 bytes
+[INFO] 18:54:12:84 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO4 | Bloque: 35
+[INFO] 18:54:12:85 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 45
+[INFO] 18:54:12:85 FileSystem/(9814:9819): [ARCHIVO] Bloque 71: 1048576 bytes
+[INFO] 18:54:12:85 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO4 | Bloque: 36
+[INFO] 18:54:12:86 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO1 | Bloque: 45
+[INFO] 18:54:12:86 FileSystem/(9814:9819): [ARCHIVO] Bloque 72: 1048576 bytes
+[INFO] 18:54:12:86 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO4 | Bloque: 37
+[INFO] 18:54:12:86 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 46
+[INFO] 18:54:12:87 FileSystem/(9814:9819): [ARCHIVO] Bloque 73: 1048576 bytes
+[INFO] 18:54:12:87 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO4 | Bloque: 38
+[INFO] 18:54:12:87 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO1 | Bloque: 46
+[INFO] 18:54:12:88 FileSystem/(9814:9819): [ARCHIVO] Bloque 74: 1048576 bytes
+[INFO] 18:54:12:88 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO4 | Bloque: 39
+[INFO] 18:54:12:88 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO2 | Bloque: 47
+[INFO] 18:54:12:88 FileSystem/(9814:9819): [ARCHIVO] Bloque 75: 1048576 bytes
+[INFO] 18:54:12:89 FileSystem/(9814:9819): [ARCHIVO] Copia 0 en: Nodo: NODO4 | Bloque: 40
+[INFO] 18:54:12:89 FileSystem/(9814:9819): [ARCHIVO] Copia 1 en: Nodo: NODO1 | Bloque: 47
+[INFO] 18:55:21:513 FileSystem/(9814:9819): [ARCHIVO] El archivo lala se copio en /home/utnso/Escritorio/Metadata/lala
+[INFO] 18:55:21:759 FileSystem/(9814:9819): [ARCHIVO] El MD5 del archivo es b431d4cb1e9307d8932d352211396fe9  /home/utnso/Escritorio/Metadata/lala
 
-[INFO] 14:06:53:593 FileSystem/(10897:10902): [ARCHIVO] El archivo lala se copio en /home/utnso/Escritorio/Metadata/lala
-[INFO] 14:06:53:640 FileSystem/(10897:10902): [ARCHIVO] El MD5 del archivo es 4c89a7d0035f3ccf4c2f964a49efe733  /home/utnso/Escritorio/Metadata/lala
+[INFO] 18:55:25:832 FileSystem/(9814:9819): [ARCHIVO] El archivo lala se copio en /home/utnso/Escritorio/Metadata/lala
+[INFO] 18:55:26:77 FileSystem/(9814:9819): [ARCHIVO] El MD5 del archivo es b431d4cb1e9307d8932d352211396fe9  /home/utnso/Escritorio/Metadata/lala
 
-[INFO] 14:06:57:590 FileSystem/(10897:10902): [ARCHIVO] El archivo lala se copio en /home/utnso/Escritorio/Metadata/lala
-[INFO] 14:06:57:641 FileSystem/(10897:10902): [ARCHIVO] El MD5 del archivo es 4c89a7d0035f3ccf4c2f964a49efe733  /home/utnso/Escritorio/Metadata/lala
+[INFO] 18:55:30:791 FileSystem/(9814:9819): [ARCHIVO] El archivo lala se copio en /home/utnso/Escritorio/Metadata/lala
+[INFO] 18:55:31:29 FileSystem/(9814:9819): [ARCHIVO] El MD5 del archivo es b431d4cb1e9307d8932d352211396fe9  /home/utnso/Escritorio/Metadata/lala
 
-[INFO] 14:07:31:582 FileSystem/(10897:10902): [ARCHIVO] El archivo lala se copio en /home/utnso/Escritorio/lala2
-[INFO] 14:07:57:165 FileSystem/(10897:10902): [ARCHIVO] El archivo lala se copio en /home/utnso/Escritorio/lala2
-[INFO] 14:10:06:455 FileSystem/(10897:10902): [ERROR] El archivo no existe
-[INFO] 14:10:08:372 FileSystem/(10897:10902): [ARCHIVO] El archivo /lala ha sido eliminado
-[INFO] 14:10:18:80 FileSystem/(10897:10902): [ARCHIVO] El archivo /home/utnso/Escritorio/lala fue copiado en File System
-[INFO] 14:10:25:192 FileSystem/(10897:10902): [ARCHIVO] El archivo lala se copio en /home/utnso/Escritorio/Metadata/lala
-[INFO] 14:10:25:255 FileSystem/(10897:10902): [ARCHIVO] El MD5 del archivo es cdf02743e038608690cf63b3bd8db67d  /home/utnso/Escritorio/Metadata/lala
-
-[INFO] 14:10:30:837 FileSystem/(10897:10902): [ARCHIVO] El archivo lala se copio en /home/utnso/Escritorio/Metadata/lala
-[INFO] 14:10:30:887 FileSystem/(10897:10902): [ARCHIVO] El MD5 del archivo es cdf02743e038608690cf63b3bd8db67d  /home/utnso/Escritorio/Metadata/lala
-
-[INFO] 14:10:34:651 FileSystem/(10897:10902): [ARCHIVO] El archivo lala se copio en /home/utnso/Escritorio/Metadata/lala
-[INFO] 14:10:34:707 FileSystem/(10897:10902): [ARCHIVO] El MD5 del archivo es cdf02743e038608690cf63b3bd8db67d  /home/utnso/Escritorio/Metadata/lala
-
-[INFO] 14:10:54:705 FileSystem/(10897:10902): [ARCHIVO] El archivo lala se copio en /home/utnso/Escritorio/Metadata/lala
-[INFO] 14:10:54:762 FileSystem/(10897:10902): [ARCHIVO] El MD5 del archivo es cdf02743e038608690cf63b3bd8db67d  /home/utnso/Escritorio/Metadata/lala
-
-[INFO] 14:11:08:582 FileSystem/(10897:10902): [ARCHIVO] El archivo lala se copio en /home/utnso/Escritorio/lala2
-[INFO] 14:13:34:746 FileSystem/(10897:10902): [ARCHIVO] El archivo /home/utnso/Escritorio/gg fue copiado en File System
-[INFO] 14:15:30:448 FileSystem/(10897:10902): [ARCHIVO] Nombre: gg
-[INFO] 14:15:30:451 FileSystem/(10897:10902): [ARCHIVO] Tipo: TEXTO
-[INFO] 14:15:30:463 FileSystem/(10897:10902): [ARCHIVO] Ubicacion: /gg
-[INFO] 14:15:30:473 FileSystem/(10897:10902): [ARCHIVO] ID Padre: 0
-[INFO] 14:15:30:482 FileSystem/(10897:10902): [ARCHIVO] Tamanio: 1633106 bytes
-[INFO] 14:15:30:484 FileSystem/(10897:10902): [ARCHIVO] Bloques: 2
-[INFO] 14:15:30:485 FileSystem/(10897:10902): [ARCHIVO] Bloque 0: 1048543 bytes
-[INFO] 14:15:30:487 FileSystem/(10897:10902): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 6
-[INFO] 14:15:30:488 FileSystem/(10897:10902): [ARCHIVO] Copia 1 en: Nodo: NODO1 | Bloque: 7
-[INFO] 14:15:30:489 FileSystem/(10897:10902): [ARCHIVO] Bloque 1: 584563 bytes
-[INFO] 14:15:30:489 FileSystem/(10897:10902): [ARCHIVO] Copia 0 en: Nodo: NODO1 | Bloque: 8
-[INFO] 14:15:30:490 FileSystem/(10897:10902): [ARCHIVO] Copia 1 en: Nodo: NODO1 | Bloque: 9
-[INFO] 14:16:29:101 FileSystem/(10897:10902): [ARCHIVO] El archivo gg se copio en /home/utnso/Escritorio/gg2
-[INFO] 14:16:45:557 FileSystem/(10897:10902): [ARCHIVO] El archivo gg se copio en /home/utnso/Escritorio/Metadata/gg
-[INFO] 14:16:45:612 FileSystem/(10897:10902): [ARCHIVO] El MD5 del archivo es ac09f6b0ecde1fb249f7e4ca4a62708c  /home/utnso/Escritorio/Metadata/gg
-
-[INFO] 14:16:51:317 FileSystem/(10897:10902): [ARCHIVO] El archivo gg se copio en /home/utnso/Escritorio/Metadata/gg
-[INFO] 14:16:51:374 FileSystem/(10897:10902): [ARCHIVO] El MD5 del archivo es ac09f6b0ecde1fb249f7e4ca4a62708c  /home/utnso/Escritorio/Metadata/gg
-
-[INFO] 14:17:56:84 FileSystem/(10897:10902): [ERROR] Comando invalido
+[INFO] 18:55:59:103 FileSystem/(9814:9819): [ARCHIVO] El archivo lala se copio en /home/utnso/Escritorio/lala2
+[INFO] 18:57:57:233 FileSystem/(9814:9814): [EJECUCION] Proceso File System finalizado

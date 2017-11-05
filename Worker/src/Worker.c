@@ -23,70 +23,82 @@ int main(void) {
 void workerCrearHijo(Socket unSocket) {
 	pid = fork();
 	if(pid == 0) {
-	imprimirMensaje(archivoLog, "[CONEXION] Esperando mensajes de Master");
-	Mensaje* mensaje = mensajeRecibir(unSocket);
-	char* codigo;
-	int sizeCodigo;
-	char* origen;
-	int sizeOrigen;
-	char* destino; //los temporales siempre miden 12, le podes mandar un char[12] aca y listo
-	int sizeDestino;
-	switch(mensaje->header.operacion){
+		imprimirMensaje(archivoLog, "[CONEXION] Esperando mensajes de Master");
+		Mensaje* mensaje = mensajeRecibir(unSocket);
+		char* codigo;
+		int sizeCodigo;
+		switch(mensaje->header.operacion){
 			case -1:
+			{
 				imprimirMensaje(archivoLog, ("[EJECUCION] Tuve problemas para comunicarme con el Master (Pid hijo: %d)", pid)); //el hijo fallo en comunicarse con el master
 				mensajeEnviar(unSocket, -4, NULL, 0); //MANDA AL MASTER QUE FALLO
 				free(mensaje);
 				break;
-			case 1: //Etapa Transformacion
+			}
+			case Transformacion: //Etapa Transformacion
 			{
-				int origenB; //si el origen es un numero de bloque esto lo facilitaria, revisar
 				memcpy(&sizeCodigo, mensaje->datos, sizeof(int32_t));
 				memcpy(&codigo,mensaje->datos + sizeof(int32_t), sizeCodigo);
-				/*
-				como esta armado master ahora primero te manda solo el script
-				de transformacion, y despues te va tirando todos los
-				bloques uno por uno (suponiendo que haya mas de un bloque
-				en un nodo que te tenga que mandar)
-				Si lo seguimos asi, en esta parte del codigo tendrias que
-				recibir los bloques y forkear devuelta por cada uno,
-				algo como
-
-				while(true){
-					Mensaje* mensaje = mensajeRecibir(unSocket);
-					if(mensaje->operacion==EXITO)
-						break;
-					//hacer fork
+				int estadoTransf=1;
+				int pasar=1;
+				while(estadoTransf){
+					if (pasar){
+						pasar=0;
+						int subpid = fork();
+						if(subpid == 0) {
+							imprimirMensaje(archivoLog, "[CONEXION] Esperando mensajes de Master");
+							Mensaje* mensaje = mensajeRecibir(unSocket);
+							pasar=1;
+							int origen;
+							char* destino;
+							int sizeDestino;
+							switch(mensaje->header.operacion){
+								case EXITO:
+								{
+									estadoTransf=0;
+									break;
+								}
+								case Transformacion:
+								{
+									memcpy(&origen,mensaje->datos + sizeof(int32_t)+sizeCodigo, sizeof(int32_t));
+									memcpy(&sizeDestino, mensaje->datos + sizeof(int32_t)*2 + sizeCodigo , sizeof(int32_t));
+									memcpy(&destino,mensaje->datos + sizeof(int32_t)*3+sizeCodigo, sizeDestino);
+									int result = transformar(codigo,origen,destino);
+									if(result==-1){
+										mensajeEnviar(unSocket, -801, NULL, 0);
+									}
+									/*char* buffer = leerArchivo(path,offset,size);
+									log_info(logFile, "[FILE SYSTEM] EL KERNEL PIDE LEER: %s | OFFSET: %i | SIZE: %i", path, offset, size);
+									if(buffer=="-1"){
+									lSend(conexion, NULL, -4, 0);
+									log_error(logFile, "[LEER]: HUBO UN ERROR AL LEER");
+									break;
+									}
+									//enviar el buffer
+									lSend(conexion, buffer, 2, sizeof(char)*size);
+									free(buffer);
+									free(path);*/
+									mensajeEnviar(unSocket, 801, origen, sizeof(int32_t));
+									free(codigo);
+									free(destino);
+									free(mensaje);
+									break;
+								}
+							}
+						}
+						else if(subpid > 0)
+							puts("PADRE ACEPTO UNA CONEXION");
+						else
+							puts("ERROR");
 					}
 				}
-				y en cada proceso hijo recien harias la transformacion
-				*/
-				memcpy(&origen,mensaje->datos + sizeof(int32_t)+sizeCodigo, sizeof(int32_t));
-				memcpy(&sizeDestino, mensaje->datos + sizeof(int32_t)*2 + sizeCodigo , sizeof(int32_t));
-				memcpy(&destino,mensaje->datos + sizeof(int32_t)*3+sizeCodigo, sizeDestino);
-				int result = transformar(codigo,origenB,destino);
-				if(result==-1){
-					mensajeEnviar(unSocket, -801, NULL, 0);
-				}
-				/*char* buffer = leerArchivo(path,offset,size);
-				log_info(logFile, "[FILE SYSTEM] EL KERNEL PIDE LEER: %s | OFFSET: %i | SIZE: %i", path, offset, size);
-				if(buffer=="-1"){
-					lSend(conexion, NULL, -4, 0);
-					log_error(logFile, "[LEER]: HUBO UN ERROR AL LEER");
-					break;
-				}
-				//enviar el buffer
-				lSend(conexion, buffer, 2, sizeof(char)*size);
-				free(buffer);
-				free(path);*/
-				mensajeEnviar(unSocket, 801, NULL, 0);
-				free(codigo);
-				free(origen);
-				free(destino);
-				free(mensaje);
 				break;
 			}
-			case 2:{ //Etapa Reduccion Local
-
+			case ReducLocal:{ //Etapa Reduccion Local
+				char* origen;
+				int sizeOrigen;
+				char* destino; //los temporales siempre miden 12, le podes mandar un char[12] aca y listo
+				int sizeDestino;
 				memcpy(&sizeCodigo, mensaje->datos, sizeof(int32_t));
 				memcpy(&codigo,mensaje->datos + sizeof(int32_t), sizeCodigo);
 				memcpy(&sizeOrigen, mensaje->datos+ sizeof(int32_t) +sizeCodigo, sizeof(int32_t));
@@ -115,8 +127,11 @@ void workerCrearHijo(Socket unSocket) {
 				free(mensaje);
 				break;
 			}
-			case 3:{ //Etapa Reduccion Global
-
+			case ReducGlobal:{ //Etapa Reduccion Global
+				char* origen;
+				int sizeOrigen;
+				char* destino; //los temporales siempre miden 12, le podes mandar un char[12] aca y listo
+				int sizeDestino;
 				memcpy(&sizeCodigo, mensaje->datos, sizeof(int32_t));
 				memcpy(&codigo,mensaje->datos + sizeof(int32_t), sizeCodigo);
 				memcpy(&sizeOrigen, mensaje->datos+ sizeof(int32_t) +sizeCodigo, sizeof(int32_t));
@@ -145,7 +160,7 @@ void workerCrearHijo(Socket unSocket) {
 				free(mensaje);
 				break;
 			}
-			case 4:{ //Almacenamiento Definitivo
+			case Almacenamiento:{ //Almacenamiento Definitivo
 				int sizeNombre;
 				char* Nombre;
 				int sizeRuta;
@@ -202,13 +217,11 @@ void workerCrearHijo(Socket unSocket) {
 				free(puntero);
 				mensajeEnviar(unSocket, 2, NULL, 0);
 				free(codigo);
-				free(origen);
-				free(destino);
 				free(mensaje);
 				mensajeEnviar(unSocket, 804, NULL, 0);
 				break;
 			}
-			case 5:{ //PasaRegistro
+			case PasaReg:{ //PasaRegistro
 				int sizeRuta;
 				char* ruta;
 				int numeroReg;
@@ -241,12 +254,10 @@ void workerCrearHijo(Socket unSocket) {
 				free(mensajeData);
 				free(puntero);
 				free(codigo);
-				free(origen);
-				free(destino);
 				free(mensaje);
 				break;
 			}
-			case 6:{ //Aborto
+			case Aborto:{ //Aborto
 				imprimirMensaje(archivoLog, ("[EJECUCION] El Master me aborto (Pid hijo: %d)", pid)); //el hijo fallo en comunicarse con el master
 				mensajeEnviar(unSocket, -806, NULL, 0); //MANDA AL MASTER QUE FALLO
 				free(mensaje);
@@ -266,6 +277,11 @@ int transformar(char* codigo,int origen,char* destino){
 	if (origen>tamanioArchData){
 		return -1;
 	}
+	char* patharchdes;
+	patharchdes = realloc(patharchdes,sizeof(RUTA_TEMPS)+16);
+	strcat(patharchdes,RUTA_TEMPS);
+	strcat(patharchdes,destino);
+	strcat(patharchdes,".bin");
 	char* buffer=NULL;
 	FILE* arch;
 	arch = fopen(configuracion->rutaDataBin,"r");
@@ -304,9 +320,10 @@ int transformar(char* codigo,int origen,char* destino){
 	strcat(command,"|");
 	strcat(command,codigo);
 	strcat(command,"| sort >");
-	strcat(command,destino);
+	strcat(command,patharchdes);
 	system(command);
 	free (command);
+	free(patharchdes);
 	//resuelto por parametro en vez de cat
 	/*strcat(command,codigo);
 	strcat(command,buffer);//suponiendo que el script requiere un buffer como parametro
@@ -324,6 +341,11 @@ int reduccionLocal(char* codigo,char* origen,char* destino){
 	char* apendado;
 	int i;
 	apendado = appendL(listaOri);
+	char* patharchdes;
+	patharchdes = realloc(patharchdes,sizeof(RUTA_TEMPS)+16);
+	strcat(patharchdes,RUTA_TEMPS);
+	strcat(patharchdes,destino);
+	strcat(patharchdes,".bin");
 	//doy privilegios a script
 	char commando [500];
 	for(i=0;i==500;i++){
@@ -343,9 +365,10 @@ int reduccionLocal(char* codigo,char* origen,char* destino){
 	strcat(command,"|");
 	strcat(command,codigo);
 	strcat(command,">");
-	strcat(command,destino);
+	strcat(command,patharchdes);
 	system(command);
 	free (command);
+	free(patharchdes);
 	free (apendado);
 	i=0;
 	while(listaOri->ruta[i]!=NULL){
@@ -361,14 +384,21 @@ locOri* getOrigenesLocales(char* origen){
 	locOri* origenes;
 	memcpy(&origenes->cant, origen, sizeof(int32_t));
 	char* oris [origenes->cant];
+	char temporis[12];
 	int i;
 	int size = sizeof(int32_t);
 	int sizeOri=0;
 	for(i=0;(i+1)==origenes->cant;i++){
+		oris[i]=NULL;
 		memcpy(&sizeOri, origen + size , sizeof(int32_t));
 		size= size + sizeof(int32_t);
-		memcpy(&oris[i],origen + size, sizeOri);
+		//memcpy(&oris[i],origen + size, sizeOri);
+		memcpy(&temporis,origen + size, sizeOri);
 		size= size + sizeOri;
+		oris[i] = realloc(oris[i],sizeof(RUTA_TEMPS)+16);
+		strcat(oris[i],RUTA_TEMPS);
+		strcat(oris[i],temporis);
+		strcat(oris[i],".bin");
 		origenes->ruta[i] =oris[i];
 	}
 	return origenes;
@@ -515,6 +545,11 @@ int reduccionGlobal(char* codigo,char* origen,char* destino){
 	char* apendado;
 	apendado = appendG(listaOri);
 	int i=0;
+	char* patharchdes;
+	patharchdes = realloc(patharchdes,sizeof(RUTA_TEMPS)+16);
+	strcat(patharchdes,RUTA_TEMPS);
+	strcat(patharchdes,destino);
+	strcat(patharchdes,".bin");
 	//doy privilegios a script
 	char commando [500];
 	for(i=0;i==500;i++){
@@ -534,10 +569,11 @@ int reduccionGlobal(char* codigo,char* origen,char* destino){
 	strcat(command,"|");
 	strcat(command,codigo);
 	strcat(command,">");
-	strcat(command,destino);
+	strcat(command,patharchdes);
 	system(command);
 	free (command);
 	free (apendado);
+	free(patharchdes);
 	i=0;
 	while(((globOri*)listaOri->oris[i])->ruta!=NULL){
 		free(((globOri*)listaOri->oris[i])->ruta);
@@ -559,14 +595,19 @@ lGlobOri* getOrigenesGlobales(char* origen){
 	memcpy(&origenes->cant, origen, sizeof(int32_t));
 	globOri** oris [origenes->cant];
 	int i;
+	char temporis[12];
 	int size = sizeof(int32_t);
 	int sizeOri=0;
 	int sizeIP=0;
 	for(i=0;(i-1)==origenes->cant;i++){
 		memcpy(&sizeOri, origen + size , sizeof(int32_t));
 		size= size + sizeof(int32_t);
-		memcpy(((globOri*) oris[i])->ruta,origen + size, sizeOri);
+		memcpy(&temporis,origen + size, sizeOri);
 		size= size + sizeOri;
+		((globOri*) oris[i])->ruta = realloc(((globOri*) oris[i])->ruta,sizeof(RUTA_TEMPS)+16);
+		strcat(((globOri*) oris[i])->ruta,RUTA_TEMPS);
+		strcat(((globOri*) oris[i])->ruta,temporis);
+		strcat(((globOri*) oris[i])->ruta,".bin");
 		memcpy(&sizeIP, origen + size , sizeof(int32_t));
 		size= size + sizeof(int32_t);
 		memcpy(((globOri*) oris[i])->ip,origen + size, sizeOri);

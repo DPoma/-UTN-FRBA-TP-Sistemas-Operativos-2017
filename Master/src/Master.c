@@ -169,7 +169,71 @@ void transformaciones(Lista bloques){
 	socketCerrar(socketWorker);
 }
 
+void reduccionLocal(Mensaje* m){
+	Dir* NODO;
+	int canttemps;
+	memcpy(NODO->ip, m->datos, sizeof(char)*20);
+	memcpy(NODO->port,m->datos + sizeof(char)*20, sizeof(char)*20);
+	memcpy(&canttemps, m->datos + sizeof(char)*40, sizeof(int32_t));
+	int tamanio=TEMPSIZE*(canttemps+1)+sizeof(int32_t)+lenReduccion;
+	char* nuevoBuffer =malloc(tamanio);
+	memcpy(&nuevoBuffer, scriptReduccion, lenReduccion);
+	memcpy(&nuevoBuffer + lenReduccion, m->datos+ sizeof(char)*40, tamanio - lenReduccion);
+	Socket sWorker =socketCrearCliente(NODO->ip, NODO->port, ID_MASTER);
+	mensajeEnviar(sWorker,ReducLocal,nuevoBuffer,tamanio);
+	free(m);
+	Mensaje* mensaje = mensajeRecibir(sWorker);
+	switch(mensaje->header.operacion){
+		case -802://Fracaso
+		{
+			//imprimirMensaje(archivoLog, ("[EJECUCION] Tuve problemas para comunicarme con el Master (Pid hijo: %d)", pid)); //el hijo fallo en comunicarse con el master
+			mensajeEnviar(socketYama, FRACASO, NULL, 0); //MANDA A YAMA QUE FALLO
+			free(mensaje);
+			break;
+		}
+		case 802: //Exito
+		{
+			//imprimirMensaje(archivoLog, ("[EJECUCION] Tuve problemas para comunicarme con el Master (Pid hijo: %d)", pid)); //el hijo fallo en comunicarse con el master
+			mensajeEnviar(socketYama, EXITO, NULL, 0); //MANDA A YAMA QUE FALLO
+			free(mensaje);
+			break;
+		}
+	}
+	socketCerrar(sWorker);
+}
 
+void reduccionGlobal(Mensaje* m){
+	Dir* NODO;
+	int canttemps;
+	memcpy(NODO->ip, m->datos, sizeof(char)*20);
+	memcpy(NODO->port,m->datos + sizeof(char)*20, sizeof(char)*20);
+	memcpy(&canttemps, m->datos + sizeof(char)*40, sizeof(int32_t));
+	int tamanio=(DIRSIZE+TEMPSIZE)*(canttemps)+TEMPSIZE+sizeof(int32_t)+lenReduccion;
+	char* nuevoBuffer =malloc(tamanio);
+	memcpy(&nuevoBuffer, scriptReduccion, lenReduccion);
+	memcpy(&nuevoBuffer + lenReduccion, m->datos+ sizeof(char)*40, tamanio - lenReduccion);
+	Socket sWorker =socketCrearCliente(NODO->ip, NODO->port, ID_MASTER);
+	mensajeEnviar(sWorker,ReducLocal,nuevoBuffer,tamanio);
+	free(m);
+	Mensaje* mensaje = mensajeRecibir(sWorker);
+	switch(mensaje->header.operacion){
+		case -802://Fracaso
+		{
+			//imprimirMensaje(archivoLog, ("[EJECUCION] Tuve problemas para comunicarme con el Master (Pid hijo: %d)", pid)); //el hijo fallo en comunicarse con el master
+			mensajeEnviar(socketYama, FRACASO, NULL, 0); //MANDA A YAMA QUE FALLO
+			free(mensaje);
+			break;
+		}
+		case 802: //Exito
+		{
+			//imprimirMensaje(archivoLog, ("[EJECUCION] Tuve problemas para comunicarme con el Master (Pid hijo: %d)", pid)); //el hijo fallo en comunicarse con el master
+			mensajeEnviar(socketYama, EXITO, NULL, 0); //MANDA A YAMA QUE FALLO
+			free(mensaje);
+			break;
+		}
+	}
+	socketCerrar(sWorker);
+}
 //void reduccionLocal(Mensaje* m){
 //	WorkerReduccion* wr= deserializarReduccion(m);
 //	int i;
