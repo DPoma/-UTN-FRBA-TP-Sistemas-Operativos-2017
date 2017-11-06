@@ -1,11 +1,12 @@
-[INFO] 21:35:57:458 FileSystem/(5741:5741): [EJECUCION] Proceso File System iniciado
-[INFO] 21:35:57:758 FileSystem/(5741:5741): [CONFIGURACION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 21:35:57:764 FileSystem/(5741:5741): [CONFIGURACION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 21:35:57:767 FileSystem/(5741:5741): [CONFIGURACION] Esperando conexiones de Workers (Puerto: 5080)
-[INFO] 21:35:57:770 FileSystem/(5741:5741): [CONFIGURACION] Ruta de metadata: /home/dario/Escritorio/Metadata
-[INFO] 21:35:57:892 FileSystem/(5741:5741): [33m[AVISO] Conecte los nodos necesarios al File System para estabilizarlo[0m
-[INFO] 21:35:59:951 FileSystem/(5741:5744): [ERROR] Comando invalido
-[INFO] 21:36:01:172 FileSystem/(5741:5744): [FORMATEO] El File System fue formateado
-[INFO] 21:36:01:179 FileSystem/(5741:5744): [33m[AVISO] El File System esta estable[0m
-[INFO] 21:36:07:180 FileSystem/(5741:5741): [CONEXION] El proceso Yama se ha conectado
-[INFO] 21:36:13:551 FileSystem/(5741:5741): [31m[ERROR] El path no existe[0m
+[INFO] 22:21:12:473 FileSystem/(3567:3567): [EJECUCION] Proceso File System iniciado
+[INFO] 22:21:12:555 FileSystem/(3567:3567): [CONFIGURACION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 22:21:12:557 FileSystem/(3567:3567): [CONFIGURACION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 22:21:12:557 FileSystem/(3567:3567): [CONFIGURACION] Esperando conexiones de Workers (Puerto: 5080)
+[INFO] 22:21:12:558 FileSystem/(3567:3567): [CONFIGURACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
+[INFO] 22:21:12:591 FileSystem/(3567:3567): [33m[AVISO] Conecte los nodos necesarios al File System para estabilizarlo[0m
+[INFO] 22:21:16:44 FileSystem/(3567:3567): [33m[AVISO] El proceso Yama no pudo conectarse, el File System no es estable[0m
+[INFO] 22:21:19:348 FileSystem/(3567:3570): [ERROR] Comando invalido
+[INFO] 22:21:22:89 FileSystem/(3567:3570): [FORMATEO] El File System fue formateado
+[INFO] 22:21:22:90 FileSystem/(3567:3570): [33m[AVISO] El File System esta estable[0m
+[INFO] 22:21:31:630 FileSystem/(3567:3567): [CONEXION] El proceso Yama se ha conectado
+[INFO] 22:21:38:489 FileSystem/(3567:3567): [31m[ERROR] El path no existe[0m

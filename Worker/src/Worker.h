@@ -10,10 +10,10 @@
 
 typedef enum {Vacio,Transformacion,ReducLocal,ReducGlobal,Almacenamiento,PasaReg,Aborto,EXITO} Etapa;
 
-#define RUTA_CONFIG "/home/dario/Escritorio/tp-2017-2c-El-legado-del-Esqui/Worker/NodoConfig.conf"
-#define RUTA_LOG "/home/dario/Escritorio/tp-2017-2c-El-legado-del-Esqui/Worker/WorkerLog.log"
-#define RUTA_ARCHDATA "/home/dario/Escritorio/"
-#define RUTA_TEMPS "/home/dario/Escritorio/temp/"
+#define RUTA_CONFIG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Worker/NodoConfig.conf"
+#define RUTA_LOG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Worker/WorkerLog.log"
+#define RUTA_ARCHDATA "/home/utnso/Escritorio/"
+#define RUTA_TEMPS "/home/utnso/Escritorio/temp/"
 
 typedef struct {
 	char ipFileSytem[50];

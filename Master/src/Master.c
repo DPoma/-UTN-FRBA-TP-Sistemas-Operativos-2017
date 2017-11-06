@@ -62,7 +62,7 @@ void masterIniciar(String* argv) {
 	imprimirMensajeDos(archivoLog,"[CONEXION] Estableciendo Conexion con YAMA...", configuracion->ipYama, configuracion->puertoYama);
 	socketYama = socketCrearCliente(configuracion->ipYama, configuracion->puertoYama, ID_MASTER);
 	imprimirMensaje(archivoLog, "[CONEXION] Conexion establecida con YAMA, esperando instrucciones");
-	mensajeEnviar(socketYama,Solicitud,argv[3],stringLongitud(argv[3])+1);
+	mensajeEnviar(socketYama,SOLICITUD,argv[3],stringLongitud(argv[3])+1);
 }
 
 void masterAtender(){

@@ -1,6 +1,7 @@
-[INFO] 21:36:06:941 YAMA/(5755:5755): [CONEXION] Realizando conexion con File System (IP: 127.0.0.1 | Puerto 5060)
-[INFO] 21:36:07:201 YAMA/(5755:5755): [CONEXION] Conexion exitosa con File System
-[INFO] 21:36:07:218 YAMA/(5755:5755): [CONEXION] Esperando conexiones de un Master (Puerto 5070)
-[INFO] 21:36:13:417 YAMA/(5755:5755): [CONEXION] Proceso Master 6 conectado exitosamente
-[INFO] 21:36:13:463 YAMA/(5755:5755): [ENVIO] path de master #-1096131004 enviado al fileSystem
-[INFO] 21:36:13:557 YAMA/(5755:5755): [ERROR] El path no existe en el File System
+[INFO] 22:21:30:148 YAMA/(3579:3579): [CONEXION] Realizando conexion con File System (IP: 127.0.0.1 | Puerto 5060)
+[INFO] 22:21:31:683 YAMA/(3579:3579): [CONEXION] Conexion exitosa con File System
+[INFO] 22:21:31:785 YAMA/(3579:3579): [CONEXION] Esperando conexiones de un Master (Puerto 5070)
+[INFO] 22:21:38:436 YAMA/(3579:3579): [CONEXION] Proceso Master 6 conectado exitosamente
+[INFO] 22:21:38:472 YAMA/(3579:3579): [ENVIO] path de master #-1094115516 enviado al fileSystem
+[INFO] 22:21:38:490 YAMA/(3579:3579): [ERROR] El path no existe en el File System
+[INFO] 22:21:38:875 YAMA/(3579:3579): [CONEXION] Proceso Master 6 se ha desconectado

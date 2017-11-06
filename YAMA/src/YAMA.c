@@ -126,10 +126,6 @@ void yamaAtender() {
 					if(mensaje->header.operacion == ERROR_ARCHIVO) {
 						log_info(archivoLog, "[ERROR] El path no existe en el File System");
 						mensajeEnviar(*(Entero*)mensaje->datos, ABORTAR_MASTER, "", 1);
-						listaSocketsEliminar(socketI, &servidor->listaMaster);
-						socketCerrar(socketI);
-						if(socketI==servidor->maximoSocket)
-							servidor->maximoSocket--;
 					}
 					else
 					if(mensaje->header.operacion==DESCONEXION){
@@ -157,7 +153,7 @@ void yamaAtender() {
 					mensajeDestruir(mensaje);
 				}else{ //master
 					Mensaje* mensaje = mensajeRecibir(socketI);
-					if(mensaje->header.operacion==Solicitud){
+					if(mensaje->header.operacion==SOLICITUD){
 						int32_t masterid = socketI; //para pasarlo a 32, por las dudas
 						//el mensaje es el path del archivo
 						//aca le acoplo el numero de master y se lo mando al fileSystem
