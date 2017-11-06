@@ -43,19 +43,8 @@ void yamaIniciar() {
 		exit(EXIT_FAILURE);
 	}
 	workers=list_create();
-	Mensaje* infoNodos=mensajeRecibir(servidor->fileSystem);
-	int i;
-	for(i=0;i<infoNodos->header.tamanio/DIRSIZE;i++){
-		Worker worker;
-		worker.conectado=true;
-		worker.carga=0;
-		worker.tareasRealizadas=0;
-		worker.nodo=*(Dir*)(infoNodos->datos+DIRSIZE*i);
-		printf("IP = %s\n", worker.nodo.ip);
-		printf("Puerto = %s\n", worker.nodo.port);
-		list_addM(workers,&worker,sizeof(Worker));
-	}
-	mensajeDestruir(infoNodos);
+	tablaEstados=list_create();
+	tablaUsados=list_create();
 }
 
 void configurar(){
@@ -79,8 +68,6 @@ void yamaAtender() {
 	servidor->maximoSocket = 0;
 	listaSocketsLimpiar(&servidor->listaMaster);
 	listaSocketsLimpiar(&servidor->listaSelect);
-
-
 	imprimirMensajeUno(archivoLog, "[CONEXION] Esperando conexiones de un Master (Puerto %s)", configuracion->puertoMaster);
 	servidor->listenerMaster = socketCrearListener(configuracion->puertoMaster);
 	listaSocketsAgregar(servidor->listenerMaster, &servidor->listaMaster);
@@ -92,24 +79,22 @@ void yamaAtender() {
 	servidorControlarMaximoSocket(servidor->fileSystem);
 	servidorControlarMaximoSocket(servidor->listenerMaster);
 
-	tablaEstados=list_create();
-	tablaUsados=list_create();
-
 	while(estadoYama==ACTIVADO){
 		if(configuracion->reconfigurar)
 			configurar();
 
 		dibujarTablaEstados();
 
-		servidor->listaSelect = servidor->listaMaster;//esto anda asi?
+		servidor->listaSelect = servidor->listaMaster;
 		socketSelect(servidor->maximoSocket, &servidor->listaSelect);
 		Socket socketI;
 		Socket maximoSocket = servidor->maximoSocket;
 		for(socketI = 0; socketI <= maximoSocket; socketI++){
 			retardo();
 			if (listaSocketsContiene(socketI, &servidor->listaSelect)){ //se recibio algo
-				//podría disparar el thread aca o antes de planificar
+				//podría disparar el thread aca
 				if(socketI==servidor->listenerMaster){
+
 					Socket nuevoSocket;
 					nuevoSocket = socketAceptar(socketI, ID_MASTER);
 					if(nuevoSocket != ERROR) {
@@ -119,7 +104,11 @@ void yamaAtender() {
 					}
 				}else if(socketI==servidor->fileSystem){
 					Mensaje* mensaje = mensajeRecibir(socketI);
-					if(mensaje->header.operacion==DESCONEXION){
+					if(mensaje->header.operacion==ERROR_ARCHIVO){
+						log_info(archivoLog,"[ERROR] El path no existe en el File System");
+						mensajeEnviar(*(Entero*)mensaje->datos, ABORTAR,"", 1);
+					}else if(mensaje->header.operacion==DESCONEXION){
+						log_info(archivoLog,"[RECEPCION] Un nodo se desconeto");
 						char nodoDesconectado[20];
 						strncpy(nodoDesconectado,mensaje->datos,20);
 						bool nodoDesconectadoF(Worker* worker){
@@ -137,14 +126,15 @@ void yamaAtender() {
 					}else{
 						Socket masterid;
 						memcpy(&masterid,mensaje->datos,INTSIZE);
-						log_info(archivoLog, "[RECEPCION] lista de bloques para master #%d recibida",&masterid);
+						log_info(archivoLog, "[RECEPCION] lista de bloques para master #%d recibida",masterid);
 						if(listaSocketsContiene(masterid,&servidor->listaMaster)) //por si el master se desconecto
 							yamaPlanificar(masterid,mensaje+INTSIZE,mensaje->header.tamanio-INTSIZE);
 					}
 					mensajeDestruir(mensaje);
 				}else{ //master
 					Mensaje* mensaje = mensajeRecibir(socketI);
-					if(mensaje->header.operacion==Solicitud){
+					if(mensaje->header.operacion==SOLICITUD){
+						log_info(archivoLog,"[RECEPCION] solicitud de master");
 						int32_t masterid = socketI; //para pasarlo a 32, por las dudas
 						//el mensaje es el path del archivo
 						//aca le acoplo el numero de master y se lo mando al fileSystem
@@ -152,15 +142,17 @@ void yamaAtender() {
 						mensaje=realloc(mensaje,mensaje->header.tamanio+INTSIZE+sizeof(Header));
 						memmove(mensaje->datos+INTSIZE,mensaje->datos,mensaje->header.tamanio);
 						memcpy(mensaje->datos,&masterid,INTSIZE);
-						mensajeEnviar(servidor->fileSystem,Solicitud,mensaje->datos,mensaje->header.tamanio+INTSIZE);
+						mensajeEnviar(servidor->fileSystem,ENVIAR_BLOQUES,mensaje->datos,mensaje->header.tamanio+INTSIZE);
 						log_info(archivoLog, "[ENVIO] path de master #%d enviado al fileSystem",&socketI);
 					}else if(mensaje->header.operacion==DESCONEXION){
+						log_info(archivoLog,"[RECEPCION] desconexion de master");
 						listaSocketsEliminar(socketI, &servidor->listaMaster);
 						socketCerrar(socketI);
 						if(socketI==servidor->maximoSocket)
 							servidor->maximoSocket--; //no debería romper nada
 						log_info(archivoLog, "[CONEXION] Proceso Master %d se ha desconectado",socketI);
 					}else{
+						log_info(archivoLog,"[RECEPCION] actualizacion de master");
 						Dir nodo=*((Dir*)mensaje->datos);//puede que rompa porque no es deep copying
 						int32_t bloque=*((int32_t*)(mensaje->datos+DIRSIZE));
 						bool buscarEntrada(Entrada* entrada){
@@ -180,6 +172,7 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 		Dir nodo;
 		int32_t bloque;
 	}Bloque;
+	int BLOCKSIZE=sizeof(Bloque);
 	int i;
 	Lista bloques=list_create();
 	Lista byteses=list_create();
@@ -187,7 +180,28 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 		list_add(bloques,listaBloques+i);
 		list_add(bloques,listaBloques+i+sizeof(Bloque));
 		list_add(byteses,listaBloques+i+sizeof(Bloque)*2);
+
+		log_info(archivoLog,"[REGISTRO] bloque: %s %s %d",listaBloques+i,listaBloques+i+DIRSIZE/2,listaBloques+i+DIRSIZE);
+		log_info(archivoLog,"[REGISTRO] bloque: %s %s %d",listaBloques+i+BLOCKSIZE,listaBloques+i+BLOCKSIZE+DIRSIZE/2,listaBloques+i+BLOCKSIZE+DIRSIZE);
+
+		void registrar(Dir* nodo){
+			bool noRegistrado(Worker* worker){
+				return worker->nodo.ip!=*nodo->ip||worker->nodo.port!=*nodo->port;
+			}
+			if(list_all_satisfy(workers,noRegistrado)){
+				Worker worker;
+				worker.conectado=true;
+				worker.carga=0;
+				worker.tareasRealizadas=0;
+				worker.nodo=*nodo;
+				list_addM(workers,&worker,sizeof(Worker));
+				log_info(archivoLog,"[REGISTRO] nodo direccion %s, puerto %s",nodo->ip,nodo->port);
+			}
+		}
+		registrar(listaBloques+i);
+		registrar(listaBloques+i+BLOCKSIZE);
 	}
+	log_info(archivoLog,"[REGISTRO] %d bloques recibidos",i);
 	Lista tablaEstadosJob;
 	job++;//mutex (supongo que las variables globales se comparten entre hilos)
 	for(i=0;i<bloques->elements_count/2;i++){
@@ -253,7 +267,7 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 			entrada->bytes=*bytes;
 			entrada->nodoAlt=alt->nodo;
 			entrada->bloqueAlt=alt->bloque;
-			entrada->etapa=Transformacion;
+			entrada->etapa=TRANSFORMACION;
 			entrada->estado=EnProceso;
 		}
 
@@ -294,7 +308,7 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 		}
 	}
 
-	int tamanioEslabon=DIRSIZE+INTSIZE*2+TEMPSIZE;//dir,bloque,bytes,temp
+	int tamanioEslabon=BLOCKSIZE*2+TEMPSIZE;//dir,bloque,bytes,temp
 	int32_t tamanioDato=tamanioEslabon*tablaEstadosJob->elements_count;
 	void* dato=malloc(tamanioDato);
 	for(i=0;i<tamanioDato;i+=tamanioEslabon){
@@ -304,11 +318,12 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 		memcpy(dato+i+DIRSIZE+INTSIZE,&entrada->bytes,INTSIZE);
 		memcpy(dato+i+DIRSIZE+INTSIZE*2,entrada->pathTemporal,TEMPSIZE);
 	}
-	mensajeEnviar(master,Transformacion,dato,tamanioDato);
+	mensajeEnviar(master,TRANSFORMACION,dato,tamanioDato);
 	free(dato);
 
 	list_add_all(tablaEstados,tablaEstadosJob); //mutex
 	list_destroy(tablaEstadosJob);
+	log_info(archivoLog,"[] planificacion terminada");
 }
 
 void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
@@ -337,9 +352,9 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 				return false;
 			}
 			moverAUsados(abortarEntrada);
-			mensajeEnviar(entradaA->masterid,Aborto,nullptr,0);
+			mensajeEnviar(entradaA->masterid,ABORTAR,nullptr,0);
 		}
-		if(entradaA->etapa==Transformacion&&actualizando==Error){
+		if(entradaA->etapa==TRANSFORMACION&&actualizando==Error){
 			if(mismoNodo(entradaA->nodo,entradaA->nodoAlt)){
 				abortarJob();
 				return;
@@ -352,7 +367,7 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 			memcpy(dato,&alternativa.nodo,DIRSIZE);
 			memcpy(dato+DIRSIZE,&alternativa.bloque,INTSIZE);
 			memcpy(dato+DIRSIZE+INTSIZE,&alternativa.bytes,INTSIZE);
-			mensajeEnviar(alternativa.masterid,Transformacion,dato,sizeof dato);
+			mensajeEnviar(alternativa.masterid,TRANSFORMACION,dato,sizeof dato);
 			list_addM(tablaEstados,&alternativa,sizeof(Entrada));
 			bool buscarError(Entrada* entrada){
 				return entrada->estado==Error;
@@ -363,13 +378,11 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 		}
 		return;
 	}
-	bool trabajoTerminadoB=true;
-	void trabajoTerminado(bool(*cond)(void*)){
-		void aux(Entrada* entrada){
-			if(cond(entrada)&&entrada->estado!=Terminado)
-				trabajoTerminadoB=false;
+	bool trabajoTerminado(bool(*cond)(void*)){
+		bool aux(Entrada* entrada){
+			return cond(entrada)&&entrada->estado!=Terminado;
 		}
-		list_iterate(tablaEstados,aux);
+		return !list_any_satisfy(tablaEstados,aux);
 	}
 	bool mismoJob(Entrada* entrada){
 		return entrada->job==entradaA->job;
@@ -377,13 +390,12 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 	bool mismoNodoJob(Entrada* entrada){
 		return mismoJob(entrada)&&mismoNodo(entrada->nodo,entradaA->nodo);
 	}
-	if(entradaA->etapa==Transformacion){
-		trabajoTerminado(mismoNodoJob);
-		if(trabajoTerminadoB){
+	if(entradaA->etapa==TRANSFORMACION){
+		if(trabajoTerminado(mismoNodoJob)){
 			Entrada reducLocal;
 			darDatosEntrada(&reducLocal);
 			darPathTemporal(&reducLocal.pathTemporal,'l');
-			reducLocal.etapa=ReducLocal;
+			reducLocal.etapa=REDUCLOCAL;
 			Lista nodos=list_filter(tablaEstados,mismoNodoJob);
 
 			/////////////////////////////////////////INICIO SERIALIZACION DANIEL
@@ -406,20 +418,19 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 			for(i=sizeof(int32_t)+DIRSIZE,j=0;i<tamanio-TEMPSIZE;i+=TEMPSIZE,j++)
 				memcpy(dato+i,((Entrada*)list_get(nodos,j))->pathTemporal,TEMPSIZE);
 			memcpy(dato+i,reducLocal.pathTemporal,TEMPSIZE);
-			mensajeEnviar(reducLocal.masterid,ReducLocal,dato,tamanio);
+			mensajeEnviar(reducLocal.masterid,REDUCLOCAL,dato,tamanio);
 			/////////////////////////////////////////FIN SERIALIZACION NICOLAS
 
 			moverAUsados(mismoNodoJob);
 			list_addM(tablaEstados,&reducLocal,sizeof(Entrada));//mutex
 		}
-	}else if(entradaA->etapa==ReducLocal){
-		trabajoTerminado(mismoJob);
-		if(trabajoTerminadoB){
+	}else if(entradaA->etapa==REDUCLOCAL){
+		if(trabajoTerminado(mismoJob)){
 			Entrada reducGlobal;
 			darDatosEntrada(&reducGlobal);
 			darPathTemporal(&reducGlobal.pathTemporal,'g');
-			reducGlobal.etapa=ReducGlobal;
-			Dir nodoMenorCarga=entradaA->nodo;//deep
+			reducGlobal.etapa=REDUCLOCAL;
+			Dir nodoMenorCarga=entradaA->nodo;
 			int menorCargaI=1000; //
 			void menorCarga(Worker* worker){
 				if(worker->carga<menorCargaI)
@@ -444,7 +455,7 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 
 			/////////////////////////////////////////INICIO SERIALIZACION NICOLAS
 			Dir* nodofalso;
-			nodofalso->ip[0]="0";
+			nodofalso->ip[0]="0"; //que paso aca
 			nodofalso->port[0]="0";
 			int tamanio=(DIRSIZE+TEMPSIZE)*(nodosReducidos->elements_count+1)+sizeof(int32_t);
 			void* dato=malloc(tamanio);
@@ -461,7 +472,7 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 				memcpy(dato+i+DIRSIZE,((Entrada*)list_get(nodosReducidos,j))->pathTemporal,TEMPSIZE);
 			}
 			memcpy(dato+i,reducGlobal.pathTemporal,TEMPSIZE);
-			mensajeEnviar(reducGlobal.masterid,ReducGlobal,dato,tamanio);
+			mensajeEnviar(reducGlobal.masterid,REDUCLOCAL,dato,tamanio);
 			//////////////////////////////////////////FIN SERIALIZACION NICOLAS
 
 			moverAUsados(mismoJob);
@@ -469,20 +480,21 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 
 
 		}
-	}else if(entradaA->etapa==ReducGlobal){
+	}else if(entradaA->etapa==REDUCGLOBAL){
 		//no le veo sentido a que yama participe del almacenado final
 		//master lo podría hacer solo,  ya esta grande
 		Entrada* reducGlobal=list_find(tablaEstados,mismoJob);
 		Entrada almacenado;
 		darDatosEntrada(&almacenado);
-		almacenado.pathTemporal=nullptr;
+		almacenado.pathTemporal="final";
 		//aca podría ponerle el nombre de archivo final, pero no lo tengo
-		//y pedirselo a master no pinta nada (habría que meter este pedazo
-		//de codigo en otra funcion o meterlo por variable global, con semaforos)
+		//y no lo necesito, no vale la pena meter la comunicacion y la
+		//logica por algo que es estetico nomas
+		almacenado.etapa=ALMACENADO;
 		char dato[DIRSIZE+TEMPSIZE];
 		memcpy(dato,&reducGlobal->nodo,DIRSIZE);
 		memcpy(dato+DIRSIZE,reducGlobal->pathTemporal,TEMPSIZE);
-		mensajeEnviar(entradaA->masterid,Cierre,dato,sizeof dato);
+		mensajeEnviar(entradaA->masterid,CIERRE,dato,sizeof dato);
 		list_add(tablaUsados,list_remove_by_condition(tablaEstados,mismoJob));
 		list_addM(tablaEstados,&almacenado,sizeof(Entrada));
 	}else
@@ -497,18 +509,19 @@ void dibujarTablaEstados(){
 	void dibujarEntrada(Entrada* entrada){
 		char* etapa,*estado;
 		switch(entrada->etapa){
-		case Transformacion: etapa="transformacion"; break;
-		case ReducLocal: etapa="reduccion local"; break;
-		default: etapa="reduccion global";
+		case TRANSFORMACION: etapa="transformacion"; break;
+		case REDUCLOCAL: etapa="reduccion local"; break;
+		case REDUCGLOBAL: etapa="reduccion global";break;
+		default: etapa="almacenado";
 		}
 		switch(entrada->estado){
 		case EnProceso: estado="en proceso"; break;
 		case Error: estado="error"; break;
 		default: estado="terminado";
 		}
-		printf("%d     %d     %d     %d     %s     %s    %s",
-				entrada->job,entrada->masterid-2,ipToNum(entrada->nodo.ip),(entrada->bloque!=-1)?:"-",
-				etapa,entrada->pathTemporal?:"-",estado);
+		printf("%d     %d     %d     %s     %s     %s    %s",
+				entrada->job,entrada->masterid-2,ipToNum(entrada->nodo.ip),(entrada->bloque!=-1)?itoa(entrada->bloque):"-",
+				etapa,entrada->pathTemporal,estado);
 	}
 	list_iterate(tablaUsados,dibujarEntrada);
 	list_iterate(tablaEstados,dibujarEntrada);
@@ -535,7 +548,7 @@ void darPathTemporal(char** ret,char pre){
 	char* temp=temporal_get_string_time();
 	*ret=malloc(TEMPSIZE); //12
 	int i,j=1;
-	(*ret)[0]=pre; //creo que la precedencia esta bien
+	(*ret)[0]=pre;
 	for(i=0;i<12;i++){
 		if(temp[i]==':')
 			continue;

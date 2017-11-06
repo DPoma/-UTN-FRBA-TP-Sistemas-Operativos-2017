@@ -18,6 +18,8 @@
 #define INTSIZE sizeof(int32_t)
 #define TEMPSIZE 12
 
+#define SOLICITUD 302
+
 typedef enum {Solicitud,Transformacion,ReducLocal,ReducGlobal,Almacenamiento,Cierre,Aborto} Etapa;
 
 typedef struct {

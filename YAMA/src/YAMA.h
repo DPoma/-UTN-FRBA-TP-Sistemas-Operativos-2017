@@ -21,6 +21,7 @@
 
 #define ACEPTACION 200
 #define SOLICITAR_BLOQUES 201
+#define ERROR_ARCHIVO 202
 
 #define DIRSIZE sizeof(Dir)
 
@@ -54,8 +55,23 @@ typedef struct{
 } Worker;
 Lista workers;
 
-typedef enum {Solicitud,Transformacion,ReducLocal,ReducGlobal,Cierre,Aborto} Etapa;
-typedef enum {Error=-1,EnProceso=0,Terminado,Abortado} Estado;
+#define ENVIAR_BLOQUES 201
+#define ERROR_ARCHIVO 202
+
+#define ABORTAR 301
+#define SOLICITUD 302
+#define TRANSFORMACION 303
+#define REDUCLOCAL 304
+#define REDUCGLOBAL 305
+#define ALMACENADO 306
+#define CIERRE 307
+
+#define ENPROCESO 1
+#define TERMINADO 2
+#define ABORTADO 3
+
+typedef enum {Error,EnProceso,Terminado,Abortado} Estado;
+
 int job=-1;
 typedef struct{
 	int job;

@@ -85,7 +85,7 @@
 
 #define ACEPTAR_YAMA 200
 #define ENVIAR_BLOQUES 201
-
+#define ERROR_ARCHIVO 202
 //--------------------------------------- Estructuras -------------------------------------
 
 typedef struct {
@@ -431,8 +431,8 @@ void archivoListaAgregar(Archivo* archivo);
 int archivoListaCantidad();
 bool archivoListaTodosDisponibles();
 void archivoListaDestruir();
-BloqueYama* archivoConvertirParaYama(Archivo* archivo);
-void archivoEnviarBloquesYama(String path);
+BloqueYama* archivoConvertirParaYama(Archivo* archivo, Entero idMaster);
+void archivoEnviarBloquesYama(Puntero path);
 
 //--------------------------------------- Funciones de Nodo -------------------------------------
 
