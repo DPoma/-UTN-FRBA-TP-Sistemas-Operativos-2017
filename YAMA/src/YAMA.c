@@ -520,7 +520,7 @@ void dibujarTablaEstados(){
 		default: estado="terminado";
 		}
 		printf("%d     %d     %d     %s     %s     %s    %s",
-				entrada->job,entrada->masterid-2,ipToNum(entrada->nodo.ip),(entrada->bloque!=-1)?itoa(entrada->bloque):"-",
+				entrada->job,entrada->masterid-2,ipToNum(entrada->nodo.ip),(entrada->bloque!=-1)?string_itoa(entrada->bloque):"-",
 				etapa,entrada->pathTemporal,estado);
 	}
 	list_iterate(tablaUsados,dibujarEntrada);

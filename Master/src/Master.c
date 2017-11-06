@@ -104,25 +104,25 @@ void masterAtender(){
 	while(estadoMaster==ACTIVADO) {
 		Mensaje* m = mensajeRecibir(socketYama);
 		switch(m->header.operacion){
-		case Aborto:
+		case ABORTAR:
 			imprimirMensaje(archivoLog,"[ABORTO] Abortando proceso");
 			abort(); //supongo que los hilos mueren aca
 			//si no se mueren matarlos
 			break;
-		case Cierre:
+		case CIERRE:
 			imprimirMensaje(archivoLog,"[EJECUCION] Terminando proceso");
 			estadoMaster=DESACTIVADO;
 			break;
-		case Transformacion://hubo error y se recibió un bloque alternativo
+		case TRANSFORMACION://hubo error y se recibió un bloque alternativo
 			memcpy(&alternativo.bloque,mensaje->datos+i+DIRSIZE,INTSIZE);
 			memcpy(&alternativo.bytes,mensaje->datos+i+DIRSIZE+INTSIZE,INTSIZE);
 			memcpy(&alternativo.temp,mensaje->datos+i+DIRSIZE+INTSIZE*2,TEMPSIZE);
 			semaforoSignal(recepcionAlternativo);
 			break;
-		case ReducLocal:
+		case REDUCLOCAL:
 			reduccionLocal(m);
 			break;
-		case ReducGlobal:
+		case REDUCGLOBAL:
 			reduccionGlobal(m);
 			break;
 		}
@@ -132,7 +132,7 @@ void masterAtender(){
 void transformaciones(Lista bloques){
 	WorkerTransformacion* dir = list_get(bloques,0);
 	socketWorker=socketCrearCliente(dir->dir.ip,dir->dir.port,ID_MASTER);
-	mensajeEnviar(socketWorker,Transformacion,scriptTransformacion,lenTransformacion);
+	mensajeEnviar(socketWorker,TRANSFORMACION,scriptTransformacion,lenTransformacion);
 	int enviados=0,respondidos=0;
 	enviarBloques:
 	for(;enviados<bloques->elements_count;enviados++){
@@ -142,7 +142,7 @@ void transformaciones(Lista bloques){
 		memcpy(data,&wt->bloque,INTSIZE);
 		memcpy(data+INTSIZE,&wt->bytes,INTSIZE); //a worker le interesan los bytes?
 		memcpy(data+INTSIZE*2,&wt->temp,TEMPSIZE);
-		mensajeEnviar(socketWorker,Transformacion,data,tamanio);
+		mensajeEnviar(socketWorker,TRANSFORMACION,data,tamanio);
 		imprimirMensajeDos(archivoLog,"[CONEXION] Estableciendo conexion con Worker (IP: %s | PUERTO: %d",wt->dir.ip,wt->dir.port);
 	}
 	for(;respondidos<enviados;respondidos++){
@@ -189,7 +189,7 @@ void reduccionLocal(Mensaje* m){
 	memcpy(&nuevoBuffer, scriptReduccion, lenReduccion);
 	memcpy(&nuevoBuffer + lenReduccion, m->datos+ sizeof(char)*40, tamanio - lenReduccion);
 	Socket sWorker =socketCrearCliente(NODO->ip, NODO->port, ID_MASTER);
-	mensajeEnviar(sWorker,ReducLocal,nuevoBuffer,tamanio);
+	mensajeEnviar(sWorker,REDUCLOCAL,nuevoBuffer,tamanio);
 	free(m);
 	Mensaje* mensaje = mensajeRecibir(sWorker);
 	switch(mensaje->header.operacion){
@@ -222,7 +222,7 @@ void reduccionGlobal(Mensaje* m){
 	memcpy(&nuevoBuffer, scriptReduccion, lenReduccion);
 	memcpy(&nuevoBuffer + lenReduccion, m->datos+ sizeof(char)*40, tamanio - lenReduccion);
 	Socket sWorker =socketCrearCliente(NODO->ip, NODO->port, ID_MASTER);
-	mensajeEnviar(sWorker,ReducLocal,nuevoBuffer,tamanio);
+	mensajeEnviar(sWorker,REDUCGLOBAL,nuevoBuffer,tamanio);
 	free(m);
 	Mensaje* mensaje = mensajeRecibir(sWorker);
 	switch(mensaje->header.operacion){

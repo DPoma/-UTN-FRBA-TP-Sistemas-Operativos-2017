@@ -12,15 +12,23 @@
 #define RUTA_CONFIG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Master/MasterConfig.conf"
 #define RUTA_LOG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Master/MasterLog.log"
 
+#define FRACASO -800
 #define EXITO 1
-#define FRACASO 0
 #define DIRSIZE sizeof(Dir)
 #define INTSIZE sizeof(int32_t)
 #define TEMPSIZE 12
 
-#define SOLICITUD 302
 
-typedef enum {Solicitud,Transformacion,ReducLocal,ReducGlobal,Almacenamiento,Cierre,Aborto} Etapa;
+#define FRACASO -800
+#define EXITO 1
+#define DESCONEXION 0
+#define ABORTAR 301
+#define SOLICITUD 302
+#define TRANSFORMACION 303
+#define REDUCLOCAL 304
+#define REDUCGLOBAL 305
+#define ALMACENADO 306
+#define CIERRE 307
 
 typedef struct {
 	char ipYama[50];

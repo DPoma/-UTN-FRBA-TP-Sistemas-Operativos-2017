@@ -31,11 +31,11 @@ void workerCrearHijo(Socket unSocket) {
 			case -1:
 			{
 				imprimirMensaje(archivoLog, ("[EJECUCION] Tuve problemas para comunicarme con el Master (Pid hijo: %d)", pid)); //el hijo fallo en comunicarse con el master
-				mensajeEnviar(unSocket, -4, NULL, 0); //MANDA AL MASTER QUE FALLO
+				mensajeEnviar(unSocket, DESCONEXION, NULL, 0); //MANDA AL MASTER QUE FALLO
 				free(mensaje);
 				break;
 			}
-			case Transformacion: //Etapa Transformacion
+			case TRANSFORMACION: //Etapa Transformacion
 			{
 				memcpy(&sizeCodigo, mensaje->datos, sizeof(int32_t));
 				memcpy(&codigo,mensaje->datos + sizeof(int32_t), sizeCodigo);
@@ -58,14 +58,14 @@ void workerCrearHijo(Socket unSocket) {
 									estadoTransf=0;
 									break;
 								}
-								case Transformacion:
+								case TRANSFORMACION:
 								{
 									memcpy(&origen,mensaje->datos + sizeof(int32_t)+sizeCodigo, sizeof(int32_t));
 									memcpy(&sizeDestino, mensaje->datos + sizeof(int32_t)*2 + sizeCodigo , sizeof(int32_t));
 									memcpy(&destino,mensaje->datos + sizeof(int32_t)*3+sizeCodigo, sizeDestino);
 									int result = transformar(codigo,origen,destino);
 									if(result==-1){
-										mensajeEnviar(unSocket, -801, NULL, 0);
+										mensajeEnviar(unSocket, FRACASO, NULL, 0);
 									}
 									/*char* buffer = leerArchivo(path,offset,size);
 									log_info(logFile, "[FILE SYSTEM] EL KERNEL PIDE LEER: %s | OFFSET: %i | SIZE: %i", path, offset, size);
@@ -78,7 +78,7 @@ void workerCrearHijo(Socket unSocket) {
 									lSend(conexion, buffer, 2, sizeof(char)*size);
 									free(buffer);
 									free(path);*/
-									mensajeEnviar(unSocket, 801, origen, sizeof(int32_t));
+									mensajeEnviar(unSocket, EXITO, origen, sizeof(int32_t));
 									free(codigo);
 									free(destino);
 									free(mensaje);
@@ -94,7 +94,7 @@ void workerCrearHijo(Socket unSocket) {
 				}
 				break;
 			}
-			case ReducLocal:{ //Etapa Reduccion Local
+			case REDUCLOCAL:{ //Etapa Reduccion Local
 				char* origen;
 				int sizeOrigen;
 				char* destino; //los temporales siempre miden 12, le podes mandar un char[12] aca y listo
@@ -107,7 +107,7 @@ void workerCrearHijo(Socket unSocket) {
 				memcpy(&destino,mensaje->datos + sizeof(int32_t)*3+sizeCodigo+ sizeOrigen, sizeDestino);
 				int result=reduccionLocal(codigo,origen,destino);
 				if(result==-1){
-					mensajeEnviar(unSocket, -802, NULL, 0);
+					mensajeEnviar(unSocket, FRACASO, NULL, 0);
 				}
 				/*char* buffer = leerArchivo(path,offset,size);
 				log_info(logFile, "[FILE SYSTEM] EL KERNEL PIDE LEER: %s | OFFSET: %i | SIZE: %i", path, offset, size);
@@ -120,14 +120,14 @@ void workerCrearHijo(Socket unSocket) {
 				lSend(conexion, buffer, 2, sizeof(char)*size);
 				free(buffer);
 				free(path);*/
-				mensajeEnviar(unSocket, 802, NULL, 0);
+				mensajeEnviar(unSocket, EXITO, NULL, 0);
 				free(codigo);
 				free(origen);
 				free(destino);
 				free(mensaje);
 				break;
 			}
-			case ReducGlobal:{ //Etapa Reduccion Global
+			case REDUCGLOBAL:{ //Etapa Reduccion Global
 				char* origen;
 				int sizeOrigen;
 				char* destino; //los temporales siempre miden 12, le podes mandar un char[12] aca y listo
@@ -140,7 +140,7 @@ void workerCrearHijo(Socket unSocket) {
 				memcpy(&destino,mensaje->datos + sizeof(int32_t)*3+sizeCodigo+ sizeOrigen, sizeDestino);
 				int result = reduccionGlobal(codigo,origen,destino);
 				if(result==-1){
-					mensajeEnviar(unSocket, -803, NULL, 0);
+					mensajeEnviar(unSocket, FRACASO, NULL, 0);
 				}
 				/*char* buffer = leerArchivo(path,offset,size);
 				log_info(logFile, "[FILE SYSTEM] EL KERNEL PIDE LEER: %s | OFFSET: %i | SIZE: %i", path, offset, size);
@@ -153,14 +153,14 @@ void workerCrearHijo(Socket unSocket) {
 				lSend(conexion, buffer, 2, sizeof(char)*size);
 				free(buffer);
 				free(path);*/
-				mensajeEnviar(unSocket, 803, NULL, 0);
+				mensajeEnviar(unSocket, EXITO, NULL, 0);
 				free(codigo);
 				free(origen);
 				free(destino);
 				free(mensaje);
 				break;
 			}
-			case Almacenamiento:{ //Almacenamiento Definitivo
+			case ALMACENADO:{ //Almacenamiento Definitivo
 				int sizeNombre;
 				char* Nombre;
 				int sizeRuta;
@@ -212,16 +212,16 @@ void workerCrearHijo(Socket unSocket) {
 				puntero += sizeof(int32_t);
 				memcpy(puntero, buffer, sizebuffer);
 				//envio
-				mensajeEnviar(socketFS,2,mensajeData,mensajeSize); //CAMBIAR 2 Seguramente
+				mensajeEnviar(socketFS,ALMACENADO,mensajeData,mensajeSize); //CAMBIAR 2 Seguramente
 				free(mensajeData);
 				free(puntero);
-				mensajeEnviar(unSocket, 2, NULL, 0);
+				mensajeEnviar(unSocket, ALMACENADO, NULL, 0);
 				free(codigo);
 				free(mensaje);
-				mensajeEnviar(unSocket, 804, NULL, 0);
+				mensajeEnviar(unSocket, EXITO, NULL, 0);
 				break;
 			}
-			case PasaReg:{ //PasaRegistro
+			case PASAREG:{ //PasaRegistro
 				int sizeRuta;
 				char* ruta;
 				int numeroReg;
@@ -250,16 +250,16 @@ void workerCrearHijo(Socket unSocket) {
 				puntero += Reg->sizebuffer;
 				memcpy(puntero, Reg->NumReg, sizeof(int));
 				//envio
-				mensajeEnviar(unSocket,5,mensajeData,mensajeSize);
+				mensajeEnviar(unSocket,PASAREG,mensajeData,mensajeSize);
 				free(mensajeData);
 				free(puntero);
 				free(codigo);
 				free(mensaje);
 				break;
 			}
-			case Aborto:{ //Aborto
+			case ABORTAR:{ //Aborto
 				imprimirMensaje(archivoLog, ("[EJECUCION] El Master me aborto (Pid hijo: %d)", pid)); //el hijo fallo en comunicarse con el master
-				mensajeEnviar(unSocket, -806, NULL, 0); //MANDA AL MASTER QUE FALLO
+				mensajeEnviar(unSocket, FRACASO, NULL, 0); //MANDA AL MASTER QUE FALLO
 				free(mensaje);
 				break;
 			}
@@ -675,7 +675,7 @@ char* appendG(lGlobOri* origenes){
 		puntero += sizeof(((globOri*)origenes->oris[i])->ruta);
 		memcpy(puntero, VLineasiguiente[i], sizeof(int32_t));
 		//envio y recibo
-		mensajeEnviar(socketClientWorker,5,mensajeData,mensajeSize);
+		mensajeEnviar(socketClientWorker,PASAREG,mensajeData,mensajeSize);
 		free(mensajeData);
 		free(puntero);
 		Mensaje* mensaje =mensajeRecibir(socketClientWorker);
@@ -780,7 +780,7 @@ char* appendG(lGlobOri* origenes){
 		puntero += sizeof(((globOri*)origenes->oris[resultado])->ruta);
 		memcpy(puntero, VLineasiguiente[resultado], sizeof(int32_t));
 		//envio y recibo
-		mensajeEnviar(socketClientWorker,5,mensajeData,mensajeSize);
+		mensajeEnviar(socketClientWorker,PASAREG,mensajeData,mensajeSize);
 		free(mensajeData);
 		free(puntero);
 		Mensaje* mensaje =mensajeRecibir(socketClientWorker);

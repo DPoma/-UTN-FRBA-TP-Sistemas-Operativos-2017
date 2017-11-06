@@ -8,7 +8,16 @@
 
 #include "../../Biblioteca/src/Biblioteca.c"
 
-typedef enum {Vacio,Transformacion,ReducLocal,ReducGlobal,Almacenamiento,PasaReg,Aborto,EXITO} Etapa;
+#define FRACASO -800
+#define EXITO 1
+#define DESCONEXION 0
+#define ABORTAR 301
+#define TRANSFORMACION 303
+#define REDUCLOCAL 304
+#define REDUCGLOBAL 305
+#define ALMACENADO 306
+#define CIERRE 307
+#define PASAREG 308
 
 #define RUTA_CONFIG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Worker/NodoConfig.conf"
 #define RUTA_LOG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Worker/WorkerLog.log"

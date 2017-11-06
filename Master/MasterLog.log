@@ -1,4 +1,2 @@
-[INFO] 22:21:38:372 Master/(3585:3585): [CONEXION] Configuracion para conexion con YAMA (IP: 127.0.0.1 | Puerto: 5070)
-[INFO] 22:21:38:407 Master/(3585:3585): [CONEXION] Estableciendo Conexion con YAMA...
-[INFO] 22:21:38:445 Master/(3585:3585): [CONEXION] Conexion establecida con YAMA, esperando instrucciones
-[INFO] 22:21:38:491 Master/(3585:3585): [31m[ERROR] Path invalido, abortando proceso[0m
+[INFO] 15:51:04:608 Master/(3207:3207): [CONEXION] Configuracion para conexion con YAMA (IP: 127.0.0.1 | Puerto: 5070)
+[INFO] 15:51:04:608 Master/(3207:3207): [CONEXION] Estableciendo Conexion con YAMA...

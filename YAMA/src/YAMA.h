@@ -58,6 +58,9 @@ Lista workers;
 #define ENVIAR_BLOQUES 201
 #define ERROR_ARCHIVO 202
 
+#define FRACASO -800
+#define EXITO 1
+#define DESCONEXION 0
 #define ABORTAR 301
 #define SOLICITUD 302
 #define TRANSFORMACION 303
@@ -81,7 +84,7 @@ typedef struct{
 	int32_t bytes;
 	Dir nodoAlt;
 	int32_t bloqueAlt;
-	Etapa etapa;
+	int etapa;
 	char* pathTemporal; //podría usar char[12] y no usar memoria dinamica, despues ver
 	Estado estado;
 } Entrada;

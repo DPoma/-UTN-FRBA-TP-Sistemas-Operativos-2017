@@ -74,6 +74,13 @@
 #define NORMAL 1
 #define INESTABLE 0
 #define ESTABLE 1
+#define FRACASO -800
+#define EXITO 1
+#define DESCONEXION 0
+#define ABORTAR 301
+#define ALMACENADO 306
+#define CIERRE 307
+
 
 #define ACEPTAR_DATANODE 100
 #define LEER_BLOQUE 101
