@@ -25,11 +25,12 @@
 #define RUTA_TEMPS "/home/utnso/Escritorio/temp/"
 
 typedef struct {
-	char ipFileSytem[50];
-	char puertoFileSystem[50];
-	char nombreNodo[50];
-	char puertoWorker[50];
-	char rutaDataBin[100];
+	char ipFileSytem[20];
+	char puertoFileSystem[20];
+	char nombreNodo[10];
+	char puertoWorker[20];
+	char rutaDataBin[255];
+	char ipPropia[20];
 } Configuracion;
 
 typedef struct {
@@ -61,7 +62,8 @@ String campos[5];
 Configuracion* configuracion;
 ArchivoLog archivoLog;
 int estadoWorker;
-int tamanioArchData;
+int bloquesArchData;
+int dataBinTamanio;
 Socket socketListenerWorker;
 void socketAceptarConexion();
 

@@ -1,0 +1,6 @@
+[INFO] 19:28:00:574 Worker/(8550:8550): [DATABIN] Cantidad de bloques 100
+[INFO] 19:28:00:587 Worker/(8550:8550): [CONFIGURACION] Nombre Nodo: NODO1
+[INFO] 19:28:00:588 Worker/(8550:8550): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data2.bin
+[INFO] 19:28:00:588 Worker/(8550:8550): [CONFIGURACION] tamanio data.bin: 100MB
+[INFO] 19:28:00:600 Worker/(8550:8550): [CONEXION] Esperando conexiones de Master (Puerto: 5050)
+[INFO] 19:39:58:958 Worker/(8550:8550): [EJECUCION] Proceso Worker finalizado

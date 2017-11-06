@@ -1,4 +1,28 @@
-[INFO] 18:39:07:243 Master/(6948:6948): [CONEXION] Configuracion para conexion con YAMA (IP: 127.0.0.1 | Puerto: 5070)
-[INFO] 18:39:07:290 Master/(6948:6948): [CONEXION] Estableciendo Conexion con YAMA...
-[INFO] 18:39:07:330 Master/(6948:6948): [CONEXION] Conexion establecida con YAMA, esperando instrucciones
-[INFO] 18:39:07:403 Master/(6948:6948): [MENSAJE] Lista de bloques recibida
+[INFO] 19:45:02:792 Master/(8933:8933): [CONEXION] Configuracion para conexion con YAMA (IP: 127.0.0.1 | Puerto: 5070)
+[INFO] 19:45:02:813 Master/(8933:8933): [CONEXION] Estableciendo Conexion con YAMA...
+[INFO] 19:45:02:836 Master/(8933:8933): [CONEXION] Conexion establecida con YAMA, esperando instrucciones
+[INFO] 19:45:02:879 Master/(8933:8933): [MENSAJE] Lista de bloques recibida
+[INFO] 19:45:02:880 Master/(8933:8933): [RECEPCION] bloque 127.0.0.1 5050 0
+[INFO] 19:45:02:885 Master/(8933:8933): ] lista para nodo 127.0.0.1 5050 armada
+[INFO] 19:45:02:885 Master/(8933:8933): [RECEPCION] bloque 127.0.0.1 5050 2
+[INFO] 19:45:02:888 Master/(8933:8933): ] lista para nodo 127.0.0.1 5050 armada
+[INFO] 19:45:02:889 Master/(8933:8933): [RECEPCION] bloque 127.0.0.1 5050 4
+[INFO] 19:45:02:893 Master/(8933:8933): ] lista para nodo 127.0.0.1 5050 armada
+[INFO] 19:45:02:893 Master/(8933:8933): [RECEPCION] bloque 127.0.0.1 5050 6
+[INFO] 19:45:02:898 Master/(8933:8933): ] lista para nodo 127.0.0.1 5050 armada
+[INFO] 19:45:02:898 Master/(8933:8933): [RECEPCION] bloque 127.0.0.1 5050 8
+[INFO] 19:45:02:899 Master/(8933:8933): ] lista para nodo 127.0.0.1 5050 armada
+[INFO] 19:45:02:899 Master/(8933:8933): [RECEPCION] bloque 127.0.0.1 5050 10
+[INFO] 19:45:02:899 Master/(8933:8933): ] lista para nodo 127.0.0.1 5050 armada
+[INFO] 19:45:02:899 Master/(8933:8933): [RECEPCION] bloque 127.0.0.1 5050 12
+[INFO] 19:45:02:899 Master/(8933:8933): ] lista para nodo 127.0.0.1 5050 armada
+[INFO] 19:45:02:900 Master/(8933:8933): [RECEPCION] bloque 127.0.0.1 5050 14
+[INFO] 19:45:02:900 Master/(8933:8933): ] lista para nodo 127.0.0.1 5050 armada
+[INFO] 19:45:02:900 Master/(8933:8933): [RECEPCION] bloque 127.0.0.1 5050 16
+[INFO] 19:45:02:900 Master/(8933:8933): ] lista para nodo 127.0.0.1 5050 armada
+[INFO] 19:45:02:900 Master/(8933:8933): [RECEPCION] bloque 127.0.0.1 5050 18
+[INFO] 19:45:02:901 Master/(8933:8933): ] lista para nodo 127.0.0.1 5050 armada
+[INFO] 19:45:02:901 Master/(8933:8933): [RECEPCION] bloque 127.0.0.1 5050 20
+[INFO] 19:45:02:901 Master/(8933:8933): ] lista para nodo 127.0.0.1 5050 armada
+[INFO] 19:45:02:901 Master/(8933:8933): [RECEPCION] bloque 127.0.0.1 5050 22
+[INFO] 19:45:02:902 Master/(8933:8933): ] lista para nodo 127.0.0.1 5050 armada

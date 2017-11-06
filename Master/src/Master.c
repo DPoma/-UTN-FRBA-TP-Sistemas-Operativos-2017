@@ -75,7 +75,7 @@ void masterAtender(){
 	imprimirMensaje(archivoLog, "[MENSAJE] Lista de bloques recibida");
 	int i;
 	bool mismoNodo(Dir a,Dir b){
-		return a.ip==b.ip&&a.port==b.port;//podría comparar solo ip
+		return stringIguales(a.ip,b.ip)&&stringIguales(a.port,b.port);//podría comparar solo ip
 	}
 	Lista listas=list_create();
 	for(i=0;i<mensaje->header.tamanio;i+=DIRSIZE+INTSIZE*2+TEMPSIZE){
@@ -83,9 +83,10 @@ void masterAtender(){
 		memcpy(&bloque.dir,mensaje->datos+i,DIRSIZE);
 		memcpy(&bloque.bloque,mensaje->datos+i+DIRSIZE,INTSIZE);
 		memcpy(&bloque.bytes,mensaje->datos+i+DIRSIZE+INTSIZE,INTSIZE);
-		memcpy(&bloque.temp,mensaje->datos+i+DIRSIZE+INTSIZE*2,TEMPSIZE);
+		memcpy(bloque.temp,mensaje->datos+i+DIRSIZE+INTSIZE*2,TEMPSIZE);
+		imprimirMensajeTres(archivoLog, "[RECEPCION] bloque %s %s %d",bloque.dir.ip,bloque.dir.port,(int*)bloque.bloque);
 		int j;
-		for(j=0;j<=listas->elements_count;j++){
+		for(j=0;j<listas->elements_count;j++){
 			Lista nodo=list_get(listas,j);
 			WorkerTransformacion* cmp=list_get(nodo,0);
 			if(mismoNodo(bloque.dir,cmp->dir)){
@@ -93,8 +94,9 @@ void masterAtender(){
 			}
 		}
 		Lista nodo=list_create();
-		list_addM(nodo, &bloque,sizeof bloque);
-		list_add(listas,nodo);//creo que no hay que alocar nada
+		list_addM(nodo, &bloque,sizeof(WorkerTransformacion));
+		list_addM(listas,nodo,sizeof(t_list));
+		imprimirMensajeDos(archivoLog,"] lista para nodo %s %s armada",bloque.dir.ip,bloque.dir.port);
 	}
 
 	for(i=0;i<=listas->elements_count;i++){

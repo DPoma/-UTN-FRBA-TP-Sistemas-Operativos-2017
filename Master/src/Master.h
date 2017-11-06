@@ -41,7 +41,7 @@ typedef struct{
 	Dir dir;
 	int bloque;
 	int bytes;
-	char* temp;
+	char temp[TEMPSIZE];
 } WorkerTransformacion;
 WorkerTransformacion alternativo;
 

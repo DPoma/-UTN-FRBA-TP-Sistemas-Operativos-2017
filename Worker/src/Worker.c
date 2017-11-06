@@ -274,7 +274,7 @@ void workerCrearHijo(Socket unSocket) {
 
 //1er etapa
 int transformar(char* codigo,int origen,char* destino){
-	if (origen>tamanioArchData){
+	if (origen>bloquesArchData){
 		return -1;
 	}
 	char* patharchdes;
@@ -873,6 +873,7 @@ Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig) {
 	stringCopiar(configuracion->nombreNodo, archivoConfigStringDe(archivoConfig, "NOMBRE_NODO"));
 	stringCopiar(configuracion->puertoWorker, archivoConfigStringDe(archivoConfig, "PUERTO_WORKER"));
 	stringCopiar(configuracion->rutaDataBin, archivoConfigStringDe(archivoConfig, "RUTA_DATABIN"));
+	stringCopiar(configuracion->ipPropia, archivoConfigStringDe(archivoConfig, "IP_PROPIA"));
 	archivoConfigDestruir(archivoConfig);
 	return configuracion;
 }
@@ -888,7 +889,7 @@ char* agregarBarraCero(char* data, int tamanio)
 void configuracionImprimir(Configuracion* configuracion) {
 	imprimirMensajeUno(archivoLog, "[CONFIGURACION] Nombre Nodo: %s", configuracion->nombreNodo);
 	imprimirMensajeUno(archivoLog, "[CONFIGURACION] Ruta archivo data.bin: %s", configuracion->rutaDataBin);
-	imprimirMensajeUno(archivoLog, "[CONFIGURACION] tamanio data.bin: %dMB", tamanioArchData);
+	imprimirMensajeUno(archivoLog, "[CONFIGURACION] tamanio data.bin: %dMB", bloquesArchData);
 
 }
 
@@ -896,7 +897,7 @@ void archivoConfigObtenerCampos() {
 	campos[0] = "IP_FILESYSTEM";
 	campos[1] = "PUERTO_FILESYSTEM";
 	campos[2] = "NOMBRE_NODO";
-	campos[3] = "IP_PROPIO";
+	campos[3] = "IP_PROPIA";
 	campos[4] = "PUERTO_WORKER";
 	campos[5] = "RUTA_DATABIN";
 }
@@ -907,6 +908,27 @@ void configuracionSenial(int senial) {
 	exit(0);
 }
 
+void dataBinCalcularBloques() {
+	Puntero Puntero;
+	int descriptorArchivo = open(configuracion->rutaDataBin, O_CLOEXEC | O_RDWR);
+	if (descriptorArchivo == ERROR) {
+		imprimirMensaje(archivoLog, "[ERROR] Fallo el open()");
+		perror("open");
+		exit(EXIT_FAILURE);
+	}
+	struct stat estadoArchivo;
+	if (fstat(descriptorArchivo, &estadoArchivo) == ERROR) {
+		imprimirMensaje(archivoLog, "[ERROR] Fallo el fstat()");
+		perror("fstat");
+		exit(EXIT_FAILURE);
+	}
+	dataBinTamanio = estadoArchivo.st_size;
+	bloquesArchData = (Entero)ceil((double)dataBinTamanio/(double)BLOQUE);
+	imprimirMensajeUno(archivoLog, "[DATABIN] Cantidad de bloques %i", (int*)bloquesArchData);
+}
+
+
+
 void workerIniciar() {
 	pantallaLimpiar();
 	imprimirMensajeProceso("# PROCESO WORKER");
@@ -914,11 +936,7 @@ void workerIniciar() {
 	archivoConfigObtenerCampos();
 	senialAsignarFuncion(SIGINT, configuracionSenial);
 	configuracion = configuracionCrear(RUTA_CONFIG, (void*)configuracionLeerArchivoConfig, campos);
-	char* texto;
-	strcat(texto,"stat -c%s ");
-	strcat(texto, configuracion->rutaDataBin);
-	tamanioArchData = system(texto)/MB;
+	dataBinCalcularBloques();
 	configuracionImprimir(configuracion);
 	estadoWorker = 1;
-	free(texto);
 }
