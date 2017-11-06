@@ -1,5 +1,5 @@
-[INFO] 19:06:57:137 DataNode/(2790:2790): [CONFIGURACION] Nombre Nodo: NODO3
-[INFO] 19:06:57:138 DataNode/(2790:2790): [CONFIGURACION] Ruta archivo data.bin: /home/dario/Escritorio/data3.bin
-[INFO] 19:06:57:138 DataNode/(2790:2790): [DATABIN] Cantidad de bloques 20
-[INFO] 19:06:57:139 DataNode/(2790:2790): [CONEXION] Estableciendo conexion con File System (IP: 127.0.0.1 | Puerto 5040)
-[INFO] 19:06:57:140 DataNode/(2790:2790): [CONEXION] Conexion establecida con el File System
+[INFO] 17:37:24:540 DataNode/(5440:5440): [CONFIGURACION] Nombre Nodo: NODO1
+[INFO] 17:37:24:541 DataNode/(5440:5440): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data2.bin
+[INFO] 17:37:24:541 DataNode/(5440:5440): [DATABIN] Cantidad de bloques 100
+[INFO] 17:37:24:541 DataNode/(5440:5440): [CONEXION] Estableciendo conexion con File System (IP: 127.0.0.1 | Puerto 5040)
+[INFO] 17:37:24:541 DataNode/(5440:5440): [CONEXION] Conexion establecida con el File System

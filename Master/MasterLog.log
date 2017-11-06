@@ -1,2 +1,4 @@
-[INFO] 15:51:04:608 Master/(3207:3207): [CONEXION] Configuracion para conexion con YAMA (IP: 127.0.0.1 | Puerto: 5070)
-[INFO] 15:51:04:608 Master/(3207:3207): [CONEXION] Estableciendo Conexion con YAMA...
+[INFO] 18:39:07:243 Master/(6948:6948): [CONEXION] Configuracion para conexion con YAMA (IP: 127.0.0.1 | Puerto: 5070)
+[INFO] 18:39:07:290 Master/(6948:6948): [CONEXION] Estableciendo Conexion con YAMA...
+[INFO] 18:39:07:330 Master/(6948:6948): [CONEXION] Conexion establecida con YAMA, esperando instrucciones
+[INFO] 18:39:07:403 Master/(6948:6948): [MENSAJE] Lista de bloques recibida

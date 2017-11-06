@@ -1834,7 +1834,8 @@ void archivoEnviarBloquesYama(Puntero datos) {
 	}
 	int cantidad = listaCantidadElementos(archivo->listaBloques);
 	BloqueYama* bloques = archivoConvertirParaYama(archivo, idMaster);
-	mensajeEnviar(socketYama, ENVIAR_BLOQUES, bloques, sizeof(BloqueYama)*cantidad);
+	mensajeEnviar(socketYama, ENVIAR_BLOQUES, bloques, sizeof(Entero)+sizeof(BloqueYama)*cantidad);
+	printf("ENVIE %d \n",sizeof(Entero)+sizeof(BloqueYama)*cantidad );
 }
 
 BloqueYama* archivoConvertirParaYama(Archivo* archivo, Entero idMaster) {
@@ -2610,6 +2611,14 @@ BloqueYama bloqueConvertirParaYama(Bloque* bloque) {
 	bloqueYama.numeroBloqueCopia1 = copia1->bloqueNodo;
 	bloqueYama.numeroBloqueCopia2 = copia2->bloqueNodo;
 	bloqueYama.bytesUtilizados = bloque->bytesUtilizados;
+	printf("bloque 1 %s\n", direccion1.ip);
+	printf("bloque 1 %s\n", direccion1.puerto);
+	printf("bloque 2 %s\n", direccion2.ip);
+	printf("bloque 2 %s\n", direccion2.puerto);
+	printf("numero b1 %d\n", bloqueYama.numeroBloqueCopia1);
+	printf("numero b2 %d\n", bloqueYama.numeroBloqueCopia2);
+	printf("bytes utiles %d\n", bloqueYama.bytesUtilizados);
+
 	return bloqueYama;
 }
 

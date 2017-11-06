@@ -124,11 +124,12 @@ void yamaAtender() {
 						//podría romper por estar recorriendo una lista con una funcion
 						//que puede modificar la lista, pero no deberia
 					}else{
-						Socket masterid;
+						int32_t masterid;
 						memcpy(&masterid,mensaje->datos,INTSIZE);
 						log_info(archivoLog, "[RECEPCION] lista de bloques para master #%d recibida",masterid);
+						printf("%d\n", mensaje->header.tamanio);
 						if(listaSocketsContiene(masterid,&servidor->listaMaster)) //por si el master se desconecto
-							yamaPlanificar(masterid,mensaje+INTSIZE,mensaje->header.tamanio-INTSIZE);
+							yamaPlanificar(masterid,mensaje->datos+INTSIZE,mensaje->header.tamanio-INTSIZE);
 					}
 					mensajeDestruir(mensaje);
 				}else{ //master
@@ -139,11 +140,13 @@ void yamaAtender() {
 						//el mensaje es el path del archivo
 						//aca le acoplo el numero de master y se lo mando al fileSystem
 						//lo de acoplar esta por si uso hilos, sino esta al pedo
-						mensaje=realloc(mensaje,mensaje->header.tamanio+INTSIZE+sizeof(Header));
-						memmove(mensaje->datos+INTSIZE,mensaje->datos,mensaje->header.tamanio);
-						memcpy(mensaje->datos,&masterid,INTSIZE);
-						mensajeEnviar(servidor->fileSystem,ENVIAR_BLOQUES,mensaje->datos,mensaje->header.tamanio+INTSIZE);
-						log_info(archivoLog, "[ENVIO] path de master #%d enviado al fileSystem",&socketI);
+
+						void* pasoFs=malloc(mensaje->header.tamanio+INTSIZE);
+						memcpy(pasoFs,&masterid,INTSIZE);
+						memcpy(pasoFs+INTSIZE,mensaje->datos,mensaje->header.tamanio);
+						mensajeEnviar(servidor->fileSystem,ENVIAR_BLOQUES,pasoFs,mensaje->header.tamanio+INTSIZE);
+						log_info(archivoLog, "[ENVIO] path de master #%d enviado al fileSystem",socketI);
+						free(pasoFs);
 					}else if(mensaje->header.operacion==DESCONEXION){
 						log_info(archivoLog,"[RECEPCION] desconexion de master");
 						listaSocketsEliminar(socketI, &servidor->listaMaster);
@@ -176,17 +179,26 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 	int i;
 	Lista bloques=list_create();
 	Lista byteses=list_create();
-	for(i=0;i<=tamanio;i+=sizeof(Bloque)*2+INTSIZE){
+	for(i=0;i<tamanio;i+=BLOCKSIZE*2+INTSIZE){
 		list_add(bloques,listaBloques+i);
 		list_add(bloques,listaBloques+i+sizeof(Bloque));
 		list_add(byteses,listaBloques+i+sizeof(Bloque)*2);
 
-		log_info(archivoLog,"[REGISTRO] bloque: %s %s %d",listaBloques+i,listaBloques+i+DIRSIZE/2,listaBloques+i+DIRSIZE);
-		log_info(archivoLog,"[REGISTRO] bloque: %s %s %d",listaBloques+i+BLOCKSIZE,listaBloques+i+BLOCKSIZE+DIRSIZE/2,listaBloques+i+BLOCKSIZE+DIRSIZE);
+		char ip[20];
+		char puerto[20];
+		int32_t bloque;
+		memcpy(ip,listaBloques+i,20);
+		memcpy(puerto,listaBloques+i+20,20);
+		memcpy(&bloque,listaBloques+i+DIRSIZE,INTSIZE);
+		log_info(archivoLog,"[REGISTRO] bloque: %s | %s | %d",ip,puerto,(int)bloque);
+		memcpy(ip,listaBloques+i+BLOCKSIZE,20);
+		memcpy(puerto,listaBloques+i+20+BLOCKSIZE,20);
+		memcpy(&bloque,listaBloques+i+DIRSIZE+BLOCKSIZE,INTSIZE);
+		log_info(archivoLog,"[REGISTRO] bloque2: %s | %s | %d",ip,puerto,(int)bloque);
 
 		void registrar(Dir* nodo){
 			bool noRegistrado(Worker* worker){
-				return worker->nodo.ip!=*nodo->ip||worker->nodo.port!=*nodo->port;
+				return !stringIguales(worker->nodo.ip,nodo->ip)||!stringIguales(worker->nodo.port,nodo->port);
 			}
 			if(list_all_satisfy(workers,noRegistrado)){
 				Worker worker;
@@ -201,8 +213,9 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 		registrar(listaBloques+i);
 		registrar(listaBloques+i+BLOCKSIZE);
 	}
-	log_info(archivoLog,"[REGISTRO] %d bloques recibidos",i);
-	Lista tablaEstadosJob;
+	log_info(archivoLog,"[REGISTRO] %d bloques recibidos",bloques->elements_count);
+	log_info(archivoLog,"[REGISTRO] %d bytes recibidos",byteses->elements_count);
+	Lista tablaEstadosJob=list_create();
 	job++;//mutex (supongo que las variables globales se comparten entre hilos)
 	for(i=0;i<bloques->elements_count/2;i++){
 		Entrada entrada;
@@ -259,9 +272,10 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 		int* bytes=list_get(byteses,i/2);
 		void asignarBloque(Worker* worker,Bloque* bloque,Bloque* alt){
 			worker->carga++; //y habría que usar mutex aca
+			log_info(archivoLog,"bloque %s %s %d asignado a worker %s %s",bloque->nodo.ip,bloque->nodo.port,bloque->bloque,worker->nodo.ip,worker->nodo.port);
 			worker->disponibilidad--;
 			worker->tareasRealizadas++;
-			Entrada* entrada=list_get(tablaEstadosJob,i);
+			Entrada* entrada=list_get(tablaEstadosJob,i/2);
 			entrada->nodo=worker->nodo;
 			entrada->bloque=bloque->bloque;
 			entrada->bytes=*bytes;
@@ -269,6 +283,7 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 			entrada->bloqueAlt=alt->bloque;
 			entrada->etapa=TRANSFORMACION;
 			entrada->estado=EnProceso;
+
 		}
 
 		bool encontrado=false;
@@ -308,11 +323,11 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 		}
 	}
 
-	int tamanioEslabon=BLOCKSIZE*2+TEMPSIZE;//dir,bloque,bytes,temp
+	int tamanioEslabon=BLOCKSIZE+INTSIZE+TEMPSIZE;//dir,bloque,bytes,temp
 	int32_t tamanioDato=tamanioEslabon*tablaEstadosJob->elements_count;
 	void* dato=malloc(tamanioDato);
 	for(i=0;i<tamanioDato;i+=tamanioEslabon){
-		Entrada* entrada=list_get(tablaEstadosJob,i);
+		Entrada* entrada=list_get(tablaEstadosJob,i/tamanioEslabon);
 		memcpy(dato+i,&entrada->nodo,DIRSIZE);
 		memcpy(dato+i+DIRSIZE,&entrada->bloque,INTSIZE);
 		memcpy(dato+i+DIRSIZE+INTSIZE,&entrada->bytes,INTSIZE);

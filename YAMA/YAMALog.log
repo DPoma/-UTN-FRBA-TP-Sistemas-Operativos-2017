@@ -1,7 +1,49 @@
-[INFO] 22:21:30:148 YAMA/(3579:3579): [CONEXION] Realizando conexion con File System (IP: 127.0.0.1 | Puerto 5060)
-[INFO] 22:21:31:683 YAMA/(3579:3579): [CONEXION] Conexion exitosa con File System
-[INFO] 22:21:31:785 YAMA/(3579:3579): [CONEXION] Esperando conexiones de un Master (Puerto 5070)
-[INFO] 22:21:38:436 YAMA/(3579:3579): [CONEXION] Proceso Master 6 conectado exitosamente
-[INFO] 22:21:38:472 YAMA/(3579:3579): [ENVIO] path de master #-1094115516 enviado al fileSystem
-[INFO] 22:21:38:490 YAMA/(3579:3579): [ERROR] El path no existe en el File System
-[INFO] 22:21:38:875 YAMA/(3579:3579): [CONEXION] Proceso Master 6 se ha desconectado
+[INFO] 18:39:05:334 YAMA/(6943:6943): [CONEXION] Realizando conexion con File System (IP: 127.0.0.1 | Puerto 5060)
+[INFO] 18:39:05:394 YAMA/(6943:6943): [CONEXION] Conexion exitosa con File System
+[INFO] 18:39:05:396 YAMA/(6943:6943): [CONEXION] Esperando conexiones de un Master (Puerto 5070)
+[INFO] 18:39:07:323 YAMA/(6943:6943): [CONEXION] Proceso Master 7 conectado exitosamente
+[INFO] 18:39:07:340 YAMA/(6943:6943): [RECEPCION] solicitud de master
+[INFO] 18:39:07:342 YAMA/(6943:6943): [ENVIO] path de master #7 enviado al fileSystem
+[INFO] 18:39:07:351 YAMA/(6943:6943): [RECEPCION] lista de bloques para master #7 recibida
+[INFO] 18:39:07:356 YAMA/(6943:6943): [REGISTRO] bloque: 127.0.0.1 | 5040 | 0
+[INFO] 18:39:07:363 YAMA/(6943:6943): [REGISTRO] bloque2: 127.0.0.1 | 5040 | 1
+[INFO] 18:39:07:367 YAMA/(6943:6943): [REGISTRO] nodo direccion 127.0.0.1, puerto 5040
+[INFO] 18:39:07:375 YAMA/(6943:6943): [REGISTRO] bloque: 127.0.0.1 | 5040 | 2
+[INFO] 18:39:07:375 YAMA/(6943:6943): [REGISTRO] bloque2: 127.0.0.1 | 5040 | 3
+[INFO] 18:39:07:375 YAMA/(6943:6943): [REGISTRO] bloque: 127.0.0.1 | 5040 | 4
+[INFO] 18:39:07:376 YAMA/(6943:6943): [REGISTRO] bloque2: 127.0.0.1 | 5040 | 5
+[INFO] 18:39:07:376 YAMA/(6943:6943): [REGISTRO] bloque: 127.0.0.1 | 5040 | 6
+[INFO] 18:39:07:376 YAMA/(6943:6943): [REGISTRO] bloque2: 127.0.0.1 | 5040 | 7
+[INFO] 18:39:07:376 YAMA/(6943:6943): [REGISTRO] bloque: 127.0.0.1 | 5040 | 8
+[INFO] 18:39:07:376 YAMA/(6943:6943): [REGISTRO] bloque2: 127.0.0.1 | 5040 | 9
+[INFO] 18:39:07:376 YAMA/(6943:6943): [REGISTRO] bloque: 127.0.0.1 | 5040 | 10
+[INFO] 18:39:07:376 YAMA/(6943:6943): [REGISTRO] bloque2: 127.0.0.1 | 5040 | 11
+[INFO] 18:39:07:377 YAMA/(6943:6943): [REGISTRO] bloque: 127.0.0.1 | 5040 | 12
+[INFO] 18:39:07:377 YAMA/(6943:6943): [REGISTRO] bloque2: 127.0.0.1 | 5040 | 13
+[INFO] 18:39:07:377 YAMA/(6943:6943): [REGISTRO] bloque: 127.0.0.1 | 5040 | 14
+[INFO] 18:39:07:377 YAMA/(6943:6943): [REGISTRO] bloque2: 127.0.0.1 | 5040 | 15
+[INFO] 18:39:07:377 YAMA/(6943:6943): [REGISTRO] bloque: 127.0.0.1 | 5040 | 16
+[INFO] 18:39:07:378 YAMA/(6943:6943): [REGISTRO] bloque2: 127.0.0.1 | 5040 | 17
+[INFO] 18:39:07:378 YAMA/(6943:6943): [REGISTRO] bloque: 127.0.0.1 | 5040 | 18
+[INFO] 18:39:07:378 YAMA/(6943:6943): [REGISTRO] bloque2: 127.0.0.1 | 5040 | 19
+[INFO] 18:39:07:378 YAMA/(6943:6943): [REGISTRO] bloque: 127.0.0.1 | 5040 | 20
+[INFO] 18:39:07:379 YAMA/(6943:6943): [REGISTRO] bloque2: 127.0.0.1 | 5040 | 21
+[INFO] 18:39:07:379 YAMA/(6943:6943): [REGISTRO] bloque: 127.0.0.1 | 5040 | 22
+[INFO] 18:39:07:379 YAMA/(6943:6943): [REGISTRO] bloque2: 127.0.0.1 | 5040 | 23
+[INFO] 18:39:07:379 YAMA/(6943:6943): [REGISTRO] 24 bloques recibidos
+[INFO] 18:39:07:379 YAMA/(6943:6943): [REGISTRO] 12 bytes recibidos
+[INFO] 18:39:07:391 YAMA/(6943:6943): bloque 127.0.0.1 5040 0 asignado a worker 127.0.0.1 5040
+[INFO] 18:39:07:399 YAMA/(6943:6943): bloque 127.0.0.1 5040 2 asignado a worker 127.0.0.1 5040
+[INFO] 18:39:07:399 YAMA/(6943:6943): bloque 127.0.0.1 5040 4 asignado a worker 127.0.0.1 5040
+[INFO] 18:39:07:400 YAMA/(6943:6943): bloque 127.0.0.1 5040 6 asignado a worker 127.0.0.1 5040
+[INFO] 18:39:07:400 YAMA/(6943:6943): bloque 127.0.0.1 5040 8 asignado a worker 127.0.0.1 5040
+[INFO] 18:39:07:400 YAMA/(6943:6943): bloque 127.0.0.1 5040 10 asignado a worker 127.0.0.1 5040
+[INFO] 18:39:07:400 YAMA/(6943:6943): bloque 127.0.0.1 5040 12 asignado a worker 127.0.0.1 5040
+[INFO] 18:39:07:400 YAMA/(6943:6943): bloque 127.0.0.1 5040 14 asignado a worker 127.0.0.1 5040
+[INFO] 18:39:07:400 YAMA/(6943:6943): bloque 127.0.0.1 5040 16 asignado a worker 127.0.0.1 5040
+[INFO] 18:39:07:400 YAMA/(6943:6943): bloque 127.0.0.1 5040 18 asignado a worker 127.0.0.1 5040
+[INFO] 18:39:07:401 YAMA/(6943:6943): bloque 127.0.0.1 5040 20 asignado a worker 127.0.0.1 5040
+[INFO] 18:39:07:401 YAMA/(6943:6943): bloque 127.0.0.1 5040 22 asignado a worker 127.0.0.1 5040
+[INFO] 18:39:07:408 YAMA/(6943:6943): [] planificacion terminada
+[INFO] 18:39:07:867 YAMA/(6943:6943): [RECEPCION] desconexion de master
+[INFO] 18:39:07:869 YAMA/(6943:6943): [CONEXION] Proceso Master 7 se ha desconectado
