@@ -43,6 +43,7 @@ void yamaIniciar() {
 		exit(EXIT_FAILURE);
 	}
 	workers=list_create();
+	/*
 	Mensaje* infoNodos=mensajeRecibir(servidor->fileSystem);
 	int i;
 	for(i=0;i<infoNodos->header.tamanio/DIRSIZE;i++){
@@ -56,6 +57,7 @@ void yamaIniciar() {
 		list_addM(workers,&worker,sizeof(Worker));
 	}
 	mensajeDestruir(infoNodos);
+	*/
 }
 
 void configurar(){
@@ -79,8 +81,6 @@ void yamaAtender() {
 	servidor->maximoSocket = 0;
 	listaSocketsLimpiar(&servidor->listaMaster);
 	listaSocketsLimpiar(&servidor->listaSelect);
-
-
 	imprimirMensajeUno(archivoLog, "[CONEXION] Esperando conexiones de un Master (Puerto %s)", configuracion->puertoMaster);
 	servidor->listenerMaster = socketCrearListener(configuracion->puertoMaster);
 	listaSocketsAgregar(servidor->listenerMaster, &servidor->listaMaster);
@@ -106,18 +106,32 @@ void yamaAtender() {
 		Socket socketI;
 		Socket maximoSocket = servidor->maximoSocket;
 		for(socketI = 0; socketI <= maximoSocket; socketI++){
+			puts("ENTRE");
 			if (listaSocketsContiene(socketI, &servidor->listaSelect)){ //se recibio algo
 				//podría disparar el thread aca o antes de planificar
 				if(socketI==servidor->listenerMaster){
+
 					Socket nuevoSocket;
+					puts("acpetando socket");
 					nuevoSocket = socketAceptar(socketI, ID_MASTER);
+					puts("acepte");
 					if(nuevoSocket != ERROR) {
 						log_info(archivoLog, "[CONEXION] Proceso Master %d conectado exitosamente",nuevoSocket);
 						listaSocketsAgregar(nuevoSocket, &servidor->listaMaster);
 						servidorControlarMaximoSocket(nuevoSocket);
 					}
 				}else if(socketI==servidor->fileSystem){
+					puts("RECIBI MENSAJE DE FS");
 					Mensaje* mensaje = mensajeRecibir(socketI);
+					if(mensaje->header.operacion == ERROR_ARCHIVO) {
+						log_info(archivoLog, "[ERROR] El path no existe en el File System");
+						mensajeEnviar(*(Entero*)mensaje->datos, ABORTAR_MASTER, "", 1);
+						listaSocketsEliminar(socketI, &servidor->listaMaster);
+						socketCerrar(socketI);
+						if(socketI==servidor->maximoSocket)
+							servidor->maximoSocket--;
+					}
+					else
 					if(mensaje->header.operacion==DESCONEXION){
 						char nodoDesconectado[20];
 						strncpy(nodoDesconectado,mensaje->datos,20);
@@ -136,7 +150,7 @@ void yamaAtender() {
 					}else{
 						Socket masterid;
 						memcpy(&masterid,mensaje->datos,INTSIZE);
-						log_info(archivoLog, "[RECEPCION] lista de bloques para master #%d recibida",&masterid);
+						log_info(archivoLog, "[RECEPCION] lista de bloques para master #%d recibida",masterid);
 						if(listaSocketsContiene(masterid,&servidor->listaMaster)) //por si el master se desconecto
 							yamaPlanificar(masterid,mensaje+INTSIZE,mensaje->header.tamanio-INTSIZE);
 					}
@@ -151,7 +165,7 @@ void yamaAtender() {
 						mensaje=realloc(mensaje,mensaje->header.tamanio+INTSIZE+sizeof(Header));
 						memmove(mensaje->datos+INTSIZE,mensaje->datos,mensaje->header.tamanio);
 						memcpy(mensaje->datos,&masterid,INTSIZE);
-						mensajeEnviar(servidor->fileSystem,Solicitud,mensaje->datos,mensaje->header.tamanio+INTSIZE);
+						mensajeEnviar(servidor->fileSystem,ENVIAR_BLOQUES,mensaje->datos,mensaje->header.tamanio+INTSIZE);
 						log_info(archivoLog, "[ENVIO] path de master #%d enviado al fileSystem",&socketI);
 					}else if(mensaje->header.operacion==DESCONEXION){
 						listaSocketsEliminar(socketI, &servidor->listaMaster);

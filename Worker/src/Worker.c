@@ -612,7 +612,7 @@ lGlobOri* getOrigenesGlobales(char* origen){
 		size= size + sizeof(int32_t);
 		memcpy(((globOri*) oris[i])->ip,origen + size, sizeOri);
 		size= size + sizeIP;
-		memcpy(((globOri*) oris[i])->puerto, origen + size , sizeof(int32_t));
+		memcpy(&((globOri*) oris[i])->puerto, origen + size , sizeof(int32_t));
 		size= size + sizeof(int32_t);
 	}
 	origenes->oris = oris;

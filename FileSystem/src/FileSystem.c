@@ -1823,21 +1823,30 @@ int archivoCantidadBloques(String ruta) {
 	return cantidadBloques;
 }
 
-void archivoEnviarBloquesYama(String path) {
-	Archivo* archivo = archivoBuscarPorRuta(path);
+void archivoEnviarBloquesYama(Puntero datos) {
+	int idMaster = *(Entero*)datos;
+	printf("%s\n", (String)datos+sizeof(Entero));
+	Archivo* archivo = archivoBuscarPorRuta(datos+sizeof(Entero));
+	if(archivo == NULL) {
+		imprimirMensaje(archivoLog, ROJO"[ERROR] El path no existe"BLANCO);
+		mensajeEnviar(socketYama, ERROR_ARCHIVO, &idMaster, sizeof(Entero));
+		return;
+	}
 	int cantidad = listaCantidadElementos(archivo->listaBloques);
-	BloqueYama* bloques = archivoConvertirParaYama(archivo);
+	BloqueYama* bloques = archivoConvertirParaYama(archivo, idMaster);
 	mensajeEnviar(socketYama, ENVIAR_BLOQUES, bloques, sizeof(BloqueYama)*cantidad);
 }
 
-BloqueYama* archivoConvertirParaYama(Archivo* archivo) {
+BloqueYama* archivoConvertirParaYama(Archivo* archivo, Entero idMaster) {
 	int indice;
 	int cantidad = listaCantidadElementos(archivo->listaBloques);
-	BloqueYama* bloques = memoriaAlocar(sizeof(BloqueYama)*cantidad);
+	Puntero bloques = memoriaAlocar(sizeof(Entero)+sizeof(BloqueYama)*cantidad);
 	listaOrdenar(archivo->listaBloques, (Puntero)bloqueOrdenarPorNumero);
+	memcpy(bloques, &idMaster, sizeof(Entero));
 	for(indice = 0; indice < cantidad; indice++) {
 		Bloque* bloque = listaObtenerElemento(archivo->listaBloques, indice);
-		bloques[indice] = bloqueConvertirParaYama(bloque);
+		BloqueYama bloqueYama = bloqueConvertirParaYama(bloque);
+		memcpy(bloques+sizeof(Entero)+sizeof(BloqueYama)*indice, &bloqueYama, sizeof(BloqueYama));
 	}
 	return bloques;
 }
@@ -2928,6 +2937,9 @@ void semaforosDestruir() {
 //TODO archivo maximo data.bin aprox
 
 //TODO con el nodo desconectado puedo borrar archivo y todo eso, no es que el nodo tiene que estar conectado porque no seria logico blabla
+
+//TODO yama usa hilos o select
+//TODO mensajes menores a un bloque (partido)
 
 //TODO directorios con muchos subdirectorios rompe
 //TODO deberia crear al menos algunos directorios y parar cuando se alcance el limite no tirar de una que se excede el limite

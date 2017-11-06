@@ -11,6 +11,10 @@
 #include "Master.h"
 
 int main(int argc, String* argv) {
+	if(argc != 5) {
+		puts(ROJO"[ERROR] Faltan o sobran argumentos"BLANCO);
+		abort();
+	}
 	masterIniciar(argv);
 	masterAtender();
 	return EXIT_SUCCESS;
@@ -36,13 +40,12 @@ void masterIniciar(String* argv) {
 	}
 	senialAsignarFuncion(SIGINT, configuracionSenial);
 	estadoMaster=ACTIVADO;
-
+	errorBloque = memoriaAlocar(sizeof(Semaforo));
+	recepcionAlternativo = memoriaAlocar(sizeof(Semaforo));
 	semaforoIniciar(errorBloque,1);
 	semaforoIniciar(recepcionAlternativo,0);
 
 	void leerArchivo(File archScript,char** script,int* len){
-		//cambiar por mmap, me había olvidado que existia eso todo
-		//habría que validar
 		fseek(archScript, 0, SEEK_END);
 		long posicion = ftell(archScript);
 		fseek(archScript, 0, SEEK_SET);
@@ -52,17 +55,23 @@ void masterIniciar(String* argv) {
 		*len=strlen(*script);
 		fclose(archScript);
 	}
+
 	leerArchivo(fopen(argv[1],"r+"),&scriptTransformacion,&lenTransformacion);
 	leerArchivo(fopen(argv[2], "r+"),&scriptReduccion,&lenReduccion);
 
 	imprimirMensajeDos(archivoLog,"[CONEXION] Estableciendo Conexion con YAMA...", configuracion->ipYama, configuracion->puertoYama);
 	socketYama = socketCrearCliente(configuracion->ipYama, configuracion->puertoYama, ID_MASTER);
 	imprimirMensaje(archivoLog, "[CONEXION] Conexion establecida con YAMA, esperando instrucciones");
-	mensajeEnviar(socketYama,Solicitud,argv[3],stringLongitud(argv[3]));
+	mensajeEnviar(socketYama,Solicitud,argv[3],stringLongitud(argv[3])+1);
 }
 
 void masterAtender(){
+	puts("ESPERANDO MENSAJE");
 	Mensaje* mensaje=mensajeRecibir(socketYama);
+	if(mensaje->header.operacion == 301) {
+		imprimirMensaje(archivoLog, ROJO"[ERROR] Path invalido, abortando proceso"BLANCO);
+		abort();
+	}
 	imprimirMensaje(archivoLog, "[MENSAJE] Lista de bloques recibida");
 	int i;
 	bool mismoNodo(Dir a,Dir b){
@@ -92,12 +101,12 @@ void masterAtender(){
 		pthread_t hilo;
 		pthread_create(&hilo,NULL,transformaciones,list_get(listas,i));
 	}
-	while(estadoMaster==ACTIVADO){
+	while(estadoMaster==ACTIVADO) {
 		Mensaje* m = mensajeRecibir(socketYama);
 		switch(m->header.operacion){
 		case Aborto:
 			imprimirMensaje(archivoLog,"[ABORTO] Abortando proceso");
-			exit(EXIT_FAILURE); //supongo que los hilos mueren aca
+			abort(); //supongo que los hilos mueren aca
 			//si no se mueren matarlos
 			break;
 		case Cierre:

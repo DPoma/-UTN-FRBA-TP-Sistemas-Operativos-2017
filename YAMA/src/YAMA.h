@@ -11,9 +11,9 @@
 
 #define EVENT_SIZE (sizeof(struct inotify_event)+24)
 #define BUF_LEN (1024*EVENT_SIZE)
-#define RUTA_NOTIFY "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/YAMA";
-#define RUTA_CONFIG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/YAMA/YAMAConfig.conf"
-#define RUTA_LOG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/YAMA/YAMALog.log"
+#define RUTA_NOTIFY "/home/dario/Escritorio/tp-2017-2c-El-legado-del-Esqui/YAMA";
+#define RUTA_CONFIG "/home/dario/Escritorio/tp-2017-2c-El-legado-del-Esqui/YAMA/YAMAConfig.conf"
+#define RUTA_LOG "/home/dario/Escritorio/tp-2017-2c-El-legado-del-Esqui/YAMA/YAMALog.log"
 
 #define INTSIZE sizeof(int32_t)
 #define TEMPSIZE 12
@@ -21,6 +21,7 @@
 
 #define ACEPTACION 200
 #define SOLICITAR_BLOQUES 201
+#define ERROR_ARCHIVO 202
 
 #define DIRSIZE sizeof(Dir)
 
@@ -53,6 +54,12 @@ typedef struct{
 	Dir nodo;
 } Worker;
 Lista workers;
+
+#define ACEPTAR_YAMA 200
+#define ENVIAR_BLOQUES 201
+#define ERROR_ARCHIVO 202
+
+#define ABORTAR_MASTER 301
 
 typedef enum {Solicitud,Transformacion,ReducLocal,ReducGlobal,Cierre,Aborto} Etapa;
 typedef enum {Error=-1,EnProceso=0,Terminado,Abortado} Estado;
