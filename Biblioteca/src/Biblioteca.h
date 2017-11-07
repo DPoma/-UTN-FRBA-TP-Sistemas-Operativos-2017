@@ -22,6 +22,8 @@
 #include <semaphore.h>
 #include <signal.h>
 #include <math.h>
+#include <sys/time.h>
+#include <sys/resource.h>
 #include "commons/config.h"
 #include "commons/log.h"
 #include "commons/string.h"
