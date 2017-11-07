@@ -1,19 +1,10 @@
-[INFO] 19:31:52:407 FileSystem/(7191:7191): [EJECUCION] Proceso File System iniciado
-[INFO] 19:31:52:469 FileSystem/(7191:7191): [CONFIGURACION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 19:31:52:471 FileSystem/(7191:7191): [CONFIGURACION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 19:31:52:471 FileSystem/(7191:7191): [CONFIGURACION] Esperando conexiones de Workers (Puerto: 5080)
-[INFO] 19:31:52:472 FileSystem/(7191:7191): [CONFIGURACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
-[INFO] 19:31:52:505 FileSystem/(7191:7191): [33m[AVISO] Conecte los nodos necesarios al File System para estabilizarlo[0m
-[INFO] 19:31:53:728 FileSystem/(7191:7191): [33m[AVISO] NODO1 conectado[0m
-[INFO] 19:31:53:734 FileSystem/(7191:7191): [33m[AVISO] El File System esta estable[0m
-[INFO] 19:32:13:101 FileSystem/(7191:7194): [FORMATEO] El File System fue formateado
-[INFO] 19:32:13:101 FileSystem/(7191:7194): [33m[AVISO] El File System esta estable[0m
-[INFO] 19:33:21:675 FileSystem/(7191:7191): [33m[AVISO] NODO1 desconectado[0m
-[INFO] 19:33:26:643 FileSystem/(7191:7191): [33m[AVISO] El NODO1 cambio su archivo de datos, formatee para guardar los cambios[0m
-[INFO] 19:33:26:643 FileSystem/(7191:7191): [33m[AVISO] NODO1 conectado[0m
-[INFO] 19:33:30:695 FileSystem/(7191:7194): [FORMATEO] El File System fue formateado
-[INFO] 19:33:30:696 FileSystem/(7191:7194): [33m[AVISO] El File System esta estable[0m
-[INFO] 19:33:51:721 FileSystem/(7191:7191): [33m[AVISO] NODO1 desconectado[0m
-[INFO] 19:33:54:962 FileSystem/(7191:7194): [FORMATEO] El File System fue formateado
-[INFO] 19:33:54:963 FileSystem/(7191:7194): [33m[AVISO] El File System esta estable[0m
-[INFO] 19:34:19:314 FileSystem/(7191:7191): [EJECUCION] Proceso File System finalizado
+[INFO] 20:28:59:183 FileSystem/(7898:7898): [EJECUCION] Proceso File System iniciado
+[INFO] 20:28:59:245 FileSystem/(7898:7898): [CONFIGURACION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 20:28:59:246 FileSystem/(7898:7898): [CONFIGURACION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 20:28:59:247 FileSystem/(7898:7898): [CONFIGURACION] Esperando conexiones de Workers (Puerto: 5080)
+[INFO] 20:28:59:247 FileSystem/(7898:7898): [CONFIGURACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
+[INFO] 20:28:59:273 FileSystem/(7898:7898): [33m[AVISO] Conecte los nodos necesarios al File System para estabilizarlo[0m
+[INFO] 20:30:12:430 FileSystem/(7898:7901): [ERROR] El nombre del directorio es demasiado largo
+[INFO] 20:30:48:650 FileSystem/(7898:7901): [ERROR] El nombre del directorio es demasiado largo
+[INFO] 20:31:05:595 FileSystem/(7898:7901): [DIRECTORIO] El directorio /aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa fue creado
+[INFO] 20:31:09:263 FileSystem/(7898:7898): [EJECUCION] Proceso File System finalizado

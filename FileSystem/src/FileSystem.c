@@ -873,18 +873,16 @@ void comandoCrearDirectorio(Comando* comando) {
 		directorioBuscarIdentificador(control);
 		if (directorioExisteIdentificador(control->identificadorDirectorio))
 			directorioControlarEntradas(control, comando->argumentos[1]);
-		else if(directorioHaySuficientesIndices(control)) {
-			int estado = directorioCrearDirectoriosRestantes(control, comando->argumentos[1]);
-			if(estado == ERROR) {
-				imprimirMensaje(archivoLog,"[ERROR] El nombre del directorio es demasiado largo");
-				break;
-			}
-		}
-		else {
+		int estado = directorioCrearDirectoriosRestantes(control, comando->argumentos[1]);
+		if(estado == ERROR) {
 			imprimirMensaje(archivoLog,"[ERROR] Se alcanzo el limite de directorios permitidos (100)");
 			break;
 		}
-		directorioControlSetearNombre(control);
+		if(estado == -2) {
+			imprimirMensaje(archivoLog,"[ERROR] El nombre del directorio es demasiado largo");
+			break;
+		}
+	directorioControlSetearNombre(control);
 	}
 	int indice;
 	for(indice=0; stringValido(control->nombresDirectorios[indice]); indice++)
@@ -1552,9 +1550,11 @@ int directorioCrearConPersistencia(int identificador, String nombre, int identif
 int directorioCrearDirectoriosRestantes(ControlDirectorio* control, String rutaDirectorio) {
 	while(stringValido(control->nombresDirectorios[control->indiceNombresDirectorios])) {
 		int indice = directorioBuscarIdentificadorLibre();
+		if(indice == ERROR)
+			return ERROR;
 		int estado = directorioCrearConPersistencia(indice, control->nombresDirectorios[control->indiceNombresDirectorios], control->identificadorPadre);
 		if(estado == ERROR)
-			return ERROR;
+			return -2;
 		control->identificadorPadre = indice;
 		control->indiceNombresDirectorios++;
 	}
@@ -2896,7 +2896,7 @@ void estadoMensaje(int estado) {
 
 void bitmapDirectoriosCrear() {
 	mutexBloquear(mutexBitmapDirectorios);
-	bitmapDirectorios = bitmapCrear(13);
+	bitmapDirectorios = bitmapCrear(MAX_DIR);
 	mutexDesbloquear(mutexBitmapDirectorios);
 }
 
@@ -2980,7 +2980,7 @@ void semaforosDestruir() {
 //TODO el bitmap cambia en tiempo de ejecucion
 
 //TODO dejar rollback
+//TODO arreglar cpfrom cpto md5 y mostrar copiarBloque
 //TODO directorios con muchos subdirectorios rompe
 //TODO deberia crear al menos algunos directorios y parar cuando se alcance el limite no tirar de una que se excede el limite
 //TODO cambiar hilos por select
-//TODO arreglar cpfrom cpto md5 y mostrar copiarBloque

@@ -775,18 +775,6 @@ void fileLimpiar(String ruta) {
 	}
 }
 
-
-
-//Dir getIpPort(Socket socket){
-//	struct sockaddr addr;
-//	size_t size=sizeof addr;
-//	getpeername(socket,&addr,&size);
-//	Dir dir;
-//	dir.ip=((struct sockaddr_in*)&addr)->sin_addr.s_addr;
-//	dir.port=((struct sockaddr_in*)&addr)->sin_port;
-//	return dir;
-//}
-
 //--------------------------------------- Funciones de Bitmap -------------------------------------
 
 Bitmap* bitmapCrear(int cantidadBloques) {
@@ -821,8 +809,9 @@ bool bitmapBitOcupado(Bitmap* bitmap, int posicion) {
 size_t bitmapCantidadBits(Bitmap* bitmap) {
 	return bitarray_get_max_bit(bitmap->controlBits);
 }
+
 int bitmapCalculo(int cantidadBloques) {
-	return (int)ceil((double)cantidadBloques/(double)8);//roto
+	return (int)ceil((double)cantidadBloques/(double)8);
 }
 
 
