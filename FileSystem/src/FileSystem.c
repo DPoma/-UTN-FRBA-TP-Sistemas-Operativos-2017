@@ -1379,6 +1379,11 @@ void comandoInformacionNodos() {
 			puts("Estado: Conectado");
 		else
 			puts("Estado: Desconectado");
+		printf("Bitmap: ");
+		int bit;
+		for(bit=0; bit < nodo->bloquesTotales; bit++)
+			printf("%d", bitmapBitOcupado(nodo->bitmap, bit));
+		puts("");
 	}
 	if(indice == 0) {
 		puts("No hay nodos conectados");
@@ -1387,7 +1392,6 @@ void comandoInformacionNodos() {
 	puts("------------------------------------------");
 	printf("Bloques totales %i\n", bloquesTotales);
 	printf("Bloques libres %i\n", bloquesLibres);
-
 }
 
 void comandoAyuda() {
@@ -2422,6 +2426,13 @@ Nodo* nodoActualizar(Nodo* nodoTemporal) {
 	Nodo* nodo = nodoBuscarPorNombre(nodoTemporal->nombre);
 	nodo->estado = ACTIVADO;
 	nodo->socket = nodoTemporal->socket;
+	if(nodo->bloquesTotales != nodoTemporal->bloquesTotales) {
+		bitmapDestruir(nodo->bitmap);
+		nodo->bitmap = bitmapCrear(nodoTemporal->bloquesTotales);
+		nodo->bloquesTotales = nodoTemporal->bloquesTotales;
+		nodo->bloquesLibres = nodoTemporal->bloquesTotales;
+		imprimirMensajeUno(archivoLog, AMARILLO"[AVISO] El %s cambio su archivo de datos, formatee para guardar los cambios"BLANCO, nodo->nombre);
+	}
 	stringCopiar(nodo->ip, nodoTemporal->ip);
 	stringCopiar(nodo->puerto, nodoTemporal->puerto);
 	nodoDestruir(nodoTemporal);
@@ -2484,6 +2495,8 @@ void nodoRecuperarPersistencia() {
 		nodo->bloquesLibres = archivoConfigEnteroDe(config, lineaLibres);
 		nodo->estado = DESACTIVADO;
 		nodo->socket = ERROR;
+		stringCopiar(nodo->ip, "NULL");
+		stringCopiar(nodo->puerto, "NULL");
 		nodo->actividadesRealizadas = 0;
 		memoriaLiberar(lineaNombre);
 		memoriaLiberar(lineaTotales);
@@ -2964,11 +2977,10 @@ void semaforosDestruir() {
 	memoriaLiberar(mutexEstadoControl);
 }
 
+//TODO el bitmap cambia en tiempo de ejecucion
+
 //TODO dejar rollback
 //TODO directorios con muchos subdirectorios rompe
 //TODO deberia crear al menos algunos directorios y parar cuando se alcance el limite no tirar de una que se excede el limite
-//TODO sin format no haces un joraca
-//TODO cuando formatee cambiar databin
-//TODO persistir bitmaps
 //TODO cambiar hilos por select
 //TODO arreglar cpfrom cpto md5 y mostrar copiarBloque
