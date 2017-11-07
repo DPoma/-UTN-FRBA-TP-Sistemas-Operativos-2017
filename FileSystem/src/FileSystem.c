@@ -797,7 +797,8 @@ String consolaLeerEntrada() {
 	for(indice = 0; caracterDistintos((caracterLeido= caracterObtener()),ENTER) && indice < MAX_STRING; indice++)
 		cadena[indice] = caracterLeido;
 	if(indice == MAX_STRING) {
-		imprimirMensaje(archivoLog, "[ERROR] Entrada demasiado larga");
+		memoriaLiberar(cadena);
+		imprimirMensaje(archivoLog, ROJO"[ERROR] Entrada demasiado larga"BLANCO);
 		return NULL;
 	}
 	else
@@ -805,10 +806,25 @@ String consolaLeerEntrada() {
 	return cadena;
 }
 
-void consolaLaburar() {
+bool consolaSinFormatear() {
+	return estadoEjecucionIgualA(NUEVO) &&
+			estadoFileSystemIgualA(INESTABLE);
+}
+
+void consolaEjecutar() {
 	char* entrada = consolaLeerEntrada();
 	if(entrada == NULL)
 		return;
+	if(consolaSinFormatear() && stringIguales(entrada, FORMAT)) {
+		comandoFormatearFileSystem();
+		memoriaLiberar(entrada);
+		return;
+	}
+	if(consolaSinFormatear()) {
+		imprimirMensaje(archivoLog, ROJO"[ERROR] Primero debe formatear el File System para utilizarlo"BLANCO);
+		memoriaLiberar(entrada);
+		return;
+	}
 	if(estadoControlIgualA(ACTIVADO)) {
 		Comando comando;
 		consolaConfigurarComando(&comando, entrada);
@@ -820,7 +836,7 @@ void consolaLaburar() {
 void consolaAtenderComandos() {
 	hiloDetach(pthread_self());
 	while(estadoControlIgualA(ACTIVADO))
-		consolaLaburar();
+		consolaEjecutar();
 	semaforoSignal(semaforoFinal);
 }
 
@@ -1197,7 +1213,7 @@ void comandoCopiarBloque(Comando* comando) {
 	mutexBloquear(mutexNodo);
 	if(nodoBuscarBloqueLibre(nodoBuffer) == ERROR) {
 		mutexDesbloquear(mutexNodo);
-		imprimirMensaje(archivoLog, "[ERROR] No hay bloques libres en el nodo");
+		imprimirMensaje(archivoLog, "[ERROR] El Nodo no tiene bloques libres");
 		return;
 	}
 	mutexDesbloquear(mutexNodo);
@@ -1400,7 +1416,7 @@ void comandoFinalizar() {
 }
 
 void comandoError() {
-	imprimirMensaje(archivoLog, "[ERROR] Comando invalido");
+	imprimirMensaje(archivoLog, ROJO"[ERROR] Comando invalido"BLANCO);
 }
 
 //--------------------------------------- Funciones de Directorio -------------------------------------
@@ -1967,7 +1983,6 @@ int archivoAlmacenar(Comando* comando) {
 		memoriaLiberar(buffer);
 	}
 	fileCerrar(file);
-	nodoLimpiarActividades();
 	if(copiasEnviadas == ERROR) {
 		archivoDestruir(archivo);
 		return ERROR;
@@ -2257,6 +2272,12 @@ void nodoListaOrdenarPorActividad() {
 	mutexDesbloquear(mutexListaNodos);
 }
 
+void nodoListaOrdenarPorBloquesLibres() {
+	mutexBloquear(mutexListaNodos);
+	listaOrdenar(listaNodos, (Puntero)nodoOrdenarPorBloquesLibres);
+	mutexDesbloquear(mutexListaNodos);
+}
+
 bool nodoListaAlgunoDisponible() {
 	mutexBloquear(mutexListaNodos);
 	int resultado = listaCumpleAlguno(listaNodos, (Puntero)nodoDisponible);
@@ -2297,7 +2318,7 @@ int nodoBuscarBloqueLibre(Nodo* nodo) {
 			return ERROR;
 }
 
-bool nodoListaOrdenarBloquesLibres(Nodo* unNodo, Nodo* otroNodo) {
+bool nodoOrdenarPorBloquesLibres(Nodo* unNodo, Nodo* otroNodo) {
 	return unNodo->bloquesLibres > otroNodo->bloquesLibres;
 }
 
@@ -2527,31 +2548,22 @@ void bloqueCopiarEnNodo(Bloque* bloque, Nodo* nodo, Entero numeroBloqueNodo) {
 int bloqueEnviarCopiasANodos(Bloque* bloque, String buffer) {
 	int copiasEnviadas = 0;
 	int indice = 0;
-
-	bool bloqueForzarCopiado() {
-		return indice == (nodoListaCantidad()-1) && nodoListaAlgunoDisponible() && copiasEnviadas < MAX_COPIAS;
-	}
 	mutexBloquear(mutexTarea);
-	nodoListaOrdenarPorActividad();
+	nodoListaOrdenarPorBloquesLibres();
 	for(indice = 0; indice < nodoListaCantidad() && copiasEnviadas < MAX_COPIAS; indice++) {
 		Nodo* nodo = nodoListaObtener(indice);
 		if(nodoDisponible(nodo)) {
 			bloqueEnviarANodo(bloque, nodo, buffer);
 			copiasEnviadas++;
-			nodo->actividadesRealizadas++;
-		}
-		if(bloqueForzarCopiado()) {
-			nodoListaOrdenarPorActividad();
-			indice = -1;
 		}
 	}
 	mutexDesbloquear(mutexTarea);
 	if(copiasEnviadas == 0) {
-		imprimirMensajeUno(archivoLog, "[ERROR] El bloque N°%i no pudo copiarse en ningun Nodo", (int*)bloque->numeroBloque);
+		imprimirMensajeUno(archivoLog, ROJO"[ERROR] El bloque N°%i no pudo copiarse en ningun Nodo, se aborta la operacion"BLANCO, (int*)bloque->numeroBloque);
 		return ERROR;
 	}
 	if(copiasEnviadas < MAX_COPIAS) {
-		imprimirMensajeDos(archivoLog, "[AVISO] El bloque N°%i no pudo copiarse %i veces ", (int*)bloque->numeroBloque, (int*)MAX_COPIAS);
+		imprimirMensajeDos(archivoLog, AMARILLO"[AVISO] El bloque N°%i no tiene %i copias"BLANCO, (int*)bloque->numeroBloque, (int*)MAX_COPIAS);
 		return OK;
 	}
 	return OK;
@@ -2952,13 +2964,11 @@ void semaforosDestruir() {
 	memoriaLiberar(mutexEstadoControl);
 }
 
-//TODO agregar yamafs en ruta
-//TODO arreglar  algoritmo y no dejar copias en mismo nodo
 //TODO dejar rollback
-//TODO persistir bitmaps
 //TODO directorios con muchos subdirectorios rompe
 //TODO deberia crear al menos algunos directorios y parar cuando se alcance el limite no tirar de una que se excede el limite
 //TODO sin format no haces un joraca
 //TODO cuando formatee cambiar databin
+//TODO persistir bitmaps
 //TODO cambiar hilos por select
 //TODO arreglar cpfrom cpto md5 y mostrar copiarBloque

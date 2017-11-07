@@ -456,7 +456,7 @@ void nodoFormatear(Nodo* nodo);
 void nodoFormatearConectados();
 void nodoVerificarBloquesLibres(Nodo* nodo);
 bool nodoTieneBloquesLibres(Nodo* nodo);
-bool nodoListaOrdenarBloquesLibres(Nodo* unNodo, Nodo* otroNodo);
+bool nodoOrdenarPorBloquesLibres(Nodo* unNodo, Nodo* otroNodo);
 int nodoBuscarBloqueLibre(Nodo* nodo);
 Nodo* nodoBuscarPorNombre(String nombre);
 void nodoRecuperarPersistenciaBitmap(Nodo* nodo);
