@@ -12,7 +12,7 @@
 
 int main(void) {
 	workerIniciar();
-	socketListenerWorker = socketCrearListener(configuracion->puertoWorker);
+	socketListenerWorker = socketCrearListener(configuracion->puertoWorker);//todo hacer otro listener para workers, por el tema del handshake
 	imprimirMensajeUno(archivoLog, "[CONEXION] Esperando conexiones de Master (Puerto: %s)", configuracion->puertoWorker);
 	while(estadoWorker)
 		socketAceptarConexion();
@@ -21,8 +21,8 @@ int main(void) {
 }
 
 void workerCrearHijo(Socket unSocket) {
-	pid = fork();
-	if(pid == 0) {
+	//int ppid = fork();
+	//if(ppid == 0) {
 		imprimirMensaje(archivoLog, "[CONEXION] Esperando mensajes de Master");
 		Mensaje* mensaje = mensajeRecibir(unSocket);
 		char* codigo;
@@ -30,68 +30,62 @@ void workerCrearHijo(Socket unSocket) {
 		switch(mensaje->header.operacion){
 			case -1:
 			{
-				imprimirMensaje(archivoLog, ("[EJECUCION] Tuve problemas para comunicarme con el Master (Pid hijo: %d)", pid)); //el hijo fallo en comunicarse con el master
+				//imprimirMensaje(archivoLog, ("[EJECUCION] Tuve problemas para comunicarme con el Master (Pid hijo: %d)", ppid)); //el hijo fallo en comunicarse con el master
 				mensajeEnviar(unSocket, DESCONEXION, NULL, 0); //MANDA AL MASTER QUE FALLO
 				free(mensaje);
 				break;
 			}
 			case TRANSFORMACION: //Etapa Transformacion
 			{
+				imprimirMensaje(archivoLog, "[CONEXION] llega op. de transformacion");
 				memcpy(&sizeCodigo, mensaje->datos, sizeof(int32_t));
-				memcpy(&codigo,mensaje->datos + sizeof(int32_t), sizeCodigo);
-				int estadoTransf=1;
-				int pasar=1;
-				while(estadoTransf){
-					if (pasar){
-						pasar=0;
+				printf("%d\n", sizeCodigo);
+				codigo = malloc(sizeCodigo);
+				puts("PaSE MEMCPY");
+				printf("%s\n", mensaje->datos+sizeof(Entero));
+				memcpy(&codigo,mensaje->datos+sizeof(int32_t), sizeCodigo);
+				puts("PASE OTREO MEMCOPTY");
+				//int pasar=1;
+				puts("ENTRANDO AL WHILE");
+				while(true){
+					//imprimirMensaje(archivoLog, "[CONEXION] Esperando mensajes de Master");
+					//if (pasar){
+					///	pasar=0;
+						imprimirMensaje(archivoLog, "[CONEXION] Esperando mensajes de Master");
+						puts("PESPERARNDO EL MANSEJA");
+						Mensaje* mensaje = mensajeRecibir(unSocket);
+						puts("PASE MENSAJE");
+						if (mensaje->header.operacion==EXITO)
+							break;
+						else{
 						int subpid = fork();
+						imprimirMensaje(archivoLog, "[CONEXION] [SUBFORK] llega op. de transformacion");
 						if(subpid == 0) {
-							imprimirMensaje(archivoLog, "[CONEXION] Esperando mensajes de Master");
-							Mensaje* mensaje = mensajeRecibir(unSocket);
-							pasar=1;
 							int origen;
 							char* destino;
 							int sizeDestino;
-							switch(mensaje->header.operacion){
-								case EXITO:
-								{
-									estadoTransf=0;
-									break;
-								}
-								case TRANSFORMACION:
-								{
-									memcpy(&origen,mensaje->datos + sizeof(int32_t)+sizeCodigo, sizeof(int32_t));
-									memcpy(&sizeDestino, mensaje->datos + sizeof(int32_t)*2 + sizeCodigo , sizeof(int32_t));
-									memcpy(&destino,mensaje->datos + sizeof(int32_t)*3+sizeCodigo, sizeDestino);
-									int result = transformar(codigo,origen,destino);
-									if(result==-1){
-										mensajeEnviar(unSocket, FRACASO, NULL, 0);
-									}
-									/*char* buffer = leerArchivo(path,offset,size);
-									log_info(logFile, "[FILE SYSTEM] EL KERNEL PIDE LEER: %s | OFFSET: %i | SIZE: %i", path, offset, size);
-									if(buffer=="-1"){
-									lSend(conexion, NULL, -4, 0);
-									log_error(logFile, "[LEER]: HUBO UN ERROR AL LEER");
-									break;
-									}
-									//enviar el buffer
-									lSend(conexion, buffer, 2, sizeof(char)*size);
-									free(buffer);
-									free(path);*/
-									mensajeEnviar(unSocket, EXITO, origen, sizeof(int32_t));
-									free(codigo);
-									free(destino);
-									free(mensaje);
-									break;
-								}
+							memcpy(&origen,mensaje->datos + sizeof(int32_t)+sizeCodigo, sizeof(int32_t));
+							memcpy(&sizeDestino, mensaje->datos + sizeof(int32_t)*2 + sizeCodigo , sizeof(int32_t));
+							destino = malloc(sizeDestino);
+							memcpy(&destino,mensaje->datos + sizeof(int32_t)*3+sizeCodigo, sizeDestino);
+							int result = transformar(codigo,origen,destino);
+							if(result==-1){
+								mensajeEnviar(unSocket, FRACASO, NULL, 0);
+								imprimirMensaje(archivoLog,"[TRASFORMACION] transformacion Fracaso");
 							}
+							mensajeEnviar(unSocket, EXITO, origen, sizeof(int32_t));
+							imprimirMensaje(archivoLog,"[TRASFORMACION] transformacion exitosa");
+							free(codigo);
+							free(destino);
+							free(mensaje);
+							break;
 						}
 						else if(subpid > 0)
-							puts("PADRE ACEPTO UNA CONEXION");
+							puts("SUBPADRE ACEPTO UNA CONEXION");
 						else
 							puts("ERROR");
+						}
 					}
-				}
 				break;
 			}
 			case REDUCLOCAL:{ //Etapa Reduccion Local
@@ -265,15 +259,20 @@ void workerCrearHijo(Socket unSocket) {
 			}
 		}
 	//printf("Mensaje: %s\n", (String)mensaje->datos);
+	/*
 	}
-	else if(pid > 0)
+	else if(ppid > 0){
 		puts("PADRE ACEPTO UNA CONEXION");
+		//socketCerrar(unSocket);
+	}
 	else
 		puts("ERROR");
+		*/
 }
 
 //1er etapa
 int transformar(char* codigo,int origen,char* destino){
+	imprimirMensaje(archivoLog,"[TRASFORMACION] Comienzo a transformar");
 	if (origen>bloquesArchData){
 		return -1;
 	}

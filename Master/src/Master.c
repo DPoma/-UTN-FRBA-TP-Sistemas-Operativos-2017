@@ -86,20 +86,25 @@ void masterAtender(){
 		memcpy(bloque.temp,mensaje->datos+i+DIRSIZE+INTSIZE*2,TEMPSIZE);
 		imprimirMensajeTres(archivoLog, "[RECEPCION] bloque %s %s %d",bloque.dir.ip,bloque.dir.port,(int*)bloque.bloque);
 		int j;
+		bool flag=false;
 		for(j=0;j<listas->elements_count;j++){
 			Lista nodo=list_get(listas,j);
 			WorkerTransformacion* cmp=list_get(nodo,0);
 			if(mismoNodo(bloque.dir,cmp->dir)){
 				list_addM(nodo,&bloque,sizeof bloque);
+				flag=true;
+				break;
 			}
 		}
-		Lista nodo=list_create();
-		list_addM(nodo, &bloque,sizeof(WorkerTransformacion));
-		list_addM(listas,nodo,sizeof(t_list));
-		imprimirMensajeDos(archivoLog,"] lista para nodo %s %s armada",bloque.dir.ip,bloque.dir.port);
+		if(!flag){
+			Lista nodo=list_create();
+			list_addM(nodo, &bloque,sizeof(WorkerTransformacion));
+			list_addM(listas,nodo,sizeof(t_list));
+			imprimirMensajeTres(archivoLog,"] lista para nodo %s %s armada, lista #%d",bloque.dir.ip,bloque.dir.port,(int*)listas->elements_count);
+		}
 	}
 
-	for(i=0;i<=listas->elements_count;i++){
+	for(i=0;i<listas->elements_count;i++){
 		pthread_t hilo;
 		pthread_create(&hilo,NULL,transformaciones,list_get(listas,i));
 	}
@@ -134,6 +139,7 @@ void masterAtender(){
 void transformaciones(Lista bloques){
 	WorkerTransformacion* dir = list_get(bloques,0);
 	socketWorker=socketCrearCliente(dir->dir.ip,dir->dir.port,ID_MASTER);
+	imprimirMensajeDos(archivoLog,"[CONEXION] Estableciendo conexion con Worker (IP: %s | PUERTO: %s",dir->dir.ip,dir->dir.port);
 	mensajeEnviar(socketWorker,TRANSFORMACION,scriptTransformacion,lenTransformacion);
 	int enviados=0,respondidos=0;
 	enviarBloques:
@@ -143,14 +149,15 @@ void transformaciones(Lista bloques){
 		char data[tamanio];
 		memcpy(data,&wt->bloque,INTSIZE);
 		memcpy(data+INTSIZE,&wt->bytes,INTSIZE); //a worker le interesan los bytes?
-		memcpy(data+INTSIZE*2,&wt->temp,TEMPSIZE);
+		memcpy(data+INTSIZE*2,wt->temp,TEMPSIZE);
 		mensajeEnviar(socketWorker,TRANSFORMACION,data,tamanio);
-		imprimirMensajeDos(archivoLog,"[CONEXION] Estableciendo conexion con Worker (IP: %s | PUERTO: %d",wt->dir.ip,wt->dir.port);
+		imprimirMensajeDos(archivoLog,"[CONEXION] Enviando bloque %d %s",(int*)wt->bloque,wt->temp);
 	}
 	for(;respondidos<enviados;respondidos++){
 		Mensaje* mensaje = mensajeRecibir(socketWorker);
 		//a demas de decir exito o fracaso devuelve el numero de bloque
 		void enviarActualizacion(){
+			imprimirMensajeDos(archivoLog,"se recibio actualizacion de Worker %d %d",(int*)(int32_t*)mensaje->datos,mensaje->header.operacion);
 			mensaje=realloc(mensaje,mensaje->header.tamanio+DIRSIZE+sizeof(Header));
 			memmove(mensaje->datos+DIRSIZE,mensaje->datos,mensaje->header.tamanio);
 			memcpy(mensaje->datos,&dir->dir,DIRSIZE);
