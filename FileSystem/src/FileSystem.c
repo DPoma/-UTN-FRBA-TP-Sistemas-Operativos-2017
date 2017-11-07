@@ -760,9 +760,8 @@ void consolaConfigurarComando(Comando* comando, String entrada) {
 		else
 			comando->identificador = ERROR;
 	}
-	else {
+	else
 		comando->identificador = ERROR;
-	}
 }
 
 void consolaEjecutarComando(Comando* comando) {
@@ -843,6 +842,7 @@ void comandoCrearDirectorio(Comando* comando) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return;
 	}
+	rutaYamaDecente(comando, 1);
 	if(stringIguales(comando->argumentos[1], RAIZ)) {
 		imprimirMensaje(archivoLog,"[ERROR] El directorio raiz no puede ser creado");
 		return;
@@ -882,6 +882,7 @@ void comandoRenombrar(Comando* comando) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return;
 	}
+	rutaYamaDecente(comando, 1);
 	if(stringIguales(comando->argumentos[1], RAIZ)) {
 		imprimirMensaje(archivoLog,"[ERROR] El directorio raiz no puede ser renombrado");
 		return;
@@ -926,10 +927,12 @@ void comandoMover(Comando* comando) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return;
 	}
+	rutaYamaDecente(comando, 1);
 	if(!rutaValida(comando->argumentos[2])) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return;
 	}
+	rutaYamaDecente(comando, 2);
 	if(stringIguales(comando->argumentos[1], RAIZ)) {
 		imprimirMensaje(archivoLog,"[ERROR] El directorio raiz no puede ser movido");
 		return;
@@ -1002,6 +1005,7 @@ void comandoEliminarCopia(Comando* comando) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return;
 	}
+	rutaYamaDecente(comando, 2);
 	if(stringIguales(comando->argumentos[2], RAIZ)) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return;
@@ -1049,6 +1053,7 @@ void comandoEliminarDirectorio(Comando* comando) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return;
 	}
+	rutaYamaDecente(comando, 2);
 	if(stringIguales(ruta, RAIZ)) {
 		imprimirMensaje(archivoLog,"[ERROR] El directorio raiz no puede ser eliminado");
 		return;
@@ -1071,6 +1076,7 @@ void comandoEliminarArchivo(Comando* comando) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return;
 	}
+	rutaYamaDecente(comando, 1);
 	if(stringIguales(comando->argumentos[1], RAIZ)) {
 		imprimirMensaje(archivoLog,"[ERROR] El directorio raiz no puede ser eliminado");
 		return;
@@ -1097,6 +1103,7 @@ void comandoListarDirectorio(Comando* comando) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return;
 	}
+	rutaYamaDecente(comando, 1);
 	if(stringIguales(comando->argumentos[1], RAIZ)) {
 		directorioMostrarArchivos(0);
 		return;
@@ -1113,6 +1120,7 @@ void comandoInformacionArchivo(Comando* comando) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return;
 	}
+	rutaYamaDecente(comando, 1);
 	if(stringIguales(comando->argumentos[1], RAIZ)) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return;
@@ -1150,6 +1158,7 @@ void comandoCopiarBloque(Comando* comando) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return;
 	}
+	rutaYamaDecente(comando, 1);
 	if(stringIguales(comando->argumentos[1], RAIZ)) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return;
@@ -1236,6 +1245,7 @@ int comandoCopiarArchivoDeYamaFS(Comando* comando) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return ERROR;
 	}
+	rutaYamaDecente(comando, 1);
 	Archivo* archivo = archivoBuscarPorRuta(comando->argumentos[1]);
 	if(archivo == NULL) {
 		imprimirMensaje(archivoLog, "[ERROR] El archivo no existe");
@@ -1875,6 +1885,7 @@ int archivoAlmacenar(Comando* comando) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return ERROR;
 	}
+	rutaYamaDecente(comando, 3);
 	Directorio* directorio = directorioBuscar(comando->argumentos[3]);
 	if(directorio == NULL) {
 		imprimirMensaje(archivoLog, "[ERROR] El directorio ingresado no existe");
@@ -1976,6 +1987,7 @@ int archivoLeer(Comando* comando) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return ERROR;
 	}
+	rutaYamaDecente(comando, 1);
 	Archivo* archivo = archivoBuscarPorRuta(comando->argumentos[1]);
 	if(archivo == NULL) {
 		imprimirMensaje(archivoLog,"[ERROR] El archivo no existe");
@@ -2726,7 +2738,7 @@ bool rutaBarrasEstanSeparadas(String ruta) {
 					return false;
 			}
 			else {
-				if(indice==stringLongitud(ruta)-1)
+				if(indice==stringLongitud(ruta)-1 && ruta[indice-1] != ':')
 					return false;
 				else
 					if(caracterIguales(ruta[indice-1], BARRA) ||
@@ -2739,10 +2751,17 @@ bool rutaBarrasEstanSeparadas(String ruta) {
 	return true;
 }
 
+bool rutaTienePrefijoYama(String ruta) {
+	String prefijo = stringTomarDesdeInicio(ruta, MAX_PREFIJO);
+	int resultado = stringIguales(prefijo, PREFIJO);
+	memoriaLiberar(prefijo);
+	return resultado;
+}
+
 bool rutaValida(String ruta) {
-	return caracterIguales(ruta[0], BARRA) &&
-			rutaTieneAlMenosUnaBarra(ruta) &&
-			rutaBarrasEstanSeparadas(ruta);
+	return 	rutaTieneAlMenosUnaBarra(ruta) &&
+			rutaBarrasEstanSeparadas(ruta) &&
+			rutaTienePrefijoYama(ruta);
 }
 
 String* rutaSeparar(String ruta) {
@@ -2775,6 +2794,12 @@ void rutaBufferDestruir() {
 	mutexBloquear(mutexRuta);
 	memoriaLiberar(rutaBuffer);
 	mutexDesbloquear(mutexRuta);
+}
+
+void rutaYamaDecente(Comando* comando, int indice) {
+	String rutaDecente = stringTomarDesdePosicion(comando->argumentos[indice], MAX_PREFIJO);
+	memoriaLiberar(comando->argumentos[indice]);
+	comando->argumentos[indice] = rutaDecente;
 }
 
 //--------------------------------------- Funciones de Estado ------------------------------------
@@ -2927,28 +2952,13 @@ void semaforosDestruir() {
 	memoriaLiberar(mutexEstadoControl);
 }
 
-//TODO Cuando se van a matar los nodos
-//TODO los txt se copian mas lento que los binarios?
-//TODO Que pasa si inicio con --clean y no tiro el format puedo usar los comandos (yo diria que no porque esto rompe sino)
-//TODO el md5 (por lo tanto el cpto) hasta ahora lo muestra bien pero cuando bajo eltamaño del bloques 256
-//80% de las veces, esto importa o tiene que ser 100% si o si
-
-//TODO utilizo algoritmo de actividades que se reinicia cuando termina, si se desconecta uno trabaja hasta empatar al otro (explicar algoritmo)
-//TODO Hay que priorizar que trabajen todos al mismo tiempo o puede se como mi algoritmo de actividades
-//TODO Esta prohibido dos copias en un mismo nodo (aca se adapta)
-//TODO lo ideal es que el archivo este repartido en la mayor cantidad de nodos posible
-
-//TODO si hay espacios para una copia de cada bloque se admite o no el archivo (dejar rollback o no)
-//TODO controlan la cantidad de bloques de un archivo (explicar la parte del \0 que descuento, ya que uso strcat, el md5 da bien md5 > bloques ?)
-//TODO el numero de copia tiene valor (como uso lista la posicion 1 se vuelve 0)
-
-//TODO cuando se reconecta el nodo lo hace con el mismo databin, no es que hay que fijarse. Y si cambia el databin y tiro format deberia tomarlo el nuevo dbin
-//TODO archivo maximo data.bin aprox
-
-//TODO con el nodo desconectado puedo borrar archivo y todo eso, no es que el nodo tiene que estar conectado porque no seria logico blabla
-
-//TODO yama usa hilos o select
-//TODO mensajes menores a un bloque (partido)
-
+//TODO agregar yamafs en ruta
+//TODO arreglar  algoritmo y no dejar copias en mismo nodo
+//TODO dejar rollback
+//TODO persistir bitmaps
 //TODO directorios con muchos subdirectorios rompe
 //TODO deberia crear al menos algunos directorios y parar cuando se alcance el limite no tirar de una que se excede el limite
+//TODO sin format no haces un joraca
+//TODO cuando formatee cambiar databin
+//TODO cambiar hilos por select
+//TODO arreglar cpfrom cpto md5 y mostrar copiarBloque

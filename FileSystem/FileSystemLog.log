@@ -1,9 +1,25 @@
-[INFO] 19:44:44:723 FileSystem/(8918:8918): [EJECUCION] Proceso File System iniciado
-[INFO] 19:44:44:723 FileSystem/(8918:8918): [CONFIGURACION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 19:44:44:723 FileSystem/(8918:8918): [CONFIGURACION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 19:44:44:723 FileSystem/(8918:8918): [CONFIGURACION] Esperando conexiones de Workers (Puerto: 5080)
-[INFO] 19:44:44:723 FileSystem/(8918:8918): [CONFIGURACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
-[INFO] 19:44:44:724 FileSystem/(8918:8918): [33m[AVISO] Conecte los nodos necesarios al File System para estabilizarlo[0m
-[INFO] 19:44:46:172 FileSystem/(8918:8918): [33m[AVISO] NODO1 conectado[0m
-[INFO] 19:44:46:172 FileSystem/(8918:8918): [33m[AVISO] El File System esta estable[0m
-[INFO] 19:44:55:23 FileSystem/(8918:8918): [CONEXION] El proceso Yama se ha conectado
+[INFO] 13:32:50:666 FileSystem/(4416:4416): [EJECUCION] Proceso File System iniciado
+[INFO] 13:32:50:728 FileSystem/(4416:4416): [CONFIGURACION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 13:32:50:729 FileSystem/(4416:4416): [CONFIGURACION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 13:32:50:730 FileSystem/(4416:4416): [CONFIGURACION] Esperando conexiones de Workers (Puerto: 5080)
+[INFO] 13:32:50:731 FileSystem/(4416:4416): [CONFIGURACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
+[INFO] 13:32:50:783 FileSystem/(4416:4416): [33m[AVISO] Conecte los nodos necesarios al File System para estabilizarlo[0m
+[INFO] 13:32:58:457 FileSystem/(4416:4419): [ERROR] El archivo o directorio ya existe
+[INFO] 13:33:05:121 FileSystem/(4416:4419): [DIRECTORIO] home (d)
+[INFO] 13:33:05:132 FileSystem/(4416:4419): [DIRECTORIO] algo (d)
+[INFO] 13:33:05:134 FileSystem/(4416:4419): [DIRECTORIO] todo (a)
+[INFO] 13:33:16:939 FileSystem/(4416:4419): [DIRECTORIO] El directorio /user/tmp/gg fue creado
+[INFO] 13:33:27:530 FileSystem/(4416:4419): [ERROR] Comando invalido
+[INFO] 13:33:37:976 FileSystem/(4416:4419): [DIRECTORIO] El directorio /user/tmp/gg fue renombrado por algo
+[INFO] 13:33:40:298 FileSystem/(4416:4419): [ERROR] Comando invalido
+[INFO] 13:33:41:582 FileSystem/(4416:4419): [ERROR] Comando invalido
+[INFO] 13:33:46:387 FileSystem/(4416:4419): [DIRECTORIO] home (d)
+[INFO] 13:33:46:389 FileSystem/(4416:4419): [DIRECTORIO] algo (d)
+[INFO] 13:33:46:389 FileSystem/(4416:4419): [DIRECTORIO] user (d)
+[INFO] 13:33:46:390 FileSystem/(4416:4419): [DIRECTORIO] todo (a)
+[INFO] 13:34:23:241 FileSystem/(4416:4419): [DIRECTORIO] El directorio algo fue movido a /home
+[INFO] 13:34:28:184 FileSystem/(4416:4419): [DIRECTORIO] home (d)
+[INFO] 13:34:28:185 FileSystem/(4416:4419): [DIRECTORIO] algo (d)
+[INFO] 13:34:28:186 FileSystem/(4416:4419): [DIRECTORIO] user (d)
+[INFO] 13:34:28:187 FileSystem/(4416:4419): [DIRECTORIO] todo (a)
+[INFO] 13:34:41:135 FileSystem/(4416:4416): [EJECUCION] Proceso File System finalizado

@@ -60,6 +60,7 @@
 #define ID_RAIZ 0
 #define ARCHIVO_BINARIO "BINARIO"
 #define ARCHIVO_TEXTO "TEXTO"
+#define PREFIJO "yamafs:"
 #define MAX_STRING 300
 #define MAX_NOMBRE 255
 #define MAX_DIR 100
@@ -70,17 +71,18 @@
 #define MAX_TIPOS 10
 #define MAX_ARGS 5
 #define MAX_CAMPOS 4
+#define MAX_PREFIJO 7
 #define NUEVO 0
 #define NORMAL 1
 #define INESTABLE 0
 #define ESTABLE 1
+
 #define FRACASO -800
 #define EXITO 1
 #define DESCONEXION 0
 #define ABORTAR 301
 #define ALMACENADO 306
 #define CIERRE 307
-
 
 #define ACEPTAR_DATANODE 100
 #define LEER_BLOQUE 101
@@ -93,6 +95,7 @@
 #define ACEPTAR_YAMA 200
 #define ENVIAR_BLOQUES 201
 #define ERROR_ARCHIVO 202
+
 //--------------------------------------- Estructuras -------------------------------------
 
 typedef struct {
@@ -518,6 +521,8 @@ bool rutaTieneAlMenosUnaBarra(String ruta);
 bool rutaValida(String ruta);
 void rutaBufferCrear();
 void rutaBufferDestruir();
+void rutaYamaDecente(Comando* comando, int indice);
+bool rutaTienePrefijoYama(String ruta);
 
 //--------------------------------------- Funciones de Estado ------------------------------------
 
