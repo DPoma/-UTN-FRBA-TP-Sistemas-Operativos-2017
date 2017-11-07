@@ -8,6 +8,8 @@
 */
 
 #include "../../Biblioteca/src/Biblioteca.c"
+#include <sys/time.h>
+#include <sys/resource.h>
 
 #define RUTA_CONFIG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Master/MasterConfig.conf"
 #define RUTA_LOG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Master/MasterLog.log"
@@ -67,6 +69,9 @@ int32_t lenTransformacion;
 char* scriptReduccion;
 int32_t lenReduccion;
 WorkerTransformacion alternativo;
+struct rusage uso;
+struct timeval comienzo, fin;
+
 
 //--------------------------------------- Funciones de Master -------------------------------------
 
@@ -100,3 +105,5 @@ int archivoValido(FILE* f);
 bool esUnArchivo(char* c);
 void enviarArchivo(FILE* f);
 char* leerCaracteresEntrantes();
+void reduccionLocal(Mensaje* m);
+void reduccionGlobal(Mensaje* m);

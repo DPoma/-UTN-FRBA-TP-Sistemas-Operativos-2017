@@ -18,6 +18,7 @@ int main(int argc, String* argv) {
 	masterIniciar(argv);
 	masterAtender();
 	return EXIT_SUCCESS;
+
 }
 
 void masterIniciar(String* argv) {
@@ -63,128 +64,19 @@ void masterIniciar(String* argv) {
 	socketYama = socketCrearCliente(configuracion->ipYama, configuracion->puertoYama, ID_MASTER);
 	imprimirMensaje(archivoLog, "[CONEXION] Conexion establecida con YAMA, esperando instrucciones");
 	mensajeEnviar(socketYama,SOLICITUD,argv[3],stringLongitud(argv[3])+1);
+
+
+
 }
 
-void masterAtender(){
-	puts("ESPERANDO MENSAJE");
-	Mensaje* mensaje=mensajeRecibir(socketYama);
-	if(mensaje->header.operacion == 301) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] Path invalido, abortando proceso"BLANCO);
-		abort();
-	}
-	imprimirMensaje(archivoLog, "[MENSAJE] Lista de bloques recibida");
-	int i;
-	bool mismoNodo(Dir a,Dir b){
-		return stringIguales(a.ip,b.ip)&&stringIguales(a.port,b.port);//podría comparar solo ip
-	}
-	Lista listas=list_create();
-	for(i=0;i<mensaje->header.tamanio;i+=DIRSIZE+INTSIZE*2+TEMPSIZE){
-		WorkerTransformacion bloque;
-		memcpy(&bloque.dir,mensaje->datos+i,DIRSIZE);
-		memcpy(&bloque.bloque,mensaje->datos+i+DIRSIZE,INTSIZE);
-		memcpy(&bloque.bytes,mensaje->datos+i+DIRSIZE+INTSIZE,INTSIZE);
-		memcpy(bloque.temp,mensaje->datos+i+DIRSIZE+INTSIZE*2,TEMPSIZE);
-		imprimirMensajeTres(archivoLog, "[RECEPCION] bloque %s %s %d",bloque.dir.ip,bloque.dir.port,(int*)bloque.bloque);
-		int j;
-		bool flag=false;
-		for(j=0;j<listas->elements_count;j++){
-			Lista nodo=list_get(listas,j);
-			WorkerTransformacion* cmp=list_get(nodo,0);
-			if(mismoNodo(bloque.dir,cmp->dir)){
-				list_addM(nodo,&bloque,sizeof bloque);
-				flag=true;
-				break;
-			}
-		}
-		if(!flag){
-			Lista nodo=list_create();
-			list_addM(nodo, &bloque,sizeof(WorkerTransformacion));
-			list_addM(listas,nodo,sizeof(t_list));
-			imprimirMensajeTres(archivoLog,"] lista para nodo %s %s armada, lista #%d",bloque.dir.ip,bloque.dir.port,(int*)listas->elements_count);
-		}
-	}
-
-	for(i=0;i<listas->elements_count;i++){
-		pthread_t hilo;
-		pthread_create(&hilo,NULL,transformaciones,list_get(listas,i));
-	}
-	while(estadoMaster==ACTIVADO) {
-		Mensaje* m = mensajeRecibir(socketYama);
-		switch(m->header.operacion){
-		case ABORTAR:
-			imprimirMensaje(archivoLog,"[ABORTO] Abortando proceso");
-			abort(); //supongo que los hilos mueren aca
-			//si no se mueren matarlos
-			break;
-		case CIERRE:
-			imprimirMensaje(archivoLog,"[EJECUCION] Terminando proceso");
-			estadoMaster=DESACTIVADO;
-			break;
-		case TRANSFORMACION://hubo error y se recibió un bloque alternativo
-			memcpy(&alternativo.bloque,mensaje->datos+i+DIRSIZE,INTSIZE);
-			memcpy(&alternativo.bytes,mensaje->datos+i+DIRSIZE+INTSIZE,INTSIZE);
-			memcpy(&alternativo.temp,mensaje->datos+i+DIRSIZE+INTSIZE*2,TEMPSIZE);
-			semaforoSignal(recepcionAlternativo);
-			break;
-		case REDUCLOCAL:
-			reduccionLocal(m);
-			break;
-		case REDUCGLOBAL:
-			reduccionGlobal(m);
-			break;
-		}
-	}
+void iniciarMetricaJob(){
+	getrusage(RUSAGE_SELF,&uso);//info del mismo proceso
+	comienzo = uso.ru_utime;//tiempo que pasa en la cpu
 }
 
-void transformaciones(Lista bloques){
-	WorkerTransformacion* dir = list_get(bloques,0);
-	socketWorker=socketCrearCliente(dir->dir.ip,dir->dir.port,ID_MASTER);
-	imprimirMensajeDos(archivoLog,"[CONEXION] Estableciendo conexion con Worker (IP: %s | PUERTO: %s",dir->dir.ip,dir->dir.port);
-	mensajeEnviar(socketWorker,TRANSFORMACION,scriptTransformacion,lenTransformacion);
-	int enviados=0,respondidos=0;
-	enviarBloques:
-	for(;enviados<bloques->elements_count;enviados++){
-		WorkerTransformacion* wt=list_get(bloques,enviados);
-		int tamanio=sizeof(WorkerTransformacion)-DIRSIZE;
-		char data[tamanio];
-		memcpy(data,&wt->bloque,INTSIZE);
-		memcpy(data+INTSIZE,&wt->bytes,INTSIZE); //a worker le interesan los bytes?
-		memcpy(data+INTSIZE*2,wt->temp,TEMPSIZE);
-		mensajeEnviar(socketWorker,TRANSFORMACION,data,tamanio);
-		imprimirMensajeDos(archivoLog,"[CONEXION] Enviando bloque %d %s",(int*)wt->bloque,wt->temp);
-	}
-	for(;respondidos<enviados;respondidos++){
-		Mensaje* mensaje = mensajeRecibir(socketWorker);
-		//a demas de decir exito o fracaso devuelve el numero de bloque
-		void enviarActualizacion(){
-			imprimirMensajeDos(archivoLog,"se recibio actualizacion de Worker %d %d",(int*)(int32_t*)mensaje->datos,mensaje->header.operacion);
-			mensaje=realloc(mensaje,mensaje->header.tamanio+DIRSIZE+sizeof(Header));
-			memmove(mensaje->datos+DIRSIZE,mensaje->datos,mensaje->header.tamanio);
-			memcpy(mensaje->datos,&dir->dir,DIRSIZE);
-			mensajeEnviar(socketYama,mensaje->header.operacion,mensaje->datos,mensaje->header.tamanio+DIRSIZE);
-			mensajeDestruir(mensaje);
-		}
-		if(mensaje->header.operacion==EXITO){
-			imprimirMensajeUno(archivoLog, "[TRANSFORMACION] Transformacion realizada con exito en el Worker %s",(*(Dir*)mensaje->datos).ip);
-			enviarActualizacion();
-		}else{
-			semaforoWait(errorBloque);
-			enviarActualizacion();
-			imprimirMensajeUno(archivoLog,"[TRANSFORMACION] Transformacion fallida en el Worker %i",&socketWorker);
-			semaforoWait(recepcionAlternativo);
-			list_addM(bloques,&alternativo,sizeof alternativo);
-			semaforoSignal(errorBloque);
-			//se podría modificar para que se puedan procesar varios errores
-			//en paralelo, pero no vale la pena porque agrega mucho codigo
-			//y se supone que estos errores son casos raros
-			//para hacer eso se tendrian que sacar el semaforo y
-			//enviar el numero de thread en el mensaje, para diferenciar despues
-			respondidos++;
-			goto enviarBloques;
-		}
-	}
-	mensajeEnviar(socketWorker, EXITO, NULL, 0);
-	socketCerrar(socketWorker);
+void finMetricaJob(){
+	getrusage(RUSAGE_SELF,&uso);
+	fin = uso.ru_utime;
 }
 
 void reduccionLocal(Mensaje* m){
@@ -252,6 +144,134 @@ void reduccionGlobal(Mensaje* m){
 	}
 	socketCerrar(sWorker);
 }
+
+void transformaciones(Lista bloques){
+	WorkerTransformacion* dir = list_get(bloques,0);
+	socketWorker=socketCrearCliente(dir->dir.ip,dir->dir.port,ID_MASTER);
+	imprimirMensajeDos(archivoLog,"[CONEXION] Estableciendo conexion con Worker (IP: %s | PUERTO: %s",dir->dir.ip,dir->dir.port);
+	mensajeEnviar(socketWorker,TRANSFORMACION,scriptTransformacion,lenTransformacion);
+	int enviados=0,respondidos=0;
+	enviarBloques:
+	for(;enviados<bloques->elements_count;enviados++){
+		WorkerTransformacion* wt=list_get(bloques,enviados);
+		int tamanio=sizeof(WorkerTransformacion)-DIRSIZE;
+		char data[tamanio];
+		memcpy(data,&wt->bloque,INTSIZE);
+		memcpy(data+INTSIZE,&wt->bytes,INTSIZE); //a worker le interesan los bytes?
+		memcpy(data+INTSIZE*2,wt->temp,TEMPSIZE);
+		mensajeEnviar(socketWorker,TRANSFORMACION,data,tamanio);
+		imprimirMensajeDos(archivoLog,"[CONEXION] Enviando bloque %d %s",(int*)wt->bloque,wt->temp);
+	}
+	for(;respondidos<enviados;respondidos++){
+		Mensaje* mensaje = mensajeRecibir(socketWorker);
+		//a demas de decir exito o fracaso devuelve el numero de bloque
+		void enviarActualizacion(){
+			imprimirMensajeDos(archivoLog,"se recibio actualizacion de Worker %d %d",(int32_t*)mensaje->datos,&mensaje->header.operacion);
+			mensaje=realloc(mensaje,mensaje->header.tamanio+DIRSIZE+sizeof(Header));
+			memmove(mensaje->datos+DIRSIZE,mensaje->datos,mensaje->header.tamanio);
+			memcpy(mensaje->datos,&dir->dir,DIRSIZE);
+			mensajeEnviar(socketYama,mensaje->header.operacion,mensaje->datos,mensaje->header.tamanio+DIRSIZE);
+			mensajeDestruir(mensaje);
+		}
+		if(mensaje->header.operacion==EXITO){
+			imprimirMensajeUno(archivoLog, "[TRANSFORMACION] Transformacion realizada con exito en el Worker %s",(*(Dir*)mensaje->datos).ip);
+			enviarActualizacion();
+		}else{
+			semaforoWait(errorBloque);
+			enviarActualizacion();
+			imprimirMensajeUno(archivoLog,"[TRANSFORMACION] Transformacion fallida en el Worker %i",&socketWorker);
+			semaforoWait(recepcionAlternativo);
+			list_addM(bloques,&alternativo,sizeof alternativo);
+			semaforoSignal(errorBloque);
+			//se podría modificar para que se puedan procesar varios errores
+			//en paralelo, pero no vale la pena porque agrega mucho codigo
+			//y se supone que estos errores son casos raros
+			//para hacer eso se tendrian que sacar el semaforo y
+			//enviar el numero de thread en el mensaje, para diferenciar despues
+			respondidos++;
+			goto enviarBloques;
+		}
+	}
+	mensajeEnviar(socketWorker, EXITO, NULL, 0);
+	socketCerrar(socketWorker);
+}
+
+
+void masterAtender(){
+	puts("ESPERANDO MENSAJE");
+	Mensaje* mensaje=mensajeRecibir(socketYama);
+	//iniciarMetricaJob() desde aca se contaria el tiempo?
+	if(mensaje->header.operacion == 301) {
+		imprimirMensaje(archivoLog, ROJO"[ERROR] Path invalido, abortando proceso"BLANCO);
+		abort();
+	}
+	imprimirMensaje(archivoLog, "[MENSAJE] Lista de bloques recibida");
+	int i;
+	bool mismoNodo(Dir a,Dir b){
+		return stringIguales(a.ip,b.ip)&&stringIguales(a.port,b.port);//podría comparar solo ip
+	}
+	Lista listas=list_create();
+	for(i=0;i<mensaje->header.tamanio;i+=DIRSIZE+INTSIZE*2+TEMPSIZE){
+		WorkerTransformacion bloque;
+		memcpy(&bloque.dir,mensaje->datos+i,DIRSIZE);
+		memcpy(&bloque.bloque,mensaje->datos+i+DIRSIZE,INTSIZE);
+		memcpy(&bloque.bytes,mensaje->datos+i+DIRSIZE+INTSIZE,INTSIZE);
+		memcpy(bloque.temp,mensaje->datos+i+DIRSIZE+INTSIZE*2,TEMPSIZE);
+		imprimirMensajeTres(archivoLog, "[RECEPCION] bloque %s %s %d",bloque.dir.ip,bloque.dir.port,(int*)bloque.bloque);
+		int j;
+		bool flag=false;
+		for(j=0;j<listas->elements_count;j++){
+			Lista nodo=list_get(listas,j);
+			WorkerTransformacion* cmp=list_get(nodo,0);
+			if(mismoNodo(bloque.dir,cmp->dir)){
+				list_addM(nodo,&bloque,sizeof bloque);
+				flag=true;
+				break;
+			}
+		}
+		if(!flag){
+			Lista nodo=list_create();
+			list_addM(nodo, &bloque,sizeof(WorkerTransformacion));
+			list_addM(listas,nodo,sizeof(t_list));
+			imprimirMensajeTres(archivoLog,"] lista para nodo %s %s armada, lista #%d",bloque.dir.ip,bloque.dir.port,(int*)listas->elements_count);
+		}
+	}
+
+	for(i=0;i<listas->elements_count;i++){
+		pthread_t hilo;
+		pthread_create(&hilo,NULL,&transformaciones,list_get(listas,i));
+	}
+	while(estadoMaster==ACTIVADO) {
+		Mensaje* m = mensajeRecibir(socketYama);
+		switch(m->header.operacion){
+		case ABORTAR:
+			imprimirMensaje(archivoLog,"[ABORTO] Abortando proceso");
+			abort(); //supongo que los hilos mueren aca
+			//si no se mueren matarlos
+			break;
+		case CIERRE:
+			imprimirMensaje(archivoLog,"[EJECUCION] Terminando proceso");
+			estadoMaster=DESACTIVADO;
+			break;
+		case TRANSFORMACION://hubo error y se recibió un bloque alternativo
+			memcpy(&alternativo.bloque,mensaje->datos+i+DIRSIZE,INTSIZE);
+			memcpy(&alternativo.bytes,mensaje->datos+i+DIRSIZE+INTSIZE,INTSIZE);
+			memcpy(&alternativo.temp,mensaje->datos+i+DIRSIZE+INTSIZE*2,TEMPSIZE);
+			semaforoSignal(recepcionAlternativo);
+			break;
+		case REDUCLOCAL:
+			reduccionLocal(m);
+			break;
+		case REDUCGLOBAL:
+			reduccionGlobal(m);
+			break;
+		}
+	}
+}
+
+
+
+
 //void reduccionLocal(Mensaje* m){
 //	WorkerReduccion* wr= deserializarReduccion(m);
 //	int i;
