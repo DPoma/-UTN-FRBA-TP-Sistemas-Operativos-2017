@@ -46,8 +46,8 @@ void fileSystemAtenderProcesos() {
 }
 
 void fileSystemFinalizar() {
+	sleep(2);
 	imprimirMensaje(archivoLog, "[EJECUCION] Proceso File System finalizado");
-	semaforoWait(semaforoFinal);
 	archivoLogDestruir(archivoLog);
 	configuracionRutasDestruir();
 	bitmapDirectoriosDestruir();
@@ -56,7 +56,6 @@ void fileSystemFinalizar() {
 	nodoListaDestruir();
 	socketListaDestruir();
 	semaforosDestruir();
-	sleep(2);
 }
 
 void fileSystemReiniciar() {
@@ -132,13 +131,15 @@ void configuracionRutasDestruir() {
 //--------------------------------------- Funciones de Servidor -------------------------------------
 
 void dataNodeListener() {
-	while(ACTIVADO)
+	hiloDetach(pthread_self());
+	while(estadoControlIgualA(ACTIVADO))
 		dataNodeCrearConexion();
 }
 
 void dataNodeCrearConexion() {
 	Socket nuevoSocket = socketAceptar(listenerDataNode, ID_DATANODE);
-	dataNodeControlarConexion(nuevoSocket);
+	if(nuevoSocket != ERROR)
+		dataNodeControlarConexion(nuevoSocket);
 }
 
 void dataNodeControlarConexion(Socket nuevoSocket) {
@@ -258,6 +259,7 @@ void dataNodeFinalizar(Nodo* nodo, int* estado) {
 //--------------------------------------- Funciones de Yama -------------------------------------
 
 void yamaListener() {
+	hiloDetach(pthread_self());
 	while(estadoControlIgualA(ACTIVADO)) {
 		socketYama = socketAceptar(listenerYama, ID_YAMA);
 	if(estadoFileSystemIgualA(ESTABLE))
@@ -287,6 +289,10 @@ void yamaAtender(int* estado) {
 		case ENVIAR_BLOQUES: archivoEnviarBloquesYama(mensaje->datos); break;
 	}
 	mensajeDestruir(mensaje);
+}
+
+void yamaDesconectar() {
+	mensajeEnviar(socketYama, DESCONEXION, VACIO, ACTIVADO);
 }
 
 void yamaFinalizar(int* estado) {
@@ -692,7 +698,6 @@ void consolaEjecutar() {
 void consolaAtenderComandos() {
 	while(estadoControlIgualA(ACTIVADO))
 		consolaEjecutar();
-	semaforoSignal(semaforoFinal);
 }
 
 //--------------------------------------- Funciones de Comando -------------------------------------
@@ -1269,7 +1274,11 @@ void comandoAyuda() {
 
 void comandoFinalizar() {
 	estadoControlDesactivar();
-	socketCrearCliente(IP_LOCAL, configuracion->puertoDataNode, ID_DATANODE);
+	shutdown(listenerDataNode, SHUT_RDWR);
+	socketCerrar(listenerYama);
+	socketCerrar(listenerWorker);
+	yamaDesconectar();
+	nodoDesconectarATodos();
 }
 
 void comandoError() {
@@ -2270,11 +2279,19 @@ void nodoFormatearConectados() {
 	mutexBloquear(mutexListaNodos);
 	listaEliminarDestruyendoPorCondicion(listaNodos, (Puntero)nodoDesconectado, (Puntero)nodoDestruir);
 	mutexDesbloquear(mutexListaNodos);
-	int indice;
-	for(indice = 0; indice < nodoListaCantidad(); indice++) {
-		Nodo* unNodo = nodoListaObtener(indice);
-		nodoFormatear(unNodo);
-	}
+	mutexBloquear(mutexListaNodos);
+	listaIterar(listaNodos, (Puntero)nodoFormatear);
+	mutexDesbloquear(mutexListaNodos);
+}
+
+void nodoDesconectar(Nodo* nodo) {
+	mensajeEnviar(nodo->socket, DESCONEXION, VACIO, ACTIVADO);
+}
+
+void nodoDesconectarATodos() {
+	mutexBloquear(mutexListaNodos);
+	listaIterar(listaNodos, (Puntero)nodoDesconectar);
+	mutexDesbloquear(mutexListaNodos);
 }
 
 Nodo* nodoActualizar(Nodo* nodoTemporal) {

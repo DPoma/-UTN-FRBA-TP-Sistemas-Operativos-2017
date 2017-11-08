@@ -261,7 +261,9 @@ void yamaListener();
 void yamaAceptar();
 void yamaRechazar();
 void yamaAtender();
+void yamaDesconectar();
 void yamaFinalizar();
+
 void workerListener();
 //--------------------------------------- Funciones de Socket-------------------------------------
 
@@ -442,7 +444,8 @@ bool nodoListaAlgunoDisponible();
 void nodoAceptar(Nodo* nodo);
 void nodoListaCrear();
 bool nodoDisponible(Nodo* nodo);
-
+void nodoDesconectar(Nodo* nodo);
+void nodoDesconectarATodos();
 //--------------------------------------- Funciones de Bloque -------------------------------------
 
 Bloque* bloqueCrear(int bytes, int numero);

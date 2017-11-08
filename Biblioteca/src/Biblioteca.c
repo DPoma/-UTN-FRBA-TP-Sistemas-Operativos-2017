@@ -45,14 +45,13 @@ void socketEscuchar(Socket unSocket, int clientesEsperando) {
 	socketError(estado, "listen");
 }
 
-
 Socket socketAceptar(Socket unSocket, int idEsperada) {
 	Conexion conexion;
 	conexion.tamanioAddress = sizeof(SockAddrIn);
 	Socket nuevoSocket = accept(unSocket, (SockAddr)&conexion.address, &conexion.tamanioAddress);
-	socketError(nuevoSocket, "accept");
-	if(handShakeRecepcionFallida(nuevoSocket, idEsperada))
-		handShakeError(nuevoSocket);
+	if(nuevoSocket != ERROR)
+		if(handShakeRecepcionFallida(nuevoSocket, idEsperada))
+			handShakeError(nuevoSocket);
 	return nuevoSocket;
 }
 
