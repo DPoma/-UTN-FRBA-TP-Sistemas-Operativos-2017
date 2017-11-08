@@ -279,7 +279,7 @@ void yamaAtender(int* estado) {
 	Mensaje* mensaje = mensajeRecibir(socketYama);
 	switch(mensaje->header.operacion) {
 		case DESCONEXION: yamaFinalizar(estado); break;
-		case ENVIAR_BLOQUES: archivoEnviarBloquesYama(mensaje->datos); break;
+		case ENVIAR_BLOQUES: yamaEnviarBloques(mensaje->datos); break;
 	}
 	mensajeDestruir(mensaje);
 }
@@ -293,6 +293,59 @@ void yamaFinalizar(int* estado) {
 	socketCerrar(socketYama);
 	*estado = DESACTIVADO;
 	imprimirMensaje(archivoLog, "[CONEXION] El proceso YAMA se ha desconectado");
+}
+
+void yamaEnviarBloques(Puntero datos) {
+	int idMaster = *(Entero*)datos;
+	printf("%s\n", (String)datos+sizeof(Entero));
+	Archivo* archivo = archivoBuscarPorRuta(datos+sizeof(Entero));
+	if(archivo == NULL) {
+		imprimirMensaje(archivoLog, ROJO"[ERROR] El path no existe"BLANCO);
+		mensajeEnviar(socketYama, ERROR_ARCHIVO, &idMaster, sizeof(Entero));
+		return;
+	}
+	int cantidad = listaCantidadElementos(archivo->listaBloques);
+	BloqueYama* bloques = yamaConvertirArchivo(archivo, idMaster);
+	mensajeEnviar(socketYama, ENVIAR_BLOQUES, bloques, sizeof(Entero)+sizeof(BloqueYama)*cantidad);
+
+	printf("ENVIE %d \n",sizeof(Entero)+sizeof(BloqueYama)*cantidad );
+}
+
+BloqueYama* yamaConvertirArchivo(Archivo* archivo, Entero idMaster) {
+	int indice;
+	int cantidad = listaCantidadElementos(archivo->listaBloques);
+	Puntero bloques = memoriaAlocar(sizeof(Entero)+sizeof(BloqueYama)*cantidad);
+	listaOrdenar(archivo->listaBloques, (Puntero)bloqueOrdenarPorNumero);
+	memcpy(bloques, &idMaster, sizeof(Entero));
+	for(indice = 0; indice < cantidad; indice++) {
+		Bloque* bloque = listaObtenerElemento(archivo->listaBloques, indice);
+		BloqueYama bloqueYama = yamaConvertirBloque(bloque);
+		memcpy(bloques+sizeof(Entero)+sizeof(BloqueYama)*indice, &bloqueYama, sizeof(BloqueYama));
+	}
+	return bloques;
+}
+
+BloqueYama yamaConvertirBloque(Bloque* bloque) {
+	BloqueYama bloqueYama;
+	Copia* copia1 = listaObtenerElemento(bloque->listaCopias, 0);
+	Copia* copia2 = listaObtenerElemento(bloque->listaCopias, 1);
+	Direccion direccion1 = nodoObtenerDireccion(copia1->nombreNodo);
+	Direccion direccion2 = nodoObtenerDireccion(copia2->nombreNodo);
+	memcpy(&bloqueYama.direccionCopia1, &direccion1, sizeof(Dir));
+	memcpy(&bloqueYama.direccionCopia2, &direccion2, sizeof(Dir));
+	bloqueYama.numeroBloqueCopia1 = copia1->bloqueNodo;
+	bloqueYama.numeroBloqueCopia2 = copia2->bloqueNodo;
+	bloqueYama.bytesUtilizados = bloque->bytesUtilizados;
+
+	printf("bloque 1 %s\n", direccion1.ip);
+	printf("bloque 1 %s\n", direccion1.puerto);
+	printf("bloque 2 %s\n", direccion2.ip);
+	printf("bloque 2 %s\n", direccion2.puerto);
+	printf("numero b1 %d\n", bloqueYama.numeroBloqueCopia1);
+	printf("numero b2 %d\n", bloqueYama.numeroBloqueCopia2);
+	printf("bytes utiles %d\n", bloqueYama.bytesUtilizados);
+
+	return bloqueYama;
 }
 
 //--------------------------------------- Funciones de Worker -------------------------------------
@@ -1635,37 +1688,6 @@ int archivoCantidadBloques(String ruta) {
 	return cantidadBloques;
 }
 
-void archivoEnviarBloquesYama(Puntero datos) {
-	int idMaster = *(Entero*)datos;
-	printf("%s\n", (String)datos+sizeof(Entero));
-	Archivo* archivo = archivoBuscarPorRuta(datos+sizeof(Entero));
-	if(archivo == NULL) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] El path no existe"BLANCO);
-		mensajeEnviar(socketYama, ERROR_ARCHIVO, &idMaster, sizeof(Entero));
-		return;
-	}
-	int cantidad = listaCantidadElementos(archivo->listaBloques);
-	BloqueYama* bloques = archivoConvertirParaYama(archivo, idMaster);
-	mensajeEnviar(socketYama, ENVIAR_BLOQUES, bloques, sizeof(Entero)+sizeof(BloqueYama)*cantidad);
-	printf("ENVIE %d \n",sizeof(Entero)+sizeof(BloqueYama)*cantidad );
-}
-
-BloqueYama* archivoConvertirParaYama(Archivo* archivo, Entero idMaster) {
-	int indice;
-	int cantidad = listaCantidadElementos(archivo->listaBloques);
-	Puntero bloques = memoriaAlocar(sizeof(Entero)+sizeof(BloqueYama)*cantidad);
-	listaOrdenar(archivo->listaBloques, (Puntero)bloqueOrdenarPorNumero);
-	memcpy(bloques, &idMaster, sizeof(Entero));
-	for(indice = 0; indice < cantidad; indice++) {
-		Bloque* bloque = listaObtenerElemento(archivo->listaBloques, indice);
-		BloqueYama bloqueYama = bloqueConvertirParaYama(bloque);
-		memcpy(bloques+sizeof(Entero)+sizeof(BloqueYama)*indice, &bloqueYama, sizeof(BloqueYama));
-	}
-	return bloques;
-}
-
-
-
 bool archivoOrdenarPorNombre(Archivo* unArchivo, Archivo* otroArchivo) {
 	return unArchivo->nombre[0] < otroArchivo->nombre[0];
 }
@@ -1678,109 +1700,132 @@ bool archivoDisponible(Archivo* archivo) {
 	return listaCumplenTodos(archivo->listaBloques, (Puntero)bloqueDisponible);
 }
 
-int archivoAlmacenar(Comando* comando) {
+void archivoGuardar(Archivo* archivo) {
+	archivoListaAgregar(archivo);
+	archivoPersistir(archivo);
+	archivoPersistirControl();
+	nodoPersistir();
+	imprimirMensaje1(archivoLog, "[ARCHIVO] El archivo %s fue copiado en File System", archivo->nombre);
+}
+
+void archivoControlar(Archivo* archivo, int estado) {
+	if(estado != ERROR)
+		archivoGuardar(archivo);
+	else
+		archivoDestruir(archivo);
+}
+
+int bloqueGuardar(Archivo* archivo, String buffer, size_t bytes, Entero numeroBloque) {
+	Bloque* bloque = bloqueCrear(bytes, numeroBloque);
+	listaAgregarElemento(archivo->listaBloques, bloque);
+	int estado = bloqueEnviarCopias(bloque, buffer);
+	return estado;
+}
+
+int archivoAlmacenarBinario(Archivo* archivo, File file) {
+	String buffer = stringCrear(BLOQUE);
+	size_t bytes;
+	int estado;
+	int numeroBloque;
+	for(numeroBloque = 0; (bytes = fread(buffer, sizeof(char), BLOQUE, file)) == BLOQUE; numeroBloque++) {
+		estado = bloqueGuardar(archivo, buffer, bytes, numeroBloque);
+		if(estado == ERROR)
+			break;
+	}
+	if(bytes != NULO)
+		estado = bloqueGuardar(archivo, buffer, bytes, numeroBloque);
+	memoriaLiberar(buffer);
+	return estado;
+}
+
+/*
+int archivoAlmacenarTexto(Archivo* archivo, File file) {
+	String buffer = stringCrear(MAX_STRING);
+	String datos = stringCrear(BLOQUE);
+	int bytesDisponibles = BLOQUE-1;
+	int numeroBloqueArchivo = 0;
+	while(fgets(buffer, MAX_STRING, file) != NULL) {
+		int tamanioBuffer = stringLongitud(buffer);
+		if(tamanioBuffer <= bytesDisponibles) {
+			stringConcatenar(datos, buffer);
+			bytesDisponibles-= tamanioBuffer;
+		}
+		else {
+			int bytesUtilizados = stringLongitud(datos)+1;
+			bytesDisponibles = BLOQUE-1;
+			Bloque* bloque = bloqueCrear(bytesUtilizados, numeroBloqueArchivo);
+			listaAgregarElemento(archivo->listaBloques, bloque);
+			copiasEnviadas = bloqueEnviarCopias(bloque, datos);
+			if(copiasEnviadas == ERROR)
+				break;
+			numeroBloqueArchivo++;
+			memoriaLiberar(datos);
+			datos = stringCrear(BLOQUE);
+			stringConcatenar(datos, buffer);
+			bytesDisponibles-= tamanioBuffer;
+		}
+	}
+	if(copiasEnviadas != ERROR && stringLongitud(datos) > 0 ) {
+		int bytesUtilizados = stringLongitud(datos)+1;
+		Bloque* bloque = bloqueCrear(bytesUtilizados, numeroBloqueArchivo);
+		listaAgregarElemento(archivo->listaBloques, bloque);
+		copiasEnviadas = bloqueEnviarCopias(bloque, datos);
+	}
+	memoriaLiberar(datos);
+	memoriaLiberar(buffer);
+}
+*/
+void archivoAlmacenar(Comando* comando) {
 	if(consolaflagInvalido(comando->argumentos[1])) {
 		imprimirMensaje(archivoLog, "[ERROR] Flag invalido");
-		return ERROR;
+		return;
 	}
 	if(!rutaValida(comando->argumentos[3])) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
-		return ERROR;
+		return;
 	}
 	rutaYamaDecente(comando, 3);
 	Directorio* directorio = directorioBuscar(comando->argumentos[3]);
 	if(directorio == NULL) {
 		imprimirMensaje(archivoLog, "[ERROR] El directorio ingresado no existe");
-		return ERROR;
+		return;
 	}
 	String nombreArchivo = rutaObtenerUltimoNombre(comando->argumentos[2]);
 	if(archivoExiste(directorio->identificador, nombreArchivo)) {
 		imprimirMensaje(archivoLog, "[ERROR] Un archivo con ese nombre ya existe en el directorio destino");
 		memoriaLiberar(nombreArchivo);
-		return ERROR;
+		return;
 	}
 	if(directorioExiste(directorio->identificador, nombreArchivo)) {
 		imprimirMensaje(archivoLog, "[ERROR] Un directorio con ese nombre ya existe en el directorio destino");
 		memoriaLiberar(nombreArchivo);
-		return ERROR;
+		return;
 	}
 	File file = fileAbrir(comando->argumentos[2], LECTURA);
 	if(file == NULL) {
 		imprimirMensaje(archivoLog, "[ERROR] El archivo a copiar no existe");
 		memoriaLiberar(nombreArchivo);
-		return ERROR;
+		return;
 	}
+	//TODO ver
 	int cantidadBloques = nodoBloquesLibresTotales();
 	int bloquesArchivo = archivoCantidadBloques(comando->argumentos[2]) * MAX_COPIAS;
 	if(cantidadBloques < bloquesArchivo) {
 		imprimirMensaje(archivoLog, "[ERROR] No hay suficientes bloques libres");
 		fileCerrar(file);
 		memoriaLiberar(nombreArchivo);
-		return ERROR;
+		return;
 	}
 	Archivo* archivo = archivoCrear(nombreArchivo, directorio->identificador, comando->argumentos[1]);
 	memoriaLiberar(nombreArchivo);
-	int copiasEnviadas = 0;
-	if(stringIguales(comando->argumentos[1], FLAG_B)) {
-		String buffer = stringCrear(BLOQUE);
-		int numeroBloqueArchivo;
-		for(numeroBloqueArchivo = 0; fread(buffer, sizeof(char), BLOQUE, file) == BLOQUE; numeroBloqueArchivo++) {
-			Bloque* bloque = bloqueCrear(BLOQUE, numeroBloqueArchivo);
-			listaAgregarElemento(archivo->listaBloques, bloque);
-			copiasEnviadas = bloqueEnviarCopiasANodos(bloque, buffer);
-			if(copiasEnviadas == ERROR)
-				break;
-		}
-		memoriaLiberar(buffer);
-	}
-	else {
-		String buffer = stringCrear(MAX_STRING);
-		String datos = stringCrear(BLOQUE);
-		int bytesDisponibles = BLOQUE-1;
-		int numeroBloqueArchivo = 0;
-		while(fgets(buffer, MAX_STRING, file) != NULL) {
-			int tamanioBuffer = stringLongitud(buffer);
-			if(tamanioBuffer <= bytesDisponibles) {
-				stringConcatenar(datos, buffer);
-				bytesDisponibles-= tamanioBuffer;
-			}
-			else {
-				int bytesUtilizados = stringLongitud(datos)+1;
-				bytesDisponibles = BLOQUE-1;
-				Bloque* bloque = bloqueCrear(bytesUtilizados, numeroBloqueArchivo);
-				listaAgregarElemento(archivo->listaBloques, bloque);
-				copiasEnviadas = bloqueEnviarCopiasANodos(bloque, datos);
-				if(copiasEnviadas == ERROR)
-					break;
-				numeroBloqueArchivo++;
-				memoriaLiberar(datos);
-				datos = stringCrear(BLOQUE);
-				stringConcatenar(datos, buffer);
-				bytesDisponibles-= tamanioBuffer;
-			}
-		}
-		if(copiasEnviadas != ERROR && stringLongitud(datos) > 0 ) {
-			int bytesUtilizados = stringLongitud(datos)+1;
-			Bloque* bloque = bloqueCrear(bytesUtilizados, numeroBloqueArchivo);
-			listaAgregarElemento(archivo->listaBloques, bloque);
-			copiasEnviadas = bloqueEnviarCopiasANodos(bloque, datos);
-		}
-		memoriaLiberar(datos);
-		memoriaLiberar(buffer);
-	}
+	int estado = NULO;
+	if(stringIguales(comando->argumentos[1], FLAG_B))
+		estado = archivoAlmacenarBinario(archivo, file);
+	//else
+		//estado = archivoAlmacenarTexto(archivo, file);
 	fileCerrar(file);
-	if(copiasEnviadas == ERROR) {
-		archivoDestruir(archivo);
-		return ERROR;
-	}
-	else {
-		archivoListaAgregar(archivo);
-		archivoPersistir(archivo);
-		archivoPersistirControl();
-		nodoPersistir();
-		imprimirMensaje1(archivoLog, "[ARCHIVO] El archivo %s fue copiado en File System", comando->argumentos[2]);
-		return OK;
-	}
+	archivoControlar(archivo, estado);
+
 }
 
 int archivoLeer(Comando* comando) {
@@ -2371,9 +2416,18 @@ void bloqueDestruir(Bloque* bloque) {
 	memoriaLiberar(bloque);
 }
 
-int bloqueEnviarANodo(Bloque* bloque, Nodo* nodo, String buffer) {
+int copiaGuardarEnNodo(Bloque* bloque, Nodo* nodo) {
 	Entero numeroBloqueNodo = nodoBuscarBloqueLibre(nodo);
-	bloqueCopiarEnNodo(bloque, nodo, numeroBloqueNodo);
+	Copia* copia = copiaCrear(numeroBloqueNodo, nodo->nombre);
+	bitmapOcuparBit(nodo->bitmap, numeroBloqueNodo);
+	nodo->bloquesLibres--;
+	nodoVerificarBloquesLibres(nodo);
+	listaAgregarElemento(bloque->listaCopias, copia);
+	return numeroBloqueNodo;
+}
+
+int copiaEnviarANodo(Bloque* bloque, Nodo* nodo, String buffer) {
+	int numeroBloqueNodo = copiaGuardarEnNodo(bloque, nodo);
 	BloqueNodo* bloqueNodo = bloqueNodoCrear(numeroBloqueNodo, buffer, BLOQUE);
 	mutexBloquear(mutexSocket);
 	mensajeEnviar(nodo->socket, ESCRIBIR_BLOQUE, bloqueNodo, sizeof(Entero)+BLOQUE);
@@ -2382,15 +2436,7 @@ int bloqueEnviarANodo(Bloque* bloque, Nodo* nodo, String buffer) {
 	return numeroBloqueNodo;
 }
 
-void bloqueCopiarEnNodo(Bloque* bloque, Nodo* nodo, Entero numeroBloqueNodo) {
-	Copia* copia = copiaCrear(numeroBloqueNodo, nodo->nombre);
-	bitmapOcuparBit(nodo->bitmap, numeroBloqueNodo);
-	nodo->bloquesLibres--;
-	nodoVerificarBloquesLibres(nodo);
-	listaAgregarElemento(bloque->listaCopias, copia);
-}
-
-int bloqueEnviarCopiasANodos(Bloque* bloque, String buffer) {
+int bloqueEnviarCopias(Bloque* bloque, String buffer) {
 	int copiasEnviadas = 0;
 	int indice = 0;
 	mutexBloquear(mutexTarea);
@@ -2398,18 +2444,14 @@ int bloqueEnviarCopiasANodos(Bloque* bloque, String buffer) {
 	for(indice = 0; indice < nodoListaCantidad() && copiasEnviadas < MAX_COPIAS; indice++) {
 		Nodo* nodo = nodoListaObtener(indice);
 		if(nodoDisponible(nodo)) {
-			bloqueEnviarANodo(bloque, nodo, buffer);
+			copiaEnviarANodo(bloque, nodo, buffer);
 			copiasEnviadas++;
 		}
 	}
 	mutexDesbloquear(mutexTarea);
-	if(copiasEnviadas == 0) {
-		imprimirMensaje1(archivoLog, ROJO"[ERROR] El bloque N°%i no pudo copiarse en ningun Nodo, se aborta la operacion"BLANCO, (int*)bloque->numeroBloque);
-		return ERROR;
-	}
 	if(copiasEnviadas < MAX_COPIAS) {
-		imprimirMensaje2(archivoLog, AMARILLO"[AVISO] El bloque N°%i no tiene %i copias"BLANCO, (int*)bloque->numeroBloque, (int*)MAX_COPIAS);
-		return OK;
+		imprimirMensaje1(archivoLog, ROJO"[ERROR] El bloque N°%i no tiene las copias necesarias"BLANCO, (int*)bloque->numeroBloque);
+		return ERROR;
 	}
 	return OK;
 }
@@ -2417,7 +2459,7 @@ int bloqueEnviarCopiasANodos(Bloque* bloque, String buffer) {
 void bloqueCopiar(Nodo* nodo, Puntero datos, int* estado) {
 	mutexBloquear(mutexNodo);
 	mutexBloquear(mutexBloque);
-	int numeroBloqueNodo = bloqueEnviarANodo(bloqueBuffer, nodoBuffer, datos);
+	int numeroBloqueNodo = copiaEnviarANodo(bloqueBuffer, nodoBuffer, datos);
 	mutexDesbloquear(mutexBloque);
 	nodoActivarDesconexion(nodoBuffer, estado);
 	mutexDesbloquear(mutexNodo);
@@ -2451,28 +2493,6 @@ void bloqueCopiarArchivo(Nodo* nodo, Puntero datos, int* estado) {
 	mutexDesbloquear(mutexRuta);
 	nodoActivarDesconexion(nodo, estado);
 	semaforoSignal(semaforoTarea);
-}
-
-
-BloqueYama bloqueConvertirParaYama(Bloque* bloque) {
-	BloqueYama bloqueYama;
-	Copia* copia1 = listaObtenerElemento(bloque->listaCopias, 0);
-	Copia* copia2 = listaObtenerElemento(bloque->listaCopias, 1);
-	Direccion direccion1 = nodoObtenerDireccion(copia1->nombreNodo);
-	Direccion direccion2 = nodoObtenerDireccion(copia2->nombreNodo);
-	memcpy(&bloqueYama.direccionCopia1, &direccion1, sizeof(Dir));
-	memcpy(&bloqueYama.direccionCopia2, &direccion2, sizeof(Dir));
-	bloqueYama.numeroBloqueCopia1 = copia1->bloqueNodo;
-	bloqueYama.numeroBloqueCopia2 = copia2->bloqueNodo;
-	bloqueYama.bytesUtilizados = bloque->bytesUtilizados;
-	printf("bloque 1 %s\n", direccion1.ip);
-	printf("bloque 1 %s\n", direccion1.puerto);
-	printf("bloque 2 %s\n", direccion2.ip);
-	printf("bloque 2 %s\n", direccion2.puerto);
-	printf("numero b1 %d\n", bloqueYama.numeroBloqueCopia1);
-	printf("numero b2 %d\n", bloqueYama.numeroBloqueCopia2);
-	printf("bytes utiles %d\n", bloqueYama.bytesUtilizados);
-	return bloqueYama;
 }
 
 bool bloqueOrdenarPorNumero(Bloque* unBloque, Bloque* otroBloque) {
@@ -2801,4 +2821,4 @@ void semaforosDestruir() {
 
 //TODO dejar rollback
 //TODO ver memory leak hilo
-//TODO arreglar cpfrom cpto md5 y mostrar copiarBloque
+//TODO arreglar cpfrom cpto md5

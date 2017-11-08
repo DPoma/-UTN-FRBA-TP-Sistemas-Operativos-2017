@@ -260,6 +260,8 @@ void yamaRechazar();
 void yamaAtender();
 void yamaDesconectar();
 void yamaFinalizar();
+BloqueYama* yamaConvertirArchivo(Archivo* archivo, Entero idMaster);
+void yamaEnviarBloques(Puntero path);
 
 void workerListener();
 
@@ -386,7 +388,7 @@ void archivoRecuperarPersistencia();
 void archivoRecuperarPersistenciaDetallada(String nombre, int padre);
 bool archivoBinario(Archivo* archivo);
 int archivoLeer(Comando* comando);
-int archivoAlmacenar(Comando* comando);
+void archivoAlmacenar(Comando* comando);
 int archivoCantidadBloques(String ruta);
 bool archivoDisponible(Archivo* archivo);
 Archivo* archivoListaObtener(int indice);
@@ -395,9 +397,8 @@ void archivoListaAgregar(Archivo* archivo);
 int archivoListaCantidad();
 bool archivoListaTodosDisponibles();
 void archivoListaDestruir();
-BloqueYama* archivoConvertirParaYama(Archivo* archivo, Entero idMaster);
-void archivoEnviarBloquesYama(Puntero path);
-
+void archivoGuardar(Archivo* archivo);
+void archivoControlar(Archivo* archivo, int estado);
 //--------------------------------------- Funciones de Nodo -------------------------------------
 
 Nodo* nodoCrear(Puntero datos, Socket nuevoSocket);
@@ -441,21 +442,22 @@ void nodoSocket(Nodo* nodo, int estado);
 void nodoMensaje(Nodo* nodo, int estado);
 void nodoEstado(Nodo* nodo, int estado);
 bool nodoMensajeIgualA(Nodo* nodo, int estado);
+Direccion nodoObtenerDireccion(String nombreNodo);
 
 //--------------------------------------- Funciones de Bloque -------------------------------------
 
 Bloque* bloqueCrear(int bytes, int numero);
 void bloqueDestruir(Bloque* bloque);
-void bloqueCopiarEnNodo(Bloque* bloque, Nodo* nodo, Entero numeroBloqueNodo);
-int bloqueEnviarANodo(Bloque* bloque, Nodo* nodo, String buffer);
-int bloqueEnviarCopiasANodos(Bloque* bloque, String buffer);
+int copiaGuardarEnNodo(Bloque* bloque, Nodo* nodo);
+int copiaEnviarANodo(Bloque* bloque, Nodo* nodo, String buffer);
+int bloqueEnviarCopias(Bloque* bloque, String buffer);
 bool bloqueOrdenarPorNumero(Bloque* unBloque, Bloque* otroBloque);
 void bloqueCopiar(Nodo* nodo, Puntero datos, int* estado);
 void bloqueLeer(Nodo* nodo, Puntero datos, int* estado);
 void bloqueCopiarArchivo(Nodo* nodo, Puntero datos, int* estado);
 bool bloqueDisponible(Bloque* bloque);
 BloqueNodo* bloqueNodoCrear(Entero numeroBloque, String buffer, int tamanioUtilizado);
-BloqueYama bloqueConvertirParaYama(Bloque* bloque);
+BloqueYama yamaConvertirBloque(Bloque* bloque);
 bool bloqueEstaEnNodo(Bloque* bloque, Nodo* nodo);
 
 //--------------------------------------- Funciones de Copia -------------------------------------
