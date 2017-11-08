@@ -450,6 +450,8 @@ int consolaIdentificarComando(String comando) {
 		return ID_NODES;
 	if(stringIguales(comando, HELP))
 		return ID_HELP;
+	if(stringIguales(comando, BITMAPS))
+		return ID_BITMAPS;
 	if(stringIguales(comando, EXIT))
 		return ID_EXIT;
 	else
@@ -483,7 +485,8 @@ bool consolaComandoExiste(String comando) {
 			stringIguales(comando, FORMAT) ||
 			stringIguales(comando, EXIT) ||
 			stringIguales(comando, HELP) ||
-			stringIguales(comando, NODES);
+			stringIguales(comando, NODES) ||
+			stringIguales(comando, BITMAPS);
 }
 
 bool consolaValidarComandoSinTipo(String* subcadenas) {
@@ -622,6 +625,7 @@ void consolaEjecutarComando(Comando* comando) {
 		case ID_LS: comandoListarDirectorio(comando); break;
 		case ID_INFO: comandoInformacionArchivo(comando); break;
 		case ID_NODES: comandoInformacionNodos(); break;
+		case ID_BITMAPS: comandoInformacionBitmaps(); break;
 		case ID_HELP: comandoAyuda(); break;
 		case ID_EXIT: comandoFinalizar();break;
 		default: comandoError(); break;
@@ -1163,6 +1167,7 @@ void comandoObtenerMD5DeArchivo(Comando* comando) {
 		memoriaLiberar(ruta);
 		return;
 	}
+	sleep(1);
 	int pidHijo;
 	int longitudMensaje;
 	int descriptores[2];
@@ -1211,11 +1216,7 @@ void comandoInformacionNodos() {
 			puts("Estado: Conectado");
 		else
 			puts("Estado: Desconectado");
-		printf("Bitmap: ");
-		int bit;
-		for(bit=0; bit < nodo->bloquesTotales; bit++)
-			printf("%d", bitmapBitOcupado(nodo->bitmap, bit));
-		puts("");
+
 	}
 	if(indice == 0) {
 		puts("No hay nodos conectados");
@@ -1224,6 +1225,19 @@ void comandoInformacionNodos() {
 	puts("------------------------------------------");
 	printf("Bloques totales %i\n", bloquesTotales);
 	printf("Bloques libres %i\n", bloquesLibres);
+}
+
+void comandoInformacionBitmaps() {
+	int indice;
+	for(indice = 0; indice < nodoListaCantidad(); indice++) {
+		Nodo* nodo = nodoListaObtener(indice);
+		printf("Bitmap %s:\n", nodo->nombre);
+		int bit;
+		for(bit=0; bit < nodo->bloquesTotales; bit++)
+			printf("%d", bitmapBitOcupado(nodo->bitmap, bit));
+		puts("");
+		puts("------------------------------------------");
+	}
 }
 
 void comandoAyuda() {
@@ -1244,7 +1258,8 @@ void comandoAyuda() {
 	puts("14) cat <Path-yama-arch> | Muestra el contenido de un archivo");
 	puts("15) info <Path-yama-arch> | Muestra la informacion de un archivo");
 	puts("16) nodes | Muestra la informacion de los nodos");
-	puts("17) exit | Finaliza YamaFS");
+	puts("17) bitmaps | Muestro los bitmaps de los nodos");
+	puts("18) exit | Finaliza YamaFS");
 }
 
 void comandoFinalizar() {

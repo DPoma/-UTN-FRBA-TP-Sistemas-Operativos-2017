@@ -1,15 +1,8 @@
-[INFO] 19:25:30:96 DataNode/(10607:10607): [CONFIGURACION] Nombre Nodo: NODO3
-[INFO] 19:25:30:118 DataNode/(10607:10607): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data3.bin
-[INFO] 19:25:30:125 DataNode/(10607:10607): [DATABIN] Cantidad de bloques 100
-[INFO] 19:25:30:158 DataNode/(10607:10607): [CONEXION] Estableciendo conexion con File System (IP: 127.0.0.1 | Puerto 5040)
-[INFO] 19:25:30:163 DataNode/(10607:10607): [CONEXION] Conexion establecida con el File System
-[INFO] 19:25:37:475 DataNode/(10607:10607): [DATABIN] El bloque N°0 fue leido
-[INFO] 19:25:37:566 DataNode/(10607:10607): [DATABIN] El bloque N°1 fue leido
-[INFO] 19:25:37:641 DataNode/(10607:10607): [DATABIN] El bloque N°2 fue leido
-[INFO] 19:25:37:723 DataNode/(10607:10607): [DATABIN] El bloque N°3 fue leido
-[INFO] 19:25:37:798 DataNode/(10607:10607): [DATABIN] El bloque N°4 fue leido
-[INFO] 19:25:37:872 DataNode/(10607:10607): [DATABIN] El bloque N°5 fue leido
-[INFO] 19:25:37:945 DataNode/(10607:10607): [DATABIN] El bloque N°6 fue leido
-[INFO] 19:25:38:51 DataNode/(10607:10607): [DATABIN] El bloque N°7 fue leido
-[INFO] 19:25:38:168 DataNode/(10607:10607): [DATABIN] El bloque N°8 fue leido
-[INFO] 19:25:38:186 DataNode/(10607:10607): [EJECUCION] Proceso Data Node finalizado
+[INFO] 19:57:06:869 DataNode/(11368:11368): [CONFIGURACION] Nombre Nodo: NODO1
+[INFO] 19:57:06:890 DataNode/(11368:11368): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data1.bin
+[INFO] 19:57:06:897 DataNode/(11368:11368): [DATABIN] Cantidad de bloques 100
+[INFO] 19:57:06:928 DataNode/(11368:11368): [CONEXION] Estableciendo conexion con File System (IP: 127.0.0.1 | Puerto 5040)
+[INFO] 19:57:06:931 DataNode/(11368:11368): [CONEXION] Conexion establecida con el File System
+[INFO] 19:57:10:676 DataNode/(11368:11368): [DATABIN] El bloque N°78 fue escrito
+[INFO] 19:58:26:190 DataNode/(11368:11368): [31m[CONEXION] Conexion finalizada con File System[0m
+[INFO] 19:58:26:192 DataNode/(11368:11368): [EJECUCION] Proceso Data Node finalizado

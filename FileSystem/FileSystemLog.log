@@ -1,53 +1,59 @@
-[INFO] 19:18:07:931 FileSystem/(10483:10483): [EJECUCION] Proceso File System iniciado
-[INFO] 19:18:07:976 FileSystem/(10483:10483): [CONFIGURACION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 19:18:07:977 FileSystem/(10483:10483): [CONFIGURACION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 19:18:07:978 FileSystem/(10483:10483): [CONFIGURACION] Esperando conexiones de Workers (Puerto: 5080)
-[INFO] 19:18:07:979 FileSystem/(10483:10483): [CONFIGURACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
-[INFO] 19:18:08:43 FileSystem/(10483:10483): [33m[AVISO] Conecte los nodos necesarios al File System para estabilizarlo[0m
-[INFO] 19:18:20:921 FileSystem/(10483:10486): [33m[AVISO] NODO1 conectado[0m
-[INFO] 19:18:31:824 FileSystem/(10483:10486): [33m[AVISO] NODO2 conectado[0m
-[INFO] 19:18:31:829 FileSystem/(10483:10486): [33m[AVISO] El File System esta estable[0m
-[INFO] 19:18:35:782 FileSystem/(10483:10486): [33m[AVISO] NODO3 conectado[0m
-[INFO] 19:19:08:502 FileSystem/(10483:10483): [ARCHIVO] El archivo WBAN.csv se copio en /home/utnso/Escritorio/Metadata/WBAN.csv
-[INFO] 19:19:08:661 FileSystem/(10483:10483): [ARCHIVO] El MD5 del archivo es 20049d7f6c02af5c6c5ba7c915c3d5d9  /home/utnso/Escritorio/Metadata/WBAN.csv
+[INFO] 19:51:13:96 FileSystem/(11274:11274): [EJECUCION] Proceso File System iniciado
+[INFO] 19:51:13:158 FileSystem/(11274:11274): [CONFIGURACION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 19:51:13:159 FileSystem/(11274:11274): [CONFIGURACION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 19:51:13:160 FileSystem/(11274:11274): [CONFIGURACION] Esperando conexiones de Workers (Puerto: 5080)
+[INFO] 19:51:13:160 FileSystem/(11274:11274): [CONFIGURACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
+[INFO] 19:51:13:220 FileSystem/(11274:11274): [33m[AVISO] Conecte los nodos necesarios al File System para estabilizarlo[0m
+[INFO] 19:51:16:326 FileSystem/(11274:11277): [33m[AVISO] NODO2 conectado[0m
+[INFO] 19:51:27:705 FileSystem/(11274:11277): [31m[ERROR] Un nodo con ese nombre ya esta conectado[0m
+[INFO] 19:51:35:638 FileSystem/(11274:11277): [33m[AVISO] NODO1 conectado[0m
+[INFO] 19:51:35:641 FileSystem/(11274:11277): [33m[AVISO] El File System esta estable[0m
+[INFO] 19:51:49:771 FileSystem/(11274:11274): [ARCHIVO] El archivo WBAN.csv se copio en /home/utnso/Escritorio/Metadata/WBAN.csv
+[INFO] 19:51:50:880 FileSystem/(11274:11274): [ARCHIVO] El MD5 del archivo es 3930877e662926394236e3208ba65f40  /home/utnso/Escritorio/Metadata/WBAN.csv
 
-[INFO] 19:19:18:818 FileSystem/(10483:10483): [ARCHIVO] El archivo WBAN.csv se copio en /home/utnso/Escritorio/Metadata/WBAN.csv
-[INFO] 19:19:18:975 FileSystem/(10483:10483): [ARCHIVO] El MD5 del archivo es 3930877e662926394236e3208ba65f40  /home/utnso/Escritorio/Metadata/WBAN.csv
+[INFO] 19:51:56:893 FileSystem/(11274:11274): [ARCHIVO] El archivo WBAN.csv se copio en /home/utnso/Escritorio/Metadata/WBAN.csv
+[INFO] 19:51:57:980 FileSystem/(11274:11274): [ARCHIVO] El MD5 del archivo es 3930877e662926394236e3208ba65f40  /home/utnso/Escritorio/Metadata/WBAN.csv
 
-[INFO] 19:19:47:464 FileSystem/(10483:10483): [ARCHIVO] El archivo WBAN.csv se copio en /home/utnso/Escritorio/Metadata/WBAN.csv
-[INFO] 19:19:47:657 FileSystem/(10483:10483): [ARCHIVO] El MD5 del archivo es 3930877e662926394236e3208ba65f40  /home/utnso/Escritorio/Metadata/WBAN.csv
+[INFO] 19:52:06:653 FileSystem/(11274:11274): [ARCHIVO] El archivo WBAN.csv se copio en /home/utnso/Escritorio/Metadata/WBAN.csv
+[INFO] 19:52:07:707 FileSystem/(11274:11274): [ARCHIVO] El MD5 del archivo es 3930877e662926394236e3208ba65f40  /home/utnso/Escritorio/Metadata/WBAN.csv
 
-[INFO] 19:19:55:303 FileSystem/(10483:10483): [ARCHIVO] El archivo WBAN.csv se copio en /home/utnso/Escritorio/Metadata/WBAN.csv
-[INFO] 19:19:55:474 FileSystem/(10483:10483): [ARCHIVO] El MD5 del archivo es 3930877e662926394236e3208ba65f40  /home/utnso/Escritorio/Metadata/WBAN.csv
+[INFO] 19:52:09:165 FileSystem/(11274:11274): [ARCHIVO] El archivo WBAN.csv se copio en /home/utnso/Escritorio/Metadata/WBAN.csv
+[INFO] 19:52:10:250 FileSystem/(11274:11274): [ARCHIVO] El MD5 del archivo es 3930877e662926394236e3208ba65f40  /home/utnso/Escritorio/Metadata/WBAN.csv
 
-[INFO] 19:20:04:287 FileSystem/(10483:10483): [ARCHIVO] El archivo WBAN.csv se copio en /home/utnso/Escritorio/asco
-[INFO] 19:20:14:273 FileSystem/(10483:10483): [ARCHIVO] El archivo WBAN.csv se copio en /home/utnso/Escritorio/asco
-[INFO] 19:20:43:151 FileSystem/(10483:10483): [ARCHIVO] El archivo WBAN.csv se copio en /home/utnso/Escritorio/asco
-[INFO] 19:20:49:608 FileSystem/(10483:10504): [33m[AVISO] NODO3 desconectado[0m
-[INFO] 19:20:50:6 FileSystem/(10483:10483): [ARCHIVO] El archivo WBAN.csv se copio en /home/utnso/Escritorio/asco
-[INFO] 19:21:05:291 FileSystem/(10483:10486): [33m[AVISO] NODO3 conectado[0m
-[INFO] 19:21:17:621 FileSystem/(10483:10542): [33m[AVISO] NODO3 desconectado[0m
-[INFO] 19:21:21:210 FileSystem/(10483:10483): [ARCHIVO] El archivo WBAN.csv se copio en /home/utnso/Escritorio/asco
-[INFO] 19:21:34:545 FileSystem/(10483:10495): [33m[AVISO] NODO1 desconectado[0m
-[INFO] 19:21:34:554 FileSystem/(10483:10483): [ERROR] No se pudo leer el bloque N°8, se aborta la operacion
-[INFO] 19:22:17:494 FileSystem/(10483:10483): [ARCHIVO] El archivo /WBAN.csv ha sido eliminado
-[INFO] 19:22:23:626 FileSystem/(10483:10483): [ERROR] El archivo no existe
-[INFO] 19:22:29:223 FileSystem/(10483:10486): [33m[AVISO] NODO3 conectado[0m
-[INFO] 19:22:37:628 FileSystem/(10483:10483): [31m[ERROR] Comando invalido[0m
-[INFO] 19:22:55:385 FileSystem/(10483:10483): [31m[ERROR] Comando invalido[0m
-[INFO] 19:23:17:700 FileSystem/(10483:10483): [ARCHIVO] El archivo WBAN.csv fue copiado en File System
-[INFO] 19:23:32:535 FileSystem/(10483:10483): [ARCHIVO] El archivo WBAN.csv se copio en /home/utnso/Escritorio/asco
-[INFO] 19:23:39:573 FileSystem/(10483:10483): [ARCHIVO] El archivo WBAN.csv se copio en /home/utnso/Escritorio/asco1
-[INFO] 19:23:42:871 FileSystem/(10483:10483): [ARCHIVO] El archivo WBAN.csv se copio en /home/utnso/Escritorio/asco2
-[INFO] 19:23:55:722 FileSystem/(10483:10570): [33m[AVISO] NODO3 desconectado[0m
-[INFO] 19:23:56:62 FileSystem/(10483:10483): [ARCHIVO] El archivo WBAN.csv se copio en /home/utnso/Escritorio/asco
-[INFO] 19:24:01:38 FileSystem/(10483:10483): [ARCHIVO] El archivo WBAN.csv se copio en /home/utnso/Escritorio/asco
-[INFO] 19:24:05:530 FileSystem/(10483:10483): [ARCHIVO] El archivo WBAN.csv se copio en /home/utnso/Escritorio/asco
-[INFO] 19:24:20:211 FileSystem/(10483:10486): [33m[AVISO] NODO3 conectado[0m
-[INFO] 19:24:35:330 FileSystem/(10483:10500): [33m[AVISO] NODO2 desconectado[0m
-[INFO] 19:24:35:574 FileSystem/(10483:10483): [ARCHIVO] El archivo WBAN.csv se copio en /home/utnso/Escritorio/asco
-[INFO] 19:24:47:502 FileSystem/(10483:10594): [33m[AVISO] NODO3 desconectado[0m
-[INFO] 19:24:47:504 FileSystem/(10483:10483): [ERROR] No se pudo leer el bloque N°9, se aborta la operacion
-[INFO] 19:25:30:162 FileSystem/(10483:10486): [33m[AVISO] NODO3 conectado[0m
-[INFO] 19:25:38:327 FileSystem/(10483:10610): [33m[AVISO] NODO3 desconectado[0m
-[INFO] 19:25:38:329 FileSystem/(10483:10483): [ERROR] No se pudo leer el bloque N°9, se aborta la operacion
+[INFO] 19:52:11:815 FileSystem/(11274:11274): [ARCHIVO] El archivo WBAN.csv se copio en /home/utnso/Escritorio/Metadata/WBAN.csv
+[INFO] 19:52:12:896 FileSystem/(11274:11274): [ARCHIVO] El MD5 del archivo es 3930877e662926394236e3208ba65f40  /home/utnso/Escritorio/Metadata/WBAN.csv
+
+[INFO] 19:52:18:100 FileSystem/(11274:11274): [ARCHIVO] El archivo gg se copio en /home/utnso/Escritorio/Metadata/gg
+[INFO] 19:52:19:167 FileSystem/(11274:11274): [ARCHIVO] El MD5 del archivo es ac09f6b0ecde1fb249f7e4ca4a62708c  /home/utnso/Escritorio/Metadata/gg
+
+[INFO] 19:52:22:953 FileSystem/(11274:11274): [ARCHIVO] El archivo gg se copio en /home/utnso/Escritorio/Metadata/gg
+[INFO] 19:52:24:20 FileSystem/(11274:11274): [ARCHIVO] El MD5 del archivo es ac09f6b0ecde1fb249f7e4ca4a62708c  /home/utnso/Escritorio/Metadata/gg
+
+[INFO] 19:52:27:997 FileSystem/(11274:11274): [ARCHIVO] El archivo gg se copio en /home/utnso/Escritorio/Metadata/gg
+[INFO] 19:52:29:47 FileSystem/(11274:11274): [ARCHIVO] El MD5 del archivo es ac09f6b0ecde1fb249f7e4ca4a62708c  /home/utnso/Escritorio/Metadata/gg
+
+[INFO] 19:53:26:491 FileSystem/(11274:11274): [ARCHIVO] El archivo lala fue copiado en File System
+[INFO] 19:53:37:233 FileSystem/(11274:11274): [ARCHIVO] El archivo lala se copio en /home/utnso/Escritorio/Metadata/lala
+[INFO] 19:53:38:484 FileSystem/(11274:11274): [ARCHIVO] El MD5 del archivo es b431d4cb1e9307d8932d352211396fe9  /home/utnso/Escritorio/Metadata/lala
+
+[INFO] 19:53:53:565 FileSystem/(11274:11274): [ARCHIVO] El archivo lala se copio en /home/utnso/Escritorio/Metadata/lala
+[INFO] 19:53:54:819 FileSystem/(11274:11274): [ARCHIVO] El MD5 del archivo es b431d4cb1e9307d8932d352211396fe9  /home/utnso/Escritorio/Metadata/lala
+
+[INFO] 19:54:33:529 FileSystem/(11274:11283): [33m[AVISO] NODO2 desconectado[0m
+[INFO] 19:54:34:658 FileSystem/(11274:11274): [ARCHIVO] El archivo lala se copio en /home/utnso/Escritorio/nose
+[INFO] 19:54:34:923 FileSystem/(11274:11292): [33m[AVISO] NODO1 desconectado[0m
+[INFO] 19:54:39:54 FileSystem/(11274:11277): [33m[AVISO] NODO1 conectado[0m
+[INFO] 19:54:51:789 FileSystem/(11274:11277): [33m[AVISO] NODO2 conectado[0m
+[INFO] 19:55:08:213 FileSystem/(11274:11326): [33m[AVISO] NODO2 desconectado[0m
+[INFO] 19:55:08:696 FileSystem/(11274:11322): [33m[AVISO] NODO1 desconectado[0m
+[INFO] 19:55:08:696 FileSystem/(11274:11274): [ERROR] No se pudo leer el bloque N°37, se aborta la operacion
+[INFO] 19:56:02:722 FileSystem/(11274:11277): [33m[AVISO] NODO2 conectado[0m
+[INFO] 19:56:16:874 FileSystem/(11274:11274): [31m[ERROR] El bloque N°0 no tiene las copias necesarias[0m
+[INFO] 19:57:06:926 FileSystem/(11274:11277): [33m[AVISO] NODO1 conectado[0m
+[INFO] 19:57:10:697 FileSystem/(11274:11274): [ARCHIVO] El archivo transformador.sh fue copiado en File System
+[INFO] 19:58:12:589 FileSystem/(11274:11274): [ARCHIVO] El archivo transformador.sh se copio en /home/utnso/Escritorio/Metadata/transformador.sh
+[INFO] 19:58:13:653 FileSystem/(11274:11274): [ARCHIVO] El MD5 del archivo es 7639a9ba8bd1ca5e50107318bf531804  /home/utnso/Escritorio/Metadata/transformador.sh
+
+[INFO] 19:58:26:205 FileSystem/(11274:11372): [33m[AVISO] NODO1 desconectado[0m
+[INFO] 19:58:26:213 FileSystem/(11274:11346): [33m[AVISO] NODO2 desconectado[0m
+[INFO] 19:58:28:216 FileSystem/(11274:11274): [EJECUCION] Proceso File System finalizado
