@@ -932,25 +932,25 @@ void comandoInformacionArchivo(Comando* comando) {
 		imprimirMensaje(archivoLog, "[ERROR] El archivo no existe");
 		return;
 	}
-	imprimirMensajeUno(archivoLog, "[ARCHIVO] Nombre: %s", archivo->nombre);
-	imprimirMensajeUno(archivoLog, "[ARCHIVO] Tipo: %s", archivo->tipo);
-	imprimirMensajeUno(archivoLog, "[ARCHIVO] Ubicacion: %s", comando->argumentos[1]);
-	imprimirMensajeUno(archivoLog, "[ARCHIVO] ID Padre: %i", (int*)archivo->identificadorPadre);
+	printf("[ARCHIVO] Nombre: %s", archivo->nombre);
+	printf("[ARCHIVO] Tipo: %s", archivo->tipo);
+	printf("[ARCHIVO] Ubicacion: %s", comando->argumentos[1]);
+	printf("[ARCHIVO] ID Padre: %i", archivo->identificadorPadre);
 	int indice;
 	int tamanio = 0;
 	for(indice = 0; indice < listaCantidadElementos(archivo->listaBloques); indice++) {
 		Bloque* bloque = listaObtenerElemento(archivo->listaBloques, indice);
 		tamanio+= bloque->bytesUtilizados;
 	}
-	imprimirMensajeUno(archivoLog, "[ARCHIVO] Tamanio: %i bytes", (int*)tamanio);
-	imprimirMensajeUno(archivoLog, "[ARCHIVO] Bloques: %i", (int*)listaCantidadElementos(archivo->listaBloques));
+	printf("[ARCHIVO] Tamanio: %i bytes", tamanio);
+	printf("[ARCHIVO] Bloques: %i", listaCantidadElementos(archivo->listaBloques));
 	for(indice = 0; indice < listaCantidadElementos(archivo->listaBloques); indice++) {
 		Bloque* bloque = listaObtenerElemento(archivo->listaBloques, indice);
-		imprimirMensajeDos(archivoLog, "[ARCHIVO] Bloque %i: %i bytes", (int*)indice, (int*)bloque->bytesUtilizados);
+		printf("[ARCHIVO] Bloque %i: %i bytes", indice, bloque->bytesUtilizados);
 		int indiceCopia;
 		for(indiceCopia = 0; indiceCopia < listaCantidadElementos(bloque->listaCopias); indiceCopia++) {
 			Copia* copiaBloque = listaObtenerElemento(bloque->listaCopias, indiceCopia);
-			imprimirMensajeTres(archivoLog, "[ARCHIVO] Copia %i en: Nodo: %s | Bloque: %i", (int*)indiceCopia, copiaBloque->nombreNodo, (int*)copiaBloque->bloqueNodo);
+			printf("[ARCHIVO] Copia %i en: Nodo: %s | Bloque: %i", indiceCopia, copiaBloque->nombreNodo, copiaBloque->bloqueNodo);
 		}
 	}
 }
