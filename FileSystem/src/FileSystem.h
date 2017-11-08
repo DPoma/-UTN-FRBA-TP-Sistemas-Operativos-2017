@@ -87,9 +87,8 @@
 #define LEER_BLOQUE 101
 #define ESCRIBIR_BLOQUE 102
 #define COPIAR_BLOQUE 103
-#define COPIAR_BINARIO 104
-#define COPIAR_TEXTO 105
-#define FINALIZAR_NODO 106
+#define COPIAR_ARCHIVO 104
+#define FINALIZAR_NODO 105
 
 #define ACEPTAR_YAMA 200
 #define ENVIAR_BLOQUES 201
@@ -188,7 +187,6 @@ Hilo hiloYama;
 Lista listaDirectorios;
 Lista listaArchivos;
 Lista listaNodos;
-Lista listaSockets;
 Bitmap* bitmapDirectorios;
 Socket listenerYama;
 Socket listenerDataNode;
@@ -211,13 +209,14 @@ Mutex* mutexArchivo;
 Mutex* mutexListaNodos;
 Mutex* mutexListaArchivos;
 Mutex* mutexListaDirectorios;
-Mutex* mutexListaSockets;
 Mutex* mutexBitmapDirectorios;
 Mutex* mutexEstadoFileSystem;
 Mutex* mutexEstadoEjecucion;
 Mutex* mutexEstadoControl;
+Mutex* mutexMensaje;
+Mutex* mutexSocket;
+Mutex* mutexEstado;
 Semaforo* semaforoTarea;
-Semaforo* semaforoFinal;
 
 //--------------------------------------- Funciones de File System -------------------------------------
 
@@ -263,14 +262,6 @@ void yamaDesconectar();
 void yamaFinalizar();
 
 void workerListener();
-//--------------------------------------- Funciones de Socket-------------------------------------
-
-void socketListaAgregar(Socket* unSocket);
-int socketListaCantidad();
-void socketListaEliminar(int posicion);
-void socketListaDestruir();
-Socket* socketListaObtener(int posicion);
-void socketListaLimpiar();
 
 //--------------------------------------- Funciones de Consola -------------------------------------
 
@@ -446,6 +437,11 @@ void nodoDesconectar(Nodo* nodo);
 void nodoDesconectarATodos();
 bool nodoDesconectado(Nodo* nodo);
 void nodoActivarDesconexion(Nodo* nodo, int* estado);
+void nodoSocket(Nodo* nodo, int estado);
+void nodoMensaje(Nodo* nodo, int estado);
+void nodoEstado(Nodo* nodo, int estado);
+bool nodoMensajeIgualA(Nodo* nodo, int estado);
+
 //--------------------------------------- Funciones de Bloque -------------------------------------
 
 Bloque* bloqueCrear(int bytes, int numero);
@@ -456,11 +452,11 @@ int bloqueEnviarCopiasANodos(Bloque* bloque, String buffer);
 bool bloqueOrdenarPorNumero(Bloque* unBloque, Bloque* otroBloque);
 void bloqueCopiar(Nodo* nodo, Puntero datos, int* estado);
 void bloqueLeer(Nodo* nodo, Puntero datos, int* estado);
-//void bloqueCopiarTexto(Servidor* servidor, Puntero datos);
-//void bloqueCopiarBinario(Servidor* servidor, Puntero datos);
+void bloqueCopiarArchivo(Nodo* nodo, Puntero datos, int* estado);
 bool bloqueDisponible(Bloque* bloque);
 BloqueNodo* bloqueNodoCrear(Entero numeroBloque, String buffer, int tamanioUtilizado);
 BloqueYama bloqueConvertirParaYama(Bloque* bloque);
+bool bloqueEstaEnNodo(Bloque* bloque, Nodo* nodo);
 
 //--------------------------------------- Funciones de Copia -------------------------------------
 

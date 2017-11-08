@@ -17,10 +17,9 @@
 #define LEER_BLOQUE 101
 #define ESCRIBIR_BLOQUE 102
 #define COPIAR_BLOQUE 103
-#define COPIAR_BINARIO 104
-#define COPIAR_TEXTO 105
-#define FINALIZAR 106
-#define SOLICITAR_CONEXION 107
+#define COPIAR_ARCHIVO 104
+#define FINALIZAR 105
+#define SOLICITAR_CONEXION 106
 
 //--------------------------------------- Estructuras -------------------------------------
 
@@ -83,8 +82,7 @@ Bloque bloqueBuscar(Entero numeroBloque);
 void bloqueEscribir(Puntero datos);
 void bloqueObtenerParaLeer(Puntero datos);
 void bloqueObtenerParaCopiar(Puntero datos);
-void bloqueObtenerParaCopiarBinario(Puntero datos);
-void bloqueObtenerParaCopiarTexto(Puntero datos);
+void bloqueObtenerParaCopiarArchivo(Puntero datos);
 
 //--------------------------------------- Interfaz con File System -------------------------------------
 

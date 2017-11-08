@@ -36,8 +36,7 @@ void dataNodeAtenderFileSystem(){
 		case LEER_BLOQUE: bloqueObtenerParaLeer(mensaje->datos); break;
 		case ESCRIBIR_BLOQUE: bloqueEscribir(mensaje->datos); break;
 		case COPIAR_BLOQUE: bloqueObtenerParaCopiar(mensaje->datos); break;
-		case COPIAR_BINARIO: bloqueObtenerParaCopiarBinario(mensaje->datos); break;
-		case COPIAR_TEXTO: bloqueObtenerParaCopiarTexto(mensaje->datos); break;
+		case COPIAR_ARCHIVO: bloqueObtenerParaCopiarArchivo(mensaje->datos); break;
 	}
 	mensajeDestruir(mensaje);
 }
@@ -152,16 +151,10 @@ void bloqueObtenerParaCopiar(Puntero datos) {
 	mensajeEnviar(socketFileSystem, COPIAR_BLOQUE, bloqueACopiar, BLOQUE);
 }
 
-void bloqueObtenerParaCopiarBinario(Puntero datos) {
+void bloqueObtenerParaCopiarArchivo(Puntero datos) {
 	Entero numeroBloque = *(Entero*)datos;
 	Bloque bloque = getBloque(numeroBloque);
-	mensajeEnviar(socketFileSystem, COPIAR_BINARIO, bloque, BLOQUE);
-}
-
-void bloqueObtenerParaCopiarTexto(Puntero datos) {
-	Entero numeroBloque = *(Entero*)datos;
-	Bloque bloque = getBloque(numeroBloque);
-	mensajeEnviar(socketFileSystem, COPIAR_TEXTO, bloque, BLOQUE);
+	mensajeEnviar(socketFileSystem, COPIAR_ARCHIVO, bloque, BLOQUE);
 }
 
 void bloqueEscribir(Puntero datos) {
