@@ -68,7 +68,6 @@ void fileSystemRecuperar() {
 	imprimirMensaje(archivoLog, AMARILLO"[AVISO] Conecte los nodos necesarios al File System para estabilizarlo"BLANCO);
 }
 
-
 //--------------------------------------- Funciones de Configuracion -------------------------------------
 
 Configuracion* configuracionLeerArchivo(ArchivoConfig archivoConfig) {
@@ -207,8 +206,8 @@ void dataNodeHilo(Nodo* nodo) {
 void dataNodeAtender(Nodo* nodo, int* estado) {
 	Mensaje* mensaje = mensajeRecibir(nodo->socket);
 	switch(mensaje->header.operacion) {
-		//case LEER_BLOQUE: bloqueLeer(mensaje->datos); break;
-		//case COPIAR_BLOQUE: bloqueCopiar(mensaje->datos); break;
+		case LEER_BLOQUE: bloqueLeer(mensaje->datos); break;
+		case COPIAR_BLOQUE: bloqueCopiar(mensaje->datos); break;
 		//case COPIAR_BINARIO: bloqueCopiarBinario(mensaje->datos); break;
 		//case COPIAR_TEXTO: bloqueCopiarTexto(mensaje->datos); break;
 		case DESCONEXION: dataNodeFinalizar(nodo, estado); break;
@@ -227,7 +226,6 @@ void dataNodeDestruir(Nodo* nodo, int* estado) {
 }
 
 void dataNodeDesactivar(Nodo* nodo, int* estado) {
-	*estado = DESACTIVADO;
 	mutexBloquear(mutexTarea);
 	if(flagMensaje == DESACTIVADO) {
 		socketCerrar(nodo->socket);
@@ -238,6 +236,7 @@ void dataNodeDesactivar(Nodo* nodo, int* estado) {
 	else
 		socketListaAgregar(&nodo->socket);
 	mutexDesbloquear(mutexTarea);
+	*estado = DESACTIVADO;
 }
 
 void dataNodeControlarFinalizacion(Nodo* nodo, int* estado) {
@@ -2479,6 +2478,13 @@ void bloqueCopiar(Puntero datos) {
 	}
 }
 
+
+void bloqueLeer(Puntero datos) {
+	printf("%s", (String)datos);
+	semaforoSignal(semaforoTarea);
+	//socketPrevenirDesconexion(servidor);
+}
+
 /*
 
 void servidorDestruirSockets(Servidor* servidor) {
@@ -2490,10 +2496,7 @@ void servidorDestruirSockets(Servidor* servidor) {
 	}
 }
 
-void bloqueLeer(Servidor* servidor, Puntero datos) {
-	printf("%s", (String)datos);
-	socketPrevenirDesconexion(servidor);
-}
+
 
 void bloqueCopiarBinario(Servidor* servidor, Puntero datos) {
 	mutexBloquear(mutexRuta);
