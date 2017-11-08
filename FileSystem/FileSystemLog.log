@@ -1,9 +1,9 @@
-[INFO] 00:09:19:876 FileSystem/(12616:12616): [EJECUCION] Proceso File System iniciado
-[INFO] 00:09:19:939 FileSystem/(12616:12616): [CONFIGURACION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 00:09:19:940 FileSystem/(12616:12616): [CONFIGURACION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 00:09:19:947 FileSystem/(12616:12616): [CONFIGURACION] Esperando conexiones de Workers (Puerto: 5080)
-[INFO] 00:09:19:947 FileSystem/(12616:12616): [CONFIGURACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
-[INFO] 00:09:19:3 FileSystem/(12616:12616): [33m[AVISO] Conecte los nodos y formatee el File System para estabilizarlo[0m
-[INFO] 00:09:22:988 FileSystem/(12616:12616): [31m[ERROR] Primero debe formatear el File System para utilizarlo[0m
-[INFO] 00:09:24:456 FileSystem/(12616:12616): [FORMATEO] El File System fue formateado
-[INFO] 00:09:24:456 FileSystem/(12616:12616): [33m[AVISO] El File System esta estable[0m
+[INFO] 11:34:11:785 FileSystem/(4298:4298): [EJECUCION] Proceso File System iniciado
+[INFO] 11:34:11:852 FileSystem/(4298:4298): [CONFIGURACION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 11:34:11:853 FileSystem/(4298:4298): [CONFIGURACION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 11:34:11:854 FileSystem/(4298:4298): [CONFIGURACION] Esperando conexiones de Workers (Puerto: 5080)
+[INFO] 11:34:11:856 FileSystem/(4298:4298): [CONFIGURACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
+[INFO] 11:34:14:35 FileSystem/(4298:4298): [33m[AVISO] Conecte los nodos necesarios al File System para estabilizarlo[0m
+[INFO] 11:34:15:886 FileSystem/(4298:4303): [33m[AVISO] NODO2 conectado[0m
+[INFO] 11:34:20:731 FileSystem/(4298:4308): [33m[AVISO] NODO2 desconectado[0m
+[INFO] 11:34:22:752 FileSystem/(4298:4298): [EJECUCION] Proceso File System finalizado

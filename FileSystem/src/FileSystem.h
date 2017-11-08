@@ -50,7 +50,6 @@
 #define FLAG_D "-d"
 #define FLAG_T "-t"
 #define OCUPADO '1'
-#define VACIO ""
 #define FIN '\0'
 #define ENTER '\n'
 #define ESPACIO ' '
@@ -147,7 +146,8 @@ typedef struct {
 	char ip[MAX_IP];
 	char nombre[MAX_NODO];
 	int estado;
-	int actividadesRealizadas;
+	int mensajeEnviado;
+	int tareasRealizadas;
 	int bloquesLibres;
 	int bloquesTotales;
 	Bitmap* bitmap;
@@ -180,9 +180,7 @@ ArchivoLog archivoLog;
 int estadoControl;
 int estadoEjecucion;
 int estadoFileSystem;
-int flagMensaje;
 int directoriosDisponibles;
-int flagSocket;
 Hilo hiloConsola;
 Hilo hiloDataNode;
 Hilo hiloWorker;
@@ -446,6 +444,8 @@ void nodoListaCrear();
 bool nodoDisponible(Nodo* nodo);
 void nodoDesconectar(Nodo* nodo);
 void nodoDesconectarATodos();
+bool nodoDesconectado(Nodo* nodo);
+void nodoActivarDesconexion(Nodo* nodo, int* estado);
 //--------------------------------------- Funciones de Bloque -------------------------------------
 
 Bloque* bloqueCrear(int bytes, int numero);
@@ -454,8 +454,8 @@ void bloqueCopiarEnNodo(Bloque* bloque, Nodo* nodo, Entero numeroBloqueNodo);
 int bloqueEnviarANodo(Bloque* bloque, Nodo* nodo, String buffer);
 int bloqueEnviarCopiasANodos(Bloque* bloque, String buffer);
 bool bloqueOrdenarPorNumero(Bloque* unBloque, Bloque* otroBloque);
-void bloqueCopiar(Puntero datos);
-void bloqueLeer(Puntero datos);
+void bloqueCopiar(Nodo* nodo, Puntero datos, int* estado);
+void bloqueLeer(Nodo* nodo, Puntero datos, int* estado);
 //void bloqueCopiarTexto(Servidor* servidor, Puntero datos);
 //void bloqueCopiarBinario(Servidor* servidor, Puntero datos);
 bool bloqueDisponible(Bloque* bloque);
@@ -500,6 +500,7 @@ void estadoFileSystemInestable();
 void estadoEjecucionNormal();
 void estadoControlDesactivar();
 void estadoMensaje(int estado);
+bool estadoMensajeIgualA(int estado);
 
 //--------------------------------------- Funciones de Bitmaps de directorios ------------------------------------
 

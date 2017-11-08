@@ -24,7 +24,6 @@ void fileSystemIniciar(String flag) {
 	pantallaLimpiar();
 	semaforosCrear();
 	semaforosIniciar();
-	flagMensaje = DESACTIVADO;
 	configuracionIniciar();
 	nodoListaCrear();
 	listaSockets = listaCrear();
@@ -37,6 +36,7 @@ void fileSystemIniciar(String flag) {
 }
 
 void fileSystemAtenderProcesos() {
+	socketYama = ERROR;
 	listenerDataNode = socketCrearListener(configuracion->puertoDataNode);
 	listenerYama = socketCrearListener(configuracion->puertoYama);
 	listenerWorker = socketCrearListener(configuracion->puertoWorker);
@@ -206,11 +206,11 @@ void dataNodeHilo(Nodo* nodo) {
 void dataNodeAtender(Nodo* nodo, int* estado) {
 	Mensaje* mensaje = mensajeRecibir(nodo->socket);
 	switch(mensaje->header.operacion) {
-		case LEER_BLOQUE: bloqueLeer(mensaje->datos); break;
-		case COPIAR_BLOQUE: bloqueCopiar(mensaje->datos); break;
-		//case COPIAR_BINARIO: bloqueCopiarBinario(mensaje->datos); break;
-		//case COPIAR_TEXTO: bloqueCopiarTexto(mensaje->datos); break;
-		case DESCONEXION: dataNodeFinalizar(nodo, estado); break;
+	case DESCONEXION: dataNodeFinalizar(nodo, estado); break;
+	case LEER_BLOQUE: bloqueLeer(nodo, mensaje->datos, estado); break;
+	case COPIAR_BLOQUE: bloqueCopiar(nodo, mensaje->datos, estado); break;
+	//case COPIAR_BINARIO: bloqueCopiarBinario(mensaje->datos); break;
+	//case COPIAR_TEXTO: bloqueCopiarTexto(mensaje->datos); break;
 	}
 	mensajeDestruir(mensaje);
 }
@@ -227,16 +227,15 @@ void dataNodeDestruir(Nodo* nodo, int* estado) {
 
 void dataNodeDesactivar(Nodo* nodo, int* estado) {
 	mutexBloquear(mutexTarea);
-	if(flagMensaje == DESACTIVADO) {
+	nodo->estado = DESACTIVADO;
+	if(nodo->mensajeEnviado == DESACTIVADO) {
 		socketCerrar(nodo->socket);
-		nodo->estado = DESACTIVADO;
 		nodo->socket = ERROR;
+		*estado = DESACTIVADO;
 		imprimirMensajeUno(archivoLog, AMARILLO"[AVISO] %s desconectado"BLANCO, nodo->nombre);
 	}
-	else
-		socketListaAgregar(&nodo->socket);
 	mutexDesbloquear(mutexTarea);
-	*estado = DESACTIVADO;
+
 }
 
 void dataNodeControlarFinalizacion(Nodo* nodo, int* estado) {
@@ -291,7 +290,8 @@ void yamaAtender(int* estado) {
 }
 
 void yamaDesconectar() {
-	mensajeEnviar(socketYama, DESCONEXION, VACIO, ACTIVADO);
+	if(socketYama != ERROR)
+		mensajeEnviar(socketYama, DESCONEXION, VACIO, ACTIVADO);
 }
 
 void yamaFinalizar(int* estado) {
@@ -1081,8 +1081,10 @@ void comandoCopiarBloque(Comando* comando) {
 		return;
 	}
 	mutexDesbloquear(mutexBloque);
-	if(!nodoConectado(nodoBuffer)) {
+	mutexBloquear(mutexTarea);
+	if(nodoDesconectado(nodoBuffer)) {
 		mutexDesbloquear(mutexNodo);
+		mutexDesbloquear(mutexTarea);
 		imprimirMensaje(archivoLog, "[ERROR] El nodo que va a guardar la nueva copia no esta conectado");
 		return;
 	}
@@ -1091,7 +1093,6 @@ void comandoCopiarBloque(Comando* comando) {
 	mutexBloquear(mutexBloque);
 	int cantidadCopias = listaCantidadElementos(bloqueBuffer->listaCopias);
 	mutexDesbloquear(mutexBloque);
-	semaforoWait(semaforoTarea);
 	for(indice = 0; indice < cantidadCopias && bloqueSinEnviar; indice++) {
 		mutexBloquear(mutexBloque);
 		Copia* copia = listaObtenerElemento(bloqueBuffer->listaCopias, indice);
@@ -1099,12 +1100,16 @@ void comandoCopiarBloque(Comando* comando) {
 		Nodo* nodoConBloque = nodoBuscarPorNombre(copia->nombreNodo);
 		if(nodoConectado(nodoConBloque)) {
 			mensajeEnviar(nodoConBloque->socket, COPIAR_BLOQUE, &copia->bloqueNodo, sizeof(Entero));
+			nodoConBloque->mensajeEnviado = ACTIVADO;
+			mutexBloquear(mutexNodo);
+			nodoBuffer->mensajeEnviado = ACTIVADO;
+			mutexDesbloquear(mutexNodo);
 			bloqueSinEnviar = false;
 		}
 	}
+	mutexBloquear(mutexTarea);
 	if(bloqueSinEnviar) {
 		imprimirMensaje(archivoLog, "[ERROR] No hay nodos conectados para obtener la copia");
-		semaforoSignal(semaforoTarea);
 		return;
 	}
 }
@@ -1149,12 +1154,12 @@ int comandoCopiarArchivoDeYamaFS(Comando* comando) {
 			Copia* copia = listaObtenerElemento(bloque->listaCopias, indiceCopias);
 			Nodo* nodo = nodoBuscarPorNombre(copia->nombreNodo);
 			if(nodoConectado(nodo)) {
-				estadoMensaje(ACTIVADO);
+				//estadoMensaje(ACTIVADO);
 				if(archivoBinario(archivo))
 					mensajeEnviar(nodo->socket, COPIAR_BINARIO, &copia->bloqueNodo, sizeof(Entero));
 				else
 					mensajeEnviar(nodo->socket, COPIAR_TEXTO, &copia->bloqueNodo, sizeof(Entero));
-				nodo->actividadesRealizadas++;
+				nodo->tareasRealizadas++;
 				copiaSinEnviar = false;
 			}
 		}
@@ -1892,15 +1897,15 @@ int archivoLeer(Comando* comando) {
 			Copia* copia = listaObtenerElemento(bloque->listaCopias, numeroCopia);
 			Nodo* nodo = nodoBuscarPorNombre(copia->nombreNodo);
 			if(nodoConectado(nodo)) {
-				estadoMensaje(ACTIVADO);
 				mensajeEnviar(nodo->socket, LEER_BLOQUE ,&copia->bloqueNodo, sizeof(Entero));
-				nodo->actividadesRealizadas++;
+				nodo->mensajeEnviado = ACTIVADO;
+				nodo->tareasRealizadas++;
 				bloqueSinImprimir = false;
 			}
 		}
 		mutexDesbloquear(mutexTarea);
 		if(bloqueSinImprimir) {
-			imprimirMensaje(archivoLog,"[ERROR] No hay nodos disponibles para obtener un bloque");
+			imprimirMensajeUno(archivoLog,ROJO"[ERROR] No se pudo leer el bloque N°%d"BLANCO, (int*)numeroBloque);
 			nodoLimpiarActividades();
 			semaforoSignal(semaforoTarea);
 			return ERROR;
@@ -2075,7 +2080,8 @@ Nodo* nodoCrear(Puntero datos, Socket nuevoSocket) {
 	Nodo* nodo = memoriaAlocar(sizeof(Nodo));
 	nodo->socket = nuevoSocket;
 	nodo->estado = ACTIVADO;
-	nodo->actividadesRealizadas = 0;
+	nodo->mensajeEnviado = DESACTIVADO;
+	nodo->tareasRealizadas = 0;
 	memcpy(&nodo->bloquesTotales, datos, sizeof(Entero));
 	nodo->bloquesLibres = nodo->bloquesTotales;
 	nodo->bitmap = bitmapCrear(nodo->bloquesTotales);
@@ -2190,7 +2196,7 @@ bool nodoOrdenarPorBloquesLibres(Nodo* unNodo, Nodo* otroNodo) {
 }
 
 bool nodoOrdenarPorActividad(Nodo* unNodo, Nodo* otroNodo) {
-	return unNodo->actividadesRealizadas < otroNodo->actividadesRealizadas;
+	return unNodo->tareasRealizadas < otroNodo->tareasRealizadas;
 }
 
 bool nodoTieneBloquesLibres(Nodo* nodo) {
@@ -2244,7 +2250,7 @@ void nodoLimpiarActividades() {
 	int indice;
 	for(indice = 0; indice < nodoListaCantidad(); indice++) {
 		Nodo* nodo = nodoListaObtener(indice);
-		nodo->actividadesRealizadas = 0;
+		nodo->tareasRealizadas = 0;
 	}
 }
 
@@ -2284,7 +2290,8 @@ void nodoFormatearConectados() {
 }
 
 void nodoDesconectar(Nodo* nodo) {
-	mensajeEnviar(nodo->socket, DESCONEXION, VACIO, ACTIVADO);
+	if(nodo->estado == ACTIVADO)
+		mensajeEnviar(nodo->socket, DESCONEXION, VACIO, ACTIVADO);
 }
 
 void nodoDesconectarATodos() {
@@ -2367,10 +2374,11 @@ void nodoRecuperarPersistencia() {
 		nodo->bloquesTotales = archivoConfigEnteroDe(config, lineaTotales);
 		nodo->bloquesLibres = archivoConfigEnteroDe(config, lineaLibres);
 		nodo->estado = DESACTIVADO;
+		nodo->mensajeEnviado = DESACTIVADO;
 		nodo->socket = ERROR;
 		stringCopiar(nodo->ip, "NULL");
 		stringCopiar(nodo->puerto, "NULL");
-		nodo->actividadesRealizadas = 0;
+		nodo->tareasRealizadas = 0;
 		memoriaLiberar(lineaNombre);
 		memoriaLiberar(lineaTotales);
 		memoriaLiberar(lineaLibres);
@@ -2455,49 +2463,36 @@ int bloqueEnviarCopiasANodos(Bloque* bloque, String buffer) {
 	return OK;
 }
 
-void bloqueCopiar(Puntero datos) {
+void bloqueCopiar(Nodo* nodo, Puntero datos, int* estado) {
 	mutexBloquear(mutexNodo);
-	if(nodoConectado(nodoBuffer)) {
-		mutexBloquear(mutexBloque);
-		int numeroBloqueNodo = bloqueEnviarANodo(bloqueBuffer, nodoBuffer, datos);
-		mutexDesbloquear(mutexBloque);
-		mutexDesbloquear(mutexNodo);
-		semaforoSignal(semaforoTarea);
-		mutexBloquear(mutexArchivo);
-		archivoPersistir(archivoBuffer);
-		mutexDesbloquear(mutexArchivo);
-		nodoPersistir();
-		mutexBloquear(mutexNodo);
-		imprimirMensajeDos(archivoLog, "[BLOQUE] El bloque fue copiado en el bloque N°%i de %s", (int*)numeroBloqueNodo, nodoBuffer->nombre);
-		mutexDesbloquear(mutexNodo);
-	}
-	else {
-		mutexDesbloquear(mutexNodo);
-		semaforoSignal(semaforoTarea);
-		imprimirMensaje(archivoLog, ROJO"[BLOQUE] No pudo copiarse el bloque, el nodo receptor no esta conectado (FALLO EL SEMAFORO, NUNCA DEBERIA PASAR)"BLANCO);
-	}
+	mutexBloquear(mutexBloque);
+	int numeroBloqueNodo = bloqueEnviarANodo(bloqueBuffer, nodoBuffer, datos);
+	mutexDesbloquear(mutexBloque);
+	nodoActivarDesconexion(nodoBuffer, estado);
+	mutexDesbloquear(mutexNodo);
+	nodoActivarDesconexion(nodo, estado);
+	mutexBloquear(mutexArchivo);
+	archivoPersistir(archivoBuffer);
+	mutexDesbloquear(mutexArchivo);
+	nodoPersistir();
+	mutexBloquear(mutexNodo);
+	imprimirMensajeDos(archivoLog, "[BLOQUE] El bloque fue copiado en el bloque N°%i de %s", (int*)numeroBloqueNodo, nodoBuffer->nombre);
+	mutexDesbloquear(mutexNodo);
 }
 
+void nodoActivarDesconexion(Nodo* nodo, int* estado) {
+	nodo->mensajeEnviado = DESACTIVADO;
+	if(nodo->estado == DESACTIVADO)
+		dataNodeDesactivar(nodo, estado);
+}
 
-void bloqueLeer(Puntero datos) {
+void bloqueLeer(Nodo* nodo, Puntero datos, int* estado) {
 	printf("%s", (String)datos);
+	nodoActivarDesconexion(nodo, estado);
 	semaforoSignal(semaforoTarea);
-	//socketPrevenirDesconexion(servidor);
 }
 
 /*
-
-void servidorDestruirSockets(Servidor* servidor) {
-	int indice;
-	for(indice=0; indice < socketListaCantidad(); indice++) {
-		Socket* unSocket = socketListaObtener(indice);
-		servidorFinalizarDataNode(servidor, *unSocket);
-		socketListaEliminar(indice);
-	}
-}
-
-
-
 void bloqueCopiarBinario(Servidor* servidor, Puntero datos) {
 	mutexBloquear(mutexRuta);
 	File file = fileAbrir(rutaBuffer, "a+");
@@ -2535,11 +2530,8 @@ BloqueYama bloqueConvertirParaYama(Bloque* bloque) {
 	printf("numero b1 %d\n", bloqueYama.numeroBloqueCopia1);
 	printf("numero b2 %d\n", bloqueYama.numeroBloqueCopia2);
 	printf("bytes utiles %d\n", bloqueYama.bytesUtilizados);
-
 	return bloqueYama;
 }
-
-
 
 bool bloqueOrdenarPorNumero(Bloque* unBloque, Bloque* otroBloque) {
 	return unBloque->numeroBloque < otroBloque->numeroBloque;
@@ -2584,7 +2576,7 @@ bool copiaDisponible(Copia* copia) {
 bool copiaOrdenarPorActividadDelNodo(Copia* unaCopia, Copia* otraCopia) {
 	Nodo* unNodo = nodoBuscarPorNombre(unaCopia->nombreNodo);
 	Nodo* otroNodo = nodoBuscarPorNombre(otraCopia->nombreNodo);
-	return unNodo->actividadesRealizadas < otroNodo->actividadesRealizadas;
+	return unNodo->tareasRealizadas < otroNodo->tareasRealizadas;
 }
 
 //--------------------------------------- Funciones de Metadata------------------------------------
@@ -2766,12 +2758,6 @@ bool estadoEjecucionIgualA(int estado) {
 	return resultado;
 }
 
-void estadoMensaje(int estado) {
-	mutexBloquear(mutexEstadoEjecucion);
-	flagMensaje = estado ;
-	mutexDesbloquear(mutexEstadoEjecucion);
-}
-
 //--------------------------------------- Funciones de Bitmap de Directorios------------------------------------
 
 void bitmapDirectoriosCrear() {
@@ -2857,8 +2843,8 @@ void semaforosDestruir() {
 	memoriaLiberar(mutexEstadoControl);
 }
 
-//TODO el bitmap cambia en tiempo de ejecucion
-
+//TODO el databin cambia en tiempo de ejecucion
+//TODO el bitmap esta bien con 1 y 0 o binario
 //TODO dejar rollback
+//TODO ver memory leak hilo
 //TODO arreglar cpfrom cpto md5 y mostrar copiarBloque
-//TODO cambiar hilos por select

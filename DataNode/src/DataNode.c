@@ -25,7 +25,7 @@ void dataNodeIniciar() {
 	dataNodeActivar();
 	dataBinConfigurar();
 	dataNodeConectarAFS();
-	//senialAsignarFuncion(SIGINT, configuracionSenial);
+	senialAsignarFuncion(SIGINT, configuracionSenial);
 }
 
 void dataNodeAtenderFileSystem(){
@@ -125,6 +125,12 @@ void configuracionIniciar() {
 	configuracionIniciarCampos();
 	configuracion = configuracionCrear(RUTA_CONFIG, (Puntero)configuracionLeerArchivo, campos);
 	configuracionImprimir(configuracion);
+}
+
+void configuracionSenial(int senial) {
+	mensajeEnviar(socketFileSystem, DESCONEXION, VACIO, ACTIVADO);
+	dataNodeDesactivar();
+	puts("");
 }
 
 //--------------------------------------- Funciones de bloques -------------------------------------
@@ -235,10 +241,4 @@ void setBloque(Entero numeroBloque, Puntero datos) {
 	Bloque bloque = bloqueBuscar(numeroBloque);
 	memcpy(bloque, datos, BLOQUE);
 	imprimirMensajeUno(archivoLog, "[DATABIN] El bloque N°%i fue escrito", (int*)numeroBloque);
-}
-
-void configuracionSenial(int senial) {
-	mensajeEnviar(socketFileSystem, FINALIZAR, &socketFileSystem, sizeof(Entero));
-	dataNodeDesactivar();
-	puts("");
 }
