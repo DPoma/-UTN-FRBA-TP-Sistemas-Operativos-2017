@@ -41,7 +41,6 @@ void fileSystemCrearConsola() {
 }
 
 void fileSystemAtenderProcesos() {
-	Servidor* servidor = memoriaAlocar(sizeof(Servidor));
 	servidorIniciar(servidor);
 	while(estadoControlIgualA(ACTIVADO))
 		servidorAtenderSolicitudes(servidor);
@@ -133,174 +132,61 @@ void configuracionRutasDestruir() {
 
 //--------------------------------------- Funciones de Servidor -------------------------------------
 
-void servidorIniciar(Servidor* servidor) {
-	servidorIniciarContadorSocket(servidor);
-	servidorLimpiarListas(servidor);
-	servidorActivarListeners(servidor);
+void dataNodeListener() {
+	while(ACTIVADO);
+		dataNodeCrearConexion();
 }
 
-void servidorFinalizar(Servidor* servidor) {
-	imprimirMensaje(archivoLog, "[EJECUCION] Proceso File System finalizado");
-	memoriaLiberar(servidor);
+void dataNodeCrearConexion() {
+	Socket nuevoSocket = socketAceptar(listenerDataNode, ID_DATANODE);
+	dataNodeControlarConexion(nuevoSocket);
 }
 
-void servidorEsperarSolicitud(Servidor* servidor) {
-	socketSelect(servidor->contadorSocket, &servidor->listaSelect);
-}
-
-bool servidorCantidadSockets(Servidor* servidor) {
-	return servidor-> contadorSocket;
-}
-
-void servidorIniciarListaSelect(Servidor* servidor) {
-	servidor->listaSelect = servidor->listaMaster;
-}
-
-void servidorIniciarContadorSocket(Servidor* servidor) {
-	servidor->contadorSocket = 0;
-}
-
-void servidorControlarContadorSocket(Servidor* servidor, Socket unSocket) {
-	if(socketEsMayor(unSocket, servidor->contadorSocket))
-		servidor->contadorSocket = unSocket;
-}
-
-void servidorAceptarConexion(Servidor* servidor, Socket unSocket) {
-	listaSocketsAgregar(unSocket, &servidor->listaMaster);
-	servidorControlarContadorSocket(servidor, unSocket);
-}
-
-void servidorActivarListeners(Servidor* servidor) {
-	servidorActivarListenerDataNode(servidor);
-	servidorActivarListenerYama(servidor);
-	servidorActivarListenerWorker(servidor);
-}
-
-void servidorLimpiarListas(Servidor* servidor) {
-	listaSocketsLimpiar(&servidor->listaMaster);
-	listaSocketsLimpiar(&servidor->listaSelect);
-	listaSocketsLimpiar(&servidor->listaDataNodes);
-	listaSocketsLimpiar(&servidor->listaWorkers);
-}
-
-void servidorActivarListenerYama(Servidor* servidor) {
-	servidor->listenerYama = socketCrearListener(configuracion->puertoYama);
-	listaSocketsAgregar(servidor->listenerYama, &servidor->listaMaster);
-	servidorControlarContadorSocket(servidor, servidor->listenerYama);
-}
-
-void servidorActivarListenerDataNode(Servidor* servidor) {
-	servidor->listenerDataNode = socketCrearListener(configuracion->puertoDataNode);
-	listaSocketsAgregar(servidor->listenerDataNode, &servidor->listaMaster);
-	servidorControlarContadorSocket(servidor, servidor->listenerDataNode);
-}
-
-void servidorActivarListenerWorker(Servidor* servidor) {
-	servidor->listenerWorker = socketCrearListener(configuracion->puertoWorker);
-	listaSocketsAgregar(servidor->listenerWorker, &servidor->listaMaster);
-	servidorControlarContadorSocket(servidor, servidor->listenerWorker);
-}
-
-void servidorAtenderSolicitudes(Servidor* servidor) {
-	servidorIniciarListaSelect(servidor);
-	servidorEsperarSolicitud(servidor);
-	Socket unSocket;
-	for(unSocket = 0; unSocket <= servidor->contadorSocket ; unSocket++)
-		if(servidorAtenderSocket(servidor, unSocket) == ID_EXIT)
-			break;
-}
-
-int servidorAtenderSocket(Servidor* servidor, Socket unSocket) {
-	if(socketRealizoSolicitud(servidor, unSocket))
-		return servidorAtenderSolicitud(servidor, unSocket);
-	return OK;
-}
-
-int servidorAtenderSolicitud(Servidor* servidor, Socket unSocket) {
-	if(socketEsListener(servidor, unSocket))
-		return servidorSolicitudProceso(servidor, unSocket);
-	else
-		servidorSolicitudMensaje(servidor, unSocket);
-	return OK;
-}
-
-int servidorSolicitudProceso(Servidor* servidor, Socket unSocket) {
-	if(socketEsListenerDataNode(servidor, unSocket))
-		return servidorSolicitudDataNode(servidor, unSocket);
-	else if(socketEsListenerYama(servidor, unSocket))
-		servidorSolicitudYama(servidor, unSocket);
-	else
-		servidorSolicitudWorker(servidor, unSocket);
-	return OK;
-}
-
-void servidorSolicitudMensaje(Servidor* servidor, Socket unSocket) {
-	Mensaje* mensaje = mensajeRecibir(unSocket);
-	if(socketEsDataNode(servidor, unSocket))
-		servidorMensajeDataNode(servidor, mensaje, unSocket);
-	else if(socketEsYama(servidor, unSocket))
-		servidorMensajeYama(mensaje);
-	else
-		servidorMensajeWorker();
-	mensajeDestruir(mensaje);
-}
-
-//--------------------------------------- Servidor Data Node -------------------------------------
-
-int servidorSolicitudDataNode(Servidor* servidor, Socket unSocket) {
-	Socket nuevoSocket = socketAceptar(unSocket, ID_DATANODE);
-	if(estadoControlIgualA(ACTIVADO))
-		servidorAtenderDataNode(servidor, nuevoSocket);
-	else
-		return ID_EXIT;
-	return OK;
-}
-
-void servidorAtenderDataNode(Servidor* servidor, Socket nuevoSocket) {
+void dataNodeControlar(Socket nuevoSocket) {
 	Mensaje* mensaje = mensajeRecibir(nuevoSocket);
 	Nodo* nodoTemporal = nodoCrear(mensaje->datos, nuevoSocket);
 	if(estadoEjecucionIgualA(NORMAL))
-		servidorReconectarDataNode(servidor, nodoTemporal);
+		dataNodeReconectar(nodoTemporal);
 	else
-		servidorControlarDataNode(servidor, nodoTemporal);
+		dataNodeControlar(nodoTemporal);
 	mensajeDestruir(mensaje);
 }
 
-void servidorReconectarDataNode(Servidor* servidor, Nodo* nodoTemporal) {
+void dataNodeReconectar(Nodo* nodoTemporal) {
 	if(nodoInvalido(nodoTemporal))
-		servidorRechazarDataNode(nodoTemporal);
+		dataNodeRechazar(nodoTemporal);
 	else
-		servidorAceptarReconexionDataNode(servidor, nodoTemporal);
+		dataNodeAceptarReconexion(nodoTemporal);
 }
 
-void servidorControlarDataNode(Servidor* servidor, Nodo* nodoTemporal) {
+void dataNodeControlar(Nodo* nodoTemporal) {
 	if(estadoFileSystemIgualA(ESTABLE))
-		servidorReconectarDataNode(servidor, nodoTemporal);
+		dataNodeReconectar(nodoTemporal);
 	else
-		servidorAdmitirDataNode(servidor, nodoTemporal);
+		dataNodeAdmitir(nodoTemporal);
 }
 
-void servidorAdmitirDataNode(Servidor* servidor, Nodo* nodoTemporal) {
+void dataNodeAdmitir(Nodo* nodoTemporal) {
 	if(nodoEstaConectado(nodoTemporal))
-		servidorRechazarDataNode(nodoTemporal);
+		DataNodeRechazar(nodoTemporal);
 	else
-		servidorAceptarDataNode(servidor, nodoTemporal);
+		dataNodeAceptar(nodoTemporal);
 }
 
-void servidorAceptarDataNode(Servidor* servidor, Nodo* nodoTemporal) {
-	servidorRegistrarDataNode(servidor, nodoTemporal);
+void dataNodeAceptar(Nodo* nodoTemporal) {
+	nodoAceptar(nodoTemporal);
 	nodoListaAgregar(nodoTemporal);
 }
 
-void servidorRechazarDataNode(Nodo* nuevoNodo) {
+void dataNodeRechazar(Nodo* nuevoNodo) {
 	socketCerrar(nuevoNodo->socket);
 	nodoDestruir(nuevoNodo);
 }
 
-void servidorAceptarReconexionDataNode(Servidor* servidor, Nodo* nuevoNodo) {
+void dataNodeAceptarReconexion(Nodo* nuevoNodo) {
 	mutexBloquear(mutexTarea);
 	Nodo* nodo = nodoActualizar(nuevoNodo);
-	servidorRegistrarDataNode(servidor, nodo);
+	nodoAceptar(nodo);
 	if(estadoFileSystemIgualA(INESTABLE) && archivoListaTodosDisponibles()) {
 		mutexBloquear(mutexEstadoFileSystem);
 		estadoFileSystem = ESTABLE;
@@ -310,38 +196,32 @@ void servidorAceptarReconexionDataNode(Servidor* servidor, Nodo* nuevoNodo) {
 	mutexDesbloquear(mutexTarea);
 }
 
-void servidorRegistrarDataNode(Servidor* servidor, Nodo* nodo) {
-	servidorAceptarConexion(servidor, nodo->socket);
-	listaSocketsAgregar(nodo->socket, &servidor->listaDataNodes);
-	nodoAceptar(nodo);
-}
 
-void servidorMensajeDataNode(Servidor* servidor, Mensaje* mensaje, Socket unSocket) {
+void DataNodeAtender(Nodo* nodo) {
+	Mensaje* mensaje = mensajeRecibir(nodo->socket);
 	switch(mensaje->header.operacion) {
-	case LEER_BLOQUE: bloqueLeer(servidor, mensaje->datos); break;
+	case LEER_BLOQUE: bloqueLeer(mensaje->datos); break;
 	case COPIAR_BLOQUE: bloqueCopiar(mensaje->datos); break;
-	case COPIAR_BINARIO: bloqueCopiarBinario(servidor, mensaje->datos); break;
-	case COPIAR_TEXTO: bloqueCopiarTexto(servidor, mensaje->datos); break;
-	case FINALIZAR_NODO: servidorFinalizarDataNode(servidor, unSocket); break;
+	case COPIAR_BINARIO: bloqueCopiarBinario(mensaje->datos); break;
+	case COPIAR_TEXTO: bloqueCopiarTexto(mensaje->datos); break;
+	case FINALIZAR_NODO: servidorFinalizarDataNode(nodo->socket); break;
 	}
+	mensajeDestruir(mensaje);
 }
 
 
-void servidorDestruirDataNode(Servidor* servidor, Nodo* nodo) {
-	servidorDesactivarDataNode(servidor, nodo);
+void dataNodeDestruir(Nodo* nodo) {
+	dataNodeDesactivar(nodo);
 	int posicion = nodoListaPosicion(nodo);
 	mutexBloquear(mutexListaNodos);
 	listaEliminarDestruyendoElemento(listaNodos, posicion , (Puntero)nodoDestruir);
 	mutexDesbloquear(mutexListaNodos);
 }
 
-
-void servidorDesactivarDataNode(Servidor* servidor, Nodo* nodo) {
+void dataNodeDesactivar(Nodo* nodo) {
 	mutexBloquear(mutexTarea);
 	if(flagMensaje == DESACTIVADO) {
 		socketCerrar(nodo->socket);
-		listaSocketsEliminar(nodo->socket, &servidor->listaDataNodes);
-		listaSocketsEliminar(nodo->socket, &servidor->listaMaster);
 		nodo->estado = DESACTIVADO;
 		nodo->socket = ERROR;
 		imprimirMensajeUno(archivoLog, AMARILLO"[AVISO] %s desconectado"BLANCO, nodo->nombre);
@@ -351,24 +231,42 @@ void servidorDesactivarDataNode(Servidor* servidor, Nodo* nodo) {
 	mutexDesbloquear(mutexTarea);
 }
 
-void servidorControlarFinalizacionDataNode(Servidor* servidor, Nodo* nodo) {
+void dataNodeControlarFinalizacion(Nodo* nodo) {
 	if(estadoFileSystemIgualA(ESTABLE))
-		servidorDesactivarDataNode(servidor, nodo);
+		dataNodeDesactivar(nodo);
 	else
-		servidorDestruirDataNode(servidor, nodo);
+		dataNodeDestruir(nodo);
 }
 
-void servidorFinalizarDataNode(Servidor* servidor, Socket unSocket) {
-	Nodo* nodo = nodoBuscarPorSocket(unSocket);
+void dataNodeFinalizar(Nodo* nodo) {
 	if(estadoEjecucionIgualA(NORMAL))
-		servidorDesactivarDataNode(servidor, nodo);
+		dataNodeDesactivar(nodo);
 	else
-		servidorControlarFinalizacionDataNode(servidor, nodo);
+		dataNodeControlarFinalizacion(nodo);
 }
 
-//--------------------------------------- Servidor Yama -------------------------------------
+void servidorIniciar(Servidor* servidor) {
+	hiloCrear(&hiloDataNode, dataNodeListener);
+	dataNodeCrearListener();
+	workerCrearListener();
+	servidorActivarListeners(servidor);
+}
 
-void servidorSolicitudYama(Servidor* servidor, Socket unSocket) {
+void servidorFinalizar(Servidor* servidor) {
+	imprimirMensaje(archivoLog, "[EJECUCION] Proceso File System finalizado");
+}
+
+
+void servidorActivarListeners(Servidor* servidor) {
+	listenerDataNode = socketCrearListener(configuracion->puertoDataNode);
+	servidor->listenerYama = socketCrearListener(configuracion->puertoYama);
+	servidor->listenerWorker = socketCrearListener(configuracion->puertoWorker);
+}
+//--------------------------------------- Funciones de Data Node -------------------------------------
+
+//--------------------------------------- Funciones de Yama -------------------------------------
+
+void servidorSolicitudYama(Socket unSocket) {
 	Socket nuevoSocket = socketAceptar(unSocket, ID_YAMA);
 	if(estadoFileSystemIgualA(ESTABLE)) {
 		servidor->yama = nuevoSocket;
@@ -394,55 +292,9 @@ void servidorFinalizarYama() {
 	imprimirMensaje(archivoLog, "[CONEXION] El proceso YAMA se ha desconectado");
 }
 
-//--------------------------------------- Servidor Worker -------------------------------------
-
-void servidorSolicitudWorker(Servidor* servidor, Socket unSocket) {
-	//TODO
-}
-
-void servidorMensajeWorker() {
-	//TODO
-}
-
-void servidorFinalizarWorker(Servidor* servidor, Socket unSocket) {
-	//TODO
-}
+//--------------------------------------- Funciones de Worker -------------------------------------
 
 //--------------------------------------- Funciones de Socket -------------------------------------
-
-bool socketRealizoSolicitud(Servidor* servidor, Socket unSocket) {
-	return listaSocketsContiene(unSocket, &servidor->listaSelect);
-}
-
-bool socketEsDataNode(Servidor* servidor, Socket unSocket) {
-	return listaSocketsContiene(unSocket, &servidor->listaDataNodes);
-}
-
-bool socketEsWorker(Servidor* servidor, Socket unSocket) {
-	return listaSocketsContiene(unSocket, &servidor->listaWorkers);
-}
-
-bool socketEsYama(Servidor* servidor, Socket unSocket) {
-	return socketSonIguales(servidor->yama, unSocket);
-}
-
-bool socketEsListenerDataNode(Servidor* servidor, Socket unSocket) {
-	return socketSonIguales(servidor->listenerDataNode, unSocket);
-}
-
-bool socketEsListenerYama(Servidor* servidor, Socket unSocket) {
-	return socketSonIguales(servidor->listenerYama, unSocket);
-}
-
-bool socketEsListenerWorker(Servidor* servidor, Socket unSocket) {
-	return socketSonIguales(servidor->listenerWorker, unSocket);
-}
-
-bool socketEsListener(Servidor* servidor, Socket unSocket) {
-	return socketEsListenerDataNode(servidor, unSocket) ||
-			socketEsListenerYama(servidor, unSocket) ||
-			socketEsListenerWorker(servidor, unSocket);
-}
 
 void socketListaAgregar(Socket* unSocket) {
 	mutexBloquear(mutexListaSockets);
@@ -2981,6 +2833,4 @@ void semaforosDestruir() {
 
 //TODO dejar rollback
 //TODO arreglar cpfrom cpto md5 y mostrar copiarBloque
-//TODO directorios con muchos subdirectorios rompe
-//TODO deberia crear al menos algunos directorios y parar cuando se alcance el limite no tirar de una que se excede el limite
 //TODO cambiar hilos por select

@@ -169,7 +169,7 @@ void bloqueEscribir(Puntero datos) {
 void dataBinAbrir() {
 	dataBin = fileAbrir(configuracion->rutaDataBin, LECTURA);
 	if(dataBin == NULL){
-		imprimirMensaje(archivoLog,"[ERROR] No se pudo abrir el archivo data.bin");
+		imprimirMensaje(archivoLog,ROJO"[ERROR] No se pudo abrir el archivo data.bin"BLANCO);
 		exit(EXIT_FAILURE);
 	}
 	fileCerrar(dataBin);
@@ -179,13 +179,13 @@ Puntero dataBinMapear() {
 	Puntero Puntero;
 	int descriptorArchivo = open(configuracion->rutaDataBin, O_CLOEXEC | O_RDWR);
 	if (descriptorArchivo == ERROR) {
-		imprimirMensaje(archivoLog, "[ERROR] Fallo el open()");
+		imprimirMensaje(archivoLog, ROJO"[ERROR] Fallo el open()"BLANCO);
 		perror("open");
 		exit(EXIT_FAILURE);
 	}
 	struct stat estadoArchivo;
 	if (fstat(descriptorArchivo, &estadoArchivo) == ERROR) {
-		imprimirMensaje(archivoLog, "[ERROR] Fallo el fstat()");
+		imprimirMensaje(archivoLog, ROJO"[ERROR] Fallo el fstat()"BLANCO);
 		perror("fstat");
 		exit(EXIT_FAILURE);
 	}
@@ -204,7 +204,7 @@ Puntero dataBinMapear() {
 
 	Puntero = mmap(0, dataBinTamanio, PROT_WRITE | PROT_READ | PROT_EXEC, MAP_SHARED, descriptorArchivo, 0);
 	if (Puntero == MAP_FAILED) {
-		imprimirMensaje(archivoLog, "[ERROR] Fallo el mmap(), corran por sus vidas");
+		imprimirMensaje(archivoLog, ROJO"[ERROR] Fallo el mmap(), corran por sus vidas"BLANCO);
 		perror("mmap");
 		exit(EXIT_FAILURE);
 	}

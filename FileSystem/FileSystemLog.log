@@ -1,10 +1,12 @@
-[INFO] 20:28:59:183 FileSystem/(7898:7898): [EJECUCION] Proceso File System iniciado
-[INFO] 20:28:59:245 FileSystem/(7898:7898): [CONFIGURACION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 20:28:59:246 FileSystem/(7898:7898): [CONFIGURACION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 20:28:59:247 FileSystem/(7898:7898): [CONFIGURACION] Esperando conexiones de Workers (Puerto: 5080)
-[INFO] 20:28:59:247 FileSystem/(7898:7898): [CONFIGURACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
-[INFO] 20:28:59:273 FileSystem/(7898:7898): [33m[AVISO] Conecte los nodos necesarios al File System para estabilizarlo[0m
-[INFO] 20:30:12:430 FileSystem/(7898:7901): [ERROR] El nombre del directorio es demasiado largo
-[INFO] 20:30:48:650 FileSystem/(7898:7901): [ERROR] El nombre del directorio es demasiado largo
-[INFO] 20:31:05:595 FileSystem/(7898:7901): [DIRECTORIO] El directorio /aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa fue creado
-[INFO] 20:31:09:263 FileSystem/(7898:7898): [EJECUCION] Proceso File System finalizado
+[INFO] 20:32:06:645 FileSystem/(7944:7944): [EJECUCION] Proceso File System iniciado
+[INFO] 20:32:06:709 FileSystem/(7944:7944): [CONFIGURACION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 20:32:06:710 FileSystem/(7944:7944): [CONFIGURACION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 20:32:06:711 FileSystem/(7944:7944): [CONFIGURACION] Esperando conexiones de Workers (Puerto: 5080)
+[INFO] 20:32:06:712 FileSystem/(7944:7944): [CONFIGURACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
+[INFO] 20:32:06:739 FileSystem/(7944:7944): [33m[AVISO] Conecte los nodos necesarios al File System para estabilizarlo[0m
+[INFO] 20:32:11:120 FileSystem/(7944:7947): [DIRECTORIO] aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa (d)
+[INFO] 20:32:30:867 FileSystem/(7944:7947): [ERROR] La ruta ingresada no es valida
+[INFO] 20:32:58:463 FileSystem/(7944:7947): [ERROR] El directorio destino  ya tiene un archivo o directorio con el mismo nombre
+[INFO] 20:33:15:992 FileSystem/(7944:7947): [DIRECTORIO] El directorio /aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa fue renombrado por hola
+[INFO] 20:33:22:406 FileSystem/(7944:7947): [DIRECTORIO] hola (d)
+[INFO] 20:33:37:968 FileSystem/(7944:7944): [EJECUCION] Proceso File System finalizado

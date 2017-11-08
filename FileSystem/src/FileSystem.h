@@ -104,18 +104,6 @@ typedef struct {
 } Comando;
 
 typedef struct {
-	ListaSockets listaSelect;
-	ListaSockets listaMaster;
-	ListaSockets listaWorkers;
-	ListaSockets listaDataNodes;
-	Socket contadorSocket;
-	Socket listenerYama;
-	Socket listenerDataNode;
-	Socket listenerWorker;
-	Socket yama;
-} Servidor;
-
-typedef struct {
 	char puertoYama[MAX_PUERTO];
 	char puertoDataNode[MAX_PUERTO];
 	char puertoWorker[MAX_PUERTO];
@@ -196,14 +184,18 @@ int flagMensaje;
 int directoriosDisponibles;
 int flagSocket;
 Hilo hiloConsola;
+Hilo hiloDataNode;
+Hilo hiloWorker;
+Hilo hiloYama;
 Lista listaDirectorios;
 Lista listaArchivos;
 Lista listaNodos;
 Lista listaSockets;
 Bitmap* bitmapDirectorios;
+Socket listenerYama;
+Socket listenerDataNode;
+Socket listenerWorker;
 Socket socketYama;
-Socket socketDataNode;
-Socket socketWorker;
 String rutaDirectorioArchivos;
 String rutaDirectorioBitmaps;
 String rutaDirectorios;
@@ -249,59 +241,8 @@ void configuracionIniciar();
 
 //--------------------------------------- Funciones de Servidor -------------------------------------
 
-void servidorIniciar(Servidor* servidor);
-void servidorFinalizar(Servidor* servidor);
-bool servidorCantidadSockets(Servidor* servidor);
-void servidorIniciarListaSelect(Servidor* servidor);
-void servidorControlarContadorSocket(Servidor* servidor, Socket unSocket);
-void servidorEsperarSolicitud(Servidor* servidor);
-void servidorFinalizarConexion(Servidor* servidor, Socket unSocket);
-void servidorSolicitudMensaje(Servidor* servidor, Socket unSocket);
-void servidorIniciarContadorSocket(Servidor* servidor);
-void servidorActivarListenerYama(Servidor* servidor);
-void servidorActivarListenerDataNode(Servidor* servidor);
-void servidorActivarListenerWorker(Servidor* servidor);
-void servidorActivarListeners(Servidor* servidor);
-void servidorAtenderSolicitudes(Servidor* servidor);
-void servidorAceptarConexion(Servidor* servidor, Socket unSocket);
-void servidorLimpiarListas(Servidor* servidor);
-int servidorSolicitudProceso(Servidor* servidor, Socket unSocket);
-int servidorAtenderSolicitud(Servidor* servidor, Socket unSocket);
-int servidorAtenderSocket(Servidor* servidor, Socket unSocket);
-
-int servidorSolicitudDataNode(Servidor* servidor, Socket unSocket);
-void servidorAtenderDataNode(Servidor* servidor, Socket nuevoSocket);
-void servidorFinalizarDataNode(Servidor* servidor, Socket unSocket);
-void servidorMensajeDataNode(Servidor* servidor, Mensaje* mensaje, Socket unSocket);
-void servidorReconectarDataNode(Servidor* servidor, Nodo* nodoTemporal);
-bool nodoNuevo(Nodo* nuevoNodo);
-void servidorControlarDataNode(Servidor* servidor, Nodo* nodoTemporal);
-void servidorRechazarDataNode(Nodo* nuevoNodo);
-void servidorRegistrarDataNode(Servidor* servidor, Nodo* nuevoNodo);
-void servidorAdmitirDataNode(Servidor* servidor, Nodo* nuevoNodo);
-void servidorAceptarReconexionDataNode(Servidor* servidor, Nodo* nuevoNodo);
-void servidorAceptarDataNode(Servidor* servidor, Nodo* nodoTemporal);
-void servidorDesactivarDataNode(Servidor* servidor, Nodo* nodo);
-void servidorDestruirDataNode(Servidor* servidor, Nodo* nodo);
-
-void servidorSolicitudYama(Servidor* servidor, Socket unSocket);
-void servidorFinalizarYama();
-void servidorMensajeYama();
-
-void servidorSolicitudWorker(Servidor* servidor, Socket unSocket);
-void servidorFinalizarWorker(Servidor* servidor, Socket unSocket);
-void servidorMensajeWorker();
-
 //--------------------------------------- Funciones de Socket-------------------------------------
 
-bool socketEsListenerYama(Servidor* servidor, Socket unSocket);
-bool socketEsListener(Servidor* servidor, Socket unSocket);
-bool socketRealizoSolicitud(Servidor* servidor, Socket unSocket);
-bool socketEsDataNode(Servidor* servidor, Socket unSocket);
-bool socketEsYama(Servidor* servidor, Socket unSocket);
-bool socketEsListenerDataNode(Servidor* servidor, Socket unSocket);
-bool socketEsWorker(Servidor* servidor, Socket unSocket);
-bool socketEsListenerWorker(Servidor* servidor, Socket unSocket);
 void socketListaAgregar(Socket* unSocket);
 int socketListaCantidad();
 void socketListaEliminar(int posicion);
