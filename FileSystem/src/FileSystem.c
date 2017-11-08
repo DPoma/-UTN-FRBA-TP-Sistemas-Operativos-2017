@@ -79,10 +79,10 @@ Configuracion* configuracionLeerArchivo(ArchivoConfig archivoConfig) {
 }
 
 void configuracionImprimir(Configuracion* configuracion) {
-	imprimirMensajeUno(archivoLog, "[CONFIGURACION] Esperando conexion de YAMA (Puerto: %s)", configuracion->puertoYama);
-	imprimirMensajeUno(archivoLog, "[CONFIGURACION] Esperando conexiones de Data Nodes (Puerto: %s)", configuracion->puertoDataNode);
-	imprimirMensajeUno(archivoLog, "[CONFIGURACION] Esperando conexiones de Workers (Puerto: %s)", configuracion->puertoWorker);
-	imprimirMensajeUno(archivoLog, "[CONFIGURACION] Ruta de metadata: %s", configuracion->rutaMetadata);
+	imprimirMensaje1(archivoLog, "[CONFIGURACION] Esperando conexion de YAMA (Puerto: %s)", configuracion->puertoYama);
+	imprimirMensaje1(archivoLog, "[CONFIGURACION] Esperando conexiones de Data Nodes (Puerto: %s)", configuracion->puertoDataNode);
+	imprimirMensaje1(archivoLog, "[CONFIGURACION] Esperando conexiones de Workers (Puerto: %s)", configuracion->puertoWorker);
+	imprimirMensaje1(archivoLog, "[CONFIGURACION] Ruta de metadata: %s", configuracion->rutaMetadata);
 }
 
 void configuracionIniciarCampos() {
@@ -215,7 +215,7 @@ void dataNodeAtender(Nodo* nodo, int* estado) {
 
 void dataNodeDestruir(Nodo* nodo, int* estado) {
 	*estado = DESACTIVADO;
-	imprimirMensajeUno(archivoLog, AMARILLO"[AVISO] %s desconectado"BLANCO, nodo->nombre);
+	imprimirMensaje1(archivoLog, AMARILLO"[AVISO] %s desconectado"BLANCO, nodo->nombre);
 	int posicion = nodoListaPosicion(nodo);
 	mutexBloquear(mutexListaNodos);
 	listaEliminarDestruyendoElemento(listaNodos, posicion , (Puntero)nodoDestruir);
@@ -229,7 +229,7 @@ void dataNodeDesactivar(Nodo* nodo, int* estado) {
 		socketCerrar(nodo->socket);
 		nodoSocket(nodo, ERROR);
 		*estado = DESACTIVADO;
-		imprimirMensajeUno(archivoLog, AMARILLO"[AVISO] %s desconectado"BLANCO, nodo->nombre);
+		imprimirMensaje1(archivoLog, AMARILLO"[AVISO] %s desconectado"BLANCO, nodo->nombre);
 	}
 	mutexDesbloquear(mutexTarea);
 
@@ -703,7 +703,7 @@ void comandoRenombrar(Comando* comando) {
 		}
 		stringCopiar(directorio->nombre, comando->argumentos[2]);
 		directorioPersistir();
-		imprimirMensajeDos(archivoLog, "[DIRECTORIO] El directorio %s fue renombrado por %s", comando->argumentos[1], directorio->nombre);
+		imprimirMensaje2(archivoLog, "[DIRECTORIO] El directorio %s fue renombrado por %s", comando->argumentos[1], directorio->nombre);
 	}
 	else {
 		int existeDirectorio = directorioExiste(archivo->identificadorPadre, comando->argumentos[2]);
@@ -719,7 +719,7 @@ void comandoRenombrar(Comando* comando) {
 		stringCopiar(archivo->nombre, comando->argumentos[2]);
 		archivoPersistir(archivo);
 		archivoPersistirControl();
-		imprimirMensajeDos(archivoLog, "[ARCHIVO] El archivo %s fue renombrado por %s", comando->argumentos[1], archivo->nombre);
+		imprimirMensaje2(archivoLog, "[ARCHIVO] El archivo %s fue renombrado por %s", comando->argumentos[1], archivo->nombre);
 
 	}
 }
@@ -772,7 +772,7 @@ void comandoMover(Comando* comando) {
 		directorio->identificadorPadre = directorioNuevoPadre->identificador;
 		directorioPersistir();
 		String nombre = rutaObtenerUltimoNombre(comando->argumentos[1]);
-		imprimirMensajeDos(archivoLog, "[DIRECTORIO] El directorio %s fue movido a %s", nombre, comando->argumentos[2]);
+		imprimirMensaje2(archivoLog, "[DIRECTORIO] El directorio %s fue movido a %s", nombre, comando->argumentos[2]);
 		memoriaLiberar(nombre);
 	}
 	else {
@@ -788,7 +788,7 @@ void comandoMover(Comando* comando) {
 		archivoPersistir(archivo);
 		archivoPersistirControl();
 		String nombre = rutaObtenerUltimoNombre(comando->argumentos[1]);
-		imprimirMensajeDos(archivoLog, "[DIRECTORIO] El archivo %s fue movido a %s", nombre, comando->argumentos[2]);
+		imprimirMensaje2(archivoLog, "[DIRECTORIO] El archivo %s fue movido a %s", nombre, comando->argumentos[2]);
 		memoriaLiberar(nombre);
 	}
 }
@@ -845,7 +845,7 @@ void comandoEliminarCopia(Comando* comando) {
 	listaEliminarDestruyendoElemento(bloque->listaCopias, numeroCopia, (Puntero)copiaDestruir);
 	archivoPersistir(archivo);
 	nodoPersistir();
-	imprimirMensajeTres(archivoLog, "[BLOQUE] La copia N°%i del bloque N°%i del archivo %s ha sido eliminada",(int*)numeroCopia, (int*)numeroBloque, comando->argumentos[2]);
+	imprimirMensaje3(archivoLog, "[BLOQUE] La copia N°%i del bloque N°%i del archivo %s ha sido eliminada",(int*)numeroCopia, (int*)numeroBloque, comando->argumentos[2]);
 }
 
 
@@ -866,10 +866,10 @@ void comandoEliminarDirectorio(Comando* comando) {
 		return;
 	}
 	if(directorioTieneAlgo(directorio->identificador))
-		imprimirMensajeUno(archivoLog,"[ERROR] El directorio %s no esta vacio",ruta);
+		imprimirMensaje1(archivoLog,"[ERROR] El directorio %s no esta vacio",ruta);
 	else {
 		directorioEliminar(directorio->identificador);
-		imprimirMensajeUno(archivoLog,"[DIRECTORIO] El directorio %s ha sido eliminado",ruta);
+		imprimirMensaje1(archivoLog,"[DIRECTORIO] El directorio %s ha sido eliminado",ruta);
 	}
 }
 
@@ -897,7 +897,7 @@ void comandoEliminarArchivo(Comando* comando) {
 	mutexDesbloquear(mutexListaArchivos);
 	archivoPersistirControl();
 	nodoPersistir();
-	imprimirMensajeUno(archivoLog, "[ARCHIVO] El archivo %s ha sido eliminado", comando->argumentos[1]);
+	imprimirMensaje1(archivoLog, "[ARCHIVO] El archivo %s ha sido eliminado", comando->argumentos[1]);
 }
 
 void comandoListarDirectorio(Comando* comando) {
@@ -1086,7 +1086,7 @@ int comandoCopiarArchivoDeYamaFS(Comando* comando) {
 		}
 	}
 	nodoLimpiarActividades();
-	imprimirMensajeDos(archivoLog, "[ARCHIVO] El archivo %s se copio en %s", archivo->nombre, comando->argumentos[2]);
+	imprimirMensaje2(archivoLog, "[ARCHIVO] El archivo %s se copio en %s", archivo->nombre, comando->argumentos[2]);
 	return OK;
 }
 
@@ -1225,14 +1225,14 @@ void directorioMostrarArchivos(int identificadorPadre) {
 	for(indice=0; indice<directorioListaCantidad(); indice++) {
 		Directorio* directorio = directorioListaObtener(indice);
 		if(directorio->identificadorPadre == identificadorPadre) {
-			imprimirMensajeUno(archivoLog, "[DIRECTORIO] %s (d)", directorio->nombre);
+			imprimirMensaje1(archivoLog, "[DIRECTORIO] %s (d)", directorio->nombre);
 			flag = ACTIVADO;
 		}
 	}
 	for(indice=0; indice < archivoListaCantidad(); indice++) {
 		Archivo* archivo = archivoListaObtener(indice);
 		if(archivo->identificadorPadre == identificadorPadre) {
-			imprimirMensajeUno(archivoLog, "[DIRECTORIO] %s (a)", archivo->nombre);
+			imprimirMensaje1(archivoLog, "[DIRECTORIO] %s (a)", archivo->nombre);
 			flag = ACTIVADO;
 		}
 	}
@@ -1340,7 +1340,7 @@ int directorioCrearDirectoriosRestantes(ControlDirectorio* control, String rutaD
 		control->identificadorPadre = indice;
 		control->indiceNombresDirectorios++;
 	}
-	imprimirMensajeUno(archivoLog, "[DIRECTORIO] El directorio %s fue creado", rutaDirectorio);
+	imprimirMensaje1(archivoLog, "[DIRECTORIO] El directorio %s fue creado", rutaDirectorio);
 	return OK;
 }
 
@@ -1534,7 +1534,7 @@ void directorioRecuperarPersistencia() {
 	File file = fileAbrir(rutaArchivos, LECTURA);
 	bitmapDirectoriosCrear();
 	if(file == NULL) {
-		imprimirMensajeUno(archivoLog, "[ERROR] No se encontro el archivo %s", rutaDirectorios);
+		imprimirMensaje1(archivoLog, "[ERROR] No se encontro el archivo %s", rutaDirectorios);
 		return;
 	}
 	fileCerrar(file);
@@ -1778,7 +1778,7 @@ int archivoAlmacenar(Comando* comando) {
 		archivoPersistir(archivo);
 		archivoPersistirControl();
 		nodoPersistir();
-		imprimirMensajeUno(archivoLog, "[ARCHIVO] El archivo %s fue copiado en File System", comando->argumentos[2]);
+		imprimirMensaje1(archivoLog, "[ARCHIVO] El archivo %s fue copiado en File System", comando->argumentos[2]);
 		return OK;
 	}
 }
@@ -1819,7 +1819,7 @@ int archivoLeer(Comando* comando) {
 		}
 		mutexDesbloquear(mutexTarea);
 		if(bloqueSinImprimir) {
-			imprimirMensajeUno(archivoLog,ROJO"[ERROR] No se pudo leer el bloque N°%d"BLANCO, (int*)numeroBloque);
+			imprimirMensaje1(archivoLog,ROJO"[ERROR] No se pudo leer el bloque N°%d"BLANCO, (int*)numeroBloque);
 			nodoLimpiarActividades();
 			semaforoSignal(semaforoTarea);
 			return ERROR;
@@ -1918,7 +1918,7 @@ void archivoPersistirControl(){
 void archivoRecuperarPersistencia() {
 	File file = fileAbrir(rutaArchivos, LECTURA);
 	if(file == NULL) {
-		imprimirMensajeUno(archivoLog, "[ERROR] No se encontro el archivo %s", rutaArchivos);
+		imprimirMensaje1(archivoLog, "[ERROR] No se encontro el archivo %s", rutaArchivos);
 		return;
 	}
 	fileCerrar(file);
@@ -1943,7 +1943,7 @@ void archivoRecuperarPersistenciaDetallada(String nombre, int padre) {
 	String ruta = string_from_format("%s/%i/%s", rutaDirectorioArchivos, padre, nombre);
 	File file = fileAbrir(ruta, LECTURA);
 	if(file == NULL) {
-		imprimirMensajeUno(archivoLog, "[ERROR] No se encontro el archivo %s", ruta);
+		imprimirMensaje1(archivoLog, "[ERROR] No se encontro el archivo %s", ruta);
 		memoriaLiberar(ruta);
 		memoriaLiberar(nombre);
 		return;
@@ -2135,8 +2135,9 @@ bool nodoDesconectado(Nodo* nodo) {
 }
 
 void nodoVerificarBloquesLibres(Nodo* nodo) {
-	if(nodo->bloquesLibres == 0)
-		imprimirMensajeUno(archivoLog, AMARILLO"[AVISO] El %s tiene todos sus bloques ocupados"BLANCO, nodo->nombre);
+	if(nodo->bloquesLibres == NULO) {
+		imprimirMensaje1(archivoLog, "[AVISO] El %s tiene todos sus bloques ocupados", nodo->nombre);
+	}
 }
 
 bool nodoDisponible(Nodo* nodo) {
@@ -2257,7 +2258,7 @@ Nodo* nodoActualizar(Nodo* nodoTemporal) {
 		nodo->bitmap = bitmapCrear(nodoTemporal->bloquesTotales);
 		nodo->bloquesTotales = nodoTemporal->bloquesTotales;
 		nodo->bloquesLibres = nodoTemporal->bloquesTotales;
-		imprimirMensajeUno(archivoLog, AMARILLO"[AVISO] El %s cambio su archivo de datos, formatee para guardar los cambios"BLANCO, nodo->nombre);
+		imprimirMensaje1(archivoLog, AMARILLO"[AVISO] El %s cambio su archivo de datos, formatee para guardar los cambios"BLANCO, nodo->nombre);
 	}
 	stringCopiar(nodo->ip, nodoTemporal->ip);
 	stringCopiar(nodo->puerto, nodoTemporal->puerto);
@@ -2269,7 +2270,7 @@ void nodoAceptar(Nodo* nodo) {
 	mensajeEnviar(nodo->socket, ACEPTAR_DATANODE, VACIO, OK);
 	Hilo dataNode;
 	hiloCrear(&dataNode, (Puntero)dataNodeHilo, nodo);
-	imprimirMensajeUno(archivoLog, AMARILLO"[AVISO] %s conectado"BLANCO, nodo->nombre);
+	imprimirMensaje1(archivoLog, AMARILLO"[AVISO] %s conectado"BLANCO, nodo->nombre);
 }
 
 void nodoPersistir() {
@@ -2306,7 +2307,7 @@ void nodoPersistirBitmap(Nodo* nodo) {
 void nodoRecuperarPersistencia() {
 	File file = fileAbrir(rutaArchivos, LECTURA);
 	if(file == NULL) {
-		imprimirMensajeUno(archivoLog, "[ERROR] No se encontro el archivo %s", rutaNodos);
+		imprimirMensaje1(archivoLog, "[ERROR] No se encontro el archivo %s", rutaNodos);
 		return;
 	}
 	fileCerrar(file);
@@ -2340,7 +2341,7 @@ void nodoRecuperarPersistenciaBitmap(Nodo* nodo) {
 	String ruta = string_from_format("%s/%s", rutaDirectorioBitmaps, nodo->nombre);
 	File file = fileAbrir(ruta, LECTURA);
 	if(file == NULL) {
-		imprimirMensajeUno(archivoLog, "[ERROR] No se encontro el archivo %s", rutaNodos);
+		imprimirMensaje1(archivoLog, "[ERROR] No se encontro el archivo %s", rutaNodos);
 		memoriaLiberar(ruta);
 		return;
 	}
@@ -2403,11 +2404,11 @@ int bloqueEnviarCopiasANodos(Bloque* bloque, String buffer) {
 	}
 	mutexDesbloquear(mutexTarea);
 	if(copiasEnviadas == 0) {
-		imprimirMensajeUno(archivoLog, ROJO"[ERROR] El bloque N°%i no pudo copiarse en ningun Nodo, se aborta la operacion"BLANCO, (int*)bloque->numeroBloque);
+		imprimirMensaje1(archivoLog, ROJO"[ERROR] El bloque N°%i no pudo copiarse en ningun Nodo, se aborta la operacion"BLANCO, (int*)bloque->numeroBloque);
 		return ERROR;
 	}
 	if(copiasEnviadas < MAX_COPIAS) {
-		imprimirMensajeDos(archivoLog, AMARILLO"[AVISO] El bloque N°%i no tiene %i copias"BLANCO, (int*)bloque->numeroBloque, (int*)MAX_COPIAS);
+		imprimirMensaje2(archivoLog, AMARILLO"[AVISO] El bloque N°%i no tiene %i copias"BLANCO, (int*)bloque->numeroBloque, (int*)MAX_COPIAS);
 		return OK;
 	}
 	return OK;
@@ -2426,7 +2427,7 @@ void bloqueCopiar(Nodo* nodo, Puntero datos, int* estado) {
 	mutexDesbloquear(mutexArchivo);
 	nodoPersistir();
 	mutexBloquear(mutexNodo);
-	imprimirMensajeDos(archivoLog, "[BLOQUE] El bloque fue copiado en el bloque N°%i de %s", (int*)numeroBloqueNodo, nodoBuffer->nombre);
+	imprimirMensaje2(archivoLog, "[BLOQUE] El bloque fue copiado en el bloque N°%i de %s", (int*)numeroBloqueNodo, nodoBuffer->nombre);
 	mutexDesbloquear(mutexNodo);
 }
 

@@ -13,7 +13,7 @@
 int main(void) {
 	workerIniciar();
 	socketListenerWorker = socketCrearListener(configuracion->puertoWorker);//todo hacer otro listener para workers, por el tema del handshake
-	imprimirMensajeUno(archivoLog, "[CONEXION] Esperando conexiones de Master (Puerto: %s)", configuracion->puertoWorker);
+	imprimirMensaje1(archivoLog, "[CONEXION] Esperando conexiones de Master (Puerto: %s)", configuracion->puertoWorker);
 	while(estadoWorker)
 		socketAceptarConexion();
 	imprimirMensaje(archivoLog, "[EJECUCION] Proceso Worker finalizado");
@@ -187,7 +187,7 @@ void workerCrearHijo(Socket unSocket) {
 				close(arch);
 				//creo socket
 				Socket socketFS;
-				imprimirMensajeDos(archivoLog, "[CONEXION] Realizando conexion con FileSystem (IP: %s | Puerto %s)", configuracion->ipFileSytem, configuracion->puertoFileSystem);
+				imprimirMensaje2(archivoLog, "[CONEXION] Realizando conexion con FileSystem (IP: %s | Puerto %s)", configuracion->ipFileSytem, configuracion->puertoFileSystem);
 				socketFS = socketCrearCliente(configuracion->ipFileSytem,configuracion->puertoFileSystem,ID_WORKER);
 				imprimirMensaje(archivoLog, "[CONEXION] Conexion exitosa con FileSystem");
 				//serializo
@@ -661,7 +661,7 @@ char* appendG(lGlobOri* origenes){
 		}
 			//etapa remota
 		if (local==0){
-		imprimirMensajeDos(archivoLog, "[CONEXION] Realizando conexion con Worker (IP: %s | Puerto %s)", ((globOri*)origenes->oris[i])->ip, ((globOri*)origenes->oris[i])->puerto);
+		imprimirMensaje2(archivoLog, "[CONEXION] Realizando conexion con Worker (IP: %s | Puerto %s)", ((globOri*)origenes->oris[i])->ip, ((globOri*)origenes->oris[i])->puerto);
 		socketClientWorker = socketCrearCliente(((globOri*)origenes->oris[i])->ip,((globOri*)origenes->oris[i])->puerto,ID_WORKER);
 		imprimirMensaje(archivoLog, "[CONEXION] Conexion exitosa con Worker");
 		//serializo
@@ -766,7 +766,7 @@ char* appendG(lGlobOri* origenes){
 		}
 			//etapa remota
 		if (local==0){
-		imprimirMensajeDos(archivoLog, "[CONEXION] Realizando conexion con Worker (IP: %s | Puerto %s)", ((globOri*)origenes->oris[resultado])->ip, ((globOri*)origenes->oris[resultado])->puerto);
+		imprimirMensaje2(archivoLog, "[CONEXION] Realizando conexion con Worker (IP: %s | Puerto %s)", ((globOri*)origenes->oris[resultado])->ip, ((globOri*)origenes->oris[resultado])->puerto);
 		socketClientWorker = socketCrearCliente(((globOri*)origenes->oris[resultado])->ip,((globOri*)origenes->oris[resultado])->puerto,ID_WORKER);
 		imprimirMensaje(archivoLog, "[CONEXION] Conexion exitosa con Worker");
 		//serializo
@@ -886,9 +886,9 @@ char* agregarBarraCero(char* data, int tamanio)
 }
 
 void configuracionImprimir(Configuracion* configuracion) {
-	imprimirMensajeUno(archivoLog, "[CONFIGURACION] Nombre Nodo: %s", configuracion->nombreNodo);
-	imprimirMensajeUno(archivoLog, "[CONFIGURACION] Ruta archivo data.bin: %s", configuracion->rutaDataBin);
-	imprimirMensajeUno(archivoLog, "[CONFIGURACION] tamanio data.bin: %dMB", bloquesArchData);
+	imprimirMensaje1(archivoLog, "[CONFIGURACION] Nombre Nodo: %s", configuracion->nombreNodo);
+	imprimirMensaje1(archivoLog, "[CONFIGURACION] Ruta archivo data.bin: %s", configuracion->rutaDataBin);
+	imprimirMensaje1(archivoLog, "[CONFIGURACION] tamanio data.bin: %dMB", bloquesArchData);
 
 }
 
@@ -923,7 +923,7 @@ void dataBinCalcularBloques() {
 	}
 	dataBinTamanio = estadoArchivo.st_size;
 	bloquesArchData = (Entero)ceil((double)dataBinTamanio/(double)BLOQUE);
-	imprimirMensajeUno(archivoLog, "[DATABIN] Cantidad de bloques %i", (int*)bloquesArchData);
+	imprimirMensaje1(archivoLog, "[DATABIN] Cantidad de bloques %i", (int*)bloquesArchData);
 }
 
 

@@ -82,7 +82,7 @@ void dataNodeConectarAFS() {
 	mensajeEnviar(socketFileSystem, SOLICITAR_CONEXION, puntero, stringLongitud(mensaje)+1+sizeof(Entero));
 	memoriaLiberar(mensaje);
 	memoriaLiberar(puntero);
-	imprimirMensajeDos(archivoLog, "[CONEXION] Estableciendo conexion con File System (IP: %s | Puerto %s)", configuracion->ipFileSystem, configuracion->puertoFileSystem);
+	imprimirMensaje2(archivoLog, "[CONEXION] Estableciendo conexion con File System (IP: %s | Puerto %s)", configuracion->ipFileSystem, configuracion->puertoFileSystem);
 }
 
 //--------------------------------------- Funciones de Configuracion -------------------------------------
@@ -100,8 +100,8 @@ Configuracion* configuracionLeerArchivo(ArchivoConfig archivoConfig) {
 }
 
 void configuracionImprimir(Configuracion* configuracion) {
-	imprimirMensajeUno(archivoLog, "[CONFIGURACION] Nombre Nodo: %s", configuracion->nombreNodo);
-	imprimirMensajeUno(archivoLog, "[CONFIGURACION] Ruta archivo data.bin: %s", configuracion->rutaDataBin);
+	imprimirMensaje1(archivoLog, "[CONFIGURACION] Nombre Nodo: %s", configuracion->nombreNodo);
+	imprimirMensaje1(archivoLog, "[CONFIGURACION] Ruta archivo data.bin: %s", configuracion->rutaDataBin);
 }
 
 void configuracionIniciarCampos() {
@@ -213,7 +213,7 @@ Puntero dataBinMapear() {
 
 void dataBinCalcularBloques() {
 	dataBinBloques = (Entero)ceil((double)dataBinTamanio/(double)BLOQUE);
-	imprimirMensajeUno(archivoLog, "[DATABIN] Cantidad de bloques %i", (int*)dataBinBloques);
+	imprimirMensaje1(archivoLog, "[DATABIN] Cantidad de bloques %i", (int*)dataBinBloques);
 }
 
 void dataBinConfigurar() {
@@ -226,12 +226,12 @@ void dataBinConfigurar() {
 
 Bloque getBloque(Entero numeroBloque) {
 	Bloque bloque = bloqueBuscar(numeroBloque);
-	imprimirMensajeUno(archivoLog, "[DATABIN] El bloque N°%i fue leido", (int*)numeroBloque);
+	imprimirMensaje1(archivoLog, "[DATABIN] El bloque N°%i fue leido", (int*)numeroBloque);
 	return bloque;
 }
 
 void setBloque(Entero numeroBloque, Puntero datos) {
 	Bloque bloque = bloqueBuscar(numeroBloque);
 	memcpy(bloque, datos, BLOQUE);
-	imprimirMensajeUno(archivoLog, "[DATABIN] El bloque N°%i fue escrito", (int*)numeroBloque);
+	imprimirMensaje1(archivoLog, "[DATABIN] El bloque N°%i fue escrito", (int*)numeroBloque);
 }

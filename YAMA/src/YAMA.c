@@ -33,7 +33,7 @@ void yamaIniciar() {
 	signal(SIGUSR1,sighandler);
 
 	servidor = malloc(sizeof(Servidor));
-	imprimirMensajeDos(archivoLog, "[CONEXION] Realizando conexion con File System (IP: %s | Puerto %s)", configuracion->ipFileSystem, configuracion->puertoFileSystem);
+	imprimirMensaje2(archivoLog, "[CONEXION] Realizando conexion con File System (IP: %s | Puerto %s)", configuracion->ipFileSystem, configuracion->puertoFileSystem);
 	servidor->fileSystem = socketCrearCliente(configuracion->ipFileSystem, configuracion->puertoFileSystem, ID_YAMA);
 	Mensaje* mensaje = mensajeRecibir(servidor->fileSystem);
 	if(mensaje->header.operacion == ACEPTACION)
@@ -68,7 +68,7 @@ void yamaAtender() {
 	servidor->maximoSocket = 0;
 	listaSocketsLimpiar(&servidor->listaMaster);
 	listaSocketsLimpiar(&servidor->listaSelect);
-	imprimirMensajeUno(archivoLog, "[CONEXION] Esperando conexiones de un Master (Puerto %s)", configuracion->puertoMaster);
+	imprimirMensaje1(archivoLog, "[CONEXION] Esperando conexiones de un Master (Puerto %s)", configuracion->puertoMaster);
 	servidor->listenerMaster = socketCrearListener(configuracion->puertoMaster);
 	listaSocketsAgregar(servidor->listenerMaster, &servidor->listaMaster);
 	listaSocketsAgregar(servidor->fileSystem,&servidor->listaMaster);

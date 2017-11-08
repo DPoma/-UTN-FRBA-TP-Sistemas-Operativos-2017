@@ -4,3 +4,20 @@
 [INFO] 15:57:57:454 FileSystem/(7341:7341): [CONFIGURACION] Esperando conexiones de Workers (Puerto: 5080)
 [INFO] 15:57:57:455 FileSystem/(7341:7341): [CONFIGURACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
 [INFO] 15:58:04:28 FileSystem/(7341:7341): [33m[AVISO] Conecte los nodos necesarios al File System para estabilizarlo[0m
+[INFO] 16:09:57:288 FileSystem/(7341:7349): [33m[AVISO] NODO1 conectado[0m
+[INFO] 16:10:16:325 FileSystem/(7341:7349): [33m[AVISO] NODO2 conectado[0m
+[INFO] 16:10:19:153 FileSystem/(7341:7349): [33m[AVISO] El File System esta estable[0m
+[INFO] 16:11:02:155 FileSystem/(7341:7341): [31m[ERROR] Comando invalido[0m
+[INFO] 16:11:23:914 FileSystem/(7341:7503): [33m[AVISO] NODO2 desconectado[0m
+[INFO] 16:11:23:919 FileSystem/(7341:7341): [31m[ERROR] No se pudo leer el bloque N°126[0m
+[INFO] 16:11:45:163 FileSystem/(7341:7349): [33m[AVISO] NODO2 conectado[0m
+[INFO] 16:11:58:626 FileSystem/(7341:7349): [33m[AVISO] NODO3 conectado[0m
+[INFO] 16:13:59:191 FileSystem/(7341:7537): [33m[AVISO] NODO3 desconectado[0m
+[INFO] 16:14:03:837 FileSystem/(7341:7349): [33m[AVISO] NODO3 conectado[0m
+[INFO] 16:14:06:282 FileSystem/(7341:7545): [33m[AVISO] NODO3 desconectado[0m
+[INFO] 16:14:11:829 FileSystem/(7341:7349): [33m[AVISO] NODO3 conectado[0m
+[INFO] 16:14:55:100 FileSystem/(7341:7550): [33m[AVISO] NODO3 desconectado[0m
+[INFO] 16:15:04:881 FileSystem/(7341:7349): [33m[AVISO] NODO3 conectado[0m
+[INFO] 16:15:37:225 FileSystem/(7341:7532): [33m[AVISO] NODO2 desconectado[0m
+[INFO] 16:15:38:674 FileSystem/(7341:7477): [33m[AVISO] NODO1 desconectado[0m
+[INFO] 16:15:38:701 FileSystem/(7341:7341): [31m[ERROR] No se pudo leer el bloque N°539[0m

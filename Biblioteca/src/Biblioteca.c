@@ -688,26 +688,25 @@ void imprimirMensaje(ArchivoLog archivoLog, String mensaje) {
 	log_info(archivoLog, mensaje);
 }
 
-void imprimirMensajeUno(ArchivoLog archivoLog, String mensaje, void* algo1) {
+void imprimirMensaje1(ArchivoLog archivoLog, String mensaje, void* algo1) {
 	printf(mensaje, algo1 );
 	puts("");
 	log_info(archivoLog, mensaje, algo1);
 }
 
-void imprimirMensajeDos(ArchivoLog archivoLog, String mensaje, void* algo1, void* algo2) {
+void imprimirMensaje2(ArchivoLog archivoLog, String mensaje, void* algo1, void* algo2) {
 	printf(mensaje, algo1, algo2);
 	puts("");
 	log_info(archivoLog, mensaje, algo1, algo2);
 }
 
-void imprimirMensajeTres(ArchivoLog archivoLog, String mensaje, void* algo1, void* algo2, void* algo3) {
+void imprimirMensaje3(ArchivoLog archivoLog, String mensaje, void* algo1, void* algo2, void* algo3) {
 	printf(mensaje, algo1, algo2, algo3);
 	puts("");
 	log_info(archivoLog, mensaje, algo1, algo2, algo3);
 }
 
-
-void imprimirMensajeCuatro(ArchivoLog archivoLog, String mensaje, void* algo1, void* algo2, void* algo3, void* algo4) {
+void imprimirMensaje4(ArchivoLog archivoLog, String mensaje, void* algo1, void* algo2, void* algo3, void* algo4) {
 	printf(mensaje, algo1, algo2, algo3, algo4);
 	puts("");
 	log_info(archivoLog, mensaje, algo1, algo2, algo3, algo4);

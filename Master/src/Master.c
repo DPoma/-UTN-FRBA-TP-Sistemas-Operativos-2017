@@ -35,7 +35,7 @@ void masterIniciar(String* argv) {
 		return configuracion;
 	}
 	configuracion = configuracionCrear(RUTA_CONFIG, (Puntero)configuracionLeerArchivo, campos);
-	imprimirMensajeDos(archivoLog, "[CONEXION] Configuracion para conexion con YAMA (IP: %s | Puerto: %s)", configuracion->ipYama, configuracion->puertoYama);
+	imprimirMensaje2(archivoLog, "[CONEXION] Configuracion para conexion con YAMA (IP: %s | Puerto: %s)", configuracion->ipYama, configuracion->puertoYama);
 	void configuracionSenial(int senial) {
 		estadoMaster=DESACTIVADO;
 	}
@@ -60,7 +60,7 @@ void masterIniciar(String* argv) {
 	leerArchivo(fopen(argv[1],"r+"),&scriptTransformacion,&lenTransformacion);
 	leerArchivo(fopen(argv[2], "r+"),&scriptReduccion,&lenReduccion);
 
-	imprimirMensajeDos(archivoLog,"[CONEXION] Estableciendo Conexion con YAMA...", configuracion->ipYama, configuracion->puertoYama);
+	imprimirMensaje2(archivoLog,"[CONEXION] Estableciendo Conexion con YAMA...", configuracion->ipYama, configuracion->puertoYama);
 	socketYama = socketCrearCliente(configuracion->ipYama, configuracion->puertoYama, ID_MASTER);
 	imprimirMensaje(archivoLog, "[CONEXION] Conexion establecida con YAMA, esperando instrucciones");
 	mensajeEnviar(socketYama,SOLICITUD,argv[3],stringLongitud(argv[3])+1);
@@ -148,7 +148,7 @@ void reduccionGlobal(Mensaje* m){
 void transformaciones(Lista bloques){
 	WorkerTransformacion* dir = list_get(bloques,0);
 	socketWorker=socketCrearCliente(dir->dir.ip,dir->dir.port,ID_MASTER);
-	imprimirMensajeDos(archivoLog,"[CONEXION] Estableciendo conexion con Worker (IP: %s | PUERTO: %s",dir->dir.ip,dir->dir.port);
+	imprimirMensaje2(archivoLog,"[CONEXION] Estableciendo conexion con Worker (IP: %s | PUERTO: %s",dir->dir.ip,dir->dir.port);
 	mensajeEnviar(socketWorker,TRANSFORMACION,scriptTransformacion,lenTransformacion);
 	int enviados=0,respondidos=0;
 	enviarBloques:
@@ -160,13 +160,13 @@ void transformaciones(Lista bloques){
 		memcpy(data+INTSIZE,&wt->bytes,INTSIZE); //a worker le interesan los bytes?
 		memcpy(data+INTSIZE*2,wt->temp,TEMPSIZE);
 		mensajeEnviar(socketWorker,TRANSFORMACION,data,tamanio);
-		imprimirMensajeDos(archivoLog,"[CONEXION] Enviando bloque %d %s",(int*)wt->bloque,wt->temp);
+		imprimirMensaje2(archivoLog,"[CONEXION] Enviando bloque %d %s",(int*)wt->bloque,wt->temp);
 	}
 	for(;respondidos<enviados;respondidos++){
 		Mensaje* mensaje = mensajeRecibir(socketWorker);
 		//a demas de decir exito o fracaso devuelve el numero de bloque
 		void enviarActualizacion(){
-			imprimirMensajeDos(archivoLog,"se recibio actualizacion de Worker %d %d",(int32_t*)mensaje->datos,&mensaje->header.operacion);
+			imprimirMensaje2(archivoLog,"se recibio actualizacion de Worker %d %d",(int32_t*)mensaje->datos,&mensaje->header.operacion);
 			mensaje=realloc(mensaje,mensaje->header.tamanio+DIRSIZE+sizeof(Header));
 			memmove(mensaje->datos+DIRSIZE,mensaje->datos,mensaje->header.tamanio);
 			memcpy(mensaje->datos,&dir->dir,DIRSIZE);
@@ -174,12 +174,12 @@ void transformaciones(Lista bloques){
 			mensajeDestruir(mensaje);
 		}
 		if(mensaje->header.operacion==EXITO){
-			imprimirMensajeUno(archivoLog, "[TRANSFORMACION] Transformacion realizada con exito en el Worker %s",(*(Dir*)mensaje->datos).ip);
+			imprimirMensaje1(archivoLog, "[TRANSFORMACION] Transformacion realizada con exito en el Worker %s",(*(Dir*)mensaje->datos).ip);
 			enviarActualizacion();
 		}else{
 			semaforoWait(errorBloque);
 			enviarActualizacion();
-			imprimirMensajeUno(archivoLog,"[TRANSFORMACION] Transformacion fallida en el Worker %i",&socketWorker);
+			imprimirMensaje1(archivoLog,"[TRANSFORMACION] Transformacion fallida en el Worker %i",&socketWorker);
 			semaforoWait(recepcionAlternativo);
 			list_addM(bloques,&alternativo,sizeof alternativo);
 			semaforoSignal(errorBloque);
@@ -217,7 +217,7 @@ void masterAtender(){
 		memcpy(&bloque.bloque,mensaje->datos+i+DIRSIZE,INTSIZE);
 		memcpy(&bloque.bytes,mensaje->datos+i+DIRSIZE+INTSIZE,INTSIZE);
 		memcpy(bloque.temp,mensaje->datos+i+DIRSIZE+INTSIZE*2,TEMPSIZE);
-		imprimirMensajeTres(archivoLog, "[RECEPCION] bloque %s %s %d",bloque.dir.ip,bloque.dir.port,(int*)bloque.bloque);
+		imprimirMensaje3(archivoLog, "[RECEPCION] bloque %s %s %d",bloque.dir.ip,bloque.dir.port,(int*)bloque.bloque);
 		int j;
 		bool flag=false;
 		for(j=0;j<listas->elements_count;j++){
@@ -233,7 +233,7 @@ void masterAtender(){
 			Lista nodo=list_create();
 			list_addM(nodo, &bloque,sizeof(WorkerTransformacion));
 			list_addM(listas,nodo,sizeof(t_list));
-			imprimirMensajeTres(archivoLog,"] lista para nodo %s %s armada, lista #%d",bloque.dir.ip,bloque.dir.port,(int*)listas->elements_count);
+			imprimirMensaje3(archivoLog,"] lista para nodo %s %s armada, lista #%d",bloque.dir.ip,bloque.dir.port,(int*)listas->elements_count);
 		}
 	}
 
