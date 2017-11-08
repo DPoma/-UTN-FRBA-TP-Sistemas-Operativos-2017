@@ -57,8 +57,8 @@
 #define BARRA '/'
 #define RAIZ "/"
 #define ID_RAIZ 0
-#define ARCHIVO_BINARIO "BINARIO"
-#define ARCHIVO_TEXTO "TEXTO"
+#define ARCHIVO_BINARIO "Binario"
+#define ARCHIVO_TEXTO "Texto"
 #define PREFIJO "yamafs:"
 #define MAX_STRING 300
 #define MAX_NOMBRE 255

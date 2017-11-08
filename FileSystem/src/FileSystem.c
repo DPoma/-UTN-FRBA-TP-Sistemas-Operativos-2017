@@ -985,25 +985,25 @@ void comandoInformacionArchivo(Comando* comando) {
 		imprimirMensaje(archivoLog, "[ERROR] El archivo no existe");
 		return;
 	}
-	printf("[ARCHIVO] Nombre: %s", archivo->nombre);
-	printf("[ARCHIVO] Tipo: %s", archivo->tipo);
-	printf("[ARCHIVO] Ubicacion: %s", comando->argumentos[1]);
-	printf("[ARCHIVO] ID Padre: %i", archivo->identificadorPadre);
+	printf("[ARCHIVO] Nombre: %s\n", archivo->nombre);
+	printf("[ARCHIVO] Tipo: %s\n", archivo->tipo);
+	printf("[ARCHIVO] Ubicacion: %s\n", comando->argumentos[1]);
+	printf("[ARCHIVO] ID Padre: %i\n", archivo->identificadorPadre);
 	int indice;
 	int tamanio = 0;
 	for(indice = 0; indice < listaCantidadElementos(archivo->listaBloques); indice++) {
 		Bloque* bloque = listaObtenerElemento(archivo->listaBloques, indice);
 		tamanio+= bloque->bytesUtilizados;
 	}
-	printf("[ARCHIVO] Tamanio: %i bytes", tamanio);
-	printf("[ARCHIVO] Bloques: %i", listaCantidadElementos(archivo->listaBloques));
+	printf("[ARCHIVO] Tamanio: %i bytes\n", tamanio);
+	printf("[ARCHIVO] Bloques: %i\n", listaCantidadElementos(archivo->listaBloques));
 	for(indice = 0; indice < listaCantidadElementos(archivo->listaBloques); indice++) {
 		Bloque* bloque = listaObtenerElemento(archivo->listaBloques, indice);
-		printf("[ARCHIVO] Bloque %i: %i bytes", indice, bloque->bytesUtilizados);
+		printf("[ARCHIVO] Bloque %i: %i bytes\n", indice, bloque->bytesUtilizados);
 		int indiceCopia;
 		for(indiceCopia = 0; indiceCopia < listaCantidadElementos(bloque->listaCopias); indiceCopia++) {
 			Copia* copiaBloque = listaObtenerElemento(bloque->listaCopias, indiceCopia);
-			printf("[ARCHIVO] Copia %i en: Nodo: %s | Bloque: %i", indiceCopia, copiaBloque->nombreNodo, copiaBloque->bloqueNodo);
+			printf("[ARCHIVO] Copia %i en: Nodo: %s | Bloque: %i\n", indiceCopia, copiaBloque->nombreNodo, copiaBloque->bloqueNodo);
 		}
 	}
 }
@@ -1109,6 +1109,7 @@ int comandoCopiarArchivoDeYamaFS(Comando* comando) {
 	mutexBloquear(mutexRuta);
 	stringCopiar(rutaBuffer, comando->argumentos[2]);
 	mutexDesbloquear(mutexRuta);
+	listaOrdenar(archivo->listaBloques, (Puntero)bloqueOrdenarPorNumero);
 	int indice;
 	for(indice = 0; indice < listaCantidadElementos(archivo->listaBloques) ;indice++) {
 		Bloque* bloque = listaObtenerElemento(archivo->listaBloques, indice);
@@ -1132,7 +1133,10 @@ int comandoCopiarArchivoDeYamaFS(Comando* comando) {
 		}
 		mutexDesbloquear(mutexTarea);
 		if(copiaSinEnviar) {
-			imprimirMensaje(archivoLog, "[ERROR] Una copia no pudo ser enviada, se aborta la operacion");
+			imprimirMensaje1(archivoLog, "[ERROR] No se pudo leer el bloque N°%d, se aborta la operacion", (int*)indice);
+			mutexBloquear(mutexRuta);
+			fileLimpiar(rutaBuffer);
+			mutexDesbloquear(mutexRuta);
 			semaforoSignal(semaforoTarea);
 			nodoLimpiarActividades();
 			return ERROR;
@@ -1154,7 +1158,6 @@ void comandoObtenerMD5DeArchivo(Comando* comando) {
 	comando->argumentos[2] = memoriaAlocar(MAX_STRING);
 	stringCopiar(comando->argumentos[2], ruta);
 	if(comandoCopiarArchivoDeYamaFS(comando) == ERROR) {
-		fileLimpiar(ruta);
 		memoriaLiberar(nombreArchivo);
 		memoriaLiberar(MD5Archivo);
 		memoriaLiberar(ruta);
@@ -1226,21 +1229,22 @@ void comandoInformacionNodos() {
 void comandoAyuda() {
 	puts("-------------------------------");
 	puts("1)  format | Formatea YamaFS");
-	puts("2)  mkdir <Path-dir> | Crea un directorio");
-	puts("3)  ls <Path-dir> | Lista un directorio");
-	puts("4)  rename <Path-dir> <Nuevo-nombre> | Renombra un archivo o directorio");
-	puts("5)  mv <Path-dir> <Path-nuevo-dir> | Renombra un archivo o directorio");
-	puts("6)  rm <Path-arch> | Elimina un archivo");
-	puts("7)  rm -b <Path-arch> <N°bloque> <N°copia> | Elimina un bloque de un archivo");
-	puts("8)  rm -d <Path-dir> | Elimina un directorio");
-	puts("9)  cpto <Path-Yama> <Path-FS> | Copia un archivo de YamaFS al FS local");
-	puts("10) cpfrom -t  <Path-arch-local> <Path-dir> | Copia un archivo de texto a YamaFS");
-	puts("11) cpfrom -b <Path-arch-local> <Path-dir> | Copia un archivo binario a YamaFS");
-	puts("12) md5 <Path-arch> | Retorna el MD5 del archivo");
-	puts("13) cat <Path-arch> | Muestra el contenido de un archivo");
-	puts("14) info <Path-Arch> | Muestra la informacion de un archivo");
-	puts("15) nodes | Muestra la informacion de los nodos");
-	puts("16) exit | Finaliza YamaFS");
+	puts("2)  mkdir <Path-yama-dir> | Crea un directorio");
+	puts("3)  ls <Path-yama-dir> | Lista un directorio");
+	puts("4)  rename <Path-yama-dir> <Nuevo-nombre> | Renombra un archivo o directorio");
+	puts("5)  mv <Path-yama-dir> <Path-yama-dir> | Mueve un archivo o directorio");
+	puts("6)  rm <Path-yama-arch> | Elimina un archivo");
+	puts("7)  rm -b <Path-yama-arch> <N°bloque> <N°copia> | Elimina un bloque de un archivo");
+	puts("8)  rm -d <Path-yama-dir> | Elimina un directorio");
+	puts("9)  cpto <Path-yama-arch> <Path-local-arch> | Copia un archivo de YamaFS al FS local");
+	puts("10) cpfrom -t  <Path-local-arch> <Path-yama-arch> | Copia un archivo de texto a YamaFS");
+	puts("11) cpfrom -b <Path-local-arch> <Path-yama-arch> | Copia un archivo binario a YamaFS");
+	puts("12) cpblock <Path-yama-arch> <N°bloque> <Nombre-Nodo>");
+	puts("13) md5 <Path-yama-arch> | Retorna el MD5 del archivo");
+	puts("14) cat <Path-yama-arch> | Muestra el contenido de un archivo");
+	puts("15) info <Path-yama-arch> | Muestra la informacion de un archivo");
+	puts("16) nodes | Muestra la informacion de los nodos");
+	puts("17) exit | Finaliza YamaFS");
 }
 
 void comandoFinalizar() {
@@ -2259,8 +2263,11 @@ void nodoFormatearConectados() {
 }
 
 void nodoDesconectar(Nodo* nodo) {
-	if(nodoConectado(nodo))
+	if(nodoConectado(nodo)) {
+		mutexBloquear(mutexSocket);
 		mensajeEnviar(nodo->socket, DESCONEXION, VACIO, ACTIVADO);
+		mutexDesbloquear(mutexSocket);
+	}
 }
 
 void nodoDesconectarATodos() {
@@ -2488,9 +2495,11 @@ void bloqueLeer(Nodo* nodo, Puntero datos, int* estado) {
 void bloqueCopiarArchivo(Nodo* nodo, Puntero datos, int* estado) {
 	mutexBloquear(mutexRuta);
 	File file = fileAbrir(rutaBuffer, "a+");
-	fwrite(datos, sizeof(char), bloqueBuffer->bytesUtilizados, file);
-	fileCerrar(file);
 	mutexDesbloquear(mutexRuta);
+	mutexBloquear(mutexBloque);
+	fwrite(datos, sizeof(char), bloqueBuffer->bytesUtilizados, file);
+	mutexDesbloquear(mutexBloque);
+	fileCerrar(file);
 	nodoActivarDesconexion(nodo, estado);
 	semaforoSignal(semaforoTarea);
 }
@@ -2821,4 +2830,4 @@ void semaforosDestruir() {
 
 //TODO dejar rollback
 //TODO ver memory leak hilo
-//TODO arreglar cpfrom cpto md5
+//TODO arreglar md5

@@ -1,13 +1,15 @@
-[INFO] 16:15:04:568 DataNode/(7564:7564): [CONFIGURACION] Nombre Nodo: NODO3
-[INFO] 16:15:04:657 DataNode/(7564:7564): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/test3.bin
-[INFO] 16:15:04:681 DataNode/(7564:7564): [DATABIN] Cantidad de bloques 20480
-[INFO] 16:15:04:789 DataNode/(7564:7564): [CONEXION] Estableciendo conexion con File System (IP: 127.0.0.1 | Puerto 5040)
-[INFO] 16:15:04:877 DataNode/(7564:7564): [CONEXION] Conexion establecida con el File System
-[INFO] 16:15:04:914 DataNode/(7564:7564): [DATABIN] El bloque N°1297 fue leido
-[INFO] 16:15:04:920 DataNode/(7564:7564): [DATABIN] El bloque N°1298 fue leido
-[INFO] 16:15:04:923 DataNode/(7564:7564): [DATABIN] El bloque N°1299 fue leido
-[INFO] 16:15:04:925 DataNode/(7564:7564): [DATABIN] El bloque N°1300 fue leido
-[INFO] 16:15:04:928 DataNode/(7564:7564): [DATABIN] El bloque N°1301 fue leido
-[INFO] 16:15:04:944 DataNode/(7564:7564): [DATABIN] El bloque N°1302 fue leido
-[INFO] 16:15:04:953 DataNode/(7564:7564): [DATABIN] El bloque N°1303 fue leido
-[INFO] 16:15:04:959 DataNode/(7564:7564): [DATABIN] El bloque N°1304 fue leido
+[INFO] 19:25:30:96 DataNode/(10607:10607): [CONFIGURACION] Nombre Nodo: NODO3
+[INFO] 19:25:30:118 DataNode/(10607:10607): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data3.bin
+[INFO] 19:25:30:125 DataNode/(10607:10607): [DATABIN] Cantidad de bloques 100
+[INFO] 19:25:30:158 DataNode/(10607:10607): [CONEXION] Estableciendo conexion con File System (IP: 127.0.0.1 | Puerto 5040)
+[INFO] 19:25:30:163 DataNode/(10607:10607): [CONEXION] Conexion establecida con el File System
+[INFO] 19:25:37:475 DataNode/(10607:10607): [DATABIN] El bloque N°0 fue leido
+[INFO] 19:25:37:566 DataNode/(10607:10607): [DATABIN] El bloque N°1 fue leido
+[INFO] 19:25:37:641 DataNode/(10607:10607): [DATABIN] El bloque N°2 fue leido
+[INFO] 19:25:37:723 DataNode/(10607:10607): [DATABIN] El bloque N°3 fue leido
+[INFO] 19:25:37:798 DataNode/(10607:10607): [DATABIN] El bloque N°4 fue leido
+[INFO] 19:25:37:872 DataNode/(10607:10607): [DATABIN] El bloque N°5 fue leido
+[INFO] 19:25:37:945 DataNode/(10607:10607): [DATABIN] El bloque N°6 fue leido
+[INFO] 19:25:38:51 DataNode/(10607:10607): [DATABIN] El bloque N°7 fue leido
+[INFO] 19:25:38:168 DataNode/(10607:10607): [DATABIN] El bloque N°8 fue leido
+[INFO] 19:25:38:186 DataNode/(10607:10607): [EJECUCION] Proceso Data Node finalizado
