@@ -12,8 +12,8 @@
 
 int main(int contadorArgumentos, String* argumentos) {
 	fileSystemIniciar(argumentos[1]);
-	fileSystemCrearConsola();
 	fileSystemAtenderProcesos();
+	consolaAtenderComandos();
 	fileSystemFinalizar();
 	return EXIT_SUCCESS;
 }
@@ -36,18 +36,17 @@ void fileSystemIniciar(String flag) {
 		fileSystemRecuperar();
 }
 
-void fileSystemCrearConsola() {
-	hiloCrear(&hiloConsola, (Puntero)consolaAtenderComandos, NULL);
-}
-
 void fileSystemAtenderProcesos() {
-	servidorIniciar(servidor);
-	while(estadoControlIgualA(ACTIVADO))
-		servidorAtenderSolicitudes(servidor);
-	servidorFinalizar(servidor);
+	listenerDataNode = socketCrearListener(configuracion->puertoDataNode);
+	listenerYama = socketCrearListener(configuracion->puertoYama);
+	listenerWorker = socketCrearListener(configuracion->puertoWorker);
+	hiloCrear(&hiloDataNode, (Puntero)dataNodeListener, NULL);
+	hiloCrear(&hiloYama, (Puntero)yamaListener, NULL);
+	//hiloCrear(&hiloWorker, (Puntero)workerListener, NULL);
 }
 
 void fileSystemFinalizar() {
+	imprimirMensaje(archivoLog, "[EJECUCION] Proceso File System finalizado");
 	semaforoWait(semaforoFinal);
 	archivoLogDestruir(archivoLog);
 	configuracionRutasDestruir();
@@ -133,7 +132,7 @@ void configuracionRutasDestruir() {
 //--------------------------------------- Funciones de Servidor -------------------------------------
 
 void dataNodeListener() {
-	while(ACTIVADO);
+	while(ACTIVADO)
 		dataNodeCrearConexion();
 }
 
@@ -142,7 +141,7 @@ void dataNodeCrearConexion() {
 	dataNodeControlarConexion(nuevoSocket);
 }
 
-void dataNodeControlar(Socket nuevoSocket) {
+void dataNodeControlarConexion(Socket nuevoSocket) {
 	Mensaje* mensaje = mensajeRecibir(nuevoSocket);
 	Nodo* nodoTemporal = nodoCrear(mensaje->datos, nuevoSocket);
 	if(estadoEjecucionIgualA(NORMAL))
@@ -168,7 +167,7 @@ void dataNodeControlar(Nodo* nodoTemporal) {
 
 void dataNodeAdmitir(Nodo* nodoTemporal) {
 	if(nodoEstaConectado(nodoTemporal))
-		DataNodeRechazar(nodoTemporal);
+		dataNodeRechazar(nodoTemporal);
 	else
 		dataNodeAceptar(nodoTemporal);
 }
@@ -197,28 +196,37 @@ void dataNodeAceptarReconexion(Nodo* nuevoNodo) {
 }
 
 
-void DataNodeAtender(Nodo* nodo) {
+void dataNodeHilo(Nodo* nodo) {
+	hiloDetach(pthread_self());
+	int estado = ACTIVADO;
+	while(estado)
+		dataNodeAtender(nodo, &estado);
+}
+
+void dataNodeAtender(Nodo* nodo, int* estado) {
 	Mensaje* mensaje = mensajeRecibir(nodo->socket);
 	switch(mensaje->header.operacion) {
-	case LEER_BLOQUE: bloqueLeer(mensaje->datos); break;
-	case COPIAR_BLOQUE: bloqueCopiar(mensaje->datos); break;
-	case COPIAR_BINARIO: bloqueCopiarBinario(mensaje->datos); break;
-	case COPIAR_TEXTO: bloqueCopiarTexto(mensaje->datos); break;
-	case FINALIZAR_NODO: servidorFinalizarDataNode(nodo->socket); break;
+		//case LEER_BLOQUE: bloqueLeer(mensaje->datos); break;
+		//case COPIAR_BLOQUE: bloqueCopiar(mensaje->datos); break;
+		//case COPIAR_BINARIO: bloqueCopiarBinario(mensaje->datos); break;
+		//case COPIAR_TEXTO: bloqueCopiarTexto(mensaje->datos); break;
+		case DESCONEXION: dataNodeFinalizar(nodo, estado); break;
 	}
 	mensajeDestruir(mensaje);
 }
 
 
-void dataNodeDestruir(Nodo* nodo) {
-	dataNodeDesactivar(nodo);
+void dataNodeDestruir(Nodo* nodo, int* estado) {
+	*estado = DESACTIVADO;
+	imprimirMensajeUno(archivoLog, AMARILLO"[AVISO] %s desconectado"BLANCO, nodo->nombre);
 	int posicion = nodoListaPosicion(nodo);
 	mutexBloquear(mutexListaNodos);
 	listaEliminarDestruyendoElemento(listaNodos, posicion , (Puntero)nodoDestruir);
 	mutexDesbloquear(mutexListaNodos);
 }
 
-void dataNodeDesactivar(Nodo* nodo) {
+void dataNodeDesactivar(Nodo* nodo, int* estado) {
+	*estado = DESACTIVADO;
 	mutexBloquear(mutexTarea);
 	if(flagMensaje == DESACTIVADO) {
 		socketCerrar(nodo->socket);
@@ -231,64 +239,59 @@ void dataNodeDesactivar(Nodo* nodo) {
 	mutexDesbloquear(mutexTarea);
 }
 
-void dataNodeControlarFinalizacion(Nodo* nodo) {
+void dataNodeControlarFinalizacion(Nodo* nodo, int* estado) {
 	if(estadoFileSystemIgualA(ESTABLE))
-		dataNodeDesactivar(nodo);
+		dataNodeDesactivar(nodo, estado);
 	else
-		dataNodeDestruir(nodo);
+		dataNodeDestruir(nodo, estado);
 }
 
-void dataNodeFinalizar(Nodo* nodo) {
+void dataNodeFinalizar(Nodo* nodo, int* estado) {
 	if(estadoEjecucionIgualA(NORMAL))
-		dataNodeDesactivar(nodo);
+		dataNodeDesactivar(nodo, estado);
 	else
-		dataNodeControlarFinalizacion(nodo);
+		dataNodeControlarFinalizacion(nodo, estado);
 }
 
-void servidorIniciar(Servidor* servidor) {
-	hiloCrear(&hiloDataNode, dataNodeListener);
-	dataNodeCrearListener();
-	workerCrearListener();
-	servidorActivarListeners(servidor);
-}
-
-void servidorFinalizar(Servidor* servidor) {
-	imprimirMensaje(archivoLog, "[EJECUCION] Proceso File System finalizado");
-}
-
-
-void servidorActivarListeners(Servidor* servidor) {
-	listenerDataNode = socketCrearListener(configuracion->puertoDataNode);
-	servidor->listenerYama = socketCrearListener(configuracion->puertoYama);
-	servidor->listenerWorker = socketCrearListener(configuracion->puertoWorker);
-}
 //--------------------------------------- Funciones de Data Node -------------------------------------
 
 //--------------------------------------- Funciones de Yama -------------------------------------
 
-void servidorSolicitudYama(Socket unSocket) {
-	Socket nuevoSocket = socketAceptar(unSocket, ID_YAMA);
-	if(estadoFileSystemIgualA(ESTABLE)) {
-		servidor->yama = nuevoSocket;
-		socketYama = nuevoSocket;
-		servidorAceptarConexion(servidor, nuevoSocket);
-		mensajeEnviar(nuevoSocket, ACEPTAR_YAMA, &nuevoSocket, sizeof(Socket));
-		imprimirMensaje(archivoLog, "[CONEXION] El proceso Yama se ha conectado");
-	}
-	else {
-		socketCerrar(nuevoSocket);
-		imprimirMensaje(archivoLog, AMARILLO"[AVISO] El proceso Yama no pudo conectarse, el File System no es estable"BLANCO);
+void yamaListener() {
+	while(estadoControlIgualA(ACTIVADO)) {
+		socketYama = socketAceptar(listenerYama, ID_YAMA);
+	if(estadoFileSystemIgualA(ESTABLE))
+		yamaAceptar();
+	else
+		yamaRechazar();
 	}
 }
 
+void yamaAceptar() {
+	mensajeEnviar(socketYama, ACEPTAR_YAMA, VACIO, ACTIVADO);
+	imprimirMensaje(archivoLog, "[CONEXION] El proceso Yama se ha conectado");
+	int estado = ACTIVADO;
+	while(estado)
+		yamaAtender(&estado);
+}
 
-void servidorMensajeYama(Mensaje* mensaje) {
+void yamaRechazar() {
+	socketCerrar(socketYama);
+	imprimirMensaje(archivoLog, AMARILLO"[AVISO] El proceso Yama no pudo conectarse, el File System no es estable"BLANCO);
+}
+
+void yamaAtender(int* estado) {
+	Mensaje* mensaje = mensajeRecibir(socketYama);
 	switch(mensaje->header.operacion) {
-		case ENVIAR_BLOQUES: archivoEnviarBloquesYama(mensaje->datos);
+		case DESCONEXION: yamaFinalizar(estado); break;
+		case ENVIAR_BLOQUES: archivoEnviarBloquesYama(mensaje->datos); break;
 	}
+	mensajeDestruir(mensaje);
 }
 
-void servidorFinalizarYama() {
+void yamaFinalizar(int* estado) {
+	socketCerrar(socketYama);
+	*estado = DESACTIVADO;
 	imprimirMensaje(archivoLog, "[CONEXION] El proceso YAMA se ha desconectado");
 }
 
@@ -341,6 +344,7 @@ void socketListaLimpiar() {
 	mutexDesbloquear(mutexListaSockets);
 }
 
+/*
 void socketDesactivarNodos(Servidor* servidor) {
 	int indice;
 	int cantidad = socketListaCantidad();
@@ -358,7 +362,7 @@ void socketPrevenirDesconexion(Servidor* servidor) {
 		socketDesactivarNodos(servidor);
 	semaforoSignal(semaforoTarea);
 }
-
+*/
 //--------------------------------------- Funciones de Consola -------------------------------------
 
 bool consolaEntradaRespetaLimiteEspacios(String entrada) {
@@ -686,7 +690,6 @@ void consolaEjecutar() {
 }
 
 void consolaAtenderComandos() {
-	hiloDetach(pthread_self());
 	while(estadoControlIgualA(ACTIVADO))
 		consolaEjecutar();
 	semaforoSignal(semaforoFinal);
@@ -2293,6 +2296,8 @@ Nodo* nodoActualizar(Nodo* nodoTemporal) {
 
 void nodoAceptar(Nodo* nodo) {
 	mensajeEnviar(nodo->socket, ACEPTAR_DATANODE, VACIO, OK);
+	Hilo dataNode;
+	hiloCrear(&dataNode, (Puntero)dataNodeHilo, nodo);
 	imprimirMensajeUno(archivoLog, AMARILLO"[AVISO] %s conectado"BLANCO, nodo->nombre);
 }
 
@@ -2457,6 +2462,8 @@ void bloqueCopiar(Puntero datos) {
 	}
 }
 
+/*
+
 void servidorDestruirSockets(Servidor* servidor) {
 	int indice;
 	for(indice=0; indice < socketListaCantidad(); indice++) {
@@ -2488,6 +2495,7 @@ void bloqueCopiarTexto(Servidor* servidor, Puntero datos) {
 	fileCerrar(file);
 	socketPrevenirDesconexion(servidor);
 }
+*/
 
 BloqueYama bloqueConvertirParaYama(Bloque* bloque) {
 	BloqueYama bloqueYama;

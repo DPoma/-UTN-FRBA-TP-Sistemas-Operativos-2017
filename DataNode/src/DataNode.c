@@ -25,7 +25,7 @@ void dataNodeIniciar() {
 	dataNodeActivar();
 	dataBinConfigurar();
 	dataNodeConectarAFS();
-	senialAsignarFuncion(SIGINT, configuracionSenial);
+	//senialAsignarFuncion(SIGINT, configuracionSenial);
 }
 
 void dataNodeAtenderFileSystem(){

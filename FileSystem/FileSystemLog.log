@@ -1,12 +1,15 @@
-[INFO] 20:32:06:645 FileSystem/(7944:7944): [EJECUCION] Proceso File System iniciado
-[INFO] 20:32:06:709 FileSystem/(7944:7944): [CONFIGURACION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 20:32:06:710 FileSystem/(7944:7944): [CONFIGURACION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 20:32:06:711 FileSystem/(7944:7944): [CONFIGURACION] Esperando conexiones de Workers (Puerto: 5080)
-[INFO] 20:32:06:712 FileSystem/(7944:7944): [CONFIGURACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
-[INFO] 20:32:06:739 FileSystem/(7944:7944): [33m[AVISO] Conecte los nodos necesarios al File System para estabilizarlo[0m
-[INFO] 20:32:11:120 FileSystem/(7944:7947): [DIRECTORIO] aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa (d)
-[INFO] 20:32:30:867 FileSystem/(7944:7947): [ERROR] La ruta ingresada no es valida
-[INFO] 20:32:58:463 FileSystem/(7944:7947): [ERROR] El directorio destino  ya tiene un archivo o directorio con el mismo nombre
-[INFO] 20:33:15:992 FileSystem/(7944:7947): [DIRECTORIO] El directorio /aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa fue renombrado por hola
-[INFO] 20:33:22:406 FileSystem/(7944:7947): [DIRECTORIO] hola (d)
-[INFO] 20:33:37:968 FileSystem/(7944:7944): [EJECUCION] Proceso File System finalizado
+[INFO] 22:47:38:69 FileSystem/(10911:10911): [EJECUCION] Proceso File System iniciado
+[INFO] 22:47:38:135 FileSystem/(10911:10911): [CONFIGURACION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 22:47:38:137 FileSystem/(10911:10911): [CONFIGURACION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 22:47:38:138 FileSystem/(10911:10911): [CONFIGURACION] Esperando conexiones de Workers (Puerto: 5080)
+[INFO] 22:47:38:138 FileSystem/(10911:10911): [CONFIGURACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
+[INFO] 22:47:38:183 FileSystem/(10911:10911): [33m[AVISO] Conecte los nodos y formatee el File System para estabilizarlo[0m
+[INFO] 22:47:39:33 FileSystem/(10911:10916): [33m[AVISO] NODO1 conectado[0m
+[INFO] 22:47:40:47 FileSystem/(10911:10921): [33m[AVISO] NODO1 desconectado[0m
+[INFO] 22:47:43:263 FileSystem/(10911:10917): [33m[AVISO] El proceso Yama no pudo conectarse, el File System no es estable[0m
+[INFO] 22:47:45:300 FileSystem/(10911:10916): [33m[AVISO] NODO1 conectado[0m
+[INFO] 22:47:46:570 FileSystem/(10911:10932): [33m[AVISO] NODO1 desconectado[0m
+[INFO] 22:47:48:380 FileSystem/(10911:10911): [31m[ERROR] Primero debe formatear el File System para utilizarlo[0m
+[INFO] 22:47:52:566 FileSystem/(10911:10911): [FORMATEO] El File System fue formateado
+[INFO] 22:47:52:566 FileSystem/(10911:10911): [33m[AVISO] El File System esta estable[0m
+[INFO] 22:47:55:907 FileSystem/(10911:10911): [EJECUCION] Proceso File System finalizado

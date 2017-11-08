@@ -1,6 +1,5 @@
-[INFO] 20:24:42:904 DataNode/(7797:7797): [CONFIGURACION] Nombre Nodo: NODO1
-[INFO] 20:24:42:904 DataNode/(7797:7797): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data1.bin
-[INFO] 20:24:42:904 DataNode/(7797:7797): [DATABIN] Cantidad de bloques 100
-[INFO] 20:24:42:932 DataNode/(7797:7797): [CONEXION] Estableciendo conexion con File System (IP: 127.0.0.1 | Puerto 5040)
-[INFO] 20:24:42:951 DataNode/(7797:7797): [31m[CONEXION] Conexion finalizada con File System[0m
-[INFO] 20:24:42:951 DataNode/(7797:7797): [EJECUCION] Proceso Data Node finalizado
+[INFO] 22:47:45:276 DataNode/(10929:10929): [CONFIGURACION] Nombre Nodo: NODO1
+[INFO] 22:47:45:276 DataNode/(10929:10929): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data1.bin
+[INFO] 22:47:45:277 DataNode/(10929:10929): [DATABIN] Cantidad de bloques 100
+[INFO] 22:47:45:294 DataNode/(10929:10929): [CONEXION] Estableciendo conexion con File System (IP: 127.0.0.1 | Puerto 5040)
+[INFO] 22:47:45:294 DataNode/(10929:10929): [CONEXION] Conexion establecida con el File System

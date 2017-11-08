@@ -240,7 +240,29 @@ void configuracionIniciarLog();
 void configuracionIniciar();
 
 //--------------------------------------- Funciones de Servidor -------------------------------------
+void dataNodeListener();
+void dataNodeCrearConexion();
+void dataNodeControlarConexion(Socket nuevoSocket);
+void dataNodeReconectar(Nodo* nodoTemporal);
+void dataNodeControlar(Nodo* nodoTemporal);
+void dataNodeReconectar(Nodo* nodoTemporal);
+void dataNodeAdmitir(Nodo* nodoTemporal);
+void dataNodeAceptar(Nodo* nodoTemporal);
+void dataNodeRechazar(Nodo* nuevoNodo);
+void dataNodeAceptarReconexion(Nodo* nuevoNodo);
+void dataNodeAtender(Nodo* nodo, int* estado);
+void dataNodeFinalizar(Nodo* nodo, int* estado);
+void dataNodeDesactivar(Nodo* nodo, int* estado);
+void dataNodeDestruir(Nodo* nodo, int* estado);
+void dataNodeControlarFinalizacion(Nodo* nodo, int* estado);
+void dataNodeHilo(Nodo* nodo);
 
+void yamaListener();
+void yamaAceptar();
+void yamaRechazar();
+void yamaAtender();
+void yamaFinalizar();
+void workerListener();
 //--------------------------------------- Funciones de Socket-------------------------------------
 
 void socketListaAgregar(Socket* unSocket);
@@ -430,10 +452,10 @@ int bloqueEnviarANodo(Bloque* bloque, Nodo* nodo, String buffer);
 int bloqueEnviarCopiasANodos(Bloque* bloque, String buffer);
 bool bloqueOrdenarPorNumero(Bloque* unBloque, Bloque* otroBloque);
 void bloqueCopiar(Puntero datos);
-void bloqueLeer(Servidor* servidor, Puntero datos);
+//void bloqueLeer(Servidor* servidor, Puntero datos);
 //void bloqueLeer(Servidor* servidor, Puntero datos, Socket unSocket);
-void bloqueCopiarTexto(Servidor* servidor, Puntero datos);
-void bloqueCopiarBinario(Servidor* servidor, Puntero datos);
+//void bloqueCopiarTexto(Servidor* servidor, Puntero datos);
+//void bloqueCopiarBinario(Servidor* servidor, Puntero datos);
 bool bloqueDisponible(Bloque* bloque);
 BloqueNodo* bloqueNodoCrear(Entero numeroBloque, String buffer, int tamanioUtilizado);
 BloqueYama bloqueConvertirParaYama(Bloque* bloque);
