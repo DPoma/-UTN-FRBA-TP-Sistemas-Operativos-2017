@@ -1,41 +1,36 @@
-[INFO] 21:17:24:951 FileSystem/(12972:12972): [EJECUCION] Proceso File System iniciado
-[INFO] 21:17:25:13 FileSystem/(12972:12972): [CONFIGURACION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 21:17:25:15 FileSystem/(12972:12972): [CONFIGURACION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 21:17:25:15 FileSystem/(12972:12972): [CONFIGURACION] Esperando conexiones de Workers (Puerto: 5080)
-[INFO] 21:17:25:16 FileSystem/(12972:12972): [CONFIGURACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
-[INFO] 21:17:25:117 FileSystem/(12972:12972): [33m[AVISO] Conecte los nodos necesarios al File System para estabilizarlo[0m
-[INFO] 21:17:28:709 FileSystem/(12972:12975): [33m[AVISO] NODO1 conectado[0m
-[INFO] 21:17:35:443 FileSystem/(12972:12975): [33m[AVISO] NODO2 conectado[0m
-[INFO] 21:17:35:449 FileSystem/(12972:12975): [33m[AVISO] El File System esta estable[0m
-[INFO] 21:17:58:255 FileSystem/(12972:12972): [ARCHIVO] El archivo todo fue copiado en File System
-[INFO] 21:18:58:212 FileSystem/(12972:12972): [ARCHIVO] El archivo todo se copio en /home/utnso/Escritorio/todo2
-[INFO] 21:20:06:9 FileSystem/(12972:12972): [ERROR] El archivo no existe
-[INFO] 21:20:10:528 FileSystem/(12972:12972): [ARCHIVO] El archivo todo se copio en /home/utnso/Escritorio/Metadata/todo
-[INFO] 21:20:11:622 FileSystem/(12972:12972): [ARCHIVO] El MD5 del archivo es 80ca5e0c1892ab8ca2617a4cd8040142  /home/utnso/Escritorio/Metadata/todo
+[INFO] 22:38:44:791 FileSystem/(14834:14834): [EJECUCION] Proceso File System iniciado
+[INFO] 22:38:44:852 FileSystem/(14834:14834): [CONFIGURACION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 22:38:44:853 FileSystem/(14834:14834): [CONFIGURACION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 22:38:44:854 FileSystem/(14834:14834): [CONFIGURACION] Esperando conexiones de Workers (Puerto: 5080)
+[INFO] 22:38:44:855 FileSystem/(14834:14834): [CONFIGURACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
+[INFO] 22:38:44:925 FileSystem/(14834:14834): [33m[AVISO] Conecte los nodos necesarios al File System para estabilizarlo[0m
+[INFO] 22:38:47:766 FileSystem/(14834:14837): [33m[AVISO] NODO2 conectado[0m
+[INFO] 22:38:47:773 FileSystem/(14834:14837): [33m[AVISO] El File System esta estable[0m
+[INFO] 22:38:54:607 FileSystem/(14834:14837): [33m[AVISO] NODO1 conectado[0m
+[INFO] 22:39:00:481 FileSystem/(14834:14834): [DIRECTORIO] El directorio esta vacio
+[INFO] 22:39:31:529 FileSystem/(14834:14834): [ARCHIVO] El archivo transformador.sh fue copiado en File System
+[INFO] 22:40:07:778 FileSystem/(14834:14834): [ARCHIVO] El archivo transformador.sh se copio en /home/utnso/Escritorio/Metadata/transformador.sh
+[INFO] 22:40:08:867 FileSystem/(14834:14834): [ARCHIVO] El MD5 del archivo es 7639a9ba8bd1ca5e50107318bf531804  /home/utnso/Escritorio/Metadata/transformador.sh
 
-[INFO] 21:20:45:884 FileSystem/(12972:12972): [DIRECTORIO] WBAN.csv (a)
-[INFO] 21:20:45:891 FileSystem/(12972:12972): [DIRECTORIO] gg (a)
-[INFO] 21:20:45:891 FileSystem/(12972:12972): [DIRECTORIO] lala (a)
-[INFO] 21:20:45:892 FileSystem/(12972:12972): [DIRECTORIO] todo (a)
-[INFO] 21:20:45:892 FileSystem/(12972:12972): [DIRECTORIO] transformador.sh (a)
-[INFO] 21:20:53:925 FileSystem/(12972:12972): [ARCHIVO] El archivo /WBAN.csv ha sido eliminado
-[INFO] 21:21:06:612 FileSystem/(12972:12972): [ARCHIVO] El archivo WBAN.csv fue copiado en File System
-[INFO] 21:21:31:93 FileSystem/(12972:12972): [ARCHIVO] El archivo WBAN.csv se copio en /home/utnso/Escritorio/sera
-[INFO] 21:23:40:805 FileSystem/(12972:12972): [ARCHIVO] El archivo WBAN.csv se copio en /home/utnso/Escritorio/sera
-[INFO] 21:24:24:930 FileSystem/(12972:12972): [ERROR] Un archivo con ese nombre ya existe en el directorio destino
-[INFO] 21:24:42:577 FileSystem/(12972:12972): [ARCHIVO] El archivo /gg ha sido eliminado
-[INFO] 21:24:45:139 FileSystem/(12972:12972): [ARCHIVO] El archivo gg fue copiado en File System
-[INFO] 21:25:04:840 FileSystem/(12972:12972): [ARCHIVO] El archivo gg se copio en /home/utnso/Escritorio/oh
-[INFO] 21:26:03:340 FileSystem/(12972:12972): [DIRECTORIO] WBAN.csv (a)
-[INFO] 21:26:03:341 FileSystem/(12972:12972): [DIRECTORIO] gg (a)
-[INFO] 21:26:03:342 FileSystem/(12972:12972): [DIRECTORIO] lala (a)
-[INFO] 21:26:03:343 FileSystem/(12972:12972): [DIRECTORIO] todo (a)
-[INFO] 21:26:03:345 FileSystem/(12972:12972): [DIRECTORIO] transformador.sh (a)
-[INFO] 21:26:15:872 FileSystem/(12972:12972): [ARCHIVO] El archivo /transformador.sh ha sido eliminado
-[INFO] 21:26:36:168 FileSystem/(12972:12972): [ARCHIVO] El archivo transformador.sh fue copiado en File System
-[INFO] 21:26:49:947 FileSystem/(12972:12972): [ARCHIVO] El archivo reductor.pl fue copiado en File System
-[INFO] 21:27:24:505 FileSystem/(12972:12972): [ARCHIVO] El archivo reductor.pl se copio en /home/utnso/Escritorio/sera2
-[INFO] 21:27:40:7 FileSystem/(12972:12972): [ARCHIVO] El archivo transformador.sh se copio en /home/utnso/Escritorio/sera
-[INFO] 21:28:03:107 FileSystem/(12972:12986): [33m[AVISO] NODO2 desconectado[0m
-[INFO] 21:28:03:108 FileSystem/(12972:12982): [33m[AVISO] NODO1 desconectado[0m
-[INFO] 21:28:05:100 FileSystem/(12972:12972): [EJECUCION] Proceso File System finalizado
+[INFO] 22:40:40:940 FileSystem/(14834:14834): [ARCHIVO] El archivo reductor.pl fue copiado en File System
+[INFO] 22:40:51:785 FileSystem/(14834:14834): [ARCHIVO] El archivo reductor.pl se copio en /home/utnso/Escritorio/Metadata/reductor.pl
+[INFO] 22:40:52:847 FileSystem/(14834:14834): [ARCHIVO] El MD5 del archivo es 249966837ff7036e8c9b36a505fa40a0  /home/utnso/Escritorio/Metadata/reductor.pl
+
+[INFO] 22:41:25:779 FileSystem/(14834:14834): [ARCHIVO] El archivo todo fue copiado en File System
+[INFO] 22:41:46:103 FileSystem/(14834:14834): [31m[ERROR] Comando invalido[0m
+[INFO] 22:42:01:8 FileSystem/(14834:14834): [ARCHIVO] El archivo todo se copio en /home/utnso/Escritorio/Metadata/todo
+[INFO] 22:42:02:77 FileSystem/(14834:14834): [ARCHIVO] El MD5 del archivo es 80ca5e0c1892ab8ca2617a4cd8040142  /home/utnso/Escritorio/Metadata/todo
+
+[INFO] 22:43:14:7 FileSystem/(14834:14834): [ARCHIVO] El archivo /todo ha sido eliminado
+[INFO] 22:43:42:831 FileSystem/(14834:14834): [ARCHIVO] El archivo todo fue copiado en File System
+[INFO] 22:43:58:891 FileSystem/(14834:14834): [31m[ERROR] Comando invalido[0m
+[INFO] 22:44:26:542 FileSystem/(14834:14834): [ARCHIVO] El archivo todo se copio en /home/utnso/Escritorio/Metadata/todo
+[INFO] 22:44:27:602 FileSystem/(14834:14834): [ARCHIVO] El MD5 del archivo es 80ca5e0c1892ab8ca2617a4cd8040142  /home/utnso/Escritorio/Metadata/todo
+
+[INFO] 22:45:15:916 FileSystem/(14834:14848): [33m[AVISO] NODO1 desconectado[0m
+[INFO] 22:45:17:702 FileSystem/(14834:14834): [ARCHIVO] El archivo todo se copio en /home/utnso/Escritorio/Metadata/todo
+[INFO] 22:45:18:768 FileSystem/(14834:14834): [ARCHIVO] El MD5 del archivo es 80ca5e0c1892ab8ca2617a4cd8040142  /home/utnso/Escritorio/Metadata/todo
+
+[INFO] 22:45:30:958 FileSystem/(14834:14844): [33m[AVISO] NODO2 desconectado[0m
+[INFO] 22:45:30:958 FileSystem/(14834:14834): [ERROR] No se pudo leer el bloque N°631, se aborta la operacion
+[INFO] 22:45:38:403 FileSystem/(14834:14834): [EJECUCION] Proceso File System finalizado

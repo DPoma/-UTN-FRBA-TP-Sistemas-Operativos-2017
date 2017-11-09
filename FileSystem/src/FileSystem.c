@@ -1126,13 +1126,13 @@ int comandoCopiarArchivoDeYamaFS(Comando* comando) {
 			Copia* copia = listaObtenerElemento(bloque->listaCopias, indiceCopias);
 			Nodo* nodo = nodoBuscarPorNombre(copia->nombreNodo);
 			if(nodoConectado(nodo)) {
+				mutexBloquear(mutexBloque);
+				bloqueBuffer = bloque;
+				mutexDesbloquear(mutexBloque);
 				mensajeEnviar(nodo->socket, COPIAR_ARCHIVO, &copia->bloqueNodo, sizeof(Entero));
 				nodoMensaje(nodo,ACTIVADO);
 				nodo->tareasRealizadas++;
 				copiaSinEnviar = false;
-				mutexBloquear(mutexBloque);
-				bloqueBuffer = bloque;
-				mutexDesbloquear(mutexBloque);
 			}
 		}
 		mutexDesbloquear(mutexTarea);
@@ -1756,8 +1756,8 @@ int archivoAlmacenarTexto(Archivo* archivo, File file) {
 	int bytesDisponibles = BLOQUE;
 	int indiceDatos = 0;
 	int estado = OK;
-	int numeroBloque;
-	for(numeroBloque =0; fgets(buffer, BLOQUE, file) != NULL; numeroBloque++) {
+	int numeroBloque = 0;
+	while(fgets(buffer, BLOQUE, file) != NULL) {
 		int tamanioBuffer = stringLongitud(buffer);
 		if(tamanioBuffer <= bytesDisponibles) {
 			memcpy(datos+indiceDatos, buffer, tamanioBuffer);
@@ -1775,6 +1775,7 @@ int archivoAlmacenarTexto(Archivo* archivo, File file) {
 			numeroBloque++;
 			memcpy(datos+indiceDatos, buffer, tamanioBuffer);
 			bytesDisponibles -= tamanioBuffer;
+			indiceDatos += tamanioBuffer;
 		}
 	}
 	if(estado != ERROR && !stringEstaVacio(buffer))
@@ -2839,6 +2840,6 @@ void semaforosDestruir() {
 
 //TODO el databin cambia en tiempo de ejecucion
 //TODO el bitmap esta bien con 1 y 0 o binario
-
+//TODO nodo no se desconecta sin format
 //TODO dejar rollback
 //TODO ver memory leak hilo
