@@ -2473,7 +2473,11 @@ void nodoActivarDesconexion(Nodo* nodo, int* estado) {
 }
 
 void bloqueLeer(Nodo* nodo, Puntero datos, int* estado) {
-	printf("%s", (String)datos);
+	String buffer = stringCrear(BLOQUE+1);
+	memcpy(buffer, datos, BLOQUE);
+	buffer[BLOQUE] = FIN;
+	printf("%s", buffer);
+	memoriaLiberar(buffer);
 	nodoActivarDesconexion(nodo, estado);
 	semaforoSignal(semaforoTarea);
 }
