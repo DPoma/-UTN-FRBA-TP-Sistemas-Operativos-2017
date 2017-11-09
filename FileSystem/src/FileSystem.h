@@ -402,6 +402,8 @@ bool archivoListaTodosDisponibles();
 void archivoListaDestruir();
 void archivoGuardar(Archivo* archivo);
 void archivoControlar(Archivo* archivo, int estado);
+int archivoAlmacenarTexto(Archivo* archivo, File file);
+int archivoAlmacenarBinario(Archivo* archivo, File file);
 //--------------------------------------- Funciones de Nodo -------------------------------------
 
 Nodo* nodoCrear(Puntero datos, Socket nuevoSocket);
@@ -454,6 +456,7 @@ void bloqueDestruir(Bloque* bloque);
 int copiaGuardarEnNodo(Bloque* bloque, Nodo* nodo);
 int copiaEnviarANodo(Bloque* bloque, Nodo* nodo, String buffer);
 int bloqueEnviarCopias(Bloque* bloque, String buffer);
+int bloqueGuardar(Archivo* archivo, String buffer, size_t bytes, Entero numeroBloque);
 bool bloqueOrdenarPorNumero(Bloque* unBloque, Bloque* otroBloque);
 void bloqueCopiar(Nodo* nodo, Puntero datos, int* estado);
 void bloqueLeer(Nodo* nodo, Puntero datos, int* estado);

@@ -1734,66 +1734,56 @@ void archivoControlar(Archivo* archivo, int estado) {
 		archivoDestruir(archivo);
 }
 
-int bloqueGuardar(Archivo* archivo, String buffer, size_t bytes, Entero numeroBloque) {
-	Bloque* bloque = bloqueCrear(bytes, numeroBloque);
-	listaAgregarElemento(archivo->listaBloques, bloque);
-	int estado = bloqueEnviarCopias(bloque, buffer);
-	return estado;
-}
-
 int archivoAlmacenarBinario(Archivo* archivo, File file) {
 	String buffer = stringCrear(BLOQUE);
 	size_t bytes;
-	int estado;
+	int estado = OK;
 	int numeroBloque;
 	for(numeroBloque = 0; (bytes = fread(buffer, sizeof(char), BLOQUE, file)) == BLOQUE; numeroBloque++) {
 		estado = bloqueGuardar(archivo, buffer, bytes, numeroBloque);
 		if(estado == ERROR)
 			break;
 	}
-	if(bytes != NULO)
+	if(estado != ERROR && bytes != NULO)
 		estado = bloqueGuardar(archivo, buffer, bytes, numeroBloque);
 	memoriaLiberar(buffer);
 	return estado;
 }
 
-/*
 int archivoAlmacenarTexto(Archivo* archivo, File file) {
-	String buffer = stringCrear(MAX_STRING);
+	String buffer = stringCrear(BLOQUE+1);
 	String datos = stringCrear(BLOQUE);
-	int bytesDisponibles = BLOQUE-1;
-	int numeroBloqueArchivo = 0;
-	while(fgets(buffer, MAX_STRING, file) != NULL) {
+	int bytesDisponibles = BLOQUE;
+	int indiceDatos = 0;
+	int estado = OK;
+	int numeroBloque;
+	for(numeroBloque =0; fgets(buffer, BLOQUE, file) != NULL; numeroBloque++) {
 		int tamanioBuffer = stringLongitud(buffer);
 		if(tamanioBuffer <= bytesDisponibles) {
-			stringConcatenar(datos, buffer);
-			bytesDisponibles-= tamanioBuffer;
+			memcpy(datos+indiceDatos, buffer, tamanioBuffer);
+			bytesDisponibles -= tamanioBuffer;
+			indiceDatos += tamanioBuffer;
 		}
 		else {
-			int bytesUtilizados = stringLongitud(datos)+1;
-			bytesDisponibles = BLOQUE-1;
-			Bloque* bloque = bloqueCrear(bytesUtilizados, numeroBloqueArchivo);
-			listaAgregarElemento(archivo->listaBloques, bloque);
-			copiasEnviadas = bloqueEnviarCopias(bloque, datos);
-			if(copiasEnviadas == ERROR)
+			estado = bloqueGuardar(archivo, datos, BLOQUE-bytesDisponibles, numeroBloque);
+			if(estado == ERROR)
 				break;
-			numeroBloqueArchivo++;
 			memoriaLiberar(datos);
 			datos = stringCrear(BLOQUE);
-			stringConcatenar(datos, buffer);
-			bytesDisponibles-= tamanioBuffer;
+			bytesDisponibles = BLOQUE;
+			indiceDatos = 0;
+			numeroBloque++;
+			memcpy(datos+indiceDatos, buffer, tamanioBuffer);
+			bytesDisponibles -= tamanioBuffer;
 		}
 	}
-	if(copiasEnviadas != ERROR && stringLongitud(datos) > 0 ) {
-		int bytesUtilizados = stringLongitud(datos)+1;
-		Bloque* bloque = bloqueCrear(bytesUtilizados, numeroBloqueArchivo);
-		listaAgregarElemento(archivo->listaBloques, bloque);
-		copiasEnviadas = bloqueEnviarCopias(bloque, datos);
-	}
+	if(estado != ERROR && !stringEstaVacio(buffer))
+		estado = bloqueGuardar(archivo, datos, BLOQUE-bytesDisponibles, numeroBloque);
 	memoriaLiberar(datos);
 	memoriaLiberar(buffer);
+	return estado;
 }
-*/
+
 void archivoAlmacenar(Comando* comando) {
 	if(consolaflagInvalido(comando->argumentos[1])) {
 		imprimirMensaje(archivoLog, "[ERROR] Flag invalido");
@@ -1840,8 +1830,8 @@ void archivoAlmacenar(Comando* comando) {
 	int estado = NULO;
 	if(stringIguales(comando->argumentos[1], FLAG_B))
 		estado = archivoAlmacenarBinario(archivo, file);
-	//else
-		//estado = archivoAlmacenarTexto(archivo, file);
+	else
+		estado = archivoAlmacenarTexto(archivo, file);
 	fileCerrar(file);
 	archivoControlar(archivo, estado);
 
@@ -2438,26 +2428,6 @@ void bloqueDestruir(Bloque* bloque) {
 	memoriaLiberar(bloque);
 }
 
-int copiaGuardarEnNodo(Bloque* bloque, Nodo* nodo) {
-	Entero numeroBloqueNodo = nodoBuscarBloqueLibre(nodo);
-	Copia* copia = copiaCrear(numeroBloqueNodo, nodo->nombre);
-	bitmapOcuparBit(nodo->bitmap, numeroBloqueNodo);
-	nodo->bloquesLibres--;
-	nodoVerificarBloquesLibres(nodo);
-	listaAgregarElemento(bloque->listaCopias, copia);
-	return numeroBloqueNodo;
-}
-
-int copiaEnviarANodo(Bloque* bloque, Nodo* nodo, String buffer) {
-	int numeroBloqueNodo = copiaGuardarEnNodo(bloque, nodo);
-	BloqueNodo* bloqueNodo = bloqueNodoCrear(numeroBloqueNodo, buffer, BLOQUE);
-	mutexBloquear(mutexSocket);
-	mensajeEnviar(nodo->socket, ESCRIBIR_BLOQUE, bloqueNodo, sizeof(Entero)+BLOQUE);
-	mutexDesbloquear(mutexSocket);
-	memoriaLiberar(bloqueNodo);
-	return numeroBloqueNodo;
-}
-
 int bloqueEnviarCopias(Bloque* bloque, String buffer) {
 	int copiasEnviadas = 0;
 	int indice = 0;
@@ -2472,7 +2442,7 @@ int bloqueEnviarCopias(Bloque* bloque, String buffer) {
 	}
 	mutexDesbloquear(mutexTarea);
 	if(copiasEnviadas < MAX_COPIAS) {
-		imprimirMensaje1(archivoLog, ROJO"[ERROR] El bloque N°%i no tiene las copias necesarias"BLANCO, (int*)bloque->numeroBloque);
+		imprimirMensaje1(archivoLog, ROJO"[ERROR] El bloque N°%i no pudo copiarse porque no hay nodos disponibles"BLANCO, (int*)bloque->numeroBloque);
 		return ERROR;
 	}
 	return OK;
@@ -2527,6 +2497,13 @@ bool bloqueDisponible(Bloque* bloque) {
 	return listaCumpleAlguno(bloque->listaCopias, (Puntero)copiaDisponible);
 }
 
+int bloqueGuardar(Archivo* archivo, String buffer, size_t bytes, Entero numeroBloque) {
+	Bloque* bloque = bloqueCrear(bytes, numeroBloque);
+	listaAgregarElemento(archivo->listaBloques, bloque);
+	int estado = bloqueEnviarCopias(bloque, buffer);
+	return estado;
+}
+
 BloqueNodo* bloqueNodoCrear(Entero numeroBloque, String buffer, int tamanioUtilizado) {
 	BloqueNodo* bloqueNodo = memoriaAlocar(sizeof(BloqueNodo));
 	bloqueNodo->numeroBloque = numeroBloque;
@@ -2566,6 +2543,26 @@ void copiaDestruir(Copia* copia) {
 bool copiaDisponible(Copia* copia) {
 	Nodo* nodo = nodoBuscarPorNombre(copia->nombreNodo);
 	return nodoConectado(nodo);
+}
+
+int copiaGuardarEnNodo(Bloque* bloque, Nodo* nodo) {
+	Entero numeroBloqueNodo = nodoBuscarBloqueLibre(nodo);
+	Copia* copia = copiaCrear(numeroBloqueNodo, nodo->nombre);
+	bitmapOcuparBit(nodo->bitmap, numeroBloqueNodo);
+	nodo->bloquesLibres--;
+	nodoVerificarBloquesLibres(nodo);
+	listaAgregarElemento(bloque->listaCopias, copia);
+	return numeroBloqueNodo;
+}
+
+int copiaEnviarANodo(Bloque* bloque, Nodo* nodo, String buffer) {
+	int numeroBloqueNodo = copiaGuardarEnNodo(bloque, nodo);
+	BloqueNodo* bloqueNodo = bloqueNodoCrear(numeroBloqueNodo, buffer, BLOQUE);
+	mutexBloquear(mutexSocket);
+	mensajeEnviar(nodo->socket, ESCRIBIR_BLOQUE, bloqueNodo, sizeof(Entero)+BLOQUE);
+	mutexDesbloquear(mutexSocket);
+	memoriaLiberar(bloqueNodo);
+	return numeroBloqueNodo;
 }
 
 bool copiaOrdenarPorActividadDelNodo(Copia* unaCopia, Copia* otraCopia) {
@@ -2845,4 +2842,3 @@ void semaforosDestruir() {
 
 //TODO dejar rollback
 //TODO ver memory leak hilo
-//TODO arreglar md5

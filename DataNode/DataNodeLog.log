@@ -1,8 +1,39 @@
-[INFO] 19:57:06:869 DataNode/(11368:11368): [CONFIGURACION] Nombre Nodo: NODO1
-[INFO] 19:57:06:890 DataNode/(11368:11368): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data1.bin
-[INFO] 19:57:06:897 DataNode/(11368:11368): [DATABIN] Cantidad de bloques 100
-[INFO] 19:57:06:928 DataNode/(11368:11368): [CONEXION] Estableciendo conexion con File System (IP: 127.0.0.1 | Puerto 5040)
-[INFO] 19:57:06:931 DataNode/(11368:11368): [CONEXION] Conexion establecida con el File System
-[INFO] 19:57:10:676 DataNode/(11368:11368): [DATABIN] El bloque N°78 fue escrito
-[INFO] 19:58:26:190 DataNode/(11368:11368): [31m[CONEXION] Conexion finalizada con File System[0m
-[INFO] 19:58:26:192 DataNode/(11368:11368): [EJECUCION] Proceso Data Node finalizado
+[INFO] 21:17:35:378 DataNode/(12983:12983): [CONFIGURACION] Nombre Nodo: NODO2
+[INFO] 21:17:35:399 DataNode/(12983:12983): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data2.bin
+[INFO] 21:17:35:406 DataNode/(12983:12983): [DATABIN] Cantidad de bloques 100
+[INFO] 21:17:35:440 DataNode/(12983:12983): [CONEXION] Estableciendo conexion con File System (IP: 127.0.0.1 | Puerto 5040)
+[INFO] 21:17:35:448 DataNode/(12983:12983): [CONEXION] Conexion establecida con el File System
+[INFO] 21:17:58:282 DataNode/(12983:12983): [DATABIN] El bloque N°90 fue escrito
+[INFO] 21:18:58:203 DataNode/(12983:12983): [DATABIN] El bloque N°90 fue leido
+[INFO] 21:21:05:356 DataNode/(12983:12983): [DATABIN] El bloque N°0 fue escrito
+[INFO] 21:21:05:485 DataNode/(12983:12983): [DATABIN] El bloque N°1 fue escrito
+[INFO] 21:21:05:596 DataNode/(12983:12983): [DATABIN] El bloque N°2 fue escrito
+[INFO] 21:21:05:701 DataNode/(12983:12983): [DATABIN] El bloque N°3 fue escrito
+[INFO] 21:21:05:816 DataNode/(12983:12983): [DATABIN] El bloque N°4 fue escrito
+[INFO] 21:21:05:933 DataNode/(12983:12983): [DATABIN] El bloque N°5 fue escrito
+[INFO] 21:21:06:33 DataNode/(12983:12983): [DATABIN] El bloque N°6 fue escrito
+[INFO] 21:21:06:148 DataNode/(12983:12983): [DATABIN] El bloque N°7 fue escrito
+[INFO] 21:21:06:259 DataNode/(12983:12983): [DATABIN] El bloque N°8 fue escrito
+[INFO] 21:21:06:365 DataNode/(12983:12983): [DATABIN] El bloque N°9 fue escrito
+[INFO] 21:21:06:511 DataNode/(12983:12983): [DATABIN] El bloque N°10 fue escrito
+[INFO] 21:21:06:598 DataNode/(12983:12983): [DATABIN] El bloque N°11 fue escrito
+[INFO] 21:21:30:865 DataNode/(12983:12983): [DATABIN] El bloque N°1 fue leido
+[INFO] 21:21:30:904 DataNode/(12983:12983): [DATABIN] El bloque N°3 fue leido
+[INFO] 21:21:30:947 DataNode/(12983:12983): [DATABIN] El bloque N°5 fue leido
+[INFO] 21:21:30:996 DataNode/(12983:12983): [DATABIN] El bloque N°7 fue leido
+[INFO] 21:21:31:34 DataNode/(12983:12983): [DATABIN] El bloque N°9 fue leido
+[INFO] 21:21:31:84 DataNode/(12983:12983): [DATABIN] El bloque N°11 fue leido
+[INFO] 21:23:40:543 DataNode/(12983:12983): [DATABIN] El bloque N°0 fue leido
+[INFO] 21:23:40:601 DataNode/(12983:12983): [DATABIN] El bloque N°2 fue leido
+[INFO] 21:23:40:654 DataNode/(12983:12983): [DATABIN] El bloque N°4 fue leido
+[INFO] 21:23:40:700 DataNode/(12983:12983): [DATABIN] El bloque N°6 fue leido
+[INFO] 21:23:40:739 DataNode/(12983:12983): [DATABIN] El bloque N°8 fue leido
+[INFO] 21:23:40:778 DataNode/(12983:12983): [DATABIN] El bloque N°10 fue leido
+[INFO] 21:24:45:32 DataNode/(12983:12983): [DATABIN] El bloque N°12 fue escrito
+[INFO] 21:24:45:124 DataNode/(12983:12983): [DATABIN] El bloque N°91 fue escrito
+[INFO] 21:25:04:795 DataNode/(12983:12983): [DATABIN] El bloque N°12 fue leido
+[INFO] 21:26:36:168 DataNode/(12983:12983): [DATABIN] El bloque N°89 fue escrito
+[INFO] 21:26:49:931 DataNode/(12983:12983): [DATABIN] El bloque N°92 fue escrito
+[INFO] 21:27:39:994 DataNode/(12983:12983): [DATABIN] El bloque N°89 fue leido
+[INFO] 21:28:03:73 DataNode/(12983:12983): [31m[CONEXION] Conexion finalizada con File System[0m
+[INFO] 21:28:03:75 DataNode/(12983:12983): [EJECUCION] Proceso Data Node finalizado
