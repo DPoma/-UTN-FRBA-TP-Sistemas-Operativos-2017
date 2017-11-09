@@ -212,9 +212,9 @@ void dataNodeAtender(Nodo* nodo, int* estado) {
 	mensajeDestruir(mensaje);
 }
 
-
 void dataNodeDestruir(Nodo* nodo, int* estado) {
 	*estado = DESACTIVADO;
+	socketCerrar(nodo->socket);
 	imprimirMensaje1(archivoLog, AMARILLO"[AVISO] %s desconectado"BLANCO, nodo->nombre);
 	int posicion = nodoListaPosicion(nodo);
 	mutexBloquear(mutexListaNodos);
@@ -255,11 +255,16 @@ void yamaListener() {
 	hiloDetach(pthread_self());
 	while(estadoControlIgualA(ACTIVADO)) {
 		socketYama = socketAceptar(listenerYama, ID_YAMA);
+	if(socketYama != ERROR)
+		yamaControlar();
+	}
+}
+
+void yamaControlar() {
 	if(estadoFileSystemIgualA(ESTABLE))
 		yamaAceptar();
 	else
 		yamaRechazar();
-	}
 }
 
 void yamaAceptar() {
@@ -282,11 +287,6 @@ void yamaAtender(int* estado) {
 		case ENVIAR_BLOQUES: yamaEnviarBloques(mensaje->datos); break;
 	}
 	mensajeDestruir(mensaje);
-}
-
-void yamaDesconectar() {
-	if(socketYama != ERROR)
-		mensajeEnviar(socketYama, DESCONEXION, VACIO, ACTIVADO);
 }
 
 void yamaFinalizar(int* estado) {
@@ -993,6 +993,7 @@ void comandoInformacionArchivo(Comando* comando) {
 	printf("[ARCHIVO] Tipo: %s\n", archivo->tipo);
 	printf("[ARCHIVO] Ubicacion: %s\n", comando->argumentos[1]);
 	printf("[ARCHIVO] ID Padre: %i\n", archivo->identificadorPadre);
+	listaOrdenar(archivo->listaBloques, (Puntero)bloqueOrdenarPorNumero);
 	int indice;
 	int tamanio = 0;
 	for(indice = 0; indice < listaCantidadElementos(archivo->listaBloques); indice++) {
@@ -1003,7 +1004,10 @@ void comandoInformacionArchivo(Comando* comando) {
 	printf("[ARCHIVO] Bloques: %i\n", listaCantidadElementos(archivo->listaBloques));
 	for(indice = 0; indice < listaCantidadElementos(archivo->listaBloques); indice++) {
 		Bloque* bloque = listaObtenerElemento(archivo->listaBloques, indice);
-		printf("[ARCHIVO] Bloque %i: %i bytes\n", indice, bloque->bytesUtilizados);
+		if(archivoBinario(archivo))
+			printf("[ARCHIVO] Bloque %i: %i bytes\n", indice, BLOQUE);
+		else
+			printf("[ARCHIVO] Bloque %i: %i bytes\n", indice, bloque->bytesUtilizados);
 		int indiceCopia;
 		for(indiceCopia = 0; indiceCopia < listaCantidadElementos(bloque->listaCopias); indiceCopia++) {
 			Copia* copiaBloque = listaObtenerElemento(bloque->listaCopias, indiceCopia);
@@ -1265,9 +1269,9 @@ void comandoAyuda() {
 void comandoFinalizar() {
 	estadoControlDesactivar();
 	shutdown(listenerDataNode, SHUT_RDWR);
+	shutdown(listenerYama, SHUT_RDWR);
 	socketCerrar(listenerYama);
 	socketCerrar(listenerWorker);
-	yamaDesconectar();
 	nodoDesconectarATodos();
 }
 
@@ -2844,6 +2848,5 @@ void semaforosDestruir() {
 
 //TODO el databin cambia en tiempo de ejecucion
 //TODO el bitmap esta bien con 1 y 0 o binario
+
 //TODO nodo no se desconecta sin format
-//TODO dejar rollback
-//TODO ver memory leak hilo

@@ -1,10 +1,27 @@
-[INFO] 23:21:52:764 FileSystem/(15335:15335): [EJECUCION] Proceso File System iniciado
-[INFO] 23:21:52:833 FileSystem/(15335:15335): [CONFIGURACION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 23:21:52:835 FileSystem/(15335:15335): [CONFIGURACION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 23:21:52:835 FileSystem/(15335:15335): [CONFIGURACION] Esperando conexiones de Workers (Puerto: 5080)
-[INFO] 23:21:52:836 FileSystem/(15335:15335): [CONFIGURACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
-[INFO] 23:21:55:425 FileSystem/(15335:15335): [33m[AVISO] Conecte los nodos necesarios al File System para estabilizarlo[0m
-[INFO] 23:21:57:519 FileSystem/(15335:15343): [33m[AVISO] NODO2 conectado[0m
-[INFO] 23:21:57:656 FileSystem/(15335:15343): [33m[AVISO] El File System esta estable[0m
-[INFO] 23:22:00:234 FileSystem/(15335:15349): [33m[AVISO] NODO2 desconectado[0m
-[INFO] 23:22:02:256 FileSystem/(15335:15335): [EJECUCION] Proceso File System finalizado
+[INFO] 23:45:59:602 FileSystem/(15941:15941): [EJECUCION] Proceso File System iniciado
+[INFO] 23:45:59:664 FileSystem/(15941:15941): [CONFIGURACION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 23:45:59:665 FileSystem/(15941:15941): [CONFIGURACION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 23:45:59:665 FileSystem/(15941:15941): [CONFIGURACION] Esperando conexiones de Workers (Puerto: 5080)
+[INFO] 23:45:59:666 FileSystem/(15941:15941): [CONFIGURACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
+[INFO] 23:45:59:724 FileSystem/(15941:15941): [33m[AVISO] Conecte los nodos y formatee el File System para estabilizarlo[0m
+[INFO] 23:46:03:499 FileSystem/(15941:15946): [33m[AVISO] NODO2 conectado[0m
+[INFO] 23:46:12:925 FileSystem/(15941:15946): [33m[AVISO] NODO1 conectado[0m
+[INFO] 23:46:20:902 FileSystem/(15941:15941): [FORMATEO] El File System fue formateado
+[INFO] 23:46:20:903 FileSystem/(15941:15941): [33m[AVISO] El File System esta estable[0m
+[INFO] 23:46:35:174 FileSystem/(15941:15941): [ARCHIVO] El archivo WBAN.csv fue copiado en File System
+[INFO] 23:47:20:648 FileSystem/(15941:15941): [31m[ERROR] Comando invalido[0m
+[INFO] 23:47:31:125 FileSystem/(15941:15941): [ARCHIVO] El archivo WBAN.csv se copio en /home/utnso/Escritorio/Metadata/WBAN.csv
+[INFO] 23:47:32:249 FileSystem/(15941:15941): [ARCHIVO] El MD5 del archivo es 3930877e662926394236e3208ba65f40  /home/utnso/Escritorio/Metadata/WBAN.csv
+
+[INFO] 23:47:51:393 FileSystem/(15941:15941): [ARCHIVO] El archivo /WBAN.csv ha sido eliminado
+[INFO] 23:48:11:771 FileSystem/(15941:15941): [ARCHIVO] El archivo WBAN.csv fue copiado en File System
+[INFO] 23:48:16:661 FileSystem/(15941:15941): [ARCHIVO] El archivo WBAN.csv se copio en /home/utnso/Escritorio/Metadata/WBAN.csv
+[INFO] 23:48:17:760 FileSystem/(15941:15941): [ARCHIVO] El MD5 del archivo es 3930877e662926394236e3208ba65f40  /home/utnso/Escritorio/Metadata/WBAN.csv
+
+[INFO] 23:48:20:361 FileSystem/(15941:15941): [ARCHIVO] El archivo WBAN.csv se copio en /home/utnso/Escritorio/Metadata/WBAN.csv
+[INFO] 23:48:21:461 FileSystem/(15941:15941): [ARCHIVO] El MD5 del archivo es 3930877e662926394236e3208ba65f40  /home/utnso/Escritorio/Metadata/WBAN.csv
+
+[INFO] 23:48:37:149 FileSystem/(15941:15958): [33m[AVISO] NODO1 desconectado[0m
+[INFO] 23:48:37:172 FileSystem/(15941:15954): [33m[AVISO] NODO2 desconectado[0m
+[INFO] 23:48:37:189 FileSystem/(15941:15941): [31m[ERROR] No se pudo leer el bloque N°1[0m
+[INFO] 23:48:45:590 FileSystem/(15941:15941): [EJECUCION] Proceso File System finalizado

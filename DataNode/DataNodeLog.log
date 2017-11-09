@@ -1,7 +1,55 @@
-[INFO] 23:21:57:419 DataNode/(15346:15346): [CONFIGURACION] Nombre Nodo: NODO2
-[INFO] 23:21:57:438 DataNode/(15346:15346): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/test2.bin
-[INFO] 23:21:57:444 DataNode/(15346:15346): [DATABIN] Cantidad de bloques 20480
-[INFO] 23:21:57:486 DataNode/(15346:15346): [CONEXION] Estableciendo conexion con File System (IP: 127.0.0.1 | Puerto 5040)
-[INFO] 23:21:57:514 DataNode/(15346:15346): [CONEXION] Conexion establecida con el File System
-[INFO] 23:22:00:221 DataNode/(15346:15346): [31m[CONEXION] Conexion finalizada con File System[0m
-[INFO] 23:22:00:223 DataNode/(15346:15346): [EJECUCION] Proceso Data Node finalizado
+[INFO] 23:46:12:863 DataNode/(15955:15955): [CONFIGURACION] Nombre Nodo: NODO1
+[INFO] 23:46:12:882 DataNode/(15955:15955): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data1.bin
+[INFO] 23:46:12:889 DataNode/(15955:15955): [DATABIN] Cantidad de bloques 100
+[INFO] 23:46:12:922 DataNode/(15955:15955): [CONEXION] Estableciendo conexion con File System (IP: 127.0.0.1 | Puerto 5040)
+[INFO] 23:46:12:926 DataNode/(15955:15955): [CONEXION] Conexion establecida con el File System
+[INFO] 23:46:34:659 DataNode/(15955:15955): [DATABIN] El bloque N°0 fue escrito
+[INFO] 23:46:34:702 DataNode/(15955:15955): [DATABIN] El bloque N°1 fue escrito
+[INFO] 23:46:34:727 DataNode/(15955:15955): [DATABIN] El bloque N°2 fue escrito
+[INFO] 23:46:34:805 DataNode/(15955:15955): [DATABIN] El bloque N°3 fue escrito
+[INFO] 23:46:34:827 DataNode/(15955:15955): [DATABIN] El bloque N°4 fue escrito
+[INFO] 23:46:34:893 DataNode/(15955:15955): [DATABIN] El bloque N°5 fue escrito
+[INFO] 23:46:34:918 DataNode/(15955:15955): [DATABIN] El bloque N°6 fue escrito
+[INFO] 23:46:34:987 DataNode/(15955:15955): [DATABIN] El bloque N°7 fue escrito
+[INFO] 23:46:35:8 DataNode/(15955:15955): [DATABIN] El bloque N°8 fue escrito
+[INFO] 23:46:35:76 DataNode/(15955:15955): [DATABIN] El bloque N°9 fue escrito
+[INFO] 23:46:35:103 DataNode/(15955:15955): [DATABIN] El bloque N°10 fue escrito
+[INFO] 23:46:35:169 DataNode/(15955:15955): [DATABIN] El bloque N°11 fue escrito
+[INFO] 23:46:49:429 DataNode/(15955:15955): [DATABIN] El bloque N°1 fue leido
+[INFO] 23:46:53:574 DataNode/(15955:15955): [DATABIN] El bloque N°3 fue leido
+[INFO] 23:46:58:225 DataNode/(15955:15955): [DATABIN] El bloque N°5 fue leido
+[INFO] 23:47:02:328 DataNode/(15955:15955): [DATABIN] El bloque N°7 fue leido
+[INFO] 23:47:06:419 DataNode/(15955:15955): [DATABIN] El bloque N°9 fue leido
+[INFO] 23:47:10:713 DataNode/(15955:15955): [DATABIN] El bloque N°11 fue leido
+[INFO] 23:47:30:877 DataNode/(15955:15955): [DATABIN] El bloque N°0 fue leido
+[INFO] 23:47:30:926 DataNode/(15955:15955): [DATABIN] El bloque N°2 fue leido
+[INFO] 23:47:30:976 DataNode/(15955:15955): [DATABIN] El bloque N°4 fue leido
+[INFO] 23:47:31:16 DataNode/(15955:15955): [DATABIN] El bloque N°6 fue leido
+[INFO] 23:47:31:56 DataNode/(15955:15955): [DATABIN] El bloque N°8 fue leido
+[INFO] 23:47:31:93 DataNode/(15955:15955): [DATABIN] El bloque N°10 fue leido
+[INFO] 23:48:10:508 DataNode/(15955:15955): [DATABIN] El bloque N°0 fue escrito
+[INFO] 23:48:10:653 DataNode/(15955:15955): [DATABIN] El bloque N°1 fue escrito
+[INFO] 23:48:10:745 DataNode/(15955:15955): [DATABIN] El bloque N°2 fue escrito
+[INFO] 23:48:10:878 DataNode/(15955:15955): [DATABIN] El bloque N°3 fue escrito
+[INFO] 23:48:10:973 DataNode/(15955:15955): [DATABIN] El bloque N°4 fue escrito
+[INFO] 23:48:11:105 DataNode/(15955:15955): [DATABIN] El bloque N°5 fue escrito
+[INFO] 23:48:11:199 DataNode/(15955:15955): [DATABIN] El bloque N°6 fue escrito
+[INFO] 23:48:11:333 DataNode/(15955:15955): [DATABIN] El bloque N°7 fue escrito
+[INFO] 23:48:11:437 DataNode/(15955:15955): [DATABIN] El bloque N°8 fue escrito
+[INFO] 23:48:11:574 DataNode/(15955:15955): [DATABIN] El bloque N°9 fue escrito
+[INFO] 23:48:11:661 DataNode/(15955:15955): [DATABIN] El bloque N°10 fue escrito
+[INFO] 23:48:11:769 DataNode/(15955:15955): [DATABIN] El bloque N°11 fue escrito
+[INFO] 23:48:16:297 DataNode/(15955:15955): [DATABIN] El bloque N°1 fue leido
+[INFO] 23:48:16:351 DataNode/(15955:15955): [DATABIN] El bloque N°3 fue leido
+[INFO] 23:48:16:528 DataNode/(15955:15955): [DATABIN] El bloque N°5 fue leido
+[INFO] 23:48:16:568 DataNode/(15955:15955): [DATABIN] El bloque N°7 fue leido
+[INFO] 23:48:16:614 DataNode/(15955:15955): [DATABIN] El bloque N°9 fue leido
+[INFO] 23:48:16:656 DataNode/(15955:15955): [DATABIN] El bloque N°11 fue leido
+[INFO] 23:48:20:110 DataNode/(15955:15955): [DATABIN] El bloque N°0 fue leido
+[INFO] 23:48:20:164 DataNode/(15955:15955): [DATABIN] El bloque N°2 fue leido
+[INFO] 23:48:20:213 DataNode/(15955:15955): [DATABIN] El bloque N°4 fue leido
+[INFO] 23:48:20:254 DataNode/(15955:15955): [DATABIN] El bloque N°6 fue leido
+[INFO] 23:48:20:291 DataNode/(15955:15955): [DATABIN] El bloque N°8 fue leido
+[INFO] 23:48:20:330 DataNode/(15955:15955): [DATABIN] El bloque N°10 fue leido
+[INFO] 23:48:35:664 DataNode/(15955:15955): [31m[CONEXION] Conexion finalizada con File System[0m
+[INFO] 23:48:35:666 DataNode/(15955:15955): [EJECUCION] Proceso Data Node finalizado

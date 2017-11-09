@@ -262,6 +262,7 @@ void yamaRechazar();
 void yamaAtender();
 void yamaDesconectar();
 void yamaFinalizar();
+void yamaControlar();
 BloqueYama* yamaConvertirArchivo(Archivo* archivo, Entero idMaster);
 void yamaEnviarBloques(Puntero path);
 
@@ -404,6 +405,7 @@ void archivoGuardar(Archivo* archivo);
 void archivoControlar(Archivo* archivo, int estado);
 int archivoAlmacenarTexto(Archivo* archivo, File file);
 int archivoAlmacenarBinario(Archivo* archivo, File file);
+
 //--------------------------------------- Funciones de Nodo -------------------------------------
 
 Nodo* nodoCrear(Puntero datos, Socket nuevoSocket);
