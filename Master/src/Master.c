@@ -10,336 +10,63 @@
 
 #include "Master.h"
 
-int main(int contadorArgumentos, String* argumentos) {
-	masterIniciar(contadorArgumentos, argumentos);
-	masterConectarAYama(argumentos[3]);
+int main(int argc, String* argv) {
+	if(argc != 5) {
+		puts(ROJO"[ERROR] Faltan o sobran argumentos"BLANCO);
+		abort();
+	}
+	masterIniciar(argv);
 	masterAtender();
 	return EXIT_SUCCESS;
+
 }
 
-//--------------------------------------- Funciones de Master -------------------------------------
-
-void masterIniciar(int contadorArgumentos, String* argumentos) {
-	configuracionError(contadorArgumentos);
-	configuracionIniciar();
-	scriptTransformacionLeer(argumentos[1]);
-	scriptReduccionLeer(argumentos[2]);
-}
-
-void masterConectarAYama(String archivoDatos) {
-	socketYama = socketCrearCliente(configuracion->ipYama, configuracion->puertoYama, ID_MASTER);
-	imprimirMensaje(archivoLog, "[CONEXION] Conexion establecida con YAMA, esperando instrucciones");
-	mensajeEnviar(socketYama, SOLICITUD, archivoDatos, stringLongitud(archivoDatos)+1);
-}
-
-void masterAtender() {
-	while(estadoMaster == ACTIVADO) {
-		Mensaje* mensaje = mensajeRecibir(socketYama);
-		switch(mensaje->header.operacion) {
-		case DESCONEXION: masterFinalizar(); break;
-		//todo mover esto afuera del while este porque pasa una vez sola
-		//usar este case para recibir los alternativos, meter los semaforos
-		//y eso como en el codigo anterior
-		case TRANSFORMACION: transformacionIniciar(mensaje); break;
-		case ALTERNATIVO: transformoBLoque();
-		//case REDUCCION_LOCAL: reduccionLocalEjecutar(mensaje); break;
-		//case REDUCCION_GLOBAL: reduccionGlobalEjecutar(mensaje); break;
-		case 301: scriptInvalido(); break;
-		}
-	}
-}
-
-void masterFinalizar() {
-	imprimirMensaje(archivoLog,"[EJECUCION] Proces Master finalizado");
-	estadoMaster=DESACTIVADO;
-}
-
-//--------------------------------------- Funciones de Configuracion -------------------------------------
-
-void configuracionIniciar() {
-	configuracionIniciarLog();
-	configuracionIniciarCampos();
-	configuracion = configuracionCrear(RUTA_CONFIG, (Puntero)configuracionLeerArchivo, campos);
-	configuracionImprimir();
-	configuracionIniciarSemaforos();
-	senialAsignarFuncion(SIGINT, configuracionSenial);
-	estadoMaster = ACTIVADO;
-}
-
-Configuracion* configuracionLeerArchivo(ArchivoConfig archivoConfig) {
-	Configuracion* configuracion = memoriaAlocar(sizeof(Configuracion));
-	stringCopiar(configuracion->ipYama, archivoConfigStringDe(archivoConfig, "IP_YAMA"));
-	stringCopiar(configuracion->puertoYama, archivoConfigStringDe(archivoConfig, "PUERTO_YAMA"));
-	archivoConfigDestruir(archivoConfig);
-	return configuracion;
-}
-
-void configuracionSenial(int senial) {
-	estadoMaster=DESACTIVADO;
-}
-
-void configuracionIniciarLog() {
+void masterIniciar(String* argv) {
 	pantallaLimpiar();
-	imprimirMensajeProceso("# PROCESO MASTER");
 	archivoLog = archivoLogCrear(RUTA_LOG, "Master");
-}
-
-void configuracionIniciarCampos() {
+	imprimirMensajeProceso("# PROCESO MASTER");
 	campos[0] = "IP_YAMA";
 	campos[1] = "PUERTO_YAMA";
-}
-
-void configuracionImprimir() {
-	imprimirMensaje2(archivoLog, "[CONFIGURACION] Conectandose a YAMA (IP: %s | Puerto: %s)", configuracion->ipYama, configuracion->puertoYama);
-}
-
-void configuracionIniciarSemaforos() {
-	semaforoErrorBloque = memoriaAlocar(sizeof(Semaforo));
-	semaforoRecepcionAlternativa = memoriaAlocar(sizeof(Semaforo));
-	semaforoIniciar(semaforoErrorBloque,1);
-	semaforoIniciar(semaforoRecepcionAlternativa,0);
-}
-
-void configuracionError(int contadorArgumentos) {
-	if(contadorArgumentos != MAX_ARGS) {
-		puts(ROJO"[ERROR] Argumentos invalidos"BLANCO);
-		exit(EXIT_FAILURE);
+	Configuracion* configuracionLeerArchivo(ArchivoConfig archivoConfig) {
+		Configuracion* configuracion = memoriaAlocar(sizeof(Configuracion));
+		stringCopiar(configuracion->ipYama, archivoConfigStringDe(archivoConfig, "IP_YAMA"));
+		stringCopiar(configuracion->puertoYama, archivoConfigStringDe(archivoConfig, "PUERTO_YAMA"));
+		archivoConfigDestruir(archivoConfig);
+		return configuracion;
 	}
-}
-
-//--------------------------------------- Funciones de Script -------------------------------------
-
-void scriptLeer(File archScript, String* script, Entero* tamanio) {
-	fseek(archScript, 0, SEEK_END);
-	long posicion = ftell(archScript);
-	fseek(archScript, 0, SEEK_SET);
-	*script = memoriaAlocar(posicion + 1);
-	fread(*script, posicion, 1, archScript);
-	(*script)[posicion] = '\0';
-	*tamanio = stringLongitud(*script);
-}
-
-void scriptTransformacionLeer(String path) {
-	File fileScript = fileAbrir(path, LECTURA);
-	scriptLeer(fileScript,&scriptTransformacion,&sizeScriptTransformacion);
-	fileCerrar(fileScript);
-}
-
-void scriptReduccionLeer(String path) {
-	File fileScript = fileAbrir(path, LECTURA);
-	scriptLeer(fileScript,&scriptReduccion,&sizeScriptReduccion);
-	fileCerrar(fileScript);
-}
-
-void scriptInvalido() {
-	imprimirMensaje(archivoLog, ROJO"[ERROR] Path invalido, abortando proceso"BLANCO);
-	exit(EXIT_FAILURE);
-}
-
-//--------------------------------------- Funciones de Transformacion -------------------------------------
-
-void transformacionIniciar(Mensaje* mensaje) {
-	imprimirMensaje(archivoLog, "[MENSAJE] Lista de bloques recibida");
-	Lista listaMaster = listaCrear();
-	int indice;
-	for(indice=0; indice<mensaje->header.tamanio; indice+=DIRSIZE+INTSIZE*2+TEMPSIZE){
-		BloqueTransformacion* bloque = transformacionCrearBloque(mensaje->datos+indice);
-		imprimirMensaje3(archivoLog, "[TRANSFORMACION] Bloque N°%i recibido (IP: %s | Puerto: %s)",(int*)bloque->numeroBloque, bloque->direccion.ip, bloque->direccion.port);
-		bool flag = false;
-		int indiceNodos;
-		for(indiceNodos=0; indiceNodos < listaMaster->elements_count; indiceNodos++){
-			Lista listaNodo = listaObtenerElemento(listaMaster,indiceNodos);
-			BloqueTransformacion* bloqueComparador = listaPrimerElemento(listaNodo);
-			if(nodoIguales(bloque->direccion, bloqueComparador->direccion)){
-				listaAgregarElemento(listaNodo, bloque);
-				flag = true;
-				break;
-			}
-		}
-		if(!flag){
-			Lista listaNodo = listaCrear();
-			listaAgregarElemento(listaNodo, bloque);
-			listaAgregarElemento(listaMaster ,listaNodo);
-		}
+	configuracion = configuracionCrear(RUTA_CONFIG, (Puntero)configuracionLeerArchivo, campos);
+	imprimirMensaje2(archivoLog, "[CONEXION] Configuracion para conexion con YAMA (IP: %s | Puerto: %s)", configuracion->ipYama, configuracion->puertoYama);
+	void configuracionSenial(int senial) {
+		estadoMaster=DESACTIVADO;
 	}
-	transformacionCrearHilos(listaMaster);
-}
+	senialAsignarFuncion(SIGINT, configuracionSenial);
+	estadoMaster=ACTIVADO;
+	errorBloque = memoriaAlocar(sizeof(Semaforo));
+	recepcionAlternativo = memoriaAlocar(sizeof(Semaforo));
+	semaforoIniciar(errorBloque,1);
+	semaforoIniciar(recepcionAlternativo,0);
 
-void transformacionHilo(Lista listaBloques) {
-	BloqueTransformacion* bloque = listaPrimerElemento(listaBloques);
-	Socket socketWorker;
-	//todo enviar el script aca
-	int indice;
-	//meter todo en dos for así manda todo de una y aprovecha que worker se forkee
-	//vas a tener que tener un for de enviados y otro de recibidos, como en el codigo viejo
-	for(indice=0; indice<listaBloques->elements_count;indice++){
-		socketWorker = socketCrearCliente(bloque->direccion.ip,bloque->direccion.port,ID_MASTER);
-		//todo el cliente crearlo afuera porque siempre es el mismo nodo
-		//imprimirMensaje2(archivoLog,"[CONEXION] Estableciendo conexion con Worker (IP: %s | PUERTO: %s)",bloque->direccion.ip,bloque->direccion.port);
-		BloqueTransformacion* bloque = listaObtenerElemento(listaBloques,indice);
-		transformacionEnviarBloque(bloque, socketWorker);
-		Mensaje* mensaje = mensajeRecibir(socketWorker);
-		switch(mensaje->header.operacion) {
-			case EXITO: transformacionExito(mensaje, listaBloques); break;
-			case FRACASO: transformacionFracaso(mensaje, listaBloques); break;
-		}
-		mensajeDestruir(mensaje);
-		socketCerrar(socketWorker);
-	}
-}
-
-BloqueTransformacion* transformacionCrearBloque(Puntero datos) {
-	BloqueTransformacion* bloque = memoriaAlocar(sizeof(BloqueTransformacion));
-	memcpy(&bloque->direccion, datos, DIRSIZE);
-	memcpy(&bloque->numeroBloque, datos+DIRSIZE, INTSIZE);
-	memcpy(&bloque->bytesUtilizados, datos+DIRSIZE+INTSIZE,INTSIZE);
-	memcpy(bloque->nombreTemporal, datos+DIRSIZE+INTSIZE*2,TEMPSIZE);
-	return bloque;
-}
-
-BloqueTransformacion* transformacionBuscarBloque(Lista listaBloques, Entero numeroBloque) {
-
-	bool bloqueBuscarNumero(BloqueTransformacion* bloque) {
-		return bloque->numeroBloque == numeroBloque;
+	void leerArchivo(File archScript,char** script,int* len){
+		fseek(archScript, 0, SEEK_END);
+		long posicion = ftell(archScript);
+		fseek(archScript, 0, SEEK_SET);
+		*script=malloc(posicion + 1);
+		fread(*script, posicion, 1, archScript);
+		(*script)[posicion] = '\0';
+		*len=strlen(*script);
+		fclose(archScript);
 	}
 
-	BloqueTransformacion* bloque = listaBuscar(listaBloques, (Puntero)bloqueBuscarNumero);
-	return bloque;
-}
+	leerArchivo(fopen(argv[1],"r+"),&scriptTransformacion,&lenTransformacion);
+	leerArchivo(fopen(argv[2], "r+"),&scriptReduccion,&lenReduccion);
 
-void transformacionCrearHilos(Lista listaMaster) {
-	int indice;
-	for(indice=0; indice < listaMaster->elements_count; indice++){
-		Hilo hilo;
-		Lista listaNodo = listaObtenerElemento(listaMaster, indice);
-		hiloCrear(&hilo, (Puntero)transformacionHilo, listaNodo);
-	}
-}
-
-void transformacionNotificarYama(Mensaje* mensaje, Lista listaBloques) {
-	Entero numeroBloque = *(Entero*)mensaje->datos;
-	BloqueTransformacion* bloque = transformacionBuscarBloque(listaBloques, numeroBloque);;
-	Puntero datos = memoriaAlocar(INTSIZE+DIRSIZE);
-	memcpy(datos, &bloque->direccion, DIRSIZE);
-	memcpy(datos+DIRSIZE, &numeroBloque, INTSIZE);
-	mensajeEnviar(socketYama,mensaje->header.operacion, datos, DIRSIZE+INTSIZE);
-}
-
-void transformacionEnviarBloque(BloqueTransformacion* bloqueTransformacion, Socket socketWorker) {
-	BloqueWorker* bloque = bloqueCrear(bloqueTransformacion);
-	int tamanioTotal = 3*sizeof(Entero)+12+sizeScriptTransformacion;
-	Puntero datos = memoriaAlocar(tamanioTotal);
-	memcpy(datos, &sizeScriptTransformacion, sizeof(Entero));
-	memcpy(datos+sizeof(Entero), scriptTransformacion, sizeScriptTransformacion+1);
-	memcpy(datos+sizeScriptTransformacion+sizeof(Entero), &bloqueTransformacion->numeroBloque, sizeof(Entero));
-	memcpy(datos+sizeScriptTransformacion+sizeof(Entero)*2, &bloqueTransformacion->bytesUtilizados, sizeof(Entero));
-	memcpy(datos+sizeScriptTransformacion+sizeof(Entero)*3, bloqueTransformacion->nombreTemporal, 12);
-	mensajeEnviar(socketWorker, TRANSFORMACION, datos, tamanioTotal);
-	imprimirMensaje2(archivoLog,"[TRANSFORMACION] Enviando bloque N°%d (Archivo temporal: %s)",(int*)bloque->numeroBloque, bloque->nombreTemporal);
-}
-
-void transformacionExito(Mensaje* mensaje, Lista listaBloques) {
-	imprimirMensaje(archivoLog, "[TRANSFORMACION] Transformacion exitosa en el Worker");
-	transformacionNotificarYama(mensaje, listaBloques);
-}
-
-void transformacionFracaso(Mensaje* mensaje, Lista listaBloques) {
-	imprimirMensaje(archivoLog,"[TRANSFORMACION] Transformacion fallida en el Worker");
-	transformacionNotificarYama(mensaje, listaBloques);
-<<<<<<< HEAD
-	mensajeRecibir
-	//TODO ver alternativo
-=======
-	//todo recibir a traves de semaforos el alternativo, como en el codigo anterior
->>>>>>> origin/master
-}
+	imprimirMensaje2(archivoLog,"[CONEXION] Estableciendo Conexion con YAMA...", configuracion->ipYama, configuracion->puertoYama);
+	socketYama = socketCrearCliente(configuracion->ipYama, configuracion->puertoYama, ID_MASTER);
+	imprimirMensaje(archivoLog, "[CONEXION] Conexion establecida con YAMA, esperando instrucciones");
+	mensajeEnviar(socketYama,SOLICITUD,argv[3],stringLongitud(argv[3])+1);
 
 
-/*
-void alternativo() {
-	memcpy(&alternativo.numeroBloque,mensaje->datos+i+DIRSIZE,INTSIZE);
-	memcpy(&alternativo.bytesUtilizados,mensaje->datos+i+DIRSIZE+INTSIZE,INTSIZE);
-	memcpy(&alternativo.nombreTemporal,mensaje->datos+i+DIRSIZE+INTSIZE*2,TEMPSIZE);
-	semaforoSignal(semaforoRecepcionAlternativa);
-}
-*/
 
-//--------------------------------------- Funciones de Reduccion Local -------------------------------------
-
-void reduccionLocalEjecutar(Mensaje* mensaje) {
-	Dir* NODO;
-	int canttemps;
-	memcpy(NODO->ip, m->datos, sizeof(char)*20);
-	memcpy(NODO->port,m->datos + sizeof(char)*20, sizeof(char)*20);
-	memcpy(&canttemps, m->datos + sizeof(char)*40, sizeof(int32_t));
-	int tamanio=TEMPSIZE*(canttemps+1)+sizeof(int32_t)+tamanioScriptReduccion;
-	char* nuevoBuffer =malloc(tamanio);
-	memcpy(&nuevoBuffer, scriptReduccion, tamanioScriptReduccion);
-	memcpy(&nuevoBuffer + tamanioScriptReduccion, m->datos+ sizeof(char)*40, tamanio - tamanioScriptReduccion);
-	Socket sWorker =socketCrearCliente(NODO->ip, NODO->port, ID_MASTER);
-	mensajeEnviar(sWorker,REDUCCION_LOCAL,nuevoBuffer,tamanio);
-	free(m);
-	Mensaje* mensaje = mensajeRecibir(sWorker);
-	switch(mensaje->header.operacion){
-		case -802://Fracaso
-		{
-			mensajeEnviar(socketYama, FRACASO, NULL, 0); //MANDA A YAMA QUE FALLO
-			free(mensaje);
-			break;
-		}
-		case 802: //Exito
-		{
-			mensajeEnviar(socketYama, EXITO, NULL, 0); //MANDA A YAMA QUE FALLO
-			free(mensaje);
-			break;
-		}
-	}
-	socketCerrar(sWorker);
-}
-
-//--------------------------------------- Funciones de Reduccion Global -------------------------------------
-
-void reduccionGlobalEjecutar(Mensaje* m) {
-	Dir* NODO;
-	int canttemps;
-	memcpy(NODO->ip, m->datos, sizeof(char)*20);
-	memcpy(NODO->port,m->datos + sizeof(char)*20, sizeof(char)*20);
-	memcpy(&canttemps, m->datos + sizeof(char)*40, sizeof(int32_t));
-	int tamanio=(DIRSIZE+TEMPSIZE)*(canttemps)+TEMPSIZE+sizeof(int32_t)+tamanioScriptReduccion;
-	char* nuevoBuffer =malloc(tamanio);
-	memcpy(&nuevoBuffer, scriptReduccion, tamanioScriptReduccion);
-	memcpy(&nuevoBuffer + tamanioScriptReduccion, m->datos+ sizeof(char)*40, tamanio - tamanioScriptReduccion);
-	Socket sWorker =socketCrearCliente(NODO->ip, NODO->port, ID_MASTER);
-	mensajeEnviar(sWorker,REDUCCION_GLOBAL,nuevoBuffer,tamanio);
-	free(m);
-	Mensaje* mensaje = mensajeRecibir(sWorker);
-	switch(mensaje->header.operacion){
-		case -802://Fracaso
-		{
-			//imprimirMensaje(archivoLog, ("[EJECUCION] Tuve problemas para comunicarme con el Master (Pid hijo: %d)", pid)); //el hijo fallo en comunicarse con el master
-			mensajeEnviar(socketYama, FRACASO, NULL, 0); //MANDA A YAMA QUE FALLO
-			free(mensaje);
-			break;
-		}
-		case 802: //Exito
-		{
-			//imprimirMensaje(archivoLog, ("[EJECUCION] Tuve problemas para comunicarme con el Master (Pid hijo: %d)", pid)); //el hijo fallo en comunicarse con el master
-			mensajeEnviar(socketYama, EXITO, NULL, 0); //MANDA A YAMA QUE FALLO
-			free(mensaje);
-			break;
-		}
-	}
-	socketCerrar(sWorker);
-}
-*/
-//--------------------------------------- Funciones de Worker -------------------------------------
-
-BloqueWorker* bloqueCrear(BloqueTransformacion* transformacion) {
-	BloqueWorker* bloque = memoriaAlocar(sizeof(BloqueWorker));
-	memcpy(&bloque->numeroBloque, &transformacion->numeroBloque,INTSIZE);
-	memcpy(&bloque->bytesUtilizados, &transformacion->bytesUtilizados,INTSIZE);
-	memcpy(bloque->nombreTemporal,transformacion->nombreTemporal,TEMPSIZE);
-	return bloque;
 }
 
 void iniciarMetricaJob(){
@@ -352,9 +79,199 @@ void finMetricaJob(){
 	fin = uso.ru_utime;
 }
 
-bool nodoIguales(Dir a, Dir b) {
-	return stringIguales(a.ip,b.ip) && stringIguales(a.port,b.port);
+void reduccionLocal(Mensaje* m){
+	Dir* NODO;
+	int canttemps;
+	memcpy(NODO->ip, m->datos, sizeof(char)*20);
+	memcpy(NODO->port,m->datos + sizeof(char)*20, sizeof(char)*20);
+	memcpy(&canttemps, m->datos + sizeof(char)*40, sizeof(int32_t));
+	int tamanio=TEMPSIZE*(canttemps+1)+sizeof(int32_t)+lenReduccion;
+	char* nuevoBuffer =malloc(tamanio);
+	memcpy(&nuevoBuffer, scriptReduccion, lenReduccion);
+	memcpy(&nuevoBuffer + lenReduccion, m->datos+ sizeof(char)*40, tamanio - lenReduccion);
+	Socket sWorker =socketCrearCliente(NODO->ip, NODO->port, ID_MASTER);
+	mensajeEnviar(sWorker,REDUCLOCAL,nuevoBuffer,tamanio);
+	free(m);
+	Mensaje* mensaje = mensajeRecibir(sWorker);
+	switch(mensaje->header.operacion){
+		case -802://Fracaso
+		{
+			//imprimirMensaje(archivoLog, ("[EJECUCION] Tuve problemas para comunicarme con el Master (Pid hijo: %d)", pid)); //el hijo fallo en comunicarse con el master
+			mensajeEnviar(socketYama, FRACASO, NULL, 0); //MANDA A YAMA QUE FALLO
+			free(mensaje);
+			break;
+		}
+		case 802: //Exito
+		{
+			//imprimirMensaje(archivoLog, ("[EJECUCION] Tuve problemas para comunicarme con el Master (Pid hijo: %d)", pid)); //el hijo fallo en comunicarse con el master
+			mensajeEnviar(socketYama, EXITO, NULL, 0); //MANDA A YAMA QUE FALLO
+			free(mensaje);
+			break;
+		}
+	}
+	socketCerrar(sWorker);
 }
+
+void reduccionGlobal(Mensaje* m){
+	Dir* NODO;
+	int canttemps;
+	memcpy(NODO->ip, m->datos, sizeof(char)*20);
+	memcpy(NODO->port,m->datos + sizeof(char)*20, sizeof(char)*20);
+	memcpy(&canttemps, m->datos + sizeof(char)*40, sizeof(int32_t));
+	int tamanio=(DIRSIZE+TEMPSIZE)*(canttemps)+TEMPSIZE+sizeof(int32_t)+lenReduccion;
+	char* nuevoBuffer =malloc(tamanio);
+	memcpy(&nuevoBuffer, scriptReduccion, lenReduccion);
+	memcpy(&nuevoBuffer + lenReduccion, m->datos+ sizeof(char)*40, tamanio - lenReduccion);
+	Socket sWorker =socketCrearCliente(NODO->ip, NODO->port, ID_MASTER);
+	mensajeEnviar(sWorker,REDUCGLOBAL,nuevoBuffer,tamanio);
+	free(m);
+	Mensaje* mensaje = mensajeRecibir(sWorker);
+	switch(mensaje->header.operacion){
+		case -802://Fracaso
+		{
+			//imprimirMensaje(archivoLog, ("[EJECUCION] Tuve problemas para comunicarme con el Master (Pid hijo: %d)", pid)); //el hijo fallo en comunicarse con el master
+			mensajeEnviar(socketYama, FRACASO, NULL, 0); //MANDA A YAMA QUE FALLO
+			free(mensaje);
+			break;
+		}
+		case 802: //Exito
+		{
+			//imprimirMensaje(archivoLog, ("[EJECUCION] Tuve problemas para comunicarme con el Master (Pid hijo: %d)", pid)); //el hijo fallo en comunicarse con el master
+			mensajeEnviar(socketYama, EXITO, NULL, 0); //MANDA A YAMA QUE FALLO
+			free(mensaje);
+			break;
+		}
+	}
+	socketCerrar(sWorker);
+}
+
+void transformaciones(Lista bloques){
+	WorkerTransformacion* dir = list_get(bloques,0);
+	socketWorker=socketCrearCliente(dir->dir.ip,dir->dir.port,ID_MASTER);
+	imprimirMensaje2(archivoLog,"[CONEXION] Estableciendo conexion con Worker (IP: %s | PUERTO: %s",dir->dir.ip,dir->dir.port);
+	mensajeEnviar(socketWorker,TRANSFORMACION,scriptTransformacion,lenTransformacion);
+	int enviados=0,respondidos=0;
+	enviarBloques:
+	for(;enviados<bloques->elements_count;enviados++){
+		WorkerTransformacion* wt=list_get(bloques,enviados);
+		int tamanio=sizeof(WorkerTransformacion)-DIRSIZE;
+		char data[tamanio];
+		memcpy(data,&wt->bloque,INTSIZE);
+		memcpy(data+INTSIZE,&wt->bytes,INTSIZE); //a worker le interesan los bytes?
+		memcpy(data+INTSIZE*2,wt->temp,TEMPSIZE);
+		mensajeEnviar(socketWorker,TRANSFORMACION,data,tamanio);
+		imprimirMensaje2(archivoLog,"[CONEXION] Enviando bloque %d %s",(int*)wt->bloque,wt->temp);
+	}
+	for(;respondidos<enviados;respondidos++){
+		Mensaje* mensaje = mensajeRecibir(socketWorker);
+		//a demas de decir exito o fracaso devuelve el numero de bloque
+		void enviarActualizacion(){
+			imprimirMensaje2(archivoLog,"se recibio actualizacion de Worker %d %d",(int32_t*)mensaje->datos,&mensaje->header.operacion);
+			mensaje=realloc(mensaje,mensaje->header.tamanio+DIRSIZE+sizeof(Header));
+			memmove(mensaje->datos+DIRSIZE,mensaje->datos,mensaje->header.tamanio);
+			memcpy(mensaje->datos,&dir->dir,DIRSIZE);
+			mensajeEnviar(socketYama,mensaje->header.operacion,mensaje->datos,mensaje->header.tamanio+DIRSIZE);
+			mensajeDestruir(mensaje);
+		}
+		if(mensaje->header.operacion==EXITO){
+			imprimirMensaje1(archivoLog, "[TRANSFORMACION] Transformacion realizada con exito en el Worker %s",(*(Dir*)mensaje->datos).ip);
+			enviarActualizacion();
+		}else{
+			semaforoWait(errorBloque);
+			enviarActualizacion();
+			imprimirMensaje1(archivoLog,"[TRANSFORMACION] Transformacion fallida en el Worker %i",&socketWorker);
+			semaforoWait(recepcionAlternativo);
+			list_addM(bloques,&alternativo,sizeof alternativo);
+			semaforoSignal(errorBloque);
+			//se podría modificar para que se puedan procesar varios errores
+			//en paralelo, pero no vale la pena porque agrega mucho codigo
+			//y se supone que estos errores son casos raros
+			//para hacer eso se tendrian que sacar el semaforo y
+			//enviar el numero de thread en el mensaje, para diferenciar despues
+			respondidos++;
+			goto enviarBloques;
+		}
+	}
+	mensajeEnviar(socketWorker, EXITO, NULL, 0);
+	socketCerrar(socketWorker);
+}
+
+
+void masterAtender(){
+	puts("ESPERANDO MENSAJE");
+	Mensaje* mensaje=mensajeRecibir(socketYama);
+	//iniciarMetricaJob() desde aca se contaria el tiempo?
+	if(mensaje->header.operacion == 301) {
+		imprimirMensaje(archivoLog, ROJO"[ERROR] Path invalido, abortando proceso"BLANCO);
+		abort();
+	}
+	imprimirMensaje(archivoLog, "[MENSAJE] Lista de bloques recibida");
+	int i;
+	bool mismoNodo(Dir a,Dir b){
+		return stringIguales(a.ip,b.ip)&&stringIguales(a.port,b.port);//podría comparar solo ip
+	}
+	Lista listas=list_create();
+	for(i=0;i<mensaje->header.tamanio;i+=DIRSIZE+INTSIZE*2+TEMPSIZE){
+		WorkerTransformacion bloque;
+		memcpy(&bloque.dir,mensaje->datos+i,DIRSIZE);
+		memcpy(&bloque.bloque,mensaje->datos+i+DIRSIZE,INTSIZE);
+		memcpy(&bloque.bytes,mensaje->datos+i+DIRSIZE+INTSIZE,INTSIZE);
+		memcpy(bloque.temp,mensaje->datos+i+DIRSIZE+INTSIZE*2,TEMPSIZE);
+		imprimirMensaje3(archivoLog, "[RECEPCION] bloque %s %s %d",bloque.dir.ip,bloque.dir.port,(int*)bloque.bloque);
+		int j;
+		bool flag=false;
+		for(j=0;j<listas->elements_count;j++){
+			Lista nodo=list_get(listas,j);
+			WorkerTransformacion* cmp=list_get(nodo,0);
+			if(mismoNodo(bloque.dir,cmp->dir)){
+				list_addM(nodo,&bloque,sizeof bloque);
+				flag=true;
+				break;
+			}
+		}
+		if(!flag){
+			Lista nodo=list_create();
+			list_addM(nodo, &bloque,sizeof(WorkerTransformacion));
+			list_addM(listas,nodo,sizeof(t_list));
+			imprimirMensaje3(archivoLog,"] lista para nodo %s %s armada, lista #%d",bloque.dir.ip,bloque.dir.port,(int*)listas->elements_count);
+		}
+	}
+
+	for(i=0;i<listas->elements_count;i++){
+		pthread_t hilo;
+		pthread_create(&hilo,NULL,&transformaciones,list_get(listas,i));
+	}
+	while(estadoMaster==ACTIVADO) {
+		Mensaje* m = mensajeRecibir(socketYama);
+		switch(m->header.operacion){
+		case ABORTAR:
+			imprimirMensaje(archivoLog,"[ABORTO] Abortando proceso");
+			abort(); //supongo que los hilos mueren aca
+			//si no se mueren matarlos
+			break;
+		case CIERRE:
+			imprimirMensaje(archivoLog,"[EJECUCION] Terminando proceso");
+			estadoMaster=DESACTIVADO;
+			break;
+		case TRANSFORMACION://hubo error y se recibió un bloque alternativo
+			memcpy(&alternativo.bloque,mensaje->datos+i+DIRSIZE,INTSIZE);
+			memcpy(&alternativo.bytes,mensaje->datos+i+DIRSIZE+INTSIZE,INTSIZE);
+			memcpy(&alternativo.temp,mensaje->datos+i+DIRSIZE+INTSIZE*2,TEMPSIZE);
+			semaforoSignal(recepcionAlternativo);
+			break;
+		case REDUCLOCAL:
+			reduccionLocal(m);
+			break;
+		case REDUCGLOBAL:
+			reduccionGlobal(m);
+			break;
+		}
+	}
+}
+
+
+
+
 //void reduccionLocal(Mensaje* m){
 //	WorkerReduccion* wr= deserializarReduccion(m);
 //	int i;
@@ -407,6 +324,19 @@ bool nodoIguales(Dir a, Dir b) {
 
 
 
+
+
+
+
+//char* leerCaracteresEntrantes() {
+//	int i, caracterLeido;
+//	char* cadena = malloc(1000);
+//	for(i = 0; (caracterLeido= getchar()) != '\n'; i++)
+//		cadena[i] = caracterLeido;
+//	cadena[i] = '\0';
+//	return cadena;
+//}
+
 //int hayWorkersParaConectar(){
 //	Mensaje* m = mensajeRecibir(socketYama);
 //	if(m->header.operacion==-1){
@@ -418,6 +348,8 @@ bool nodoIguales(Dir a, Dir b) {
 //		}
 //
 //}
+
+
 
 //Lista workersAConectar(){
 //	Lista workers = list_create();

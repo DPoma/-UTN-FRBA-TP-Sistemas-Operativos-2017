@@ -12,496 +12,329 @@
 
 int main(void) {
 	workerIniciar();
-	workerAtenderMasters();
-	workerFinalizar();
+	socketListenerWorker = socketCrearListener(configuracion->puertoWorker);//todo hacer otro listener para workers, por el tema del handshake
+	imprimirMensaje1(archivoLog, "[CONEXION] Esperando conexiones de Master (Puerto: %s)", configuracion->puertoWorker);
+	while(estadoWorker)
+		socketAceptarConexion();
+	imprimirMensaje(archivoLog, "[EJECUCION] Proceso Worker finalizado");
 	return EXIT_SUCCESS;
 }
 
-//--------------------------------------- Funciones de Worker -------------------------------------
-
-void workerIniciar() {
-	configuracionIniciar();
-	estadoWorker = ACTIVADO;
-}
-
-void workerAtenderMasters() {
-	listenerMaster = socketCrearListener(configuracion->puertoMaster);
-	//listenerWorker = socketCrearListener(configuracion->puertoWorker);
-	while(estadoWorker)
-		masterAceptarConexion();
-}
-
-void workerFinalizar() {
-	imprimirMensaje(archivoLog, "[EJECUCION] Proceso Worker finalizado");
-}
-
-//--------------------------------------- Funciones de Configuracion -------------------------------------
-
-Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig) {
-	Configuracion* configuracion = memoriaAlocar(sizeof(Configuracion));
-	stringCopiar(configuracion->ipFileSytem, archivoConfigStringDe(archivoConfig, "IP_FILESYSTEM"));
-	stringCopiar(configuracion->puertoFileSystem, archivoConfigStringDe(archivoConfig, "PUERTO_FILESYSTEM"));
-	stringCopiar(configuracion->nombreNodo, archivoConfigStringDe(archivoConfig, "NOMBRE_NODO"));
-	stringCopiar(configuracion->puertoMaster, archivoConfigStringDe(archivoConfig, "PUERTO_MASTER"));
-	stringCopiar(configuracion->puertoWorker, archivoConfigStringDe(archivoConfig, "PUERTO_WORKER"));
-	stringCopiar(configuracion->rutaDataBin, archivoConfigStringDe(archivoConfig, "RUTA_DATABIN"));
-	stringCopiar(configuracion->ipPropia, archivoConfigStringDe(archivoConfig, "IP_PROPIA"));
-	archivoConfigDestruir(archivoConfig);
-	return configuracion;
-}
-
-void configuracionIniciar() {
-	configuracionIniciarLog();
-	configuracionIniciarCampos();
-	configuracion = configuracionCrear(RUTA_CONFIG, (void*)configuracionLeerArchivoConfig, campos);
-	configuracionImprimir(configuracion);
-	dataBinConfigurar();
-	//senialAsignarFuncion(SIGINT, configuracionSenial);
-}
-
-void configuracionIniciarLog() {
-	pantallaLimpiar();
-	imprimirMensajeProceso("# PROCESO WORKER");
-	archivoLog = archivoLogCrear(RUTA_LOG, "Worker");
-}
-
-void configuracionImprimir(Configuracion* configuracion) {
-	imprimirMensaje1(archivoLog, "[CONFIGURACION] Nombre: %s", configuracion->nombreNodo);
-	imprimirMensaje1(archivoLog, "[CONFIGURACION] Esperando conexiones de Master (Puerto: %s)", configuracion->puertoMaster);
-	imprimirMensaje1(archivoLog, "[CONFIGURACION] Esperando conexiones de Woker (Puerto: %s)", configuracion->puertoWorker);
-}
-
-void configuracionIniciarCampos() {
-	campos[0] = "IP_FILESYSTEM";
-	campos[1] = "PUERTO_FILESYSTEM";
-	campos[2] = "NOMBRE_NODO";
-	campos[3] = "IP_PROPIA";
-	campos[4] = "PUERTO_MASTER";
-	campos[5] = "PUERTO_WORKER";
-	campos[6] = "RUTA_DATABIN";
-}
-
-void configuracionCalcularBloques() {
-	int descriptorArchivo = open(configuracion->rutaDataBin, O_CLOEXEC | O_RDWR);
-	if (descriptorArchivo == ERROR) {
-		imprimirMensaje(archivoLog, "[ERROR] Fallo el open()");
-		perror("open");
-		exit(EXIT_FAILURE);
-	}
-	struct stat estadoArchivo;
-	if (fstat(descriptorArchivo, &estadoArchivo) == ERROR) {
-		imprimirMensaje(archivoLog, "[ERROR] Fallo el fstat()");
-		perror("fstat");
-		exit(EXIT_FAILURE);
-	}
-	dataBinTamanio = estadoArchivo.st_size;
-	dataBinBloques = (Entero)ceil((double)dataBinTamanio/(double)BLOQUE);
-	imprimirMensaje1(archivoLog, "[CONFIGURACION] Ruta archivo data.bin: %s", configuracion->rutaDataBin);
-	imprimirMensaje1(archivoLog, "[CONFIGURACION] Cantidad de bloques: %d", (int*)dataBinBloques);
-}
-
-void configuracionSenial(int senial) {
-	puts("");
-	imprimirMensaje(archivoLog, "[EJECUCION] Proceso Worker finalizado");
-}
-
-//--------------------------------------- Funciones de Master -------------------------------------
-
-void masterAceptarConexion() {
-	Socket nuevoSocket = socketAceptar(listenerMaster, ID_MASTER);
-	if(nuevoSocket != ERROR)
-		masterAtenderOperacion(nuevoSocket);
-	else
-		imprimirMensaje(archivoLog, "[ERROR] Error en el accept(), hoy no es tu dia papu");
-}
-
-void masterAtenderOperacion(Socket unSocket) {
-	int estado;
-	pid_t pid = fork();
-	if(pid == 0)
-		masterEjecutarOperacion(unSocket);
-	else if(pid > 0)
-		waitpid(pid, &estado, NULO);
-	else
-		imprimirMensaje(archivoLog, "[ERROR] Error en el fork(), estas jodido");
-}
-
-void masterEjecutarOperacion(Socket unSocket) {
-	imprimirMensaje(archivoLog, "[CONEXION] Proceso Master conectado exitosamente");
-	Mensaje* mensaje = mensajeRecibir(unSocket);
-	switch(mensaje->header.operacion) {
-		case DESCONEXION: imprimirMensaje(archivoLog, "[AVISO] El Master se desconecto"); break;
-		case TRANSFORMACION: transformacionIniciar(mensaje->datos, unSocket); break;
-		case REDUCCION_LOCAL reduccionLocalIniciar(mensaje->datos, unSocket); break;
-		case REDUCCION_GLOBAL: break;
-		case ALMACENADO: break;
-		case PASAREG: break;
-	}
-	exit(EXIT_SUCCESS);
-}
-
-//--------------------------------------- Funciones de Transformacion -------------------------------------
-
-Transformacion* transformacionRecibir(Puntero datos) {
-	Transformacion* transformacion = memoriaAlocar(sizeof(Transformacion));
-	memcpy(&transformacion->sizeScript, datos, sizeof(Entero));
-	transformacion->script = memoriaAlocar(transformacion->sizeScript);
-	memcpy(transformacion->script, datos+sizeof(Entero), transformacion->sizeScript);
-	memcpy(&transformacion->numeroBloque, datos+sizeof(Entero)+transformacion->sizeScript, sizeof(Entero));
-	memcpy(&transformacion->bytesUtilizados, datos+sizeof(Entero)*2+transformacion->sizeScript, sizeof(Entero));
-	memcpy(transformacion->archivoTemporal, datos+sizeof(Entero)*3+transformacion->sizeScript, 12);
-	return transformacion;
-}
-
-void transformacionIniciar(Puntero datos, Socket unSocket) {
-	Transformacion* transformacion = transformacionRecibir(datos);
-	int resultado = transformacionEjecutar(transformacion);
-	if(resultado != ERROR)
-		transformacionExito(transformacion->numeroBloque, unSocket);
-	else
-		transformacionFracaso(transformacion->numeroBloque, unSocket);
-}
-
-int transformacionEjecutar(Transformacion* transformacion) {
-	String pathBloque = transformacionBloqueTemporal(transformacion);
-	String pathScript = transformacionScriptTemporal(transformacion);
-	String pathDestino = string_from_format("%s/%s", RUTA_TEMPS, transformacion->archivoTemporal);
-	String comando = string_from_format("cat %s | sh %s | sort > %s", pathBloque, pathScript, pathDestino);
-	int resultado = system(comando);
-	fileLimpiar(pathBloque);
-	fileLimpiar(pathScript);
-	memoriaLiberar(pathScript);
-	memoriaLiberar(pathDestino);
-	memoriaLiberar(pathBloque);
-	return resultado;
-}
-
-void transformacionExito(Entero numeroBloque, Socket unSocket) {
-	imprimirMensaje1(archivoLog,"[TRANSFORMACION] Transformacion exitosa en bloque N°%i de Master", (int*)numeroBloque);
-	mensajeEnviar(unSocket, EXITO, &numeroBloque, sizeof(Entero));
-}
-
-void transformacionFracaso(Entero numeroBloque, Socket unSocket) {
-	imprimirMensaje1(archivoLog,"[TRANSFORMACION] Transformacion fallida en bloque N°%i de Master", (int*)numeroBloque);
-	mensajeEnviar(unSocket, FRACASO, &numeroBloque, sizeof(Entero));
-}
-
-String transformacionBloqueTemporal(Transformacion* transformacion) {
-	String path = string_from_format("%s/bloqueTemporal%i", RUTA_TEMPS, transformacion->numeroBloque);
-	File file = fileAbrir(path, ESCRITURA);
-	Puntero puntero = getBloque(transformacion->numeroBloque);
-	fwrite(puntero, sizeof(char), transformacion->bytesUtilizados, file);
-	fileCerrar(file);
-	return path;
-}
-
-String transformacionScriptTemporal(Transformacion* transformacion) {
-	String path = string_from_format("%s/scriptTemporal%i", RUTA_TEMPS, transformacion->numeroBloque);
-	File file = fileAbrir(path , ESCRITURA);
-	fwrite(transformacion->script, sizeof(char), transformacion->sizeScript, file);
-	fileCerrar(file);
-	return path;
-}
-
-//--------------------------------------- Funciones de Reduccion Local -----------------------------------
-
-void reduccionLocalIniciar(Puntero datos, Socket unSocket) {
-	ReduccionLocal* reduccion = reduccionLocalRecibir(datos);
-	int resultado = reduccionLocalEjecutar(reduccion);
-	if(resultado != ERROR)
-		reduccionLocalExito(unSocket);
-	else
-		reduccionLocalFracaso(unSocket);
-}
-
-ReduccionLocal* reduccionLocalRecibir(Puntero datos) {
-	ReduccionLocal* reduccion = memoriaAlocar(sizeof(ReduccionLocal));
-	memcpy(&reduccion->sizeScript, datos, sizeof(Entero));
-	reduccion->script = memoriaAlocar(reduccion->sizeScript);
-	memcpy(reduccion->script, datos+sizeof(Entero), reduccion->sizeScript);
-	memcpy(&reduccion->cantidadTemporales, datos+sizeof(Entero)+reduccion->sizeScript, sizeof(Entero));
-	memcpy(reduccion->archivosTemporales, datos+sizeof(Entero)*2+reduccion->sizeScript, reduccion->cantidadTemporales*12);
-	memcpy(reduccion->archivoTemporal, datos+sizeof(Entero)*3+reduccion->sizeScript+reduccion->cantidadTemporales*12, 12);
-	return reduccion;
-}
-
-int transformacionEjecutar(Transformacion* transformacion) {
-	String pathBloque = transformacionBloqueTemporal(transformacion);
-	String pathScript = transformacionScriptTemporal(transformacion);
-	String pathDestino = string_from_format("%s/%s", RUTA_TEMPS, transformacion->archivoTemporal);
-	String comando = string_from_format("cat %s | pl %s | sort > %s", pathBloque, pathScript, pathDestino);
-	int resultado = system(comando);
-	fileLimpiar(pathBloque);
-	fileLimpiar(pathScript);
-	memoriaLiberar(pathScript);
-	memoriaLiberar(pathDestino);
-	memoriaLiberar(pathBloque);
-	return resultado;
-}
-
-void transformacionExito(Entero numeroBloque, Socket unSocket) {
-	imprimirMensaje1(archivoLog,"[TRANSFORMACION] Transformacion exitosa en bloque N°%i de Master", (int*)numeroBloque);
-	mensajeEnviar(unSocket, EXITO, &numeroBloque, sizeof(Entero));
-}
-
-void transformacionFracaso(Entero numeroBloque, Socket unSocket) {
-	imprimirMensaje1(archivoLog,"[TRANSFORMACION] Transformacion fallida en bloque N°%i de Master", (int*)numeroBloque);
-	mensajeEnviar(unSocket, FRACASO, &numeroBloque, sizeof(Entero));
-}
-
-String transformacionBloqueTemporal(Transformacion* transformacion) {
-	String path = string_from_format("%s/bloqueTemporal%i", RUTA_TEMPS, transformacion->numeroBloque);
-	File file = fileAbrir(path, ESCRITURA);
-	Puntero puntero = getBloque(transformacion->numeroBloque);
-	fwrite(puntero, sizeof(char), transformacion->bytesUtilizados, file);
-	fileCerrar(file);
-	return path;
-}
-
-String transformacionScriptTemporal(Transformacion* transformacion) {
-	String path = string_from_format("%s/scriptTemporal%i", RUTA_TEMPS, transformacion->numeroBloque);
-	File file = fileAbrir(path , ESCRITURA);
-	fwrite(transformacion->script, sizeof(char), transformacion->sizeScript, file);
-	fileCerrar(file);
-	return path;
-}
-
-
-//--------------------------------------- Funciones de DataBin -------------------------------------
-
-void dataBinConfigurar() {
-	dataBinAbrir();
-	punteroDataBin = dataBinMapear();
-	configuracionCalcularBloques();
-}
-
-void dataBinAbrir() {
-	dataBin = fileAbrir(configuracion->rutaDataBin, LECTURA);
-	if(dataBin == NULL){
-		imprimirMensaje(archivoLog,ROJO"[ERROR] No se pudo abrir el archivo data.bin"BLANCO);
-		exit(EXIT_FAILURE);
-	}
-	fileCerrar(dataBin);
-}
-
-Puntero dataBinMapear() {
-	Puntero Puntero;
-	int descriptorArchivo = open(configuracion->rutaDataBin, O_CLOEXEC | O_RDWR);
-	if (descriptorArchivo == ERROR) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] Fallo el open()"BLANCO);
-		perror("open");
-		exit(EXIT_FAILURE);
-	}
-	struct stat estadoArchivo;
-	if (fstat(descriptorArchivo, &estadoArchivo) == ERROR) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] Fallo el fstat()"BLANCO);
-		perror("fstat");
-		exit(EXIT_FAILURE);
-	}
-	dataBinTamanio = estadoArchivo.st_size;
-	Puntero = mmap(0, dataBinTamanio, PROT_WRITE | PROT_READ | PROT_EXEC, MAP_SHARED, descriptorArchivo, 0);
-	if (Puntero == MAP_FAILED) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] Fallo el mmap(), corran por sus vidas"BLANCO);
-		perror("mmap");
-		exit(EXIT_FAILURE);
-	}
-	close(descriptorArchivo);
-	return Puntero;
-}
-
-//--------------------------------------- Funciones de Bloque -------------------------------------
-
-BloqueWorker bloqueBuscar(Entero numeroBloque) {
-	BloqueWorker bloque = punteroDataBin + (BLOQUE * numeroBloque);
-	return bloque;
-}
-
-BloqueWorker getBloque(Entero numeroBloque) {
-	BloqueWorker bloque = bloqueBuscar(numeroBloque);
-	imprimirMensaje1(archivoLog, "[DATABIN] El bloque N°%i fue leido", (int*)numeroBloque);
-	return bloque;
-}
-
-
-
-
-/* todo
-void redulocal() {
-	char* origen;
-	int sizeOrigen;
-	char* destino; //los temporales siempre miden 12, le podes mandar un char[12] aca y listo
-	int sizeDestino;
-	memcpy(&sizeCodigo, mensaje->datos, sizeof(int32_t));
-	memcpy(&codigo,mensaje->datos + sizeof(int32_t), sizeCodigo);
-	memcpy(&sizeOrigen, mensaje->datos+ sizeof(int32_t) +sizeCodigo, sizeof(int32_t));
-	memcpy(&origen,mensaje->datos + sizeof(int32_t)*2+sizeCodigo, sizeOrigen);
-	memcpy(&sizeDestino, mensaje->datos + sizeof(int32_t)*2 + sizeCodigo + sizeOrigen, sizeof(int32_t));
-	memcpy(&destino,mensaje->datos + sizeof(int32_t)*3+sizeCodigo+ sizeOrigen, sizeDestino);
-	int result=reduccionLocalEjecutar(codigo,origen,destino);
-	if(result==-1){
-		mensajeEnviar(unSocket, FRACASO, NULL, 0);
-	}
-	/*char* buffer = leerArchivo(path,offset,size);
-	log_info(logFile, "[FILE SYSTEM] EL KERNEL PIDE LEER: %s | OFFSET: %i | SIZE: %i", path, offset, size);
-	if(buffer=="-1"){
-		lSend(conexion, NULL, -4, 0);
-		log_error(logFile, "[LEER]: HUBO UN ERROR AL LEER");
-		break;
-	}
-	//enviar el buffer
-	lSend(conexion, buffer, 2, sizeof(char)*size);
-	free(buffer);
-	free(path);*/
-/* todo
-	mensajeEnviar(unSocket, EXITO, NULL, 0);
-	free(codigo);
-	free(origen);
-	free(destino);
-	free(mensaje);
-}
-*/
-
-/*todo
-void reducglobal() {
-	char* origen;
-					int sizeOrigen;
-					char* destino; //los temporales siempre miden 12, le podes mandar un char[12] aca y listo
-					int sizeDestino;
-					memcpy(&sizeCodigo, mensaje->datos, sizeof(int32_t));
-					memcpy(&codigo,mensaje->datos + sizeof(int32_t), sizeCodigo);
-					memcpy(&sizeOrigen, mensaje->datos+ sizeof(int32_t) +sizeCodigo, sizeof(int32_t));
-					memcpy(&origen,mensaje->datos + sizeof(int32_t)*2+sizeCodigo, sizeOrigen);
-					memcpy(&sizeDestino, mensaje->datos + sizeof(int32_t)*2 + sizeCodigo + sizeOrigen, sizeof(int32_t));
-					memcpy(&destino,mensaje->datos + sizeof(int32_t)*3+sizeCodigo+ sizeOrigen, sizeDestino);
-					int result = reduccionGlobalEjecutar(codigo,origen,destino);
-					if(result==-1){
-						mensajeEnviar(unSocket, FRACASO, NULL, 0);
-					}
-					/*char* buffer = leerArchivo(path,offset,size);
-					log_info(logFile, "[FILE SYSTEM] EL KERNEL PIDE LEER: %s | OFFSET: %i | SIZE: %i", path, offset, size);
-					if(buffer=="-1"){
-						lSend(conexion, NULL, -4, 0);
-						log_error(logFile, "[LEER]: HUBO UN ERROR AL LEER");
-						break;32_t
-					}
-					//enviar el buffer
-					lSend(conexion, buffer, 2, sizeof(char)*size);
-					free(buffer);
-					free(path);*/
-/* todo
-					mensajeEnviar(unSocket, EXITO, NULL, 0);
-					free(codigo);
-					free(origen);
-					free(destino);
-					free(mensaje);
-}
-*///todo
-
-/* todo
-void alamcenado() {
-	int sizeNombre;
-			char* Nombre;
-			int sizeRuta;
-			char* Ruta;
-			int sizebuffer=0;
-			char* buffer;
-			char* c;
-			memcpy(&sizeNombre, mensaje->datos, sizeof(int32_t));
-			memcpy(&Nombre,mensaje->datos + sizeof(int32_t), sizeNombre);
-			memcpy(&sizeRuta, mensaje->datos+ sizeof(int32_t) +sizeNombre, sizeof(int32_t));
-			memcpy(&Ruta,mensaje->datos + sizeof(int32_t)*2+sizeCodigo, sizeRuta);
-			//almacenar();
-			//leer el archivo y meterlo en un buffer
-			FILE* arch;
-			arch = fopen(Ruta,"r");
-			c = fgetc(arch);
-			while(c!=EOF){
-				buffer = realloc(buffer,sizeof(char)*(sizebuffer+1));
-				buffer[sizebuffer]=c;
-				sizebuffer++;
-				c = fgetc(arch);
+void workerCrearHijo(Socket unSocket) {
+	//int ppid = fork();
+	//if(ppid == 0) {
+		imprimirMensaje(archivoLog, "[CONEXION] Esperando mensajes de Master");
+		Mensaje* mensaje = mensajeRecibir(unSocket);
+		char* codigo;
+		int sizeCodigo;
+		switch(mensaje->header.operacion){
+			case -1:
+			{
+				//imprimirMensaje(archivoLog, ("[EJECUCION] Tuve problemas para comunicarme con el Master (Pid hijo: %d)", ppid)); //el hijo fallo en comunicarse con el master
+				mensajeEnviar(unSocket, DESCONEXION, NULL, 0); //MANDA AL MASTER QUE FALLO
+				free(mensaje);
+				break;
 			}
-					/*if(buffer!=NULL){
-						VRegistros[i]= realloc(VRegistros[i],sizeof(char)*(sizebuffer+1));
-						VRegistros[i]= buffer;
-						sizebuffer=0;
-						free(buffer);
-					}*/
-			/*todo c=NULL;
-			close(arch);
-			//creo socket
-			Socket socketFS;
-			imprimirMensaje2(archivoLog, "[CONEXION] Realizando conexion con FileSystem (IP: %s | Puerto %s)", configuracion->ipFileSytem, configuracion->puertoFileSystem);
-			socketFS = socketCrearCliente(configuracion->ipFileSytem,configuracion->puertoFileSystem,ID_WORKER);
-			imprimirMensaje(archivoLog, "[CONEXION] Conexion exitosa con FileSystem");
-			//serializo
-			int mensajeSize = sizeof(int32_t)*3 + sizeNombre + sizeRuta + sizebuffer;
-			char* mensajeData = malloc(mensajeSize);
-			char* puntero = mensajeData;
-			memcpy(puntero, sizeNombre, sizeof(int32_t));
-			puntero += sizeof(int32_t);
-			memcpy(puntero, Nombre, sizeNombre);
-			puntero += sizeNombre;
-			memcpy(puntero, sizeRuta, sizeof(int32_t));
-			puntero += sizeof(int32_t);
-			memcpy(puntero, Ruta, sizeRuta);
-			puntero += sizeRuta;
-			memcpy(puntero, sizebuffer, sizeof(int32_t));
-			puntero += sizeof(int32_t);
-			memcpy(puntero, buffer, sizebuffer);
-			//envio
-			mensajeEnviar(socketFS,ALMACENADO,mensajeData,mensajeSize); //CAMBIAR 2 Seguramente
-			free(mensajeData);
-			free(puntero);
-			mensajeEnviar(unSocket, ALMACENADO, NULL, 0);
-			free(codigo);
-			free(mensaje);
-			mensajeEnviar(unSocket, EXITO, NULL, 0);
-}
-todo */
-
-/*todo
-void pasaRegistro() {
-	int sizeRuta;
-	char* ruta;
-	int numeroReg;
-	memcpy(&sizeRuta, mensaje->datos, sizeof(int32_t));
-	memcpy(&ruta,mensaje->datos + sizeof(int32_t), sizeRuta);
-	memcpy(&numeroReg, mensaje->datos+ sizeof(int32_t) +sizeCodigo, sizeof(int32_t));
-	datosReg* Reg = PasaRegistro(ruta,numeroReg);
-	/*char* buffer = leerArchivo(path,offset,size);
-	log_info(logFile, "[FILE SYSTEM] EL KERNEL PIDE LEER: %s | OFFSET: %i | SIZE: %i", path, offset, size);
-	if(buffer=="-1"){
-		lSend(conexion, NULL, -4, 0);
-		log_error(logFile, "[LEER]: HUBO UN ERROR AL LEER");
-		break;
+			case TRANSFORMACION: //Etapa Transformacion
+			{
+				imprimirMensaje(archivoLog, "[CONEXION] llega op. de transformacion");
+				memcpy(&sizeCodigo, mensaje->datos, sizeof(int32_t));
+				printf("%d\n", sizeCodigo);
+				codigo = malloc(sizeCodigo);
+				puts("PaSE MEMCPY");
+				printf("%s\n", mensaje->datos+sizeof(Entero));
+				memcpy(&codigo,mensaje->datos+sizeof(int32_t), sizeCodigo);
+				puts("PASE OTREO MEMCOPTY");
+				//int pasar=1;
+				puts("ENTRANDO AL WHILE");
+				while(true){
+					//imprimirMensaje(archivoLog, "[CONEXION] Esperando mensajes de Master");
+					//if (pasar){
+					///	pasar=0;
+						imprimirMensaje(archivoLog, "[CONEXION] Esperando mensajes de Master");
+						puts("PESPERARNDO EL MANSEJA");
+						Mensaje* mensaje = mensajeRecibir(unSocket);
+						puts("PASE MENSAJE");
+						if (mensaje->header.operacion==EXITO)
+							break;
+						else{
+						int subpid = fork();
+						imprimirMensaje(archivoLog, "[CONEXION] [SUBFORK] llega op. de transformacion");
+						if(subpid == 0) {
+							int origen;
+							char* destino;
+							int sizeDestino;
+							memcpy(&origen,mensaje->datos + sizeof(int32_t)+sizeCodigo, sizeof(int32_t));
+							memcpy(&sizeDestino, mensaje->datos + sizeof(int32_t)*2 + sizeCodigo , sizeof(int32_t));
+							destino = malloc(sizeDestino);
+							memcpy(&destino,mensaje->datos + sizeof(int32_t)*3+sizeCodigo, sizeDestino);
+							int result = transformar(codigo,origen,destino);
+							if(result==-1){
+								mensajeEnviar(unSocket, FRACASO, NULL, 0);
+								imprimirMensaje(archivoLog,"[TRASFORMACION] transformacion Fracaso");
+							}
+							mensajeEnviar(unSocket, EXITO, origen, sizeof(int32_t));
+							imprimirMensaje(archivoLog,"[TRASFORMACION] transformacion exitosa");
+							free(codigo);
+							free(destino);
+							free(mensaje);
+							break;
+						}
+						else if(subpid > 0)
+							puts("SUBPADRE ACEPTO UNA CONEXION");
+						else
+							puts("ERROR");
+						}
+					}
+				break;
+			}
+			case REDUCLOCAL:{ //Etapa Reduccion Local
+				char* origen;
+				int sizeOrigen;
+				char* destino; //los temporales siempre miden 12, le podes mandar un char[12] aca y listo
+				int sizeDestino;
+				memcpy(&sizeCodigo, mensaje->datos, sizeof(int32_t));
+				memcpy(&codigo,mensaje->datos + sizeof(int32_t), sizeCodigo);
+				memcpy(&sizeOrigen, mensaje->datos+ sizeof(int32_t) +sizeCodigo, sizeof(int32_t));
+				memcpy(&origen,mensaje->datos + sizeof(int32_t)*2+sizeCodigo, sizeOrigen);
+				memcpy(&sizeDestino, mensaje->datos + sizeof(int32_t)*2 + sizeCodigo + sizeOrigen, sizeof(int32_t));
+				memcpy(&destino,mensaje->datos + sizeof(int32_t)*3+sizeCodigo+ sizeOrigen, sizeDestino);
+				int result=reduccionLocal(codigo,origen,destino);
+				if(result==-1){
+					mensajeEnviar(unSocket, FRACASO, NULL, 0);
+				}
+				/*char* buffer = leerArchivo(path,offset,size);
+				log_info(logFile, "[FILE SYSTEM] EL KERNEL PIDE LEER: %s | OFFSET: %i | SIZE: %i", path, offset, size);
+				if(buffer=="-1"){
+					lSend(conexion, NULL, -4, 0);
+					log_error(logFile, "[LEER]: HUBO UN ERROR AL LEER");
+					break;
+				}
+				//enviar el buffer
+				lSend(conexion, buffer, 2, sizeof(char)*size);
+				free(buffer);
+				free(path);*/
+				mensajeEnviar(unSocket, EXITO, NULL, 0);
+				free(codigo);
+				free(origen);
+				free(destino);
+				free(mensaje);
+				break;
+			}
+			case REDUCGLOBAL:{ //Etapa Reduccion Global
+				char* origen;
+				int sizeOrigen;
+				char* destino; //los temporales siempre miden 12, le podes mandar un char[12] aca y listo
+				int sizeDestino;
+				memcpy(&sizeCodigo, mensaje->datos, sizeof(int32_t));
+				memcpy(&codigo,mensaje->datos + sizeof(int32_t), sizeCodigo);
+				memcpy(&sizeOrigen, mensaje->datos+ sizeof(int32_t) +sizeCodigo, sizeof(int32_t));
+				memcpy(&origen,mensaje->datos + sizeof(int32_t)*2+sizeCodigo, sizeOrigen);
+				memcpy(&sizeDestino, mensaje->datos + sizeof(int32_t)*2 + sizeCodigo + sizeOrigen, sizeof(int32_t));
+				memcpy(&destino,mensaje->datos + sizeof(int32_t)*3+sizeCodigo+ sizeOrigen, sizeDestino);
+				int result = reduccionGlobal(codigo,origen,destino);
+				if(result==-1){
+					mensajeEnviar(unSocket, FRACASO, NULL, 0);
+				}
+				/*char* buffer = leerArchivo(path,offset,size);
+				log_info(logFile, "[FILE SYSTEM] EL KERNEL PIDE LEER: %s | OFFSET: %i | SIZE: %i", path, offset, size);
+				if(buffer=="-1"){
+					lSend(conexion, NULL, -4, 0);
+					log_error(logFile, "[LEER]: HUBO UN ERROR AL LEER");
+					break;32_t
+				}
+				//enviar el buffer
+				lSend(conexion, buffer, 2, sizeof(char)*size);
+				free(buffer);
+				free(path);*/
+				mensajeEnviar(unSocket, EXITO, NULL, 0);
+				free(codigo);
+				free(origen);
+				free(destino);
+				free(mensaje);
+				break;
+			}
+			case ALMACENADO:{ //Almacenamiento Definitivo
+				int sizeNombre;
+				char* Nombre;
+				int sizeRuta;
+				char* Ruta;
+				int sizebuffer=0;
+				char* buffer;
+				char* c;
+				memcpy(&sizeNombre, mensaje->datos, sizeof(int32_t));
+				memcpy(&Nombre,mensaje->datos + sizeof(int32_t), sizeNombre);
+				memcpy(&sizeRuta, mensaje->datos+ sizeof(int32_t) +sizeNombre, sizeof(int32_t));
+				memcpy(&Ruta,mensaje->datos + sizeof(int32_t)*2+sizeCodigo, sizeRuta);
+				//almacenar();
+				//leer el archivo y meterlo en un buffer
+				FILE* arch;
+				arch = fopen(Ruta,"r");
+				c = fgetc(arch);
+				while(c!=EOF){
+					buffer = realloc(buffer,sizeof(char)*(sizebuffer+1));
+					buffer[sizebuffer]=c;
+					sizebuffer++;
+					c = fgetc(arch);
+				}
+						/*if(buffer!=NULL){
+							VRegistros[i]= realloc(VRegistros[i],sizeof(char)*(sizebuffer+1));
+							VRegistros[i]= buffer;
+							sizebuffer=0;
+							free(buffer);
+						}*/
+				c=NULL;
+				close(arch);
+				//creo socket
+				Socket socketFS;
+				imprimirMensaje2(archivoLog, "[CONEXION] Realizando conexion con FileSystem (IP: %s | Puerto %s)", configuracion->ipFileSytem, configuracion->puertoFileSystem);
+				socketFS = socketCrearCliente(configuracion->ipFileSytem,configuracion->puertoFileSystem,ID_WORKER);
+				imprimirMensaje(archivoLog, "[CONEXION] Conexion exitosa con FileSystem");
+				//serializo
+				int mensajeSize = sizeof(int32_t)*3 + sizeNombre + sizeRuta + sizebuffer;
+				char* mensajeData = malloc(mensajeSize);
+				char* puntero = mensajeData;
+				memcpy(puntero, sizeNombre, sizeof(int32_t));
+				puntero += sizeof(int32_t);
+				memcpy(puntero, Nombre, sizeNombre);
+				puntero += sizeNombre;
+				memcpy(puntero, sizeRuta, sizeof(int32_t));
+				puntero += sizeof(int32_t);
+				memcpy(puntero, Ruta, sizeRuta);
+				puntero += sizeRuta;
+				memcpy(puntero, sizebuffer, sizeof(int32_t));
+				puntero += sizeof(int32_t);
+				memcpy(puntero, buffer, sizebuffer);
+				//envio
+				mensajeEnviar(socketFS,ALMACENADO,mensajeData,mensajeSize); //CAMBIAR 2 Seguramente
+				free(mensajeData);
+				free(puntero);
+				mensajeEnviar(unSocket, ALMACENADO, NULL, 0);
+				free(codigo);
+				free(mensaje);
+				mensajeEnviar(unSocket, EXITO, NULL, 0);
+				break;
+			}
+			case PASAREG:{ //PasaRegistro
+				int sizeRuta;
+				char* ruta;
+				int numeroReg;
+				memcpy(&sizeRuta, mensaje->datos, sizeof(int32_t));
+				memcpy(&ruta,mensaje->datos + sizeof(int32_t), sizeRuta);
+				memcpy(&numeroReg, mensaje->datos+ sizeof(int32_t) +sizeCodigo, sizeof(int32_t));
+				datosReg* Reg = PasaRegistro(ruta,numeroReg);
+				/*char* buffer = leerArchivo(path,offset,size);
+				log_info(logFile, "[FILE SYSTEM] EL KERNEL PIDE LEER: %s | OFFSET: %i | SIZE: %i", path, offset, size);
+				if(buffer=="-1"){
+					lSend(conexion, NULL, -4, 0);
+					log_error(logFile, "[LEER]: HUBO UN ERROR AL LEER");
+					break;
+				}
+				//enviar el buffer
+				lSend(conexion, buffer, 2, sizeof(char)*size);
+				free(buffer);
+				free(path);*/
+				//serializo
+				int mensajeSize = sizeof(int)*2 +  Reg->sizebuffer;
+				char* mensajeData = malloc(mensajeSize);
+				char* puntero = mensajeData;
+				memcpy(puntero, Reg->sizebuffer, sizeof(int));
+				puntero += sizeof(int);
+				memcpy(puntero, Reg->buffer, Reg->sizebuffer);
+				puntero += Reg->sizebuffer;
+				memcpy(puntero, Reg->NumReg, sizeof(int));
+				//envio
+				mensajeEnviar(unSocket,PASAREG,mensajeData,mensajeSize);
+				free(mensajeData);
+				free(puntero);
+				free(codigo);
+				free(mensaje);
+				break;
+			}
+			case ABORTAR:{ //Aborto
+				imprimirMensaje(archivoLog, ("[EJECUCION] El Master me aborto (Pid hijo: %d)", pid)); //el hijo fallo en comunicarse con el master
+				mensajeEnviar(unSocket, FRACASO, NULL, 0); //MANDA AL MASTER QUE FALLO
+				free(mensaje);
+				break;
+			}
+		}
+	//printf("Mensaje: %s\n", (String)mensaje->datos);
+	/*
 	}
-	//enviar el buffer
-	lSend(conexion, buffer, 2, sizeof(char)*size);
-	free(buffer);
-	free(path);*/
-	//serializo
-/*todo
-	int mensajeSize = sizeof(int)*2 +  Reg->sizebuffer;
-	char* mensajeData = malloc(mensajeSize);
-	char* puntero = mensajeData;
-	memcpy(puntero, Reg->sizebuffer, sizeof(int));
-	puntero += sizeof(int);
-	memcpy(puntero, Reg->buffer, Reg->sizebuffer);
-	puntero += Reg->sizebuffer;
-	memcpy(puntero, Reg->NumReg, sizeof(int));
-	//envio
-	mensajeEnviar(unSocket,PASAREG,mensajeData,mensajeSize);
-	free(mensajeData);
-	free(puntero);
-	free(codigo);
-	free(mensaje);
+	else if(ppid > 0){
+		puts("PADRE ACEPTO UNA CONEXION");
+		//socketCerrar(unSocket);
+	}
+	else
+		puts("ERROR");
+		*/
 }
-todo*/
 
-/*//TODO remover
+//1er etapa
+int transformar(char* codigo,int origen,char* destino){
+	imprimirMensaje(archivoLog,"[TRASFORMACION] Comienzo a transformar");
+	if (origen>bloquesArchData){
+		return -1;
+	}
+	char* patharchdes;
+	patharchdes = realloc(patharchdes,sizeof(RUTA_TEMPS)+16);
+	strcat(patharchdes,RUTA_TEMPS);
+	strcat(patharchdes,destino);
+	strcat(patharchdes,".bin");
+	char* buffer=NULL;
+	FILE* arch;
+	arch = fopen(configuracion->rutaDataBin,"r");
+	fseek(arch,MB*origen,SEEK_SET);
+	int i;
+	char c;
+	int cc = 0;
+	for(i=0;cc<=MB;i++){
+		c = fgetc(arch);
+			buffer = realloc(buffer,sizeof(char)*(cc+1));
+			buffer[cc]=c;
+			cc++;
+	}
+	/*int j;
+	for(j=0;j<=size;j++){
+		c = fgetc(arch);
+		srtcat(buffer,c);
+	}*/
+	fclose(arch);
+	//doy privilegios a script
+	char commando [500];
+	for(i=0;i==500;i++){
+		commando[i]=NULL;
+	}
+	strcat(commando,"chmod 0755");
+	strcat(commando,codigo);
+	system(commando);
+	free (commando);
+	//paso buffer a script y resultado script a sort
+	char command [500];
+	for(i=0;i==500;i++){
+		command[i]=NULL;
+	}
+	strcat(command,"cat");
+	strcat(command,buffer);
+	strcat(command,"|");
+	strcat(command,codigo);
+	strcat(command,"| sort >");
+	strcat(command,patharchdes);
+	system(command);
+	free (command);
+	free(patharchdes);
+	//resuelto por parametro en vez de cat
+	/*strcat(command,codigo);
+	strcat(command,buffer);//suponiendo que el script requiere un buffer como parametro
+	strcat(command,"| sort >");
+	strcat(command,destino);
+	system(command);
+	free (command);*/
+	return 0;
+}
+
 //2da etapa
-int reduccionLocalEjecutar(char* codigo,char* origen,char* destino){
+int reduccionLocal(char* codigo,char* origen,char* destino){
 	locOri* listaOri;
 	listaOri = getOrigenesLocales(origen);
 	char* apendado;
@@ -593,7 +426,6 @@ char* appendL(locOri* origen){
 		int i;
 		char c;
 		int cc = 0;*/
-/*todo remover
 		c = fgetc(arch);
 		if(c=="\n"){
 			VLineasiguiente[i] = VLineasiguiente[i] +1;
@@ -706,7 +538,7 @@ int registroMayorOrden(char** VRegistros,int cant){
 }
 
 //3ra etapa
-int reduccionGlobalEjecutar(char* codigo,char* origen,char* destino){
+int reduccionGlobal(char* codigo,char* origen,char* destino){
 	lGlobOri* listaOri;
 	listaOri = getOrigenesGlobales(origen);
 	char* apendado;
@@ -871,7 +703,7 @@ char* appendG(lGlobOri* origenes){
 			buffer[cc]=c;
 			cc++;
 		}*/
-/*Todo remover
+
 		if(buffer!=NULL){
 			VRegistros[i]= realloc(VRegistros[i],sizeof(char)*(cc+1));
 			VRegistros[i]= buffer;
@@ -1017,6 +849,34 @@ datosReg* PasaRegistro(char* ruta,int NroReg){
 	return Reg;
 }
 
+void socketAceptarConexion() {
+	Socket nuevoSocket;
+	nuevoSocket = socketAceptar(socketListenerWorker, ID_MASTER);
+	if(nuevoSocket != ERROR) {
+		imprimirMensaje(archivoLog, "[CONEXION] Proceso Master conectado exitosamente");
+		workerCrearHijo(nuevoSocket);
+	}
+	else{
+		nuevoSocket = socketAceptar(socketListenerWorker, ID_WORKER);
+		if(nuevoSocket != ERROR) {
+			imprimirMensaje(archivoLog, "[CONEXION] Proceso Worker conectado exitosamente");
+			workerCrearHijo(nuevoSocket);
+		}
+	}
+}
+
+Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig) {
+	Configuracion* configuracion = memoriaAlocar(sizeof(Configuracion));
+	stringCopiar(configuracion->ipFileSytem, archivoConfigStringDe(archivoConfig, "IP_FILESYSTEM"));
+	stringCopiar(configuracion->puertoFileSystem, archivoConfigStringDe(archivoConfig, "PUERTO_FILESYSTEM"));
+	stringCopiar(configuracion->nombreNodo, archivoConfigStringDe(archivoConfig, "NOMBRE_NODO"));
+	stringCopiar(configuracion->puertoWorker, archivoConfigStringDe(archivoConfig, "PUERTO_WORKER"));
+	stringCopiar(configuracion->rutaDataBin, archivoConfigStringDe(archivoConfig, "RUTA_DATABIN"));
+	stringCopiar(configuracion->ipPropia, archivoConfigStringDe(archivoConfig, "IP_PROPIA"));
+	archivoConfigDestruir(archivoConfig);
+	return configuracion;
+}
+
 char* agregarBarraCero(char* data, int tamanio)
 {
 	char* path = malloc(tamanio+1);
@@ -1025,14 +885,57 @@ char* agregarBarraCero(char* data, int tamanio)
 	return path;
 }
 
+void configuracionImprimir(Configuracion* configuracion) {
+	imprimirMensaje1(archivoLog, "[CONFIGURACION] Nombre Nodo: %s", configuracion->nombreNodo);
+	imprimirMensaje1(archivoLog, "[CONFIGURACION] Ruta archivo data.bin: %s", configuracion->rutaDataBin);
+	imprimirMensaje1(archivoLog, "[CONFIGURACION] tamanio data.bin: %dMB", bloquesArchData);
 
-//TODO cambiar por alamcenadoFinal algo asi
-void workerAtenderWorkers() {
-	Socket nuevoSocket;
-	nuevoSocket = socketAceptar(listenerWorker, ID_WORKER);
-	if(nuevoSocket != ERROR) {
-		imprimirMensaje(archivoLog, "[CONEXION] Proceso Worker conectado exitosamente");
-		workerAtenderOperacion(nuevoSocket);
-	}
 }
-*/ //todo remover
+
+void archivoConfigObtenerCampos() {
+	campos[0] = "IP_FILESYSTEM";
+	campos[1] = "PUERTO_FILESYSTEM";
+	campos[2] = "NOMBRE_NODO";
+	campos[3] = "IP_PROPIA";
+	campos[4] = "PUERTO_WORKER";
+	campos[5] = "RUTA_DATABIN";
+}
+
+void configuracionSenial(int senial) {
+	puts("");
+	imprimirMensaje(archivoLog, "[EJECUCION] Proceso Worker finalizado");
+	exit(0);
+}
+
+void dataBinCalcularBloques() {
+	Puntero Puntero;
+	int descriptorArchivo = open(configuracion->rutaDataBin, O_CLOEXEC | O_RDWR);
+	if (descriptorArchivo == ERROR) {
+		imprimirMensaje(archivoLog, "[ERROR] Fallo el open()");
+		perror("open");
+		exit(EXIT_FAILURE);
+	}
+	struct stat estadoArchivo;
+	if (fstat(descriptorArchivo, &estadoArchivo) == ERROR) {
+		imprimirMensaje(archivoLog, "[ERROR] Fallo el fstat()");
+		perror("fstat");
+		exit(EXIT_FAILURE);
+	}
+	dataBinTamanio = estadoArchivo.st_size;
+	bloquesArchData = (Entero)ceil((double)dataBinTamanio/(double)BLOQUE);
+	imprimirMensaje1(archivoLog, "[DATABIN] Cantidad de bloques %i", (int*)bloquesArchData);
+}
+
+
+
+void workerIniciar() {
+	pantallaLimpiar();
+	imprimirMensajeProceso("# PROCESO WORKER");
+	archivoLog = archivoLogCrear(RUTA_LOG, "Worker");
+	archivoConfigObtenerCampos();
+	senialAsignarFuncion(SIGINT, configuracionSenial);
+	configuracion = configuracionCrear(RUTA_CONFIG, (void*)configuracionLeerArchivoConfig, campos);
+	dataBinCalcularBloques();
+	configuracionImprimir(configuracion);
+	estadoWorker = 1;
+}
