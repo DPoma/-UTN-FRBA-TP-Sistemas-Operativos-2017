@@ -12,6 +12,7 @@
 
 int main(int contadorArgumentos, String* argumentos) {
 	masterIniciar(contadorArgumentos, argumentos);
+	masterConectarAYama(argumentos[3]);
 	masterAtender();
 	return EXIT_SUCCESS;
 }
@@ -23,7 +24,6 @@ void masterIniciar(int contadorArgumentos, String* argumentos) {
 	configuracionIniciar();
 	scriptTransformacionLeer(argumentos[1]);
 	scriptReduccionLeer(argumentos[2]);
-	masterConectarAYama(argumentos[3]);
 }
 
 void masterConectarAYama(String archivoDatos) {

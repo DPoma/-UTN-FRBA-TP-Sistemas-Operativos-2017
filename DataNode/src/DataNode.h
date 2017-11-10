@@ -71,7 +71,7 @@ void dataNodeAceptado();
 //--------------------------------------- Funciones de DataBin -------------------------------------
 
 void dataBinAbrir();
-void dataBinCalcularBloques();
+void configuracionCalcularBloques();
 Puntero dataBinMapear();
 Puntero dataBinUbicarPuntero(Entero numeroBloque);
 void dataBinConfigurar();

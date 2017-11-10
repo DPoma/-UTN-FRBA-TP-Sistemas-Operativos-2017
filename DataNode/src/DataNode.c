@@ -211,7 +211,7 @@ Puntero dataBinMapear() {
 	return Puntero;
 }
 
-void dataBinCalcularBloques() {
+void configuracionCalcularBloques() {
 	dataBinBloques = (Entero)ceil((double)dataBinTamanio/(double)BLOQUE);
 	imprimirMensaje1(archivoLog, "[DATABIN] Cantidad de bloques %i", (int*)dataBinBloques);
 }
@@ -219,7 +219,7 @@ void dataBinCalcularBloques() {
 void dataBinConfigurar() {
 	dataBinAbrir();
 	punteroDataBin = dataBinMapear();
-	dataBinCalcularBloques();
+	configuracionCalcularBloques();
 }
 
 //--------------------------------------- Interfaz con File System -------------------------------------

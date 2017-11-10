@@ -8,6 +8,8 @@
 
 #include "../../Biblioteca/src/Biblioteca.c"
 
+//--------------------------------------- Constantes -------------------------------------
+
 #define FRACASO -800
 #define EXITO 1
 #define DESCONEXION 0
@@ -24,10 +26,13 @@
 #define RUTA_ARCHDATA "/home/utnso/Escritorio/" //TODO borrrar y poner en config
 #define RUTA_TEMPS "/home/utnso/Escritorio/temp/"
 
+//--------------------------------------- Estructuras -------------------------------------
+
 typedef struct {
 	char ipFileSytem[20];
 	char puertoFileSystem[20];
 	char nombreNodo[10];
+	char puertoMaster[20];
 	char puertoWorker[20];
 	char rutaDataBin[255];
 	char ipPropia[20];
@@ -55,20 +60,41 @@ typedef struct {
 	int NumReg;
 } datosReg;
 
-int pid;
+//--------------------------------------- Globales -------------------------------------
 
-const int MB = 1048576;
-String campos[5];
 Configuracion* configuracion;
 ArchivoLog archivoLog;
+String campos[7];
+Socket listenerWorker;
+Socket listenerMaster;
+int pid;
 int estadoWorker;
-int bloquesArchData;
+int dataBinBloques;
 int dataBinTamanio;
-Socket socketListenerWorker;
-void socketAceptarConexion();
 
+//--------------------------------------- Funciones de Worker -------------------------------------
 
 void workerIniciar();
+void workerAtenderMasters();
+void workerFinalizar();
+void masterAceptarConexion();
+void masterEjecutarOperacion(Socket unSocket);
+
+//--------------------------------------- Funciones de Configuracion  -------------------------------------
+
+void configuracionImprimir(Configuracion* configuracion);
+void configuracionIniciarLog();
+void configuracionIniciarCampos();
+void configuracionCalcularBloques();
+void configuracionSenial(int senial);
+void configuracionIniciar();
+
+//--------------------------------------- Funciones de Worker -------------------------------------
+void masterAceptarConexion();
+void masterAtenderOperacion(Socket unSocket);
+void masterEjecutarOperacion(Socket unSocket);
+
+
 int transformar(char*,int,char*);
 int reduccionLocalEjecutar(char*,char*,char*);
 locOri* getOrigenesLocales(char*);
