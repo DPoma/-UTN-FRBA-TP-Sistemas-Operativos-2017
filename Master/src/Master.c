@@ -37,6 +37,9 @@ void masterAtender(){
 		Mensaje* mensaje = mensajeRecibir(socketYama);
 		switch(mensaje->header.operacion) {
 		case DESCONEXION: masterFinalizar(); break;
+		//todo mover esto afuera del while este porque pasa una vez sola
+		//usar este case para recibir los alternativos, meter los semaforos
+		//y eso como en el codigo anterior
 		case TRANSFORMACION: transformacionIniciar(mensaje); break;
 		//case REDUCCION_LOCAL: reduccionLocalEjecutar(mensaje); break;
 		//case REDUCCION_GLOBAL: reduccionGlobalEjecutar(mensaje); break;
@@ -164,10 +167,13 @@ void transformacionIniciar(Mensaje* mensaje) {
 void transformacionHilo(Lista listaBloques) {
 	BloqueTransformacion* bloque = listaPrimerElemento(listaBloques);
 	Socket socketWorker;
+	//todo enviar el script aca
 	int indice;
+	//meter todo en dos for así manda todo de una y aprovecha que worker se forkee
+	//vas a tener que tener un for de enviados y otro de recibidos, como en el codigo viejo
 	for(indice=0; indice<listaBloques->elements_count;indice++){
 		socketWorker = socketCrearCliente(bloque->direccion.ip,bloque->direccion.port,ID_MASTER);
-		//TODO ver si es hilo por bloque o por nodo
+		//todo el cliente crearlo afuera porque siempre es el mismo nodo
 		//imprimirMensaje2(archivoLog,"[CONEXION] Estableciendo conexion con Worker (IP: %s | PUERTO: %s)",bloque->direccion.ip,bloque->direccion.port);
 		BloqueTransformacion* bloque = listaObtenerElemento(listaBloques,indice);
 		transformacionEnviarBloque(bloque, socketWorker);
@@ -241,7 +247,7 @@ void transformacionExito(Mensaje* mensaje, Lista listaBloques) {
 void transformacionFracaso(Mensaje* mensaje, Lista listaBloques) {
 	imprimirMensaje(archivoLog,"[TRANSFORMACION] Transformacion fallida en el Worker");
 	transformacionNotificarYama(mensaje, listaBloques);
-	//TODO ver alternativo
+	//todo recibir a traves de semaforos el alternativo, como en el codigo anterior
 }
 
 
