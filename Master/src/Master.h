@@ -14,10 +14,11 @@
 #define RUTA_CONFIG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Master/MasterConfig.conf"
 #define RUTA_LOG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Master/MasterLog.log"
 
+#define MAX_ARGS 4
 #define FRACASO -800
 #define EXITO 1
 #define DIRSIZE sizeof(Dir)
-#define INTSIZE sizeof(int32_t)
+#define INTSIZE sizeof(Entero)
 #define TEMPSIZE 12
 
 
@@ -27,8 +28,8 @@
 #define ABORTAR 301
 #define SOLICITUD 302
 #define TRANSFORMACION 303
-#define REDUCLOCAL 304
-#define REDUCGLOBAL 305
+#define REDUCCION_LOCAL 304
+#define REDUCCION_GLOBAL 305
 #define ALMACENADO 306
 #define CIERRE 307
 
@@ -40,70 +41,90 @@ typedef struct {
 } Configuracion;
 
 typedef struct{
-	Dir dir;
-	int bloque;
-	int bytes;
-	char temp[TEMPSIZE];
-} WorkerTransformacion;
-WorkerTransformacion alternativo;
+	Dir direccion;
+	int numeroBloque;
+	int bytesUtilizados;
+	char nombreTemporal[TEMPSIZE];
+} BloqueTransformacion;
 
-typedef struct{ //no se hasta que punto es util este struct
-	Dir dir;
-	char* temp;
-	char* listaTemps;
-} WorkerReduccion;
+typedef struct{
+	Dir direccion;
+	String listaTemporales;
+	char nombreTemporal[TEMPSIZE];
+} BloqueReduccionLocal;
+
+typedef struct{
+	Entero numeroBloque;
+	Entero bytesUtilizados;
+	char nombreTemporal[TEMPSIZE];
+} BloqueWorker;
+
 
 //--------------------------------------- Globales -------------------------------------
-
-Semaforo* errorBloque;
-Semaforo* recepcionAlternativo;
 
 String campos[2];
 Configuracion* configuracion;
 ArchivoLog archivoLog;
+Semaforo* semaforoErrorBloque;
+Semaforo* semaforoRecepcionAlternativa;
 Socket socketYama;
-Socket socketWorker;
 int estadoMaster;
-char* scriptTransformacion;
-int32_t lenTransformacion;
-char* scriptReduccion;
-int32_t lenReduccion;
-WorkerTransformacion alternativo;
+String scriptTransformacion;
+String scriptReduccion;
+Entero tamanioScriptTransformacion;
+Entero tamanioScriptReduccion;
+BloqueTransformacion alternativo;
 struct rusage uso;
 struct timeval comienzo, fin;
 
-
 //--------------------------------------- Funciones de Master -------------------------------------
 
-void masterIniciar(char**);
+void masterIniciar(int argc, String* argv);
+void masterConectarAYama(String archivoDatos);
 void masterAtender();
+void masterFinalizar();
 
-void configuracionIniciar();
+//--------------------------------------- Funciones de Configuracion -------------------------------------
+
 Configuracion* configuracionLeerArchivo(ArchivoConfig archivoConfig);
-void archivoConfigObtenerCampos();
-void establecerConexiones();
-void leerArchivoConfig();
-void archivoConfigObtenerCampos();
-void funcionSenial();
-int hayWorkersParaConectar();
-WorkerTransformacion* deserializarTransformacion(Mensaje* mensaje);
-WorkerReduccion* deserializarReduccion(Mensaje* mensaje);
-void confirmacionWorker(Socket unSocket);
-void serializarYEnviar(Entero nroBloque, Entero nroBytes, char* nombretemp, Socket unSocket);
-void transformaciones(Lista);
-void transformacion(Mensaje* mensaje);
-Lista workersAConectar();
-ListaSockets sockets();
-void serializarYEnviar();
-void enviarScript(Socket unSocket, FILE* script, Entero operacion);
-bool masterActivado();
-bool masterDesactivado();
-void masterActivar();
-void masterDesactivar();
-char* leerArchivo(FILE* f);
-int archivoValido(FILE* f);
-bool esUnArchivo(char* c);
-void enviarArchivo(FILE* f);
-char* leerCaracteresEntrantes();
-void reduccionLocal(Mensaje* m);
-void reduccionGlobal(Mensaje* m);
+void configuracionIniciar();
+void configuracionIniciarLog();
+void configuracionIniciarCampos();
+void configuracionImprimir();
+void configuracionIniciarSemaforos();
+void configuracionError(int contadorArgumentos);
+
+//--------------------------------------- Funciones de Script -------------------------------------
+
+void scriptLeer(File archScript, String* script, Entero* tamanio);
+void scriptTransformacionLeer(String path);
+void scriptReduccionLeer(String path);
+void scriptInvalido();
+
+//--------------------------------------- Funciones de Transformacion -------------------------------------
+
+void transformacionEjecutar(Mensaje* mensaje);
+void transformacionCrearHilos(Lista listaMaster);
+void transformacionNotificarYama(Mensaje* mensaje, Lista ListaBloques);
+void transformacionEnviarBloque(BloqueTransformacion* bloqueTransformacion, Socket socketWorker);
+void transformacionExito(Mensaje* mensaje, Lista listaBloques);
+void transformacionFracaso(Mensaje* mensaje, Lista listaBloques);
+void transformacionHilo(Lista listaBloques);
+BloqueTransformacion* transformacionCrearBloque(Puntero datos);
+BloqueTransformacion* transformacionBuscarBloque(Lista listaBloques, Entero numeroBloque);
+
+//--------------------------------------- Funciones de Reduccion Local -------------------------------------
+
+void reduccionLocalEjecutar(Mensaje* mensaje);
+
+//--------------------------------------- Funciones de Reduccion Global -------------------------------------
+
+void reduccionGlobalEjecutar(Mensaje* mensaje);
+
+//--------------------------------------- Funciones de Worker -------------------------------------
+
+BloqueWorker* bloqueCrear(BloqueTransformacion* transformacion);
+bool nodoIguales(Dir a, Dir b);
+
+
+

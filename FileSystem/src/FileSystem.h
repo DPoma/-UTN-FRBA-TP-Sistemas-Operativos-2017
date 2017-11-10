@@ -135,7 +135,7 @@ typedef struct {
 	int bytesUtilizados;
 	int numeroBloque;
 	Lista listaCopias;
-} Bloque;
+} BloqueWorker;
 
 typedef struct {
 	char nombreNodo[MAX_NODO];
@@ -201,7 +201,7 @@ String rutaArchivos;
 String rutaNodos;
 String rutaBuffer;
 Nodo* nodoBuffer;
-Bloque* bloqueBuffer;
+BloqueWorker* bloqueBuffer;
 Archivo* archivoBuffer;
 Mutex* mutexTarea;
 Mutex* mutexRuta;
@@ -453,20 +453,20 @@ Direccion nodoObtenerDireccion(String nombreNodo);
 
 //--------------------------------------- Funciones de Bloque -------------------------------------
 
-Bloque* bloqueCrear(int bytes, int numero);
-void bloqueDestruir(Bloque* bloque);
-int copiaGuardarEnNodo(Bloque* bloque, Nodo* nodo);
-int copiaEnviarANodo(Bloque* bloque, Nodo* nodo, String buffer);
-int bloqueEnviarCopias(Bloque* bloque, String buffer);
+BloqueWorker* bloqueCrear(int bytes, int numero);
+void bloqueDestruir(BloqueWorker* bloque);
+int copiaGuardarEnNodo(BloqueWorker* bloque, Nodo* nodo);
+int copiaEnviarANodo(BloqueWorker* bloque, Nodo* nodo, String buffer);
+int bloqueEnviarCopias(BloqueWorker* bloque, String buffer);
 int bloqueGuardar(Archivo* archivo, String buffer, size_t bytes, Entero numeroBloque);
-bool bloqueOrdenarPorNumero(Bloque* unBloque, Bloque* otroBloque);
+bool bloqueOrdenarPorNumero(BloqueWorker* unBloque, BloqueWorker* otroBloque);
 void bloqueCopiar(Nodo* nodo, Puntero datos, int* estado);
 void bloqueLeer(Nodo* nodo, Puntero datos, int* estado);
 void bloqueCopiarArchivo(Nodo* nodo, Puntero datos, int* estado);
-bool bloqueDisponible(Bloque* bloque);
+bool bloqueDisponible(BloqueWorker* bloque);
 BloqueNodo* bloqueNodoCrear(Entero numeroBloque, String buffer, int tamanioUtilizado);
-BloqueYama yamaConvertirBloque(Bloque* bloque);
-bool bloqueEstaEnNodo(Bloque* bloque, Nodo* nodo);
+BloqueYama yamaConvertirBloque(BloqueWorker* bloque);
+bool bloqueEstaEnNodo(BloqueWorker* bloque, Nodo* nodo);
 
 //--------------------------------------- Funciones de Copia -------------------------------------
 

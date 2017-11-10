@@ -134,26 +134,26 @@ void configuracionSenial(int senial) {
 
 //--------------------------------------- Funciones de bloques -------------------------------------
 
-Bloque bloqueBuscar(Entero numeroBloque) {
-	Bloque bloque = punteroDataBin + (BLOQUE * numeroBloque);
+BloqueWorker bloqueBuscar(Entero numeroBloque) {
+	BloqueWorker bloque = punteroDataBin + (BLOQUE * numeroBloque);
 	return bloque;
 }
 
 void bloqueObtenerParaLeer(Puntero datos) {
 	Entero numeroBloque = *(Entero*)datos;
-	Bloque bloque = getBloque(numeroBloque);
+	BloqueWorker bloque = getBloque(numeroBloque);
 	mensajeEnviar(socketFileSystem, LEER_BLOQUE, bloque, BLOQUE);
 }
 
 void bloqueObtenerParaCopiar(Puntero datos) {
 	Entero numeroBloqueACopiar = *(Entero*)datos;
-	Bloque bloqueACopiar = getBloque(numeroBloqueACopiar);
+	BloqueWorker bloqueACopiar = getBloque(numeroBloqueACopiar);
 	mensajeEnviar(socketFileSystem, COPIAR_BLOQUE, bloqueACopiar, BLOQUE);
 }
 
 void bloqueObtenerParaCopiarArchivo(Puntero datos) {
 	Entero numeroBloque = *(Entero*)datos;
-	Bloque bloque = getBloque(numeroBloque);
+	BloqueWorker bloque = getBloque(numeroBloque);
 	mensajeEnviar(socketFileSystem, COPIAR_ARCHIVO, bloque, BLOQUE);
 }
 
@@ -224,14 +224,14 @@ void dataBinConfigurar() {
 
 //--------------------------------------- Interfaz con File System -------------------------------------
 
-Bloque getBloque(Entero numeroBloque) {
-	Bloque bloque = bloqueBuscar(numeroBloque);
+BloqueWorker getBloque(Entero numeroBloque) {
+	BloqueWorker bloque = bloqueBuscar(numeroBloque);
 	imprimirMensaje1(archivoLog, "[DATABIN] El bloque N°%i fue leido", (int*)numeroBloque);
 	return bloque;
 }
 
 void setBloque(Entero numeroBloque, Puntero datos) {
-	Bloque bloque = bloqueBuscar(numeroBloque);
+	BloqueWorker bloque = bloqueBuscar(numeroBloque);
 	memcpy(bloque, datos, BLOQUE);
 	imprimirMensaje1(archivoLog, "[DATABIN] El bloque N°%i fue escrito", (int*)numeroBloque);
 }

@@ -88,7 +88,7 @@ void workerCrearHijo(Socket unSocket) {
 					}
 				break;
 			}
-			case REDUCLOCAL:{ //Etapa Reduccion Local
+			case REDUCCION_LOCAL:{ //Etapa Reduccion Local
 				char* origen;
 				int sizeOrigen;
 				char* destino; //los temporales siempre miden 12, le podes mandar un char[12] aca y listo
@@ -99,7 +99,7 @@ void workerCrearHijo(Socket unSocket) {
 				memcpy(&origen,mensaje->datos + sizeof(int32_t)*2+sizeCodigo, sizeOrigen);
 				memcpy(&sizeDestino, mensaje->datos + sizeof(int32_t)*2 + sizeCodigo + sizeOrigen, sizeof(int32_t));
 				memcpy(&destino,mensaje->datos + sizeof(int32_t)*3+sizeCodigo+ sizeOrigen, sizeDestino);
-				int result=reduccionLocal(codigo,origen,destino);
+				int result=reduccionLocalEjecutar(codigo,origen,destino);
 				if(result==-1){
 					mensajeEnviar(unSocket, FRACASO, NULL, 0);
 				}
@@ -121,7 +121,7 @@ void workerCrearHijo(Socket unSocket) {
 				free(mensaje);
 				break;
 			}
-			case REDUCGLOBAL:{ //Etapa Reduccion Global
+			case REDUCCION_GLOBAL:{ //Etapa Reduccion Global
 				char* origen;
 				int sizeOrigen;
 				char* destino; //los temporales siempre miden 12, le podes mandar un char[12] aca y listo
@@ -132,7 +132,7 @@ void workerCrearHijo(Socket unSocket) {
 				memcpy(&origen,mensaje->datos + sizeof(int32_t)*2+sizeCodigo, sizeOrigen);
 				memcpy(&sizeDestino, mensaje->datos + sizeof(int32_t)*2 + sizeCodigo + sizeOrigen, sizeof(int32_t));
 				memcpy(&destino,mensaje->datos + sizeof(int32_t)*3+sizeCodigo+ sizeOrigen, sizeDestino);
-				int result = reduccionGlobal(codigo,origen,destino);
+				int result = reduccionGlobalEjecutar(codigo,origen,destino);
 				if(result==-1){
 					mensajeEnviar(unSocket, FRACASO, NULL, 0);
 				}
@@ -334,7 +334,7 @@ int transformar(char* codigo,int origen,char* destino){
 }
 
 //2da etapa
-int reduccionLocal(char* codigo,char* origen,char* destino){
+int reduccionLocalEjecutar(char* codigo,char* origen,char* destino){
 	locOri* listaOri;
 	listaOri = getOrigenesLocales(origen);
 	char* apendado;
@@ -538,7 +538,7 @@ int registroMayorOrden(char** VRegistros,int cant){
 }
 
 //3ra etapa
-int reduccionGlobal(char* codigo,char* origen,char* destino){
+int reduccionGlobalEjecutar(char* codigo,char* origen,char* destino){
 	lGlobOri* listaOri;
 	listaOri = getOrigenesGlobales(origen);
 	char* apendado;

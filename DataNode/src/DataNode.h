@@ -23,7 +23,7 @@
 
 //--------------------------------------- Estructuras -------------------------------------
 
-typedef void* Bloque;
+typedef void* BloqueWorker;
 
 typedef struct {
 	char ipFileSystem[20];
@@ -78,7 +78,7 @@ void dataBinConfigurar();
 
 //--------------------------------------- Funciones de Bloque -------------------------------------
 
-Bloque bloqueBuscar(Entero numeroBloque);
+BloqueWorker bloqueBuscar(Entero numeroBloque);
 void bloqueEscribir(Puntero datos);
 void bloqueObtenerParaLeer(Puntero datos);
 void bloqueObtenerParaCopiar(Puntero datos);

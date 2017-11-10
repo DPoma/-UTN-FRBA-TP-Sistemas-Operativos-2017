@@ -11,7 +11,7 @@
 #include "FileSystem.h"
 
 int main(int contadorArgumentos, String* argumentos) {
-	fileSystemIniciar(contadorArgumentos>1?argumentos[1]:0); //o algo por el estilo
+	fileSystemIniciar(argumentos[1]);
 	fileSystemAtenderProcesos();
 	consolaAtenderComandos();
 	fileSystemFinalizar();
@@ -318,14 +318,14 @@ BloqueYama* yamaConvertirArchivo(Archivo* archivo, Entero idMaster) {
 	listaOrdenar(archivo->listaBloques, (Puntero)bloqueOrdenarPorNumero);
 	memcpy(bloques, &idMaster, sizeof(Entero));
 	for(indice = 0; indice < cantidad; indice++) {
-		Bloque* bloque = listaObtenerElemento(archivo->listaBloques, indice);
+		BloqueWorker* bloque = listaObtenerElemento(archivo->listaBloques, indice);
 		BloqueYama bloqueYama = yamaConvertirBloque(bloque);
 		memcpy(bloques+sizeof(Entero)+sizeof(BloqueYama)*indice, &bloqueYama, sizeof(BloqueYama));
 	}
 	return bloques;
 }
 
-BloqueYama yamaConvertirBloque(Bloque* bloque) {
+BloqueYama yamaConvertirBloque(BloqueWorker* bloque) {
 	BloqueYama bloqueYama;
 	Copia* copia1 = listaObtenerElemento(bloque->listaCopias, 0);
 	Copia* copia2 = listaObtenerElemento(bloque->listaCopias, 1);
@@ -884,7 +884,7 @@ void comandoEliminarCopia(Comando* comando) {
 	}
 	int numeroBloque = atoi(comando->argumentos[3]);
 	int numeroCopia = atoi(comando->argumentos[4]);
-	Bloque* bloque = listaObtenerElemento(archivo->listaBloques, numeroBloque);
+	BloqueWorker* bloque = listaObtenerElemento(archivo->listaBloques, numeroBloque);
 
 	if(bloque == NULL) {
 		imprimirMensaje(archivoLog, "[ERROR] El numero de bloque no existe");
@@ -997,13 +997,13 @@ void comandoInformacionArchivo(Comando* comando) {
 	int indice;
 	int tamanio = 0;
 	for(indice = 0; indice < listaCantidadElementos(archivo->listaBloques); indice++) {
-		Bloque* bloque = listaObtenerElemento(archivo->listaBloques, indice);
+		BloqueWorker* bloque = listaObtenerElemento(archivo->listaBloques, indice);
 		tamanio+= bloque->bytesUtilizados;
 	}
 	printf("[ARCHIVO] Tamanio: %i bytes\n", tamanio);
 	printf("[ARCHIVO] Bloques: %i\n", listaCantidadElementos(archivo->listaBloques));
 	for(indice = 0; indice < listaCantidadElementos(archivo->listaBloques); indice++) {
-		Bloque* bloque = listaObtenerElemento(archivo->listaBloques, indice);
+		BloqueWorker* bloque = listaObtenerElemento(archivo->listaBloques, indice);
 		if(archivoBinario(archivo))
 			printf("[ARCHIVO] Bloque %i: %i bytes\n", indice, BLOQUE);
 		else
@@ -1045,7 +1045,7 @@ void comandoCopiarBloque(Comando* comando) {
 		return;
 	}
 	Entero numeroBloque = atoi(comando->argumentos[2]);
-	Bloque* bloque = listaObtenerElemento(archivo->listaBloques, numeroBloque);
+	BloqueWorker* bloque = listaObtenerElemento(archivo->listaBloques, numeroBloque);
 	if(bloque == NULL) {
 		imprimirMensaje(archivoLog, "[ERROR] El numero de bloque no existe");
 		return;
@@ -1120,7 +1120,7 @@ int comandoCopiarArchivoDeYamaFS(Comando* comando) {
 	listaOrdenar(archivo->listaBloques, (Puntero)bloqueOrdenarPorNumero);
 	int indice;
 	for(indice = 0; indice < listaCantidadElementos(archivo->listaBloques) ;indice++) {
-		Bloque* bloque = listaObtenerElemento(archivo->listaBloques, indice);
+		BloqueWorker* bloque = listaObtenerElemento(archivo->listaBloques, indice);
 		int copiaSinEnviar = true;
 		int indiceCopias;
 		listaOrdenar(bloque->listaCopias, (Puntero)copiaOrdenarPorActividadDelNodo);
@@ -1860,7 +1860,7 @@ int archivoLeer(Comando* comando) {
 	listaOrdenar(archivo->listaBloques, (Puntero)bloqueOrdenarPorNumero);
 	int numeroBloque;
 	for(numeroBloque=0; numeroBloque < listaCantidadElementos(archivo->listaBloques); numeroBloque++) {
-		Bloque* bloque = listaObtenerElemento(archivo->listaBloques, numeroBloque);
+		BloqueWorker* bloque = listaObtenerElemento(archivo->listaBloques, numeroBloque);
 		int numeroCopia;
 		int bloqueSinImprimir = true;
 		listaOrdenar(bloque->listaCopias, (Puntero)copiaOrdenarPorActividadDelNodo);
@@ -1943,7 +1943,7 @@ void archivoPersistir(Archivo* archivo) {
 	fprintf(file, "BLOQUES=%i\n", listaCantidadElementos(archivo->listaBloques));
 	int indice;
 	for(indice = 0; indice < listaCantidadElementos(archivo->listaBloques); indice++) {
-		Bloque* bloque = listaObtenerElemento(archivo->listaBloques, indice);
+		BloqueWorker* bloque = listaObtenerElemento(archivo->listaBloques, indice);
 		fprintf(file, "BLOQUE%i_BYTES=%i\n",indice, bloque->bytesUtilizados);
 		fprintf(file, "BLOQUE%i_COPIAS=%i\n",indice, listaCantidadElementos(bloque->listaCopias));
 		int indiceCopia;
@@ -2019,7 +2019,7 @@ void archivoRecuperarPersistenciaDetallada(String nombre, int padre) {
 	archivo->listaBloques = listaCrear();
 	int cantidadBloques = archivoConfigEnteroDe(config, "BLOQUES");
 	for(indiceBloques = 0; indiceBloques < cantidadBloques; indiceBloques++) {
-		Bloque* bloque = memoriaAlocar(sizeof(Bloque));
+		BloqueWorker* bloque = memoriaAlocar(sizeof(BloqueWorker));
 		String lineaBloque = string_from_format("BLOQUE%i_BYTES", indiceBloques);
 		bloque->numeroBloque = indiceBloques;
 		bloque->bytesUtilizados = archivoConfigEnteroDe(config, lineaBloque);
@@ -2420,20 +2420,20 @@ void nodoRecuperarPersistenciaBitmap(Nodo* nodo) {
 
 //--------------------------------------- Funciones de Bloque-------------------------------------
 
-Bloque* bloqueCrear(int bytes, int numero) {
-	Bloque* bloque = memoriaAlocar(sizeof(Bloque));
+BloqueWorker* bloqueCrear(int bytes, int numero) {
+	BloqueWorker* bloque = memoriaAlocar(sizeof(BloqueWorker));
 	bloque->bytesUtilizados = bytes;
 	bloque->listaCopias = listaCrear();
 	bloque->numeroBloque = numero;
 	return bloque;
 }
 
-void bloqueDestruir(Bloque* bloque) {
+void bloqueDestruir(BloqueWorker* bloque) {
 	listaDestruirConElementos(bloque->listaCopias, (Puntero)copiaDestruir);
 	memoriaLiberar(bloque);
 }
 
-int bloqueEnviarCopias(Bloque* bloque, String buffer) {
+int bloqueEnviarCopias(BloqueWorker* bloque, String buffer) {
 	int copiasEnviadas = 0;
 	int indice = 0;
 	mutexBloquear(mutexTarea);
@@ -2498,16 +2498,16 @@ void bloqueCopiarArchivo(Nodo* nodo, Puntero datos, int* estado) {
 	semaforoSignal(semaforoTarea);
 }
 
-bool bloqueOrdenarPorNumero(Bloque* unBloque, Bloque* otroBloque) {
+bool bloqueOrdenarPorNumero(BloqueWorker* unBloque, BloqueWorker* otroBloque) {
 	return unBloque->numeroBloque < otroBloque->numeroBloque;
 }
 
-bool bloqueDisponible(Bloque* bloque) {
+bool bloqueDisponible(BloqueWorker* bloque) {
 	return listaCumpleAlguno(bloque->listaCopias, (Puntero)copiaDisponible);
 }
 
 int bloqueGuardar(Archivo* archivo, String buffer, size_t bytes, Entero numeroBloque) {
-	Bloque* bloque = bloqueCrear(bytes, numeroBloque);
+	BloqueWorker* bloque = bloqueCrear(bytes, numeroBloque);
 	listaAgregarElemento(archivo->listaBloques, bloque);
 	int estado = bloqueEnviarCopias(bloque, buffer);
 	return estado;
@@ -2520,7 +2520,7 @@ BloqueNodo* bloqueNodoCrear(Entero numeroBloque, String buffer, int tamanioUtili
 	return bloqueNodo;
 }
 
-bool bloqueEstaEnNodo(Bloque* bloque, Nodo* nodo) {
+bool bloqueEstaEnNodo(BloqueWorker* bloque, Nodo* nodo) {
 
 	bool copiaEstaEnNodo(Copia* copia) {
 		return stringIguales(copia->nombreNodo, nodo->nombre);
@@ -2554,7 +2554,7 @@ bool copiaDisponible(Copia* copia) {
 	return nodoConectado(nodo);
 }
 
-int copiaGuardarEnNodo(Bloque* bloque, Nodo* nodo) {
+int copiaGuardarEnNodo(BloqueWorker* bloque, Nodo* nodo) {
 	Entero numeroBloqueNodo = nodoBuscarBloqueLibre(nodo);
 	Copia* copia = copiaCrear(numeroBloqueNodo, nodo->nombre);
 	bitmapOcuparBit(nodo->bitmap, numeroBloqueNodo);
@@ -2564,7 +2564,7 @@ int copiaGuardarEnNodo(Bloque* bloque, Nodo* nodo) {
 	return numeroBloqueNodo;
 }
 
-int copiaEnviarANodo(Bloque* bloque, Nodo* nodo, String buffer) {
+int copiaEnviarANodo(BloqueWorker* bloque, Nodo* nodo, String buffer) {
 	int numeroBloqueNodo = copiaGuardarEnNodo(bloque, nodo);
 	BloqueNodo* bloqueNodo = bloqueNodoCrear(numeroBloqueNodo, buffer, BLOQUE);
 	mutexBloquear(mutexSocket);

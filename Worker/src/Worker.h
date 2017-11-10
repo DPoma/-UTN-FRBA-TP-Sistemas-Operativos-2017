@@ -13,8 +13,8 @@
 #define DESCONEXION 0
 #define ABORTAR 301
 #define TRANSFORMACION 303
-#define REDUCLOCAL 304
-#define REDUCGLOBAL 305
+#define REDUCCION_LOCAL 304
+#define REDUCCION_GLOBAL 305
 #define ALMACENADO 306
 #define CIERRE 307
 #define PASAREG 308
@@ -70,10 +70,10 @@ void socketAceptarConexion();
 
 void workerIniciar();
 int transformar(char*,int,char*);
-int reduccionLocal(char*,char*,char*);
+int reduccionLocalEjecutar(char*,char*,char*);
 locOri* getOrigenesLocales(char*);
 char* appendL(locOri*);
-int reduccionGlobal(char*,char*,char*);
+int reduccionGlobalEjecutar(char*,char*,char*);
 lGlobOri* getOrigenesGlobales(char*);
 char* appendG(lGlobOri*);
 datosReg* PasaRegistro(char*,int);
