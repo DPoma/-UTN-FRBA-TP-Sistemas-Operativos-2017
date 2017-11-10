@@ -46,6 +46,14 @@ typedef struct {
 } Transformacion;
 
 typedef struct {
+	int sizeScript;
+	String script;
+	int cantidadTemporales;
+	String archivosTemporales;
+	char archivoTemporal[12];
+} ReduccionLocal;
+
+typedef struct {
 	char* ruta;
 	char* ip;
 	int puerto;
@@ -116,6 +124,12 @@ String transformacionBloqueTemporal(Transformacion* transformacion);
 String transformacionScriptTemporal(Transformacion* transformacion);
 
 //--------------------------------------- Funciones de DataBin -------------------------------------
+
+//--------------------------------------- Funciones de Reduccion Local -------------------------------------
+
+void reduccionLocalIniciar(Puntero datos, Socket unSocket);
+ReduccionLocal* reduccionLocalRecibir(Puntero datos);
+
 
 void dataBinAbrir();
 void configuracionCalcularBloques();

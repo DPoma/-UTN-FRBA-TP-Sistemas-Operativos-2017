@@ -129,10 +129,10 @@ void masterAtenderOperacion(Socket unSocket) {
 void masterEjecutarOperacion(Socket unSocket) {
 	imprimirMensaje(archivoLog, "[CONEXION] Proceso Master conectado exitosamente");
 	Mensaje* mensaje = mensajeRecibir(unSocket);
-	switch(mensaje->header.operacion){
-		case DESCONEXION: imprimirMensaje(archivoLog, "[AVISO] El Master  se desconecto"); break;
+	switch(mensaje->header.operacion) {
+		case DESCONEXION: imprimirMensaje(archivoLog, "[AVISO] El Master se desconecto"); break;
 		case TRANSFORMACION: transformacionIniciar(mensaje->datos, unSocket); break;
-		case REDUCCION_LOCAL: break;
+		case REDUCCION_LOCAL reduccionLocalIniciar(mensaje->datos, unSocket); break;
 		case REDUCCION_GLOBAL: break;
 		case ALMACENADO: break;
 		case PASAREG: break;
@@ -177,13 +177,12 @@ int transformacionEjecutar(Transformacion* transformacion) {
 }
 
 void transformacionExito(Entero numeroBloque, Socket unSocket) {
-	imprimirMensaje1(archivoLog,"[TRANSFORMACION] Transformacion exitosa en bloque N°%i de Master d", (int*)numeroBloque);
+	imprimirMensaje1(archivoLog,"[TRANSFORMACION] Transformacion exitosa en bloque N°%i de Master", (int*)numeroBloque);
 	mensajeEnviar(unSocket, EXITO, &numeroBloque, sizeof(Entero));
-
 }
 
 void transformacionFracaso(Entero numeroBloque, Socket unSocket) {
-	imprimirMensaje(archivoLog,"[TRANSFORMACION] transformacion Fracaso");
+	imprimirMensaje1(archivoLog,"[TRANSFORMACION] Transformacion fallida en bloque N°%i de Master", (int*)numeroBloque);
 	mensajeEnviar(unSocket, FRACASO, &numeroBloque, sizeof(Entero));
 }
 
@@ -203,6 +202,70 @@ String transformacionScriptTemporal(Transformacion* transformacion) {
 	fileCerrar(file);
 	return path;
 }
+
+//--------------------------------------- Funciones de Reduccion Local -----------------------------------
+
+void reduccionLocalIniciar(Puntero datos, Socket unSocket) {
+	ReduccionLocal* reduccion = reduccionLocalRecibir(datos);
+	int resultado = reduccionLocalEjecutar(reduccion);
+	if(resultado != ERROR)
+		reduccionLocalExito(unSocket);
+	else
+		reduccionLocalFracaso(unSocket);
+}
+
+ReduccionLocal* reduccionLocalRecibir(Puntero datos) {
+	ReduccionLocal* reduccion = memoriaAlocar(sizeof(ReduccionLocal));
+	memcpy(&reduccion->sizeScript, datos, sizeof(Entero));
+	reduccion->script = memoriaAlocar(reduccion->sizeScript);
+	memcpy(reduccion->script, datos+sizeof(Entero), reduccion->sizeScript);
+	memcpy(&reduccion->cantidadTemporales, datos+sizeof(Entero)+reduccion->sizeScript, sizeof(Entero));
+	memcpy(reduccion->archivosTemporales, datos+sizeof(Entero)*2+reduccion->sizeScript, reduccion->cantidadTemporales*12);
+	memcpy(reduccion->archivoTemporal, datos+sizeof(Entero)*3+reduccion->sizeScript+reduccion->cantidadTemporales*12, 12);
+	return reduccion;
+}
+
+int transformacionEjecutar(Transformacion* transformacion) {
+	String pathBloque = transformacionBloqueTemporal(transformacion);
+	String pathScript = transformacionScriptTemporal(transformacion);
+	String pathDestino = string_from_format("%s/%s", RUTA_TEMPS, transformacion->archivoTemporal);
+	String comando = string_from_format("cat %s | pl %s | sort > %s", pathBloque, pathScript, pathDestino);
+	int resultado = system(comando);
+	fileLimpiar(pathBloque);
+	fileLimpiar(pathScript);
+	memoriaLiberar(pathScript);
+	memoriaLiberar(pathDestino);
+	memoriaLiberar(pathBloque);
+	return resultado;
+}
+
+void transformacionExito(Entero numeroBloque, Socket unSocket) {
+	imprimirMensaje1(archivoLog,"[TRANSFORMACION] Transformacion exitosa en bloque N°%i de Master", (int*)numeroBloque);
+	mensajeEnviar(unSocket, EXITO, &numeroBloque, sizeof(Entero));
+}
+
+void transformacionFracaso(Entero numeroBloque, Socket unSocket) {
+	imprimirMensaje1(archivoLog,"[TRANSFORMACION] Transformacion fallida en bloque N°%i de Master", (int*)numeroBloque);
+	mensajeEnviar(unSocket, FRACASO, &numeroBloque, sizeof(Entero));
+}
+
+String transformacionBloqueTemporal(Transformacion* transformacion) {
+	String path = string_from_format("%s/bloqueTemporal%i", RUTA_TEMPS, transformacion->numeroBloque);
+	File file = fileAbrir(path, ESCRITURA);
+	Puntero puntero = getBloque(transformacion->numeroBloque);
+	fwrite(puntero, sizeof(char), transformacion->bytesUtilizados, file);
+	fileCerrar(file);
+	return path;
+}
+
+String transformacionScriptTemporal(Transformacion* transformacion) {
+	String path = string_from_format("%s/scriptTemporal%i", RUTA_TEMPS, transformacion->numeroBloque);
+	File file = fileAbrir(path , ESCRITURA);
+	fwrite(transformacion->script, sizeof(char), transformacion->sizeScript, file);
+	fileCerrar(file);
+	return path;
+}
+
 
 //--------------------------------------- Funciones de DataBin -------------------------------------
 

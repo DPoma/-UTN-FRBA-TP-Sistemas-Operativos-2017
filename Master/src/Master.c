@@ -32,12 +32,13 @@ void masterConectarAYama(String archivoDatos) {
 	mensajeEnviar(socketYama, SOLICITUD, archivoDatos, stringLongitud(archivoDatos)+1);
 }
 
-void masterAtender(){
+void masterAtender() {
 	while(estadoMaster == ACTIVADO) {
 		Mensaje* mensaje = mensajeRecibir(socketYama);
 		switch(mensaje->header.operacion) {
 		case DESCONEXION: masterFinalizar(); break;
 		case TRANSFORMACION: transformacionIniciar(mensaje); break;
+		case ALTERNATIVO: transformoBLoque();
 		//case REDUCCION_LOCAL: reduccionLocalEjecutar(mensaje); break;
 		//case REDUCCION_GLOBAL: reduccionGlobalEjecutar(mensaje); break;
 		case 301: scriptInvalido(); break;
@@ -211,9 +212,7 @@ void transformacionCrearHilos(Lista listaMaster) {
 
 void transformacionNotificarYama(Mensaje* mensaje, Lista listaBloques) {
 	Entero numeroBloque = *(Entero*)mensaje->datos;
-	BloqueTransformacion* bloque = transformacionBuscarBloque(listaBloques, numeroBloque);
-	if(bloque == NULL)
-		puts("no BLOQUE");
+	BloqueTransformacion* bloque = transformacionBuscarBloque(listaBloques, numeroBloque);;
 	Puntero datos = memoriaAlocar(INTSIZE+DIRSIZE);
 	memcpy(datos, &bloque->direccion, DIRSIZE);
 	memcpy(datos+DIRSIZE, &numeroBloque, INTSIZE);
@@ -241,6 +240,7 @@ void transformacionExito(Mensaje* mensaje, Lista listaBloques) {
 void transformacionFracaso(Mensaje* mensaje, Lista listaBloques) {
 	imprimirMensaje(archivoLog,"[TRANSFORMACION] Transformacion fallida en el Worker");
 	transformacionNotificarYama(mensaje, listaBloques);
+	mensajeRecibir
 	//TODO ver alternativo
 }
 
@@ -256,7 +256,6 @@ void alternativo() {
 
 //--------------------------------------- Funciones de Reduccion Local -------------------------------------
 
-/*
 void reduccionLocalEjecutar(Mensaje* mensaje) {
 	Dir* NODO;
 	int canttemps;
