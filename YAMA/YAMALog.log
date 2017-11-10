@@ -1,3 +1,2 @@
-[INFO] 23:37:41:524 YAMA/(12243:12243): [CONEXION] Realizando conexion con File System (IP: 127.0.0.1 | Puerto 5060)
-[INFO] 23:37:41:533 YAMA/(12243:12243): [CONEXION] Conexion exitosa con File System
-[INFO] 23:37:41:533 YAMA/(12243:12243): [CONEXION] Esperando conexiones de un Master (Puerto 5070)
+[INFO] 21:19:44:446 YAMA/(2795:2795): [CONEXION] Realizando conexion con File System (IP: 127.0.0.1 | Puerto 5060)
+[INFO] 21:19:44:457 YAMA/(2795:2795): [31m[ERROR] El File System no se encuentra estable[0m

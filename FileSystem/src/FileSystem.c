@@ -11,7 +11,7 @@
 #include "FileSystem.h"
 
 int main(int contadorArgumentos, String* argumentos) {
-	fileSystemIniciar(argumentos[1]);
+	fileSystemIniciar(contadorArgumentos>1?argumentos[1]:0); //o algo por el estilo
 	fileSystemAtenderProcesos();
 	consolaAtenderComandos();
 	fileSystemFinalizar();

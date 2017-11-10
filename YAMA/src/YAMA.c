@@ -572,13 +572,14 @@ void darPathTemporal(char** ret,char pre){
 	}
 	(*ret)[10]='0';
 	(*ret)[11]='\0';
+	char* anteriorTemp=string_duplicate(*ret);
 	if(stringIguales(*ret,anterior))
 		agregado++;
 	else
 		agregado='0';
 	(*ret)[10]=agregado;
 	free(anterior);
-	anterior=string_duplicate(*ret);
+	anterior=anteriorTemp;
 }
 
 void retardo(){usleep(configuracion->retardoPlanificacion);}
