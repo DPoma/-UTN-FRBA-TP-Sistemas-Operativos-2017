@@ -1,30 +1,18 @@
-[INFO] 21:26:35:878 Master/(12011:12011): [CONEXION] Configuracion para conexion con YAMA (IP: 127.0.0.1 | Puerto: 5070)
-[INFO] 21:26:35:899 Master/(12011:12011): [CONEXION] Estableciendo Conexion con YAMA...
-[INFO] 21:26:35:927 Master/(12011:12011): [CONEXION] Conexion establecida con YAMA, esperando instrucciones
-[INFO] 21:26:35:978 Master/(12011:12011): [MENSAJE] Lista de bloques recibida
-[INFO] 21:26:35:979 Master/(12011:12011): [RECEPCION] bloque 127.0.0.1 5050 0
-[INFO] 21:26:35:982 Master/(12011:12011): ] lista para nodo 127.0.0.1 5050 armada, lista #1
-[INFO] 21:26:35:983 Master/(12011:12011): [RECEPCION] bloque 127.0.0.1 5050 2
-[INFO] 21:26:35:998 Master/(12011:12011): [RECEPCION] bloque 127.0.0.1 5050 4
-[INFO] 21:26:35:999 Master/(12011:12011): [RECEPCION] bloque 127.0.0.1 5050 6
-[INFO] 21:26:35:999 Master/(12011:12011): [RECEPCION] bloque 127.0.0.1 5050 8
-[INFO] 21:26:35:999 Master/(12011:12011): [RECEPCION] bloque 127.0.0.1 5050 10
-[INFO] 21:26:35:999 Master/(12011:12011): [RECEPCION] bloque 127.0.0.1 5050 12
-[INFO] 21:26:35:999 Master/(12011:12011): [RECEPCION] bloque 127.0.0.1 5050 14
-[INFO] 21:26:35:0 Master/(12011:12011): [RECEPCION] bloque 127.0.0.1 5050 16
-[INFO] 21:26:35:0 Master/(12011:12011): [RECEPCION] bloque 127.0.0.1 5050 18
-[INFO] 21:26:35:0 Master/(12011:12011): [RECEPCION] bloque 127.0.0.1 5050 20
-[INFO] 21:26:35:2 Master/(12011:12011): [RECEPCION] bloque 127.0.0.1 5050 22
-[INFO] 21:26:36:34 Master/(12011:12020): [CONEXION] Estableciendo conexion con Worker (IP: 127.0.0.1 | PUERTO: 5050
-[INFO] 21:26:36:39 Master/(12011:12020): [CONEXION] Enviando bloque 0 t2126359750
-[INFO] 21:26:36:39 Master/(12011:12020): [CONEXION] Enviando bloque 2 t2126359751
-[INFO] 21:26:36:39 Master/(12011:12020): [CONEXION] Enviando bloque 4 t2126359750
-[INFO] 21:26:36:41 Master/(12011:12020): [CONEXION] Enviando bloque 6 t2126359751
-[INFO] 21:26:36:41 Master/(12011:12020): [CONEXION] Enviando bloque 8 t2126359750
-[INFO] 21:26:36:42 Master/(12011:12020): [CONEXION] Enviando bloque 10 t2126359751
-[INFO] 21:26:36:42 Master/(12011:12020): [CONEXION] Enviando bloque 12 t2126359760
-[INFO] 21:26:36:42 Master/(12011:12020): [CONEXION] Enviando bloque 14 t2126359761
-[INFO] 21:26:36:43 Master/(12011:12020): [CONEXION] Enviando bloque 16 t2126359760
-[INFO] 21:26:36:44 Master/(12011:12020): [CONEXION] Enviando bloque 18 t2126359761
-[INFO] 21:26:36:45 Master/(12011:12020): [CONEXION] Enviando bloque 20 t2126359760
-[INFO] 21:26:36:45 Master/(12011:12020): [CONEXION] Enviando bloque 22 t2126359761
+[INFO] 15:36:08:63 Master/(12406:12406): [CONFIGURACION] Conectandose a YAMA (IP: 127.0.0.1 | Puerto: 5070)
+[INFO] 15:36:08:156 Master/(12406:12406): [CONEXION] Conexion establecida con YAMA, esperando instrucciones
+[INFO] 15:36:08:259 Master/(12406:12406): [MENSAJE] Lista de bloques recibida
+[INFO] 15:36:08:263 Master/(12406:12406): [TRANSFORMACION] Bloque N°0 recibido (IP: 127.0.0.1 | Puerto: 5090)
+[INFO] 15:36:08:278 Master/(12406:12406): [TRANSFORMACION] Bloque N°1 recibido (IP: 127.0.0.1 | Puerto: 5090)
+[INFO] 15:36:08:294 Master/(12406:12406): [TRANSFORMACION] Bloque N°2 recibido (IP: 127.0.0.1 | Puerto: 5090)
+[INFO] 15:36:08:295 Master/(12406:12406): [TRANSFORMACION] Bloque N°3 recibido (IP: 127.0.0.1 | Puerto: 5090)
+[INFO] 15:36:08:295 Master/(12406:12406): [TRANSFORMACION] Bloque N°4 recibido (IP: 127.0.0.1 | Puerto: 5090)
+[INFO] 15:36:08:296 Master/(12406:12406): [TRANSFORMACION] Bloque N°5 recibido (IP: 127.0.0.1 | Puerto: 5090)
+[INFO] 15:36:08:296 Master/(12406:12406): [TRANSFORMACION] Bloque N°6 recibido (IP: 127.0.0.1 | Puerto: 5090)
+[INFO] 15:36:08:296 Master/(12406:12406): [TRANSFORMACION] Bloque N°7 recibido (IP: 127.0.0.1 | Puerto: 5090)
+[INFO] 15:36:08:297 Master/(12406:12406): [TRANSFORMACION] Bloque N°8 recibido (IP: 127.0.0.1 | Puerto: 5090)
+[INFO] 15:36:08:297 Master/(12406:12406): [TRANSFORMACION] Bloque N°9 recibido (IP: 127.0.0.1 | Puerto: 5090)
+[INFO] 15:36:08:297 Master/(12406:12406): [TRANSFORMACION] Bloque N°10 recibido (IP: 127.0.0.1 | Puerto: 5090)
+[INFO] 15:36:08:298 Master/(12406:12406): [TRANSFORMACION] Bloque N°11 recibido (IP: 127.0.0.1 | Puerto: 5090)
+[INFO] 15:36:08:359 Master/(12406:12415): [CONEXION] Estableciendo conexion con Worker (IP: 127.0.0.1 | PUERTO: 5090)
+[INFO] 15:36:08:364 Master/(12406:12415): [TRANSFORMACION] Enviando bloque N°0 (Archivo temporal: t1536082550)
+[INFO] 15:36:08:432 Master/(12406:12415): [TRANSFORMACION] Enviando bloque N°1 (Archivo temporal: t1536082551)

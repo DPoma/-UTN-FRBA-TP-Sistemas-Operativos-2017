@@ -297,8 +297,9 @@ void yamaFinalizar(int* estado) {
 
 void yamaEnviarBloques(Puntero datos) {
 	int idMaster = *(Entero*)datos;
-	printf("%s\n", (String)datos+sizeof(Entero));
-	Archivo* archivo = archivoBuscarPorRuta(datos+sizeof(Entero));
+	String rutaDecente = stringTomarDesdePosicion(datos+sizeof(Entero), MAX_PREFIJO);
+	Archivo* archivo = archivoBuscarPorRuta(rutaDecente);
+	memoriaLiberar(rutaDecente);
 	if(archivo == NULL) {
 		imprimirMensaje(archivoLog, ROJO"[ERROR] El path no existe"BLANCO);
 		mensajeEnviar(socketYama, ERROR_ARCHIVO, &idMaster, sizeof(Entero));
@@ -307,7 +308,7 @@ void yamaEnviarBloques(Puntero datos) {
 	int cantidad = listaCantidadElementos(archivo->listaBloques);
 	BloqueYama* bloques = yamaConvertirArchivo(archivo, idMaster);
 	mensajeEnviar(socketYama, ENVIAR_BLOQUES, bloques, sizeof(Entero)+sizeof(BloqueYama)*cantidad);
-
+	memoriaLiberar(bloques);
 	printf("ENVIE %d \n",sizeof(Entero)+sizeof(BloqueYama)*cantidad );
 }
 

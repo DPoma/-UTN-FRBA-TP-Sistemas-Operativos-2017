@@ -76,7 +76,7 @@ void dataNodeAceptado() {
 void dataNodeConectarAFS() {
 	socketFileSystem = socketCrearCliente(configuracion->ipFileSystem, configuracion->puertoFileSystem, ID_DATANODE);
 	Puntero puntero = malloc(100);
-	String mensaje = string_from_format("/%s/%s/%s", configuracion->nombreNodo, configuracion->ipPropia, configuracion->puertoWorker);
+	String mensaje = string_from_format("/%s/%s/%s", configuracion->nombreNodo, configuracion->ipPropia, configuracion->puertoMaster);
 	memcpy(puntero, &dataBinBloques, sizeof(Entero));
 	memcpy(puntero+sizeof(Entero), mensaje, stringLongitud(mensaje)+1);
 	mensajeEnviar(socketFileSystem, SOLICITAR_CONEXION, puntero, stringLongitud(mensaje)+1+sizeof(Entero));
@@ -92,6 +92,7 @@ Configuracion* configuracionLeerArchivo(ArchivoConfig archivoConfig) {
 	stringCopiar(configuracion->ipFileSystem, archivoConfigStringDe(archivoConfig, "IP_FILESYSTEM"));
 	stringCopiar(configuracion->puertoFileSystem, archivoConfigStringDe(archivoConfig, "PUERTO_FILESYSTEM"));
 	stringCopiar(configuracion->nombreNodo, archivoConfigStringDe(archivoConfig, "NOMBRE_NODO"));
+	stringCopiar(configuracion->puertoMaster, archivoConfigStringDe(archivoConfig, "PUERTO_MASTER"));
 	stringCopiar(configuracion->puertoWorker, archivoConfigStringDe(archivoConfig, "PUERTO_WORKER"));
 	stringCopiar(configuracion->rutaDataBin, archivoConfigStringDe(archivoConfig, "RUTA_DATABIN"));
 	stringCopiar(configuracion->ipPropia, archivoConfigStringDe(archivoConfig, "IP_PROPIA"));
@@ -108,9 +109,10 @@ void configuracionIniciarCampos() {
 	campos[0] = "IP_FILESYSTEM";
 	campos[1] = "PUERTO_FILESYSTEM";
 	campos[2] = "NOMBRE_NODO";
-	campos[3] = "PUERTO_WORKER";
-	campos[4] = "RUTA_DATABIN";
-	campos[5] = "IP_PROPIA";
+	campos[3] = "PUERTO_MASTER";
+	campos[4] = "PUERTO_WORKER";
+	campos[5] = "RUTA_DATABIN";
+	campos[6] = "IP_PROPIA";
 }
 
 void configuracionIniciarLog() {

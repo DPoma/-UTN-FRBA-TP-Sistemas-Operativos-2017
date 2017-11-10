@@ -38,8 +38,8 @@ void masterAtender(){
 		switch(mensaje->header.operacion) {
 		case DESCONEXION: masterFinalizar(); break;
 		case TRANSFORMACION: transformacionIniciar(mensaje); break;
-		case REDUCCION_LOCAL: reduccionLocalEjecutar(mensaje); break;
-		case REDUCCION_GLOBAL: reduccionGlobalEjecutar(mensaje); break;
+		//case REDUCCION_LOCAL: reduccionLocalEjecutar(mensaje); break;
+		//case REDUCCION_GLOBAL: reduccionGlobalEjecutar(mensaje); break;
 		case 301: scriptInvalido(); break;
 		}
 	}
@@ -117,13 +117,13 @@ void scriptLeer(File archScript, String* script, Entero* tamanio) {
 
 void scriptTransformacionLeer(String path) {
 	File fileScript = fileAbrir(path, LECTURA);
-	scriptLeer(fileScript,&scriptTransformacion,&tamanioScriptTransformacion);
+	scriptLeer(fileScript,&scriptTransformacion,&sizeScriptTransformacion);
 	fileCerrar(fileScript);
 }
 
 void scriptReduccionLeer(String path) {
 	File fileScript = fileAbrir(path, LECTURA);
-	scriptLeer(fileScript,&scriptReduccion,&tamanioScriptReduccion);
+	scriptLeer(fileScript,&scriptReduccion,&sizeScriptReduccion);
 	fileCerrar(fileScript);
 }
 
@@ -140,7 +140,7 @@ void transformacionIniciar(Mensaje* mensaje) {
 	int indice;
 	for(indice=0; indice<mensaje->header.tamanio; indice+=DIRSIZE+INTSIZE*2+TEMPSIZE){
 		BloqueTransformacion* bloque = transformacionCrearBloque(mensaje->datos+indice);
-		imprimirMensaje3(archivoLog, "[TRANSFORMACION] Bloque N°%i recibido (%s|%s)",(int*)bloque->numeroBloque, bloque->direccion.ip, bloque->direccion.port);
+		imprimirMensaje3(archivoLog, "[TRANSFORMACION] Bloque N°%i recibido (IP: %s | Puerto: %s)",(int*)bloque->numeroBloque, bloque->direccion.ip, bloque->direccion.port);
 		bool flag = false;
 		int indiceNodos;
 		for(indiceNodos=0; indiceNodos < listaMaster->elements_count; indiceNodos++){
@@ -156,7 +156,6 @@ void transformacionIniciar(Mensaje* mensaje) {
 			Lista listaNodo = listaCrear();
 			listaAgregarElemento(listaNodo, bloque);
 			listaAgregarElemento(listaMaster ,listaNodo);
-			imprimirMensaje3(archivoLog,"[TRANSFORMACION] Lista para Nodo %s|%s armada, lista size #%d",bloque->direccion.ip, bloque->direccion.port,(int*)listaMaster->elements_count);
 		}
 	}
 	transformacionCrearHilos(listaMaster);
@@ -165,8 +164,7 @@ void transformacionIniciar(Mensaje* mensaje) {
 void transformacionHilo(Lista listaBloques) {
 	BloqueTransformacion* bloque = listaPrimerElemento(listaBloques);
 	Socket socketWorker = socketCrearCliente(bloque->direccion.ip,bloque->direccion.port,ID_MASTER);
-	imprimirMensaje2(archivoLog,"[CONEXION] Estableciendo conexion con Worker (IP: %s | PUERTO: %s",bloque->direccion.ip,bloque->direccion.port);
-	mensajeEnviar(socketWorker,TRANSFORMACION,scriptTransformacion,tamanioScriptTransformacion);
+	imprimirMensaje2(archivoLog,"[CONEXION] Estableciendo conexion con Worker (IP: %s | PUERTO: %s)",bloque->direccion.ip,bloque->direccion.port);
 	int indice;
 	for(indice=0; indice<listaBloques->elements_count;indice++){
 		BloqueTransformacion* bloque = listaObtenerElemento(listaBloques,indice);
@@ -221,7 +219,14 @@ void transformacionNotificarYama(Mensaje* mensaje, Lista listaBloques) {
 
 void transformacionEnviarBloque(BloqueTransformacion* bloqueTransformacion, Socket socketWorker) {
 	BloqueWorker* bloque = bloqueCrear(bloqueTransformacion);
-	mensajeEnviar(socketWorker, TRANSFORMACION, bloque, sizeof(BloqueWorker));
+	int tamanioTotal = 3*sizeof(Entero)+12+sizeScriptTransformacion;
+	Puntero datos = memoriaAlocar(tamanioTotal);
+	memcpy(datos, &sizeScriptTransformacion, sizeof(Entero));
+	memcpy(datos+sizeof(Entero), scriptTransformacion, sizeScriptTransformacion+1);
+	memcpy(datos+sizeScriptTransformacion+sizeof(Entero), &bloqueTransformacion->numeroBloque, sizeof(Entero));
+	memcpy(datos+sizeScriptTransformacion+sizeof(Entero)*2, &bloqueTransformacion->bytesUtilizados, sizeof(Entero));
+	memcpy(datos+sizeScriptTransformacion+sizeof(Entero)*3, bloqueTransformacion->nombreTemporal, 12);
+	mensajeEnviar(socketWorker, TRANSFORMACION, datos, tamanioTotal);
 	imprimirMensaje2(archivoLog,"[TRANSFORMACION] Enviando bloque N°%d (Archivo temporal: %s)",(int*)bloque->numeroBloque, bloque->nombreTemporal);
 }
 
@@ -248,6 +253,7 @@ void alternativo() {
 
 //--------------------------------------- Funciones de Reduccion Local -------------------------------------
 
+/*
 void reduccionLocalEjecutar(Mensaje* mensaje) {
 	Dir* NODO;
 	int canttemps;
@@ -313,14 +319,14 @@ void reduccionGlobalEjecutar(Mensaje* m) {
 	}
 	socketCerrar(sWorker);
 }
-
+*/
 //--------------------------------------- Funciones de Worker -------------------------------------
 
 BloqueWorker* bloqueCrear(BloqueTransformacion* transformacion) {
 	BloqueWorker* bloque = memoriaAlocar(sizeof(BloqueWorker));
-	memcpy(bloque,&transformacion->numeroBloque,INTSIZE);
-	memcpy(bloque+INTSIZE,&transformacion->bytesUtilizados,INTSIZE);
-	memcpy(bloque+INTSIZE*2,transformacion->nombreTemporal,TEMPSIZE);
+	memcpy(&bloque->numeroBloque, &transformacion->numeroBloque,INTSIZE);
+	memcpy(&bloque->bytesUtilizados, &transformacion->bytesUtilizados,INTSIZE);
+	memcpy(bloque->nombreTemporal,transformacion->nombreTemporal,TEMPSIZE);
 	return bloque;
 }
 

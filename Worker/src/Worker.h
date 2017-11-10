@@ -108,7 +108,7 @@ void masterEjecutarOperacion(Socket unSocket);
 //--------------------------------------- Funciones de Transformacion -------------------------------------
 
 int transformacionEjecutar(Transformacion* transformacion);
-void transformacionIniciar(Mensaje* mensaje, Socket unSocket);
+void transformacionIniciar(Puntero datos, Socket unSocket);
 int transformacionEjecutar(Transformacion* transformacion);
 void transformacionExito(Entero numeroBloque, Socket unSocket);
 void transformacionFracaso(Entero numeroBloque, Socket unSocket);

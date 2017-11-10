@@ -30,6 +30,7 @@ typedef struct {
 	char ipPropia[20];
 	char puertoFileSystem[20];
 	char nombreNodo[10];
+	char puertoMaster[20];
 	char puertoWorker[20];
 	char rutaDataBin[255];
 } Configuracion;
@@ -41,7 +42,7 @@ int estadoDataNode;
 int dataBinTamanio;
 Entero dataBinBloques;
 Puntero punteroDataBin;
-String campos[6];
+String campos[7];
 Socket socketFileSystem;
 Configuracion* configuracion;
 ArchivoLog archivoLog;

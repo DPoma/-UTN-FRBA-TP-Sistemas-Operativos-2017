@@ -1,10 +1,10 @@
-[INFO] 21:14:43:465 FileSystem/(2669:2669): [EJECUCION] Proceso File System iniciado
-[INFO] 21:14:43:466 FileSystem/(2669:2669): [CONFIGURACION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 21:14:43:466 FileSystem/(2669:2669): [CONFIGURACION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 21:14:43:467 FileSystem/(2669:2669): [CONFIGURACION] Esperando conexiones de Workers (Puerto: 5080)
-[INFO] 21:14:43:467 FileSystem/(2669:2669): [CONFIGURACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
-[INFO] 21:14:43:467 FileSystem/(2669:2669): [ERROR] No se encontro el archivo /home/utnso/Escritorio/Metadata/Archivos.txt
-[INFO] 21:14:43:467 FileSystem/(2669:2669): [ERROR] No se encontro el archivo /home/utnso/Escritorio/Metadata/Directorios.txt
-[INFO] 21:14:43:467 FileSystem/(2669:2669): [ERROR] No se encontro el archivo /home/utnso/Escritorio/Metadata/Nodos.bin
-[INFO] 21:14:43:467 FileSystem/(2669:2669): [33m[AVISO] Conecte los nodos necesarios al File System para estabilizarlo[0m
-[INFO] 21:19:44:456 FileSystem/(2669:2673): [33m[AVISO] El proceso Yama no pudo conectarse, el File System no es estable[0m
+[INFO] 15:13:52:926 FileSystem/(11247:11247): [EJECUCION] Proceso File System iniciado
+[INFO] 15:13:52:990 FileSystem/(11247:11247): [CONFIGURACION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 15:13:52:991 FileSystem/(11247:11247): [CONFIGURACION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 15:13:52:992 FileSystem/(11247:11247): [CONFIGURACION] Esperando conexiones de Workers (Puerto: 5080)
+[INFO] 15:13:52:992 FileSystem/(11247:11247): [CONFIGURACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
+[INFO] 15:13:53:53 FileSystem/(11247:11247): [33m[AVISO] Conecte los nodos necesarios al File System para estabilizarlo[0m
+[INFO] 15:13:55:355 FileSystem/(11247:11250): [33m[AVISO] NODO2 conectado[0m
+[INFO] 15:13:55:366 FileSystem/(11247:11250): [33m[AVISO] El File System esta estable[0m
+[INFO] 15:14:00:464 FileSystem/(11247:11250): [33m[AVISO] NODO1 conectado[0m
+[INFO] 15:14:01:793 FileSystem/(11247:11251): [CONEXION] El proceso Yama se ha conectado

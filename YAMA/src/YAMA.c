@@ -520,7 +520,7 @@ void dibujarTablaEstados(){
 	if(list_is_empty(tablaEstados))
 		return;
 	pantallaLimpiar();
-	puts("Job    Master    Nodo    Bloque    Etapa    Temporal    Estado");
+	puts("Job    Master    Nodo    Bloque    Etapa        Temporal        Estado");
 	void dibujarEntrada(Entrada* entrada){
 		char* etapa,*estado;
 		switch(entrada->etapa){
@@ -534,7 +534,7 @@ void dibujarTablaEstados(){
 		case Error: estado="error"; break;
 		default: estado="terminado";
 		}
-		printf("%d     %d     %d     %s     %s     %s    %s",
+		printf(" %d       %d         %d        %s   %s  %s  %s\n",
 				entrada->job,entrada->masterid-2,ipToNum(entrada->nodo.ip),(entrada->bloque!=-1)?string_itoa(entrada->bloque):"-",
 				etapa,entrada->pathTemporal,estado);
 	}

@@ -14,7 +14,7 @@
 #define RUTA_CONFIG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Master/MasterConfig.conf"
 #define RUTA_LOG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Master/MasterLog.log"
 
-#define MAX_ARGS 4
+#define MAX_ARGS 5
 #define FRACASO -800
 #define EXITO 1
 #define DIRSIZE sizeof(Dir)
@@ -71,8 +71,8 @@ Socket socketYama;
 int estadoMaster;
 String scriptTransformacion;
 String scriptReduccion;
-Entero tamanioScriptTransformacion;
-Entero tamanioScriptReduccion;
+Entero sizeScriptTransformacion;
+Entero sizeScriptReduccion;
 BloqueTransformacion alternativo;
 struct rusage uso;
 struct timeval comienzo, fin;

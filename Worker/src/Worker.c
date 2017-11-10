@@ -20,14 +20,13 @@ int main(void) {
 //--------------------------------------- Funciones de Worker -------------------------------------
 
 void workerIniciar() {
-	configuracionCalcularBloques();
 	configuracionIniciar();
 	estadoWorker = ACTIVADO;
 }
 
 void workerAtenderMasters() {
 	listenerMaster = socketCrearListener(configuracion->puertoMaster);
-	listenerWorker = socketCrearListener(configuracion->puertoWorker);
+	//listenerWorker = socketCrearListener(configuracion->puertoWorker);
 	while(estadoWorker)
 		masterAceptarConexion();
 }
@@ -54,10 +53,10 @@ Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig) {
 void configuracionIniciar() {
 	configuracionIniciarLog();
 	configuracionIniciarCampos();
-	configuracionCalcularBloques();
 	configuracion = configuracionCrear(RUTA_CONFIG, (void*)configuracionLeerArchivoConfig, campos);
 	configuracionImprimir(configuracion);
-	senialAsignarFuncion(SIGINT, configuracionSenial);
+	configuracionCalcularBloques();
+	//senialAsignarFuncion(SIGINT, configuracionSenial);
 }
 
 void configuracionIniciarLog() {
@@ -68,8 +67,6 @@ void configuracionIniciarLog() {
 
 void configuracionImprimir(Configuracion* configuracion) {
 	imprimirMensaje1(archivoLog, "[CONFIGURACION] Nombre: %s", configuracion->nombreNodo);
-	imprimirMensaje1(archivoLog, "[CONFIGURACION] Ruta archivo data.bin: %s", configuracion->rutaDataBin);
-	imprimirMensaje1(archivoLog, "[CONFIGURACION] Cantidad de bloques: %d", (int*)dataBinBloques);
 	imprimirMensaje1(archivoLog, "[CONFIGURACION] Esperando conexiones de Master (Puerto: %s)", configuracion->puertoMaster);
 	imprimirMensaje1(archivoLog, "[CONFIGURACION] Esperando conexiones de Woker (Puerto: %s)", configuracion->puertoWorker);
 }
@@ -99,6 +96,8 @@ void configuracionCalcularBloques() {
 	}
 	dataBinTamanio = estadoArchivo.st_size;
 	dataBinBloques = (Entero)ceil((double)dataBinTamanio/(double)BLOQUE);
+	imprimirMensaje1(archivoLog, "[CONFIGURACION] Ruta archivo data.bin: %s", configuracion->rutaDataBin);
+	imprimirMensaje1(archivoLog, "[CONFIGURACION] Cantidad de bloques: %d", (int*)dataBinBloques);
 }
 
 void configuracionSenial(int senial) {
@@ -109,7 +108,7 @@ void configuracionSenial(int senial) {
 //--------------------------------------- Funciones de Master -------------------------------------
 
 void masterAceptarConexion() {
-	Socket nuevoSocket = socketAceptar(listenerWorker, ID_MASTER);
+	Socket nuevoSocket = socketAceptar(listenerMaster, ID_MASTER);
 	if(nuevoSocket != ERROR)
 		masterEjecutarOperacion(nuevoSocket);
 	else
@@ -117,7 +116,6 @@ void masterAceptarConexion() {
 }
 
 void masterAtenderOperacion(Socket unSocket) {
-	imprimirMensaje(archivoLog, "[CONEXION] Proceso Master conectado exitosamente");
 	pid = fork();
 	if(pid == 0)
 		masterEjecutarOperacion(unSocket);
@@ -128,9 +126,10 @@ void masterAtenderOperacion(Socket unSocket) {
 }
 
 void masterEjecutarOperacion(Socket unSocket) {
+	imprimirMensaje(archivoLog, "[CONEXION] Proceso Master conectado exitosamente");
 	Mensaje* mensaje = mensajeRecibir(unSocket);
 	switch(mensaje->header.operacion){
-		case DESCONEXION: imprimirMensaje(archivoLog, "[AVISO] El Master #%d se desconecto"); break;
+		case DESCONEXION: imprimirMensaje(archivoLog, "[AVISO] El Master  se desconecto"); break;
 		case TRANSFORMACION: transformacionIniciar(mensaje->datos, unSocket); break;
 		case REDUCCION_LOCAL: break;
 		case REDUCCION_GLOBAL: break;
@@ -142,7 +141,10 @@ void masterEjecutarOperacion(Socket unSocket) {
 //--------------------------------------- Funciones de Transformacion -------------------------------------
 
 Transformacion* transformacionRecibir(Puntero datos) {
-	int sizeScript = *(Entero*)datos;
+	int sizeScript;
+	memcpy(&sizeScript, datos, sizeof(Entero));
+	printf("%d\n", sizeScript);
+	exit(0);
 	Transformacion* transformacion = memoriaAlocar(sizeof(Transformacion));
 	transformacion->script = memoriaAlocar(sizeScript);
 	memcpy(transformacion->script, datos+sizeof(Entero), sizeScript);
@@ -152,9 +154,9 @@ Transformacion* transformacionRecibir(Puntero datos) {
 	return transformacion;
 }
 
-void transformacionIniciar(Mensaje* mensaje, Socket unSocket) {
-	imprimirMensaje(archivoLog, "[TRANSFORMACION] Etapa iniciada en Master #%d");
-	Transformacion* transformacion = transformacionRecibir(mensaje->datos);
+void transformacionIniciar(Puntero datos, Socket unSocket) {
+	imprimirMensaje(archivoLog, "[TRANSFORMACION] Etapa iniciada en Master");
+	Transformacion* transformacion = transformacionRecibir(datos);
 	int resultado = transformacionEjecutar(transformacion);
 	if(resultado == OK)
 		transformacionExito(transformacion->numeroBloque, unSocket);
@@ -175,7 +177,7 @@ int transformacionEjecutar(Transformacion* transformacion) {
 }
 
 void transformacionExito(Entero numeroBloque, Socket unSocket) {
-	imprimirMensaje1(archivoLog,"[TRANSFORMACION] Transformacion exitosa en bloque N°%i de Master #%d", (int*)numeroBloque);
+	imprimirMensaje1(archivoLog,"[TRANSFORMACION] Transformacion exitosa en bloque N°%i de Master d", (int*)numeroBloque);
 	mensajeEnviar(unSocket, EXITO, &numeroBloque, sizeof(Entero));
 
 }
