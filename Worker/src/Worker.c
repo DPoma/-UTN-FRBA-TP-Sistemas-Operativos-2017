@@ -131,7 +131,7 @@ void masterEjecutarOperacion(Socket unSocket) {
 	Mensaje* mensaje = mensajeRecibir(unSocket);
 	switch(mensaje->header.operacion){
 		case DESCONEXION: imprimirMensaje(archivoLog, "[AVISO] El Master #%d se desconecto"); break;
-		case TRANSFORMACION: break;
+		case TRANSFORMACION: transformacionEjecutar(mensaje->datos, unSocket); break;
 		case REDUCCION_LOCAL: break;
 		case REDUCCION_GLOBAL: break;
 		case ALMACENADO: break;
@@ -139,53 +139,91 @@ void masterEjecutarOperacion(Socket unSocket) {
 	}
 }
 
+Transformacion* transformacionRecibir(Puntero datos) {
+	int sizeScript = *(Entero*)datos;
+	Transformacion* transformacion = memoriaAlocar(sizeof(Transformacion));
+	transformacion->script = memoriaAlocar(sizeScript);
+	memcpy(transformacion->script, datos+sizeof(Entero), sizeScript);
+	memcpy(&transformacion->numeroBloque, datos+sizeof(Entero)+sizeScript, sizeof(Entero));
+	memcpy(&transformacion->bytesUtilizados, datos+sizeof(Entero)*2+sizeScript, sizeof(Entero));
+	memcpy(transformacion->nombreTemporal, datos+sizeof(Entero)*3+sizeScript, 12);
+	return transformacion;
+}
+
+void transformacionExito(Entero numeroBloque, Socket unSocket) {
+	imprimirMensaje1(archivoLog,"[TRANSFORMACION] Transformacion exitosa en bloque N°%i de Master #%d", (int*)numeroBloque);
+	mensajeEnviar(unSocket, EXITO, &numeroBloque, sizeof(Entero));
+
+}
+
+void transformacionFracaso(Entero numeroBloque, Socket unSocket) {
+	imprimirMensaje(archivoLog,"[TRANSFORMACION] transformacion Fracaso");
+	mensajeEnviar(unSocket, FRACASO, &numeroBloque, sizeof(Entero));
+}
+
 void antesdetransformar(Mensaje* mensaje, Socket unSocket) {
-	char* codigo;
-	int sizeCodigo;
-	imprimirMensaje(archivoLog, "[CONEXION] llega op. de transformacion");
-	memcpy(&sizeCodigo, mensaje->datos, sizeof(int32_t));
-	printf("%d\n", sizeCodigo);
-	codigo = malloc(sizeCodigo);
-	puts("PaSE MEMCPY");
-	printf("%s\n", mensaje->datos+sizeof(Entero));
-	memcpy(&codigo,mensaje->datos+sizeof(int32_t), sizeCodigo);
-	puts("PASE OTREO MEMCOPTY");
-	//int pasar=1;
-	puts("ENTRANDO AL WHILE");
-		while(true){
-				//imprimirMensaje(archivoLog, "[CONEXION] Esperando mensajes de Master");
-				//if (pasar){
-				///	pasar=0;
-					imprimirMensaje(archivoLog, "[CONEXION] Esperando mensajes de Master");
-					puts("PESPERARNDO EL MANSEJA");
-					Mensaje* mensaje = mensajeRecibir(unSocket);
-					puts("PASE MENSAJE");
-					if (mensaje->header.operacion==EXITO)
-						break;
-					else{
-					int subpid = fork();
-					imprimirMensaje(archivoLog, "[CONEXION] [SUBFORK] llega op. de transformacion");
-					if(subpid == 0) {
-						int origen;
-						char* destino;
-						int sizeDestino;
-						memcpy(&origen,mensaje->datos + sizeof(int32_t)+sizeCodigo, sizeof(int32_t));
-						memcpy(&sizeDestino, mensaje->datos + sizeof(int32_t)*2 + sizeCodigo , sizeof(int32_t));
-						destino = malloc(sizeDestino);
-						memcpy(&destino,mensaje->datos + sizeof(int32_t)*3+sizeCodigo, sizeDestino);
-						int result = transformar(codigo,origen,destino);
-						if(result==-1){
-							mensajeEnviar(unSocket, FRACASO, NULL, 0);
-							imprimirMensaje(archivoLog,"[TRASFORMACION] transformacion Fracaso");
-						}
-						mensajeEnviar(unSocket, EXITO, origen, sizeof(int32_t));
-						imprimirMensaje(archivoLog,"[TRASFORMACION] transformacion exitosa");
-						free(codigo);
-						free(destino);
-						free(mensaje);
-					}
-				}
-		}
+	imprimirMensaje(archivoLog, "[TRANSFORMACION] Etapa iniciada en Master #%d");
+	Transformacion* transformacion = transformacionRecibir(mensaje->datos);
+	int resultado = transformar(codigo,origen,destino);
+	if(resultado == OK)
+		transformacionExito(transformacion->numeroBloque, unSocket);
+	else
+		transformacionFracaso(transformacion->numeroBloque, unSocket);
+}
+
+//--------------------------------------- Funciones de DataBin -------------------------------------
+
+void dataBinConfigurar() {
+	dataBinAbrir();
+	punteroDataBin = dataBinMapear();
+	configuracionCalcularBloques();
+}
+
+void dataBinAbrir() {
+	dataBin = fileAbrir(configuracion->rutaDataBin, LECTURA);
+	if(dataBin == NULL){
+		imprimirMensaje(archivoLog,ROJO"[ERROR] No se pudo abrir el archivo data.bin"BLANCO);
+		exit(EXIT_FAILURE);
+	}
+	fileCerrar(dataBin);
+}
+
+Puntero dataBinMapear() {
+	Puntero Puntero;
+	int descriptorArchivo = open(configuracion->rutaDataBin, O_CLOEXEC | O_RDWR);
+	if (descriptorArchivo == ERROR) {
+		imprimirMensaje(archivoLog, ROJO"[ERROR] Fallo el open()"BLANCO);
+		perror("open");
+		exit(EXIT_FAILURE);
+	}
+	struct stat estadoArchivo;
+	if (fstat(descriptorArchivo, &estadoArchivo) == ERROR) {
+		imprimirMensaje(archivoLog, ROJO"[ERROR] Fallo el fstat()"BLANCO);
+		perror("fstat");
+		exit(EXIT_FAILURE);
+	}
+	dataBinTamanio = estadoArchivo.st_size;
+	Puntero = mmap(0, dataBinTamanio, PROT_WRITE | PROT_READ | PROT_EXEC, MAP_SHARED, descriptorArchivo, 0);
+	if (Puntero == MAP_FAILED) {
+		imprimirMensaje(archivoLog, ROJO"[ERROR] Fallo el mmap(), corran por sus vidas"BLANCO);
+		perror("mmap");
+		exit(EXIT_FAILURE);
+	}
+	close(descriptorArchivo);
+	return Puntero;
+}
+
+//--------------------------------------- Funciones de Bloque -------------------------------------
+
+BloqueWorker bloqueBuscar(Entero numeroBloque) {
+	BloqueWorker bloque = punteroDataBin + (BLOQUE * numeroBloque);
+	return bloque;
+}
+
+BloqueWorker getBloque(Entero numeroBloque) {
+	BloqueWorker bloque = bloqueBuscar(numeroBloque);
+	imprimirMensaje1(archivoLog, "[DATABIN] El bloque N°%i fue leido", (int*)numeroBloque);
+	return bloque;
 }
 
 
@@ -242,13 +280,6 @@ int transformar(char* codigo,int origen,char* destino){
 	system(command);
 	free (command);
 	free(patharchdes);
-	//resuelto por parametro en vez de cat
-	/*strcat(command,codigo);
-	strcat(command,buffer);//suponiendo que el script requiere un buffer como parametro
-	strcat(command,"| sort >");
-	strcat(command,destino);
-	system(command);
-	free (command);*/
 	return 0;
 }
 

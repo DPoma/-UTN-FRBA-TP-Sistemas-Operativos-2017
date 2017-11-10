@@ -39,6 +39,13 @@ typedef struct {
 } Configuracion;
 
 typedef struct {
+	String script;
+	int numeroBloque;
+	int bytesUtilizados;
+	char nombreTemporal[12];
+} Transformacion;
+
+typedef struct {
 	char* ruta;
 	char* ip;
 	int puerto;
@@ -60,6 +67,8 @@ typedef struct {
 	int NumReg;
 } datosReg;
 
+typedef void* BloqueWorker;
+
 //--------------------------------------- Globales -------------------------------------
 
 Configuracion* configuracion;
@@ -67,6 +76,8 @@ ArchivoLog archivoLog;
 String campos[7];
 Socket listenerWorker;
 Socket listenerMaster;
+File dataBin;
+Puntero punteroDataBin;
 int pid;
 int estadoWorker;
 int dataBinBloques;
@@ -88,6 +99,15 @@ void configuracionIniciarCampos();
 void configuracionCalcularBloques();
 void configuracionSenial(int senial);
 void configuracionIniciar();
+
+//--------------------------------------- Funciones de DataBin -------------------------------------
+
+void dataBinAbrir();
+void configuracionCalcularBloques();
+Puntero dataBinMapear();
+Puntero dataBinUbicarPuntero(Entero numeroBloque);
+void dataBinConfigurar();
+
 
 //--------------------------------------- Funciones de Worker -------------------------------------
 void masterAceptarConexion();
