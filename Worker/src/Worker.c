@@ -131,13 +131,15 @@ void masterEjecutarOperacion(Socket unSocket) {
 	Mensaje* mensaje = mensajeRecibir(unSocket);
 	switch(mensaje->header.operacion){
 		case DESCONEXION: imprimirMensaje(archivoLog, "[AVISO] El Master #%d se desconecto"); break;
-		case TRANSFORMACION: transformacionEjecutar(mensaje->datos, unSocket); break;
+		case TRANSFORMACION: transformacionIniciar(mensaje->datos, unSocket); break;
 		case REDUCCION_LOCAL: break;
 		case REDUCCION_GLOBAL: break;
 		case ALMACENADO: break;
 		case PASAREG: break;
 	}
 }
+
+//--------------------------------------- Funciones de Transformacion -------------------------------------
 
 Transformacion* transformacionRecibir(Puntero datos) {
 	int sizeScript = *(Entero*)datos;
@@ -146,8 +148,30 @@ Transformacion* transformacionRecibir(Puntero datos) {
 	memcpy(transformacion->script, datos+sizeof(Entero), sizeScript);
 	memcpy(&transformacion->numeroBloque, datos+sizeof(Entero)+sizeScript, sizeof(Entero));
 	memcpy(&transformacion->bytesUtilizados, datos+sizeof(Entero)*2+sizeScript, sizeof(Entero));
-	memcpy(transformacion->nombreTemporal, datos+sizeof(Entero)*3+sizeScript, 12);
+	memcpy(transformacion->archivoTemporal, datos+sizeof(Entero)*3+sizeScript, 12);
 	return transformacion;
+}
+
+void transformacionIniciar(Mensaje* mensaje, Socket unSocket) {
+	imprimirMensaje(archivoLog, "[TRANSFORMACION] Etapa iniciada en Master #%d");
+	Transformacion* transformacion = transformacionRecibir(mensaje->datos);
+	int resultado = transformacionEjecutar(transformacion);
+	if(resultado == OK)
+		transformacionExito(transformacion->numeroBloque, unSocket);
+	else
+		transformacionFracaso(transformacion->numeroBloque, unSocket);
+}
+
+int transformacionEjecutar(Transformacion* transformacion) {
+	String pathBloque = transformacionBloqueTemporal(transformacion->numeroBloque, transformacion->bytesUtilizados);
+	String pathScript = transformacionScriptTemporal(transformacion->script, transformacion->numeroBloque);
+	String pathDestino = string_from_format("%s/%s", RUTA_TEMPS, transformacion->archivoTemporal);
+	String comando = string_from_format("cat %s | sh %s | sort > %s", pathBloque, pathScript, pathDestino);
+	int resultado = system(comando);
+	memoriaLiberar(pathScript);
+	memoriaLiberar(pathDestino);
+	memoriaLiberar(pathBloque);
+	return resultado;
 }
 
 void transformacionExito(Entero numeroBloque, Socket unSocket) {
@@ -161,14 +185,21 @@ void transformacionFracaso(Entero numeroBloque, Socket unSocket) {
 	mensajeEnviar(unSocket, FRACASO, &numeroBloque, sizeof(Entero));
 }
 
-void antesdetransformar(Mensaje* mensaje, Socket unSocket) {
-	imprimirMensaje(archivoLog, "[TRANSFORMACION] Etapa iniciada en Master #%d");
-	Transformacion* transformacion = transformacionRecibir(mensaje->datos);
-	int resultado = transformar(codigo,origen,destino);
-	if(resultado == OK)
-		transformacionExito(transformacion->numeroBloque, unSocket);
-	else
-		transformacionFracaso(transformacion->numeroBloque, unSocket);
+String transformacionBloqueTemporal(Entero numeroBloque, Entero bytesUtilizados) {
+	String path = string_from_format("%s/bloqueTemporal%i", RUTA_TEMPS, numeroBloque);
+	File file = fileAbrir(path, ESCRITURA);
+	bloqueBuscar(numeroBloque);
+	fwrite(punteroDataBin, sizeof(char), bytesUtilizados, file);
+	fileCerrar(file);
+	return path;
+}
+
+String transformacionScriptTemporal(String script, Entero numeroBloque) {
+	String path = string_from_format("%s/scriptTemporal%i", RUTA_TEMPS, numeroBloque);
+	File file = fileAbrir(path , ESCRITURA);
+	fwrite(script, sizeof(char), stringLongitud(script), file);
+	fileCerrar(file);
+	return path;
 }
 
 //--------------------------------------- Funciones de DataBin -------------------------------------
@@ -227,61 +258,7 @@ BloqueWorker getBloque(Entero numeroBloque) {
 }
 
 
-//1er etapa
-int transformar(char* codigo,int origen,char* destino){
-	imprimirMensaje(archivoLog,"[TRASFORMACION] Comienzo a transformar");
-	if (origen>dataBinBloques){
-		return -1;
-	}
-	char* patharchdes;
-	patharchdes = realloc(patharchdes,sizeof(RUTA_TEMPS)+16);
-	strcat(patharchdes,RUTA_TEMPS);
-	strcat(patharchdes,destino);
-	strcat(patharchdes,".bin");
-	char* buffer=NULL;
-	FILE* arch;
-	arch = fopen(configuracion->rutaDataBin,"r");
-	fseek(arch,BLOQUE*origen,SEEK_SET);
-	int i;
-	char c;
-	int cc = 0;
-	for(i=0;cc<=BLOQUE;i++){
-		c = fgetc(arch);
-			buffer = realloc(buffer,sizeof(char)*(cc+1));
-			buffer[cc]=c;
-			cc++;
-	}
-	/*int j;
-	for(j=0;j<=size;j++){
-		c = fgetc(arch);
-		srtcat(buffer,c);
-	}*/
-	fclose(arch);
-	//doy privilegios a script
-	char commando [500];
-	for(i=0;i==500;i++){
-		commando[i]=NULL;
-	}
-	strcat(commando,"chmod 0755");
-	strcat(commando,codigo);
-	system(commando);
-	free (commando);
-	//paso buffer a script y resultado script a sort
-	char command [500];
-	for(i=0;i==500;i++){
-		command[i]=NULL;
-	}
-	strcat(command,"cat");
-	strcat(command,buffer);
-	strcat(command,"|");
-	strcat(command,codigo);
-	strcat(command,"| sort >");
-	strcat(command,patharchdes);
-	system(command);
-	free (command);
-	free(patharchdes);
-	return 0;
-}
+
 
 /* todo
 void redulocal() {

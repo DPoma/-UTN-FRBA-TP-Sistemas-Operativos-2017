@@ -42,7 +42,7 @@ typedef struct {
 	String script;
 	int numeroBloque;
 	int bytesUtilizados;
-	char nombreTemporal[12];
+	char archivoTemporal[12];
 } Transformacion;
 
 typedef struct {
@@ -100,22 +100,34 @@ void configuracionCalcularBloques();
 void configuracionSenial(int senial);
 void configuracionIniciar();
 
+//--------------------------------------- Funciones de Master -------------------------------------
+void masterAceptarConexion();
+void masterAtenderOperacion(Socket unSocket);
+void masterEjecutarOperacion(Socket unSocket);
+
+//--------------------------------------- Funciones de Transformacion -------------------------------------
+
+int transformacionEjecutar(Transformacion* transformacion);
+void transformacionIniciar(Mensaje* mensaje, Socket unSocket);
+int transformacionEjecutar(Transformacion* transformacion);
+void transformacionExito(Entero numeroBloque, Socket unSocket);
+void transformacionFracaso(Entero numeroBloque, Socket unSocket);
+String transformacionBloqueTemporal(Entero numeroBloque, Entero bytesUtilizados);
+String transformacionScriptTemporal(String script, Entero numeroBloque);
+
 //--------------------------------------- Funciones de DataBin -------------------------------------
 
 void dataBinAbrir();
 void configuracionCalcularBloques();
 Puntero dataBinMapear();
-Puntero dataBinUbicarPuntero(Entero numeroBloque);
 void dataBinConfigurar();
+BloqueWorker bloqueBuscar(Entero numeroBloque);
+BloqueWorker getBloque(Entero numeroBloque);
 
 
-//--------------------------------------- Funciones de Worker -------------------------------------
-void masterAceptarConexion();
-void masterAtenderOperacion(Socket unSocket);
-void masterEjecutarOperacion(Socket unSocket);
 
 
-int transformar(char*,int,char*);
+
 int reduccionLocalEjecutar(char*,char*,char*);
 locOri* getOrigenesLocales(char*);
 char* appendL(locOri*);

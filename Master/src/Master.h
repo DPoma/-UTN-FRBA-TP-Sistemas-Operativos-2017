@@ -103,7 +103,7 @@ void scriptInvalido();
 
 //--------------------------------------- Funciones de Transformacion -------------------------------------
 
-void transformacionEjecutar(Mensaje* mensaje);
+void transformacionIniciar(Mensaje* mensaje);
 void transformacionCrearHilos(Lista listaMaster);
 void transformacionNotificarYama(Mensaje* mensaje, Lista ListaBloques);
 void transformacionEnviarBloque(BloqueTransformacion* bloqueTransformacion, Socket socketWorker);

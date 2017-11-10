@@ -37,7 +37,7 @@ void masterAtender(){
 		Mensaje* mensaje = mensajeRecibir(socketYama);
 		switch(mensaje->header.operacion) {
 		case DESCONEXION: masterFinalizar(); break;
-		case TRANSFORMACION: transformacionEjecutar(mensaje); break;
+		case TRANSFORMACION: transformacionIniciar(mensaje); break;
 		case REDUCCION_LOCAL: reduccionLocalEjecutar(mensaje); break;
 		case REDUCCION_GLOBAL: reduccionGlobalEjecutar(mensaje); break;
 		case 301: scriptInvalido(); break;
@@ -134,7 +134,7 @@ void scriptInvalido() {
 
 //--------------------------------------- Funciones de Transformacion -------------------------------------
 
-void transformacionEjecutar(Mensaje* mensaje) {
+void transformacionIniciar(Mensaje* mensaje) {
 	imprimirMensaje(archivoLog, "[MENSAJE] Lista de bloques recibida");
 	Lista listaMaster = listaCrear();
 	int indice;
