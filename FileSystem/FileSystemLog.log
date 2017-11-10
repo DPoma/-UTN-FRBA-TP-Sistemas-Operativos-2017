@@ -12,3 +12,7 @@
 [INFO] 16:01:18:363 FileSystem/(11247:11251): [CONEXION] El proceso Yama se ha conectado
 [INFO] 16:10:36:837 FileSystem/(11247:11255): [33m[AVISO] NODO2 desconectado[0m
 [INFO] 16:10:37:478 FileSystem/(11247:11261): [33m[AVISO] NODO1 desconectado[0m
+[INFO] 16:29:47:851 FileSystem/(11247:11251): [CONEXION] El proceso YAMA se ha desconectado
+[INFO] 16:29:50:220 FileSystem/(11247:11251): [CONEXION] El proceso Yama se ha conectado
+[INFO] 16:40:41:807 FileSystem/(11247:11251): [CONEXION] El proceso YAMA se ha desconectado
+[INFO] 16:40:47:318 FileSystem/(11247:11251): [CONEXION] El proceso Yama se ha conectado

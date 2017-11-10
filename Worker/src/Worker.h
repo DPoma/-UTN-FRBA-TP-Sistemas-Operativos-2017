@@ -38,6 +38,7 @@ typedef struct {
 } Configuracion;
 
 typedef struct {
+	int sizeScript;
 	String script;
 	int numeroBloque;
 	int bytesUtilizados;
@@ -111,8 +112,8 @@ void transformacionIniciar(Puntero datos, Socket unSocket);
 int transformacionEjecutar(Transformacion* transformacion);
 void transformacionExito(Entero numeroBloque, Socket unSocket);
 void transformacionFracaso(Entero numeroBloque, Socket unSocket);
-String transformacionBloqueTemporal(Entero numeroBloque, Entero bytesUtilizados);
-String transformacionScriptTemporal(String script, Entero numeroBloque);
+String transformacionBloqueTemporal(Transformacion* transformacion);
+String transformacionScriptTemporal(Transformacion* transformacion);
 
 //--------------------------------------- Funciones de DataBin -------------------------------------
 

@@ -56,7 +56,6 @@ void configuracionIniciar() {
 	configuracion = configuracionCrear(RUTA_CONFIG, (void*)configuracionLeerArchivoConfig, campos);
 	configuracionImprimir(configuracion);
 	dataBinConfigurar();
-	configuracionCalcularBloques();
 	//senialAsignarFuncion(SIGINT, configuracionSenial);
 }
 
@@ -109,20 +108,20 @@ void configuracionSenial(int senial) {
 //--------------------------------------- Funciones de Master -------------------------------------
 
 void masterAceptarConexion() {
-	puts("ESERPANDO MASTER");
 	Socket nuevoSocket = socketAceptar(listenerMaster, ID_MASTER);
 	if(nuevoSocket != ERROR)
-		masterEjecutarOperacion(nuevoSocket);
+		masterAtenderOperacion(nuevoSocket);
 	else
 		imprimirMensaje(archivoLog, "[ERROR] Error en el accept(), hoy no es tu dia papu");
 }
 
 void masterAtenderOperacion(Socket unSocket) {
-	pid = fork();
+	int estado;
+	pid_t pid = fork();
 	if(pid == 0)
 		masterEjecutarOperacion(unSocket);
 	else if(pid > 0)
-		puts("PADRE ACEPTO UNA CONEXION");
+		waitpid(pid, &estado, NULO);
 	else
 		imprimirMensaje(archivoLog, "[ERROR] Error en el fork(), estas jodido");
 }
@@ -138,39 +137,39 @@ void masterEjecutarOperacion(Socket unSocket) {
 		case ALMACENADO: break;
 		case PASAREG: break;
 	}
+	exit(EXIT_SUCCESS);
 }
 
 //--------------------------------------- Funciones de Transformacion -------------------------------------
 
 Transformacion* transformacionRecibir(Puntero datos) {
-	int sizeScript;
-	memcpy(&sizeScript, datos, sizeof(Entero));
-	printf("%d\n", sizeScript);
 	Transformacion* transformacion = memoriaAlocar(sizeof(Transformacion));
-	transformacion->script = memoriaAlocar(sizeScript);
-	memcpy(transformacion->script, datos+sizeof(Entero), sizeScript);
-	memcpy(&transformacion->numeroBloque, datos+sizeof(Entero)+sizeScript, sizeof(Entero));
-	memcpy(&transformacion->bytesUtilizados, datos+sizeof(Entero)*2+sizeScript, sizeof(Entero));
-	memcpy(transformacion->archivoTemporal, datos+sizeof(Entero)*3+sizeScript, 12);
+	memcpy(&transformacion->sizeScript, datos, sizeof(Entero));
+	transformacion->script = memoriaAlocar(transformacion->sizeScript);
+	memcpy(transformacion->script, datos+sizeof(Entero), transformacion->sizeScript);
+	memcpy(&transformacion->numeroBloque, datos+sizeof(Entero)+transformacion->sizeScript, sizeof(Entero));
+	memcpy(&transformacion->bytesUtilizados, datos+sizeof(Entero)*2+transformacion->sizeScript, sizeof(Entero));
+	memcpy(transformacion->archivoTemporal, datos+sizeof(Entero)*3+transformacion->sizeScript, 12);
 	return transformacion;
 }
 
 void transformacionIniciar(Puntero datos, Socket unSocket) {
-	imprimirMensaje(archivoLog, "[TRANSFORMACION] Etapa iniciada en Master");
 	Transformacion* transformacion = transformacionRecibir(datos);
 	int resultado = transformacionEjecutar(transformacion);
-	if(resultado == OK)
+	if(resultado != ERROR)
 		transformacionExito(transformacion->numeroBloque, unSocket);
 	else
 		transformacionFracaso(transformacion->numeroBloque, unSocket);
 }
 
 int transformacionEjecutar(Transformacion* transformacion) {
-	String pathBloque = transformacionBloqueTemporal(transformacion->numeroBloque, transformacion->bytesUtilizados);
-	String pathScript = transformacionScriptTemporal(transformacion->script, transformacion->numeroBloque);
+	String pathBloque = transformacionBloqueTemporal(transformacion);
+	String pathScript = transformacionScriptTemporal(transformacion);
 	String pathDestino = string_from_format("%s/%s", RUTA_TEMPS, transformacion->archivoTemporal);
 	String comando = string_from_format("cat %s | sh %s | sort > %s", pathBloque, pathScript, pathDestino);
 	int resultado = system(comando);
+	fileLimpiar(pathBloque);
+	fileLimpiar(pathScript);
 	memoriaLiberar(pathScript);
 	memoriaLiberar(pathDestino);
 	memoriaLiberar(pathBloque);
@@ -188,21 +187,19 @@ void transformacionFracaso(Entero numeroBloque, Socket unSocket) {
 	mensajeEnviar(unSocket, FRACASO, &numeroBloque, sizeof(Entero));
 }
 
-String transformacionBloqueTemporal(Entero numeroBloque, Entero bytesUtilizados) {
-	String path = string_from_format("%s/bloqueTemporal%i", RUTA_TEMPS, numeroBloque);
+String transformacionBloqueTemporal(Transformacion* transformacion) {
+	String path = string_from_format("%s/bloqueTemporal%i", RUTA_TEMPS, transformacion->numeroBloque);
 	File file = fileAbrir(path, ESCRITURA);
-	void* puntero = getBloque(numeroBloque);
-	if(puntero == NULL)
-		puts("EL PUNTOER ES NULO");
-	fwrite(puntero, sizeof(char), bytesUtilizados, file);
+	Puntero puntero = getBloque(transformacion->numeroBloque);
+	fwrite(puntero, sizeof(char), transformacion->bytesUtilizados, file);
 	fileCerrar(file);
 	return path;
 }
 
-String transformacionScriptTemporal(String script, Entero numeroBloque) {
-	String path = string_from_format("%s/scriptTemporal%i", RUTA_TEMPS, numeroBloque);
+String transformacionScriptTemporal(Transformacion* transformacion) {
+	String path = string_from_format("%s/scriptTemporal%i", RUTA_TEMPS, transformacion->numeroBloque);
 	File file = fileAbrir(path , ESCRITURA);
-	fwrite(script, sizeof(char), stringLongitud(script), file);
+	fwrite(transformacion->script, sizeof(char), transformacion->sizeScript, file);
 	fileCerrar(file);
 	return path;
 }

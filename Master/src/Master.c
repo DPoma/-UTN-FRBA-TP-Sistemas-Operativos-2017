@@ -163,10 +163,12 @@ void transformacionIniciar(Mensaje* mensaje) {
 
 void transformacionHilo(Lista listaBloques) {
 	BloqueTransformacion* bloque = listaPrimerElemento(listaBloques);
-	Socket socketWorker = socketCrearCliente(bloque->direccion.ip,bloque->direccion.port,ID_MASTER);
-	imprimirMensaje2(archivoLog,"[CONEXION] Estableciendo conexion con Worker (IP: %s | PUERTO: %s)",bloque->direccion.ip,bloque->direccion.port);
+	Socket socketWorker;
 	int indice;
 	for(indice=0; indice<listaBloques->elements_count;indice++){
+		socketWorker = socketCrearCliente(bloque->direccion.ip,bloque->direccion.port,ID_MASTER);
+		//TODO ver si es hilo por bloque o por nodo
+		//imprimirMensaje2(archivoLog,"[CONEXION] Estableciendo conexion con Worker (IP: %s | PUERTO: %s)",bloque->direccion.ip,bloque->direccion.port);
 		BloqueTransformacion* bloque = listaObtenerElemento(listaBloques,indice);
 		transformacionEnviarBloque(bloque, socketWorker);
 		Mensaje* mensaje = mensajeRecibir(socketWorker);
@@ -175,9 +177,8 @@ void transformacionHilo(Lista listaBloques) {
 			case FRACASO: transformacionFracaso(mensaje, listaBloques); break;
 		}
 		mensajeDestruir(mensaje);
+		socketCerrar(socketWorker);
 	}
-	mensajeEnviar(socketWorker, EXITO, VACIO, ACTIVADO);
-	socketCerrar(socketWorker);
 }
 
 BloqueTransformacion* transformacionCrearBloque(Puntero datos) {
@@ -233,7 +234,7 @@ void transformacionEnviarBloque(BloqueTransformacion* bloqueTransformacion, Sock
 }
 
 void transformacionExito(Mensaje* mensaje, Lista listaBloques) {
-	imprimirMensaje1(archivoLog, "[TRANSFORMACION] Transformacion realizada con exito en el Worker %s",(*(Dir*)mensaje->datos).ip);
+	imprimirMensaje(archivoLog, "[TRANSFORMACION] Transformacion exitosa en el Worker");
 	transformacionNotificarYama(mensaje, listaBloques);
 }
 
