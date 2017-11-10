@@ -3,3 +3,5 @@
 [INFO] 15:14:00:436 DataNode/(11257:11257): [DATABIN] Cantidad de bloques 100
 [INFO] 15:14:00:466 DataNode/(11257:11257): [CONEXION] Estableciendo conexion con File System (IP: 127.0.0.1 | Puerto 5040)
 [INFO] 15:14:00:469 DataNode/(11257:11257): [CONEXION] Conexion establecida con el File System
+[INFO] 16:10:37:485 DataNode/(11257:11257): [31m[CONEXION] Conexion finalizada con File System[0m
+[INFO] 16:10:37:505 DataNode/(11257:11257): [EJECUCION] Proceso Data Node finalizado

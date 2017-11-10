@@ -1,7 +1,11 @@
-[INFO] 15:36:06:466 Worker/(12402:12402): [CONFIGURACION] Nombre: NODO1
-[INFO] 15:36:06:487 Worker/(12402:12402): [CONFIGURACION] Esperando conexiones de Master (Puerto: 5090)
-[INFO] 15:36:06:488 Worker/(12402:12402): [CONFIGURACION] Esperando conexiones de Woker (Puerto: 5050)
-[INFO] 15:36:06:492 Worker/(12402:12402): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data1.bin
-[INFO] 15:36:06:493 Worker/(12402:12402): [CONFIGURACION] Cantidad de bloques: 100
-[INFO] 15:36:08:364 Worker/(12402:12402): [CONEXION] Proceso Master conectado exitosamente
-[INFO] 15:36:08:365 Worker/(12402:12402): [TRANSFORMACION] Etapa iniciada en Master
+[INFO] 16:17:27:545 Worker/(13739:13739): [CONFIGURACION] Nombre: NODO1
+[INFO] 16:17:27:564 Worker/(13739:13739): [CONFIGURACION] Esperando conexiones de Master (Puerto: 5090)
+[INFO] 16:17:27:565 Worker/(13739:13739): [CONFIGURACION] Esperando conexiones de Woker (Puerto: 5050)
+[INFO] 16:17:27:571 Worker/(13739:13739): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data1.bin
+[INFO] 16:17:27:572 Worker/(13739:13739): [CONFIGURACION] Cantidad de bloques: 100
+[INFO] 16:17:27:573 Worker/(13739:13739): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data1.bin
+[INFO] 16:17:27:573 Worker/(13739:13739): [CONFIGURACION] Cantidad de bloques: 100
+[INFO] 16:17:29:627 Worker/(13739:13739): [CONEXION] Proceso Master conectado exitosamente
+[INFO] 16:17:29:632 Worker/(13739:13739): [TRANSFORMACION] Etapa iniciada en Master
+[INFO] 16:17:29:636 Worker/(13739:13739): [DATABIN] El bloque N°0 fue leido
+[INFO] 16:17:29:767 Worker/(13739:13739): [TRANSFORMACION] transformacion Fracaso

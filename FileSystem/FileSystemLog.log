@@ -8,3 +8,7 @@
 [INFO] 15:13:55:366 FileSystem/(11247:11250): [33m[AVISO] El File System esta estable[0m
 [INFO] 15:14:00:464 FileSystem/(11247:11250): [33m[AVISO] NODO1 conectado[0m
 [INFO] 15:14:01:793 FileSystem/(11247:11251): [CONEXION] El proceso Yama se ha conectado
+[INFO] 15:58:43:838 FileSystem/(11247:11251): [CONEXION] El proceso YAMA se ha desconectado
+[INFO] 16:01:18:363 FileSystem/(11247:11251): [CONEXION] El proceso Yama se ha conectado
+[INFO] 16:10:36:837 FileSystem/(11247:11255): [33m[AVISO] NODO2 desconectado[0m
+[INFO] 16:10:37:478 FileSystem/(11247:11261): [33m[AVISO] NODO1 desconectado[0m

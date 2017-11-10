@@ -55,6 +55,7 @@ void configuracionIniciar() {
 	configuracionIniciarCampos();
 	configuracion = configuracionCrear(RUTA_CONFIG, (void*)configuracionLeerArchivoConfig, campos);
 	configuracionImprimir(configuracion);
+	dataBinConfigurar();
 	configuracionCalcularBloques();
 	//senialAsignarFuncion(SIGINT, configuracionSenial);
 }
@@ -108,6 +109,7 @@ void configuracionSenial(int senial) {
 //--------------------------------------- Funciones de Master -------------------------------------
 
 void masterAceptarConexion() {
+	puts("ESERPANDO MASTER");
 	Socket nuevoSocket = socketAceptar(listenerMaster, ID_MASTER);
 	if(nuevoSocket != ERROR)
 		masterEjecutarOperacion(nuevoSocket);
@@ -144,7 +146,6 @@ Transformacion* transformacionRecibir(Puntero datos) {
 	int sizeScript;
 	memcpy(&sizeScript, datos, sizeof(Entero));
 	printf("%d\n", sizeScript);
-	exit(0);
 	Transformacion* transformacion = memoriaAlocar(sizeof(Transformacion));
 	transformacion->script = memoriaAlocar(sizeScript);
 	memcpy(transformacion->script, datos+sizeof(Entero), sizeScript);
@@ -190,8 +191,10 @@ void transformacionFracaso(Entero numeroBloque, Socket unSocket) {
 String transformacionBloqueTemporal(Entero numeroBloque, Entero bytesUtilizados) {
 	String path = string_from_format("%s/bloqueTemporal%i", RUTA_TEMPS, numeroBloque);
 	File file = fileAbrir(path, ESCRITURA);
-	bloqueBuscar(numeroBloque);
-	fwrite(punteroDataBin, sizeof(char), bytesUtilizados, file);
+	void* puntero = getBloque(numeroBloque);
+	if(puntero == NULL)
+		puts("EL PUNTOER ES NULO");
+	fwrite(puntero, sizeof(char), bytesUtilizados, file);
 	fileCerrar(file);
 	return path;
 }

@@ -209,12 +209,14 @@ void transformacionCrearHilos(Lista listaMaster) {
 }
 
 void transformacionNotificarYama(Mensaje* mensaje, Lista listaBloques) {
-	Entero numeroBloque = (Entero)mensaje->datos;
+	Entero numeroBloque = *(Entero*)mensaje->datos;
 	BloqueTransformacion* bloque = transformacionBuscarBloque(listaBloques, numeroBloque);
+	if(bloque == NULL)
+		puts("no BLOQUE");
 	Puntero datos = memoriaAlocar(INTSIZE+DIRSIZE);
 	memcpy(datos, &bloque->direccion, DIRSIZE);
 	memcpy(datos+DIRSIZE, &numeroBloque, INTSIZE);
-	mensajeEnviar(socketYama,mensaje->header.operacion,mensaje->datos, DIRSIZE);
+	mensajeEnviar(socketYama,mensaje->header.operacion, datos, DIRSIZE+INTSIZE);
 }
 
 void transformacionEnviarBloque(BloqueTransformacion* bloqueTransformacion, Socket socketWorker) {
