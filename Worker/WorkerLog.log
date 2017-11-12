@@ -1,8 +1,41 @@
-[INFO] 21:26:34:619 Worker/(12008:12008): [DATABIN] Cantidad de bloques 100
-[INFO] 21:26:34:632 Worker/(12008:12008): [CONFIGURACION] Nombre Nodo: NODO1
-[INFO] 21:26:34:632 Worker/(12008:12008): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data2.bin
-[INFO] 21:26:34:633 Worker/(12008:12008): [CONFIGURACION] tamanio data.bin: 100MB
-[INFO] 21:26:34:645 Worker/(12008:12008): [CONEXION] Esperando conexiones de Master (Puerto: 5050)
-[INFO] 21:26:36:37 Worker/(12008:12008): [CONEXION] Proceso Master conectado exitosamente
-[INFO] 21:26:36:38 Worker/(12008:12008): [CONEXION] Esperando mensajes de Master
-[INFO] 21:26:36:38 Worker/(12008:12008): [CONEXION] llega op. de transformacion
+[INFO] 17:19:55:440 Worker/(15419:15419): [CONFIGURACION] Nombre: NODO1
+[INFO] 17:19:55:459 Worker/(15419:15419): [CONFIGURACION] Esperando conexiones de Master (Puerto: 5090)
+[INFO] 17:19:55:460 Worker/(15419:15419): [CONFIGURACION] Esperando conexiones de Woker (Puerto: 5050)
+[INFO] 17:19:55:467 Worker/(15419:15419): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data1.bin
+[INFO] 17:19:55:467 Worker/(15419:15419): [CONFIGURACION] Cantidad de bloques: 100
+[INFO] 17:19:57:488 Worker/(15419:15435): [CONEXION] Proceso Master conectado exitosamente
+[INFO] 17:19:57:493 Worker/(15419:15435): [DATABIN] El bloque N°0 fue leido
+[INFO] 17:19:57:613 Worker/(15419:15435): [TRANSFORMACION] Transformacion exitosa en bloque N°0 de Master d
+[INFO] 17:19:58:587 Worker/(15419:15446): [CONEXION] Proceso Master conectado exitosamente
+[INFO] 17:19:58:594 Worker/(15419:15446): [DATABIN] El bloque N°1 fue leido
+[INFO] 17:19:58:714 Worker/(15419:15446): [TRANSFORMACION] Transformacion exitosa en bloque N°1 de Master d
+[INFO] 17:19:59:696 Worker/(15419:15457): [CONEXION] Proceso Master conectado exitosamente
+[INFO] 17:19:59:702 Worker/(15419:15457): [DATABIN] El bloque N°2 fue leido
+[INFO] 17:19:59:824 Worker/(15419:15457): [TRANSFORMACION] Transformacion exitosa en bloque N°2 de Master d
+[INFO] 17:20:00:790 Worker/(15419:15468): [CONEXION] Proceso Master conectado exitosamente
+[INFO] 17:20:00:800 Worker/(15419:15468): [DATABIN] El bloque N°3 fue leido
+[INFO] 17:20:00:920 Worker/(15419:15468): [TRANSFORMACION] Transformacion exitosa en bloque N°3 de Master d
+[INFO] 17:20:01:888 Worker/(15419:15479): [CONEXION] Proceso Master conectado exitosamente
+[INFO] 17:20:01:906 Worker/(15419:15479): [DATABIN] El bloque N°4 fue leido
+[INFO] 17:20:02:53 Worker/(15419:15479): [TRANSFORMACION] Transformacion exitosa en bloque N°4 de Master d
+[INFO] 17:20:03:24 Worker/(15419:15490): [CONEXION] Proceso Master conectado exitosamente
+[INFO] 17:20:03:35 Worker/(15419:15490): [DATABIN] El bloque N°5 fue leido
+[INFO] 17:20:03:184 Worker/(15419:15490): [TRANSFORMACION] Transformacion exitosa en bloque N°5 de Master d
+[INFO] 17:20:04:136 Worker/(15419:15501): [CONEXION] Proceso Master conectado exitosamente
+[INFO] 17:20:04:145 Worker/(15419:15501): [DATABIN] El bloque N°6 fue leido
+[INFO] 17:20:04:268 Worker/(15419:15501): [TRANSFORMACION] Transformacion exitosa en bloque N°6 de Master d
+[INFO] 17:20:05:261 Worker/(15419:15512): [CONEXION] Proceso Master conectado exitosamente
+[INFO] 17:20:05:267 Worker/(15419:15512): [DATABIN] El bloque N°7 fue leido
+[INFO] 17:20:05:407 Worker/(15419:15512): [TRANSFORMACION] Transformacion exitosa en bloque N°7 de Master d
+[INFO] 17:20:06:378 Worker/(15419:15523): [CONEXION] Proceso Master conectado exitosamente
+[INFO] 17:20:06:388 Worker/(15419:15523): [DATABIN] El bloque N°8 fue leido
+[INFO] 17:20:06:540 Worker/(15419:15523): [TRANSFORMACION] Transformacion exitosa en bloque N°8 de Master d
+[INFO] 17:20:07:512 Worker/(15419:15534): [CONEXION] Proceso Master conectado exitosamente
+[INFO] 17:20:07:520 Worker/(15419:15534): [DATABIN] El bloque N°9 fue leido
+[INFO] 17:20:07:653 Worker/(15419:15534): [TRANSFORMACION] Transformacion exitosa en bloque N°9 de Master d
+[INFO] 17:20:08:639 Worker/(15419:15545): [CONEXION] Proceso Master conectado exitosamente
+[INFO] 17:20:08:648 Worker/(15419:15545): [DATABIN] El bloque N°10 fue leido
+[INFO] 17:20:08:792 Worker/(15419:15545): [TRANSFORMACION] Transformacion exitosa en bloque N°10 de Master d
+[INFO] 17:20:09:778 Worker/(15419:15556): [CONEXION] Proceso Master conectado exitosamente
+[INFO] 17:20:09:788 Worker/(15419:15556): [DATABIN] El bloque N°11 fue leido
+[INFO] 17:20:09:880 Worker/(15419:15556): [TRANSFORMACION] Transformacion exitosa en bloque N°11 de Master d

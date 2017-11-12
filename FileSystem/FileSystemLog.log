@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 [INFO] 22:32:32:207 FileSystem/(3164:3164): [EJECUCION] Proceso File System iniciado
 [INFO] 22:32:32:208 FileSystem/(3164:3164): [CONFIGURACION] Esperando conexion de YAMA (Puerto: 5060)
 [INFO] 22:32:32:209 FileSystem/(3164:3164): [CONFIGURACION] Esperando conexiones de Data Nodes (Puerto: 5040)
@@ -12,3 +13,23 @@
 [INFO] 23:01:38:572 FileSystem/(3164:3164): [31m[ERROR] Comando invalido[0m
 [INFO] 23:06:45:440 FileSystem/(3164:3164): [ERROR] El archivo a copiar no existe
 [INFO] 23:31:00:854 FileSystem/(3164:3164): [ERROR] El archivo a copiar no existe
+=======
+[INFO] 15:13:52:926 FileSystem/(11247:11247): [EJECUCION] Proceso File System iniciado
+[INFO] 15:13:52:990 FileSystem/(11247:11247): [CONFIGURACION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 15:13:52:991 FileSystem/(11247:11247): [CONFIGURACION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 15:13:52:992 FileSystem/(11247:11247): [CONFIGURACION] Esperando conexiones de Workers (Puerto: 5080)
+[INFO] 15:13:52:992 FileSystem/(11247:11247): [CONFIGURACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
+[INFO] 15:13:53:53 FileSystem/(11247:11247): [33m[AVISO] Conecte los nodos necesarios al File System para estabilizarlo[0m
+[INFO] 15:13:55:355 FileSystem/(11247:11250): [33m[AVISO] NODO2 conectado[0m
+[INFO] 15:13:55:366 FileSystem/(11247:11250): [33m[AVISO] El File System esta estable[0m
+[INFO] 15:14:00:464 FileSystem/(11247:11250): [33m[AVISO] NODO1 conectado[0m
+[INFO] 15:14:01:793 FileSystem/(11247:11251): [CONEXION] El proceso Yama se ha conectado
+[INFO] 15:58:43:838 FileSystem/(11247:11251): [CONEXION] El proceso YAMA se ha desconectado
+[INFO] 16:01:18:363 FileSystem/(11247:11251): [CONEXION] El proceso Yama se ha conectado
+[INFO] 16:10:36:837 FileSystem/(11247:11255): [33m[AVISO] NODO2 desconectado[0m
+[INFO] 16:10:37:478 FileSystem/(11247:11261): [33m[AVISO] NODO1 desconectado[0m
+[INFO] 16:29:47:851 FileSystem/(11247:11251): [CONEXION] El proceso YAMA se ha desconectado
+[INFO] 16:29:50:220 FileSystem/(11247:11251): [CONEXION] El proceso Yama se ha conectado
+[INFO] 16:40:41:807 FileSystem/(11247:11251): [CONEXION] El proceso YAMA se ha desconectado
+[INFO] 16:40:47:318 FileSystem/(11247:11251): [CONEXION] El proceso Yama se ha conectado
+>>>>>>> f18fd9bea11848141a997427e8cc476321d8adb6

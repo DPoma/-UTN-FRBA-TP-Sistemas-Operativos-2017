@@ -76,7 +76,7 @@ void dataNodeAceptado() {
 void dataNodeConectarAFS() {
 	socketFileSystem = socketCrearCliente(configuracion->ipFileSystem, configuracion->puertoFileSystem, ID_DATANODE);
 	Puntero puntero = malloc(100);
-	String mensaje = string_from_format("/%s/%s/%s", configuracion->nombreNodo, configuracion->ipPropia, configuracion->puertoWorker);
+	String mensaje = string_from_format("/%s/%s/%s", configuracion->nombreNodo, configuracion->ipPropia, configuracion->puertoMaster);
 	memcpy(puntero, &dataBinBloques, sizeof(Entero));
 	memcpy(puntero+sizeof(Entero), mensaje, stringLongitud(mensaje)+1);
 	mensajeEnviar(socketFileSystem, SOLICITAR_CONEXION, puntero, stringLongitud(mensaje)+1+sizeof(Entero));
@@ -92,6 +92,7 @@ Configuracion* configuracionLeerArchivo(ArchivoConfig archivoConfig) {
 	stringCopiar(configuracion->ipFileSystem, archivoConfigStringDe(archivoConfig, "IP_FILESYSTEM"));
 	stringCopiar(configuracion->puertoFileSystem, archivoConfigStringDe(archivoConfig, "PUERTO_FILESYSTEM"));
 	stringCopiar(configuracion->nombreNodo, archivoConfigStringDe(archivoConfig, "NOMBRE_NODO"));
+	stringCopiar(configuracion->puertoMaster, archivoConfigStringDe(archivoConfig, "PUERTO_MASTER"));
 	stringCopiar(configuracion->puertoWorker, archivoConfigStringDe(archivoConfig, "PUERTO_WORKER"));
 	stringCopiar(configuracion->rutaDataBin, archivoConfigStringDe(archivoConfig, "RUTA_DATABIN"));
 	stringCopiar(configuracion->ipPropia, archivoConfigStringDe(archivoConfig, "IP_PROPIA"));
@@ -108,9 +109,10 @@ void configuracionIniciarCampos() {
 	campos[0] = "IP_FILESYSTEM";
 	campos[1] = "PUERTO_FILESYSTEM";
 	campos[2] = "NOMBRE_NODO";
-	campos[3] = "PUERTO_WORKER";
-	campos[4] = "RUTA_DATABIN";
-	campos[5] = "IP_PROPIA";
+	campos[3] = "PUERTO_MASTER";
+	campos[4] = "PUERTO_WORKER";
+	campos[5] = "RUTA_DATABIN";
+	campos[6] = "IP_PROPIA";
 }
 
 void configuracionIniciarLog() {
@@ -134,26 +136,26 @@ void configuracionSenial(int senial) {
 
 //--------------------------------------- Funciones de bloques -------------------------------------
 
-Bloque bloqueBuscar(Entero numeroBloque) {
-	Bloque bloque = punteroDataBin + (BLOQUE * numeroBloque);
+BloqueWorker bloqueBuscar(Entero numeroBloque) {
+	BloqueWorker bloque = punteroDataBin + (BLOQUE * numeroBloque);
 	return bloque;
 }
 
 void bloqueObtenerParaLeer(Puntero datos) {
 	Entero numeroBloque = *(Entero*)datos;
-	Bloque bloque = getBloque(numeroBloque);
+	BloqueWorker bloque = getBloque(numeroBloque);
 	mensajeEnviar(socketFileSystem, LEER_BLOQUE, bloque, BLOQUE);
 }
 
 void bloqueObtenerParaCopiar(Puntero datos) {
 	Entero numeroBloqueACopiar = *(Entero*)datos;
-	Bloque bloqueACopiar = getBloque(numeroBloqueACopiar);
+	BloqueWorker bloqueACopiar = getBloque(numeroBloqueACopiar);
 	mensajeEnviar(socketFileSystem, COPIAR_BLOQUE, bloqueACopiar, BLOQUE);
 }
 
 void bloqueObtenerParaCopiarArchivo(Puntero datos) {
 	Entero numeroBloque = *(Entero*)datos;
-	Bloque bloque = getBloque(numeroBloque);
+	BloqueWorker bloque = getBloque(numeroBloque);
 	mensajeEnviar(socketFileSystem, COPIAR_ARCHIVO, bloque, BLOQUE);
 }
 
@@ -211,7 +213,7 @@ Puntero dataBinMapear() {
 	return Puntero;
 }
 
-void dataBinCalcularBloques() {
+void configuracionCalcularBloques() {
 	dataBinBloques = (Entero)ceil((double)dataBinTamanio/(double)BLOQUE);
 	imprimirMensaje1(archivoLog, "[DATABIN] Cantidad de bloques %i", (int*)dataBinBloques);
 }
@@ -219,19 +221,19 @@ void dataBinCalcularBloques() {
 void dataBinConfigurar() {
 	dataBinAbrir();
 	punteroDataBin = dataBinMapear();
-	dataBinCalcularBloques();
+	configuracionCalcularBloques();
 }
 
 //--------------------------------------- Interfaz con File System -------------------------------------
 
-Bloque getBloque(Entero numeroBloque) {
-	Bloque bloque = bloqueBuscar(numeroBloque);
+BloqueWorker getBloque(Entero numeroBloque) {
+	BloqueWorker bloque = bloqueBuscar(numeroBloque);
 	imprimirMensaje1(archivoLog, "[DATABIN] El bloque N°%i fue leido", (int*)numeroBloque);
 	return bloque;
 }
 
 void setBloque(Entero numeroBloque, Puntero datos) {
-	Bloque bloque = bloqueBuscar(numeroBloque);
+	BloqueWorker bloque = bloqueBuscar(numeroBloque);
 	memcpy(bloque, datos, BLOQUE);
 	imprimirMensaje1(archivoLog, "[DATABIN] El bloque N°%i fue escrito", (int*)numeroBloque);
 }

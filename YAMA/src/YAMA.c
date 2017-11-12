@@ -60,7 +60,7 @@ void configurar(){
 	archivoConfigDestruir(archivoConfig);
 }
 
-bool mismoNodo(Dir a,Dir b){
+bool nodoIguales(Dir a,Dir b){
 	return stringIguales(a.ip,b.ip)&&stringIguales(a.port,b.port);//podría comparar solo ip
 }
 
@@ -287,10 +287,10 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 		}
 
 		bool encontrado=false;
-		if(mismoNodo(workerClock->nodo,bloque0->nodo)){
+		if(nodoIguales(workerClock->nodo,bloque0->nodo)){
 			asignarBloque(workerClock,bloque0,bloque1);
 			encontrado=true;
-		}else if(mismoNodo(workerClock->nodo,bloque1->nodo)){
+		}else if(nodoIguales(workerClock->nodo,bloque1->nodo)){
 			asignarBloque(workerClock,bloque1,bloque0);
 			encontrado=true;
 		}
@@ -312,10 +312,10 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 			}
 			Worker* workerAdv=obtenerWorker(&clockAdv);
 			if(workerAdv->disponibilidad>0){
-				if(mismoNodo(workerAdv->nodo,bloque0->nodo)){
+				if(nodoIguales(workerAdv->nodo,bloque0->nodo)){
 					asignarBloque(workerAdv,bloque0,bloque1);
 					break;
-				}else if(mismoNodo(workerClock->nodo,bloque1->nodo)){
+				}else if(nodoIguales(workerClock->nodo,bloque1->nodo)){
 					asignarBloque(workerAdv,bloque1,bloque0);
 					break;
 				}
@@ -370,7 +370,7 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 			mensajeEnviar(entradaA->masterid,ABORTAR,nullptr,0);
 		}
 		if(entradaA->etapa==TRANSFORMACION&&actualizando==Error){
-			if(mismoNodo(entradaA->nodo,entradaA->nodoAlt)){
+			if(nodoIguales(entradaA->nodo,entradaA->nodoAlt)){
 				abortarJob();
 				return;
 			}
@@ -403,14 +403,14 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 		return entrada->job==entradaA->job;
 	}
 	bool mismoNodoJob(Entrada* entrada){
-		return mismoJob(entrada)&&mismoNodo(entrada->nodo,entradaA->nodo);
+		return mismoJob(entrada)&&nodoIguales(entrada->nodo,entradaA->nodo);
 	}
 	if(entradaA->etapa==TRANSFORMACION){
 		if(trabajoTerminado(mismoNodoJob)){
 			Entrada reducLocal;
 			darDatosEntrada(&reducLocal);
 			darPathTemporal(&reducLocal.pathTemporal,'l');
-			reducLocal.etapa=REDUCLOCAL;
+			reducLocal.etapa=REDUCCION_LOCAL;
 			Lista nodos=list_filter(tablaEstados,mismoNodoJob);
 
 			/////////////////////////////////////////INICIO SERIALIZACION DANIEL
@@ -433,18 +433,18 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 			for(i=sizeof(int32_t)+DIRSIZE,j=0;i<tamanio-TEMPSIZE;i+=TEMPSIZE,j++)
 				memcpy(dato+i,((Entrada*)list_get(nodos,j))->pathTemporal,TEMPSIZE);
 			memcpy(dato+i,reducLocal.pathTemporal,TEMPSIZE);
-			mensajeEnviar(reducLocal.masterid,REDUCLOCAL,dato,tamanio);
+			mensajeEnviar(reducLocal.masterid,REDUCCION_LOCAL,dato,tamanio);
 			/////////////////////////////////////////FIN SERIALIZACION NICOLAS
 
 			moverAUsados(mismoNodoJob);
 			list_addM(tablaEstados,&reducLocal,sizeof(Entrada));//mutex
 		}
-	}else if(entradaA->etapa==REDUCLOCAL){
+	}else if(entradaA->etapa==REDUCCION_LOCAL){
 		if(trabajoTerminado(mismoJob)){
 			Entrada reducGlobal;
 			darDatosEntrada(&reducGlobal);
 			darPathTemporal(&reducGlobal.pathTemporal,'g');
-			reducGlobal.etapa=REDUCLOCAL;
+			reducGlobal.etapa=REDUCCION_LOCAL;
 			Dir nodoMenorCarga=entradaA->nodo;
 			int menorCargaI=1000; //
 			void menorCarga(Worker* worker){
@@ -487,7 +487,7 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 				memcpy(dato+i+DIRSIZE,((Entrada*)list_get(nodosReducidos,j))->pathTemporal,TEMPSIZE);
 			}
 			memcpy(dato+i,reducGlobal.pathTemporal,TEMPSIZE);
-			mensajeEnviar(reducGlobal.masterid,REDUCLOCAL,dato,tamanio);
+			mensajeEnviar(reducGlobal.masterid,REDUCCION_LOCAL,dato,tamanio);
 			//////////////////////////////////////////FIN SERIALIZACION NICOLAS
 
 			moverAUsados(mismoJob);
@@ -495,7 +495,7 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 
 
 		}
-	}else if(entradaA->etapa==REDUCGLOBAL){
+	}else if(entradaA->etapa==REDUCCION_GLOBAL){
 		//no le veo sentido a que yama participe del almacenado final
 		//master lo podría hacer solo,  ya esta grande
 		Entrada* reducGlobal=list_find(tablaEstados,mismoJob);
@@ -520,13 +520,13 @@ void dibujarTablaEstados(){
 	if(list_is_empty(tablaEstados))
 		return;
 	pantallaLimpiar();
-	puts("Job    Master    Nodo    Bloque    Etapa    Temporal    Estado");
+	puts("Job    Master    Nodo    Bloque    Etapa        Temporal        Estado");
 	void dibujarEntrada(Entrada* entrada){
 		char* etapa,*estado,*bloque; bool doFree=false;
 		switch(entrada->etapa){
 		case TRANSFORMACION: etapa="transformacion"; break;
-		case REDUCLOCAL: etapa="reduccion local"; break;
-		case REDUCGLOBAL: etapa="reduccion global";break;
+		case REDUCCION_LOCAL: etapa="reduccion local"; break;
+		case REDUCCION_GLOBAL: etapa="reduccion global";break;
 		default: etapa="almacenado";
 		}
 		switch(entrada->estado){

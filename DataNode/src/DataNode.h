@@ -23,13 +23,14 @@
 
 //--------------------------------------- Estructuras -------------------------------------
 
-typedef void* Bloque;
+typedef void* BloqueWorker;
 
 typedef struct {
 	char ipFileSystem[20];
 	char ipPropia[20];
 	char puertoFileSystem[20];
 	char nombreNodo[10];
+	char puertoMaster[20];
 	char puertoWorker[20];
 	char rutaDataBin[255];
 } Configuracion;
@@ -41,7 +42,7 @@ int estadoDataNode;
 int dataBinTamanio;
 Entero dataBinBloques;
 Puntero punteroDataBin;
-String campos[6];
+String campos[7];
 Socket socketFileSystem;
 Configuracion* configuracion;
 ArchivoLog archivoLog;
@@ -71,14 +72,14 @@ void dataNodeAceptado();
 //--------------------------------------- Funciones de DataBin -------------------------------------
 
 void dataBinAbrir();
-void dataBinCalcularBloques();
+void configuracionCalcularBloques();
 Puntero dataBinMapear();
 Puntero dataBinUbicarPuntero(Entero numeroBloque);
 void dataBinConfigurar();
 
 //--------------------------------------- Funciones de Bloque -------------------------------------
 
-Bloque bloqueBuscar(Entero numeroBloque);
+BloqueWorker bloqueBuscar(Entero numeroBloque);
 void bloqueEscribir(Puntero datos);
 void bloqueObtenerParaLeer(Puntero datos);
 void bloqueObtenerParaCopiar(Puntero datos);
