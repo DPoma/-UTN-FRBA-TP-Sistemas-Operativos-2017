@@ -1,9 +1,0 @@
-[INFO] 19:37:03:955 FileSystem/(6886:6886): [EJECUCION] Proceso File System iniciado
-[INFO] 19:37:04:57 FileSystem/(6886:6886): [CONFIGURACION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 19:37:04:62 FileSystem/(6886:6886): [CONFIGURACION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 19:37:04:62 FileSystem/(6886:6886): [CONFIGURACION] Esperando conexiones de Workers (Puerto: 5080)
-[INFO] 19:37:04:63 FileSystem/(6886:6886): [CONFIGURACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
-[INFO] 19:37:04:149 FileSystem/(6886:6886): [33m[AVISO] Conecte los nodos necesarios al File System para estabilizarlo[0m
-[INFO] 19:37:14:741 FileSystem/(6886:6889): [33m[AVISO] NODO1 conectado[0m
-[INFO] 19:37:14:760 FileSystem/(6886:6889): [33m[AVISO] El File System esta estable[0m
-[INFO] 19:37:18:561 FileSystem/(6886:6890): [CONEXION] El proceso Yama se ha conectado

@@ -410,41 +410,25 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 			Entrada reducLocal;
 			darDatosEntrada(&reducLocal);
 			darPathTemporal(&reducLocal.pathTemporal,'l');
-			reducLocal.etapa=REDUCCION_LOCAL;
+			reducLocal.etapa=REDUCLOCAL;
 			Lista nodos=list_filter(tablaEstados,mismoNodoJob);
-
-			/////////////////////////////////////////INICIO SERIALIZACION DANIEL
-			/*int tamanio=TEMPSIZE*(nodos->elements_count+1)+DIRSIZE;
+			int tamanio=TEMPSIZE*(nodos->elements_count+1)+DIRSIZE;
 			void* dato=malloc(tamanio);
 			memcpy(dato,&reducLocal.nodo,DIRSIZE);
-			memcpy(dato+DIRSIZE,reducLocal.pathTemporal,TEMPSIZE);
 			int i,j;
-			for(i=TEMPSIZE+DIRSIZE,j=0;i<tamanio;i+=TEMPSIZE,j++)
-				memcpy(dato+i,((Entrada*)list_get(nodos,j))->pathTemporal,TEMPSIZE);
-			mensajeEnviar(reducLocal.masterid,ReducLocal,dato,tamanio);*/
-			/////////////////////////////////////////FIN SERIALIZACION DANIEL
-
-			/////////////////////////////////////////INICIO SERIALIZACION NICOLAS
-			int tamanio=TEMPSIZE*(nodos->elements_count+1)+DIRSIZE+sizeof(int32_t);
-			void* dato=malloc(tamanio);
-			memcpy(dato,&reducLocal.nodo,DIRSIZE);
-			memcpy(dato,&nodos->elements_count,sizeof(int32_t));
-			int i,j;
-			for(i=sizeof(int32_t)+DIRSIZE,j=0;i<tamanio-TEMPSIZE;i+=TEMPSIZE,j++)
+			for(i=DIRSIZE,j=0;i<tamanio-TEMPSIZE;i+=TEMPSIZE,j++)
 				memcpy(dato+i,((Entrada*)list_get(nodos,j))->pathTemporal,TEMPSIZE);
 			memcpy(dato+i,reducLocal.pathTemporal,TEMPSIZE);
-			mensajeEnviar(reducLocal.masterid,REDUCCION_LOCAL,dato,tamanio);
-			/////////////////////////////////////////FIN SERIALIZACION NICOLAS
-
+			mensajeEnviar(reducLocal.masterid,REDUCLOCAL,dato,tamanio);
 			moverAUsados(mismoNodoJob);
 			list_addM(tablaEstados,&reducLocal,sizeof(Entrada));//mutex
 		}
-	}else if(entradaA->etapa==REDUCCION_LOCAL){
+	}else if(entradaA->etapa==REDUCLOCAL){
 		if(trabajoTerminado(mismoJob)){
 			Entrada reducGlobal;
 			darDatosEntrada(&reducGlobal);
 			darPathTemporal(&reducGlobal.pathTemporal,'g');
-			reducGlobal.etapa=REDUCCION_LOCAL;
+			reducGlobal.etapa=REDUCLOCAL;
 			Dir nodoMenorCarga=entradaA->nodo;
 			int menorCargaI=1000; //
 			void menorCarga(Worker* worker){
@@ -454,48 +438,26 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 			}
 			list_iterate(workers,menorCarga);
 			Lista nodosReducidos=list_filter(tablaEstados,mismoJob);
-
-			/////////////////////////////////////////INICIO SERIALIZACION DANIEL
-			/*int tamanio=(DIRSIZE+TEMPSIZE)*(nodosReducidos->elements_count+1);
+			int tamanio=(DIRSIZE+TEMPSIZE)*(nodosReducidos->elements_count+1);
 			void* dato=malloc(tamanio);
-			memcpy(dato,reducGlobal.pathTemporal,TEMPSIZE);
-			memcpy(dato+TEMPSIZE,&nodoMenorCarga,DIRSIZE);
+			memcpy(dato,&nodoMenorCarga,DIRSIZE);
 			int i,j;
-			for(i=TEMPSIZE+DIRSIZE,j=0;i<tamanio;i+=DIRSIZE+TEMPSIZE,j++){
-				memcpy(dato+i,&((Entrada*)list_get(nodosReducidos,j))->nodo,DIRSIZE);
-				memcpy(dato+i+DIRSIZE,((Entrada*)list_get(nodosReducidos,j))->pathTemporal,TEMPSIZE);
-				mensajeEnviar(reducGlobal.masterid,ReducGlobal,dato,tamanio);
-			}*/
-			/////////////////////////////////////////FIN SERIALIZACION DANIEL
-
-			/////////////////////////////////////////INICIO SERIALIZACION NICOLAS
-			Dir* nodofalso;
-			nodofalso->ip[0]="0"; //que paso aca
-			nodofalso->port[0]="0";
-			int tamanio=(DIRSIZE+TEMPSIZE)*(nodosReducidos->elements_count+1)+sizeof(int32_t);
-			void* dato=malloc(tamanio);
-			memcpy(dato+TEMPSIZE,&nodoMenorCarga,DIRSIZE);
-			memcpy(dato,&nodosReducidos->elements_count,sizeof(int32_t));
-			int i,j;
-			for(i=sizeof(int32_t)+DIRSIZE,j=0;i<tamanio-TEMPSIZE;i+=DIRSIZE+TEMPSIZE,j++){
-				if (nodoMenorCarga.ip==((Entrada*)list_get(nodosReducidos,j))->nodo.ip){
-					memcpy(dato+i,nodofalso,DIRSIZE);
-				}
-				else{
-					memcpy(dato+i,&((Entrada*)list_get(nodosReducidos,j))->nodo,DIRSIZE);
-				}
+			void* nodoFalso=calloc(DIRSIZE,1);//tirar esto a worker
+			for(i=DIRSIZE,j=0;i<tamanio-TEMPSIZE;i+=DIRSIZE+TEMPSIZE,j++){
+				Dir* nodoActual=&((Entrada*)list_get(nodosReducidos,j))->nodo;
+				memcpy(dato+i,nodoIguales(*nodoActual,nodoMenorCarga)?nodoActual:nodoFalso,DIRSIZE);
 				memcpy(dato+i+DIRSIZE,((Entrada*)list_get(nodosReducidos,j))->pathTemporal,TEMPSIZE);
 			}
 			memcpy(dato+i,reducGlobal.pathTemporal,TEMPSIZE);
-			mensajeEnviar(reducGlobal.masterid,REDUCCION_LOCAL,dato,tamanio);
-			//////////////////////////////////////////FIN SERIALIZACION NICOLAS
+			free(nodoFalso);
 
+			mensajeEnviar(reducGlobal.masterid,REDUCGLOBAL,dato,tamanio);
 			moverAUsados(mismoJob);
 			list_addM(tablaEstados,&reducGlobal,sizeof(Entrada));//mutex
 
 
 		}
-	}else if(entradaA->etapa==REDUCCION_GLOBAL){
+	}else if(entradaA->etapa==REDUCGLOBAL){
 		//no le veo sentido a que yama participe del almacenado final
 		//master lo podría hacer solo,  ya esta grande
 		Entrada* reducGlobal=list_find(tablaEstados,mismoJob);
@@ -522,11 +484,11 @@ void dibujarTablaEstados(){
 	pantallaLimpiar();
 	puts("Job    Master    Nodo    Bloque    Etapa        Temporal        Estado");
 	void dibujarEntrada(Entrada* entrada){
-		char* etapa,*estado;
+		char* etapa,*estado,*bloque; bool doFree=false;
 		switch(entrada->etapa){
 		case TRANSFORMACION: etapa="transformacion"; break;
-		case REDUCCION_LOCAL: etapa="reduccion local"; break;
-		case REDUCCION_GLOBAL: etapa="reduccion global";break;
+		case REDUCLOCAL: etapa="reduccion local"; break;
+		case REDUCGLOBAL: etapa="reduccion global";break;
 		default: etapa="almacenado";
 		}
 		switch(entrada->estado){
@@ -534,9 +496,17 @@ void dibujarTablaEstados(){
 		case Error: estado="error"; break;
 		default: estado="terminado";
 		}
-		printf(" %d       %d         %d        %s   %s  %s  %s\n",
-				entrada->job,entrada->masterid-2,ipToNum(entrada->nodo.ip),(entrada->bloque!=-1)?string_itoa(entrada->bloque):"-",
+		if(entrada->bloque==-1)
+			bloque="-";
+		else{
+			bloque=string_itoa(entrada->bloque);
+			doFree=true;
+		}
+		printf("%d     %d     %d     %s     %s     %s    %s",
+				entrada->job,entrada->masterid-2,ipToNum(entrada->nodo.ip),bloque,
 				etapa,entrada->pathTemporal,estado);
+		if(doFree)
+			free(bloque);
 	}
 	list_iterate(tablaUsados,dibujarEntrada);
 	list_iterate(tablaEstados,dibujarEntrada);

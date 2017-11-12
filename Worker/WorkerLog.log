@@ -1,6 +1,6 @@
-[INFO] 18:57:30:768 Worker/(6519:6519): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data1.bin
-[INFO] 18:57:30:768 Worker/(6519:6519): [CONFIGURACION] Cantidad de bloques: 30
-[INFO] 18:57:30:768 Worker/(6519:6519): [CONFIGURACION] Nombre Nodo: NODO1
-[INFO] 18:57:30:768 Worker/(6519:6519): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data1.bin
-[INFO] 18:57:30:768 Worker/(6519:6519): [CONFIGURACION] tamanio data.bin: 0MB
-[INFO] 18:57:30:768 Worker/(6519:6519): [CONEXION] Esperando conexiones de Master (Puerto: 5050)
+[INFO] 20:08:24:811 Worker/(7489:7489): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data.bin
+[INFO] 20:08:24:811 Worker/(7489:7489): [CONFIGURACION] Cantidad de bloques: 30
+[INFO] 20:08:24:811 Worker/(7489:7489): [CONFIGURACION] Nombre Nodo: NODO1
+[INFO] 20:08:24:811 Worker/(7489:7489): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data.bin
+[INFO] 20:08:24:811 Worker/(7489:7489): [CONFIGURACION] tamanio data.bin: 0MB
+[INFO] 20:08:24:811 Worker/(7489:7489): [CONEXION] Esperando conexiones de Master (Puerto: 5050)

@@ -1,7 +1,0 @@
-[INFO] 19:37:18:487 YAMA/(6898:6898): [CONEXION] Realizando conexion con File System (IP: 127.0.0.1 | Puerto 5060)
-[INFO] 19:37:18:574 YAMA/(6898:6898): [CONEXION] Conexion exitosa con File System
-[INFO] 19:37:18:584 YAMA/(6898:6898): [CONEXION] Esperando conexiones de un Master (Puerto 5070)
-[INFO] 19:37:35:975 YAMA/(6898:6898): [CONEXION] Proceso Master 6 conectado exitosamente
-[INFO] 19:37:35:986 YAMA/(6898:6898): [RECEPCION] solicitud de master
-[INFO] 19:37:35:988 YAMA/(6898:6898): [ENVIO] path de master #6 enviado al fileSystem
-[INFO] 19:37:36:159 YAMA/(6898:6898): [RECEPCION] Un nodo se desconeto
