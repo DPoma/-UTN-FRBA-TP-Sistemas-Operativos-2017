@@ -68,7 +68,7 @@
 #define MAX_IP 20
 #define MAX_PUERTO 20
 #define MAX_NODO 10
-#define MAX_COPIAS 2
+#define MAX_COPIAS 1 ///////////////////////////////cambiado "2" por "1" para pruebas
 #define MAX_TIPOS 10
 #define MAX_ARGS 5
 #define MAX_CAMPOS 4

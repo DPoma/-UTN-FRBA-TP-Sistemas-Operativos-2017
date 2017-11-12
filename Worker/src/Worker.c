@@ -897,8 +897,9 @@ void archivoConfigObtenerCampos() {
 	campos[1] = "PUERTO_FILESYSTEM";
 	campos[2] = "NOMBRE_NODO";
 	campos[3] = "IP_PROPIA";
-	campos[4] = "PUERTO_WORKER";
-	campos[5] = "RUTA_DATABIN";
+	campos[4] = "PUERTO_MASTER";
+	campos[5] = "PUERTO_WORKER";
+	campos[6] = "RUTA_DATABIN";
 }
 
 void configuracionSenial(int senial) {
@@ -907,26 +908,64 @@ void configuracionSenial(int senial) {
 	exit(0);
 }
 
-void dataBinCalcularBloques() {
-	Puntero Puntero;
-	int descriptorArchivo = open(configuracion->rutaDataBin, O_CLOEXEC | O_RDWR);
-	if (descriptorArchivo == ERROR) {
-		imprimirMensaje(archivoLog, "[ERROR] Fallo el open()");
-		perror("open");
-		exit(EXIT_FAILURE);
-	}
-	struct stat estadoArchivo;
-	if (fstat(descriptorArchivo, &estadoArchivo) == ERROR) {
-		imprimirMensaje(archivoLog, "[ERROR] Fallo el fstat()");
-		perror("fstat");
-		exit(EXIT_FAILURE);
-	}
-	dataBinTamanio = estadoArchivo.st_size;
-	bloquesArchData = (Entero)ceil((double)dataBinTamanio/(double)BLOQUE);
-	imprimirMensaje1(archivoLog, "[DATABIN] Cantidad de bloques %i", (int*)bloquesArchData);
+void configuracionCalcularBloques() {
+int descriptorArchivo = open(configuracion->rutaDataBin, O_CLOEXEC | O_RDWR);
+if (descriptorArchivo == ERROR) {
+imprimirMensaje(archivoLog, "[ERROR] Fallo el open()");
+perror("open");
+exit(EXIT_FAILURE);
+}
+struct stat estadoArchivo;
+if (fstat(descriptorArchivo, &estadoArchivo) == ERROR) {
+imprimirMensaje(archivoLog, "[ERROR] Fallo el fstat()");
+perror("fstat");
+exit(EXIT_FAILURE);
+}
+dataBinTamanio = estadoArchivo.st_size;
+dataBinBloques = (Entero)ceil((double)dataBinTamanio/(double)BLOQUE);
+imprimirMensaje1(archivoLog, "[CONFIGURACION] Ruta archivo data.bin: %s", configuracion->rutaDataBin);
+imprimirMensaje1(archivoLog, "[CONFIGURACION] Cantidad de bloques: %d", (int*)dataBinBloques);
 }
 
+void dataBinConfigurar() {
+dataBinAbrir();
+punteroDataBin = dataBinMapear();
+configuracionCalcularBloques();
+}
 
+void dataBinAbrir() {
+dataBin = fileAbrir(configuracion->rutaDataBin, LECTURA);
+if(dataBin == NULL){
+imprimirMensaje(archivoLog,ROJO"[ERROR] No se pudo abrir el archivo data.bin"BLANCO);
+exit(EXIT_FAILURE);
+}
+fileCerrar(dataBin);
+}
+
+Puntero dataBinMapear() {
+Puntero Puntero;
+int descriptorArchivo = open(configuracion->rutaDataBin, O_CLOEXEC | O_RDWR);
+if (descriptorArchivo == ERROR) {
+imprimirMensaje(archivoLog, ROJO"[ERROR] Fallo el open()"BLANCO);
+perror("open");
+exit(EXIT_FAILURE);
+}
+struct stat estadoArchivo;
+if (fstat(descriptorArchivo, &estadoArchivo) == ERROR) {
+imprimirMensaje(archivoLog, ROJO"[ERROR] Fallo el fstat()"BLANCO);
+perror("fstat");
+exit(EXIT_FAILURE);
+}
+dataBinTamanio = estadoArchivo.st_size;
+Puntero = mmap(0, dataBinTamanio, PROT_WRITE | PROT_READ | PROT_EXEC, MAP_SHARED, descriptorArchivo, 0);
+if (Puntero == MAP_FAILED) {
+imprimirMensaje(archivoLog, ROJO"[ERROR] Fallo el mmap(), corran por sus vidas"BLANCO);
+perror("mmap");
+exit(EXIT_FAILURE);
+}
+close(descriptorArchivo);
+return Puntero;
+}
 
 void workerIniciar() {
 	pantallaLimpiar();
@@ -935,7 +974,7 @@ void workerIniciar() {
 	archivoConfigObtenerCampos();
 	senialAsignarFuncion(SIGINT, configuracionSenial);
 	configuracion = configuracionCrear(RUTA_CONFIG, (void*)configuracionLeerArchivoConfig, campos);
-	dataBinCalcularBloques();
+	dataBinConfigurar();
 	configuracionImprimir(configuracion);
 	estadoWorker = 1;
 }

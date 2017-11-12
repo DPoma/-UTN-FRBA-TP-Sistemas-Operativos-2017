@@ -1,39 +1,4 @@
-[INFO] 17:19:57:219 Master/(15422:15422): [CONFIGURACION] Conectandose a YAMA (IP: 127.0.0.1 | Puerto: 5070)
-[INFO] 17:19:57:295 Master/(15422:15422): [CONEXION] Conexion establecida con YAMA, esperando instrucciones
-[INFO] 17:19:57:375 Master/(15422:15422): [MENSAJE] Lista de bloques recibida
-[INFO] 17:19:57:378 Master/(15422:15422): [TRANSFORMACION] Bloque N°0 recibido (IP: 127.0.0.1 | Puerto: 5090)
-[INFO] 17:19:57:386 Master/(15422:15422): [TRANSFORMACION] Bloque N°1 recibido (IP: 127.0.0.1 | Puerto: 5090)
-[INFO] 17:19:57:398 Master/(15422:15422): [TRANSFORMACION] Bloque N°2 recibido (IP: 127.0.0.1 | Puerto: 5090)
-[INFO] 17:19:57:399 Master/(15422:15422): [TRANSFORMACION] Bloque N°3 recibido (IP: 127.0.0.1 | Puerto: 5090)
-[INFO] 17:19:57:399 Master/(15422:15422): [TRANSFORMACION] Bloque N°4 recibido (IP: 127.0.0.1 | Puerto: 5090)
-[INFO] 17:19:57:400 Master/(15422:15422): [TRANSFORMACION] Bloque N°5 recibido (IP: 127.0.0.1 | Puerto: 5090)
-[INFO] 17:19:57:400 Master/(15422:15422): [TRANSFORMACION] Bloque N°6 recibido (IP: 127.0.0.1 | Puerto: 5090)
-[INFO] 17:19:57:404 Master/(15422:15422): [TRANSFORMACION] Bloque N°7 recibido (IP: 127.0.0.1 | Puerto: 5090)
-[INFO] 17:19:57:408 Master/(15422:15422): [TRANSFORMACION] Bloque N°8 recibido (IP: 127.0.0.1 | Puerto: 5090)
-[INFO] 17:19:57:408 Master/(15422:15422): [TRANSFORMACION] Bloque N°9 recibido (IP: 127.0.0.1 | Puerto: 5090)
-[INFO] 17:19:57:408 Master/(15422:15422): [TRANSFORMACION] Bloque N°10 recibido (IP: 127.0.0.1 | Puerto: 5090)
-[INFO] 17:19:57:409 Master/(15422:15422): [TRANSFORMACION] Bloque N°11 recibido (IP: 127.0.0.1 | Puerto: 5090)
-[INFO] 17:19:57:460 Master/(15422:15434): [TRANSFORMACION] Enviando bloque N°0 (Archivo temporal: t1719573650)
-[INFO] 17:19:57:614 Master/(15422:15434): [TRANSFORMACION] Transformacion exitosa en el Worker
-[INFO] 17:19:58:563 Master/(15422:15434): [TRANSFORMACION] Enviando bloque N°1 (Archivo temporal: t1719573651)
-[INFO] 17:19:58:715 Master/(15422:15434): [TRANSFORMACION] Transformacion exitosa en el Worker
-[INFO] 17:19:59:671 Master/(15422:15434): [TRANSFORMACION] Enviando bloque N°2 (Archivo temporal: t1719573652)
-[INFO] 17:19:59:825 Master/(15422:15434): [TRANSFORMACION] Transformacion exitosa en el Worker
-[INFO] 17:20:00:765 Master/(15422:15434): [TRANSFORMACION] Enviando bloque N°3 (Archivo temporal: t1719573653)
-[INFO] 17:20:00:921 Master/(15422:15434): [TRANSFORMACION] Transformacion exitosa en el Worker
-[INFO] 17:20:01:863 Master/(15422:15434): [TRANSFORMACION] Enviando bloque N°4 (Archivo temporal: t1719573654)
-[INFO] 17:20:02:54 Master/(15422:15434): [TRANSFORMACION] Transformacion exitosa en el Worker
-[INFO] 17:20:02:999 Master/(15422:15434): [TRANSFORMACION] Enviando bloque N°5 (Archivo temporal: t1719573655)
-[INFO] 17:20:03:184 Master/(15422:15434): [TRANSFORMACION] Transformacion exitosa en el Worker
-[INFO] 17:20:04:110 Master/(15422:15434): [TRANSFORMACION] Enviando bloque N°6 (Archivo temporal: t1719573660)
-[INFO] 17:20:04:269 Master/(15422:15434): [TRANSFORMACION] Transformacion exitosa en el Worker
-[INFO] 17:20:05:229 Master/(15422:15434): [TRANSFORMACION] Enviando bloque N°7 (Archivo temporal: t1719573661)
-[INFO] 17:20:05:408 Master/(15422:15434): [TRANSFORMACION] Transformacion exitosa en el Worker
-[INFO] 17:20:06:354 Master/(15422:15434): [TRANSFORMACION] Enviando bloque N°8 (Archivo temporal: t1719573662)
-[INFO] 17:20:06:541 Master/(15422:15434): [TRANSFORMACION] Transformacion exitosa en el Worker
-[INFO] 17:20:07:487 Master/(15422:15434): [TRANSFORMACION] Enviando bloque N°9 (Archivo temporal: t1719573663)
-[INFO] 17:20:07:654 Master/(15422:15434): [TRANSFORMACION] Transformacion exitosa en el Worker
-[INFO] 17:20:08:614 Master/(15422:15434): [TRANSFORMACION] Enviando bloque N°10 (Archivo temporal: t1719573664)
-[INFO] 17:20:08:792 Master/(15422:15434): [TRANSFORMACION] Transformacion exitosa en el Worker
-[INFO] 17:20:09:754 Master/(15422:15434): [TRANSFORMACION] Enviando bloque N°11 (Archivo temporal: t1719573665)
-[INFO] 17:20:09:881 Master/(15422:15434): [TRANSFORMACION] Transformacion exitosa en el Worker
+[INFO] 19:37:35:923 Master/(6905:6905): [CONEXION] Configuracion para conexion con YAMA (IP: 127.0.0.1 | Puerto: 5070)
+[INFO] 19:37:35:948 Master/(6905:6905): [CONEXION] Estableciendo Conexion con YAMA...
+[INFO] 19:37:35:980 Master/(6905:6905): [CONEXION] Conexion establecida con YAMA, esperando instrucciones
+[INFO] 19:37:39:167 Master/(6905:6905): [MENSAJE] Lista de bloques recibida
