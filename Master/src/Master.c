@@ -69,10 +69,15 @@ void masterIniciar(String* argv) {
 
 }
 
+void iniciarClock(){
+	tiempo=clock();
+}
+
+
 void masterAtender(){
 	puts("ESPERANDO MENSAJE");
 	Mensaje* mensaje=mensajeRecibir(socketYama);
-	//iniciarMetricaJob() desde aca se contaria el tiempo?
+	iniciarClock();
 	if(mensaje->header.operacion == 301) {
 		imprimirMensaje(archivoLog, ROJO"[ERROR] Path invalido, abortando proceso"BLANCO);
 		abort();
@@ -137,10 +142,21 @@ void masterAtender(){
 		case REDUCGLOBAL:
 			reduccionGlobal(m);
 			break;
+		case ALMACENADO:
+			almacenadoFinal(m);
 		}
 		mensajeDestruir(m);
 	}
+
+	tiempo= clock() - tiempo;
+	double tiempotranscurrido = ((double)tiempo/CLOCKS_PER_SEC); //me da en segundos
+
+	imprimirMensaje1(archivoLog,"[TIEMPO] El job tardo %f segundos en ejecutarse",&tiempotranscurrido);
+
 }
+
+
+
 void transformaciones(Lista bloques){
 	WorkerTransformacion* dir = list_get(bloques,0);
 	socketWorker=socketCrearCliente(dir->dir.ip,dir->dir.port,ID_MASTER);
@@ -236,6 +252,46 @@ void reduccionGlobal(Mensaje* m){
 	mensajeDestruir(mensaje);
 	socketCerrar(sWorker);
 }
+
+void almacenadoFinal(Mensaje* m){
+	Dir* nodo = malloc(DIRSIZE);
+	char* temp = malloc(TEMPSIZE);
+	memcpy(nodo, m->datos,DIRSIZE);
+	memcpy(temp, m->datos + DIRSIZE, TEMPSIZE);
+
+	Socket worker = socketCrearCliente(nodo->ip, nodo->port, ID_MASTER);
+
+	void* data = malloc(DIRSIZE+TEMPSIZE);
+
+	memcpy(data, nodo, DIRSIZE);
+	memcpy(data + TEMPSIZE, temp,TEMPSIZE);
+
+	mensajeEnviar(worker, ALMACENADO, data, DIRSIZE+TEMPSIZE);
+
+	Mensaje* mens = mensajeRecibir(worker);
+	if(mens->header.operacion == EXITO){
+		imprimirMensaje(archivoLog,"[EJECUCION] ALMACENADO FINAL EXITOSO");
+	}
+	else{
+		imprimirMensaje(archivoLog, "[ERROR] ALMACENADO FINAL FALLIDO");
+	}
+
+	mensajeEnviar(socketYama, mens->header.operacion, NULL, 0 );
+	mensajeDestruir(mens);
+	free(data);
+	free(temp);
+	free(nodo);
+
+	socketCerrar(worker);
+
+	estadoMaster = DESACTIVADO;
+
+}
+
+
+
+
+
 void iniciarMetricaJob(){
 	getrusage(RUSAGE_SELF,&uso);//info del mismo proceso
 	comienzo = uso.ru_utime;//tiempo que pasa en la cpu

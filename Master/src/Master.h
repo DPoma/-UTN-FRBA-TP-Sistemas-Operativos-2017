@@ -10,6 +10,7 @@
 #include "../../Biblioteca/src/Biblioteca.c"
 #include <sys/time.h>
 #include <sys/resource.h>
+#include <time.h>
 
 #define RUTA_CONFIG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Master/MasterConfig.conf"
 #define RUTA_LOG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Master/MasterLog.log"
@@ -71,7 +72,7 @@ int32_t lenReduccion;
 WorkerTransformacion alternativo;
 struct rusage uso;
 struct timeval comienzo, fin;
-
+clock_t tiempo;
 
 //--------------------------------------- Funciones de Master -------------------------------------
 
@@ -107,3 +108,4 @@ void enviarArchivo(FILE* f);
 char* leerCaracteresEntrantes();
 void reduccionLocal(Mensaje* m);
 void reduccionGlobal(Mensaje* m);
+void almacenadoFinal(Mensaje* m);
