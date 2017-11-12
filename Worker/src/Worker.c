@@ -38,13 +38,17 @@ void workerCrearHijo(Socket unSocket) {
 			case TRANSFORMACION: //Etapa Transformacion
 			{
 				imprimirMensaje(archivoLog, "[CONEXION] llega op. de transformacion");
-				memcpy(&sizeCodigo, mensaje->datos, sizeof(int32_t));
+				/*memcpy(&sizeCodigo, mensaje->datos, sizeof(int32_t));
 				printf("%d\n", sizeCodigo);
 				codigo = malloc(sizeCodigo);
 				puts("PaSE MEMCPY");
 				printf("%s\n", mensaje->datos+sizeof(Entero));
 				memcpy(&codigo,mensaje->datos+sizeof(int32_t), sizeCodigo);
-				puts("PASE OTREO MEMCOPTY");
+
+				te mando el script directamente, el tamaño del script es
+				el tamaño del mensaje
+
+				*/puts("PASE OTREO MEMCOPTY");
 				//int pasar=1;
 				puts("ENTRANDO AL WHILE");
 				while(true){
@@ -97,7 +101,7 @@ void workerCrearHijo(Socket unSocket) {
 				memcpy(&codigo,mensaje->datos + sizeof(int32_t), sizeCodigo);
 				memcpy(&sizeOrigen, mensaje->datos+ sizeof(int32_t) +sizeCodigo, sizeof(int32_t));
 				memcpy(&origen,mensaje->datos + sizeof(int32_t)*2+sizeCodigo, sizeOrigen);
-				memcpy(&sizeDestino, mensaje->datos + sizeof(int32_t)*2 + sizeCodigo + sizeOrigen, sizeof(int32_t));
+				memcpy(&sizeDestino, mensaje->datos + sizeof(int32_t)*2 + sizeCodigo + sizeOrigen, sizeof(int32_t)); //es 12
 				memcpy(&destino,mensaje->datos + sizeof(int32_t)*3+sizeCodigo+ sizeOrigen, sizeDestino);
 				int result=reduccionLocal(codigo,origen,destino);
 				if(result==-1){
