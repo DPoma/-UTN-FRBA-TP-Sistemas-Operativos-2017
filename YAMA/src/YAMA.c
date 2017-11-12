@@ -522,7 +522,7 @@ void dibujarTablaEstados(){
 	pantallaLimpiar();
 	puts("Job    Master    Nodo    Bloque    Etapa    Temporal    Estado");
 	void dibujarEntrada(Entrada* entrada){
-		char* etapa,*estado;
+		char* etapa,*estado,*bloque; bool doFree=false;
 		switch(entrada->etapa){
 		case TRANSFORMACION: etapa="transformacion"; break;
 		case REDUCLOCAL: etapa="reduccion local"; break;
@@ -534,9 +534,17 @@ void dibujarTablaEstados(){
 		case Error: estado="error"; break;
 		default: estado="terminado";
 		}
+		if(entrada->bloque==-1)
+			bloque="-";
+		else{
+			bloque=string_itoa(entrada->bloque);
+			doFree=true;
+		}
 		printf("%d     %d     %d     %s     %s     %s    %s",
-				entrada->job,entrada->masterid-2,ipToNum(entrada->nodo.ip),(entrada->bloque!=-1)?string_itoa(entrada->bloque):"-",
+				entrada->job,entrada->masterid-2,ipToNum(entrada->nodo.ip),bloque,
 				etapa,entrada->pathTemporal,estado);
+		if(doFree)
+			free(bloque);
 	}
 	list_iterate(tablaUsados,dibujarEntrada);
 	list_iterate(tablaEstados,dibujarEntrada);

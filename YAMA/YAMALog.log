@@ -1,2 +1,10 @@
-[INFO] 21:19:44:446 YAMA/(2795:2795): [CONEXION] Realizando conexion con File System (IP: 127.0.0.1 | Puerto 5060)
-[INFO] 21:19:44:457 YAMA/(2795:2795): [31m[ERROR] El File System no se encuentra estable[0m
+[INFO] 22:37:34:371 YAMA/(3262:3262): [CONEXION] Realizando conexion con File System (IP: 127.0.0.1 | Puerto 5060)
+[INFO] 22:37:34:373 YAMA/(3262:3262): [CONEXION] Conexion exitosa con File System
+[INFO] 22:37:34:373 YAMA/(3262:3262): [CONEXION] Esperando conexiones de un Master (Puerto 5070)
+[INFO] 22:50:37:533 YAMA/(3262:3262): [CONEXION] Proceso Master 6 conectado exitosamente
+[INFO] 22:50:37:554 YAMA/(3262:3262): [RECEPCION] solicitud de master
+[INFO] 22:50:37:555 YAMA/(3262:3262): [ENVIO] path de master #6 enviado al fileSystem
+[INFO] 22:50:37:568 YAMA/(3262:3262): [ERROR] El path no existe en el File System
+[INFO] 22:50:39:367 YAMA/(3262:3262): [RECEPCION] desconexion de master
+[INFO] 22:50:39:367 YAMA/(3262:3262): [CONEXION] Proceso Master 6 se ha desconectado
+[INFO] 23:31:54:134 YAMA/(3262:3262): [RECEPCION] Un nodo se desconeto
