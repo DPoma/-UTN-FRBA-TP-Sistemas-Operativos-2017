@@ -471,18 +471,20 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 		char dato[DIRSIZE+TEMPSIZE];
 		memcpy(dato,&reducGlobal->nodo,DIRSIZE);
 		memcpy(dato+DIRSIZE,reducGlobal->pathTemporal,TEMPSIZE);
-		mensajeEnviar(entradaA->masterid,CIERRE,dato,sizeof dato);
+		mensajeEnviar(entradaA->masterid,ALMACENADO,dato,sizeof dato);
 		list_add(tablaUsados,list_remove_by_condition(tablaEstados,mismoJob));
 		list_addM(tablaEstados,&almacenado,sizeof(Entrada));
-	}else
+	}else{
 		list_add(tablaUsados,list_remove_by_condition(tablaEstados,mismoJob));
+		mensajeEnviar(entradaA->masterid,CIERRE,nullptr,0);
+	}
 }
 
 void dibujarTablaEstados(){
 	if(list_is_empty(tablaEstados))
 		return;
 	pantallaLimpiar();
-	puts("Job    Master    Nodo    Bloque    Etapa        Temporal        Estado");
+	puts("Job  Master  Nodo  Bloque  Etapa  Temporal  Estado\n");
 	void dibujarEntrada(Entrada* entrada){
 		char* etapa,*estado,*bloque; bool doFree=false;
 		switch(entrada->etapa){
@@ -502,7 +504,7 @@ void dibujarTablaEstados(){
 			bloque=string_itoa(entrada->bloque);
 			doFree=true;
 		}
-		printf("%d     %d     %d     %s     %s     %s    %s",
+		printf("%d  %d  %d  %s  %s  %s  %s\n",
 				entrada->job,entrada->masterid-2,ipToNum(entrada->nodo.ip),bloque,
 				etapa,entrada->pathTemporal,estado);
 		if(doFree)
