@@ -1,0 +1,4 @@
+[INFO] 21:42:17:444 Master/(5918:5918): [CONEXION] Configuracion para conexion con YAMA (IP: 127.0.0.1 | Puerto: 5070)
+[INFO] 21:42:17:448 Master/(5918:5918): [CONEXION] Estableciendo Conexion con YAMA...
+[INFO] 21:42:17:464 Master/(5918:5918): [CONEXION] Conexion establecida con YAMA, esperando instrucciones
+[INFO] 21:42:20:480 Master/(5918:5918): [MENSAJE] Lista de bloques recibida

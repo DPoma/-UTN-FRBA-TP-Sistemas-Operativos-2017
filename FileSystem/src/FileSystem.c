@@ -297,6 +297,7 @@ void yamaFinalizar(int* estado) {
 
 void yamaEnviarBloques(Puntero datos) {
 	int idMaster = *(Entero*)datos;
+	printf("%s",datos+sizeof(Entero));
 	String rutaDecente = stringTomarDesdePosicion(datos+sizeof(Entero), MAX_PREFIJO);
 	Archivo* archivo = archivoBuscarPorRuta(rutaDecente);
 	memoriaLiberar(rutaDecente);

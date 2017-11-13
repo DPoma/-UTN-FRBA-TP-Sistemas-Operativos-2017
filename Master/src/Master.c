@@ -20,7 +20,6 @@ int main(int argc, String* argv) {
 	return EXIT_SUCCESS;
 
 }
-
 void masterIniciar(String* argv) {
 	pantallaLimpiar();
 	archivoLog = archivoLogCrear(RUTA_LOG, "Master");
@@ -68,7 +67,6 @@ void masterIniciar(String* argv) {
 
 
 }
-
 void masterAtender(){
 	puts("ESPERANDO MENSAJE");
 	Mensaje* mensaje=mensajeRecibir(socketYama);
@@ -108,7 +106,7 @@ void masterAtender(){
 			imprimirMensaje3(archivoLog,"] lista para nodo %s %s armada, lista #%d",bloque.dir.ip,bloque.dir.port,(int*)listas->elements_count);
 		}
 	}
-
+	mensajeDestruir(mensaje);
 	for(i=0;i<listas->elements_count;i++){
 		pthread_t hilo;
 		pthread_create(&hilo,NULL,&transformaciones,list_get(listas,i));
@@ -124,21 +122,23 @@ void masterAtender(){
 		case CIERRE:
 			imprimirMensaje(archivoLog,"[EJECUCION] Terminando proceso");
 			estadoMaster=DESACTIVADO;
+			mensajeDestruir(m);
 			break;
 		case TRANSFORMACION://hubo error y se recibió un bloque alternativo
 			memcpy(&alternativo.bloque,mensaje->datos+i+DIRSIZE,INTSIZE);
 			memcpy(&alternativo.bytes,mensaje->datos+i+DIRSIZE+INTSIZE,INTSIZE);
 			memcpy(&alternativo.temp,mensaje->datos+i+DIRSIZE+INTSIZE*2,TEMPSIZE);
 			semaforoSignal(recepcionAlternativo);
+			mensajeDestruir(m);
 			break;
-		case REDUCLOCAL:
-			reduccionLocal(m);
-			break;
-		case REDUCGLOBAL:
-			reduccionGlobal(m);
-			break;
-		}
-		mensajeDestruir(m);
+		case REDUCLOCAL:{
+			pthread_t hilo;
+			pthread_create(&hilo,NULL,&reduccionLocal,m);
+		}break;
+		case REDUCGLOBAL:{
+			pthread_t hilo;//medio al pedo hacer un hilo para la global
+			pthread_create(&hilo,NULL,&reduccionGlobal,m);
+		}break;
 	}
 }
 void transformaciones(Lista bloques){
@@ -205,6 +205,7 @@ void reduccionLocal(Mensaje* m){
 
 	memcpy(buffer+INTSIZE*2+lenReduccion+cantTemps*TEMPSIZE,m->datos+DIRSIZE+cantTemps*TEMPSIZE,TEMPSIZE);//destino
 
+	mensajeDestruir(m);
 	Socket sWorker=socketCrearCliente(nodo->ip,nodo->port,ID_MASTER);
 	mensajeEnviar(sWorker,REDUCLOCAL,buffer,tamanio);
 
@@ -227,6 +228,7 @@ void reduccionGlobal(Mensaje* m){
 	memcpy(buffer+INTSIZE+lenReduccion,&cantTemps,INTSIZE);//origen
 	memcpy(buffer+INTSIZE*2+lenReduccion,m->datos+DIRSIZE,tamanio-DIRSIZE);//y destino
 
+	mensajeDestruir(m);
 	Socket sWorker=socketCrearCliente(nodo->ip,nodo->port,ID_MASTER);
 	mensajeEnviar(sWorker,REDUCGLOBAL,buffer,tamanio);
 	Mensaje* mensaje = mensajeRecibir(sWorker);
