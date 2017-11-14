@@ -73,7 +73,7 @@ void masterIniciar(String* argv) {
 }
 void masterAtender(){
 	Mensaje* mensaje=mensajeRecibir(socketYama);
-	if(mensaje->header.operacion == 301){
+	if(mensaje->header.operacion==ABORTAR){
 		imprimirMensaje(archivoLog, ROJO"[ERROR] Path invalido, abortando proceso"BLANCO);
 		abort();
 	}
@@ -118,7 +118,7 @@ void masterAtender(){
 		Mensaje* m=mensajeRecibir(socketYama);
 		switch(m->header.operacion){
 		case TRANSFORMACION://hubo error y se recibió un bloque alternativo
-			metricas.fallos++;metricas.cantTrans++;
+			metricas.fallos++;
 			memcpy(&alternativo.bloque,mensaje->datos+i+DIRSIZE,INTSIZE);
 			memcpy(&alternativo.bytes,mensaje->datos+i+DIRSIZE+INTSIZE,INTSIZE);
 			memcpy(&alternativo.temp,mensaje->datos+i+DIRSIZE+INTSIZE*2,TEMPSIZE);
