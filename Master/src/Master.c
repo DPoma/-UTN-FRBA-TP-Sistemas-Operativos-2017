@@ -21,6 +21,8 @@ int main(int argc, String* argv) {
 
 }
 
+
+
 void masterIniciar(String* argv) {
 	pantallaLimpiar();
 	archivoLog = archivoLogCrear(RUTA_LOG, "Master");

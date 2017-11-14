@@ -1,0 +1,6 @@
+[INFO] 21:53:45:1 FileSystem/(9040:9040): [EJECUCION] Proceso File System iniciado
+[INFO] 21:53:45:1 FileSystem/(9040:9040): [CONFIGURACION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 21:53:45:1 FileSystem/(9040:9040): [CONFIGURACION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 21:53:45:1 FileSystem/(9040:9040): [CONFIGURACION] Esperando conexiones de Workers (Puerto: 5080)
+[INFO] 21:53:45:1 FileSystem/(9040:9040): [CONFIGURACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
+[INFO] 21:53:45:1 FileSystem/(9040:9040): [33m[AVISO] Conecte los nodos necesarios al File System para estabilizarlo[0m

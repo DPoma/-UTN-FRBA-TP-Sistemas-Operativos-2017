@@ -144,6 +144,8 @@ void yamaAtender() {
 						void* pasoFs=malloc(mensaje->header.tamanio+INTSIZE);
 						memcpy(pasoFs,&masterid,INTSIZE);
 						memcpy(pasoFs+INTSIZE,mensaje->datos,mensaje->header.tamanio);
+						printf("%d\n",masterid);
+						printf("%s\n",pasoFs+INTSIZE);
 						mensajeEnviar(servidor->fileSystem,ENVIAR_BLOQUES,pasoFs,mensaje->header.tamanio+INTSIZE);
 						log_info(archivoLog, "[ENVIO] path de master #%d enviado al fileSystem",socketI);
 						free(pasoFs);

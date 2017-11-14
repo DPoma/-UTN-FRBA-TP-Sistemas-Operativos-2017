@@ -10,8 +10,8 @@
 
 //--------------------------------------- Constantes -------------------------------------
 
-#define RUTA_CONFIG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/DataNode/NodoConfig.conf"
-#define RUTA_LOG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/DataNode/DataNodeLog.log"
+#define RUTA_CONFIG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/DataNode2/NodoConfig.conf"
+#define RUTA_LOG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/DataNode2/DataNodeLog.log"
 
 #define ACEPTACION 100
 #define LEER_BLOQUE 101
