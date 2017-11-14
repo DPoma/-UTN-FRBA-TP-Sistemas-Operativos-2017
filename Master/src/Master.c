@@ -21,12 +21,14 @@ int main(int argc, String* argv) {
 
 }
 void masterIniciar(String* argv) {
+	metricas.procesoC=clock();
+	metricas.maxParalelo=metricas.paralelo=metricas.fallos=metricas.cantRedLoc=metricas.cantTrans=0;
 	pantallaLimpiar();
 	archivoLog = archivoLogCrear(RUTA_LOG, "Master");
 	imprimirMensajeProceso("# PROCESO MASTER");
 	campos[0] = "IP_YAMA";
 	campos[1] = "PUERTO_YAMA";
-	Configuracion* configuracionLeerArchivo(ArchivoConfig archivoConfig) {
+	Configuracion* configuracionLeerArchivo(ArchivoConfig archivoConfig){
 		Configuracion* configuracion = memoriaAlocar(sizeof(Configuracion));
 		stringCopiar(configuracion->ipYama, archivoConfigStringDe(archivoConfig, "IP_YAMA"));
 		stringCopiar(configuracion->puertoYama, archivoConfigStringDe(archivoConfig, "PUERTO_YAMA"));
@@ -35,18 +37,20 @@ void masterIniciar(String* argv) {
 	}
 	configuracion = configuracionCrear(RUTA_CONFIG, (Puntero)configuracionLeerArchivo, campos);
 	imprimirMensaje2(archivoLog, "[CONEXION] Configuracion para conexion con YAMA (IP: %s | Puerto: %s)", configuracion->ipYama, configuracion->puertoYama);
-	void configuracionSenial(int senial) {
+	void configuracionSenial(int senial){
 		estadoMaster=DESACTIVADO;
 	}
 	senialAsignarFuncion(SIGINT, configuracionSenial);
 	estadoMaster=ACTIVADO;
-	errorBloque=malloc(sizeof(Semaforo));
-	recepcionAlternativo=malloc(sizeof(Semaforo));
-	paralelos=malloc(sizeof(Semaforo));
-	semaforoIniciar(errorBloque,1);
-	semaforoIniciar(recepcionAlternativo,0);
-	semaforoIniciar(paralelos,1);
-	maxParalelo=paralelo=0;
+	void semaforoIniciar2(Semaforo* semaforo,int valor){
+		semaforo=malloc(sizeof(Semaforo));
+		semaforoIniciar(semaforo,valor);
+	}
+	semaforoIniciar2(errorBloque,1);
+	semaforoIniciar2(recepcionAlternativo,0);
+	semaforoIniciar2(metricas.paralelos,1);
+	semaforoIniciar2(metricas.transformaciones,1);
+	semaforoIniciar2(metricas.reducLocales,1);
 
 	void leerArchivo(File archScript,char** script,int* len){
 		fseek(archScript, 0, SEEK_END);
@@ -58,7 +62,6 @@ void masterIniciar(String* argv) {
 		*len=strlen(*script);
 		fclose(archScript);
 	}
-
 	leerArchivo(fopen(argv[1],"r+"),&scriptTransformacion,&lenTransformacion);
 	leerArchivo(fopen(argv[2], "r+"),&scriptReduccion,&lenReduccion);
 	archivoSalida=argv[4];
@@ -68,14 +71,9 @@ void masterIniciar(String* argv) {
 	imprimirMensaje(archivoLog, "[CONEXION] Conexion establecida con YAMA, enviando solicitud");
 	mensajeEnviar(socketYama,SOLICITUD,argv[3],stringLongitud(argv[3])+1);
 }
-
-
 void masterAtender(){
 	Mensaje* mensaje=mensajeRecibir(socketYama);
-	clock_t tiempoInicial=clock();
-	clock_t tiempoProceso=tiempoInicial;
-	int cantTrans=0,cantRedLoc=0,fallos=0;
-	if(mensaje->header.operacion == 301) {
+	if(mensaje->header.operacion == 301){
 		imprimirMensaje(archivoLog, ROJO"[ERROR] Path invalido, abortando proceso"BLANCO);
 		abort();
 	}
@@ -86,7 +84,7 @@ void masterAtender(){
 	}
 	Lista listas=list_create();
 	for(i=0;i<mensaje->header.tamanio;i+=DIRSIZE+INTSIZE*2+TEMPSIZE){
-		cantTrans++;
+		metricas.cantTrans++;
 		WorkerTransformacion bloque;
 		memcpy(&bloque.dir,mensaje->datos+i,DIRSIZE);
 		memcpy(&bloque.bloque,mensaje->datos+i+DIRSIZE,INTSIZE);
@@ -115,19 +113,12 @@ void masterAtender(){
 	for(i=0;i<listas->elements_count;i++){
 		pthread_t hilo;
 		pthread_create(&hilo,NULL,&transformaciones,list_get(listas,i));
-		tareasEnParalelo(1);
 	}
-	while(estadoMaster==ACTIVADO) {
+	while(estadoMaster==ACTIVADO){
 		Mensaje* m=mensajeRecibir(socketYama);
-
-		void mostrarTiempo(char* proceso){
-			//internet dice que en algunos linux la resta no sirve, ver que pasa
-			double tiempotranscurrido=((double)(tiempoProceso=clock()-tiempoProceso)/CLOCKS_PER_SEC);
-			imprimirMensaje2(archivoLog,"[METRICA]%s tardo %f segundos en ejecutarse",proceso,&tiempotranscurrido);
-		}
 		switch(m->header.operacion){
 		case TRANSFORMACION://hubo error y se recibió un bloque alternativo
-			fallos++;cantTrans++;
+			metricas.fallos++;metricas.cantTrans++;
 			memcpy(&alternativo.bloque,mensaje->datos+i+DIRSIZE,INTSIZE);
 			memcpy(&alternativo.bytes,mensaje->datos+i+DIRSIZE+INTSIZE,INTSIZE);
 			memcpy(&alternativo.temp,mensaje->datos+i+DIRSIZE+INTSIZE*2,TEMPSIZE);
@@ -135,24 +126,18 @@ void masterAtender(){
 			mensajeDestruir(m);
 			break;
 		case REDUCLOCAL:{
-			cantRedLoc++;
-			mostrarTiempo("Transformacion");
 			pthread_t hilo;
 			pthread_create(&hilo,NULL,&reduccionLocal,m);
-			tareasEnParalelo(1);
 		}break;
 		case REDUCGLOBAL:{
-			mostrarTiempo("Reduccion local");
 			pthread_t hilo;//medio al pedo hacer un hilo para la global
 			pthread_create(&hilo,NULL,&reduccionGlobal,m);
 		}break;
 		case ALMACENADO:{
-			mostrarTiempo("Reduccion global");
 			pthread_t hilo;//para este tambien
-			pthread_create(&hilo,NULL,&almacenadoFinal,m);
+			pthread_create(&hilo,NULL,&almacenado,m);
 		}break;
 		case CIERRE:
-			mostrarTiempo("Almacenado");
 			estadoMaster=DESACTIVADO;
 			mensajeDestruir(m);
 			break;
@@ -160,22 +145,40 @@ void masterAtender(){
 			imprimirMensaje(archivoLog,"[ABORTO] Abortando proceso");
 			abort(); //supongo que los hilos mueren aca
 			//si no se mueren matarlos
+		}
 	}
+	metricas.proceso=transcurrido(metricas.procesoC);
 	imprimirMensaje(archivoLog,"[EJECUCION]Terminando proceso");
-	double tiempotranscurrido=((double)(clock()-tiempoInicial)/CLOCKS_PER_SEC);
-	imprimirMensaje1(archivoLog,"[METRICA]El job tardo %f segundos en ejecutarse",&tiempotranscurrido);
-	imprimirMensaje1(archivoLog,"[METRICA]Cantidad de fallos: %d",&fallos);
-	imprimirMensaje1(archivoLog,"[METRICA]Tareas realizadas en paralelo: %d",&maxParalelo);
-	imprimirMensaje2(archivoLog,"[METRICA]Transformaciones: %d,Reducciones locales:%d",&cantTrans,&cantRedLoc);
+	void mostrarTranscurrido(double dt,char* tarea){
+		imprimirMensaje2(archivoLog,"[METRICA]%s tardo %f segundos en ejecutarse",tarea,&dt);
+	}
+	mostrarTranscurrido(metricas.proceso,"Job");
+	mostrarTranscurrido(metricas.transformacionSum/metricas.cantTrans,"Transformacion promedio ");
+	mostrarTranscurrido(metricas.reducLocalSum/metricas.cantRedLoc,"Reduccion local promedio");
+	imprimirMensaje2(archivoLog,"[METRICA]Transformaciones: %d,Reducciones locales:%d",&metricas.cantTrans,&metricas.cantRedLoc);
+	mostrarTranscurrido(metricas.reducGlobal,"Reducccion Global");
+	mostrarTranscurrido(metricas.almacenado,"Almacenado");
+	imprimirMensaje1(archivoLog,"[METRICA]Cantidad de fallos: %d",&metricas.fallos);
+	imprimirMensaje1(archivoLog,"[METRICA]Tareas realizadas en paralelo: %d",&metricas.maxParalelo);
 }
 void transformaciones(Lista bloques){
+	tareasEnParalelo(1);
+	clock_t tiempo=clock();
+	t_queue* clocks=queue_create();
 	WorkerTransformacion* dir = list_get(bloques,0);
 	socketWorker=socketCrearCliente(dir->dir.ip,dir->dir.port,ID_MASTER);
 	imprimirMensaje2(archivoLog,"[CONEXION] Estableciendo conexion con Worker (IP: %s | PUERTO: %s",dir->dir.ip,dir->dir.port);
 	mensajeEnviar(socketWorker,TRANSFORMACION,scriptTransformacion,lenTransformacion);
 	int enviados=0,respondidos=0;
+	semaforoWait(metricas.transformaciones);
+	metricas.transformacionSum+=transcurrido(tiempo);
+	semaforoSignal(metricas.transformaciones);
 	do{
 		for(;enviados<bloques->elements_count;enviados++){
+			clock_t* inicio=malloc(sizeof(clock_t));
+			*inicio=clock();
+			queue_push(clocks,inicio);
+
 			WorkerTransformacion* wt=list_get(bloques,enviados);
 			int tamanio=INTSIZE*2+TEMPSIZE;
 			char data[tamanio];
@@ -212,14 +215,21 @@ void transformaciones(Lista bloques){
 				//para hacer eso se tendrian que sacar el semaforo y
 				//enviar el numero de thread en el mensaje, para diferenciar despues
 			}
-			mensajeDestruir(mensaje);
+			double dt=transcurrido(*(clock_t*)queue_pop(clocks));//si llegan desordenados no importa, la suma da lo mismo
+			semaforoWait(metricas.transformaciones);
+			metricas.transformacionSum+=dt;
+			metricas.cantTrans++;
+			semaforoSignal(metricas.transformaciones);
 		}
+
 	}while(enviados<bloques->elements_count);
 	mensajeEnviar(socketWorker, EXITO, NULL, 0);
 	socketCerrar(socketWorker);
 	tareasEnParalelo(-1);
 }
 void reduccionLocal(Mensaje* m){
+	tareasEnParalelo(1);
+	clock_t tiempo=clock();
 	Dir* nodo;
 	memcpy(nodo,m->datos,DIRSIZE);
 	int32_t cantTemps=(m->header.tamanio-DIRSIZE-TEMPSIZE)/TEMPSIZE;
@@ -244,8 +254,14 @@ void reduccionLocal(Mensaje* m){
 	mensajeDestruir(mensaje);
 	socketCerrar(sWorker);
 	tareasEnParalelo(-1);
+
+	semaforoWait(metricas.reducLocales);
+	metricas.reducLocalSum+=transcurrido(tiempo);
+	metricas.cantRedLoc++;
+	semaforoSignal(metricas.reducLocales);
 }
 void reduccionGlobal(Mensaje* m){
+	clock_t tiempo=clock();
 	Dir* nodo;
 	memcpy(nodo,m->datos,DIRSIZE);
 	int cantTemps=(m->header.tamanio-DIRSIZE-TEMPSIZE)/TEMPSIZE;
@@ -267,8 +283,10 @@ void reduccionGlobal(Mensaje* m){
 	mensajeEnviar(socketYama,mensaje->header.operacion,NULL,0);
 	mensajeDestruir(mensaje);
 	socketCerrar(sWorker);
+	metricas.reducGlobal=transcurrido(tiempo);
 }
-void almacenadoFinal(Mensaje* m){
+void almacenado(Mensaje* m){
+	clock_t tiempo=clock();
 	Dir nodo;
 	memcpy(&nodo,m->datos,DIRSIZE);
 	Socket sWorker=socketCrearCliente(nodo.ip,nodo.port,ID_MASTER);
@@ -287,14 +305,18 @@ void almacenadoFinal(Mensaje* m){
 	mensajeEnviar(socketYama,mens->header.operacion, NULL,0);
 	mensajeDestruir(mens);
 	socketCerrar(sWorker);
+	metricas.almacenado=transcurrido(tiempo);
 }
-
 void tareasEnParalelo(int dtp){
-	semaforoWait(paralelos);
-	paralelo+=dtp;
-	if(paralelo>maxParalelo)
-		maxParalelo=paralelo;
-	semaforoSignal(paralelos);
+	semaforoWait(metricas.paralelos);
+	metricas.paralelo+=dtp;
+	if(metricas.paralelo>metricas.maxParalelo)
+		metricas.maxParalelo=metricas.paralelo;
+	semaforoSignal(metricas.paralelos);
+}
+double transcurrido(clock_t tiempo){
+	//internet dice que en algunos linux esta resta no anda, ver que pasa
+	return ((double)(clock()-tiempo)/CLOCKS_PER_SEC);
 }
 //no se que onda el error flotando aca jaja
 

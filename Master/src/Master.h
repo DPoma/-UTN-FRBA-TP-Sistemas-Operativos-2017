@@ -11,6 +11,7 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <time.h>
+#include "commons/collections/queue.h"
 
 #define RUTA_CONFIG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Master/MasterConfig.conf"
 #define RUTA_LOG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Master/MasterLog.log"
@@ -50,7 +51,6 @@ WorkerTransformacion alternativo;
 
 Semaforo* errorBloque;
 Semaforo* recepcionAlternativo;
-Semaforo* paralelos;
 
 String campos[2];
 Configuracion* configuracion;
@@ -63,8 +63,23 @@ int32_t lenTransformacion;
 char* scriptReduccion;
 int32_t lenReduccion;
 char* archivoSalida;
-int paralelo;
-int maxParalelo;
+
+struct{
+	clock_t procesoC;
+	double proceso;
+	double almacenado;
+	double reducGlobal;//por ahi es al pedo usar doubles
+	double reducLocalSum;
+	int cantRedLoc;
+	double transformacionSum;
+	int cantTrans;
+	int fallos;
+	int paralelo;
+	int maxParalelo;
+	Semaforo* paralelos;
+	Semaforo* transformaciones;
+	Semaforo* reducLocales;
+}metricas;
 //struct rusage uso;
 //struct timeval comienzo, fin;
 
@@ -76,4 +91,7 @@ void masterAtender();
 void transformaciones(Lista);
 void reduccionLocal(Mensaje*);
 void reduccionGlobal(Mensaje*);
-void almacenadoFinal(Mensaje*);
+void almacenado(Mensaje*);
+
+double transcurrido(clock_t);
+void tareasEnParalelo(int);
