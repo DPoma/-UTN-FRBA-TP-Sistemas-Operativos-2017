@@ -154,40 +154,37 @@ void mensajeEnviar(int socketReceptor, int32_t operacion, void* dato, int32_t ta
 	free(buffer);
 }
 
-//void mensajeAvisarDesconexion(Mensaje* mensaje) {
-//	mensaje->header.operacion = DESCONEXION;
-//	mensaje->header.tamanio = NULO;
-//	mensaje->datos = NULL;
-//}
-//
-//bool mensajeConexionFinalizada(int bytes) {
-//	return bytes == NULO;
-//}
+void mensajeAvisarDesconexion(Mensaje* mensaje) {
+	mensaje->header.operacion = DESCONEXION;
+	mensaje->header.tamanio = NULO;
+	mensaje->datos = NULL;
+}
 
-//void mensajeRevisarConexion(Mensaje* mensaje, Socket socketReceptor, int bytes) {
-//	if(mensajeConexionFinalizada(bytes))
-//		mensajeAvisarDesconexion(mensaje);
-//	else
-//		mensajeObtenerDatos(mensaje, socketReceptor);
-//}
+bool mensajeConexionFinalizada(int bytes) {
+	return bytes == NULO;
+}
+
+void mensajeRevisarConexion(Mensaje* mensaje, Socket socketReceptor, int bytes) {
+	if(mensajeConexionFinalizada(bytes))
+		mensajeAvisarDesconexion(mensaje);
+	else
+		mensajeObtenerDatos(mensaje, socketReceptor);
+}
 
 void mensajeObtenerDatos(Mensaje* mensaje, Socket socketReceptor) {
 	int tamanioDato = mensaje->header.tamanio;
 	if(tamanioDato==0)
 		return;//el recv no se banca el 0
 	mensaje->datos = malloc(tamanioDato);
-	socketRecibir(socketReceptor, mensaje->datos, tamanioDato);
-//	int bytes = socketRecibir(socketReceptor, mensaje->datos, tamanioDato);
-//	if(mensajeConexionFinalizada(bytes))
-//		mensajeAvisarDesconexion(mensaje);
+	int bytes = socketRecibir(socketReceptor, mensaje->datos, tamanioDato);
+	if(mensajeConexionFinalizada(bytes))
+		mensajeAvisarDesconexion(mensaje);
 }
 
 Mensaje* mensajeRecibir(int socketReceptor) {
 	Mensaje* mensaje = malloc(sizeof(Mensaje));
-	socketRecibir(socketReceptor, &mensaje->header, sizeof(Header));
-//	int bytes = socketRecibir(socketReceptor, &mensaje->header, sizeof(Header));
-	//mensajeRevisarConexion(mensaje, socketReceptor, bytes);
-	mensajeObtenerDatos(mensaje, socketReceptor);
+	int bytes = socketRecibir(socketReceptor, &mensaje->header, sizeof(Header));
+	mensajeRevisarConexion(mensaje, socketReceptor, bytes);
 	return mensaje;
 }
 
