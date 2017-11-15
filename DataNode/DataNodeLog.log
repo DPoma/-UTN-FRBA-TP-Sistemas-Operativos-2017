@@ -1,19 +1,5 @@
-[INFO] 21:41:48:843 DataNode/(5907:5907): [CONFIGURACION] Nombre Nodo: NODO1
-[INFO] 21:41:48:849 DataNode/(5907:5907): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data.bin
-[INFO] 21:41:48:850 DataNode/(5907:5907): [DATABIN] Cantidad de bloques 50
-[INFO] 21:41:48:858 DataNode/(5907:5907): [CONEXION] Estableciendo conexion con File System (IP: 127.0.0.1 | Puerto 5040)
-[INFO] 21:41:48:858 DataNode/(5907:5907): [CONEXION] Conexion establecida con el File System
-[INFO] 21:42:02:219 DataNode/(5907:5907): [DATABIN] El bloque N°0 fue escrito
-[INFO] 21:42:02:473 DataNode/(5907:5907): [DATABIN] El bloque N°1 fue escrito
-[INFO] 21:42:02:939 DataNode/(5907:5907): [DATABIN] El bloque N°2 fue escrito
-[INFO] 21:42:03:162 DataNode/(5907:5907): [DATABIN] El bloque N°3 fue escrito
-[INFO] 21:42:03:620 DataNode/(5907:5907): [DATABIN] El bloque N°4 fue escrito
-[INFO] 21:42:03:781 DataNode/(5907:5907): [DATABIN] El bloque N°5 fue escrito
-[INFO] 21:42:04:71 DataNode/(5907:5907): [DATABIN] El bloque N°6 fue escrito
-[INFO] 21:42:04:261 DataNode/(5907:5907): [DATABIN] El bloque N°7 fue escrito
-[INFO] 21:42:04:529 DataNode/(5907:5907): [DATABIN] El bloque N°8 fue escrito
-[INFO] 21:42:04:933 DataNode/(5907:5907): [DATABIN] El bloque N°9 fue escrito
-[INFO] 21:42:05:162 DataNode/(5907:5907): [DATABIN] El bloque N°10 fue escrito
-[INFO] 21:42:05:573 DataNode/(5907:5907): [DATABIN] El bloque N°11 fue escrito
-[INFO] 21:42:18:959 DataNode/(5907:5907): [31m[CONEXION] Conexion finalizada con File System[0m
-[INFO] 21:42:18:959 DataNode/(5907:5907): [EJECUCION] Proceso Data Node finalizado
+[INFO] 01:26:04:520 DataNode/(2997:2997): [CONFIGURACION] Nombre Nodo: NODO1
+[INFO] 01:26:04:521 DataNode/(2997:2997): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data.bin
+[INFO] 01:26:04:521 DataNode/(2997:2997): [DATABIN] Cantidad de bloques 50
+[INFO] 01:26:04:526 DataNode/(2997:2997): [CONEXION] Estableciendo conexion con File System (IP: 127.0.0.1 | Puerto 5040)
+[INFO] 01:26:04:526 DataNode/(2997:2997): [CONEXION] Conexion establecida con el File System
