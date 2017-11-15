@@ -129,22 +129,19 @@ void masterAtender(){
 			pthread_t hilo;
 			pthread_create(&hilo,NULL,&reduccionLocal,m);
 		}break;
-		case REDUCGLOBAL:{
-			pthread_t hilo;//medio al pedo hacer un hilo para la global
-			pthread_create(&hilo,NULL,&reduccionGlobal,m);
-		}break;
-		case ALMACENADO:{
-			pthread_t hilo;//para este tambien
-			pthread_create(&hilo,NULL,&almacenado,m);
-		}break;
+		case REDUCGLOBAL:
+			reduccionGlobal(m);
+			break;
+		case ALMACENADO:
+			almacenado(m);
+			break;
 		case CIERRE:
 			estadoMaster=DESACTIVADO;
 			mensajeDestruir(m);
 			break;
 		case ABORTAR:
 			imprimirMensaje(archivoLog,"[ABORTO] Abortando proceso");
-			abort(); //supongo que los hilos mueren aca
-			//si no se mueren matarlos
+			abort();
 		}
 	}
 	metricas.proceso=transcurrido(metricas.procesoC);
@@ -318,16 +315,3 @@ double transcurrido(clock_t tiempo){
 	//internet dice que en algunos linux esta resta no anda, ver que pasa
 	return ((double)(clock()-tiempo)/CLOCKS_PER_SEC);
 }
-//no se que onda el error flotando aca jaja
-
-
-
-
-//void iniciarMetricaJob(){
-//	getrusage(RUSAGE_SELF,&uso);//info del mismo proceso
-//	comienzo = uso.ru_utime;//tiempo que pasa en la cpu
-//}
-//void finMetricaJob(){
-//	getrusage(RUSAGE_SELF,&uso);
-//	fin = uso.ru_utime;
-//}
