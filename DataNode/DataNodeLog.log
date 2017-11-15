@@ -1,7 +1,17 @@
-[INFO] 21:37:09:881 DataNode/(8919:8919): [CONFIGURACION] Nombre Nodo: NODO1
-[INFO] 21:37:09:881 DataNode/(8919:8919): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data.bin
-[INFO] 21:37:09:881 DataNode/(8919:8919): [DATABIN] Cantidad de bloques 30
-[INFO] 21:37:09:881 DataNode/(8919:8919): [CONEXION] Estableciendo conexion con File System (IP: 127.0.0.1 | Puerto 5040)
-[INFO] 21:37:09:881 DataNode/(8919:8919): [CONEXION] Conexion establecida con el File System
-[INFO] 21:37:19:436 DataNode/(8919:8919): [31m[CONEXION] Conexion finalizada con File System[0m
-[INFO] 21:37:19:436 DataNode/(8919:8919): [EJECUCION] Proceso Data Node finalizado
+[INFO] 19:55:17:942 DataNode/(13255:13255): [CONFIGURACION] Nombre Nodo: NODO1
+[INFO] 19:55:17:942 DataNode/(13255:13255): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data.bin
+[INFO] 19:55:17:942 DataNode/(13255:13255): [DATABIN] Cantidad de bloques 30
+[INFO] 19:55:17:943 DataNode/(13255:13255): [CONEXION] Estableciendo conexion con File System (IP: 127.0.0.1 | Puerto 5040)
+[INFO] 19:55:17:943 DataNode/(13255:13255): [CONEXION] Conexion establecida con el File System
+[INFO] 21:10:42:923 DataNode/(13255:13255): [DATABIN] El bloque N°0 fue escrito
+[INFO] 21:10:42:925 DataNode/(13255:13255): [DATABIN] El bloque N°1 fue escrito
+[INFO] 21:10:42:933 DataNode/(13255:13255): [DATABIN] El bloque N°2 fue escrito
+[INFO] 21:10:42:945 DataNode/(13255:13255): [DATABIN] El bloque N°3 fue escrito
+[INFO] 21:10:42:953 DataNode/(13255:13255): [DATABIN] El bloque N°4 fue escrito
+[INFO] 21:10:42:960 DataNode/(13255:13255): [DATABIN] El bloque N°5 fue escrito
+[INFO] 21:10:42:967 DataNode/(13255:13255): [DATABIN] El bloque N°6 fue escrito
+[INFO] 21:10:42:973 DataNode/(13255:13255): [DATABIN] El bloque N°7 fue escrito
+[INFO] 21:10:42:982 DataNode/(13255:13255): [DATABIN] El bloque N°8 fue escrito
+[INFO] 21:10:42:992 DataNode/(13255:13255): [DATABIN] El bloque N°9 fue escrito
+[INFO] 21:10:42:999 DataNode/(13255:13255): [DATABIN] El bloque N°10 fue escrito
+[INFO] 21:10:43:6 DataNode/(13255:13255): [DATABIN] El bloque N°11 fue escrito

@@ -809,5 +809,6 @@ size_t bitmapCantidadBits(Bitmap* bitmap) {
 }
 
 int bitmapCalculo(int cantidadBloques) {
+
 	return (int)ceil((double)cantidadBloques/(double)8);
 }

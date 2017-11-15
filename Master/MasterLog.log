@@ -1,4 +1,17 @@
-[INFO] 21:37:19:299 Master/(8928:8928): [CONEXION] Configuracion para conexion con YAMA (IP: 127.0.0.1 | Puerto: 5070)
-[INFO] 21:37:19:299 Master/(8928:8928): [CONEXION] Estableciendo Conexion con YAMA...
-[INFO] 21:37:19:303 Master/(8928:8928): [CONEXION] Conexion establecida con YAMA, esperando instrucciones
-[INFO] 21:37:19:577 Master/(8928:8928): [MENSAJE] Lista de bloques recibida
+[INFO] 21:10:50:978 Master/(13467:13467): [CONEXION] Configuracion para conexion con YAMA (IP: 127.0.0.1 | Puerto: 5070)
+[INFO] 21:10:50:978 Master/(13467:13467): [CONEXION] Estableciendo Conexion con YAMA...
+[INFO] 21:10:50:982 Master/(13467:13467): [CONEXION] Conexion establecida con YAMA, enviando solicitud
+[INFO] 21:10:50:991 Master/(13467:13467): [MENSAJE] Lista de bloques recibida
+[INFO] 21:10:50:991 Master/(13467:13467): [RECEPCION] bloque 127.0.0.1 5090 0
+[INFO] 21:10:50:991 Master/(13467:13467): ] lista para nodo 127.0.0.1 5090 armada, lista #1
+[INFO] 21:10:50:991 Master/(13467:13467): [RECEPCION] bloque 127.0.0.1 5090 1
+[INFO] 21:10:50:991 Master/(13467:13467): [RECEPCION] bloque 127.0.0.1 5090 2
+[INFO] 21:10:50:991 Master/(13467:13467): [RECEPCION] bloque 127.0.0.1 5090 3
+[INFO] 21:10:50:991 Master/(13467:13467): [RECEPCION] bloque 127.0.0.1 5090 4
+[INFO] 21:10:50:991 Master/(13467:13467): [RECEPCION] bloque 127.0.0.1 5090 5
+[INFO] 21:10:50:991 Master/(13467:13467): [RECEPCION] bloque 127.0.0.1 5090 6
+[INFO] 21:10:50:991 Master/(13467:13467): [RECEPCION] bloque 127.0.0.1 5090 7
+[INFO] 21:10:50:991 Master/(13467:13467): [RECEPCION] bloque 127.0.0.1 5090 8
+[INFO] 21:10:50:991 Master/(13467:13467): [RECEPCION] bloque 127.0.0.1 5090 9
+[INFO] 21:10:50:991 Master/(13467:13467): [RECEPCION] bloque 127.0.0.1 5090 10
+[INFO] 21:10:50:991 Master/(13467:13467): [RECEPCION] bloque 127.0.0.1 5090 11

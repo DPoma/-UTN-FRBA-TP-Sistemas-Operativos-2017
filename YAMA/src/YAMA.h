@@ -17,14 +17,29 @@
 
 #define INTSIZE sizeof(int32_t)
 #define TEMPSIZE 12
+#define DIRSIZE sizeof(Dir)
 #define nullptr NULL
 
 #define ACEPTACION 200
 #define SOLICITAR_BLOQUES 201
 #define ERROR_ARCHIVO 202
+#define ENVIAR_BLOQUES 201
+#define ERROR_ARCHIVO 202
 
-#define DIRSIZE sizeof(Dir)
+#define FRACASO -800
+#define EXITO 1
+#define DESCONEXION 0
+#define ABORTAR 301
+#define SOLICITUD 302
+#define TRANSFORMACION 303
+#define REDUCLOCAL 304
+#define REDUCGLOBAL 305
+#define ALMACENADO 306
+#define CIERRE 307
 
+#define ENPROCESO 1
+#define TERMINADO 2
+#define ABORTADO 3
 
 typedef struct {
 	char puertoMaster[50];
@@ -55,23 +70,7 @@ typedef struct{
 } Worker;
 Lista workers;
 
-#define ENVIAR_BLOQUES 201
-#define ERROR_ARCHIVO 202
 
-#define FRACASO -800
-#define EXITO 1
-#define DESCONEXION 0
-#define ABORTAR 301
-#define SOLICITUD 302
-#define TRANSFORMACION 303
-#define REDUCLOCAL 304
-#define REDUCGLOBAL 305
-#define ALMACENADO 306
-#define CIERRE 307
-
-#define ENPROCESO 1
-#define TERMINADO 2
-#define ABORTADO 3
 
 typedef enum {Error,EnProceso,Terminado,Abortado} Estado;
 
@@ -102,7 +101,6 @@ int ipToNum(char*);
 void darPathTemporal(char**,char);
 void configurar();
 void archivoConfigObtenerCampos();
-void pantallaLimpiar();
 void yamaIniciar();
 void yamaAtender();
 void yamaPlanificar(Socket,void*,int);
