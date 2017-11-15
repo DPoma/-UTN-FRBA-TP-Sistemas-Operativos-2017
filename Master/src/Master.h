@@ -80,8 +80,6 @@ struct{
 	Semaforo* transformaciones;
 	Semaforo* reducLocales;
 }metricas;
-//struct rusage uso;
-//struct timeval comienzo, fin;
 
 //--------------------------------------- Funciones de Master -------------------------------------
 
