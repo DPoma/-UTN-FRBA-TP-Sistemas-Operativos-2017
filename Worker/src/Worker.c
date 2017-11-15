@@ -912,6 +912,8 @@ void configuracionSenial(int senial) {
 	exit(0);
 }
 
+
+
 void configuracionCalcularBloques() {
 int descriptorArchivo = open(configuracion->rutaDataBin, O_CLOEXEC | O_RDWR);
 if (descriptorArchivo == ERROR) {

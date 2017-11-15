@@ -1,3 +1,15 @@
-[INFO] 01:26:10:659 YAMA/(3004:3004): [CONEXION] Realizando conexion con File System (IP: 127.0.0.1 | Puerto 5060)
-[INFO] 01:26:10:662 YAMA/(3004:3004): [CONEXION] Conexion exitosa con File System
-[INFO] 01:26:10:662 YAMA/(3004:3004): [CONEXION] Esperando conexiones de un Master (Puerto 5070)
+[INFO] 00:18:24:349 YAMA/(3317:3317): [CONEXION] Realizando conexion con File System (IP: 127.0.0.1 | Puerto 5060)
+[INFO] 00:18:24:366 YAMA/(3317:3317): [CONEXION] Conexion exitosa con File System
+[INFO] 00:18:24:366 YAMA/(3317:3317): [CONEXION] Esperando conexiones de un Master (Puerto 5070)
+[INFO] 00:19:06:461 YAMA/(3317:3317): [CONEXION] Proceso Master conectado exitosamente
+[INFO] 00:19:06:467 YAMA/(3317:3317): [CONEXION] Un proceso Master se ha desconectado
+[INFO] 00:19:21:630 YAMA/(3317:3317): [CONEXION] Proceso Master conectado exitosamente
+[INFO] 00:19:21:639 YAMA/(3317:3317): [CONEXION] Un proceso Master se ha desconectado
+[INFO] 00:19:23:470 YAMA/(3317:3317): [CONEXION] Proceso Master conectado exitosamente
+[INFO] 00:19:23:476 YAMA/(3317:3317): [CONEXION] Un proceso Master se ha desconectado
+[INFO] 00:19:24:311 YAMA/(3317:3317): [CONEXION] Proceso Master conectado exitosamente
+[INFO] 00:19:24:320 YAMA/(3317:3317): [CONEXION] Un proceso Master se ha desconectado
+[INFO] 00:19:24:4 YAMA/(3317:3317): [CONEXION] Proceso Master conectado exitosamente
+[INFO] 00:19:25:16 YAMA/(3317:3317): [CONEXION] Un proceso Master se ha desconectado
+[INFO] 00:27:48:242 YAMA/(3317:3317): [CONEXION] Proceso Master conectado exitosamente
+[INFO] 00:42:27:981 YAMA/(3317:3317): [CONEXION] Un proceso Master se ha desconectado
