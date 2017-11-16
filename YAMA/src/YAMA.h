@@ -106,6 +106,7 @@ void yamaAtender();
 void yamaPlanificar(Socket,void*,int);
 void actualizarTablaEstados(Entrada*,Estado);
 void dibujarTablaEstados();
+int dirToNum(Dir);
 void retardo();
 
 

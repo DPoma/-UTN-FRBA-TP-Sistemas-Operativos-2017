@@ -258,7 +258,7 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 		void setearClock(Worker* worker){
 			if(worker->disponibilidad>mayorDisponibilidad){
 				mayorDisponibilidad=worker->disponibilidad;
-				clock=ipToNum(worker->nodo.ip);
+				clock=dirToNum(worker->nodo);
 			}
 		}
 		list_iterate(workers,setearClock);
@@ -489,7 +489,7 @@ void dibujarTablaEstados(){
 	if(list_is_empty(tablaEstados))
 		return;
 	pantallaLimpiar();
-	puts("Job  Master  Nodo  Bloque  Etapa  Temporal  Estado\n");
+	puts("Job    Master     Nodo  Bloque  Etapa  Temporal  Estado\n");
 	void dibujarEntrada(Entrada* entrada){
 		char* etapa,*estado,*bloque; bool doFree=false;
 		switch(entrada->etapa){
@@ -510,7 +510,7 @@ void dibujarTablaEstados(){
 			doFree=true;
 		}
 		printf("%d  %d  %d  %s  %s  %s  %s\n",
-				entrada->job,entrada->masterid-2,ipToNum(entrada->nodo.ip),bloque,
+				entrada->job,entrada->masterid-2,dirToNum(entrada->nodo),bloque,
 				etapa,entrada->pathTemporal,estado);
 		if(doFree)
 			free(bloque);
@@ -521,10 +521,10 @@ void dibujarTablaEstados(){
 
 
 
-int ipToNum(char* ip){//no se si puede pasar un array a pointer asi nomas
+int dirToNum(Dir nodo){
 	int index,i=0;
 	void buscarIp(Worker* worker){
-		if(stringIguales(worker->nodo.ip,ip))
+		if(nodoIguales(worker->nodo,nodo))
 			index=i;
 		i++;
 	}
