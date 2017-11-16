@@ -107,7 +107,7 @@ void yamaAtender() {
 					if(mensaje->header.operacion==ERROR_ARCHIVO){
 						log_info(archivoLog,"[ERROR] El path no existe en el File System");
 						mensajeEnviar(*(Entero*)mensaje->datos, ABORTAR,"", 1);
-					}else if(mensaje->header.operacion==DESCONEXION){
+					}else if(mensaje->header.operacion==666){ //todo
 						log_info(archivoLog,"[RECEPCION] Un nodo se desconeto");
 						char nodoDesconectado[20];
 						strncpy(nodoDesconectado,mensaje->datos,20);
@@ -123,6 +123,9 @@ void yamaAtender() {
 						list_iterate(tablaEstados,cazarEntradasDesconectadas);
 						//podría romper por estar recorriendo una lista con una funcion
 						//que puede modificar la lista, pero no deberia
+					}else if(mensaje->header.operacion==DESCONEXION){
+						imprimirMensaje(archivoLog,"[ERROR] FileSystem desconectado");
+						abort();
 					}else{
 						int32_t masterid;
 						memcpy(&masterid,mensaje->datos,INTSIZE);
@@ -149,7 +152,7 @@ void yamaAtender() {
 						mensajeEnviar(servidor->fileSystem,ENVIAR_BLOQUES,pasoFs,mensaje->header.tamanio+INTSIZE);
 						log_info(archivoLog, "[ENVIO] path de master #%d enviado al fileSystem",socketI);
 						free(pasoFs);
-					}else if(mensaje->header.operacion==DESCONEXION){
+					}else if(mensaje->header.operacion==DESCONEXION){//todo diferenciar la desconexion buena de la mala
 						log_info(archivoLog,"[RECEPCION] desconexion de master");
 						listaSocketsEliminar(socketI, &servidor->listaMaster);
 						socketCerrar(socketI);
@@ -548,7 +551,14 @@ void darPathTemporal(char** ret,char pre){
 	(*ret)[11]='\0';
 	char* anteriorTemp=string_duplicate(*ret);
 	if(stringIguales(*ret,anterior))
-		agregado++;
+		if(agregado=='9')
+			agregado='a';
+		else if(agregado=='z')
+			agregado='A';
+		else if(agregado=='Y')
+			usleep(1000);
+		else
+			agregado++;
 	else
 		agregado='0';
 	(*ret)[10]=agregado;

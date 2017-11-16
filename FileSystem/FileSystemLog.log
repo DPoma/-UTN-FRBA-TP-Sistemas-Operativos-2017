@@ -1,12 +1,13 @@
-[INFO] 12:07:56:958 FileSystem/(3791:3791): [EJECUCION] Proceso File System iniciado
-[INFO] 12:07:56:958 FileSystem/(3791:3791): [CONFIGURACION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 12:07:56:958 FileSystem/(3791:3791): [CONFIGURACION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 12:07:56:958 FileSystem/(3791:3791): [CONFIGURACION] Esperando conexiones de Workers (Puerto: 5080)
-[INFO] 12:07:56:958 FileSystem/(3791:3791): [CONFIGURACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
-[INFO] 12:07:56:958 FileSystem/(3791:3791): [33m[AVISO] Conecte los nodos necesarios al File System para estabilizarlo[0m
-[INFO] 12:08:02:68 FileSystem/(3791:3794): [33m[AVISO] NODO1 conectado[0m
-[INFO] 12:08:02:68 FileSystem/(3791:3794): [33m[AVISO] El File System esta estable[0m
-[INFO] 12:08:03:936 FileSystem/(3791:3794): [33m[AVISO] NODO2 conectado[0m
-[INFO] 12:08:14:242 FileSystem/(3791:3795): [CONEXION] El proceso Yama se ha conectado
-[INFO] 14:37:58:468 FileSystem/(3791:3795): [CONEXION] El proceso YAMA se ha desconectado
-[INFO] 14:38:25:654 FileSystem/(3791:3795): [CONEXION] El proceso Yama se ha conectado
+[INFO] 18:51:43:637 FileSystem/(3206:3206): [EJECUCION] Proceso File System iniciado
+[INFO] 18:51:43:645 FileSystem/(3206:3206): [CONFIGURACION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 18:51:43:645 FileSystem/(3206:3206): [CONFIGURACION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 18:51:43:645 FileSystem/(3206:3206): [CONFIGURACION] Esperando conexiones de Workers (Puerto: 5080)
+[INFO] 18:51:43:645 FileSystem/(3206:3206): [CONFIGURACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
+[INFO] 18:51:43:747 FileSystem/(3206:3206): [33m[AVISO] Conecte los nodos y formatee el File System para estabilizarlo[0m
+[INFO] 18:51:49:159 FileSystem/(3206:3211): [33m[AVISO] NODO1 conectado[0m
+[INFO] 18:51:52:527 FileSystem/(3206:3211): [33m[AVISO] NODO2 conectado[0m
+[INFO] 18:51:57:790 FileSystem/(3206:3206): [FORMATEO] El File System fue formateado
+[INFO] 18:51:57:790 FileSystem/(3206:3206): [33m[AVISO] El File System esta estable[0m
+[INFO] 18:52:03:753 FileSystem/(3206:3212): [CONEXION] El proceso Yama se ha conectado
+[INFO] 18:52:11:720 FileSystem/(3206:3212): [31m[ERROR] El path no existe[0m
+[INFO] 18:52:22:297 FileSystem/(3206:3206): [ARCHIVO] El archivo WBAN.csv fue copiado en File System
