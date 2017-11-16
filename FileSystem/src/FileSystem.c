@@ -268,7 +268,7 @@ void yamaControlar() {
 }
 
 void yamaAceptar() {
-	mensajeEnviar(socketYama, ACEPTAR_YAMA, NULL, 0);
+	mensajeEnviar(socketYama, ACEPTAR_YAMA, "1", 1);
 	imprimirMensaje(archivoLog, "[CONEXION] El proceso Yama se ha conectado");
 	int estado = ACTIVADO;
 	while(estado)

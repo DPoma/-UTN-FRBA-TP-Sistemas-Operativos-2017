@@ -60,6 +60,9 @@ int pid;
 
 const int MB = 1048576;
 
+#define DIRSIZE sizeof(Dir)
+#define INTSIZE sizeof(int32_t)
+#define TEMPSIZE 12
 
 String campos[7];
 Socket listenerWorker;
@@ -78,7 +81,7 @@ void socketAceptarConexion();
 
 
 void workerIniciar();
-int transformar(char*,int,char*);
+int transformar(char*,int,int,char*);
 int reduccionLocal(char*,char*,char*);
 locOri* getOrigenesLocales(char*);
 char* appendL(locOri*);

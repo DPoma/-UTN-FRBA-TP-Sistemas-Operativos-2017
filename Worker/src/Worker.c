@@ -12,8 +12,8 @@
 
 int main(void) {
 	workerIniciar();
-	socketListenerWorker = socketCrearListener(configuracion->puertoWorker);//todo hacer otro listener para workers, por el tema del handshake
-	imprimirMensaje1(archivoLog, "[CONEXION] Esperando conexiones de Master (Puerto: %s)", configuracion->puertoWorker);
+	socketListenerWorker = socketCrearListener(configuracion->puertoMaster);//todo hacer otro listener para workers, por el tema del handshake
+	imprimirMensaje1(archivoLog, "[CONEXION] Esperando conexiones de Master (Puerto: %s)", configuracion->puertoMaster);
 	while(estadoWorker)
 		socketAceptarConexion();
 	imprimirMensaje(archivoLog, "[EJECUCION] Proceso Worker finalizado");
@@ -38,58 +38,42 @@ void workerCrearHijo(Socket unSocket) {
 			case TRANSFORMACION: //Etapa Transformacion
 			{
 				imprimirMensaje(archivoLog, "[CONEXION] llega op. de transformacion");
-				/*memcpy(&sizeCodigo, mensaje->datos, sizeof(int32_t));
-				printf("%d\n", sizeCodigo);
-				codigo = malloc(sizeCodigo);
-				puts("PaSE MEMCPY");
-				printf("%s\n", mensaje->datos+sizeof(Entero));
-				memcpy(&codigo,mensaje->datos+sizeof(int32_t), sizeCodigo);
-
-				te mando el script directamente, el tamaño del script es
-				el tamaño del mensaje
-
-				*/puts("PASE OTREO MEMCOPTY");
-				//int pasar=1;
-				puts("ENTRANDO AL WHILE");
+				codigo = malloc(mensaje->header.tamanio);
+				memcpy(&codigo,mensaje->datos, mensaje->header.tamanio);
 				while(true){
-					//imprimirMensaje(archivoLog, "[CONEXION] Esperando mensajes de Master");
-					//if (pasar){
-					///	pasar=0;
-						imprimirMensaje(archivoLog, "[CONEXION] Esperando mensajes de Master");
-						puts("PESPERARNDO EL MANSEJA");
-						Mensaje* mensaje = mensajeRecibir(unSocket);
-						puts("PASE MENSAJE");
-						if (mensaje->header.operacion==EXITO)
-							break;
-						else{
-						int subpid = fork();
-						imprimirMensaje(archivoLog, "[CONEXION] [SUBFORK] llega op. de transformacion");
-						if(subpid == 0) {
-							int origen;
-							char* destino;
-							int sizeDestino;
-							memcpy(&origen,mensaje->datos + sizeof(int32_t)+sizeCodigo, sizeof(int32_t));
-							memcpy(&sizeDestino, mensaje->datos + sizeof(int32_t)*2 + sizeCodigo , sizeof(int32_t));
-							destino = malloc(sizeDestino);
-							memcpy(&destino,mensaje->datos + sizeof(int32_t)*3+sizeCodigo, sizeDestino);
-							int result = transformar(codigo,origen,destino);
-							if(result==-1){
-								mensajeEnviar(unSocket, FRACASO, NULL, 0);
-								imprimirMensaje(archivoLog,"[TRASFORMACION] transformacion Fracaso");
-							}
-							mensajeEnviar(unSocket, EXITO, origen, sizeof(int32_t));
-							imprimirMensaje(archivoLog,"[TRASFORMACION] transformacion exitosa");
-							free(codigo);
-							free(destino);
-							free(mensaje);
-							break;
+					imprimirMensaje(archivoLog, "[CONEXION] Esperando bloques a transformar");
+					puts("PESPERARNDO EL MANSEJA");
+					//mensajeEnviar(unSocket, 100, "recibido", 8);
+					Mensaje* men = mensajeRecibir(unSocket);
+					puts("PASE MENSAJE");
+					if (mensaje->header.operacion==EXITO)
+						break;
+					else{
+					int subpid = fork();
+					imprimirMensaje(archivoLog, "[CONEXION] [SUBFORK] llega op. de transformacion");
+					if(subpid == 0) {
+						int origen;
+						char destino[12];
+						int bytes;
+						memcpy(&origen,mensaje->datos + sizeof(int32_t), sizeof(int32_t));
+						memcpy(&bytes, mensaje->datos + sizeof(int32_t), sizeof(int32_t));
+						memcpy(&destino,mensaje->datos + sizeof(int32_t)*2, TEMPSIZE);
+						int result = transformar(codigo,origen,bytes,destino);
+						if(result==-1){
+							mensajeEnviar(unSocket, FRACASO, origen, sizeof(int32_t));
+							imprimirMensaje(archivoLog,"[TRASFORMACION] transformacion Fracaso");
 						}
-						else if(subpid > 0)
-							puts("SUBPADRE ACEPTO UNA CONEXION");
-						else
-							puts("ERROR");
-						}
+						mensajeEnviar(unSocket, EXITO, origen, sizeof(int32_t));
+						imprimirMensaje(archivoLog,"[TRASFORMACION] transformacion exitosa");
+						free(mensaje);
+						break;
 					}
+					else if(subpid > 0)
+						puts("SUBPADRE ACEPTO UNA CONEXION");
+					else
+						puts("ERROR");
+					}
+				}
 				break;
 			}
 			case REDUCLOCAL:{ //Etapa Reduccion Local
@@ -275,16 +259,14 @@ void workerCrearHijo(Socket unSocket) {
 }
 
 //1er etapa
-int transformar(char* codigo,int origen,char* destino){
+int transformar(char* codigo,int origen,int bytes ,char destino[12]){
 	imprimirMensaje(archivoLog,"[TRASFORMACION] Comienzo a transformar");
 	if (origen>bloquesArchData){
 		return -1;
 	}
 	char* patharchdes;
-	patharchdes = realloc(patharchdes,sizeof(RUTA_TEMPS)+16);
-	strcat(patharchdes,RUTA_TEMPS);
-	strcat(patharchdes,destino);
-	strcat(patharchdes,".bin");
+	patharchdes = realloc(patharchdes,sizeof(RUTA_TEMPS)+TEMPSIZE+4);
+	patharchdes = string_from_format(RUTA_TEMPS,destino,".bin");
 	char* buffer=NULL;
 	FILE* arch;
 	arch = fopen(configuracion->rutaDataBin,"r");
@@ -292,48 +274,26 @@ int transformar(char* codigo,int origen,char* destino){
 	int i;
 	char c;
 	int cc = 0;
-	for(i=0;cc<=MB;i++){
+	for(i=0;cc<=bytes;i++){
 		c = fgetc(arch);
 			buffer = realloc(buffer,sizeof(char)*(cc+1));
 			buffer[cc]=c;
 			cc++;
 	}
-	/*int j;
-	for(j=0;j<=size;j++){
-		c = fgetc(arch);
-		srtcat(buffer,c);
-	}*/
 	fclose(arch);
 	//doy privilegios a script
-	char commando [500];
-	for(i=0;i==500;i++){
-		commando[i]=NULL;
-	}
-	strcat(commando,"chmod 0755");
-	strcat(commando,codigo);
+	char* commando;
+	commando = realloc(commando,sizeof(codigo)+10);
+	commando = string_from_format("chmod 0755",codigo);
 	system(commando);
 	free (commando);
 	//paso buffer a script y resultado script a sort
-	char command [500];
-	for(i=0;i==500;i++){
-		command[i]=NULL;
-	}
-	strcat(command,"cat");
-	strcat(command,buffer);
-	strcat(command,"|");
-	strcat(command,codigo);
-	strcat(command,"| sort >");
-	strcat(command,patharchdes);
+	char* command;
+	command = realloc(command,3+sizeof(buffer)+1+sizeof(codigo)+8+sizeof(patharchdes));
+	command = string_from_format("cat",buffer,"|",codigo,"| sort >",patharchdes);
 	system(command);
 	free (command);
 	free(patharchdes);
-	//resuelto por parametro en vez de cat
-	/*strcat(command,codigo);
-	strcat(command,buffer);//suponiendo que el script requiere un buffer como parametro
-	strcat(command,"| sort >");
-	strcat(command,destino);
-	system(command);
-	free (command);*/
 	return 0;
 }
 
@@ -875,6 +835,7 @@ Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig) {
 	stringCopiar(configuracion->puertoFileSystem, archivoConfigStringDe(archivoConfig, "PUERTO_FILESYSTEM"));
 	stringCopiar(configuracion->nombreNodo, archivoConfigStringDe(archivoConfig, "NOMBRE_NODO"));
 	stringCopiar(configuracion->puertoWorker, archivoConfigStringDe(archivoConfig, "PUERTO_WORKER"));
+	stringCopiar(configuracion->puertoMaster, archivoConfigStringDe(archivoConfig, "PUERTO_MASTER"));
 	stringCopiar(configuracion->rutaDataBin, archivoConfigStringDe(archivoConfig, "RUTA_DATABIN"));
 	stringCopiar(configuracion->ipPropia, archivoConfigStringDe(archivoConfig, "IP_PROPIA"));
 	archivoConfigDestruir(archivoConfig);
@@ -891,9 +852,11 @@ char* agregarBarraCero(char* data, int tamanio)
 
 void configuracionImprimir(Configuracion* configuracion) {
 	imprimirMensaje1(archivoLog, "[CONFIGURACION] Nombre Nodo: %s", configuracion->nombreNodo);
-	imprimirMensaje1(archivoLog, "[CONFIGURACION] Ruta archivo data.bin: %s", configuracion->rutaDataBin);
-	imprimirMensaje1(archivoLog, "[CONFIGURACION] tamanio data.bin: %dMB", bloquesArchData);
-
+	imprimirMensaje1(archivoLog, "[CONFIGURACION] IP: %s", configuracion->ipPropia);
+	imprimirMensaje1(archivoLog, "[CONFIGURACION] PUERTO MASTER: %s", configuracion->puertoMaster);
+	imprimirMensaje1(archivoLog, "[CONFIGURACION] PUERTO WORKER: %s", configuracion->puertoWorker);
+	imprimirMensaje1(archivoLog, "[CONFIGURACION] IP FILESYSTEM: %s", configuracion->ipFileSytem);
+	imprimirMensaje1(archivoLog, "[CONFIGURACION] PUERTO FILESYSTEM: %s", configuracion->puertoFileSystem);
 }
 
 void archivoConfigObtenerCampos() {
@@ -980,7 +943,7 @@ void workerIniciar() {
 	archivoConfigObtenerCampos();
 	senialAsignarFuncion(SIGINT, configuracionSenial);
 	configuracion = configuracionCrear(RUTA_CONFIG, (void*)configuracionLeerArchivoConfig, campos);
-	dataBinConfigurar();
 	configuracionImprimir(configuracion);
+	dataBinConfigurar();
 	estadoWorker = 1;
 }

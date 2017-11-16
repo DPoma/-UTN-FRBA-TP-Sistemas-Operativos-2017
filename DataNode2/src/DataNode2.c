@@ -214,9 +214,7 @@ Puntero dataBinMapear() {
 }
 
 void configuracionCalcularBloques() {
-
 	dataBinBloques = (Entero)ceil((double)dataBinTamanio/(double)BLOQUE);
-
 	imprimirMensaje1(archivoLog, "[DATABIN] Cantidad de bloques %i", (int*)dataBinBloques);
 }
 
