@@ -160,10 +160,10 @@ void yamaAtender() {
 						log_info(archivoLog, "[CONEXION] Proceso Master %d se ha desconectado",socketI);
 					}else{
 						log_info(archivoLog,"[RECEPCION] actualizacion de master");
-						Dir nodo=*((Dir*)mensaje->datos);//puede que rompa porque no es deep copying
+						Dir nodo=*((Dir*)mensaje->datos);
 						int32_t bloque=*((int32_t*)(mensaje->datos+DIRSIZE));
 						bool buscarEntrada(Entrada* entrada){
-							return stringIguales(entrada->nodo.ip,nodo.ip)&&entrada->bloque==bloque;
+							return nodoIguales(entrada->nodo,nodo)&&entrada->bloque==bloque;
 						}
 						actualizarTablaEstados(list_find(tablaEstados,buscarEntrada),mensaje->header.operacion);
 					}

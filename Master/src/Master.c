@@ -216,7 +216,7 @@ void transformaciones(Lista bloques){
 			int tamanio=INTSIZE*2+TEMPSIZE;
 			char data[tamanio];
 			memcpy(data,&wt->bloque,INTSIZE);
-			memcpy(data+INTSIZE,&wt->bytes,INTSIZE); //a worker le interesan los bytes?
+			memcpy(data+INTSIZE,&wt->bytes,INTSIZE);
 			memcpy(data+INTSIZE*2,wt->temp,TEMPSIZE);
 			mensajeEnviar(socketWorker,TRANSFORMACION,data,tamanio);
 			imprimirMensaje2(archivoLog,"[CONEXION] Enviando bloque %d %s",(int*)wt->bloque,wt->temp);
@@ -225,16 +225,10 @@ void transformaciones(Lista bloques){
 			Mensaje* mensaje = mensajeRecibir(socketWorker);
 			//a demas de decir exito o fracaso devuelve el numero de bloque
 			void enviarActualizacion(){
-				imprimirMensaje2(archivoLog,"se recibio actualizacion de Worker %d %d",(int32_t*)mensaje->datos,mensaje->header.operacion);
-				/*mensaje=realloc(mensaje,mensaje->header.tamanio+DIRSIZE+sizeof(Header));
-				memmove(mensaje->datos+DIRSIZE,mensaje->datos,mensaje->header.tamanio);
-				memcpy(mensaje->datos,&dir->dir,DIRSIZE);*/
-				int bloqresult;
-				memcpy(&bloqresult,mensaje->datos,INTSIZE);
 				char buffer[INTSIZE+DIRSIZE];
-				memcpy(buffer,&bloqresult,INTSIZE);
 				memcpy(buffer,&dir->dir,DIRSIZE);
-				mensajeEnviar(socketYama,mensaje->header.operacion,buffer,sizeof(buffer)+1);
+				memcpy(buffer+DIRSIZE,mensaje->datos,INTSIZE);
+				mensajeEnviar(socketYama,mensaje->header.operacion,buffer,sizeof buffer);
 				mensajeDestruir(mensaje);
 			}
 			if(mensaje->header.operacion==EXITO){

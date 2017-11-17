@@ -23,7 +23,7 @@ int main(void) {
 void workerCrearHijo(Socket unSocket) {
 	int ppid = fork();
 	if(ppid == 0) {
-		//socketCerrar(socketListenerWorker);
+		socketCerrar(socketListenerWorker);
 		imprimirMensaje(archivoLog, "[CONEXION] Esperando mensajes de Master");
 		Mensaje* mensaje = mensajeRecibir(unSocket);
 		char* codigo;
@@ -259,6 +259,7 @@ void workerCrearHijo(Socket unSocket) {
 				break;
 			}
 		}
+		//todo debería haber un exit() aca, supongo
 	}
 	else if(ppid > 0){
 		puts("PADRE ACEPTO UNA CONEXION");
@@ -811,7 +812,6 @@ void socketAceptarConexion() {
 	if(nuevoSocket != ERROR) {
 		imprimirMensaje(archivoLog, "[CONEXION] Proceso Master conectado exitosamente");
 		workerCrearHijo(nuevoSocket);
-		socketCerrar(nuevoSocket);
 	}
 	else{
 		imprimirMensaje(archivoLog, ROJO"[ERROR] NO SE PUDO CONECTAR CON EL PROCESO MASTER"BLANCO);
