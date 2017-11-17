@@ -47,11 +47,6 @@ typedef struct{
 } WorkerTransformacion;
 WorkerTransformacion alternativo;
 
-typedef struct{
-	int bloque;
-	int bytes;
-	char temp[TEMPSIZE];
-} BloqueWorkerParaPrueba;
 
 //--------------------------------------- Globales -------------------------------------
 

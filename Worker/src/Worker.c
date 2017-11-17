@@ -12,12 +12,26 @@
 
 int main(void) {
 	workerIniciar();
+	//PARA PRUEBA
+	leerArchivo(fopen("/home/utnso/Escritorio/transformador.sh","r+"),&scriptTransformacion,&lenTransformacion);
+	/////////////////////////
 	socketListenerWorker = socketCrearListener(configuracion->puertoMaster);//todo hacer otro listener para workers, por el tema del handshake
 	imprimirMensaje1(archivoLog, "[CONEXION] Esperando conexiones de Master (Puerto: %s)", configuracion->puertoMaster);
 	while(estadoWorker)
 		socketAceptarConexion();
 	imprimirMensaje(archivoLog, "[EJECUCION] Proceso Worker finalizado");
 	return EXIT_SUCCESS;
+}
+
+void leerArchivo(File archScript,char** script,int* len){
+	fseek(archScript, 0, SEEK_END);
+	long posicion = ftell(archScript);
+	fseek(archScript, 0, SEEK_SET);
+	*script=malloc(posicion + 1);
+	fread(*script, posicion, 1, archScript);
+	(*script)[posicion] = '\0';
+	*len=strlen(*script);
+	fclose(archScript);
 }
 
 void workerCrearHijo(Socket unSocket) {
@@ -38,27 +52,32 @@ void workerCrearHijo(Socket unSocket) {
 			case TRANSFORMACION: //Etapa Transformacion
 			{
 				imprimirMensaje(archivoLog, "[CONEXION] llega op. de transformacion");
-				codigo = malloc(mensaje->header.tamanio);
-				memcpy(&codigo,mensaje->datos, mensaje->header.tamanio);
+				//codigo = malloc(mensaje->header.tamanio);
+				//memcpy(&codigo,mensaje->datos, mensaje->header.tamanio);
 				while(true){
 					imprimirMensaje(archivoLog, "[CONEXION] Esperando bloques a transformar");
 					puts("PESPERARNDO EL MANSEJA");
 					//mensajeEnviar(unSocket, 100, "recibido", 8);
-					Mensaje* men = mensajeRecibir(unSocket);
+					//Mensaje* men = mensajeRecibir(unSocket);
 					puts("PASE MENSAJE");
-					if (mensaje->header.operacion==EXITO)
-						break;
+					if (mensaje->header.operacion==EXITO){
+						puts("WTF");
+						break;}
 					else{
-					int subpid = fork();
+					//int subpid = fork();
 					imprimirMensaje(archivoLog, "[CONEXION] [SUBFORK] llega op. de transformacion");
-					if(subpid == 0) {
+					//if(subpid == 0) {
 						int origen;
 						char destino[12];
 						int bytes;
+						puts("falla memcopy?");
 						memcpy(&origen,mensaje->datos + sizeof(int32_t), sizeof(int32_t));
+						puts("NO");
 						memcpy(&bytes, mensaje->datos + sizeof(int32_t), sizeof(int32_t));
 						memcpy(&destino,mensaje->datos + sizeof(int32_t)*2, TEMPSIZE);
-						int result = transformar(codigo,origen,bytes,destino);
+						puts("falla tranfs?");
+						int result = transformar(scriptTransformacion,lenTransformacion,0,bytes,destino);
+						puts("NO");
 						if(result==-1){
 							mensajeEnviar(unSocket, FRACASO, origen, sizeof(int32_t));
 							imprimirMensaje(archivoLog,"[TRASFORMACION] transformacion Fracaso");
@@ -67,11 +86,11 @@ void workerCrearHijo(Socket unSocket) {
 						imprimirMensaje(archivoLog,"[TRASFORMACION] transformacion exitosa");
 						free(mensaje);
 						break;
-					}
-					else if(subpid > 0)
-						puts("SUBPADRE ACEPTO UNA CONEXION");
-					else
-						puts("ERROR");
+					//}
+					//else if(subpid > 0)
+					//	puts("SUBPADRE ACEPTO UNA CONEXION");
+					//else
+					//	puts("ERROR");
 					}
 				}
 				break;
@@ -259,14 +278,14 @@ void workerCrearHijo(Socket unSocket) {
 }
 
 //1er etapa
-int transformar(char* codigo,int origen,int bytes ,char destino[12]){
+int transformar(char* codigo, int sizeCodigo,int origen,int bytes ,char destino[12]){
 	imprimirMensaje(archivoLog,"[TRASFORMACION] Comienzo a transformar");
 	if (origen>bloquesArchData){
+		imprimirMensaje(archivoLog,"[TRASFORMACION] se busca leer un bloque mayor al tamaño de bloques archivo");
 		return -1;
 	}
-	char* patharchdes;
-	patharchdes = realloc(patharchdes,sizeof(RUTA_TEMPS)+TEMPSIZE+4);
-	patharchdes = string_from_format(RUTA_TEMPS,destino,".bin");
+	char* patharchdes = string_from_format("%s%s.bin",RUTA_TEMPS,destino);
+	printf("%s",patharchdes);
 	char* buffer=NULL;
 	FILE* arch;
 	arch = fopen(configuracion->rutaDataBin,"r");
@@ -281,20 +300,38 @@ int transformar(char* codigo,int origen,int bytes ,char destino[12]){
 			cc++;
 	}
 	fclose(arch);
+	String fileBloque=transformacionBloqueTemporal( buffer, origen, cc+1);
+	printf("%s",fileBloque);
+	String fileScript=transformacionScriptTemporal( codigo, origen, sizeCodigo);
 	//doy privilegios a script
-	char* commando;
-	commando = realloc(commando,sizeof(codigo)+10);
-	commando = string_from_format("chmod 0755",codigo);
+	char* commando = string_from_format("chmod 0755 %s",fileScript);
 	system(commando);
 	free (commando);
 	//paso buffer a script y resultado script a sort
-	char* command;
-	command = realloc(command,3+sizeof(buffer)+1+sizeof(codigo)+8+sizeof(patharchdes));
-	command = string_from_format("cat",buffer,"|",codigo,"| sort >",patharchdes);
+	char* command = string_from_format("cat %s | sh %s | sort > %s",fileBloque,fileScript,patharchdes);
+	//printf("%s",command);
 	system(command);
+	fileLimpiar(fileBloque);
+	fileLimpiar(fileScript);
 	free (command);
 	free(patharchdes);
 	return 0;
+}
+
+String transformacionBloqueTemporal(char* buffer,int origen, int sizeBuffer) {
+	String path = string_from_format("%s/bloqueTemporal%i", RUTA_TEMPS, origen);
+	File file = fileAbrir(path, ESCRITURA);
+	fwrite(buffer, sizeof(char), sizeBuffer, file);
+	fileCerrar(file);
+	return path;
+}
+
+String transformacionScriptTemporal(char* codigo,int origen, int sizeCodigo) {
+	String path = string_from_format("%s/scriptTemporal%i", RUTA_TEMPS, origen);
+	File file = fileAbrir(path , ESCRITURA);
+	fwrite(codigo, sizeof(char), sizeCodigo, file);
+	fileCerrar(file);
+	return path;
 }
 
 //2da etapa
