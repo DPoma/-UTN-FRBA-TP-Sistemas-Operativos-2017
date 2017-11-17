@@ -84,8 +84,8 @@ void mock4worker(){
 	//buffer = string_from_format(scriptTransformacion,bloque);
 	mensajeEnviar(socketWorker,TRANSFORMACION,scriptTransformacion,lenTransformacion);
 	//printf("%s",bloque);
-	while(1);
 	mensajeEnviar(socketWorker,TRANSFORMACION,bloque,INTSIZE*2+TEMPSIZE);
+	while(1);
 	/*Mensaje* men =mensajeRecibir(socketWorker);
 	if (men->header.operacion==100){
 		printf("recibo para mandar");

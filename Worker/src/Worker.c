@@ -23,6 +23,7 @@ int main(void) {
 void workerCrearHijo(Socket unSocket) {
 	int ppid = fork();
 	if(ppid == 0) {
+		//socketCerrar(socketListenerWorker);
 		imprimirMensaje(archivoLog, "[CONEXION] Esperando mensajes de Master");
 		Mensaje* mensaje = mensajeRecibir(unSocket);
 		char* codigo;
@@ -31,7 +32,7 @@ void workerCrearHijo(Socket unSocket) {
 			case -1:
 			{
 				imprimirMensaje(archivoLog, ("[EJECUCION] Tuve problemas para comunicarme con el Master (Pid hijo: %d)", ppid)); //el hijo fallo en comunicarse con el master
-				mensajeEnviar(unSocket, DESCONEXION, NULL, 0); //MANDA AL MASTER QUE FALLO
+				mensajeEnviar(unSocket, DESCONEXION, "", 1); //MANDA AL MASTER QUE FALLO
 				free(mensaje);
 				break;
 			}
@@ -43,34 +44,37 @@ void workerCrearHijo(Socket unSocket) {
 				sizeCodigo=mensaje->header.tamanio;
 				while(true){
 					imprimirMensaje(archivoLog, "[CONEXION] Esperando bloques a transformar");
-					Mensaje* mensaje = mensajeRecibir(unSocket);
-					if (mensaje->header.operacion==EXITO){
+					Mensaje* men = mensajeRecibir(unSocket);
+					if (men->header.operacion==EXITO){
 						imprimirMensaje(archivoLog, "[CONEXION] Fin de envio de bloques a transformar");
+						socketCerrar(unSocket);
 						break;}
-					else{
+					else if (men->header.operacion==TRANSFORMACION){
 						int subpid = fork();
 						imprimirMensaje(archivoLog, "[CONEXION] [SUBFORK] llega op. de transformacion");
 						if(subpid == 0) {
 							int origen;
 							char destino[12];
 							int bytes;
-							memcpy(&origen,mensaje->datos, sizeof(int32_t));
-							memcpy(&bytes, mensaje->datos + sizeof(int32_t), sizeof(int32_t));
-							memcpy(destino,mensaje->datos + sizeof(int32_t)*2, TEMPSIZE);
+							memcpy(&origen,men->datos, sizeof(int32_t));
+							memcpy(&bytes, men->datos + sizeof(int32_t), sizeof(int32_t));
+							memcpy(destino,men->datos + sizeof(int32_t)*2, TEMPSIZE);
 							int result = transformar(codigo,sizeCodigo,origen,bytes,destino);
 							if(result==-1){
 								imprimirMensaje1(archivoLog,"[TRASFORMACION] Fracaso la transformacion del bloque %d",origen);
 								char respuesta[INTSIZE];
 								memcpy(respuesta,&origen,INTSIZE);
 								mensajeEnviar(unSocket, FRACASO, respuesta, INTSIZE+1);
+								socketCerrar(unSocket);
 							}
 							else{
 								imprimirMensaje1(archivoLog,"[TRASFORMACION] transformacion del bloque %d exitosa",origen);
 								char respuesta[INTSIZE];
 								memcpy(respuesta,&origen,INTSIZE);
 								mensajeEnviar(unSocket, EXITO, respuesta, INTSIZE+1);
+								socketCerrar(unSocket);
 							}
-							free(mensaje);
+							free(men);
 							break;
 						}
 						else if(subpid > 0){
@@ -258,9 +262,12 @@ void workerCrearHijo(Socket unSocket) {
 	}
 	else if(ppid > 0){
 		puts("PADRE ACEPTO UNA CONEXION");
+		socketCerrar(unSocket);
 	}
-	else
+	else{
 		puts("ERROR");
+		socketCerrar(unSocket);
+	}
 }
 
 //1er etapa
@@ -804,9 +811,11 @@ void socketAceptarConexion() {
 	if(nuevoSocket != ERROR) {
 		imprimirMensaje(archivoLog, "[CONEXION] Proceso Master conectado exitosamente");
 		workerCrearHijo(nuevoSocket);
+		socketCerrar(nuevoSocket);
 	}
 	else{
 		imprimirMensaje(archivoLog, ROJO"[ERROR] NO SE PUDO CONECTAR CON EL PROCESO MASTER"BLANCO);
+		socketCerrar(nuevoSocket);
 	}
 }
 
