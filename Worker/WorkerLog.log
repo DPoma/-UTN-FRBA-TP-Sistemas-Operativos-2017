@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 [INFO] 21:48:10:988 Worker/(17288:17288): [CONFIGURACION] Nombre Nodo: NODO1
 [INFO] 21:48:10:988 Worker/(17288:17288): [CONFIGURACION] IP: 127.0.0.1
 [INFO] 21:48:10:988 Worker/(17288:17288): [CONFIGURACION] PUERTO MASTER: 5090
@@ -13,3 +14,11 @@
 [INFO] 21:48:12:218 Worker/(17288:17288): [CONEXION] Esperando bloques a transformar
 [INFO] 21:48:12:218 Worker/(17288:17288): [CONEXION] [SUBFORK] llega op. de transformacion
 [INFO] 21:48:12:218 Worker/(17288:17288): [TRASFORMACION] Comienzo a transformar
+=======
+[INFO] 19:45:11:283 Worker/(3735:3735): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data.bin
+[INFO] 19:45:11:284 Worker/(3735:3735): [CONFIGURACION] Cantidad de bloques: 50
+[INFO] 19:45:11:284 Worker/(3735:3735): [CONFIGURACION] Nombre Nodo: NODO1
+[INFO] 19:45:11:284 Worker/(3735:3735): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data.bin
+[INFO] 19:45:11:284 Worker/(3735:3735): [CONFIGURACION] tamanio data.bin: 0MB
+[INFO] 19:45:11:285 Worker/(3735:3735): [CONEXION] Esperando conexiones de Master (Puerto: 5050)
+>>>>>>> 02a25489c012da911ba46f9205f97707d2a523f4

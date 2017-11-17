@@ -1,6 +1,26 @@
+<<<<<<< HEAD
 [INFO] 21:48:12:178 Master/(17294:17294): [CONEXION] Configuracion para conexion con YAMA (IP: 127.0.0.1 | Puerto: 5070)
 [INFO] 21:48:12:178 Master/(17294:17294): [CONEXION] Estableciendo Conexion con YAMA...
 [INFO] 21:48:12:184 Master/(17294:17294): [CONEXION] Conexion establecida con YAMA, enviando solicitud
 [INFO] 21:48:12:218 Master/(17294:17294): [MOCK] Recibo solo un bloque
 [INFO] 21:48:12:218 Master/(17294:17294): [RECEPCION] bloque 127.0.0.1 5090
 [INFO] 21:48:12:218 Master/(17294:17294): [CONEXION] Estableciendo conexion con Worker (IP: 127.0.0.1 | PUERTO: 5090
+=======
+[INFO] 19:57:26:234 Master/(3944:3944): [CONEXION] Configuracion para conexion con YAMA (IP: 127.0.0.1 | Puerto: 5070)
+[INFO] 19:57:26:235 Master/(3944:3944): [CONEXION] Estableciendo Conexion con YAMA...
+[INFO] 19:57:26:244 Master/(3944:3944): [CONEXION] Conexion establecida con YAMA, enviando solicitud
+[INFO] 19:57:26:256 Master/(3944:3944): [MENSAJE] Lista de bloques recibida
+[INFO] 19:57:26:256 Master/(3944:3944): [RECEPCION] bloque 127.0.0.1 5090 0
+[INFO] 19:57:26:257 Master/(3944:3944): ] lista para nodo 127.0.0.1 5090 armada, lista #1
+[INFO] 19:57:26:257 Master/(3944:3944): [RECEPCION] bloque 127.0.0.1 5090 1
+[INFO] 19:57:26:257 Master/(3944:3944): [RECEPCION] bloque 127.0.0.1 5090 2
+[INFO] 19:57:26:257 Master/(3944:3944): [RECEPCION] bloque 127.0.0.1 5090 3
+[INFO] 19:57:26:257 Master/(3944:3944): [RECEPCION] bloque 127.0.0.1 5090 4
+[INFO] 19:57:26:257 Master/(3944:3944): [RECEPCION] bloque 127.0.0.1 5090 5
+[INFO] 19:57:26:257 Master/(3944:3944): [RECEPCION] bloque 127.0.0.1 5090 6
+[INFO] 19:57:26:258 Master/(3944:3944): [RECEPCION] bloque 127.0.0.1 5090 7
+[INFO] 19:57:26:258 Master/(3944:3944): [RECEPCION] bloque 127.0.0.1 5090 8
+[INFO] 19:57:26:258 Master/(3944:3944): [RECEPCION] bloque 127.0.0.1 5090 9
+[INFO] 19:57:26:258 Master/(3944:3944): [RECEPCION] bloque 127.0.0.1 5090 10
+[INFO] 19:57:26:258 Master/(3944:3944): [RECEPCION] bloque 127.0.0.1 5090 11
+>>>>>>> 02a25489c012da911ba46f9205f97707d2a523f4

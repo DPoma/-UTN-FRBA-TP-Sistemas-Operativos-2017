@@ -40,15 +40,15 @@ void masterIniciar(String* argv) {
 	}
 	senialAsignarFuncion(SIGINT, configuracionSenial);
 	estadoMaster=ACTIVADO;
-	void semaforoIniciar2(Semaforo* semaforo,int valor){
-		semaforo=malloc(sizeof(Semaforo));
-		semaforoIniciar(semaforo,valor);
+	void semaforoIniciar2(Semaforo** semaforo,int valor){
+		*semaforo=malloc(sizeof(Semaforo));
+		semaforoIniciar(*semaforo,valor);
 	}
-	semaforoIniciar2(errorBloque,1);
-	semaforoIniciar2(recepcionAlternativo,0);
-	semaforoIniciar2(metricas.paralelos,1);
-	semaforoIniciar2(metricas.transformaciones,1);
-	semaforoIniciar2(metricas.reducLocales,1);
+	semaforoIniciar2(&errorBloque,1);
+	semaforoIniciar2(&recepcionAlternativo,0);
+	semaforoIniciar2(&metricas.paralelos,1);
+	semaforoIniciar2(&metricas.transformaciones,1);
+	semaforoIniciar2(&metricas.reducLocales,1);
 
 	void leerArchivo(File archScript,char** script,int* len){
 		fseek(archScript, 0, SEEK_END);
@@ -106,6 +106,9 @@ void masterAtender(){
 	Mensaje* mensaje=mensajeRecibir(socketYama);
 	if(mensaje->header.operacion==ABORTAR){
 		imprimirMensaje(archivoLog, ROJO"[ERROR] Path invalido, abortando proceso"BLANCO);
+		abort();
+	}else if(mensaje->header.operacion==DESCONEXION){
+		imprimirMensaje(archivoLog,"[ERROR] yama desconectado");
 		abort();
 	}
 	imprimirMensaje(archivoLog, "[MENSAJE] Lista de bloques recibida");

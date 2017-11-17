@@ -107,7 +107,7 @@ void yamaAtender() {
 					if(mensaje->header.operacion==ERROR_ARCHIVO){
 						log_info(archivoLog,"[ERROR] El path no existe en el File System");
 						mensajeEnviar(*(Entero*)mensaje->datos, ABORTAR,"", 1);
-					}else if(mensaje->header.operacion==DESCONEXION){
+					}else if(mensaje->header.operacion==666){ //todo
 						log_info(archivoLog,"[RECEPCION] Un nodo se desconeto");
 						char nodoDesconectado[20];
 						strncpy(nodoDesconectado,mensaje->datos,20);
@@ -123,6 +123,9 @@ void yamaAtender() {
 						list_iterate(tablaEstados,cazarEntradasDesconectadas);
 						//podría romper por estar recorriendo una lista con una funcion
 						//que puede modificar la lista, pero no deberia
+					}else if(mensaje->header.operacion==DESCONEXION){
+						imprimirMensaje(archivoLog,"[ERROR] FileSystem desconectado");
+						abort();
 					}else{
 						int32_t masterid;
 						memcpy(&masterid,mensaje->datos,INTSIZE);
@@ -149,7 +152,7 @@ void yamaAtender() {
 						mensajeEnviar(servidor->fileSystem,ENVIAR_BLOQUES,pasoFs,mensaje->header.tamanio+INTSIZE);
 						log_info(archivoLog, "[ENVIO] path de master #%d enviado al fileSystem",socketI);
 						free(pasoFs);
-					}else if(mensaje->header.operacion==DESCONEXION){
+					}else if(mensaje->header.operacion==DESCONEXION){//todo diferenciar la desconexion buena de la mala
 						log_info(archivoLog,"[RECEPCION] desconexion de master");
 						listaSocketsEliminar(socketI, &servidor->listaMaster);
 						socketCerrar(socketI);
@@ -255,7 +258,7 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 		void setearClock(Worker* worker){
 			if(worker->disponibilidad>mayorDisponibilidad){
 				mayorDisponibilidad=worker->disponibilidad;
-				clock=ipToNum(worker->nodo.ip);
+				clock=dirToNum(worker->nodo);
 			}
 		}
 		list_iterate(workers,setearClock);
@@ -486,7 +489,7 @@ void dibujarTablaEstados(){
 	if(list_is_empty(tablaEstados))
 		return;
 	pantallaLimpiar();
-	puts("Job  Master  Nodo  Bloque  Etapa  Temporal  Estado\n");
+	puts("Job    Master     Nodo  Bloque  Etapa  Temporal  Estado\n");
 	void dibujarEntrada(Entrada* entrada){
 		char* etapa,*estado,*bloque; bool doFree=false;
 		switch(entrada->etapa){
@@ -507,7 +510,7 @@ void dibujarTablaEstados(){
 			doFree=true;
 		}
 		printf("%d  %d  %d  %s  %s  %s  %s\n",
-				entrada->job,entrada->masterid-2,ipToNum(entrada->nodo.ip),bloque,
+				entrada->job,entrada->masterid-2,dirToNum(entrada->nodo),bloque,
 				etapa,entrada->pathTemporal,estado);
 		if(doFree)
 			free(bloque);
@@ -518,10 +521,10 @@ void dibujarTablaEstados(){
 
 
 
-int ipToNum(char* ip){//no se si puede pasar un array a pointer asi nomas
+int dirToNum(Dir nodo){
 	int index,i=0;
 	void buscarIp(Worker* worker){
-		if(stringIguales(worker->nodo.ip,ip))
+		if(nodoIguales(worker->nodo,nodo))
 			index=i;
 		i++;
 	}
@@ -548,7 +551,14 @@ void darPathTemporal(char** ret,char pre){
 	(*ret)[11]='\0';
 	char* anteriorTemp=string_duplicate(*ret);
 	if(stringIguales(*ret,anterior))
-		agregado++;
+		if(agregado=='9')
+			agregado='a';
+		else if(agregado=='z')
+			agregado='A';
+		else if(agregado=='Y')
+			usleep(1000);
+		else
+			agregado++;
 	else
 		agregado='0';
 	(*ret)[10]=agregado;

@@ -299,6 +299,7 @@ void yamaEnviarBloques(Puntero datos) {
 	int idMaster = *(Entero*)datos;
 	printf("%s",datos+sizeof(Entero));
 	String rutaDecente = stringTomarDesdePosicion(datos+sizeof(Entero), MAX_PREFIJO);
+	//todo por que toma un tamaño fijo aca? no deberia ser el tamaño del mensaje - INTSIZE?
 	Archivo* archivo = archivoBuscarPorRuta(rutaDecente);
 	memoriaLiberar(rutaDecente);
 	if(archivo == NULL) {
