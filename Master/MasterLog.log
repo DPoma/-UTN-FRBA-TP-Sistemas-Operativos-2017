@@ -1,17 +1,19 @@
-[INFO] 19:57:26:234 Master/(3944:3944): [CONEXION] Configuracion para conexion con YAMA (IP: 127.0.0.1 | Puerto: 5070)
-[INFO] 19:57:26:235 Master/(3944:3944): [CONEXION] Estableciendo Conexion con YAMA...
-[INFO] 19:57:26:244 Master/(3944:3944): [CONEXION] Conexion establecida con YAMA, enviando solicitud
-[INFO] 19:57:26:256 Master/(3944:3944): [MENSAJE] Lista de bloques recibida
-[INFO] 19:57:26:256 Master/(3944:3944): [RECEPCION] bloque 127.0.0.1 5090 0
-[INFO] 19:57:26:257 Master/(3944:3944): ] lista para nodo 127.0.0.1 5090 armada, lista #1
-[INFO] 19:57:26:257 Master/(3944:3944): [RECEPCION] bloque 127.0.0.1 5090 1
-[INFO] 19:57:26:257 Master/(3944:3944): [RECEPCION] bloque 127.0.0.1 5090 2
-[INFO] 19:57:26:257 Master/(3944:3944): [RECEPCION] bloque 127.0.0.1 5090 3
-[INFO] 19:57:26:257 Master/(3944:3944): [RECEPCION] bloque 127.0.0.1 5090 4
-[INFO] 19:57:26:257 Master/(3944:3944): [RECEPCION] bloque 127.0.0.1 5090 5
-[INFO] 19:57:26:257 Master/(3944:3944): [RECEPCION] bloque 127.0.0.1 5090 6
-[INFO] 19:57:26:258 Master/(3944:3944): [RECEPCION] bloque 127.0.0.1 5090 7
-[INFO] 19:57:26:258 Master/(3944:3944): [RECEPCION] bloque 127.0.0.1 5090 8
-[INFO] 19:57:26:258 Master/(3944:3944): [RECEPCION] bloque 127.0.0.1 5090 9
-[INFO] 19:57:26:258 Master/(3944:3944): [RECEPCION] bloque 127.0.0.1 5090 10
-[INFO] 19:57:26:258 Master/(3944:3944): [RECEPCION] bloque 127.0.0.1 5090 11
+[INFO] 21:16:12:85 Master/(4777:4777): [CONEXION] Configuracion para conexion con YAMA (IP: 127.0.0.1 | Puerto: 5070)
+[INFO] 21:16:13:134 Master/(4777:4777): [CONEXION] Estableciendo Conexion con YAMA...
+[INFO] 21:16:13:172 Master/(4777:4777): [CONEXION] Conexion establecida con YAMA, enviando solicitud
+[INFO] 21:16:13:194 Master/(4777:4777): [MENSAJE] Lista de bloques recibida
+[INFO] 21:16:13:206 Master/(4777:4777): [RECEPCION] bloque 127.0.0.1 5090 0
+[INFO] 21:16:13:230 Master/(4777:4777): ] lista para nodo 127.0.0.1 5090 armada, lista #1
+[INFO] 21:16:13:230 Master/(4777:4777): [RECEPCION] bloque 127.0.0.1 5090 1
+[INFO] 21:16:13:250 Master/(4777:4777): [RECEPCION] bloque 127.0.0.1 5090 2
+[INFO] 21:16:13:251 Master/(4777:4777): [RECEPCION] bloque 127.0.0.1 5090 3
+[INFO] 21:16:13:254 Master/(4777:4777): [RECEPCION] bloque 127.0.0.1 5090 4
+[INFO] 21:16:13:255 Master/(4777:4777): [RECEPCION] bloque 127.0.0.1 5090 5
+[INFO] 21:16:13:255 Master/(4777:4777): [RECEPCION] bloque 127.0.0.1 5090 6
+[INFO] 21:16:13:257 Master/(4777:4777): [RECEPCION] bloque 127.0.0.1 5090 7
+[INFO] 21:16:13:257 Master/(4777:4777): [RECEPCION] bloque 127.0.0.1 5090 8
+[INFO] 21:16:13:260 Master/(4777:4777): [RECEPCION] bloque 127.0.0.1 5090 9
+[INFO] 21:16:13:264 Master/(4777:4777): [RECEPCION] bloque 127.0.0.1 5090 10
+[INFO] 21:16:13:264 Master/(4777:4777): [RECEPCION] bloque 127.0.0.1 5090 11
+[INFO] 21:16:13:408 Master/(4777:4782): [CONEXION] Estableciendo conexion con Worker (IP: 127.0.0.1 | PUERTO: 5090
+[INFO] 21:16:13:438 Master/(4777:4782): [CONEXION] Enviando bloque 0 t2116131850

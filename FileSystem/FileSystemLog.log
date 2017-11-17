@@ -1,12 +1,13 @@
-[INFO] 19:56:30:567 FileSystem/(3920:3920): [EJECUCION] Proceso File System iniciado
-[INFO] 19:56:30:569 FileSystem/(3920:3920): [CONFIGURACION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 19:56:30:569 FileSystem/(3920:3920): [CONFIGURACION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 19:56:30:569 FileSystem/(3920:3920): [CONFIGURACION] Esperando conexiones de Workers (Puerto: 5080)
-[INFO] 19:56:30:569 FileSystem/(3920:3920): [CONFIGURACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
-[INFO] 19:56:30:646 FileSystem/(3920:3920): [33m[AVISO] Conecte los nodos y formatee el File System para estabilizarlo[0m
-[INFO] 19:56:34:650 FileSystem/(3920:3925): [33m[AVISO] NODO1 conectado[0m
-[INFO] 19:56:38:261 FileSystem/(3920:3925): [33m[AVISO] NODO2 conectado[0m
-[INFO] 19:56:47:823 FileSystem/(3920:3920): [FORMATEO] El File System fue formateado
-[INFO] 19:56:47:824 FileSystem/(3920:3920): [33m[AVISO] El File System esta estable[0m
-[INFO] 19:57:05:463 FileSystem/(3920:3920): [ARCHIVO] El archivo WBAN.csv fue copiado en File System
-[INFO] 19:57:21:933 FileSystem/(3920:3926): [CONEXION] El proceso Yama se ha conectado
+[INFO] 21:14:51:591 FileSystem/(4710:4710): [EJECUCION] Proceso File System iniciado
+[INFO] 21:14:51:592 FileSystem/(4710:4710): [CONFIGURACION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 21:14:51:592 FileSystem/(4710:4710): [CONFIGURACION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 21:14:51:593 FileSystem/(4710:4710): [CONFIGURACION] Esperando conexiones de Workers (Puerto: 5080)
+[INFO] 21:14:51:593 FileSystem/(4710:4710): [CONFIGURACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
+[INFO] 21:14:51:644 FileSystem/(4710:4710): [33m[AVISO] Conecte los nodos y formatee el File System para estabilizarlo[0m
+[INFO] 21:14:57:367 FileSystem/(4710:4715): [33m[AVISO] NODO1 conectado[0m
+[INFO] 21:15:00:906 FileSystem/(4710:4715): [33m[AVISO] NODO2 conectado[0m
+[INFO] 21:15:07:118 FileSystem/(4710:4710): [FORMATEO] El File System fue formateado
+[INFO] 21:15:07:118 FileSystem/(4710:4710): [33m[AVISO] El File System esta estable[0m
+[INFO] 21:15:11:937 FileSystem/(4710:4710): [31m[ERROR] Comando invalido[0m
+[INFO] 21:15:31:308 FileSystem/(4710:4710): [ARCHIVO] El archivo WBAN.csv fue copiado en File System
+[INFO] 21:15:39:174 FileSystem/(4710:4716): [CONEXION] El proceso Yama se ha conectado

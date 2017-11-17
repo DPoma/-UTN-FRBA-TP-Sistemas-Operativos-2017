@@ -45,6 +45,7 @@ void yamaIniciar() {
 	workers=list_create();
 	tablaEstados=list_create();
 	tablaUsados=list_create();
+	masters=list_create();
 }
 
 void configurar(){
@@ -107,7 +108,7 @@ void yamaAtender() {
 					if(mensaje->header.operacion==ERROR_ARCHIVO){
 						log_info(archivoLog,"[ERROR] El path no existe en el File System");
 						mensajeEnviar(*(Entero*)mensaje->datos, ABORTAR,"", 1);
-					}else if(mensaje->header.operacion==666){ //todo
+					}else if(mensaje->header.operacion==666){ //todo esto no debería existir? worker me tendría que ir pasando los errores
 						log_info(archivoLog,"[RECEPCION] Un nodo se desconeto");
 						char nodoDesconectado[20];
 						strncpy(nodoDesconectado,mensaje->datos,20);
@@ -147,12 +148,10 @@ void yamaAtender() {
 						void* pasoFs=malloc(mensaje->header.tamanio+INTSIZE);
 						memcpy(pasoFs,&masterid,INTSIZE);
 						memcpy(pasoFs+INTSIZE,mensaje->datos,mensaje->header.tamanio);
-						printf("%d\n",masterid);
-						printf("%s\n",pasoFs+INTSIZE);
 						mensajeEnviar(servidor->fileSystem,ENVIAR_BLOQUES,pasoFs,mensaje->header.tamanio+INTSIZE);
-						log_info(archivoLog, "[ENVIO] path de master #%d enviado al fileSystem",socketI);
+						log_info(archivoLog, "[ENVIO] path %s de master #%d enviado al fileSystem",mensaje->datos,socketI);
 						free(pasoFs);
-					}else if(mensaje->header.operacion==DESCONEXION){//todo diferenciar la desconexion buena de la mala
+					}else if(mensaje->header.operacion==DESCONEXION){
 						log_info(archivoLog,"[RECEPCION] desconexion de master");
 						listaSocketsEliminar(socketI, &servidor->listaMaster);
 						socketCerrar(socketI);
@@ -489,7 +488,7 @@ void dibujarTablaEstados(){
 	if(list_is_empty(tablaEstados))
 		return;
 	pantallaLimpiar();
-	puts("Job    Master     Nodo  Bloque  Etapa  Temporal  Estado\n");
+	puts("Job  Master  Nodo  Bloque  Etapa  Temporal  Estado\n");
 	void dibujarEntrada(Entrada* entrada){
 		char* etapa,*estado,*bloque; bool doFree=false;
 		switch(entrada->etapa){
@@ -509,8 +508,22 @@ void dibujarTablaEstados(){
 			bloque=string_itoa(entrada->bloque);
 			doFree=true;
 		}
-		printf("%d  %d  %d  %s  %s  %s  %s\n",
-				entrada->job,entrada->masterid-2,dirToNum(entrada->nodo),bloque,
+		int masterToNum(int masterid){
+			int index=-1,i=0;
+			void buscarMaster(int* master){
+				if(*master==masterid)
+					index=i;
+				i++;
+			}
+			list_iterate(masters,buscarMaster);
+			if(index==-1){
+				list_addM(masters,&masterid,sizeof(int));
+				return i;
+			}
+			return index;
+		}
+		printf("%d   %d       %d     %s  %s  %s  %s\n",
+				entrada->job,masterToNum(entrada->masterid),dirToNum(entrada->nodo),bloque,
 				etapa,entrada->pathTemporal,estado);
 		if(doFree)
 			free(bloque);
@@ -518,8 +531,6 @@ void dibujarTablaEstados(){
 	list_iterate(tablaUsados,dibujarEntrada);
 	list_iterate(tablaEstados,dibujarEntrada);
 }
-
-
 
 int dirToNum(Dir nodo){
 	int index,i=0;
@@ -531,7 +542,6 @@ int dirToNum(Dir nodo){
 	list_iterate(workers,buscarIp);
 	return index;
 }
-//lo mismo con socketMasters a menos que -2 funcione
 
 void darPathTemporal(char** ret,char pre){
 	//mutex

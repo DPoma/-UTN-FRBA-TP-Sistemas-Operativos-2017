@@ -70,6 +70,7 @@ typedef struct{
 } Worker;
 Lista workers;
 
+Lista masters;
 
 
 typedef enum {Error,EnProceso,Terminado,Abortado} Estado;

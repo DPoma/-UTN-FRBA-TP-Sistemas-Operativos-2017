@@ -1,17 +1,17 @@
-[INFO] 19:56:38:252 DataNode/(3933:3933): [CONFIGURACION] Nombre Nodo: NODO2
-[INFO] 19:56:38:256 DataNode/(3933:3933): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data1.bin
-[INFO] 19:56:38:257 DataNode/(3933:3933): [DATABIN] Cantidad de bloques 50
-[INFO] 19:56:38:261 DataNode/(3933:3933): [CONEXION] Estableciendo conexion con File System (IP: 127.0.0.1 | Puerto 5040)
-[INFO] 19:56:38:261 DataNode/(3933:3933): [CONEXION] Conexion establecida con el File System
-[INFO] 19:57:03:872 DataNode/(3933:3933): [DATABIN] El bloque N°0 fue escrito
-[INFO] 19:57:04:52 DataNode/(3933:3933): [DATABIN] El bloque N°1 fue escrito
-[INFO] 19:57:04:200 DataNode/(3933:3933): [DATABIN] El bloque N°2 fue escrito
-[INFO] 19:57:04:306 DataNode/(3933:3933): [DATABIN] El bloque N°3 fue escrito
-[INFO] 19:57:04:383 DataNode/(3933:3933): [DATABIN] El bloque N°4 fue escrito
-[INFO] 19:57:04:621 DataNode/(3933:3933): [DATABIN] El bloque N°5 fue escrito
-[INFO] 19:57:04:675 DataNode/(3933:3933): [DATABIN] El bloque N°6 fue escrito
-[INFO] 19:57:04:900 DataNode/(3933:3933): [DATABIN] El bloque N°7 fue escrito
-[INFO] 19:57:04:988 DataNode/(3933:3933): [DATABIN] El bloque N°8 fue escrito
-[INFO] 19:57:05:168 DataNode/(3933:3933): [DATABIN] El bloque N°9 fue escrito
-[INFO] 19:57:05:225 DataNode/(3933:3933): [DATABIN] El bloque N°10 fue escrito
-[INFO] 19:57:05:486 DataNode/(3933:3933): [DATABIN] El bloque N°11 fue escrito
+[INFO] 21:15:00:833 DataNode/(4722:4722): [CONFIGURACION] Nombre Nodo: NODO2
+[INFO] 21:15:00:836 DataNode/(4722:4722): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data1.bin
+[INFO] 21:15:00:836 DataNode/(4722:4722): [DATABIN] Cantidad de bloques 50
+[INFO] 21:15:00:844 DataNode/(4722:4722): [CONEXION] Estableciendo conexion con File System (IP: 127.0.0.1 | Puerto 5040)
+[INFO] 21:15:00:844 DataNode/(4722:4722): [CONEXION] Conexion establecida con el File System
+[INFO] 21:15:29:788 DataNode/(4722:4722): [DATABIN] El bloque N°0 fue escrito
+[INFO] 21:15:29:967 DataNode/(4722:4722): [DATABIN] El bloque N°1 fue escrito
+[INFO] 21:15:30:55 DataNode/(4722:4722): [DATABIN] El bloque N°2 fue escrito
+[INFO] 21:15:30:261 DataNode/(4722:4722): [DATABIN] El bloque N°3 fue escrito
+[INFO] 21:15:30:348 DataNode/(4722:4722): [DATABIN] El bloque N°4 fue escrito
+[INFO] 21:15:30:540 DataNode/(4722:4722): [DATABIN] El bloque N°5 fue escrito
+[INFO] 21:15:30:620 DataNode/(4722:4722): [DATABIN] El bloque N°6 fue escrito
+[INFO] 21:15:30:817 DataNode/(4722:4722): [DATABIN] El bloque N°7 fue escrito
+[INFO] 21:15:30:872 DataNode/(4722:4722): [DATABIN] El bloque N°8 fue escrito
+[INFO] 21:15:31:90 DataNode/(4722:4722): [DATABIN] El bloque N°9 fue escrito
+[INFO] 21:15:31:150 DataNode/(4722:4722): [DATABIN] El bloque N°10 fue escrito
+[INFO] 21:15:31:351 DataNode/(4722:4722): [DATABIN] El bloque N°11 fue escrito
