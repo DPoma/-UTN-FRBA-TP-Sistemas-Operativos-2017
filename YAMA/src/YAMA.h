@@ -37,8 +37,7 @@
 #define ALMACENADO 306
 #define CIERRE 307
 
-#define ENPROCESO 1
-#define TERMINADO 2
+#define ENPROCESO 2
 #define ABORTADO 3
 
 typedef struct {
@@ -72,9 +71,6 @@ Lista workers;
 
 Lista masters;
 
-
-typedef enum {Error,EnProceso,Terminado,Abortado} Estado;
-
 int job=-1;
 typedef struct{
 	int job;
@@ -86,7 +82,7 @@ typedef struct{
 	int32_t bloqueAlt;
 	int etapa;
 	char* pathTemporal; //podría usar char[12] y no usar memoria dinamica, despues ver
-	Estado estado;
+	int estado;
 } Entrada;
 
 Lista tablaEstados;
@@ -105,7 +101,7 @@ void archivoConfigObtenerCampos();
 void yamaIniciar();
 void yamaAtender();
 void yamaPlanificar(Socket,void*,int);
-void actualizarTablaEstados(Entrada*,Estado);
+void actualizarTablaEstados(Entrada*,int);
 void dibujarTablaEstados();
 int dirToNum(Dir);
 void retardo();

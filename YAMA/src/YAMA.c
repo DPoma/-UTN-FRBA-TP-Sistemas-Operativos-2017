@@ -118,7 +118,7 @@ void yamaAtender() {
 						((Worker*)list_find(workers,nodoDesconectadoF))->conectado=false;
 						void cazarEntradasDesconectadas(Entrada* entrada){
 							if(stringIguales(entrada->nodo.ip,nodoDesconectado)){
-								actualizarTablaEstados(entrada,Error);
+								actualizarTablaEstados(entrada,FRACASO);
 							}
 						}
 						list_iterate(tablaEstados,cazarEntradasDesconectadas);
@@ -159,9 +159,9 @@ void yamaAtender() {
 							servidor->maximoSocket--; //no debería romper nada
 						log_info(archivoLog, "[CONEXION] Proceso Master %d se ha desconectado",socketI);
 					}else{
-						log_info(archivoLog,"[RECEPCION] actualizacion de master");
 						Dir nodo=*((Dir*)mensaje->datos);
 						int32_t bloque=*((int32_t*)(mensaje->datos+DIRSIZE));
+						log_info(archivoLog,"[RECEPCION] actualizacion de master, %s",mensaje->header.operacion==EXITO?"exito":"fracaso");
 						bool buscarEntrada(Entrada* entrada){
 							return nodoIguales(entrada->nodo,nodo)&&entrada->bloque==bloque;
 						}
@@ -286,7 +286,7 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 			entrada->nodoAlt=alt->nodo;
 			entrada->bloqueAlt=alt->bloque;
 			entrada->etapa=TRANSFORMACION;
-			entrada->estado=EnProceso;
+			entrada->estado=ENPROCESO;
 
 		}
 
@@ -345,7 +345,7 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 	log_info(archivoLog,"[] planificacion terminada");
 }
 
-void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
+void actualizarTablaEstados(Entrada* entradaA,int actualizando){
 	void moverAUsados(bool(*cond)(void*)){
 		//mutex
 		Entrada* entrada;
@@ -357,15 +357,15 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 		entrada->nodo=entradaA->nodo;
 		entrada->job=entradaA->job;
 		entrada->masterid=entradaA->masterid;
-		entrada->estado=EnProceso;
+		entrada->estado=ENPROCESO;
 		entrada->bloque=-1;
 	}
 	entradaA->estado=actualizando;
-	if(actualizando==Error||actualizando==Abortado){
+	if(actualizando==FRACASO||actualizando==ABORTADO){
 		void abortarJob(){
 			bool abortarEntrada(Entrada* entrada){
 				if(entrada->job==entradaA->job){
-					entrada->estado=Abortado;
+					entrada->estado=ABORTADO;
 					return true;
 				}
 				return false;
@@ -373,23 +373,23 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 			moverAUsados(abortarEntrada);
 			mensajeEnviar(entradaA->masterid,ABORTAR,nullptr,0);
 		}
-		if(entradaA->etapa==TRANSFORMACION&&actualizando==Error){
+		if(entradaA->etapa==TRANSFORMACION&&actualizando==FRACASO){
 			if(nodoIguales(entradaA->nodo,entradaA->nodoAlt)){
 				abortarJob();
 				return;
 			}
 			Entrada alternativa;
 			darDatosEntrada(&alternativa);
-			alternativa.nodo=entradaA->nodoAlt;//deep?
+			alternativa.nodo=entradaA->nodoAlt;
 			alternativa.bloque=entradaA->bloqueAlt;
-			char dato[DIRSIZE+INTSIZE*2]; //podría no mandarle los bytes
+			char dato[DIRSIZE+INTSIZE*2];
 			memcpy(dato,&alternativa.nodo,DIRSIZE);
 			memcpy(dato+DIRSIZE,&alternativa.bloque,INTSIZE);
 			memcpy(dato+DIRSIZE+INTSIZE,&alternativa.bytes,INTSIZE);
 			mensajeEnviar(alternativa.masterid,TRANSFORMACION,dato,sizeof dato);
 			list_addM(tablaEstados,&alternativa,sizeof(Entrada));
 			bool buscarError(Entrada* entrada){
-				return entrada->estado==Error;
+				return entrada->estado==FRACASO;
 			}
 			list_add(tablaUsados,list_remove_by_condition(tablaEstados,buscarError));//mutex
 		}else{
@@ -399,7 +399,7 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 	}
 	bool trabajoTerminado(bool(*cond)(void*)){
 		bool aux(Entrada* entrada){
-			return cond(entrada)&&entrada->estado!=Terminado;
+			return cond(entrada)&&entrada->estado!=EXITO;
 		}
 		return !list_any_satisfy(tablaEstados,aux);
 	}
@@ -411,6 +411,7 @@ void actualizarTablaEstados(Entrada* entradaA,Estado actualizando){
 	}
 	if(entradaA->etapa==TRANSFORMACION){
 		if(trabajoTerminado(mismoNodoJob)){
+			log_info(archivoLog,"[REDUCLOCAL] creando entrada");
 			Entrada reducLocal;
 			darDatosEntrada(&reducLocal);
 			darPathTemporal(&reducLocal.pathTemporal,'l');
@@ -498,9 +499,9 @@ void dibujarTablaEstados(){
 		default: etapa="almacenado";
 		}
 		switch(entrada->estado){
-		case EnProceso: estado="en proceso"; break;
-		case Error: estado="error"; break;
-		default: estado="terminado";
+		case EXITO: estado="terminado"; break;
+		case FRACASO: estado="error"; break;
+		default: estado="en proceso";
 		}
 		if(entrada->bloque==-1)
 			bloque="-";

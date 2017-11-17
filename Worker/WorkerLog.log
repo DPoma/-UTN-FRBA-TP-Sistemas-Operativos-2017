@@ -1,121 +1,123 @@
-[INFO] 18:24:40:396 Worker/(3934:3934): [CONFIGURACION] Nombre Nodo: NODO1
-[INFO] 18:24:40:403 Worker/(3934:3934): [CONFIGURACION] IP: 127.0.0.1
-[INFO] 18:24:40:403 Worker/(3934:3934): [CONFIGURACION] PUERTO MASTER: 5090
-[INFO] 18:24:40:404 Worker/(3934:3934): [CONFIGURACION] IP FILESYSTEM: 127.0.0.1
-[INFO] 18:24:40:404 Worker/(3934:3934): [CONFIGURACION] PUERTO FILESYSTEM: 5040
-[INFO] 18:24:40:404 Worker/(3934:3934): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data.bin
-[INFO] 18:24:40:404 Worker/(3934:3934): [CONFIGURACION] Cantidad de bloques: 50
-[INFO] 18:24:40:406 Worker/(3934:3934): [CONEXION] Esperando conexiones de Master (Puerto: 5090)
-[INFO] 18:25:19:871 Worker/(3934:3934): [CONEXION] Proceso Master conectado exitosamente
-[INFO] 18:25:19:925 Worker/(3934:3983): [CONEXION] Esperando mensajes de Master
-[INFO] 18:25:19:931 Worker/(3934:3983): [CONEXION] recibo script master transformacion
-[INFO] 18:25:19:938 Worker/(3934:3983): [CONEXION] Esperando bloques a transformar
-[INFO] 18:25:19:962 Worker/(3934:3983): [CONEXION] [SUBFORK] llega bloque
-[INFO] 18:25:19:962 Worker/(3934:3983): [CONEXION] Esperando bloques a transformar
-[INFO] 18:25:20:26 Worker/(3934:3983): [CONEXION] [SUBFORK] llega bloque
-[INFO] 18:25:20:30 Worker/(3934:3983): [CONEXION] Esperando bloques a transformar
-[INFO] 18:25:20:63 Worker/(3934:3983): [CONEXION] [SUBFORK] llega bloque
-[INFO] 18:25:20:64 Worker/(3934:3983): [CONEXION] Esperando bloques a transformar
-[INFO] 18:25:19:60 Worker/(3934:3985): [CONEXION] [SUBFORK] llega bloque
-[INFO] 18:25:20:84 Worker/(3934:3988): [CONEXION] [SUBFORK] llega bloque
-[INFO] 18:25:20:86 Worker/(3934:3989): [CONEXION] [SUBFORK] llega bloque
-[INFO] 18:25:20:96 Worker/(3934:3983): [CONEXION] [SUBFORK] llega bloque
-[INFO] 18:25:20:97 Worker/(3934:3986): [CONEXION] [SUBFORK] llega bloque
-[INFO] 18:25:20:100 Worker/(3934:3988): [TRASFORMACION] Comienzo a transformar
-[INFO] 18:25:20:101 Worker/(3934:3988): [TRASFORMACION] Ruta temporal: /home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/temp/t1825198682
-[INFO] 18:25:20:101 Worker/(3934:3988): [TRASFORMACION] N° de bloque a tranfsormar: 2
-[INFO] 18:25:20:101 Worker/(3934:3985): [TRASFORMACION] Comienzo a transformar
-[INFO] 18:25:20:109 Worker/(3934:3988): [TRASFORMACION] cant de bytes a transformar: 1048576
-[INFO] 18:25:20:111 Worker/(3934:3983): [CONEXION] Esperando bloques a transformar
-[INFO] 18:25:20:112 Worker/(3934:3988): [DATABIN] Se lee bloque N°2
-[INFO] 18:25:20:116 Worker/(3934:3989): [TRASFORMACION] Comienzo a transformar
-[INFO] 18:25:20:118 Worker/(3934:3989): [TRASFORMACION] Ruta temporal: /home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/temp/t1825198683
-[INFO] 18:25:20:118 Worker/(3934:3989): [TRASFORMACION] N° de bloque a tranfsormar: 3
-[INFO] 18:25:20:118 Worker/(3934:3989): [TRASFORMACION] cant de bytes a transformar: 1048576
-[INFO] 18:25:20:118 Worker/(3934:3989): [DATABIN] Se lee bloque N°3
-[INFO] 18:25:20:141 Worker/(3934:3985): [TRASFORMACION] Ruta temporal: /home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/temp/t1825198680
-[INFO] 18:25:20:144 Worker/(3934:3983): [CONEXION] [SUBFORK] llega bloque
-[INFO] 18:25:20:144 Worker/(3934:3985): [TRASFORMACION] N° de bloque a tranfsormar: 0
-[INFO] 18:25:20:144 Worker/(3934:3985): [TRASFORMACION] cant de bytes a transformar: 1048576
-[INFO] 18:25:20:145 Worker/(3934:3983): [CONEXION] Esperando bloques a transformar
-[INFO] 18:25:20:150 Worker/(3934:3986): [TRASFORMACION] Comienzo a transformar
-[INFO] 18:25:20:153 Worker/(3934:3990): [CONEXION] [SUBFORK] llega bloque
-[INFO] 18:25:20:157 Worker/(3934:3985): [DATABIN] Se lee bloque N°0
-[INFO] 18:25:20:182 Worker/(3934:3983): [CONEXION] [SUBFORK] llega bloque
-[INFO] 18:25:20:184 Worker/(3934:3990): [TRASFORMACION] Comienzo a transformar
-[INFO] 18:25:20:185 Worker/(3934:3986): [TRASFORMACION] Ruta temporal: /home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/temp/t1825198681
-[INFO] 18:25:20:185 Worker/(3934:3990): [TRASFORMACION] Ruta temporal: /home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/temp/t1825198684
-[INFO] 18:25:20:185 Worker/(3934:3990): [TRASFORMACION] N° de bloque a tranfsormar: 4
-[INFO] 18:25:20:185 Worker/(3934:3990): [TRASFORMACION] cant de bytes a transformar: 1048576
-[INFO] 18:25:20:186 Worker/(3934:3990): [DATABIN] Se lee bloque N°4
-[INFO] 18:25:20:204 Worker/(3934:3983): [CONEXION] Esperando bloques a transformar
-[INFO] 18:25:20:208 Worker/(3934:3986): [TRASFORMACION] N° de bloque a tranfsormar: 1
-[INFO] 18:25:20:210 Worker/(3934:3991): [CONEXION] [SUBFORK] llega bloque
-[INFO] 18:25:20:235 Worker/(3934:3986): [TRASFORMACION] cant de bytes a transformar: 1048576
-[INFO] 18:25:20:236 Worker/(3934:3986): [DATABIN] Se lee bloque N°1
-[INFO] 18:25:20:245 Worker/(3934:3992): [CONEXION] [SUBFORK] llega bloque
-[INFO] 18:25:20:246 Worker/(3934:3991): [TRASFORMACION] Comienzo a transformar
-[INFO] 18:25:20:247 Worker/(3934:3983): [CONEXION] [SUBFORK] llega bloque
-[INFO] 18:25:20:250 Worker/(3934:3991): [TRASFORMACION] Ruta temporal: /home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/temp/t1825198685
-[INFO] 18:25:20:250 Worker/(3934:3991): [TRASFORMACION] N° de bloque a tranfsormar: 5
-[INFO] 18:25:20:250 Worker/(3934:3991): [TRASFORMACION] cant de bytes a transformar: 1048576
-[INFO] 18:25:20:250 Worker/(3934:3983): [CONEXION] Esperando bloques a transformar
-[INFO] 18:25:20:255 Worker/(3934:3991): [DATABIN] Se lee bloque N°5
-[INFO] 18:25:20:261 Worker/(3934:3992): [TRASFORMACION] Comienzo a transformar
-[INFO] 18:25:20:285 Worker/(3934:3992): [TRASFORMACION] Ruta temporal: /home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/temp/t1825198686
-[INFO] 18:25:20:294 Worker/(3934:3992): [TRASFORMACION] N° de bloque a tranfsormar: 6
-[INFO] 18:25:20:294 Worker/(3934:3992): [TRASFORMACION] cant de bytes a transformar: 1048576
-[INFO] 18:25:20:305 Worker/(3934:3983): [CONEXION] [SUBFORK] llega bloque
-[INFO] 18:25:20:325 Worker/(3934:3983): [CONEXION] Esperando bloques a transformar
-[INFO] 18:25:20:349 Worker/(3934:3992): [DATABIN] Se lee bloque N°6
-[INFO] 18:25:20:361 Worker/(3934:3993): [CONEXION] [SUBFORK] llega bloque
-[INFO] 18:25:20:362 Worker/(3934:3983): [CONEXION] [SUBFORK] llega bloque
-[INFO] 18:25:20:368 Worker/(3934:3993): [TRASFORMACION] Comienzo a transformar
-[INFO] 18:25:20:380 Worker/(3934:3983): [CONEXION] Esperando bloques a transformar
-[INFO] 18:25:20:391 Worker/(3934:3993): [TRASFORMACION] Ruta temporal: /home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/temp/t1825198687
-[INFO] 18:25:20:391 Worker/(3934:3993): [TRASFORMACION] N° de bloque a tranfsormar: 7
-[INFO] 18:25:20:391 Worker/(3934:3993): [TRASFORMACION] cant de bytes a transformar: 1048576
-[INFO] 18:25:20:391 Worker/(3934:3993): [DATABIN] Se lee bloque N°7
-[INFO] 18:25:20:364 Worker/(3934:3994): [CONEXION] [SUBFORK] llega bloque
-[INFO] 18:25:20:417 Worker/(3934:3994): [TRASFORMACION] Comienzo a transformar
-[INFO] 18:25:20:423 Worker/(3934:3994): [TRASFORMACION] Ruta temporal: /home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/temp/t1825198688
-[INFO] 18:25:20:423 Worker/(3934:3994): [TRASFORMACION] N° de bloque a tranfsormar: 8
-[INFO] 18:25:20:423 Worker/(3934:3994): [TRASFORMACION] cant de bytes a transformar: 1048576
-[INFO] 18:25:20:424 Worker/(3934:3983): [CONEXION] [SUBFORK] llega bloque
-[INFO] 18:25:20:444 Worker/(3934:3994): [DATABIN] Se lee bloque N°8
-[INFO] 18:25:20:457 Worker/(3934:3983): [CONEXION] Esperando bloques a transformar
-[INFO] 18:25:20:480 Worker/(3934:3996): [CONEXION] [SUBFORK] llega bloque
-[INFO] 18:25:20:496 Worker/(3934:3996): [TRASFORMACION] Comienzo a transformar
-[INFO] 18:25:20:510 Worker/(3934:3996): [TRASFORMACION] Ruta temporal: /home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/temp/t1825198689
-[INFO] 18:25:20:510 Worker/(3934:3996): [TRASFORMACION] N° de bloque a tranfsormar: 9
-[INFO] 18:25:20:510 Worker/(3934:3996): [TRASFORMACION] cant de bytes a transformar: 1048576
-[INFO] 18:25:20:516 Worker/(3934:3996): [DATABIN] Se lee bloque N°9
-[INFO] 18:25:20:527 Worker/(3934:3983): [CONEXION] [SUBFORK] llega bloque
-[INFO] 18:25:20:530 Worker/(3934:3983): [CONEXION] Esperando bloques a transformar
-[INFO] 18:25:20:620 Worker/(3934:4000): [CONEXION] [SUBFORK] llega bloque
-[INFO] 18:25:20:621 Worker/(3934:3983): [CONEXION] [SUBFORK] llega bloque
-[INFO] 18:25:20:625 Worker/(3934:3983): [CONEXION] Esperando bloques a transformar
-[INFO] 18:25:20:632 Worker/(3934:4000): [TRASFORMACION] Comienzo a transformar
-[INFO] 18:25:20:636 Worker/(3934:4000): [TRASFORMACION] Ruta temporal: /home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/temp/t182519868b
-[INFO] 18:25:20:640 Worker/(3934:4000): [TRASFORMACION] N° de bloque a tranfsormar: 11
-[INFO] 18:25:20:657 Worker/(3934:4000): [TRASFORMACION] cant de bytes a transformar: 597657
-[INFO] 18:25:20:660 Worker/(3934:4000): [DATABIN] Se lee bloque N°11
-[INFO] 18:25:20:736 Worker/(3934:3998): [CONEXION] [SUBFORK] llega bloque
-[INFO] 18:25:20:755 Worker/(3934:3998): [TRASFORMACION] Comienzo a transformar
-[INFO] 18:25:20:818 Worker/(3934:3998): [TRASFORMACION] Ruta temporal: /home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/temp/t182519868a
-[INFO] 18:25:20:818 Worker/(3934:3998): [TRASFORMACION] N° de bloque a tranfsormar: 10
-[INFO] 18:25:20:818 Worker/(3934:3998): [TRASFORMACION] cant de bytes a transformar: 1048576
-[INFO] 18:25:20:860 Worker/(3934:3998): [DATABIN] Se lee bloque N°10
-[INFO] 18:25:24:74 Worker/(3934:4000): [TRASFORMACION] transformacion del bloque 11 exitosa
-[INFO] 18:25:24:425 Worker/(3934:3988): [TRASFORMACION] transformacion del bloque 2 exitosa
-[INFO] 18:25:24:432 Worker/(3934:3985): [TRASFORMACION] transformacion del bloque 0 exitosa
-[INFO] 18:25:24:629 Worker/(3934:3986): [TRASFORMACION] transformacion del bloque 1 exitosa
-[INFO] 18:25:24:934 Worker/(3934:3989): [TRASFORMACION] transformacion del bloque 3 exitosa
-[INFO] 18:25:24:972 Worker/(3934:3992): [TRASFORMACION] transformacion del bloque 6 exitosa
-[INFO] 18:25:25:274 Worker/(3934:3993): [TRASFORMACION] transformacion del bloque 7 exitosa
-[INFO] 18:25:25:341 Worker/(3934:3991): [TRASFORMACION] transformacion del bloque 5 exitosa
-[INFO] 18:25:25:432 Worker/(3934:3990): [TRASFORMACION] transformacion del bloque 4 exitosa
-[INFO] 18:25:25:628 Worker/(3934:3996): [TRASFORMACION] transformacion del bloque 9 exitosa
-[INFO] 18:25:25:686 Worker/(3934:3998): [TRASFORMACION] transformacion del bloque 10 exitosa
-[INFO] 18:25:25:804 Worker/(3934:3994): [TRASFORMACION] transformacion del bloque 8 exitosa
-[INFO] 18:25:25:806 Worker/(3934:3983): [CONEXION] Fin de envio de bloques a transformar
+[INFO] 19:21:20:831 Worker/(6640:6640): [CONFIGURACION] Nombre Nodo: NODO2
+[INFO] 19:21:20:831 Worker/(6640:6640): [CONFIGURACION] IP: 127.0.0.1
+[INFO] 19:21:20:831 Worker/(6640:6640): [CONFIGURACION] PUERTO MASTER: 5090
+[INFO] 19:21:20:832 Worker/(6640:6640): [CONFIGURACION] IP FILESYSTEM: 127.0.0.1
+[INFO] 19:21:20:832 Worker/(6640:6640): [CONFIGURACION] PUERTO FILESYSTEM: 5040
+[INFO] 19:21:20:832 Worker/(6640:6640): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data1.bin
+[INFO] 19:21:20:832 Worker/(6640:6640): [CONFIGURACION] Cantidad de bloques: 50
+[INFO] 19:21:20:833 Worker/(6640:6640): [CONEXION] Esperando conexiones de Master (Puerto: 5090)
+[INFO] 19:21:34:336 Worker/(6640:6640): [CONEXION] Proceso Master conectado exitosamente
+[INFO] 19:21:34:368 Worker/(6640:6648): [CONEXION] Esperando mensajes de Master
+[INFO] 19:21:34:390 Worker/(6640:6648): [CONEXION] recibo script master transformacion
+[INFO] 19:21:34:392 Worker/(6640:6648): [CONEXION] Esperando bloques a transformar
+[INFO] 19:21:34:433 Worker/(6640:6648): [CONEXION] [SUBFORK] llega bloque
+[INFO] 19:21:34:441 Worker/(6640:6648): [CONEXION] Esperando bloques a transformar
+[INFO] 19:21:34:464 Worker/(6640:6648): [CONEXION] [SUBFORK] llega bloque
+[INFO] 19:21:34:465 Worker/(6640:6651): [CONEXION] [SUBFORK] llega bloque
+[INFO] 19:21:34:473 Worker/(6640:6648): [CONEXION] Esperando bloques a transformar
+[INFO] 19:21:34:477 Worker/(6640:6651): [TRASFORMACION] Comienzo a transformar
+[INFO] 19:21:34:480 Worker/(6640:6651): [TRASFORMACION] Ruta temporal: /home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/temp/t1921341480
+[INFO] 19:21:34:481 Worker/(6640:6651): [TRASFORMACION] N° de bloque a tranfsormar: 1
+[INFO] 19:21:34:481 Worker/(6640:6651): [TRASFORMACION] cant de bytes a transformar: 1048576
+[INFO] 19:21:34:482 Worker/(6640:6650): [CONEXION] [SUBFORK] llega bloque
+[INFO] 19:21:34:512 Worker/(6640:6651): [DATABIN] Se lee bloque N°1
+[INFO] 19:21:34:525 Worker/(6640:6652): [CONEXION] [SUBFORK] llega bloque
+[INFO] 19:21:34:529 Worker/(6640:6648): [CONEXION] [SUBFORK] llega bloque
+[INFO] 19:21:34:530 Worker/(6640:6648): [CONEXION] Esperando bloques a transformar
+[INFO] 19:21:34:539 Worker/(6640:6652): [TRASFORMACION] Comienzo a transformar
+[INFO] 19:21:34:539 Worker/(6640:6650): [TRASFORMACION] Comienzo a transformar
+[INFO] 19:21:34:551 Worker/(6640:6652): [TRASFORMACION] Ruta temporal: /home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/temp/t1921341481
+[INFO] 19:21:34:551 Worker/(6640:6652): [TRASFORMACION] N° de bloque a tranfsormar: 2
+[INFO] 19:21:34:551 Worker/(6640:6652): [TRASFORMACION] cant de bytes a transformar: 1048576
+[INFO] 19:21:34:551 Worker/(6640:6652): [DATABIN] Se lee bloque N°2
+[INFO] 19:21:34:560 Worker/(6640:6648): [CONEXION] [SUBFORK] llega bloque
+[INFO] 19:21:34:560 Worker/(6640:6648): [CONEXION] Esperando bloques a transformar
+[INFO] 19:21:34:600 Worker/(6640:6650): [TRASFORMACION] Ruta temporal: /home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/temp/t1921341450
+[INFO] 19:21:34:601 Worker/(6640:6650): [TRASFORMACION] N° de bloque a tranfsormar: 0
+[INFO] 19:21:34:601 Worker/(6640:6650): [TRASFORMACION] cant de bytes a transformar: 1048576
+[INFO] 19:21:34:603 Worker/(6640:6653): [CONEXION] [SUBFORK] llega bloque
+[INFO] 19:21:34:604 Worker/(6640:6650): [DATABIN] Se lee bloque N°0
+[INFO] 19:21:34:620 Worker/(6640:6648): [CONEXION] [SUBFORK] llega bloque
+[INFO] 19:21:34:622 Worker/(6640:6654): [CONEXION] [SUBFORK] llega bloque
+[INFO] 19:21:34:629 Worker/(6640:6648): [CONEXION] Esperando bloques a transformar
+[INFO] 19:21:34:640 Worker/(6640:6653): [TRASFORMACION] Comienzo a transformar
+[INFO] 19:21:34:642 Worker/(6640:6653): [TRASFORMACION] Ruta temporal: /home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/temp/t1921341490
+[INFO] 19:21:34:644 Worker/(6640:6653): [TRASFORMACION] N° de bloque a tranfsormar: 3
+[INFO] 19:21:34:644 Worker/(6640:6653): [TRASFORMACION] cant de bytes a transformar: 1048576
+[INFO] 19:21:34:644 Worker/(6640:6653): [DATABIN] Se lee bloque N°3
+[INFO] 19:21:34:648 Worker/(6640:6654): [TRASFORMACION] Comienzo a transformar
+[INFO] 19:21:34:654 Worker/(6640:6654): [TRASFORMACION] Ruta temporal: /home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/temp/t1921341491
+[INFO] 19:21:34:654 Worker/(6640:6654): [TRASFORMACION] N° de bloque a tranfsormar: 4
+[INFO] 19:21:34:654 Worker/(6640:6654): [TRASFORMACION] cant de bytes a transformar: 1048576
+[INFO] 19:21:34:654 Worker/(6640:6654): [DATABIN] Se lee bloque N°4
+[INFO] 19:21:34:657 Worker/(6640:6648): [CONEXION] [SUBFORK] llega bloque
+[INFO] 19:21:34:663 Worker/(6640:6655): [CONEXION] [SUBFORK] llega bloque
+[INFO] 19:21:34:666 Worker/(6640:6648): [CONEXION] Esperando bloques a transformar
+[INFO] 19:21:34:708 Worker/(6640:6655): [TRASFORMACION] Comienzo a transformar
+[INFO] 19:21:34:714 Worker/(6640:6656): [CONEXION] [SUBFORK] llega bloque
+[INFO] 19:21:34:715 Worker/(6640:6655): [TRASFORMACION] Ruta temporal: /home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/temp/t1921341492
+[INFO] 19:21:34:716 Worker/(6640:6655): [TRASFORMACION] N° de bloque a tranfsormar: 5
+[INFO] 19:21:34:716 Worker/(6640:6655): [TRASFORMACION] cant de bytes a transformar: 1048576
+[INFO] 19:21:34:716 Worker/(6640:6655): [DATABIN] Se lee bloque N°5
+[INFO] 19:21:34:760 Worker/(6640:6648): [CONEXION] [SUBFORK] llega bloque
+[INFO] 19:21:34:760 Worker/(6640:6648): [CONEXION] Esperando bloques a transformar
+[INFO] 19:21:34:763 Worker/(6640:6656): [TRASFORMACION] Comienzo a transformar
+[INFO] 19:21:34:768 Worker/(6640:6656): [TRASFORMACION] Ruta temporal: /home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/temp/t1921341493
+[INFO] 19:21:34:768 Worker/(6640:6656): [TRASFORMACION] N° de bloque a tranfsormar: 6
+[INFO] 19:21:34:768 Worker/(6640:6656): [TRASFORMACION] cant de bytes a transformar: 1048576
+[INFO] 19:21:34:768 Worker/(6640:6656): [DATABIN] Se lee bloque N°6
+[INFO] 19:21:34:778 Worker/(6640:6648): [CONEXION] [SUBFORK] llega bloque
+[INFO] 19:21:34:781 Worker/(6640:6658): [CONEXION] [SUBFORK] llega bloque
+[INFO] 19:21:34:797 Worker/(6640:6648): [CONEXION] Esperando bloques a transformar
+[INFO] 19:21:34:800 Worker/(6640:6658): [TRASFORMACION] Comienzo a transformar
+[INFO] 19:21:34:832 Worker/(6640:6658): [TRASFORMACION] Ruta temporal: /home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/temp/t1921341494
+[INFO] 19:21:34:833 Worker/(6640:6658): [TRASFORMACION] N° de bloque a tranfsormar: 7
+[INFO] 19:21:34:835 Worker/(6640:6658): [TRASFORMACION] cant de bytes a transformar: 1048576
+[INFO] 19:21:34:835 Worker/(6640:6658): [DATABIN] Se lee bloque N°7
+[INFO] 19:21:34:844 Worker/(6640:6648): [CONEXION] [SUBFORK] llega bloque
+[INFO] 19:21:34:848 Worker/(6640:6648): [CONEXION] Esperando bloques a transformar
+[INFO] 19:21:34:892 Worker/(6640:6660): [CONEXION] [SUBFORK] llega bloque
+[INFO] 19:21:34:898 Worker/(6640:6661): [CONEXION] [SUBFORK] llega bloque
+[INFO] 19:21:34:899 Worker/(6640:6648): [CONEXION] [SUBFORK] llega bloque
+[INFO] 19:21:34:899 Worker/(6640:6660): [TRASFORMACION] Comienzo a transformar
+[INFO] 19:21:34:903 Worker/(6640:6648): [CONEXION] Esperando bloques a transformar
+[INFO] 19:21:34:941 Worker/(6640:6648): [CONEXION] [SUBFORK] llega bloque
+[INFO] 19:21:34:948 Worker/(6640:6648): [CONEXION] Esperando bloques a transformar
+[INFO] 19:21:34:948 Worker/(6640:6660): [TRASFORMACION] Ruta temporal: /home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/temp/t1921341500
+[INFO] 19:21:34:948 Worker/(6640:6660): [TRASFORMACION] N° de bloque a tranfsormar: 8
+[INFO] 19:21:34:948 Worker/(6640:6660): [TRASFORMACION] cant de bytes a transformar: 1048576
+[INFO] 19:21:34:948 Worker/(6640:6660): [DATABIN] Se lee bloque N°8
+[INFO] 19:21:34:961 Worker/(6640:6661): [TRASFORMACION] Comienzo a transformar
+[INFO] 19:21:34:991 Worker/(6640:6661): [TRASFORMACION] Ruta temporal: /home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/temp/t1921341501
+[INFO] 19:21:34:991 Worker/(6640:6661): [TRASFORMACION] N° de bloque a tranfsormar: 9
+[INFO] 19:21:34:991 Worker/(6640:6661): [TRASFORMACION] cant de bytes a transformar: 1048576
+[INFO] 19:21:34:991 Worker/(6640:6661): [DATABIN] Se lee bloque N°9
+[INFO] 19:21:34:1 Worker/(6640:6662): [CONEXION] [SUBFORK] llega bloque
+[INFO] 19:21:35:76 Worker/(6640:6648): [CONEXION] [SUBFORK] llega bloque
+[INFO] 19:21:35:77 Worker/(6640:6648): [CONEXION] Esperando bloques a transformar
+[INFO] 19:21:35:77 Worker/(6640:6662): [TRASFORMACION] Comienzo a transformar
+[INFO] 19:21:35:80 Worker/(6640:6662): [TRASFORMACION] Ruta temporal: /home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/temp/t1921341502
+[INFO] 19:21:35:80 Worker/(6640:6662): [TRASFORMACION] N° de bloque a tranfsormar: 10
+[INFO] 19:21:35:80 Worker/(6640:6662): [TRASFORMACION] cant de bytes a transformar: 1048576
+[INFO] 19:21:35:84 Worker/(6640:6662): [DATABIN] Se lee bloque N°10
+[INFO] 19:21:35:200 Worker/(6640:6664): [CONEXION] [SUBFORK] llega bloque
+[INFO] 19:21:35:256 Worker/(6640:6664): [TRASFORMACION] Comienzo a transformar
+[INFO] 19:21:35:257 Worker/(6640:6664): [TRASFORMACION] Ruta temporal: /home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/temp/t1921341503
+[INFO] 19:21:35:291 Worker/(6640:6664): [TRASFORMACION] N° de bloque a tranfsormar: 11
+[INFO] 19:21:35:292 Worker/(6640:6664): [TRASFORMACION] cant de bytes a transformar: 597657
+[INFO] 19:21:35:319 Worker/(6640:6664): [DATABIN] Se lee bloque N°11
+[INFO] 19:21:37:998 Worker/(6640:6651): [TRASFORMACION] transformacion del bloque 1 exitosa
+[INFO] 19:21:38:229 Worker/(6640:6652): [TRASFORMACION] transformacion del bloque 2 exitosa
+[INFO] 19:21:38:464 Worker/(6640:6664): [TRASFORMACION] transformacion del bloque 11 exitosa
+[INFO] 19:21:38:517 Worker/(6640:6650): [TRASFORMACION] transformacion del bloque 0 exitosa
+[INFO] 19:21:38:620 Worker/(6640:6653): [TRASFORMACION] transformacion del bloque 3 exitosa
+[INFO] 19:21:39:140 Worker/(6640:6654): [TRASFORMACION] transformacion del bloque 4 exitosa
+[INFO] 19:21:39:431 Worker/(6640:6656): [TRASFORMACION] transformacion del bloque 6 exitosa
+[INFO] 19:21:39:553 Worker/(6640:6655): [TRASFORMACION] transformacion del bloque 5 exitosa
+[INFO] 19:21:39:610 Worker/(6640:6661): [TRASFORMACION] transformacion del bloque 9 exitosa
+[INFO] 19:21:39:736 Worker/(6640:6658): [TRASFORMACION] transformacion del bloque 7 exitosa
+[INFO] 19:21:39:956 Worker/(6640:6662): [TRASFORMACION] transformacion del bloque 10 exitosa
+[INFO] 19:21:39:974 Worker/(6640:6660): [TRASFORMACION] transformacion del bloque 8 exitosa
+[INFO] 19:21:39:989 Worker/(6640:6648): [CONEXION] Fin de envio de bloques a transformar
+[INFO] 19:21:41:681 Worker/(6640:6640): [CONEXION] Proceso Master conectado exitosamente
+[INFO] 19:21:41:724 Worker/(6640:6784): [CONEXION] Esperando mensajes de Master

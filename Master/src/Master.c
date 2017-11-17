@@ -262,8 +262,8 @@ void transformaciones(Lista bloques){
 void reduccionLocal(Mensaje* m){
 	tareasEnParalelo(1);
 	clock_t tiempo=clock();
-	Dir* nodo;
-	memcpy(nodo,m->datos,DIRSIZE);
+	Dir nodo;
+	memcpy(&nodo,m->datos,DIRSIZE);
 	int32_t cantTemps=(m->header.tamanio-DIRSIZE-TEMPSIZE)/TEMPSIZE;
 	int tamanio=cantTemps*TEMPSIZE+TEMPSIZE+lenReduccion+INTSIZE*2;
 	void* buffer=malloc(tamanio);
@@ -275,11 +275,14 @@ void reduccionLocal(Mensaje* m){
 
 	memcpy(buffer+INTSIZE*2+lenReduccion+cantTemps*TEMPSIZE,m->datos+DIRSIZE+cantTemps*TEMPSIZE,TEMPSIZE);//destino
 
-	Socket sWorker=socketCrearCliente(nodo->ip,nodo->port,ID_MASTER);
+	Socket sWorker=socketCrearCliente(nodo.ip,nodo.port,ID_MASTER);
 	mensajeEnviar(sWorker,REDUCLOCAL,buffer,tamanio);
 	mensajeDestruir(m);free(buffer);
 
 	Mensaje* mensaje = mensajeRecibir(sWorker);
+	if(mensaje->header.operacion==DESCONEXION){
+		puts("AHHHH");
+	}
 	imprimirMensaje(archivoLog,mensaje->header.operacion==EXITO?"[EJECUCION]REDUCCION LOCAL EXISTOSA"
 			:"[ERROR]FALLO EN LA RE_D_UCCION LOCAL");
 	mensajeEnviar(socketYama,mensaje->header.operacion,NULL,0);
@@ -294,8 +297,8 @@ void reduccionLocal(Mensaje* m){
 }
 void reduccionGlobal(Mensaje* m){
 	clock_t tiempo=clock();
-	Dir* nodo;
-	memcpy(nodo,m->datos,DIRSIZE);
+	Dir nodo;
+	memcpy(&nodo,m->datos,DIRSIZE);
 	int cantTemps=(m->header.tamanio-DIRSIZE-TEMPSIZE)/TEMPSIZE;
 	int tamanio=(DIRSIZE+TEMPSIZE)*(cantTemps)+TEMPSIZE+INTSIZE+lenReduccion;
 	void* buffer=malloc(tamanio);
@@ -305,7 +308,7 @@ void reduccionGlobal(Mensaje* m){
 	memcpy(buffer+INTSIZE+lenReduccion,&cantTemps,INTSIZE);//origen
 	memcpy(buffer+INTSIZE*2+lenReduccion,m->datos+DIRSIZE,tamanio-DIRSIZE);//y destino
 
-	Socket sWorker=socketCrearCliente(nodo->ip,nodo->port,ID_MASTER);
+	Socket sWorker=socketCrearCliente(nodo.ip,nodo.port,ID_MASTER);
 	mensajeEnviar(sWorker,REDUCGLOBAL,buffer,tamanio);
 	mensajeDestruir(m);free(buffer);
 

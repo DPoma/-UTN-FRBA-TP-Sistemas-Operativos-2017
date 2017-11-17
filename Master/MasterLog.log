@@ -1,42 +1,43 @@
-[INFO] 18:25:19:734 Master/(3975:3975): [CONEXION] Configuracion para conexion con YAMA (IP: 127.0.0.1 | Puerto: 5070)
-[INFO] 18:25:19:735 Master/(3975:3975): [CONEXION] Estableciendo Conexion con YAMA...
-[INFO] 18:25:19:753 Master/(3975:3975): [CONEXION] Conexion establecida con YAMA, enviando solicitud
-[INFO] 18:25:19:869 Master/(3975:3975): [MENSAJE] Lista de bloques recibida
-[INFO] 18:25:19:869 Master/(3975:3975): [RECEPCION] bloque 127.0.0.1 5090 0
-[INFO] 18:25:19:869 Master/(3975:3975): ] lista para nodo 127.0.0.1 5090 armada, lista #1
-[INFO] 18:25:19:869 Master/(3975:3975): [RECEPCION] bloque 127.0.0.1 5090 1
-[INFO] 18:25:19:869 Master/(3975:3975): [RECEPCION] bloque 127.0.0.1 5090 2
-[INFO] 18:25:19:869 Master/(3975:3975): [RECEPCION] bloque 127.0.0.1 5090 3
-[INFO] 18:25:19:869 Master/(3975:3975): [RECEPCION] bloque 127.0.0.1 5090 4
-[INFO] 18:25:19:869 Master/(3975:3975): [RECEPCION] bloque 127.0.0.1 5090 5
-[INFO] 18:25:19:869 Master/(3975:3975): [RECEPCION] bloque 127.0.0.1 5090 6
-[INFO] 18:25:19:869 Master/(3975:3975): [RECEPCION] bloque 127.0.0.1 5090 7
-[INFO] 18:25:19:869 Master/(3975:3975): [RECEPCION] bloque 127.0.0.1 5090 8
-[INFO] 18:25:19:869 Master/(3975:3975): [RECEPCION] bloque 127.0.0.1 5090 9
-[INFO] 18:25:19:869 Master/(3975:3975): [RECEPCION] bloque 127.0.0.1 5090 10
-[INFO] 18:25:19:869 Master/(3975:3975): [RECEPCION] bloque 127.0.0.1 5090 11
-[INFO] 18:25:19:874 Master/(3975:3982): [CONEXION] Estableciendo conexion con Worker (IP: 127.0.0.1 | PUERTO: 5090
-[INFO] 18:25:19:875 Master/(3975:3982): [CONEXION] Enviando bloque 0 t1825198680
-[INFO] 18:25:19:875 Master/(3975:3982): [CONEXION] Enviando bloque 1 t1825198681
-[INFO] 18:25:19:875 Master/(3975:3982): [CONEXION] Enviando bloque 2 t1825198682
-[INFO] 18:25:19:875 Master/(3975:3982): [CONEXION] Enviando bloque 3 t1825198683
-[INFO] 18:25:19:875 Master/(3975:3982): [CONEXION] Enviando bloque 4 t1825198684
-[INFO] 18:25:19:875 Master/(3975:3982): [CONEXION] Enviando bloque 5 t1825198685
-[INFO] 18:25:19:875 Master/(3975:3982): [CONEXION] Enviando bloque 6 t1825198686
-[INFO] 18:25:19:875 Master/(3975:3982): [CONEXION] Enviando bloque 7 t1825198687
-[INFO] 18:25:19:875 Master/(3975:3982): [CONEXION] Enviando bloque 8 t1825198688
-[INFO] 18:25:19:875 Master/(3975:3982): [CONEXION] Enviando bloque 9 t1825198689
-[INFO] 18:25:19:875 Master/(3975:3982): [CONEXION] Enviando bloque 10 t182519868a
-[INFO] 18:25:19:875 Master/(3975:3982): [CONEXION] Enviando bloque 11 t182519868b
-[INFO] 18:25:24:75 Master/(3975:3982): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
-[INFO] 18:25:24:425 Master/(3975:3982): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
-[INFO] 18:25:24:433 Master/(3975:3982): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
-[INFO] 18:25:24:630 Master/(3975:3982): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
-[INFO] 18:25:24:934 Master/(3975:3982): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
-[INFO] 18:25:24:973 Master/(3975:3982): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
-[INFO] 18:25:25:275 Master/(3975:3982): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
-[INFO] 18:25:25:342 Master/(3975:3982): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
-[INFO] 18:25:25:433 Master/(3975:3982): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
-[INFO] 18:25:25:628 Master/(3975:3982): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
-[INFO] 18:25:25:688 Master/(3975:3982): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
-[INFO] 18:25:25:805 Master/(3975:3982): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
+[INFO] 19:21:33:965 Master/(6643:6643): [CONEXION] Configuracion para conexion con YAMA (IP: 127.0.0.1 | Puerto: 5070)
+[INFO] 19:21:34:11 Master/(6643:6643): [CONEXION] Estableciendo Conexion con YAMA...
+[INFO] 19:21:34:64 Master/(6643:6643): [CONEXION] Conexion establecida con YAMA, enviando solicitud
+[INFO] 19:21:34:168 Master/(6643:6643): [MENSAJE] Lista de bloques recibida
+[INFO] 19:21:34:175 Master/(6643:6643): [RECEPCION] bloque 127.0.0.1 5090 0
+[INFO] 19:21:34:186 Master/(6643:6643): ] lista para nodo 127.0.0.1 5090 armada, lista #1
+[INFO] 19:21:34:187 Master/(6643:6643): [RECEPCION] bloque 127.0.0.1 5090 1
+[INFO] 19:21:34:211 Master/(6643:6643): [RECEPCION] bloque 127.0.0.1 5090 2
+[INFO] 19:21:34:213 Master/(6643:6643): [RECEPCION] bloque 127.0.0.1 5090 3
+[INFO] 19:21:34:213 Master/(6643:6643): [RECEPCION] bloque 127.0.0.1 5090 4
+[INFO] 19:21:34:214 Master/(6643:6643): [RECEPCION] bloque 127.0.0.1 5090 5
+[INFO] 19:21:34:214 Master/(6643:6643): [RECEPCION] bloque 127.0.0.1 5090 6
+[INFO] 19:21:34:216 Master/(6643:6643): [RECEPCION] bloque 127.0.0.1 5090 7
+[INFO] 19:21:34:216 Master/(6643:6643): [RECEPCION] bloque 127.0.0.1 5090 8
+[INFO] 19:21:34:217 Master/(6643:6643): [RECEPCION] bloque 127.0.0.1 5090 9
+[INFO] 19:21:34:217 Master/(6643:6643): [RECEPCION] bloque 127.0.0.1 5090 10
+[INFO] 19:21:34:218 Master/(6643:6643): [RECEPCION] bloque 127.0.0.1 5090 11
+[INFO] 19:21:34:350 Master/(6643:6647): [CONEXION] Estableciendo conexion con Worker (IP: 127.0.0.1 | PUERTO: 5090
+[INFO] 19:21:34:379 Master/(6643:6647): [CONEXION] Enviando bloque 0 t1921341450
+[INFO] 19:21:34:385 Master/(6643:6647): [CONEXION] Enviando bloque 1 t1921341480
+[INFO] 19:21:34:388 Master/(6643:6647): [CONEXION] Enviando bloque 2 t1921341481
+[INFO] 19:21:34:389 Master/(6643:6647): [CONEXION] Enviando bloque 3 t1921341490
+[INFO] 19:21:34:389 Master/(6643:6647): [CONEXION] Enviando bloque 4 t1921341491
+[INFO] 19:21:34:390 Master/(6643:6647): [CONEXION] Enviando bloque 5 t1921341492
+[INFO] 19:21:34:391 Master/(6643:6647): [CONEXION] Enviando bloque 6 t1921341493
+[INFO] 19:21:34:392 Master/(6643:6647): [CONEXION] Enviando bloque 7 t1921341494
+[INFO] 19:21:34:392 Master/(6643:6647): [CONEXION] Enviando bloque 8 t1921341500
+[INFO] 19:21:34:393 Master/(6643:6647): [CONEXION] Enviando bloque 9 t1921341501
+[INFO] 19:21:34:398 Master/(6643:6647): [CONEXION] Enviando bloque 10 t1921341502
+[INFO] 19:21:34:399 Master/(6643:6647): [CONEXION] Enviando bloque 11 t1921341503
+[INFO] 19:21:38:8 Master/(6643:6647): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
+[INFO] 19:21:38:232 Master/(6643:6647): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
+[INFO] 19:21:38:465 Master/(6643:6647): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
+[INFO] 19:21:38:518 Master/(6643:6647): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
+[INFO] 19:21:38:623 Master/(6643:6647): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
+[INFO] 19:21:39:144 Master/(6643:6647): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
+[INFO] 19:21:39:432 Master/(6643:6647): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
+[INFO] 19:21:39:556 Master/(6643:6647): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
+[INFO] 19:21:39:610 Master/(6643:6647): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
+[INFO] 19:21:39:737 Master/(6643:6647): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
+[INFO] 19:21:39:957 Master/(6643:6647): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
+[INFO] 19:21:39:976 Master/(6643:6647): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
+[INFO] 19:21:42:589 Master/(6643:6783): [ERROR]FALLO EN LA RE_D_UCCION LOCAL

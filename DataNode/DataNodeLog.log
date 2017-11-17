@@ -1,17 +1,19 @@
-[INFO] 17:19:18:742 DataNode/(3261:3261): [CONFIGURACION] Nombre Nodo: NODO2
-[INFO] 17:19:18:743 DataNode/(3261:3261): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data1.bin
-[INFO] 17:19:18:743 DataNode/(3261:3261): [DATABIN] Cantidad de bloques 50
-[INFO] 17:19:18:758 DataNode/(3261:3261): [CONEXION] Estableciendo conexion con File System (IP: 127.0.0.1 | Puerto 5040)
-[INFO] 17:19:18:758 DataNode/(3261:3261): [CONEXION] Conexion establecida con el File System
-[INFO] 17:19:37:681 DataNode/(3261:3261): [DATABIN] El bloque N°0 fue escrito
-[INFO] 17:19:37:813 DataNode/(3261:3261): [DATABIN] El bloque N°1 fue escrito
-[INFO] 17:19:37:978 DataNode/(3261:3261): [DATABIN] El bloque N°2 fue escrito
-[INFO] 17:19:38:98 DataNode/(3261:3261): [DATABIN] El bloque N°3 fue escrito
-[INFO] 17:19:38:247 DataNode/(3261:3261): [DATABIN] El bloque N°4 fue escrito
-[INFO] 17:19:38:393 DataNode/(3261:3261): [DATABIN] El bloque N°5 fue escrito
-[INFO] 17:19:38:639 DataNode/(3261:3261): [DATABIN] El bloque N°6 fue escrito
-[INFO] 17:19:38:822 DataNode/(3261:3261): [DATABIN] El bloque N°7 fue escrito
-[INFO] 17:19:39:214 DataNode/(3261:3261): [DATABIN] El bloque N°8 fue escrito
-[INFO] 17:19:39:422 DataNode/(3261:3261): [DATABIN] El bloque N°9 fue escrito
-[INFO] 17:19:39:562 DataNode/(3261:3261): [DATABIN] El bloque N°10 fue escrito
-[INFO] 17:19:39:645 DataNode/(3261:3261): [DATABIN] El bloque N°11 fue escrito
+[INFO] 19:20:43:747 DataNode/(6625:6625): [CONFIGURACION] Nombre Nodo: NODO2
+[INFO] 19:20:43:748 DataNode/(6625:6625): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data1.bin
+[INFO] 19:20:43:748 DataNode/(6625:6625): [DATABIN] Cantidad de bloques 50
+[INFO] 19:20:43:751 DataNode/(6625:6625): [CONEXION] Estableciendo conexion con File System (IP: 127.0.0.1 | Puerto 5040)
+[INFO] 19:20:43:751 DataNode/(6625:6625): [CONEXION] Conexion establecida con el File System
+[INFO] 19:20:58:665 DataNode/(6625:6625): [DATABIN] El bloque N°0 fue escrito
+[INFO] 19:20:58:873 DataNode/(6625:6625): [DATABIN] El bloque N°1 fue escrito
+[INFO] 19:20:59:50 DataNode/(6625:6625): [DATABIN] El bloque N°2 fue escrito
+[INFO] 19:20:59:182 DataNode/(6625:6625): [DATABIN] El bloque N°3 fue escrito
+[INFO] 19:20:59:357 DataNode/(6625:6625): [DATABIN] El bloque N°4 fue escrito
+[INFO] 19:20:59:416 DataNode/(6625:6625): [DATABIN] El bloque N°5 fue escrito
+[INFO] 19:20:59:508 DataNode/(6625:6625): [DATABIN] El bloque N°6 fue escrito
+[INFO] 19:20:59:704 DataNode/(6625:6625): [DATABIN] El bloque N°7 fue escrito
+[INFO] 19:20:59:764 DataNode/(6625:6625): [DATABIN] El bloque N°8 fue escrito
+[INFO] 19:20:59:949 DataNode/(6625:6625): [DATABIN] El bloque N°9 fue escrito
+[INFO] 19:21:00:18 DataNode/(6625:6625): [DATABIN] El bloque N°10 fue escrito
+[INFO] 19:21:00:693 DataNode/(6625:6625): [DATABIN] El bloque N°11 fue escrito
+[INFO] 19:27:50:892 DataNode/(6625:6625): [31m[CONEXION] Conexion finalizada con File System[0m
+[INFO] 19:27:51:47 DataNode/(6625:6625): [EJECUCION] Proceso Data Node finalizado
