@@ -47,3 +47,115 @@
 [INFO] 17:21:52:373 YAMA/(3311:3311): [] planificacion terminada
 [INFO] 17:34:41:395 YAMA/(3311:3311): [RECEPCION] desconexion de master
 [INFO] 17:34:41:396 YAMA/(3311:3311): [CONEXION] Proceso Master 6 se ha desconectado
+[INFO] 18:16:30:108 YAMA/(3311:3311): [CONEXION] Proceso Master 6 conectado exitosamente
+[INFO] 18:16:30:142 YAMA/(3311:3311): [RECEPCION] solicitud de master
+[INFO] 18:16:30:144 YAMA/(3311:3311): [ENVIO] path yamafs:/WBAN.csv de master #6 enviado al fileSystem
+[INFO] 18:16:30:202 YAMA/(3311:3311): [RECEPCION] lista de bloques para master #6 recibida
+[INFO] 18:16:30:202 YAMA/(3311:3311): [REGISTRO] bloque: 127.0.0.1 | 5090 | 0
+[INFO] 18:16:30:202 YAMA/(3311:3311): [REGISTRO] bloque2: 127.0.0.1 | 5090 | 0
+[INFO] 18:16:30:202 YAMA/(3311:3311): [REGISTRO] bloque: 127.0.0.1 | 5090 | 1
+[INFO] 18:16:30:202 YAMA/(3311:3311): [REGISTRO] bloque2: 127.0.0.1 | 5090 | 1
+[INFO] 18:16:30:202 YAMA/(3311:3311): [REGISTRO] bloque: 127.0.0.1 | 5090 | 2
+[INFO] 18:16:30:202 YAMA/(3311:3311): [REGISTRO] bloque2: 127.0.0.1 | 5090 | 2
+[INFO] 18:16:30:202 YAMA/(3311:3311): [REGISTRO] bloque: 127.0.0.1 | 5090 | 3
+[INFO] 18:16:30:202 YAMA/(3311:3311): [REGISTRO] bloque2: 127.0.0.1 | 5090 | 3
+[INFO] 18:16:30:202 YAMA/(3311:3311): [REGISTRO] bloque: 127.0.0.1 | 5090 | 4
+[INFO] 18:16:30:202 YAMA/(3311:3311): [REGISTRO] bloque2: 127.0.0.1 | 5090 | 4
+[INFO] 18:16:30:202 YAMA/(3311:3311): [REGISTRO] bloque: 127.0.0.1 | 5090 | 5
+[INFO] 18:16:30:202 YAMA/(3311:3311): [REGISTRO] bloque2: 127.0.0.1 | 5090 | 5
+[INFO] 18:16:30:202 YAMA/(3311:3311): [REGISTRO] bloque: 127.0.0.1 | 5090 | 6
+[INFO] 18:16:30:202 YAMA/(3311:3311): [REGISTRO] bloque2: 127.0.0.1 | 5090 | 6
+[INFO] 18:16:30:202 YAMA/(3311:3311): [REGISTRO] bloque: 127.0.0.1 | 5090 | 7
+[INFO] 18:16:30:202 YAMA/(3311:3311): [REGISTRO] bloque2: 127.0.0.1 | 5090 | 7
+[INFO] 18:16:30:202 YAMA/(3311:3311): [REGISTRO] bloque: 127.0.0.1 | 5090 | 8
+[INFO] 18:16:30:202 YAMA/(3311:3311): [REGISTRO] bloque2: 127.0.0.1 | 5090 | 8
+[INFO] 18:16:30:202 YAMA/(3311:3311): [REGISTRO] bloque: 127.0.0.1 | 5090 | 9
+[INFO] 18:16:30:202 YAMA/(3311:3311): [REGISTRO] bloque2: 127.0.0.1 | 5090 | 9
+[INFO] 18:16:30:202 YAMA/(3311:3311): [REGISTRO] bloque: 127.0.0.1 | 5090 | 10
+[INFO] 18:16:30:202 YAMA/(3311:3311): [REGISTRO] bloque2: 127.0.0.1 | 5090 | 10
+[INFO] 18:16:30:202 YAMA/(3311:3311): [REGISTRO] bloque: 127.0.0.1 | 5090 | 11
+[INFO] 18:16:30:202 YAMA/(3311:3311): [REGISTRO] bloque2: 127.0.0.1 | 5090 | 11
+[INFO] 18:16:30:202 YAMA/(3311:3311): [REGISTRO] 24 bloques recibidos
+[INFO] 18:16:30:202 YAMA/(3311:3311): [REGISTRO] 12 bytes recibidos
+[INFO] 18:16:30:203 YAMA/(3311:3311): bloque 127.0.0.1 5090 0 asignado a worker 127.0.0.1 5090
+[INFO] 18:16:30:203 YAMA/(3311:3311): bloque 127.0.0.1 5090 1 asignado a worker 127.0.0.1 5090
+[INFO] 18:16:30:203 YAMA/(3311:3311): bloque 127.0.0.1 5090 2 asignado a worker 127.0.0.1 5090
+[INFO] 18:16:30:203 YAMA/(3311:3311): bloque 127.0.0.1 5090 3 asignado a worker 127.0.0.1 5090
+[INFO] 18:16:30:203 YAMA/(3311:3311): bloque 127.0.0.1 5090 4 asignado a worker 127.0.0.1 5090
+[INFO] 18:16:30:203 YAMA/(3311:3311): bloque 127.0.0.1 5090 5 asignado a worker 127.0.0.1 5090
+[INFO] 18:16:30:203 YAMA/(3311:3311): bloque 127.0.0.1 5090 6 asignado a worker 127.0.0.1 5090
+[INFO] 18:16:30:203 YAMA/(3311:3311): bloque 127.0.0.1 5090 7 asignado a worker 127.0.0.1 5090
+[INFO] 18:16:30:203 YAMA/(3311:3311): bloque 127.0.0.1 5090 8 asignado a worker 127.0.0.1 5090
+[INFO] 18:16:30:203 YAMA/(3311:3311): bloque 127.0.0.1 5090 9 asignado a worker 127.0.0.1 5090
+[INFO] 18:16:30:203 YAMA/(3311:3311): bloque 127.0.0.1 5090 10 asignado a worker 127.0.0.1 5090
+[INFO] 18:16:30:203 YAMA/(3311:3311): bloque 127.0.0.1 5090 11 asignado a worker 127.0.0.1 5090
+[INFO] 18:16:30:204 YAMA/(3311:3311): [] planificacion terminada
+[INFO] 18:16:34:299 YAMA/(3311:3311): [RECEPCION] actualizacion de master
+[INFO] 18:16:34:517 YAMA/(3311:3311): [RECEPCION] actualizacion de master
+[INFO] 18:16:34:908 YAMA/(3311:3311): [RECEPCION] actualizacion de master
+[INFO] 18:16:35:14 YAMA/(3311:3311): [RECEPCION] actualizacion de master
+[INFO] 18:16:35:505 YAMA/(3311:3311): [RECEPCION] actualizacion de master
+[INFO] 18:16:35:806 YAMA/(3311:3311): [RECEPCION] actualizacion de master
+[INFO] 18:16:35:984 YAMA/(3311:3311): [RECEPCION] actualizacion de master
+[INFO] 18:16:36:256 YAMA/(3311:3311): [RECEPCION] actualizacion de master
+[INFO] 18:16:36:420 YAMA/(3311:3311): [RECEPCION] actualizacion de master
+[INFO] 18:16:36:501 YAMA/(3311:3311): [RECEPCION] actualizacion de master
+[INFO] 18:16:36:568 YAMA/(3311:3311): [RECEPCION] actualizacion de master
+[INFO] 18:16:36:645 YAMA/(3311:3311): [RECEPCION] actualizacion de master
+[INFO] 18:24:58:509 YAMA/(3311:3311): [RECEPCION] desconexion de master
+[INFO] 18:24:58:510 YAMA/(3311:3311): [CONEXION] Proceso Master 6 se ha desconectado
+[INFO] 18:25:19:739 YAMA/(3311:3311): [CONEXION] Proceso Master 6 conectado exitosamente
+[INFO] 18:25:19:799 YAMA/(3311:3311): [RECEPCION] solicitud de master
+[INFO] 18:25:19:802 YAMA/(3311:3311): [ENVIO] path yamafs:/WBAN.csv de master #6 enviado al fileSystem
+[INFO] 18:25:19:868 YAMA/(3311:3311): [RECEPCION] lista de bloques para master #6 recibida
+[INFO] 18:25:19:868 YAMA/(3311:3311): [REGISTRO] bloque: 127.0.0.1 | 5090 | 0
+[INFO] 18:25:19:868 YAMA/(3311:3311): [REGISTRO] bloque2: 127.0.0.1 | 5090 | 0
+[INFO] 18:25:19:868 YAMA/(3311:3311): [REGISTRO] bloque: 127.0.0.1 | 5090 | 1
+[INFO] 18:25:19:868 YAMA/(3311:3311): [REGISTRO] bloque2: 127.0.0.1 | 5090 | 1
+[INFO] 18:25:19:868 YAMA/(3311:3311): [REGISTRO] bloque: 127.0.0.1 | 5090 | 2
+[INFO] 18:25:19:868 YAMA/(3311:3311): [REGISTRO] bloque2: 127.0.0.1 | 5090 | 2
+[INFO] 18:25:19:868 YAMA/(3311:3311): [REGISTRO] bloque: 127.0.0.1 | 5090 | 3
+[INFO] 18:25:19:868 YAMA/(3311:3311): [REGISTRO] bloque2: 127.0.0.1 | 5090 | 3
+[INFO] 18:25:19:868 YAMA/(3311:3311): [REGISTRO] bloque: 127.0.0.1 | 5090 | 4
+[INFO] 18:25:19:868 YAMA/(3311:3311): [REGISTRO] bloque2: 127.0.0.1 | 5090 | 4
+[INFO] 18:25:19:868 YAMA/(3311:3311): [REGISTRO] bloque: 127.0.0.1 | 5090 | 5
+[INFO] 18:25:19:868 YAMA/(3311:3311): [REGISTRO] bloque2: 127.0.0.1 | 5090 | 5
+[INFO] 18:25:19:868 YAMA/(3311:3311): [REGISTRO] bloque: 127.0.0.1 | 5090 | 6
+[INFO] 18:25:19:868 YAMA/(3311:3311): [REGISTRO] bloque2: 127.0.0.1 | 5090 | 6
+[INFO] 18:25:19:868 YAMA/(3311:3311): [REGISTRO] bloque: 127.0.0.1 | 5090 | 7
+[INFO] 18:25:19:868 YAMA/(3311:3311): [REGISTRO] bloque2: 127.0.0.1 | 5090 | 7
+[INFO] 18:25:19:868 YAMA/(3311:3311): [REGISTRO] bloque: 127.0.0.1 | 5090 | 8
+[INFO] 18:25:19:868 YAMA/(3311:3311): [REGISTRO] bloque2: 127.0.0.1 | 5090 | 8
+[INFO] 18:25:19:868 YAMA/(3311:3311): [REGISTRO] bloque: 127.0.0.1 | 5090 | 9
+[INFO] 18:25:19:868 YAMA/(3311:3311): [REGISTRO] bloque2: 127.0.0.1 | 5090 | 9
+[INFO] 18:25:19:868 YAMA/(3311:3311): [REGISTRO] bloque: 127.0.0.1 | 5090 | 10
+[INFO] 18:25:19:868 YAMA/(3311:3311): [REGISTRO] bloque2: 127.0.0.1 | 5090 | 10
+[INFO] 18:25:19:868 YAMA/(3311:3311): [REGISTRO] bloque: 127.0.0.1 | 5090 | 11
+[INFO] 18:25:19:868 YAMA/(3311:3311): [REGISTRO] bloque2: 127.0.0.1 | 5090 | 11
+[INFO] 18:25:19:868 YAMA/(3311:3311): [REGISTRO] 24 bloques recibidos
+[INFO] 18:25:19:868 YAMA/(3311:3311): [REGISTRO] 12 bytes recibidos
+[INFO] 18:25:19:868 YAMA/(3311:3311): bloque 127.0.0.1 5090 0 asignado a worker 127.0.0.1 5090
+[INFO] 18:25:19:869 YAMA/(3311:3311): bloque 127.0.0.1 5090 1 asignado a worker 127.0.0.1 5090
+[INFO] 18:25:19:869 YAMA/(3311:3311): bloque 127.0.0.1 5090 2 asignado a worker 127.0.0.1 5090
+[INFO] 18:25:19:869 YAMA/(3311:3311): bloque 127.0.0.1 5090 3 asignado a worker 127.0.0.1 5090
+[INFO] 18:25:19:869 YAMA/(3311:3311): bloque 127.0.0.1 5090 4 asignado a worker 127.0.0.1 5090
+[INFO] 18:25:19:869 YAMA/(3311:3311): bloque 127.0.0.1 5090 5 asignado a worker 127.0.0.1 5090
+[INFO] 18:25:19:869 YAMA/(3311:3311): bloque 127.0.0.1 5090 6 asignado a worker 127.0.0.1 5090
+[INFO] 18:25:19:869 YAMA/(3311:3311): bloque 127.0.0.1 5090 7 asignado a worker 127.0.0.1 5090
+[INFO] 18:25:19:869 YAMA/(3311:3311): bloque 127.0.0.1 5090 8 asignado a worker 127.0.0.1 5090
+[INFO] 18:25:19:869 YAMA/(3311:3311): bloque 127.0.0.1 5090 9 asignado a worker 127.0.0.1 5090
+[INFO] 18:25:19:869 YAMA/(3311:3311): bloque 127.0.0.1 5090 10 asignado a worker 127.0.0.1 5090
+[INFO] 18:25:19:869 YAMA/(3311:3311): bloque 127.0.0.1 5090 11 asignado a worker 127.0.0.1 5090
+[INFO] 18:25:19:871 YAMA/(3311:3311): [] planificacion terminada
+[INFO] 18:25:24:83 YAMA/(3311:3311): [RECEPCION] actualizacion de master
+[INFO] 18:25:24:439 YAMA/(3311:3311): [RECEPCION] actualizacion de master
+[INFO] 18:25:24:541 YAMA/(3311:3311): [RECEPCION] actualizacion de master
+[INFO] 18:25:24:647 YAMA/(3311:3311): [RECEPCION] actualizacion de master
+[INFO] 18:25:24:943 YAMA/(3311:3311): [RECEPCION] actualizacion de master
+[INFO] 18:25:25:48 YAMA/(3311:3311): [RECEPCION] actualizacion de master
+[INFO] 18:25:25:283 YAMA/(3311:3311): [RECEPCION] actualizacion de master
+[INFO] 18:25:25:458 YAMA/(3311:3311): [RECEPCION] actualizacion de master
+[INFO] 18:25:25:536 YAMA/(3311:3311): [RECEPCION] actualizacion de master
+[INFO] 18:25:25:639 YAMA/(3311:3311): [RECEPCION] actualizacion de master
+[INFO] 18:25:25:733 YAMA/(3311:3311): [RECEPCION] actualizacion de master
+[INFO] 18:25:25:905 YAMA/(3311:3311): [RECEPCION] actualizacion de master

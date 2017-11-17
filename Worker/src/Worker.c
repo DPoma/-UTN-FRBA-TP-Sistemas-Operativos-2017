@@ -259,7 +259,7 @@ void workerCrearHijo(Socket unSocket) {
 				break;
 			}
 		}
-		//todo debería haber un exit() aca, supongo
+		exit(EXIT_SUCCESS);
 	}
 	else if(ppid > 0){
 		puts("PADRE ACEPTO UNA CONEXION");
