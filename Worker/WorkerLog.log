@@ -1,13 +1,15 @@
-[INFO] 15:41:20:439 Worker/(8389:8389): [CONFIGURACION] Nombre Nodo: NODO1
-[INFO] 15:41:20:439 Worker/(8389:8389): [CONFIGURACION] IP: 127.0.0.1
-[INFO] 15:41:20:439 Worker/(8389:8389): [CONFIGURACION] PUERTO MASTER: 5090
-[INFO] 15:41:20:439 Worker/(8389:8389): [CONFIGURACION] PUERTO WORKER: 5050
-[INFO] 15:41:20:439 Worker/(8389:8389): [CONFIGURACION] IP FILESYSTEM: 127.0.0.1
-[INFO] 15:41:20:439 Worker/(8389:8389): [CONFIGURACION] PUERTO FILESYSTEM: 5040
-[INFO] 15:41:20:440 Worker/(8389:8389): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data.bin
-[INFO] 15:41:20:440 Worker/(8389:8389): [CONFIGURACION] Cantidad de bloques: 30
-[INFO] 15:41:20:440 Worker/(8389:8389): [CONEXION] Esperando conexiones de Master (Puerto: 5090)
-[INFO] 15:41:50:215 Worker/(8389:8389): [CONEXION] Proceso Master conectado exitosamente
-[INFO] 15:41:50:215 Worker/(8389:8389): [CONEXION] Esperando mensajes de Master
-[INFO] 15:41:50:215 Worker/(8389:8389): [CONEXION] llega op. de transformacion
-[INFO] 15:41:50:215 Worker/(8389:8389): [CONEXION] Esperando bloques a transformar
+[INFO] 21:48:10:988 Worker/(17288:17288): [CONFIGURACION] Nombre Nodo: NODO1
+[INFO] 21:48:10:988 Worker/(17288:17288): [CONFIGURACION] IP: 127.0.0.1
+[INFO] 21:48:10:988 Worker/(17288:17288): [CONFIGURACION] PUERTO MASTER: 5090
+[INFO] 21:48:10:988 Worker/(17288:17288): [CONFIGURACION] PUERTO WORKER: 5050
+[INFO] 21:48:10:988 Worker/(17288:17288): [CONFIGURACION] IP FILESYSTEM: 127.0.0.1
+[INFO] 21:48:10:988 Worker/(17288:17288): [CONFIGURACION] PUERTO FILESYSTEM: 5040
+[INFO] 21:48:10:988 Worker/(17288:17288): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data.bin
+[INFO] 21:48:10:988 Worker/(17288:17288): [CONFIGURACION] Cantidad de bloques: 30
+[INFO] 21:48:10:988 Worker/(17288:17288): [CONEXION] Esperando conexiones de Master (Puerto: 5090)
+[INFO] 21:48:12:218 Worker/(17288:17288): [CONEXION] Proceso Master conectado exitosamente
+[INFO] 21:48:12:218 Worker/(17288:17288): [CONEXION] Esperando mensajes de Master
+[INFO] 21:48:12:218 Worker/(17288:17288): [CONEXION] llega op. de transformacion
+[INFO] 21:48:12:218 Worker/(17288:17288): [CONEXION] Esperando bloques a transformar
+[INFO] 21:48:12:218 Worker/(17288:17288): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 21:48:12:218 Worker/(17288:17288): [TRASFORMACION] Comienzo a transformar

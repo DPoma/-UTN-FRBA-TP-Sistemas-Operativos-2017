@@ -73,19 +73,17 @@ void masterIniciar(String* argv) {
 void mock4worker(){
 	Mensaje* mensaje=mensajeRecibir(socketYama);
 	imprimirMensaje(archivoLog, "[MOCK] Recibo solo un bloque");
-	BloqueWorkerParaPrueba bloque;
+	char bloque[INTSIZE*2+TEMPSIZE];
 	Dir Nodoworker;
 	memcpy(&Nodoworker,mensaje->datos,DIRSIZE);
-	memcpy(&bloque.bloque,mensaje->datos+DIRSIZE,INTSIZE);
-	memcpy(&bloque.bytes,mensaje->datos+DIRSIZE+INTSIZE,INTSIZE);
-	memcpy(bloque.temp,mensaje->datos+DIRSIZE+INTSIZE*2,TEMPSIZE);
-	imprimirMensaje3(archivoLog, "[RECEPCION] bloque %s %s %d",Nodoworker.ip,Nodoworker.port,(int*)bloque.bloque);
+	memcpy(&bloque,mensaje->datos+DIRSIZE,INTSIZE*2+TEMPSIZE);
+	imprimirMensaje2(archivoLog, "[RECEPCION] bloque %s %s",Nodoworker.ip,Nodoworker.port);
 	socketWorker=socketCrearCliente(Nodoworker.ip,Nodoworker.port,ID_MASTER);
 	imprimirMensaje2(archivoLog,"[CONEXION] Estableciendo conexion con Worker (IP: %s | PUERTO: %s",Nodoworker.ip,Nodoworker.port);
-	mensajeEnviar(socketWorker,TRANSFORMACION,scriptTransformacion,lenTransformacion);
-	while(1){
-
-	}
+	//char* buffer= malloc(lenTransformacion+INTSIZE*2+TEMPSIZE);
+	//buffer = string_from_format(scriptTransformacion,bloque);
+	printf("%s",bloque);
+	mensajeEnviar(socketWorker,TRANSFORMACION,bloque,INTSIZE*2+TEMPSIZE);
 	/*Mensaje* men =mensajeRecibir(socketWorker);
 	if (men->header.operacion==100){
 		printf("recibo para mandar");
@@ -124,36 +122,28 @@ void masterAtender(){
 		memcpy(&bloque.bytes,mensaje->datos+i+DIRSIZE+INTSIZE,INTSIZE);
 		memcpy(bloque.temp,mensaje->datos+i+DIRSIZE+INTSIZE*2,TEMPSIZE);
 		imprimirMensaje3(archivoLog, "[RECEPCION] bloque %s %s %d",bloque.dir.ip,bloque.dir.port,(int*)bloque.bloque);
-		printf("xd");
 		int j;
-		printf("xd?");
 		bool flag=false;
-		printf("xdd");
 		for(j=0;j<listas->elements_count;j++){
-			printf("cuanto entra aca?");
 			Lista nodo=list_get(listas,j);
 			WorkerTransformacion* cmp=list_get(nodo,0);
 			if(mismoNodo(bloque.dir,cmp->dir)){
-				printf("entra aca?");
 				list_addM(nodo,&bloque,sizeof bloque);
 				flag=true;
 				break;
 			}
 		}
 		if(!flag){
-			printf("y aca?");
 			Lista nodo=list_create();
 			list_addM(nodo, &bloque,sizeof(WorkerTransformacion));
 			list_addM(listas,nodo,sizeof(t_list));
 			imprimirMensaje3(archivoLog,"] lista para nodo %s %s armada, lista #%d",bloque.dir.ip,bloque.dir.port,(int*)listas->elements_count);
 		}
 	}
-	printf("termine el for");
 	mensajeDestruir(mensaje);
 	for(i=0;i<listas->elements_count;i++){
 		pthread_t hilo;
 		pthread_create(&hilo,NULL,&transformaciones,list_get(listas,i));
-		printf("hilos");
 	}
 	while(estadoMaster==ACTIVADO){
 		Mensaje* m=mensajeRecibir(socketYama);

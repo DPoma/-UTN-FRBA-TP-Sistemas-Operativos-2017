@@ -80,8 +80,13 @@ Socket socketListenerWorker;
 void socketAceptarConexion();
 
 
+//PARA PRUEBA
+char* scriptTransformacion;
+int32_t lenTransformacion;
+/////////////
+
 void workerIniciar();
-int transformar(char*,int,int,char*);
+int transformar(char*,int,int,int,char*);
 int reduccionLocal(char*,char*,char*);
 locOri* getOrigenesLocales(char*);
 char* appendL(locOri*);
@@ -93,3 +98,5 @@ void dataBinAbrir();
 void configuracionCalcularBloques();
 Puntero dataBinMapear();
 void dataBinConfigurar();
+String transformacionBloqueTemporal(char* ,int , int );
+String transformacionScriptTemporal(char* ,int , int );
