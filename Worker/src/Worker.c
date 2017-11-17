@@ -51,7 +51,7 @@ void workerCrearHijo(Socket unSocket) {
 						break;}
 					else if (men->header.operacion==TRANSFORMACION){
 						int subpid = fork();
-						imprimirMensaje(archivoLog, "[CONEXION] [SUBFORK] llega op. de transformacion");
+						imprimirMensaje(archivoLog, "[CONEXION] [SUBFORK] llega bloque");
 						if(subpid == 0) {
 							int origen;
 							char destino[12];
@@ -292,7 +292,7 @@ int transformar(char* codigo, int sizeCodigo,int origen,int bytes ,char destino[
 	char* command = string_from_format("cat %s | sh %s | sort > %s",fileBloque,fileScript,patharchdes);
 	system(command);
 	fileLimpiar(fileBloque);
-	fileLimpiar(fileScript);
+	fileLimpiar(fileScript);//todo sospechoso
 	free (command);
 	free(patharchdes);
 	return 0;

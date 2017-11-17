@@ -4,3 +4,9 @@
 [INFO] 16:46:40:856 FileSystem/(2899:2899): [CONFIGURACION] Esperando conexiones de Workers (Puerto: 5080)
 [INFO] 16:46:40:856 FileSystem/(2899:2899): [CONFIGURACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
 [INFO] 16:46:40:901 FileSystem/(2899:2899): [33m[AVISO] Conecte los nodos y formatee el File System para estabilizarlo[0m
+[INFO] 17:18:22:69 FileSystem/(2899:2904): [33m[AVISO] NODO1 conectado[0m
+[INFO] 17:19:18:746 FileSystem/(2899:2904): [33m[AVISO] NODO2 conectado[0m
+[INFO] 17:19:24:59 FileSystem/(2899:2899): [FORMATEO] El File System fue formateado
+[INFO] 17:19:24:60 FileSystem/(2899:2899): [33m[AVISO] El File System esta estable[0m
+[INFO] 17:19:39:528 FileSystem/(2899:2899): [ARCHIVO] El archivo WBAN.csv fue copiado en File System
+[INFO] 17:20:06:199 FileSystem/(2899:2905): [CONEXION] El proceso Yama se ha conectado
