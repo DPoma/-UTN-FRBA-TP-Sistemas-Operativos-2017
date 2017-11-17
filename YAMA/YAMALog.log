@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 [INFO] 03:13:52:921 YAMA/(3641:3641): [CONEXION] Realizando conexion con File System (IP: 127.0.0.1 | Puerto 5060)
 [INFO] 03:13:52:921 YAMA/(3641:3641): [CONEXION] Conexion exitosa con File System
 [INFO] 03:13:52:921 YAMA/(3641:3641): [CONEXION] Esperando conexiones de un Master (Puerto 5070)
@@ -46,3 +47,5 @@
 [INFO] 03:13:54:69 YAMA/(3641:3641): bloque 127.0.0.1 5090 11 asignado a worker 127.0.0.1 5090
 [INFO] 03:13:54:69 YAMA/(3641:3641): [] planificacion terminada
 [INFO] 03:13:54:607 YAMA/(3641:3641): [RECEPCION] actualizacion de master
+=======
+>>>>>>> 19c4e2b11ba987f3d4698095a161fb7e8f4fe0cc

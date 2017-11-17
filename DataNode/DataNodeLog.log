@@ -1,5 +1,25 @@
+<<<<<<< HEAD
 [INFO] 02:54:46:113 DataNode/(2742:2742): [CONFIGURACION] Nombre Nodo: NODO1
 [INFO] 02:54:46:113 DataNode/(2742:2742): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data.bin
 [INFO] 02:54:46:114 DataNode/(2742:2742): [DATABIN] Cantidad de bloques 30
 [INFO] 02:54:46:114 DataNode/(2742:2742): [CONEXION] Estableciendo conexion con File System (IP: 127.0.0.1 | Puerto 5040)
 [INFO] 02:54:46:114 DataNode/(2742:2742): [CONEXION] Conexion establecida con el File System
+=======
+[INFO] 21:14:57:363 DataNode/(4718:4718): [CONFIGURACION] Nombre Nodo: NODO1
+[INFO] 21:14:57:363 DataNode/(4718:4718): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data.bin
+[INFO] 21:14:57:364 DataNode/(4718:4718): [DATABIN] Cantidad de bloques 50
+[INFO] 21:14:57:372 DataNode/(4718:4718): [CONEXION] Estableciendo conexion con File System (IP: 127.0.0.1 | Puerto 5040)
+[INFO] 21:14:57:372 DataNode/(4718:4718): [CONEXION] Conexion establecida con el File System
+[INFO] 21:15:29:880 DataNode/(4718:4718): [DATABIN] El bloque N°0 fue escrito
+[INFO] 21:15:29:948 DataNode/(4718:4718): [DATABIN] El bloque N°1 fue escrito
+[INFO] 21:15:30:107 DataNode/(4718:4718): [DATABIN] El bloque N°2 fue escrito
+[INFO] 21:15:30:151 DataNode/(4718:4718): [DATABIN] El bloque N°3 fue escrito
+[INFO] 21:15:30:399 DataNode/(4718:4718): [DATABIN] El bloque N°4 fue escrito
+[INFO] 21:15:30:458 DataNode/(4718:4718): [DATABIN] El bloque N°5 fue escrito
+[INFO] 21:15:30:664 DataNode/(4718:4718): [DATABIN] El bloque N°6 fue escrito
+[INFO] 21:15:30:742 DataNode/(4718:4718): [DATABIN] El bloque N°7 fue escrito
+[INFO] 21:15:30:962 DataNode/(4718:4718): [DATABIN] El bloque N°8 fue escrito
+[INFO] 21:15:31:43 DataNode/(4718:4718): [DATABIN] El bloque N°9 fue escrito
+[INFO] 21:15:31:190 DataNode/(4718:4718): [DATABIN] El bloque N°10 fue escrito
+[INFO] 21:15:31:262 DataNode/(4718:4718): [DATABIN] El bloque N°11 fue escrito
+>>>>>>> 19c4e2b11ba987f3d4698095a161fb7e8f4fe0cc

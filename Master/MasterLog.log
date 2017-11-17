@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 [INFO] 03:13:54:57 Master/(3645:3645): [CONEXION] Configuracion para conexion con YAMA (IP: 127.0.0.1 | Puerto: 5070)
 [INFO] 03:13:54:57 Master/(3645:3645): [CONEXION] Estableciendo Conexion con YAMA...
 [INFO] 03:13:54:61 Master/(3645:3645): [CONEXION] Conexion establecida con YAMA, enviando solicitud
@@ -42,3 +43,5 @@
 [INFO] 03:13:54:902 Master/(3645:3648): se recibio actualizacion de Worker -1229978376 1
 [INFO] 03:13:54:921 Master/(3645:3648): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
 [INFO] 03:13:54:921 Master/(3645:3648): se recibio actualizacion de Worker -1229978344 1
+=======
+>>>>>>> 19c4e2b11ba987f3d4698095a161fb7e8f4fe0cc
