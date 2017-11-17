@@ -1,26 +1,44 @@
-<<<<<<< HEAD
-[INFO] 21:48:12:178 Master/(17294:17294): [CONEXION] Configuracion para conexion con YAMA (IP: 127.0.0.1 | Puerto: 5070)
-[INFO] 21:48:12:178 Master/(17294:17294): [CONEXION] Estableciendo Conexion con YAMA...
-[INFO] 21:48:12:184 Master/(17294:17294): [CONEXION] Conexion establecida con YAMA, enviando solicitud
-[INFO] 21:48:12:218 Master/(17294:17294): [MOCK] Recibo solo un bloque
-[INFO] 21:48:12:218 Master/(17294:17294): [RECEPCION] bloque 127.0.0.1 5090
-[INFO] 21:48:12:218 Master/(17294:17294): [CONEXION] Estableciendo conexion con Worker (IP: 127.0.0.1 | PUERTO: 5090
-=======
-[INFO] 19:57:26:234 Master/(3944:3944): [CONEXION] Configuracion para conexion con YAMA (IP: 127.0.0.1 | Puerto: 5070)
-[INFO] 19:57:26:235 Master/(3944:3944): [CONEXION] Estableciendo Conexion con YAMA...
-[INFO] 19:57:26:244 Master/(3944:3944): [CONEXION] Conexion establecida con YAMA, enviando solicitud
-[INFO] 19:57:26:256 Master/(3944:3944): [MENSAJE] Lista de bloques recibida
-[INFO] 19:57:26:256 Master/(3944:3944): [RECEPCION] bloque 127.0.0.1 5090 0
-[INFO] 19:57:26:257 Master/(3944:3944): ] lista para nodo 127.0.0.1 5090 armada, lista #1
-[INFO] 19:57:26:257 Master/(3944:3944): [RECEPCION] bloque 127.0.0.1 5090 1
-[INFO] 19:57:26:257 Master/(3944:3944): [RECEPCION] bloque 127.0.0.1 5090 2
-[INFO] 19:57:26:257 Master/(3944:3944): [RECEPCION] bloque 127.0.0.1 5090 3
-[INFO] 19:57:26:257 Master/(3944:3944): [RECEPCION] bloque 127.0.0.1 5090 4
-[INFO] 19:57:26:257 Master/(3944:3944): [RECEPCION] bloque 127.0.0.1 5090 5
-[INFO] 19:57:26:257 Master/(3944:3944): [RECEPCION] bloque 127.0.0.1 5090 6
-[INFO] 19:57:26:258 Master/(3944:3944): [RECEPCION] bloque 127.0.0.1 5090 7
-[INFO] 19:57:26:258 Master/(3944:3944): [RECEPCION] bloque 127.0.0.1 5090 8
-[INFO] 19:57:26:258 Master/(3944:3944): [RECEPCION] bloque 127.0.0.1 5090 9
-[INFO] 19:57:26:258 Master/(3944:3944): [RECEPCION] bloque 127.0.0.1 5090 10
-[INFO] 19:57:26:258 Master/(3944:3944): [RECEPCION] bloque 127.0.0.1 5090 11
->>>>>>> 02a25489c012da911ba46f9205f97707d2a523f4
+[INFO] 03:13:54:57 Master/(3645:3645): [CONEXION] Configuracion para conexion con YAMA (IP: 127.0.0.1 | Puerto: 5070)
+[INFO] 03:13:54:57 Master/(3645:3645): [CONEXION] Estableciendo Conexion con YAMA...
+[INFO] 03:13:54:61 Master/(3645:3645): [CONEXION] Conexion establecida con YAMA, enviando solicitud
+[INFO] 03:13:54:69 Master/(3645:3645): [MENSAJE] Lista de bloques recibida
+[INFO] 03:13:54:69 Master/(3645:3645): [RECEPCION] bloque 127.0.0.1 5090 0
+[INFO] 03:13:54:69 Master/(3645:3645): ] lista para nodo 127.0.0.1 5090 armada, lista #1
+[INFO] 03:13:54:69 Master/(3645:3645): [RECEPCION] bloque 127.0.0.1 5090 1
+[INFO] 03:13:54:69 Master/(3645:3645): [RECEPCION] bloque 127.0.0.1 5090 2
+[INFO] 03:13:54:69 Master/(3645:3645): [RECEPCION] bloque 127.0.0.1 5090 3
+[INFO] 03:13:54:69 Master/(3645:3645): [RECEPCION] bloque 127.0.0.1 5090 4
+[INFO] 03:13:54:69 Master/(3645:3645): [RECEPCION] bloque 127.0.0.1 5090 5
+[INFO] 03:13:54:69 Master/(3645:3645): [RECEPCION] bloque 127.0.0.1 5090 6
+[INFO] 03:13:54:69 Master/(3645:3645): [RECEPCION] bloque 127.0.0.1 5090 7
+[INFO] 03:13:54:69 Master/(3645:3645): [RECEPCION] bloque 127.0.0.1 5090 8
+[INFO] 03:13:54:69 Master/(3645:3645): [RECEPCION] bloque 127.0.0.1 5090 9
+[INFO] 03:13:54:69 Master/(3645:3645): [RECEPCION] bloque 127.0.0.1 5090 10
+[INFO] 03:13:54:69 Master/(3645:3645): [RECEPCION] bloque 127.0.0.1 5090 11
+[INFO] 03:13:54:69 Master/(3645:3648): [CONEXION] Estableciendo conexion con Worker (IP: 127.0.0.1 | PUERTO: 5090
+[INFO] 03:13:54:69 Master/(3645:3648): [CONEXION] Enviando bloque 0 t03135469
+[INFO] 03:13:54:69 Master/(3645:3648): [CONEXION] Enviando bloque 1 t03135469
+[INFO] 03:13:54:69 Master/(3645:3648): [CONEXION] Enviando bloque 2 t03135469
+[INFO] 03:13:54:69 Master/(3645:3648): [CONEXION] Enviando bloque 3 t03135469
+[INFO] 03:13:54:69 Master/(3645:3648): [CONEXION] Enviando bloque 4 t03135469
+[INFO] 03:13:54:70 Master/(3645:3648): [CONEXION] Enviando bloque 5 t03135469
+[INFO] 03:13:54:70 Master/(3645:3648): [CONEXION] Enviando bloque 6 t03135469
+[INFO] 03:13:54:70 Master/(3645:3648): [CONEXION] Enviando bloque 7 t03135469
+[INFO] 03:13:54:70 Master/(3645:3648): [CONEXION] Enviando bloque 8 t03135469
+[INFO] 03:13:54:70 Master/(3645:3648): [CONEXION] Enviando bloque 9 t03135469
+[INFO] 03:13:54:70 Master/(3645:3648): [CONEXION] Enviando bloque 10 t03135469
+[INFO] 03:13:54:70 Master/(3645:3648): [CONEXION] Enviando bloque 11 t03135469
+[INFO] 03:13:54:600 Master/(3645:3648): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
+[INFO] 03:13:54:600 Master/(3645:3648): se recibio actualizacion de Worker -1229978088 1
+[INFO] 03:13:54:880 Master/(3645:3648): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
+[INFO] 03:13:54:880 Master/(3645:3648): se recibio actualizacion de Worker -1229978104 1
+[INFO] 03:13:54:886 Master/(3645:3648): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
+[INFO] 03:13:54:886 Master/(3645:3648): se recibio actualizacion de Worker -1229978472 1
+[INFO] 03:13:54:896 Master/(3645:3648): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
+[INFO] 03:13:54:896 Master/(3645:3648): se recibio actualizacion de Worker -1229978440 1
+[INFO] 03:13:54:901 Master/(3645:3648): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
+[INFO] 03:13:54:901 Master/(3645:3648): se recibio actualizacion de Worker -1229978408 1
+[INFO] 03:13:54:902 Master/(3645:3648): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
+[INFO] 03:13:54:902 Master/(3645:3648): se recibio actualizacion de Worker -1229978376 1
+[INFO] 03:13:54:921 Master/(3645:3648): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
+[INFO] 03:13:54:921 Master/(3645:3648): se recibio actualizacion de Worker -1229978344 1

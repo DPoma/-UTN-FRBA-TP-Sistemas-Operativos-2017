@@ -21,8 +21,7 @@
 
 #define RUTA_CONFIG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Worker/NodoConfig.conf"
 #define RUTA_LOG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Worker/WorkerLog.log"
-//#define RUTA_ARCHDATA "/home/utnso/Escritorio/" //TODO borrrar y poner en config
-#define RUTA_TEMPS "/home/utnso/Escritorio/temp/"
+#define RUTA_TEMPS "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/temp/"
 
 typedef struct {
 	char ipFileSytem[20];
@@ -64,8 +63,7 @@ const int MB = 1048576;
 #define INTSIZE sizeof(int32_t)
 #define TEMPSIZE 12
 
-String campos[7];
-Socket listenerWorker;
+String campos[6];
 Socket listenerMaster;
 
 Puntero punteroDataBin;
@@ -73,24 +71,18 @@ File dataBin;
 Configuracion* configuracion;
 ArchivoLog archivoLog;
 int estadoWorker;
-int bloquesArchData;
 int dataBinBloques;
 int dataBinTamanio;
 Socket socketListenerWorker;
 void socketAceptarConexion();
-
-
-//PARA PRUEBA
-char* scriptTransformacion;
-int32_t lenTransformacion;
-/////////////
+typedef void* BloqueWorker;
 
 void workerIniciar();
 int transformar(char*,int,int,int,char*);
-int reduccionLocal(char*,char*,char*);
+int reduccionLocal(char*,int,char*,char*);
 locOri* getOrigenesLocales(char*);
 char* appendL(locOri*);
-int reduccionGlobal(char*,char*,char*);
+int reduccionGlobal(char*,int,char*,char*);
 lGlobOri* getOrigenesGlobales(char*);
 char* appendG(lGlobOri*);
 datosReg* PasaRegistro(char*,int);
@@ -98,5 +90,7 @@ void dataBinAbrir();
 void configuracionCalcularBloques();
 Puntero dataBinMapear();
 void dataBinConfigurar();
-String transformacionBloqueTemporal(char* ,int , int );
+String transformacionBloqueTemporal(int , int );
 String transformacionScriptTemporal(char* ,int , int );
+BloqueWorker getBloque(Entero );
+BloqueWorker bloqueBuscar(Entero );

@@ -1,12 +1,13 @@
-[INFO] 19:56:30:567 FileSystem/(3920:3920): [EJECUCION] Proceso File System iniciado
-[INFO] 19:56:30:569 FileSystem/(3920:3920): [CONFIGURACION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 19:56:30:569 FileSystem/(3920:3920): [CONFIGURACION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 19:56:30:569 FileSystem/(3920:3920): [CONFIGURACION] Esperando conexiones de Workers (Puerto: 5080)
-[INFO] 19:56:30:569 FileSystem/(3920:3920): [CONFIGURACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
-[INFO] 19:56:30:646 FileSystem/(3920:3920): [33m[AVISO] Conecte los nodos y formatee el File System para estabilizarlo[0m
-[INFO] 19:56:34:650 FileSystem/(3920:3925): [33m[AVISO] NODO1 conectado[0m
-[INFO] 19:56:38:261 FileSystem/(3920:3925): [33m[AVISO] NODO2 conectado[0m
-[INFO] 19:56:47:823 FileSystem/(3920:3920): [FORMATEO] El File System fue formateado
-[INFO] 19:56:47:824 FileSystem/(3920:3920): [33m[AVISO] El File System esta estable[0m
-[INFO] 19:57:05:463 FileSystem/(3920:3920): [ARCHIVO] El archivo WBAN.csv fue copiado en File System
-[INFO] 19:57:21:933 FileSystem/(3920:3926): [CONEXION] El proceso Yama se ha conectado
+[INFO] 02:52:20:61 FileSystem/(2590:2590): [EJECUCION] Proceso File System iniciado
+[INFO] 02:52:20:62 FileSystem/(2590:2590): [CONFIGURACION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 02:52:20:62 FileSystem/(2590:2590): [CONFIGURACION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 02:52:20:62 FileSystem/(2590:2590): [CONFIGURACION] Esperando conexiones de Workers (Puerto: 5080)
+[INFO] 02:52:20:62 FileSystem/(2590:2590): [CONFIGURACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
+[INFO] 02:52:20:72 FileSystem/(2590:2590): [33m[AVISO] Conecte los nodos necesarios al File System para estabilizarlo[0m
+[INFO] 02:54:46:114 FileSystem/(2590:2593): [33m[AVISO] NODO1 conectado[0m
+[INFO] 02:54:46:114 FileSystem/(2590:2593): [33m[AVISO] El File System esta estable[0m
+[INFO] 02:55:16:581 FileSystem/(2590:2593): [33m[AVISO] NODO2 conectado[0m
+[INFO] 02:55:53:943 FileSystem/(2590:2594): [CONEXION] El proceso Yama se ha conectado
+[INFO] 02:57:15:468 FileSystem/(2590:2594): [CONEXION] El proceso YAMA se ha desconectado
+[INFO] 03:13:52:921 FileSystem/(2590:2594): [CONEXION] El proceso Yama se ha conectado
+[INFO] 03:13:54:949 FileSystem/(2590:2594): [CONEXION] El proceso YAMA se ha desconectado

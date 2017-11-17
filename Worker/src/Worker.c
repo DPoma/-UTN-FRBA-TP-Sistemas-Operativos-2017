@@ -12,10 +12,7 @@
 
 int main(void) {
 	workerIniciar();
-	//PARA PRUEBA
-	leerArchivo(fopen("/home/utnso/Escritorio/transformador.sh","r+"),&scriptTransformacion,&lenTransformacion);
-	/////////////////////////
-	socketListenerWorker = socketCrearListener(configuracion->puertoMaster);//todo hacer otro listener para workers, por el tema del handshake
+	socketListenerWorker = socketCrearListener(configuracion->puertoMaster);
 	imprimirMensaje1(archivoLog, "[CONEXION] Esperando conexiones de Master (Puerto: %s)", configuracion->puertoMaster);
 	while(estadoWorker)
 		socketAceptarConexion();
@@ -23,20 +20,9 @@ int main(void) {
 	return EXIT_SUCCESS;
 }
 
-void leerArchivo(File archScript,char** script,int* len){
-	fseek(archScript, 0, SEEK_END);
-	long posicion = ftell(archScript);
-	fseek(archScript, 0, SEEK_SET);
-	*script=malloc(posicion + 1);
-	fread(*script, posicion, 1, archScript);
-	(*script)[posicion] = '\0';
-	*len=strlen(*script);
-	fclose(archScript);
-}
-
 void workerCrearHijo(Socket unSocket) {
-	//int ppid = fork();
-	//if(ppid == 0) {
+	int ppid = fork();
+	if(ppid == 0) {
 		imprimirMensaje(archivoLog, "[CONEXION] Esperando mensajes de Master");
 		Mensaje* mensaje = mensajeRecibir(unSocket);
 		char* codigo;
@@ -44,53 +30,57 @@ void workerCrearHijo(Socket unSocket) {
 		switch(mensaje->header.operacion){
 			case -1:
 			{
-				//imprimirMensaje(archivoLog, ("[EJECUCION] Tuve problemas para comunicarme con el Master (Pid hijo: %d)", ppid)); //el hijo fallo en comunicarse con el master
+				imprimirMensaje(archivoLog, ("[EJECUCION] Tuve problemas para comunicarme con el Master (Pid hijo: %d)", ppid)); //el hijo fallo en comunicarse con el master
 				mensajeEnviar(unSocket, DESCONEXION, NULL, 0); //MANDA AL MASTER QUE FALLO
 				free(mensaje);
 				break;
 			}
 			case TRANSFORMACION: //Etapa Transformacion
 			{
-				imprimirMensaje(archivoLog, "[CONEXION] llega op. de transformacion");
-				//codigo = malloc(mensaje->header.tamanio);
-				//memcpy(&codigo,mensaje->datos, mensaje->header.tamanio);
+				imprimirMensaje(archivoLog, "[CONEXION] recibo script master transformacion");
+				codigo = malloc(mensaje->header.tamanio);
+				memcpy(codigo,mensaje->datos, mensaje->header.tamanio);
+				sizeCodigo=mensaje->header.tamanio;
 				while(true){
 					imprimirMensaje(archivoLog, "[CONEXION] Esperando bloques a transformar");
-					puts("PESPERARNDO EL MANSEJA");
-					//mensajeEnviar(unSocket, 100, "recibido", 8);
-					//Mensaje* men = mensajeRecibir(unSocket);
-					puts("PASE MENSAJE");
+					Mensaje* mensaje = mensajeRecibir(unSocket);
 					if (mensaje->header.operacion==EXITO){
-						puts("WTF");
+						imprimirMensaje(archivoLog, "[CONEXION] Fin de envio de bloques a transformar");
 						break;}
 					else{
-					//int subpid = fork();
-					imprimirMensaje(archivoLog, "[CONEXION] [SUBFORK] llega op. de transformacion");
-					//if(subpid == 0) {
-						int origen;
-						char destino[12];
-						int bytes;
-						puts("falla memcopy?");
-						memcpy(&origen,mensaje->datos + sizeof(int32_t), sizeof(int32_t));
-						puts("NO");
-						memcpy(&bytes, mensaje->datos + sizeof(int32_t), sizeof(int32_t));
-						memcpy(&destino,mensaje->datos + sizeof(int32_t)*2, TEMPSIZE);
-						puts("falla tranfs?");
-						int result = transformar(scriptTransformacion,lenTransformacion,0,bytes,destino);
-						puts("NO");
-						if(result==-1){
-							mensajeEnviar(unSocket, FRACASO, origen, sizeof(int32_t));
-							imprimirMensaje(archivoLog,"[TRASFORMACION] transformacion Fracaso");
+						int subpid = fork();
+						imprimirMensaje(archivoLog, "[CONEXION] [SUBFORK] llega op. de transformacion");
+						if(subpid == 0) {
+							int origen;
+							char destino[12];
+							int bytes;
+							memcpy(&origen,mensaje->datos, sizeof(int32_t));
+							memcpy(&bytes, mensaje->datos + sizeof(int32_t), sizeof(int32_t));
+							memcpy(destino,mensaje->datos + sizeof(int32_t)*2, TEMPSIZE);
+							int result = transformar(codigo,sizeCodigo,origen,bytes,destino);
+							if(result==-1){
+								imprimirMensaje1(archivoLog,"[TRASFORMACION] Fracaso la transformacion del bloque %d",origen);
+								char respuesta[INTSIZE];
+								memcpy(respuesta,&origen,INTSIZE);
+								mensajeEnviar(unSocket, FRACASO, respuesta, INTSIZE+1);
+							}
+							else{
+								imprimirMensaje1(archivoLog,"[TRASFORMACION] transformacion del bloque %d exitosa",origen);
+								char respuesta[INTSIZE];
+								memcpy(respuesta,&origen,INTSIZE);
+								mensajeEnviar(unSocket, EXITO, respuesta, INTSIZE+1);
+							}
+							free(mensaje);
+							break;
 						}
-						mensajeEnviar(unSocket, EXITO, origen, sizeof(int32_t));
-						imprimirMensaje(archivoLog,"[TRASFORMACION] transformacion exitosa");
-						free(mensaje);
-						break;
-					//}
-					//else if(subpid > 0)
-					//	puts("SUBPADRE ACEPTO UNA CONEXION");
-					//else
-					//	puts("ERROR");
+						else if(subpid > 0){
+							puts("SUBPADRE ACEPTO UNA CONEXION");
+							free(mensaje);
+						}
+						else{
+							puts("ERROR");
+							free(mensaje);
+						}
 					}
 				}
 				break;
@@ -106,7 +96,7 @@ void workerCrearHijo(Socket unSocket) {
 				memcpy(&origen,mensaje->datos + sizeof(int32_t)*2+sizeCodigo, sizeOrigen);
 				memcpy(&sizeDestino, mensaje->datos + sizeof(int32_t)*2 + sizeCodigo + sizeOrigen, sizeof(int32_t)); //es 12
 				memcpy(&destino,mensaje->datos + sizeof(int32_t)*3+sizeCodigo+ sizeOrigen, sizeDestino);
-				int result=reduccionLocal(codigo,origen,destino);
+				int result=reduccionLocal(codigo,sizeCodigo,origen,destino);
 				if(result==-1){
 					mensajeEnviar(unSocket, FRACASO, NULL, 0);
 				}
@@ -139,7 +129,7 @@ void workerCrearHijo(Socket unSocket) {
 				memcpy(&origen,mensaje->datos + sizeof(int32_t)*2+sizeCodigo, sizeOrigen);
 				memcpy(&sizeDestino, mensaje->datos + sizeof(int32_t)*2 + sizeCodigo + sizeOrigen, sizeof(int32_t));
 				memcpy(&destino,mensaje->datos + sizeof(int32_t)*3+sizeCodigo+ sizeOrigen, sizeDestino);
-				int result = reduccionGlobal(codigo,origen,destino);
+				int result = reduccionGlobal(codigo,sizeCodigo,origen,destino);
 				if(result==-1){
 					mensajeEnviar(unSocket, FRACASO, NULL, 0);
 				}
@@ -265,43 +255,26 @@ void workerCrearHijo(Socket unSocket) {
 				break;
 			}
 		}
-	//printf("Mensaje: %s\n", (String)mensaje->datos);
-	/*
 	}
 	else if(ppid > 0){
 		puts("PADRE ACEPTO UNA CONEXION");
-		//socketCerrar(unSocket);
 	}
 	else
 		puts("ERROR");
-		*/
 }
 
 //1er etapa
-int transformar(char* codigo, int sizeCodigo,int origen,int bytes ,char destino[12]){
+int transformar(char* codigo, int sizeCodigo,int origen,int bytes ,char destino[TEMPSIZE]){
 	imprimirMensaje(archivoLog,"[TRASFORMACION] Comienzo a transformar");
-	if (origen>bloquesArchData){
-		imprimirMensaje(archivoLog,"[TRASFORMACION] se busca leer un bloque mayor al tamaño de bloques archivo");
+	if (origen>=dataBinBloques){
+		imprimirMensaje(archivoLog,"[TRASFORMACION] se busca leer un bloque mayor al tamaño de bloques archivo, abortando transformacion");
 		return -1;
 	}
-	char* patharchdes = string_from_format("%s%s.bin",RUTA_TEMPS,destino);
-	printf("%s",patharchdes);
-	char* buffer=NULL;
-	FILE* arch;
-	arch = fopen(configuracion->rutaDataBin,"r");
-	fseek(arch,MB*origen,SEEK_SET);
-	int i;
-	char c;
-	int cc = 0;
-	for(i=0;cc<=bytes;i++){
-		c = fgetc(arch);
-			buffer = realloc(buffer,sizeof(char)*(cc+1));
-			buffer[cc]=c;
-			cc++;
-	}
-	fclose(arch);
-	String fileBloque=transformacionBloqueTemporal( buffer, origen, cc+1);
-	printf("%s",fileBloque);
+	char* patharchdes = string_from_format("%s%s",RUTA_TEMPS,destino);
+	imprimirMensaje1(archivoLog,"[TRASFORMACION] Ruta temporal: %s",patharchdes);
+	imprimirMensaje1(archivoLog,"[TRASFORMACION] N° de bloque a tranfsormar: %d",origen);
+	imprimirMensaje1(archivoLog,"[TRASFORMACION] cant de bytes a transformar: %d",bytes);
+	String fileBloque=transformacionBloqueTemporal(origen, bytes);
 	String fileScript=transformacionScriptTemporal( codigo, origen, sizeCodigo);
 	//doy privilegios a script
 	char* commando = string_from_format("chmod 0755 %s",fileScript);
@@ -309,7 +282,6 @@ int transformar(char* codigo, int sizeCodigo,int origen,int bytes ,char destino[
 	free (commando);
 	//paso buffer a script y resultado script a sort
 	char* command = string_from_format("cat %s | sh %s | sort > %s",fileBloque,fileScript,patharchdes);
-	//printf("%s",command);
 	system(command);
 	fileLimpiar(fileBloque);
 	fileLimpiar(fileScript);
@@ -318,10 +290,11 @@ int transformar(char* codigo, int sizeCodigo,int origen,int bytes ,char destino[
 	return 0;
 }
 
-String transformacionBloqueTemporal(char* buffer,int origen, int sizeBuffer) {
+String transformacionBloqueTemporal(int origen, int bytes) {
 	String path = string_from_format("%s/bloqueTemporal%i", RUTA_TEMPS, origen);
 	File file = fileAbrir(path, ESCRITURA);
-	fwrite(buffer, sizeof(char), sizeBuffer, file);
+	Puntero puntero = getBloque(origen);
+	fwrite(puntero, sizeof(char), bytes, file);
 	fileCerrar(file);
 	return path;
 }
@@ -334,49 +307,40 @@ String transformacionScriptTemporal(char* codigo,int origen, int sizeCodigo) {
 	return path;
 }
 
+BloqueWorker bloqueBuscar(Entero numeroBloque) {
+	BloqueWorker bloque = punteroDataBin + (BLOQUE * numeroBloque);
+	return bloque;
+}
+
+BloqueWorker getBloque(Entero numeroBloque) {
+	BloqueWorker bloque = bloqueBuscar(numeroBloque);
+	imprimirMensaje1(archivoLog, "[DATABIN] Se lee bloque N°%i", (int*)numeroBloque);
+	return bloque;
+}
+
 //2da etapa
-int reduccionLocal(char* codigo,char* origen,char* destino){
+int reduccionLocal(char* codigo,int sizeCodigo,char* origen,char destino[TEMPSIZE]){
 	locOri* listaOri;
 	listaOri = getOrigenesLocales(origen);
-	char* apendado;
-	int i;
-	apendado = appendL(listaOri);
-	char* patharchdes;
-	patharchdes = realloc(patharchdes,sizeof(RUTA_TEMPS)+16);
-	strcat(patharchdes,RUTA_TEMPS);
-	strcat(patharchdes,destino);
-	strcat(patharchdes,".bin");
+	int i=0;
+	char* archApendado = appendL(listaOri);
+	char* patharchdes = string_from_format("%s%s",RUTA_TEMPS,destino);
+	String fileScript=transformacionScriptTemporal( codigo, origen, sizeCodigo);
 	//doy privilegios a script
-	char commando [500];
-	for(i=0;i==500;i++){
-		commando[i]=NULL;
-	}
-	strcat(commando,"chmod 0755");
-	strcat(commando,codigo);
+	char* commando = string_from_format("chmod 0755 %s",fileScript);
 	system(commando);
 	free (commando);
 	//paso buffer a script y resultado script a sort
-	char command [500];
-	for(i=0;i==500;i++){
-		command[i]=NULL;
-	}
-	strcat(command,"cat");
-	strcat(command,apendado);
-	strcat(command,"|");
-	strcat(command,codigo);
-	strcat(command,">");
-	strcat(command,patharchdes);
+	char* command = string_from_format("cat %s | sh %s | sort > %s",archApendado,fileScript,patharchdes);
 	system(command);
+	fileLimpiar(archApendado);
+	fileLimpiar(fileScript);
 	free (command);
 	free(patharchdes);
-	free (apendado);
-	i=0;
 	while(listaOri->ruta[i]!=NULL){
 		free(listaOri->ruta[i]);
 		i++;
 	}
-	//for(i=0;;i++)
-	//free (listaOri->ruta);
 	return 0;
 }
 
@@ -539,42 +503,24 @@ int registroMayorOrden(char** VRegistros,int cant){
 }
 
 //3ra etapa
-int reduccionGlobal(char* codigo,char* origen,char* destino){
+int reduccionGlobal(char* codigo, int sizeCodigo,char* origen,char* destino){
 	lGlobOri* listaOri;
 	listaOri = getOrigenesGlobales(origen);
-	char* apendado;
-	apendado = appendG(listaOri);
+	char* archApendado = appendG(listaOri);
 	int i=0;
-	char* patharchdes;
-	patharchdes = realloc(patharchdes,sizeof(RUTA_TEMPS)+16);
-	strcat(patharchdes,RUTA_TEMPS);
-	strcat(patharchdes,destino);
-	strcat(patharchdes,".bin");
+	char* patharchdes = string_from_format("%s%s",RUTA_TEMPS,destino);
+	String fileScript=transformacionScriptTemporal( codigo, origen, sizeCodigo);
 	//doy privilegios a script
-	char commando [500];
-	for(i=0;i==500;i++){
-		commando[i]=NULL;
-	}
-	strcat(commando,"chmod 0755");
-	strcat(commando,codigo);
+	char* commando = string_from_format("chmod 0755 %s",fileScript);
 	system(commando);
 	free (commando);
 	//paso buffer a script y resultado script a sort
-	char command [500];
-	for(i=0;i==500;i++){
-		command[i]=NULL;
-	}
-	strcat(command,"cat");
-	strcat(command,apendado);
-	strcat(command,"|");
-	strcat(command,codigo);
-	strcat(command,">");
-	strcat(command,patharchdes);
+	char* command = string_from_format("cat %s | sh %s | sort > %s",archApendado,fileScript,patharchdes);
 	system(command);
+	fileLimpiar(archApendado);
+	fileLimpiar(fileScript);
 	free (command);
-	free (apendado);
 	free(patharchdes);
-	i=0;
 	while(((globOri*)listaOri->oris[i])->ruta!=NULL){
 		free(((globOri*)listaOri->oris[i])->ruta);
 		i++;
@@ -663,7 +609,7 @@ char* appendG(lGlobOri* origenes){
 			//etapa remota
 		if (local==0){
 		imprimirMensaje2(archivoLog, "[CONEXION] Realizando conexion con Worker (IP: %s | Puerto %s)", ((globOri*)origenes->oris[i])->ip, ((globOri*)origenes->oris[i])->puerto);
-		socketClientWorker = socketCrearCliente(((globOri*)origenes->oris[i])->ip,((globOri*)origenes->oris[i])->puerto,ID_WORKER);
+		socketClientWorker = socketCrearCliente(((globOri*)origenes->oris[i])->ip,((globOri*)origenes->oris[i])->puerto,ID_MASTER);
 		imprimirMensaje(archivoLog, "[CONEXION] Conexion exitosa con Worker");
 		//serializo
 		int mensajeSize = sizeof(int32_t)*2 + sizeof(((globOri*)origenes->oris[i])->ruta);
@@ -768,7 +714,7 @@ char* appendG(lGlobOri* origenes){
 			//etapa remota
 		if (local==0){
 		imprimirMensaje2(archivoLog, "[CONEXION] Realizando conexion con Worker (IP: %s | Puerto %s)", ((globOri*)origenes->oris[resultado])->ip, ((globOri*)origenes->oris[resultado])->puerto);
-		socketClientWorker = socketCrearCliente(((globOri*)origenes->oris[resultado])->ip,((globOri*)origenes->oris[resultado])->puerto,ID_WORKER);
+		socketClientWorker = socketCrearCliente(((globOri*)origenes->oris[resultado])->ip,((globOri*)origenes->oris[resultado])->puerto,ID_MASTER);
 		imprimirMensaje(archivoLog, "[CONEXION] Conexion exitosa con Worker");
 		//serializo
 		int mensajeSize = sizeof(int32_t)*2 + sizeof(((globOri*)origenes->oris[resultado])->ruta);
@@ -853,16 +799,14 @@ datosReg* PasaRegistro(char* ruta,int NroReg){
 void socketAceptarConexion() {
 	Socket nuevoSocket;
 	nuevoSocket = socketAceptar(socketListenerWorker, ID_MASTER);
+	printf("%d",nuevoSocket);
+	puts("");
 	if(nuevoSocket != ERROR) {
 		imprimirMensaje(archivoLog, "[CONEXION] Proceso Master conectado exitosamente");
 		workerCrearHijo(nuevoSocket);
 	}
 	else{
-		nuevoSocket = socketAceptar(socketListenerWorker, ID_WORKER);
-		if(nuevoSocket != ERROR) {
-			imprimirMensaje(archivoLog, "[CONEXION] Proceso Worker conectado exitosamente");
-			workerCrearHijo(nuevoSocket);
-		}
+		imprimirMensaje(archivoLog, ROJO"[ERROR] NO SE PUDO CONECTAR CON EL PROCESO MASTER"BLANCO);
 	}
 }
 
@@ -871,7 +815,6 @@ Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig) {
 	stringCopiar(configuracion->ipFileSytem, archivoConfigStringDe(archivoConfig, "IP_FILESYSTEM"));
 	stringCopiar(configuracion->puertoFileSystem, archivoConfigStringDe(archivoConfig, "PUERTO_FILESYSTEM"));
 	stringCopiar(configuracion->nombreNodo, archivoConfigStringDe(archivoConfig, "NOMBRE_NODO"));
-	stringCopiar(configuracion->puertoWorker, archivoConfigStringDe(archivoConfig, "PUERTO_WORKER"));
 	stringCopiar(configuracion->puertoMaster, archivoConfigStringDe(archivoConfig, "PUERTO_MASTER"));
 	stringCopiar(configuracion->rutaDataBin, archivoConfigStringDe(archivoConfig, "RUTA_DATABIN"));
 	stringCopiar(configuracion->ipPropia, archivoConfigStringDe(archivoConfig, "IP_PROPIA"));
@@ -891,7 +834,6 @@ void configuracionImprimir(Configuracion* configuracion) {
 	imprimirMensaje1(archivoLog, "[CONFIGURACION] Nombre Nodo: %s", configuracion->nombreNodo);
 	imprimirMensaje1(archivoLog, "[CONFIGURACION] IP: %s", configuracion->ipPropia);
 	imprimirMensaje1(archivoLog, "[CONFIGURACION] PUERTO MASTER: %s", configuracion->puertoMaster);
-	imprimirMensaje1(archivoLog, "[CONFIGURACION] PUERTO WORKER: %s", configuracion->puertoWorker);
 	imprimirMensaje1(archivoLog, "[CONFIGURACION] IP FILESYSTEM: %s", configuracion->ipFileSytem);
 	imprimirMensaje1(archivoLog, "[CONFIGURACION] PUERTO FILESYSTEM: %s", configuracion->puertoFileSystem);
 }
@@ -902,8 +844,7 @@ void archivoConfigObtenerCampos() {
 	campos[2] = "NOMBRE_NODO";
 	campos[3] = "IP_PROPIA";
 	campos[4] = "PUERTO_MASTER";
-	campos[5] = "PUERTO_WORKER";
-	campos[6] = "RUTA_DATABIN";
+	campos[5] = "RUTA_DATABIN";
 }
 
 void configuracionSenial(int senial) {

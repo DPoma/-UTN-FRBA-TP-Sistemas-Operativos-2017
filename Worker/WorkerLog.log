@@ -1,24 +1,479 @@
-<<<<<<< HEAD
-[INFO] 21:48:10:988 Worker/(17288:17288): [CONFIGURACION] Nombre Nodo: NODO1
-[INFO] 21:48:10:988 Worker/(17288:17288): [CONFIGURACION] IP: 127.0.0.1
-[INFO] 21:48:10:988 Worker/(17288:17288): [CONFIGURACION] PUERTO MASTER: 5090
-[INFO] 21:48:10:988 Worker/(17288:17288): [CONFIGURACION] PUERTO WORKER: 5050
-[INFO] 21:48:10:988 Worker/(17288:17288): [CONFIGURACION] IP FILESYSTEM: 127.0.0.1
-[INFO] 21:48:10:988 Worker/(17288:17288): [CONFIGURACION] PUERTO FILESYSTEM: 5040
-[INFO] 21:48:10:988 Worker/(17288:17288): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data.bin
-[INFO] 21:48:10:988 Worker/(17288:17288): [CONFIGURACION] Cantidad de bloques: 30
-[INFO] 21:48:10:988 Worker/(17288:17288): [CONEXION] Esperando conexiones de Master (Puerto: 5090)
-[INFO] 21:48:12:218 Worker/(17288:17288): [CONEXION] Proceso Master conectado exitosamente
-[INFO] 21:48:12:218 Worker/(17288:17288): [CONEXION] Esperando mensajes de Master
-[INFO] 21:48:12:218 Worker/(17288:17288): [CONEXION] llega op. de transformacion
-[INFO] 21:48:12:218 Worker/(17288:17288): [CONEXION] Esperando bloques a transformar
-[INFO] 21:48:12:218 Worker/(17288:17288): [CONEXION] [SUBFORK] llega op. de transformacion
-[INFO] 21:48:12:218 Worker/(17288:17288): [TRASFORMACION] Comienzo a transformar
-=======
-[INFO] 19:45:11:283 Worker/(3735:3735): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data.bin
-[INFO] 19:45:11:284 Worker/(3735:3735): [CONFIGURACION] Cantidad de bloques: 50
-[INFO] 19:45:11:284 Worker/(3735:3735): [CONFIGURACION] Nombre Nodo: NODO1
-[INFO] 19:45:11:284 Worker/(3735:3735): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data.bin
-[INFO] 19:45:11:284 Worker/(3735:3735): [CONFIGURACION] tamanio data.bin: 0MB
-[INFO] 19:45:11:285 Worker/(3735:3735): [CONEXION] Esperando conexiones de Master (Puerto: 5050)
->>>>>>> 02a25489c012da911ba46f9205f97707d2a523f4
+[INFO] 03:13:48:698 Worker/(3638:3638): [CONFIGURACION] Nombre Nodo: NODO1
+[INFO] 03:13:48:698 Worker/(3638:3638): [CONFIGURACION] IP: 127.0.0.1
+[INFO] 03:13:48:698 Worker/(3638:3638): [CONFIGURACION] PUERTO MASTER: 5090
+[INFO] 03:13:48:698 Worker/(3638:3638): [CONFIGURACION] IP FILESYSTEM: 127.0.0.1
+[INFO] 03:13:48:698 Worker/(3638:3638): [CONFIGURACION] PUERTO FILESYSTEM: 5040
+[INFO] 03:13:48:698 Worker/(3638:3638): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data.bin
+[INFO] 03:13:48:698 Worker/(3638:3638): [CONFIGURACION] Cantidad de bloques: 30
+[INFO] 03:13:48:698 Worker/(3638:3638): [CONEXION] Esperando conexiones de Master (Puerto: 5090)
+[INFO] 03:13:54:69 Worker/(3638:3638): [CONEXION] Proceso Master conectado exitosamente
+[INFO] 03:13:54:69 Worker/(3638:3649): [CONEXION] Esperando mensajes de Master
+[INFO] 03:13:54:69 Worker/(3638:3649): [CONEXION] recivo script master transformacion
+[INFO] 03:13:54:69 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:106 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:106 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:106 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:106 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:106 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:106 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:106 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:106 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:106 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:106 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:106 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:106 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:106 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:106 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:106 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:106 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:107 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:107 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:107 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:107 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:107 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:107 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:107 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:107 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:107 Worker/(3638:3658): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:107 Worker/(3638:3658): [TRASFORMACION] Comienzo a transformar
+[INFO] 03:13:54:107 Worker/(3638:3658): [TRASFORMACION] Ruta temporal: /home/utnso/Escritorio/temp/t03135469
+[INFO] 03:13:54:107 Worker/(3638:3658): [TRASFORMACION] N° de bloque a tranfsormar: 6
+[INFO] 03:13:54:107 Worker/(3638:3658): [TRASFORMACION] cant de bytes a transformar: 1048467
+[INFO] 03:13:54:107 Worker/(3638:3658): [DATABIN] Se lee bloque N°6
+[INFO] 03:13:54:108 Worker/(3638:3657): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:108 Worker/(3638:3656): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:108 Worker/(3638:3657): [TRASFORMACION] Comienzo a transformar
+[INFO] 03:13:54:108 Worker/(3638:3656): [TRASFORMACION] Comienzo a transformar
+[INFO] 03:13:54:108 Worker/(3638:3657): [TRASFORMACION] Ruta temporal: /home/utnso/Escritorio/temp/t03135469
+[INFO] 03:13:54:108 Worker/(3638:3655): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:108 Worker/(3638:3657): [TRASFORMACION] N° de bloque a tranfsormar: 5
+[INFO] 03:13:54:108 Worker/(3638:3656): [TRASFORMACION] Ruta temporal: /home/utnso/Escritorio/temp/t03135469
+[INFO] 03:13:54:108 Worker/(3638:3657): [TRASFORMACION] cant de bytes a transformar: 1048476
+[INFO] 03:13:54:108 Worker/(3638:3659): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:108 Worker/(3638:3656): [TRASFORMACION] N° de bloque a tranfsormar: 4
+[INFO] 03:13:54:108 Worker/(3638:3656): [TRASFORMACION] cant de bytes a transformar: 1048563
+[INFO] 03:13:54:108 Worker/(3638:3657): [DATABIN] Se lee bloque N°5
+[INFO] 03:13:54:109 Worker/(3638:3656): [DATABIN] Se lee bloque N°4
+[INFO] 03:13:54:109 Worker/(3638:3655): [TRASFORMACION] Comienzo a transformar
+[INFO] 03:13:54:109 Worker/(3638:3655): [TRASFORMACION] Ruta temporal: /home/utnso/Escritorio/temp/t03135469
+[INFO] 03:13:54:109 Worker/(3638:3659): [TRASFORMACION] Comienzo a transformar
+[INFO] 03:13:54:109 Worker/(3638:3655): [TRASFORMACION] N° de bloque a tranfsormar: 3
+[INFO] 03:13:54:110 Worker/(3638:3660): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:110 Worker/(3638:3659): [TRASFORMACION] Ruta temporal: /home/utnso/Escritorio/temp/t03135469
+[INFO] 03:13:54:110 Worker/(3638:3655): [TRASFORMACION] cant de bytes a transformar: 1048572
+[INFO] 03:13:54:110 Worker/(3638:3654): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:110 Worker/(3638:3659): [TRASFORMACION] N° de bloque a tranfsormar: 7
+[INFO] 03:13:54:110 Worker/(3638:3655): [DATABIN] Se lee bloque N°3
+[INFO] 03:13:54:110 Worker/(3638:3659): [TRASFORMACION] cant de bytes a transformar: 1048496
+[INFO] 03:13:54:110 Worker/(3638:3660): [TRASFORMACION] Comienzo a transformar
+[INFO] 03:13:54:110 Worker/(3638:3661): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:110 Worker/(3638:3659): [DATABIN] Se lee bloque N°7
+[INFO] 03:13:54:111 Worker/(3638:3654): [TRASFORMACION] Comienzo a transformar
+[INFO] 03:13:54:111 Worker/(3638:3660): [TRASFORMACION] Ruta temporal: /home/utnso/Escritorio/temp/t03135469
+[INFO] 03:13:54:111 Worker/(3638:3654): [TRASFORMACION] Ruta temporal: /home/utnso/Escritorio/temp/t03135469
+[INFO] 03:13:54:111 Worker/(3638:3660): [TRASFORMACION] N° de bloque a tranfsormar: 8
+[INFO] 03:13:54:111 Worker/(3638:3661): [TRASFORMACION] Comienzo a transformar
+[INFO] 03:13:54:111 Worker/(3638:3654): [TRASFORMACION] N° de bloque a tranfsormar: 2
+[INFO] 03:13:54:111 Worker/(3638:3660): [TRASFORMACION] cant de bytes a transformar: 1048461
+[INFO] 03:13:54:111 Worker/(3638:3662): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:111 Worker/(3638:3654): [TRASFORMACION] cant de bytes a transformar: 1048489
+[INFO] 03:13:54:111 Worker/(3638:3661): [TRASFORMACION] Ruta temporal: /home/utnso/Escritorio/temp/t03135469
+[INFO] 03:13:54:111 Worker/(3638:3660): [DATABIN] Se lee bloque N°8
+[INFO] 03:13:54:112 Worker/(3638:3661): [TRASFORMACION] N° de bloque a tranfsormar: 9
+[INFO] 03:13:54:112 Worker/(3638:3654): [DATABIN] Se lee bloque N°2
+[INFO] 03:13:54:113 Worker/(3638:3661): [TRASFORMACION] cant de bytes a transformar: 1048479
+[INFO] 03:13:54:113 Worker/(3638:3662): [TRASFORMACION] Comienzo a transformar
+[INFO] 03:13:54:113 Worker/(3638:3663): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:114 Worker/(3638:3661): [DATABIN] Se lee bloque N°9
+[INFO] 03:13:54:114 Worker/(3638:3662): [TRASFORMACION] Ruta temporal: /home/utnso/Escritorio/temp/t03135469
+[INFO] 03:13:54:114 Worker/(3638:3662): [TRASFORMACION] N° de bloque a tranfsormar: 10
+[INFO] 03:13:54:114 Worker/(3638:3663): [TRASFORMACION] Comienzo a transformar
+[INFO] 03:13:54:114 Worker/(3638:3662): [TRASFORMACION] cant de bytes a transformar: 1048537
+[INFO] 03:13:54:114 Worker/(3638:3653): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:114 Worker/(3638:3663): [TRASFORMACION] Ruta temporal: /home/utnso/Escritorio/temp/t03135469
+[INFO] 03:13:54:114 Worker/(3638:3662): [DATABIN] Se lee bloque N°10
+[INFO] 03:13:54:115 Worker/(3638:3663): [TRASFORMACION] N° de bloque a tranfsormar: 11
+[INFO] 03:13:54:115 Worker/(3638:3663): [TRASFORMACION] cant de bytes a transformar: 598394
+[INFO] 03:13:54:115 Worker/(3638:3653): [TRASFORMACION] Comienzo a transformar
+[INFO] 03:13:54:115 Worker/(3638:3663): [DATABIN] Se lee bloque N°11
+[INFO] 03:13:54:115 Worker/(3638:3653): [TRASFORMACION] Ruta temporal: /home/utnso/Escritorio/temp/t03135469
+[INFO] 03:13:54:116 Worker/(3638:3653): [TRASFORMACION] N° de bloque a tranfsormar: 1
+[INFO] 03:13:54:116 Worker/(3638:3653): [TRASFORMACION] cant de bytes a transformar: 1048568
+[INFO] 03:13:54:116 Worker/(3638:3653): [DATABIN] Se lee bloque N°1
+[INFO] 03:13:54:125 Worker/(3638:3652): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:125 Worker/(3638:3652): [TRASFORMACION] Comienzo a transformar
+[INFO] 03:13:54:125 Worker/(3638:3652): [TRASFORMACION] Ruta temporal: /home/utnso/Escritorio/temp/t03135469
+[INFO] 03:13:54:125 Worker/(3638:3652): [TRASFORMACION] N° de bloque a tranfsormar: 0
+[INFO] 03:13:54:125 Worker/(3638:3652): [TRASFORMACION] cant de bytes a transformar: 1048491
+[INFO] 03:13:54:125 Worker/(3638:3652): [DATABIN] Se lee bloque N°0
+[INFO] 03:13:54:600 Worker/(3638:3663): [TRASFORMACION] transformacion del bloque 11 exitosa
+[INFO] 03:13:54:880 Worker/(3638:3653): [TRASFORMACION] transformacion del bloque 1 exitosa
+[INFO] 03:13:54:886 Worker/(3638:3652): [TRASFORMACION] transformacion del bloque 0 exitosa
+[INFO] 03:13:54:895 Worker/(3638:3654): [TRASFORMACION] transformacion del bloque 2 exitosa
+[INFO] 03:13:54:901 Worker/(3638:3658): [TRASFORMACION] transformacion del bloque 6 exitosa
+[INFO] 03:13:54:902 Worker/(3638:3655): [TRASFORMACION] transformacion del bloque 3 exitosa
+[INFO] 03:13:54:921 Worker/(3638:3661): [TRASFORMACION] transformacion del bloque 9 exitosa
+[INFO] 03:13:54:950 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:950 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:950 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:950 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:950 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:951 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:951 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:951 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:951 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:951 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:951 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:951 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:951 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:951 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:951 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:951 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:951 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:951 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:952 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:952 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:952 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:952 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:952 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:952 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:952 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:952 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:952 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:952 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:952 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:952 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:952 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:953 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:953 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:953 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:953 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:953 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:953 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:953 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:953 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:953 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:953 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:954 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:954 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:954 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:954 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:954 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:954 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:954 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:954 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:954 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:955 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:955 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:955 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:955 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:955 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:955 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:955 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:955 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:955 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:955 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:955 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:955 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:955 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:956 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:956 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:956 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:956 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:956 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:956 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:956 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:956 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:956 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:956 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:956 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:956 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:956 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:956 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:956 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:956 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:956 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:958 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:958 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:958 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:958 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:958 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:958 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:958 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:958 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:958 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:958 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:958 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:958 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:958 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:958 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:958 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:958 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:958 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:958 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:958 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:958 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:958 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:958 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:958 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:958 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:959 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:966 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:966 Worker/(3638:3799): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:966 Worker/(3638:3794): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:966 Worker/(3638:3788): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:966 Worker/(3638:3786): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:966 Worker/(3638:3800): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:967 Worker/(3638:3770): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:967 Worker/(3638:3797): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:967 Worker/(3638:3773): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:967 Worker/(3638:3772): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:967 Worker/(3638:3778): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:968 Worker/(3638:3790): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:969 Worker/(3638:3791): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:969 Worker/(3638:3782): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:969 Worker/(3638:3796): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:969 Worker/(3638:3763): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:969 Worker/(3638:3762): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:969 Worker/(3638:3793): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:969 Worker/(3638:3789): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:969 Worker/(3638:3765): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:969 Worker/(3638:3764): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:969 Worker/(3638:3767): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:969 Worker/(3638:3780): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:969 Worker/(3638:3792): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:969 Worker/(3638:3781): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:969 Worker/(3638:3775): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:969 Worker/(3638:3769): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:969 Worker/(3638:3784): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:969 Worker/(3638:3783): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:970 Worker/(3638:3776): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:970 Worker/(3638:3779): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:970 Worker/(3638:3777): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:970 Worker/(3638:3787): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:970 Worker/(3638:3785): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:970 Worker/(3638:3798): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:974 Worker/(3638:3795): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:974 Worker/(3638:3774): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:974 Worker/(3638:3768): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:975 Worker/(3638:3771): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:975 Worker/(3638:3766): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:976 Worker/(3638:3801): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:976 Worker/(3638:3761): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:976 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:986 Worker/(3638:3802): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:986 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:986 Worker/(3638:3803): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:986 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:989 Worker/(3638:3804): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:989 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:54:998 Worker/(3638:3819): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:1 Worker/(3638:3805): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:4 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:4 Worker/(3638:3806): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:6 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:6 Worker/(3638:3820): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:6 Worker/(3638:3814): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:6 Worker/(3638:3808): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:54:6 Worker/(3638:3807): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:6 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:6 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:7 Worker/(3638:3823): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:10 Worker/(3638:3809): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:10 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:11 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:11 Worker/(3638:3810): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:11 Worker/(3638:3824): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:11 Worker/(3638:3811): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:11 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:11 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:12 Worker/(3638:3812): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:13 Worker/(3638:3826): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:18 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:22 Worker/(3638:3813): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:22 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:38 Worker/(3638:3827): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:38 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:38 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:38 Worker/(3638:3829): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:44 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:44 Worker/(3638:3831): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:46 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:46 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:106 Worker/(3638:3659): [TRASFORMACION] transformacion del bloque 7 exitosa
+[INFO] 03:13:55:106 Worker/(3638:3833): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:106 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:107 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:107 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:107 Worker/(3638:3841): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:110 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:110 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:114 Worker/(3638:3842): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:122 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:122 Worker/(3638:3843): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:126 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:126 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:126 Worker/(3638:3845): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:126 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:126 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:126 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:126 Worker/(3638:3846): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:129 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:146 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:246 Worker/(3638:3847): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:246 Worker/(3638:3849): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:246 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:270 Worker/(3638:3656): [TRASFORMACION] transformacion del bloque 4 exitosa
+[INFO] 03:13:55:270 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:270 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:270 Worker/(3638:3858): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:271 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:271 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:271 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:271 Worker/(3638:3859): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:271 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:271 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:326 Worker/(3638:3860): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:331 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:331 Worker/(3638:3861): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:342 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:350 Worker/(3638:3865): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:354 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:354 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:358 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:358 Worker/(3638:3866): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:362 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:362 Worker/(3638:3867): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:362 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:362 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:370 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:370 Worker/(3638:3868): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:370 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:370 Worker/(3638:3870): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:370 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:370 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:374 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:374 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:374 Worker/(3638:3871): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:374 Worker/(3638:3872): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:374 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:374 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:382 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:390 Worker/(3638:3873): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:394 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:550 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:550 Worker/(3638:3875): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:552 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:554 Worker/(3638:3882): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:554 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:554 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:566 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:570 Worker/(3638:3883): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:570 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:610 Worker/(3638:3660): [TRASFORMACION] transformacion del bloque 8 exitosa
+[INFO] 03:13:55:618 Worker/(3638:3884): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:626 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:630 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:640 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:640 Worker/(3638:3887): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:640 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:641 Worker/(3638:3888): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:641 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:641 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:641 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:641 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:641 Worker/(3638:3889): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:646 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:646 Worker/(3638:3890): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:652 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:660 Worker/(3638:3892): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:661 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:661 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:661 Worker/(3638:3893): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:661 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:661 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:662 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:662 Worker/(3638:3894): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:666 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:671 Worker/(3638:3895): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:678 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:682 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:685 Worker/(3638:3897): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:690 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:694 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:706 Worker/(3638:3898): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:710 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:714 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:724 Worker/(3638:3899): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:726 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:726 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:734 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:734 Worker/(3638:3901): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:736 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:736 Worker/(3638:3902): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:746 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:747 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:747 Worker/(3638:3903): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:750 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:750 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:754 Worker/(3638:3904): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:759 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:762 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:774 Worker/(3638:3906): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:774 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:774 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:794 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:794 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:799 Worker/(3638:3907): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:826 Worker/(3638:3908): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:834 Worker/(3638:3657): [TRASFORMACION] transformacion del bloque 5 exitosa
+[INFO] 03:13:55:834 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:837 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:846 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:846 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:850 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:850 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:850 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:850 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:854 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:854 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:858 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:858 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:862 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:870 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:874 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:874 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:882 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:882 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:886 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:890 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:906 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:906 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:908 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:910 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:922 Worker/(3638:3662): [TRASFORMACION] transformacion del bloque 10 exitosa
+[INFO] 03:13:55:926 Worker/(3638:3649): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:974 Worker/(3638:3649): [CONEXION] Esperando bloques a transformar
+[INFO] 03:13:55:978 Worker/(3638:3917): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:978 Worker/(3638:3918): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:978 Worker/(3638:3919): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:982 Worker/(3638:3923): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:994 Worker/(3638:3916): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:994 Worker/(3638:3921): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:994 Worker/(3638:3914): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:994 Worker/(3638:3920): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:2 Worker/(3638:3913): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:2 Worker/(3638:3924): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:55:2 Worker/(3638:3912): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:56:6 Worker/(3638:3911): [CONEXION] [SUBFORK] llega op. de transformacion
+[INFO] 03:13:56:10 Worker/(3638:3652): [EJECUCION] Proceso Worker finalizado
+[INFO] 03:13:56:18 Worker/(3638:3663): [EJECUCION] Proceso Worker finalizado
+[INFO] 03:13:56:25 Worker/(3638:3926): [EJECUCION] Proceso Worker finalizado
+[INFO] 03:13:56:27 Worker/(3638:3638): [EJECUCION] Proceso Worker finalizado
+[INFO] 03:13:56:58 Worker/(3638:3661): [EJECUCION] Proceso Worker finalizado
+[INFO] 03:13:56:74 Worker/(3638:3659): [EJECUCION] Proceso Worker finalizado
+[INFO] 03:13:56:75 Worker/(3638:3658): [EJECUCION] Proceso Worker finalizado
+[INFO] 03:13:56:86 Worker/(3638:3654): [EJECUCION] Proceso Worker finalizado
+[INFO] 03:13:56:90 Worker/(3638:3655): [EJECUCION] Proceso Worker finalizado
+[INFO] 03:13:56:98 Worker/(3638:3653): [EJECUCION] Proceso Worker finalizado
+[INFO] 03:13:56:114 Worker/(3638:3649): [EJECUCION] Proceso Worker finalizado

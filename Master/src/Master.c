@@ -57,7 +57,7 @@ void masterIniciar(String* argv) {
 		*script=malloc(posicion + 1);
 		fread(*script, posicion, 1, archScript);
 		(*script)[posicion] = '\0';
-		*len=strlen(*script);
+		*len=strlen(*script)+1;
 		fclose(archScript);
 	}
 	leerArchivo(fopen(argv[1],"r+"),&scriptTransformacion,&lenTransformacion);
@@ -82,7 +82,9 @@ void mock4worker(){
 	imprimirMensaje2(archivoLog,"[CONEXION] Estableciendo conexion con Worker (IP: %s | PUERTO: %s",Nodoworker.ip,Nodoworker.port);
 	//char* buffer= malloc(lenTransformacion+INTSIZE*2+TEMPSIZE);
 	//buffer = string_from_format(scriptTransformacion,bloque);
-	printf("%s",bloque);
+	mensajeEnviar(socketWorker,TRANSFORMACION,scriptTransformacion,lenTransformacion);
+	//printf("%s",bloque);
+	while(1);
 	mensajeEnviar(socketWorker,TRANSFORMACION,bloque,INTSIZE*2+TEMPSIZE);
 	/*Mensaje* men =mensajeRecibir(socketWorker);
 	if (men->header.operacion==100){
@@ -223,15 +225,20 @@ void transformaciones(Lista bloques){
 			Mensaje* mensaje = mensajeRecibir(socketWorker);
 			//a demas de decir exito o fracaso devuelve el numero de bloque
 			void enviarActualizacion(){
-				imprimirMensaje2(archivoLog,"se recibio actualizacion de Worker %d %d",(int32_t*)mensaje->datos,&mensaje->header.operacion);
-				mensaje=realloc(mensaje,mensaje->header.tamanio+DIRSIZE+sizeof(Header));
+				imprimirMensaje2(archivoLog,"se recibio actualizacion de Worker %d %d",(int32_t*)mensaje->datos,mensaje->header.operacion);
+				/*mensaje=realloc(mensaje,mensaje->header.tamanio+DIRSIZE+sizeof(Header));
 				memmove(mensaje->datos+DIRSIZE,mensaje->datos,mensaje->header.tamanio);
-				memcpy(mensaje->datos,&dir->dir,DIRSIZE);
-				mensajeEnviar(socketYama,mensaje->header.operacion,mensaje->datos,mensaje->header.tamanio+DIRSIZE);
+				memcpy(mensaje->datos,&dir->dir,DIRSIZE);*/
+				int bloqresult;
+				memcpy(&bloqresult,mensaje->datos,INTSIZE);
+				char buffer[INTSIZE+DIRSIZE];
+				memcpy(buffer,&bloqresult,INTSIZE);
+				memcpy(buffer,&dir->dir,DIRSIZE);
+				mensajeEnviar(socketYama,mensaje->header.operacion,buffer,sizeof(buffer)+1);
 				mensajeDestruir(mensaje);
 			}
 			if(mensaje->header.operacion==EXITO){
-				imprimirMensaje1(archivoLog, "[TRANSFORMACION] Transformacion realizada con exito en el Worker %s",(*(Dir*)mensaje->datos).ip);
+				imprimirMensaje1(archivoLog, "[TRANSFORMACION] Transformacion realizada con exito en el Worker %s",dir->dir.ip);
 				enviarActualizacion();
 			}else{
 				semaforoWait(errorBloque);
