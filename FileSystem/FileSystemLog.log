@@ -1,10 +1,9 @@
-[INFO] 15:41:34:378 FileSystem/(2622:2622): [EJECUCION] Proceso File System iniciado
-[INFO] 15:41:34:462 FileSystem/(2622:2622): [CONFIGURACION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 15:41:34:463 FileSystem/(2622:2622): [CONFIGURACION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 15:41:34:463 FileSystem/(2622:2622): [CONFIGURACION] Esperando conexiones de Workers (Puerto: 5080)
-[INFO] 15:41:34:464 FileSystem/(2622:2622): [CONFIGURACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
-[INFO] 15:41:34:554 FileSystem/(2622:2622): [33m[AVISO] Conecte los nodos necesarios al File System para estabilizarlo[0m
-[INFO] 15:44:22:724 FileSystem/(2622:2625): [33m[AVISO] NODO1 conectado[0m
-[INFO] 15:44:22:737 FileSystem/(2622:2625): [33m[AVISO] El File System esta estable[0m
-[INFO] 15:44:47:445 FileSystem/(2622:2622): [DIRECTORIO] WBAN.csv (a)
-[INFO] 15:45:01:989 FileSystem/(2622:2626): [CONEXION] El proceso Yama se ha conectado
+[INFO] 18:36:06:642 FileSystem/(5758:5758): [EJECUCION] Proceso File System iniciado
+[INFO] 18:36:06:722 FileSystem/(5758:5758): [CONFIGURACION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 18:36:06:724 FileSystem/(5758:5758): [CONFIGURACION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 18:36:06:724 FileSystem/(5758:5758): [CONFIGURACION] Esperando conexiones de Workers (Puerto: 5080)
+[INFO] 18:36:06:725 FileSystem/(5758:5758): [CONFIGURACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
+[INFO] 18:36:06:823 FileSystem/(5758:5758): [33m[AVISO] Conecte los nodos necesarios al File System para estabilizarlo[0m
+[INFO] 18:36:08:308 FileSystem/(5758:5761): [33m[AVISO] NODO1 conectado[0m
+[INFO] 18:36:08:319 FileSystem/(5758:5761): [33m[AVISO] El File System esta estable[0m
+[INFO] 18:36:09:649 FileSystem/(5758:5762): [CONEXION] El proceso Yama se ha conectado
