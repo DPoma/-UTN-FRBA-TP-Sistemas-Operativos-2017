@@ -93,6 +93,7 @@ Configuracion* configuracionLeerArchivo(ArchivoConfig archivoConfig) {
 	stringCopiar(configuracion->puertoFileSystem, archivoConfigStringDe(archivoConfig, "PUERTO_FILESYSTEM"));
 	stringCopiar(configuracion->nombreNodo, archivoConfigStringDe(archivoConfig, "NOMBRE_NODO"));
 	stringCopiar(configuracion->puertoMaster, archivoConfigStringDe(archivoConfig, "PUERTO_MASTER"));
+	stringCopiar(configuracion->puertoWorker, archivoConfigStringDe(archivoConfig, "PUERTO_WORKER"));
 	stringCopiar(configuracion->rutaDataBin, archivoConfigStringDe(archivoConfig, "RUTA_DATABIN"));
 	stringCopiar(configuracion->ipPropia, archivoConfigStringDe(archivoConfig, "IP_PROPIA"));
 	archivoConfigDestruir(archivoConfig);
@@ -111,6 +112,7 @@ void configuracionIniciarCampos() {
 	campos[3] = "PUERTO_MASTER";
 	campos[4] = "RUTA_DATABIN";
 	campos[5] = "IP_PROPIA";
+	campos[6] = "PUERTO_WORKER";
 }
 
 void configuracionIniciarLog() {

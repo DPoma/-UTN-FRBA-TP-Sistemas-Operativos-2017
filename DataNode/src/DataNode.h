@@ -42,7 +42,7 @@ int estadoDataNode;
 int dataBinTamanio;
 Entero dataBinBloques;
 Puntero punteroDataBin;
-String campos[6];
+String campos[7];
 Socket socketFileSystem;
 Configuracion* configuracion;
 ArchivoLog archivoLog;

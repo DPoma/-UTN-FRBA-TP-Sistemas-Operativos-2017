@@ -293,8 +293,10 @@ String reduccionScriptTemporal(ReduccionLocal* reduccion) {
 ReduccionLocal reduccionLocalRecibirDatos(Puntero datos) {
 	ReduccionLocal reduccion;
 	memcpy(&reduccion.sizeScript, datos, sizeof(Entero));
+	reduccion.script = memoriaAlocar(reduccion.sizeScript);
 	memcpy(reduccion.script, datos+sizeof(Entero), reduccion.sizeScript);
 	memcpy(&reduccion.cantidadTemporales,datos+INTSIZE+reduccion.sizeScript,INTSIZE);//origen
+	reduccion.temporales = memoriaAlocar(reduccion.cantidadTemporales*TEMPSIZE);
 	memcpy(reduccion.temporales, datos+INTSIZE*2+reduccion.sizeScript, reduccion.cantidadTemporales*TEMPSIZE);
 	memcpy(reduccion.temporalReduccion, datos+INTSIZE*2+reduccion.sizeScript+reduccion.cantidadTemporales*TEMPSIZE, TEMPSIZE);
 	return reduccion;
