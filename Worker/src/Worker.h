@@ -135,7 +135,7 @@ BloqueWorker bloqueBuscar(Entero numeroBloque);
 BloqueWorker getBloque(Entero numeroBloque);
 
 
-
+String reduccionScriptTemporal(ReduccionLocal* reduccion);
 
 
 int reduccionLocalEjecutar(char*,char*,char*);

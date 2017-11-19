@@ -309,7 +309,7 @@ void reduccionLocalFracaso(int resultado, Socket unSocket) {
 	}
 }
 
-int reduccionLocalIniciar(Mensaje* mensaje, Socket unSocket){
+void reduccionLocalIniciar(Mensaje* mensaje, Socket unSocket){
 	ReduccionLocal reduccion = reduccionLocalRecibirDatos(mensaje->datos);
 	String temporales = stringCrear((TEMPSIZE+stringLongitud(RUTA_TEMPS))*reduccion.cantidadTemporales + reduccion.cantidadTemporales-1);
 	int indice;
@@ -321,24 +321,29 @@ int reduccionLocalIniciar(Mensaje* mensaje, Socket unSocket){
 	}
 	String archivoApareado = string_from_format("%s%sApareado", RUTA_TEMPS, reduccion.temporalReduccion);
 	String archivoReduccion = string_from_format("%s%s", RUTA_TEMPS, reduccion.temporalReduccion);
-	String scriptPath = reduccionScriptTemporal(reduccion);
+	String scriptPath = reduccionScriptTemporal(&reduccion);
 	String comando = string_from_format("chmod 0755 %s", scriptPath);
 	int resultado = system(comando);
-	reduccionLocalFracaso(resultado);
+	reduccionLocalFracaso(resultado, unSocket);
 	memoriaLiberar(comando);
-	comando = string_from_format("sort -m %s > %s | sh %s > %s", temporales, archivoApareado, scriptPath, archivoReduccion);
-	resultado = system(comando);
-	reduccionLocalFracaso(resultado);
+	if(resultado != ERROR) {
+		comando = string_from_format("sort -m %s > %s | sh %s > %s", temporales, archivoApareado, scriptPath, archivoReduccion);
+		resultado = system(comando);
+		reduccionLocalFracaso(resultado, unSocket);
+		if(resultado != ERROR) {
+			imprimirMensaje(archivoLog,"[REDUCCION LOCAL] Operacion terminada existosamente");
+			mensajeEnviar(unSocket, EXITO, NULL, 0);
+		}
+	}
 	fileLimpiar(scriptPath);
 	//fileLimpiar(archivoApareado);
 	memoriaLiberar(archivoApareado);
 	memoriaLiberar(archivoReduccion);
 	memoriaLiberar(scriptPath);
 	memoriaLiberar(temporales);
-
-
 }
 
+/*
 //2da etapa
 int reduccionLocal(char* codigo,int sizeCodigo,char* origen,char* destino){
 	locOri* listaOri;
@@ -364,7 +369,7 @@ int reduccionLocal(char* codigo,int sizeCodigo,char* origen,char* destino){
 	}
 	return 0;
 }
-
+*/
 
 locOri* getOrigenesLocales(char* origen){
 	locOri* origenes;
