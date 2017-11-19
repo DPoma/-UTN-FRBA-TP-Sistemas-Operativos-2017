@@ -61,3 +61,62 @@
 [INFO] 10:29:56:279 YAMA/(4320:4320): [RECEPCION] actualizacion de reduccion local, exito
 [INFO] 10:29:56:407 YAMA/(4320:4320): [RECEPCION] desconexion de master
 [INFO] 10:29:56:409 YAMA/(4320:4320): [CONEXION] Proceso Master 6 se ha desconectado
+[INFO] 10:38:04:674 YAMA/(4320:4320): [CONEXION] Proceso Master 6 conectado exitosamente
+[INFO] 10:38:04:720 YAMA/(4320:4320): [RECEPCION] solicitud de master
+[INFO] 10:38:04:722 YAMA/(4320:4320): [ENVIO] path yamafs:/WBAN.csv de master #6 enviado al fileSystem
+[INFO] 10:38:04:768 YAMA/(4320:4320): [RECEPCION] lista de bloques para master #6 recibida
+[INFO] 10:38:04:768 YAMA/(4320:4320): [REGISTRO] bloque: 127.0.0.1 | 5090 | 0
+[INFO] 10:38:04:768 YAMA/(4320:4320): [REGISTRO] bloque2: 127.0.0.1 | 5090 | 0
+[INFO] 10:38:04:769 YAMA/(4320:4320): [REGISTRO] bloque: 127.0.0.1 | 5090 | 1
+[INFO] 10:38:04:769 YAMA/(4320:4320): [REGISTRO] bloque2: 127.0.0.1 | 5090 | 1
+[INFO] 10:38:04:770 YAMA/(4320:4320): [REGISTRO] bloque: 127.0.0.1 | 5090 | 2
+[INFO] 10:38:04:770 YAMA/(4320:4320): [REGISTRO] bloque2: 127.0.0.1 | 5090 | 2
+[INFO] 10:38:04:770 YAMA/(4320:4320): [REGISTRO] bloque: 127.0.0.1 | 5090 | 3
+[INFO] 10:38:04:770 YAMA/(4320:4320): [REGISTRO] bloque2: 127.0.0.1 | 5090 | 3
+[INFO] 10:38:04:770 YAMA/(4320:4320): [REGISTRO] bloque: 127.0.0.1 | 5090 | 4
+[INFO] 10:38:04:771 YAMA/(4320:4320): [REGISTRO] bloque2: 127.0.0.1 | 5090 | 4
+[INFO] 10:38:04:771 YAMA/(4320:4320): [REGISTRO] bloque: 127.0.0.1 | 5090 | 5
+[INFO] 10:38:04:771 YAMA/(4320:4320): [REGISTRO] bloque2: 127.0.0.1 | 5090 | 5
+[INFO] 10:38:04:771 YAMA/(4320:4320): [REGISTRO] bloque: 127.0.0.1 | 5090 | 6
+[INFO] 10:38:04:771 YAMA/(4320:4320): [REGISTRO] bloque2: 127.0.0.1 | 5090 | 6
+[INFO] 10:38:04:771 YAMA/(4320:4320): [REGISTRO] bloque: 127.0.0.1 | 5090 | 7
+[INFO] 10:38:04:772 YAMA/(4320:4320): [REGISTRO] bloque2: 127.0.0.1 | 5090 | 7
+[INFO] 10:38:04:772 YAMA/(4320:4320): [REGISTRO] bloque: 127.0.0.1 | 5090 | 8
+[INFO] 10:38:04:772 YAMA/(4320:4320): [REGISTRO] bloque2: 127.0.0.1 | 5090 | 8
+[INFO] 10:38:04:772 YAMA/(4320:4320): [REGISTRO] bloque: 127.0.0.1 | 5090 | 9
+[INFO] 10:38:04:772 YAMA/(4320:4320): [REGISTRO] bloque2: 127.0.0.1 | 5090 | 9
+[INFO] 10:38:04:772 YAMA/(4320:4320): [REGISTRO] bloque: 127.0.0.1 | 5090 | 10
+[INFO] 10:38:04:773 YAMA/(4320:4320): [REGISTRO] bloque2: 127.0.0.1 | 5090 | 10
+[INFO] 10:38:04:773 YAMA/(4320:4320): [REGISTRO] bloque: 127.0.0.1 | 5090 | 11
+[INFO] 10:38:04:773 YAMA/(4320:4320): [REGISTRO] bloque2: 127.0.0.1 | 5090 | 11
+[INFO] 10:38:04:773 YAMA/(4320:4320): [REGISTRO] 24 bloques recibidos
+[INFO] 10:38:04:773 YAMA/(4320:4320): [REGISTRO] 12 bytes recibidos
+[INFO] 10:38:04:775 YAMA/(4320:4320): bloque 127.0.0.1 5090 0 asignado a worker 127.0.0.1 5090
+[INFO] 10:38:04:775 YAMA/(4320:4320): bloque 127.0.0.1 5090 1 asignado a worker 127.0.0.1 5090
+[INFO] 10:38:04:775 YAMA/(4320:4320): bloque 127.0.0.1 5090 2 asignado a worker 127.0.0.1 5090
+[INFO] 10:38:04:776 YAMA/(4320:4320): bloque 127.0.0.1 5090 3 asignado a worker 127.0.0.1 5090
+[INFO] 10:38:04:776 YAMA/(4320:4320): bloque 127.0.0.1 5090 4 asignado a worker 127.0.0.1 5090
+[INFO] 10:38:04:776 YAMA/(4320:4320): bloque 127.0.0.1 5090 5 asignado a worker 127.0.0.1 5090
+[INFO] 10:38:04:776 YAMA/(4320:4320): bloque 127.0.0.1 5090 6 asignado a worker 127.0.0.1 5090
+[INFO] 10:38:04:776 YAMA/(4320:4320): bloque 127.0.0.1 5090 7 asignado a worker 127.0.0.1 5090
+[INFO] 10:38:04:777 YAMA/(4320:4320): bloque 127.0.0.1 5090 8 asignado a worker 127.0.0.1 5090
+[INFO] 10:38:04:777 YAMA/(4320:4320): bloque 127.0.0.1 5090 9 asignado a worker 127.0.0.1 5090
+[INFO] 10:38:04:777 YAMA/(4320:4320): bloque 127.0.0.1 5090 10 asignado a worker 127.0.0.1 5090
+[INFO] 10:38:04:777 YAMA/(4320:4320): bloque 127.0.0.1 5090 11 asignado a worker 127.0.0.1 5090
+[INFO] 10:38:04:783 YAMA/(4320:4320): [] planificacion terminada
+[INFO] 10:38:05:83 YAMA/(4320:4320): [RECEPCION] actualizacion de transformacion, exito
+[INFO] 10:38:06:137 YAMA/(4320:4320): [RECEPCION] actualizacion de transformacion, exito
+[INFO] 10:38:07:183 YAMA/(4320:4320): [RECEPCION] actualizacion de transformacion, exito
+[INFO] 10:38:08:222 YAMA/(4320:4320): [RECEPCION] actualizacion de transformacion, exito
+[INFO] 10:38:09:294 YAMA/(4320:4320): [RECEPCION] actualizacion de transformacion, exito
+[INFO] 10:38:10:374 YAMA/(4320:4320): [RECEPCION] actualizacion de transformacion, exito
+[INFO] 10:38:11:441 YAMA/(4320:4320): [RECEPCION] actualizacion de transformacion, exito
+[INFO] 10:38:12:510 YAMA/(4320:4320): [RECEPCION] actualizacion de transformacion, exito
+[INFO] 10:38:13:587 YAMA/(4320:4320): [RECEPCION] actualizacion de transformacion, exito
+[INFO] 10:38:14:657 YAMA/(4320:4320): [RECEPCION] actualizacion de transformacion, exito
+[INFO] 10:38:15:734 YAMA/(4320:4320): [RECEPCION] actualizacion de transformacion, exito
+[INFO] 10:38:16:767 YAMA/(4320:4320): [RECEPCION] actualizacion de transformacion, exito
+[INFO] 10:38:16:768 YAMA/(4320:4320): [REDUCLOCAL] creando entrada
+[INFO] 10:38:17:531 YAMA/(4320:4320): [RECEPCION] actualizacion de reduccion local, exito
+[INFO] 10:38:20:233 YAMA/(4320:4320): [RECEPCION] desconexion de master
+[INFO] 10:38:20:233 YAMA/(4320:4320): [CONEXION] Proceso Master 6 se ha desconectado

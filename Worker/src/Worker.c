@@ -244,7 +244,6 @@ String transformacionCrearScriptTemporal(Transformacion* transformacion) {
 void reduccionLocalIniciar(Mensaje* mensaje, Socket unSocket) {
 	ReduccionLocal reduccion = reduccionLocalRecibirTemporales(mensaje->datos);
 	String temporales = reduccionLocalObtenerTemporales(reduccion);
-	printf("%s\n", temporales); //TODO
 	int resultado = reduccionLocalEjecutar(reduccion, temporales);
 	reduccionLocalTerminar(resultado, unSocket);
 }
@@ -300,7 +299,6 @@ void reduccionLocalFracaso(Socket unSocket) {
 }
 
 String reduccionLocalCrearScript(ReduccionLocal* reduccion) {
-	//TODO ver .pl
 	String path = string_from_format("%s./scriptTemporal", RUTA_TEMPS);
 	File file = fileAbrir(path , ESCRITURA);
 	fwrite(reduccion->script, sizeof(char), reduccion->sizeScript-1, file);

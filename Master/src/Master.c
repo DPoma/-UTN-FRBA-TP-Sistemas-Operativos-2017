@@ -38,7 +38,7 @@ void masterIniciar(String* argv) {
 	void configuracionSenial(int senial){
 		estadoMaster=DESACTIVADO;
 	}
-	senialAsignarFuncion(SIGINT, configuracionSenial);
+	//senialAsignarFuncion(SIGINT, configuracionSenial);
 	estadoMaster=ACTIVADO;
 	void semaforoIniciar2(Semaforo** semaforo,int valor){
 		*semaforo=malloc(sizeof(Semaforo));
