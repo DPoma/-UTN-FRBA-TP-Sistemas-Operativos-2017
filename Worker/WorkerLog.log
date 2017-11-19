@@ -1,32 +1,18 @@
-[INFO] 18:43:35:227 Worker/(6114:6114): [CONFIGURACION] Nombre: NODO1
-[INFO] 18:43:35:247 Worker/(6114:6114): [CONFIGURACION] Esperando conexiones de Master (Puerto: 5090)
-[INFO] 18:43:35:248 Worker/(6114:6114): [CONFIGURACION] Esperando conexiones de Woker (Puerto: 5999)
-[INFO] 18:43:35:254 Worker/(6114:6114): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data1.bin
-[INFO] 18:43:35:255 Worker/(6114:6114): [CONFIGURACION] Cantidad de bloques: 100
-[INFO] 18:43:37:645 Worker/(6114:6127): [CONEXION] Proceso Master conectado exitosamente
-[INFO] 18:43:37:682 Worker/(6114:6128): [DATABIN] El bloque N°0 fue leido
-[INFO] 18:43:37:803 Worker/(6114:6128): [TRANSFORMACION] Transformacion exitosa en bloque N°0 de Master d
-[INFO] 18:43:38:878 Worker/(6114:6141): [DATABIN] El bloque N°1 fue leido
-[INFO] 18:43:39:17 Worker/(6114:6141): [TRANSFORMACION] Transformacion exitosa en bloque N°1 de Master d
-[INFO] 18:43:40:77 Worker/(6114:6152): [DATABIN] El bloque N°2 fue leido
-[INFO] 18:43:40:212 Worker/(6114:6152): [TRANSFORMACION] Transformacion exitosa en bloque N°2 de Master d
-[INFO] 18:43:41:282 Worker/(6114:6163): [DATABIN] El bloque N°3 fue leido
-[INFO] 18:43:41:418 Worker/(6114:6163): [TRANSFORMACION] Transformacion exitosa en bloque N°3 de Master d
-[INFO] 18:43:42:600 Worker/(6114:6174): [DATABIN] El bloque N°4 fue leido
-[INFO] 18:43:42:751 Worker/(6114:6174): [TRANSFORMACION] Transformacion exitosa en bloque N°4 de Master d
-[INFO] 18:43:43:835 Worker/(6114:6185): [DATABIN] El bloque N°5 fue leido
-[INFO] 18:43:43:998 Worker/(6114:6185): [TRANSFORMACION] Transformacion exitosa en bloque N°5 de Master d
-[INFO] 18:43:45:78 Worker/(6114:6196): [DATABIN] El bloque N°6 fue leido
-[INFO] 18:43:45:208 Worker/(6114:6196): [TRANSFORMACION] Transformacion exitosa en bloque N°6 de Master d
-[INFO] 18:43:46:291 Worker/(6114:6207): [DATABIN] El bloque N°7 fue leido
-[INFO] 18:43:46:447 Worker/(6114:6207): [TRANSFORMACION] Transformacion exitosa en bloque N°7 de Master d
-[INFO] 18:43:47:527 Worker/(6114:6218): [DATABIN] El bloque N°8 fue leido
-[INFO] 18:43:47:682 Worker/(6114:6218): [TRANSFORMACION] Transformacion exitosa en bloque N°8 de Master d
-[INFO] 18:43:48:771 Worker/(6114:6229): [DATABIN] El bloque N°9 fue leido
-[INFO] 18:43:48:907 Worker/(6114:6229): [TRANSFORMACION] Transformacion exitosa en bloque N°9 de Master d
-[INFO] 18:43:49:998 Worker/(6114:6240): [DATABIN] El bloque N°10 fue leido
-[INFO] 18:43:50:159 Worker/(6114:6240): [TRANSFORMACION] Transformacion exitosa en bloque N°10 de Master d
-[INFO] 18:43:51:237 Worker/(6114:6251): [DATABIN] El bloque N°11 fue leido
-[INFO] 18:43:51:343 Worker/(6114:6251): [TRANSFORMACION] Transformacion exitosa en bloque N°11 de Master d
-[INFO] 18:43:52:426 Worker/(6114:6127): [CONEXION] Fin de envio de bloques a transformar
-[INFO] 18:43:53:413 Worker/(6114:6263): [CONEXION] Proceso Master conectado exitosamente
+[INFO] 00:36:17:979 Worker/(4692:4692): [CONFIGURACION] Nombre: NODO2
+[INFO] 00:36:17:980 Worker/(4692:4692): [CONFIGURACION] Esperando conexiones de Master (Puerto: 5090)
+[INFO] 00:36:17:980 Worker/(4692:4692): [CONFIGURACION] Esperando conexiones de Woker (Puerto: 5999)
+[INFO] 00:36:17:980 Worker/(4692:4692): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data.bin
+[INFO] 00:36:17:980 Worker/(4692:4692): [CONFIGURACION] Cantidad de bloques: 50
+[INFO] 00:36:43:973 Worker/(4692:4706): [CONEXION] Proceso Master conectado exitosamente
+[INFO] 00:36:44:64 Worker/(4692:4708): [DATABIN] El bloque N°0 fue leido
+[INFO] 00:36:44:934 Worker/(4692:4710): [DATABIN] El bloque N°1 fue leido
+[INFO] 00:36:45:541 Worker/(4692:4714): [DATABIN] El bloque N°2 fue leido
+[INFO] 00:36:45:992 Worker/(4692:4716): [DATABIN] El bloque N°3 fue leido
+[INFO] 00:36:46:341 Worker/(4692:4718): [DATABIN] El bloque N°4 fue leido
+[INFO] 00:36:46:764 Worker/(4692:4720): [DATABIN] El bloque N°5 fue leido
+[INFO] 00:36:47:181 Worker/(4692:4722): [DATABIN] El bloque N°6 fue leido
+[INFO] 00:36:47:532 Worker/(4692:4724): [DATABIN] El bloque N°7 fue leido
+[INFO] 00:36:47:894 Worker/(4692:4726): [DATABIN] El bloque N°8 fue leido
+[INFO] 00:36:48:304 Worker/(4692:4728): [DATABIN] El bloque N°9 fue leido
+[INFO] 00:36:48:828 Worker/(4692:4730): [DATABIN] El bloque N°10 fue leido
+[INFO] 00:36:49:287 Worker/(4692:4732): [DATABIN] El bloque N°11 fue leido

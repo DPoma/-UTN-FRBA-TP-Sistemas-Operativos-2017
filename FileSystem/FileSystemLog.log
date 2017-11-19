@@ -1,6 +1,14 @@
-[INFO] 20:19:20:401 FileSystem/(2555:2555): [EJECUCION] Proceso File System iniciado
-[INFO] 20:19:20:402 FileSystem/(2555:2555): [CONFIGURACION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 20:19:20:402 FileSystem/(2555:2555): [CONFIGURACION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 20:19:20:403 FileSystem/(2555:2555): [CONFIGURACION] Esperando conexiones de Workers (Puerto: 5080)
-[INFO] 20:19:20:403 FileSystem/(2555:2555): [CONFIGURACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
-[INFO] 20:19:20:439 FileSystem/(2555:2555): [33m[AVISO] Conecte los nodos y formatee el File System para estabilizarlo[0m
+[INFO] 00:06:18:33 FileSystem/(3768:3768): [EJECUCION] Proceso File System iniciado
+[INFO] 00:06:18:42 FileSystem/(3768:3768): [CONFIGURACION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 00:06:18:42 FileSystem/(3768:3768): [CONFIGURACION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 00:06:18:42 FileSystem/(3768:3768): [CONFIGURACION] Esperando conexiones de Workers (Puerto: 5080)
+[INFO] 00:06:18:42 FileSystem/(3768:3768): [CONFIGURACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
+[INFO] 00:06:18:106 FileSystem/(3768:3768): [33m[AVISO] Conecte los nodos y formatee el File System para estabilizarlo[0m
+[INFO] 00:16:54:777 FileSystem/(3768:3773): [33m[AVISO] NODO1 conectado[0m
+[INFO] 00:17:54:310 FileSystem/(3768:3773): [33m[AVISO] NODO2 conectado[0m
+[INFO] 00:18:02:525 FileSystem/(3768:3768): [FORMATEO] El File System fue formateado
+[INFO] 00:18:02:525 FileSystem/(3768:3768): [33m[AVISO] El File System esta estable[0m
+[INFO] 00:19:07:764 FileSystem/(3768:3768): [ARCHIVO] El archivo WBAN.csv fue copiado en File System
+[INFO] 00:19:26:30 FileSystem/(3768:3774): [CONEXION] El proceso Yama se ha conectado
+[INFO] 00:36:27:411 FileSystem/(3768:3774): [CONEXION] El proceso YAMA se ha desconectado
+[INFO] 00:36:28:899 FileSystem/(3768:3774): [CONEXION] El proceso Yama se ha conectado

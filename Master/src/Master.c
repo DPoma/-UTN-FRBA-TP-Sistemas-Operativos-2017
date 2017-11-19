@@ -225,9 +225,11 @@ void transformaciones(Lista bloques){
 			Mensaje* mensaje = mensajeRecibir(socketWorker);
 			//a demas de decir exito o fracaso devuelve el numero de bloque
 			void enviarActualizacion(){
-				char buffer[INTSIZE+DIRSIZE];
-				memcpy(buffer,&dir->dir,DIRSIZE);
-				memcpy(buffer+DIRSIZE,mensaje->datos,INTSIZE);
+				char buffer[INTSIZE*2+DIRSIZE];
+				int32_t op=TRANSFORMACION;
+				memcpy(buffer,&op,INTSIZE);
+				memcpy(buffer+INTSIZE,&dir->dir,DIRSIZE);
+				memcpy(buffer+INTSIZE+DIRSIZE,mensaje->datos,INTSIZE);
 				mensajeEnviar(socketYama,mensaje->header.operacion,buffer,sizeof buffer);
 				mensajeDestruir(mensaje);
 			}
@@ -285,7 +287,11 @@ void reduccionLocal(Mensaje* m){
 	}
 	imprimirMensaje(archivoLog,mensaje->header.operacion==EXITO?"[EJECUCION]REDUCCION LOCAL EXISTOSA"
 			:"[ERROR]FALLO EN LA RE_D_UCCION LOCAL");
-	mensajeEnviar(socketYama,mensaje->header.operacion,&nodo,DIRSIZE);
+	char bufferY[INTSIZE+DIRSIZE];
+	int32_t op=REDUCLOCAL;
+	memcpy(bufferY,&op,INTSIZE);
+	memcpy(bufferY+INTSIZE,&nodo,DIRSIZE);
+	mensajeEnviar(socketYama,mensaje->header.operacion,bufferY,sizeof bufferY);
 	mensajeDestruir(mensaje);
 	socketCerrar(sWorker);
 	tareasEnParalelo(-1);
@@ -315,7 +321,8 @@ void reduccionGlobal(Mensaje* m){
 	Mensaje* mensaje = mensajeRecibir(sWorker);
 	imprimirMensaje(archivoLog,mensaje->header.operacion==EXITO?"[EJECUCION]REDUCCION GLOBAL EXISTOSA"
 			:"[ERROR]FALLO EN LA RE_D_UCCION GLOBAL");
-	mensajeEnviar(socketYama,mensaje->header.operacion,NULL,0);
+	int32_t op=REDUCGLOBAL;
+	mensajeEnviar(socketYama,mensaje->header.operacion,&op,INTSIZE);
 	mensajeDestruir(mensaje);
 	socketCerrar(sWorker);
 	metricas.reducGlobal=transcurrido(tiempo);
@@ -337,7 +344,8 @@ void almacenado(Mensaje* m){
 	Mensaje* mens=mensajeRecibir(sWorker);
 	imprimirMensaje(archivoLog,mens->header.operacion==EXITO?"[EJECUCION] ALMACENADO FINAL EXITOSO":"[ERROR] ALMACENADO FINAL FALLIDO");
 
-	mensajeEnviar(socketYama,mens->header.operacion, NULL,0);
+	int32_t op=ALMACENADO;
+	mensajeEnviar(socketYama,mens->header.operacion,&op,INTSIZE);
 	mensajeDestruir(mens);
 	socketCerrar(sWorker);
 	metricas.almacenado=transcurrido(tiempo);
