@@ -104,7 +104,7 @@ void masterEjecutarOperacion(Socket unSocket);
 //--------------------------------------- Funciones de Transformacion -------------------------------------
 
 int transformacionEjecutar(Transformacion* transformacion);
-void transformacionIniciar(Mensaje* mensaje, Socket unSocket);
+void transformacion(Mensaje* mensaje, Socket unSocket);
 void transformacionDestruir(Transformacion* transformacion);
 void transformacionExito(Entero numeroBloque, Socket unSocket);
 void transformacionFracaso(Entero numeroBloque, Socket unSocket);
@@ -116,7 +116,7 @@ String transformacionCrearScriptTemporal(Transformacion* transformacion);
 
 //--------------------------------------- Funciones de Reduccion Local -------------------------------------
 
-void reduccionLocalIniciar(Mensaje* mensaje, Socket unSocket);
+void reduccionLocal(Mensaje* mensaje, Socket unSocket);
 ReduccionLocal reduccionLocalRecibirTemporales(Puntero datos);
 int reduccionLocalEjecutar(ReduccionLocal reduccion, String temporales);
 void reduccionLocalTerminar(int resultado, Socket unSocket);

@@ -128,22 +128,14 @@ void masterAtenderOperacion(Socket unSocket) {
 		imprimirMensaje(archivoLog, "[ERROR] Error en el fork(), estas jodido");
 }
 
-void apareoGlobalEnviarTemporales() {
-	File archivoReduccionLocal = fileAbrir(pathReduccionLocal, LECTURA);
-	String buffer = stringCrear(BLOQUE);
-	while(fgets(buffer, BLOQUE, archivoReduccionLocal) != NULL)
-		mensajeEnviar(socketWorker, APAREO_LINEA, buffer, stringLongitud(buffer));
-	fileCerrar(archivoReduccionLocal);
-}
-
 void masterEjecutarOperacion(Socket unSocket) {
 	imprimirMensaje(archivoLog, "[CONEXION] Proceso Master conectado exitosamente");
 	Mensaje* mensaje = mensajeRecibir(unSocket);
 	switch(mensaje->header.operacion) {
 		case DESCONEXION: imprimirMensaje(archivoLog, "[AVISO] El Master  se desconecto"); break;
-		case TRANSFORMACION: transformacionIniciar(mensaje, unSocket); break;
-		case REDUCCION_LOCAL: reduccionLocalIniciar(mensaje, unSocket); break;
-		case REDUCCION_GLOBAL: break;
+		case TRANSFORMACION: transformacion(mensaje, unSocket); break;
+		case REDUCCION_LOCAL: reduccionLocal(mensaje, unSocket); break;
+		case REDUCCION_GLOBAL: reduccionGlobal(mensaje, unSocket); break;
 		case APAREO_GLOBAL: apareoGlobalEnviarTemporales();
 		case ALMACENADO: break;
 		case PASAREG: break;
@@ -154,7 +146,7 @@ void masterEjecutarOperacion(Socket unSocket) {
 
 //--------------------------------------- Funciones de Transformacion -------------------------------------
 
-void transformacionIniciar(Mensaje* mensaje, Socket unSocket) {
+void transformacion(Mensaje* mensaje, Socket unSocket) {
 	Transformacion* transformacion = memoriaAlocar(sizeof(Transformacion));
 	transformacionRecibirScript(transformacion, mensaje);
 	while(ACTIVADO) {
@@ -251,7 +243,7 @@ String transformacionCrearScriptTemporal(Transformacion* transformacion) {
 
 //--------------------------------------- Funciones de Reduccion Local -------------------------------------
 
-void reduccionLocalIniciar(Mensaje* mensaje, Socket unSocket) {
+void reduccionLocal(Mensaje* mensaje, Socket unSocket) {
 	ReduccionLocal reduccion = reduccionLocalRecibirTemporales(mensaje->datos);
 	String temporales = reduccionLocalObtenerTemporales(reduccion);
 	int resultado = reduccionLocalEjecutar(reduccion, temporales);
@@ -330,15 +322,41 @@ String reduccionLocalObtenerTemporales(ReduccionLocal reduccion) {
 
 //--------------------------------------- Funciones de Reduccion Global -------------------------------------
 
-int apareoEscribir(ReduccionGlobal reduccion) {
+int reduccionGlobalAtenderWorker(ReduccionGlobal reduccion) {
+	Socket unSocket = socketCrearCliente(direccion.ip, direccion.puerto, ID_WORKER);
 	Mensaje* mensaje = mensajeRecibir(unSocket);
 	//todo sincronizar
+	fileAbrir(reduccion.archivoReduccion, "a+");
 	fwrite(mensaje->datos, sizeof(char), mensaje->header.tamanio, reduccion.archivoReduccion);
+	fileCerrar(reduccion.archivoReduccion);
+}
+
+void workerAtender(Socket socketWorker) {
+	File archivoReduccionLocal = fileAbrir(pathReduccionLocal, LECTURA);
+	String buffer = stringCrear(BLOQUE);
+	while(fgets(buffer, BLOQUE, archivoReduccionLocal) != NULL)
+		mensajeEnviar(socketWorker, APAREO_LINEA, buffer, stringLongitud(buffer));
+	fileCerrar(archivoReduccionLocal);
+}
+
+void workerAceptarWorker() {
+	Socket nuevoSocket = socketAceptar(listenerWorker, ID_WORKER);
+	if(nuevoSocket != ERROR)
+		workerAtender(nuevoSocket);
+	else
+		imprimirMensaje(archivoLog, "[ERROR] Error en el accept(), hoy no es tu dia papu");
+}
+
+void reduccionGlobalGenerarArchivo(ReduccionGlobal reduccion) {
+	int indice;
+	for(indice=0; indice < cantidadWorkers; indice++) {
+		Hilo hilo;
+		hiloCrear(&hilo, (Puntero)reduccionGlobalAtenderWorker, direccion);
+	}
 
 }
 
-
-void reduccionGlobalIniciar(Mensaje* mensaje, Socket unSocket) {
+void reduccionGlobal(Mensaje* mensaje, Socket unSocket) {
 	ReduccionGlobal reduccion = reduccionGlobalRecibirDatos(mensaje->datos);
 	reduccionGlobalGenerarArchivo(reduccion);
 	int resultado = reduccionGlobalEjecutar(reduccion);
