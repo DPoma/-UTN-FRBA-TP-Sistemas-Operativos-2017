@@ -285,7 +285,7 @@ void reduccionLocal(Mensaje* m){
 	}
 	imprimirMensaje(archivoLog,mensaje->header.operacion==EXITO?"[EJECUCION]REDUCCION LOCAL EXISTOSA"
 			:"[ERROR]FALLO EN LA RE_D_UCCION LOCAL");
-	mensajeEnviar(socketYama,mensaje->header.operacion,NULL,0);
+	mensajeEnviar(socketYama,mensaje->header.operacion,&nodo,DIRSIZE);
 	mensajeDestruir(mensaje);
 	socketCerrar(sWorker);
 	tareasEnParalelo(-1);

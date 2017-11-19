@@ -101,7 +101,7 @@ void archivoConfigObtenerCampos();
 void yamaIniciar();
 void yamaAtender();
 void yamaPlanificar(Socket,void*,int);
-void actualizarTablaEstados(Entrada*,int);
+void actualizarTablaEstados(int,void*,int,Socket);
 void dibujarTablaEstados();
 int dirToNum(Dir);
 void retardo();

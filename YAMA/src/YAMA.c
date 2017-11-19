@@ -107,21 +107,21 @@ void yamaAtender() {
 					Mensaje* mensaje = mensajeRecibir(socketI);
 					if(mensaje->header.operacion==ERROR_ARCHIVO){
 						log_info(archivoLog,"[ERROR] El path no existe en el File System");
-						mensajeEnviar(*(Entero*)mensaje->datos, ABORTAR,"", 1);
-					}else if(mensaje->header.operacion==666){ //todo esto no debería existir? worker me tendría que ir pasando los errores
-						log_info(archivoLog,"[RECEPCION] Un nodo se desconeto");
-						char nodoDesconectado[20];
-						strncpy(nodoDesconectado,mensaje->datos,20);
-						bool nodoDesconectadoF(Worker* worker){
-							return stringIguales(worker->nodo.ip,nodoDesconectado);
-						}
-						((Worker*)list_find(workers,nodoDesconectadoF))->conectado=false;
-						void cazarEntradasDesconectadas(Entrada* entrada){
-							if(stringIguales(entrada->nodo.ip,nodoDesconectado)){
-								actualizarTablaEstados(entrada,FRACASO);
-							}
-						}
-						list_iterate(tablaEstados,cazarEntradasDesconectadas);
+						mensajeEnviar(*(Entero*)mensaje->datos,ABORTAR,NULL,0);
+//					}else if(mensaje->header.operacion==666){ //todo esto no debería existir? worker me tendría que ir pasando los errores
+//						log_info(archivoLog,"[RECEPCION] Un nodo se desconeto");
+//						char nodoDesconectado[20];
+//						strncpy(nodoDesconectado,mensaje->datos,20);
+//						bool nodoDesconectadoF(Worker* worker){
+//							return stringIguales(worker->nodo.ip,nodoDesconectado);
+//						}
+//						((Worker*)list_find(workers,nodoDesconectadoF))->conectado=false;
+//						void cazarEntradasDesconectadas(Entrada* entrada){
+//							if(stringIguales(entrada->nodo.ip,nodoDesconectado)){
+//								actualizarTablaEstados(entrada,FRACASO);
+//							}
+//						}
+						//list_iterate(tablaEstados,cazarEntradasDesconectadas);
 						//podría romper por estar recorriendo una lista con una funcion
 						//que puede modificar la lista, pero no deberia
 					}else if(mensaje->header.operacion==DESCONEXION){
@@ -159,14 +159,8 @@ void yamaAtender() {
 							servidor->maximoSocket--; //no debería romper nada
 						log_info(archivoLog, "[CONEXION] Proceso Master %d se ha desconectado",socketI);
 					}else{
-						Dir nodo=*((Dir*)mensaje->datos);
-						int32_t bloque=*((int32_t*)(mensaje->datos+DIRSIZE));
-						log_info(archivoLog,"[RECEPCION] actualizacion de master, %s",mensaje->header.operacion==EXITO?"exito":"fracaso");
-						bool buscarEntrada(Entrada* entrada){
-							return nodoIguales(entrada->nodo,nodo)&&entrada->bloque==bloque;
+						actualizarTablaEstados(*(int32_t*)mensaje->datos,mensaje->datos+INTSIZE,mensaje->header.operacion,socketI);
 						}
-						actualizarTablaEstados(list_find(tablaEstados,buscarEntrada),mensaje->header.operacion);
-					}
 					mensajeDestruir(mensaje);
 				}
 			}
@@ -345,7 +339,35 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 	log_info(archivoLog,"[] planificacion terminada");
 }
 
-void actualizarTablaEstados(Entrada* entradaA,int actualizando){
+void actualizarTablaEstados(int etapa,void* datos,int actualizando,Socket masterid){
+	Entrada* entradaA;
+	void registrarActualizacion(char* s){
+		log_info(archivoLog,"[RECEPCION] actualizacion de %s, %s",s,actualizando==EXITO?"exito":"fracaso");
+	}
+	if(etapa==TRANSFORMACION){
+		registrarActualizacion("transformacion");
+		Dir nodo=*((Dir*)datos);
+		int32_t bloque=*((int32_t*)(datos+DIRSIZE));
+		bool buscarEntrada(Entrada* entrada){
+			return nodoIguales(entrada->nodo,nodo)&&entrada->bloque==bloque;
+		}
+		entradaA=list_find(tablaEstados,buscarEntrada);
+	}else if(etapa==REDUCLOCAL){
+		registrarActualizacion("reduccion local");
+		Dir nodo=*((Dir*)datos);
+		bool buscarEntrada(Entrada* entrada){
+			return nodoIguales(entrada->nodo,nodo);
+		}
+		entradaA=list_find(tablaEstados,buscarEntrada);
+	}else{
+		if(etapa==REDUCGLOBAL) registrarActualizacion("reduccion global");
+		else registrarActualizacion("almacenado");
+		bool buscarEntrada(Entrada* entrada){
+			return entrada->masterid==masterid;
+		}
+		entradaA=list_find(tablaEstados,buscarEntrada);
+	}
+
 	void moverAUsados(bool(*cond)(void*)){
 		//mutex
 		Entrada* entrada;
@@ -361,7 +383,7 @@ void actualizarTablaEstados(Entrada* entradaA,int actualizando){
 		entrada->bloque=-1;
 	}
 	entradaA->estado=actualizando;
-	if(actualizando==FRACASO||actualizando==ABORTADO){
+	if(actualizando==FRACASO||actualizando==ABORTADO){//todo sacar ABORTADO?
 		void abortarJob(){
 			bool abortarEntrada(Entrada* entrada){
 				if(entrada->job==entradaA->job){
