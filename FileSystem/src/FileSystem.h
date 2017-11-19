@@ -392,7 +392,7 @@ void archivoRecuperarPersistencia();
 void archivoRecuperarPersistenciaDetallada(String nombre, int padre);
 bool archivoBinario(Archivo* archivo);
 int archivoLeer(Comando* comando);
-void archivoAlmacenar(Comando* comando);
+int archivoAlmacenar(Comando* comando);
 int archivoCantidadBloques(String ruta);
 bool archivoDisponible(Archivo* archivo);
 Archivo* archivoListaObtener(int indice);

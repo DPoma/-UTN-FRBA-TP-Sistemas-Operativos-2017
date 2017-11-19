@@ -41,7 +41,7 @@ void fileSystemAtenderProcesos() {
 	listenerWorker = socketCrearListener(configuracion->puertoWorker);
 	hiloCrear(&hiloDataNode, (Puntero)dataNodeListener, NULL);
 	hiloCrear(&hiloYama, (Puntero)yamaListener, NULL);
-	//hiloCrear(&hiloWorker, (Puntero)workerListener, NULL);
+	hiloCrear(&hiloWorker, (Puntero)workerListener, NULL);
 }
 
 void fileSystemFinalizar() {
@@ -297,7 +297,6 @@ void yamaFinalizar(int* estado) {
 
 void yamaEnviarBloques(Puntero datos) {
 	int idMaster = *(Entero*)datos;
-	printf("%s",datos+sizeof(Entero));
 	String rutaDecente = stringTomarDesdePosicion(datos+sizeof(Entero), MAX_PREFIJO);
 	//todo por que toma un tamaño fijo aca? no deberia ser el tamaño del mensaje - INTSIZE?
 	Archivo* archivo = archivoBuscarPorRuta(rutaDecente);
@@ -311,7 +310,6 @@ void yamaEnviarBloques(Puntero datos) {
 	BloqueYama* bloques = yamaConvertirArchivo(archivo, idMaster);
 	mensajeEnviar(socketYama, ENVIAR_BLOQUES, bloques, sizeof(Entero)+sizeof(BloqueYama)*cantidad);
 	memoriaLiberar(bloques);
-	printf("ENVIE %d \n",sizeof(Entero)+sizeof(BloqueYama)*cantidad );
 }
 
 BloqueYama* yamaConvertirArchivo(Archivo* archivo, Entero idMaster) {
@@ -340,10 +338,10 @@ BloqueYama yamaConvertirBloque(BloqueWorker* bloque) {
 	bloqueYama.numeroBloqueCopia2 = copia2->bloqueNodo;
 	bloqueYama.bytesUtilizados = bloque->bytesUtilizados;
 
-	printf("bloque 1 %s\n", direccion1.ip);
-	printf("bloque 1 %s\n", direccion1.puerto);
-	printf("bloque 2 %s\n", direccion2.ip);
-	printf("bloque 2 %s\n", direccion2.puerto);
+	printf("ip bloque 1 %s\n", direccion1.ip);
+	printf("puerto bloque 1 %s\n", direccion1.puerto);
+	printf("ip bloque 2 %s\n", direccion2.ip);
+	printf("puerto bloque 2 %s\n", direccion2.puerto);
 	printf("numero b1 %d\n", bloqueYama.numeroBloqueCopia1);
 	printf("numero b2 %d\n", bloqueYama.numeroBloqueCopia2);
 	printf("bytes utiles %d\n", bloqueYama.bytesUtilizados);
@@ -352,6 +350,41 @@ BloqueYama yamaConvertirBloque(BloqueWorker* bloque) {
 }
 
 //--------------------------------------- Funciones de Worker -------------------------------------
+
+Comando workerConfigurarComando(Mensaje* mensaje) {
+	Comando comando;
+	comando.argumentos[0] = CPFROM;
+	comando.argumentos[1] = FLAG_T;
+	int tamanioLocal = (Entero)mensaje->datos;
+	comando.argumentos[2] = stringCrear(tamanioLocal);
+	memcpy(comando.argumentos[2], mensaje->datos+sizeof(Entero), tamanioLocal);
+	int tamanioYama;
+	memcpy(&tamanioYama, mensaje->datos+sizeof(Entero)+tamanioLocal, sizeof(Entero));
+	comando.argumentos[3] = stringCrear(tamanioYama);
+	memcpy(comando.argumentos[3], mensaje->datos+sizeof(Entero)*2+tamanioLocal, tamanioYama);
+	return comando;
+}
+
+void workerAvisarAlmacenado(int resultado, Socket unSocket) {
+	if(resultado != ERROR)
+		mensajeEnviar(unSocket, EXITO, NULL, 0);
+	else
+		mensajeEnviar(unSocket, FRACASO, NULL, 0);
+}
+
+void workerListener() {
+	hiloDetach(pthread_self());
+	while(estadoControlIgualA(ACTIVADO)) {
+		Socket socketWorker = socketAceptar(listenerWorker, ID_WORKER);
+		Mensaje* mensaje = mensajeRecibir(socketWorker);
+		Comando comando = workerConfigurarComando(mensaje);
+		mensajeDestruir(mensaje);
+		int resultado = archivoAlmacenar(&comando);
+		memoriaLiberar(comando.argumentos[3]);
+		memoriaLiberar(comando.argumentos[4]);
+		workerAvisarAlmacenado(resultado, socketWorker);
+	}
+}
 
 //--------------------------------------- Funciones de Consola -------------------------------------
 
@@ -1792,37 +1825,37 @@ int archivoAlmacenarTexto(Archivo* archivo, File file) {
 	return estado;
 }
 
-void archivoAlmacenar(Comando* comando) {
+int archivoAlmacenar(Comando* comando) {
 	if(consolaflagInvalido(comando->argumentos[1])) {
 		imprimirMensaje(archivoLog, "[ERROR] Flag invalido");
-		return;
+		return ERROR;
 	}
 	if(!rutaValida(comando->argumentos[3])) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
-		return;
+		return ERROR;
 	}
 	rutaYamaDecente(comando, 3);
 	Directorio* directorio = directorioBuscar(comando->argumentos[3]);
 	if(directorio == NULL) {
 		imprimirMensaje(archivoLog, "[ERROR] El directorio ingresado no existe");
-		return;
+		return ERROR;
 	}
 	String nombreArchivo = rutaObtenerUltimoNombre(comando->argumentos[2]);
 	if(archivoExiste(directorio->identificador, nombreArchivo)) {
 		imprimirMensaje(archivoLog, "[ERROR] Un archivo con ese nombre ya existe en el directorio destino");
 		memoriaLiberar(nombreArchivo);
-		return;
+		return ERROR;
 	}
 	if(directorioExiste(directorio->identificador, nombreArchivo)) {
 		imprimirMensaje(archivoLog, "[ERROR] Un directorio con ese nombre ya existe en el directorio destino");
 		memoriaLiberar(nombreArchivo);
-		return;
+		return ERROR;
 	}
 	File file = fileAbrir(comando->argumentos[2], LECTURA);
 	if(file == NULL) {
 		imprimirMensaje(archivoLog, "[ERROR] El archivo a copiar no existe");
 		memoriaLiberar(nombreArchivo);
-		return;
+		return ERROR;
 	}
 	//TODO ver
 	int cantidadBloques = nodoBloquesLibresTotales();
@@ -1831,7 +1864,7 @@ void archivoAlmacenar(Comando* comando) {
 		imprimirMensaje(archivoLog, "[ERROR] No hay suficientes bloques libres");
 		fileCerrar(file);
 		memoriaLiberar(nombreArchivo);
-		return;
+		return ERROR;
 	}
 	Archivo* archivo = archivoCrear(nombreArchivo, directorio->identificador, comando->argumentos[1]);
 	memoriaLiberar(nombreArchivo);
@@ -1842,7 +1875,7 @@ void archivoAlmacenar(Comando* comando) {
 		estado = archivoAlmacenarTexto(archivo, file);
 	fileCerrar(file);
 	archivoControlar(archivo, estado);
-
+	return estado;
 }
 
 int archivoLeer(Comando* comando) {

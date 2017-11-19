@@ -78,6 +78,7 @@ void masterRealizarOperacion(Socket unSocket) {
 		case TRANSFORMACION: transformacion(mensaje, unSocket); break;
 		case REDUCCION_LOCAL: reduccionLocal(mensaje, unSocket); break;
 		case REDUCCION_GLOBAL: reduccionGlobal(mensaje, unSocket); break;
+		case ALMACENADO_FINAL: almacenadoFinal(mensaje, unSocket); break;
 	}
 	mensajeDestruir(mensaje);
 	exit(EXIT_SUCCESS);
@@ -417,6 +418,33 @@ void reduccionGlobalExito(Socket unSocket) {
 void reduccionGlobalFracaso(Socket unSocket) {
 	imprimirMensaje(archivoLog,"[REDUCCION GLOBAL] La operacion fracaso");
 	mensajeEnviar(unSocket, FRACASO, NULL, 0);
+}
+
+//--------------------------------------- Funciones de Almacenado Final -------------------------------------
+
+void almacenadoFracaso(Socket unSocket) {
+	imprimirMensaje(archivoLog,"[ALMACENADO FINAL] La operacion se realizo con exito");
+	mensajeEnviar(unSocket, EXITO, NULL, 0);
+}
+
+void almacenadoExitoso(Socket unSocket) {
+	imprimirMensaje(archivoLog,"[ALMACENADO FINAL] La operacion fracaso");
+	mensajeEnviar(unSocket, FRACASO, NULL, 0);
+}
+
+void almacenadoTerminar(int resultado, Socket unSocket) {
+	if(resultado == EXITO)
+		almacenadoExitoso(unSocket);
+	else
+		almacenadoFracaso(unSocket);
+}
+
+void almacenadoFinal(Mensaje* mensaje, Socket socketMaster) {
+	Socket socketFileSystem =socketCrearCliente(configuracion->ipFileSytem, configuracion->puertoFileSystem, ID_WORKER);
+	mensajeEnviar(socketFileSystem, ALMACENADO_FINAL, mensaje->datos, mensaje->header.tamanio);
+	Mensaje* mensajeOperacion = mensajeRecibir(socketFileSystem);
+	almacenadoTerminar(mensajeOperacion->header.operacion, socketMaster);
+	mensajeDestruir(mensajeOperacion);
 }
 
 //--------------------------------------- Funciones de DataBin -------------------------------------

@@ -137,13 +137,20 @@ void reduccionLocalFracaso(Socket unSocket);
 String reduccionLocalCrearScript(ReduccionLocal reduccion);
 String reduccionLocalObtenerTemporales(ReduccionLocal reduccion);
 
-//--------------------------------------- Funciones de Reduccion Local -------------------------------------
+//--------------------------------------- Funciones de Reduccion Global -------------------------------------
 
 void reduccionGlobal(Mensaje* mensaje, Socket unSocket);
 int reduccionGlobalEjecutar(ReduccionGlobal reduccion);
 void reduccionGlobalTerminar(int resultado, Socket unSocket);
 void reduccionGlobalExito(Socket unSocket);
 void reduccionGlobalFracaso(Socket unSocket);
+
+//--------------------------------------- Funciones de Almacenado Final -------------------------------------
+
+void almacenadoFracaso(Socket unSocket);
+void almacenadoExitoso(Socket unSocket);
+void almacenadoTerminar(int resultado, Socket unSocket);
+void almacenadoFinal(Mensaje* mensaje, Socket socketMaster);
 
 //--------------------------------------- Funciones de DataBin -------------------------------------
 
