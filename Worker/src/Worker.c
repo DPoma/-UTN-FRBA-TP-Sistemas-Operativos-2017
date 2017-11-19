@@ -116,7 +116,6 @@ void masterAceptarConexion() {
 }
 
 void masterAtenderOperacion(Socket unSocket) {
-	int estado;
 	pid_t pid = fork();
 	if(pid == 0) {
 		socketCerrar(listenerMaster);
@@ -145,6 +144,55 @@ void masterEjecutarOperacion(Socket unSocket) {
 
 //--------------------------------------- Funciones de Transformacion -------------------------------------
 
+void transformacionIniciar(Mensaje* mensaje, Socket unSocket) {
+	Transformacion* transformacion = memoriaAlocar(sizeof(Transformacion));
+	transformacionRecibirScript(transformacion, mensaje);
+	while(ACTIVADO) {
+		Mensaje* mensaje = mensajeRecibir(unSocket);
+		if (mensaje->header.operacion==EXITO) {
+			imprimirMensaje(archivoLog, "[CONEXION] Fin de envio de bloques a transformar");
+			socketCerrar(unSocket);
+			break;
+		}
+		else {
+			transformacionRecibirBloque(transformacion, mensaje->datos);
+			transformacionCrearNieto(transformacion, unSocket);
+		}
+	}
+	transformacionDestruir(transformacion);
+}
+
+int transformacionEjecutar(Transformacion* transformacion) {
+	String pathBloque = transformacionCrearBloqueTemporal(transformacion);
+	String pathScript = transformacionCrearScriptTemporal(transformacion);
+	String pathDestino = string_from_format("%s%s", RUTA_TEMPS, transformacion->archivoTemporal);
+	String comando = string_from_format("cat %s | sh %s | sort > %s", pathBloque, pathScript, pathDestino);
+	int resultado = system(comando);
+	fileLimpiar(pathBloque);
+	fileLimpiar(pathScript);
+	memoriaLiberar(pathScript);
+	memoriaLiberar(pathDestino);
+	memoriaLiberar(pathBloque);
+	return resultado;
+}
+
+void transformacionTerminar(int resultado, Socket unSocket, Entero numeroBloque) {
+	if(resultado != ERROR)
+		transformacionExito(numeroBloque, unSocket);
+	else
+		transformacionFracaso(numeroBloque, unSocket);
+}
+
+void transformacionExito(Entero numeroBloque, Socket unSocket) {
+	imprimirMensaje1(archivoLog,"[TRANSFORMACION] Transformacion exitosa en bloque N°%i de Master d", (int*)numeroBloque);
+	mensajeEnviar(unSocket, EXITO, &numeroBloque, sizeof(Entero));
+}
+
+void transformacionFracaso(Entero numeroBloque, Socket unSocket) {
+	imprimirMensaje(archivoLog,"[TRANSFORMACION] transformacion Fracaso");
+	mensajeEnviar(unSocket, FRACASO, &numeroBloque, sizeof(Entero));
+}
+
 void transformacionRecibirScript(Transformacion* transformacion, Mensaje* mensaje) {
 	transformacion->sizeScript = mensaje->header.tamanio;
 	transformacion->script = memoriaAlocar(transformacion->sizeScript);
@@ -157,60 +205,24 @@ void transformacionRecibirBloque(Transformacion* transformacion, Puntero datos) 
 	memcpy(transformacion->archivoTemporal, datos+sizeof(Entero)*2, 12);
 }
 
-void transformacionIniciar(Mensaje* mensaje, Socket unSocket) {
-	Transformacion* transformacion = memoriaAlocar(sizeof(Transformacion));
-	transformacionRecibirScript(transformacion, mensaje);
-	while(ACTIVADO) {
-		Mensaje* mensaje = mensajeRecibir(unSocket);
-		if (mensaje->header.operacion==EXITO) {
-			imprimirMensaje(archivoLog, "[CONEXION] Fin de envio de bloques a transformar");
-			socketCerrar(unSocket);
-			break;
-		}
-		else {
-		transformacionRecibirBloque(transformacion, mensaje->datos);
-		int estado;
-		pid_t pid = fork();
-		if(pid == 0) {
-			int resultado = transformacionEjecutar(transformacion);
-			if(resultado != ERROR)
-				transformacionExito(transformacion->numeroBloque, unSocket);
-			else
-				transformacionFracaso(transformacion->numeroBloque, unSocket);
-			exit(0);
-		}
-		else if(pid > 0)
-			waitpid(pid, &estado, NULO);
-		}
+void transformacionCrearNieto(Transformacion* transformacion, Socket unSocket) {
+	int estado;
+	pid_t pid = fork();
+	if(pid == 0) {
+		int resultado = transformacionEjecutar(transformacion);
+		transformacionTerminar(resultado, unSocket, transformacion->numeroBloque);
+		exit(EXIT_SUCCESS);
 	}
+	else if(pid > 0)
+		waitpid(pid, &estado, NULO);
 }
 
-int transformacionEjecutar(Transformacion* transformacion) {
-	String pathBloque = transformacionBloqueTemporal(transformacion);
-	String pathScript = transformacionScriptTemporal(transformacion);
-	String pathDestino = string_from_format("%s%s", RUTA_TEMPS, transformacion->archivoTemporal);
-	String comando = string_from_format("cat %s | sh %s | sort > %s", pathBloque, pathScript, pathDestino);
-	int resultado = system(comando);
-	fileLimpiar(pathBloque);
-	fileLimpiar(pathScript);
-	memoriaLiberar(pathScript);
-	memoriaLiberar(pathDestino);
-	memoriaLiberar(pathBloque);
-	return resultado;
+void transformacionDestruir(Transformacion* transformacion) {
+	memoriaLiberar(transformacion->script);
+	memoriaLiberar(transformacion);
 }
 
-void transformacionExito(Entero numeroBloque, Socket unSocket) {
-	imprimirMensaje1(archivoLog,"[TRANSFORMACION] Transformacion exitosa en bloque N°%i de Master d", (int*)numeroBloque);
-	mensajeEnviar(unSocket, EXITO, &numeroBloque, sizeof(Entero));
-
-}
-
-void transformacionFracaso(Entero numeroBloque, Socket unSocket) {
-	imprimirMensaje(archivoLog,"[TRANSFORMACION] transformacion Fracaso");
-	mensajeEnviar(unSocket, FRACASO, &numeroBloque, sizeof(Entero));
-}
-
-String transformacionBloqueTemporal(Transformacion* transformacion) {
+String transformacionCrearBloqueTemporal(Transformacion* transformacion) {
 	String path = string_from_format("%sbloqueTemporal%i", RUTA_TEMPS, transformacion->numeroBloque);
 	File file = fileAbrir(path, ESCRITURA);
 	Puntero puntero = getBloque(transformacion->numeroBloque);
@@ -219,12 +231,93 @@ String transformacionBloqueTemporal(Transformacion* transformacion) {
 	return path;
 }
 
-String transformacionScriptTemporal(Transformacion* transformacion) {
+String transformacionCrearScriptTemporal(Transformacion* transformacion) {
 	String path = string_from_format("%sscriptTemporal%i", RUTA_TEMPS, transformacion->numeroBloque);
 	File file = fileAbrir(path , ESCRITURA);
 	fwrite(transformacion->script, sizeof(char), transformacion->sizeScript, file);
 	fileCerrar(file);
 	return path;
+}
+
+//--------------------------------------- Funciones de Reduccion -------------------------------------
+
+void reduccionLocalIniciar(Mensaje* mensaje, Socket unSocket) {
+	ReduccionLocal reduccion = reduccionLocalRecibirTemporales(mensaje->datos);
+	String temporales = reduccionLocalObtenerTemporales(reduccion);
+	printf("%s\n", temporales); //TODO
+	int resultado = reduccionLocalEjecutar(reduccion, temporales);
+	reduccionLocalTerminar(resultado, unSocket);
+}
+
+ReduccionLocal reduccionLocalRecibirTemporales(Puntero datos) {
+	ReduccionLocal reduccion;
+	memcpy(&reduccion.sizeScript, datos, sizeof(Entero));
+	reduccion.script = memoriaAlocar(reduccion.sizeScript);
+	memcpy(reduccion.script, datos+sizeof(Entero), reduccion.sizeScript);
+	memcpy(&reduccion.cantidadTemporales,datos+INTSIZE+reduccion.sizeScript,INTSIZE);//origen
+	reduccion.temporales = memoriaAlocar(reduccion.cantidadTemporales*TEMPSIZE);
+	memcpy(reduccion.temporales, datos+INTSIZE*2+reduccion.sizeScript, reduccion.cantidadTemporales*TEMPSIZE);
+	memcpy(reduccion.temporalReduccion, datos+INTSIZE*2+reduccion.sizeScript+reduccion.cantidadTemporales*TEMPSIZE, TEMPSIZE);
+	return reduccion;
+}
+
+int reduccionLocalEjecutar(ReduccionLocal reduccion, String temporales) {
+	String archivoApareado = string_from_format("%s%sApareado", RUTA_TEMPS, reduccion.temporalReduccion);
+	String archivoReduccion = string_from_format("%s%s", RUTA_TEMPS, reduccion.temporalReduccion);
+	String archivoScript = reduccionLocalCrearScript(&reduccion);
+	String comando = string_from_format("chmod 0755 %s", archivoScript);
+	int resultado = system(comando);
+	memoriaLiberar(comando);
+	if(resultado != ERROR) {
+		comando = string_from_format("sort -m %s | cat | %s > %s", temporales, archivoScript, archivoReduccion);
+		resultado = system(comando);
+	}
+	//fileLimpiar(archivoScript);
+	//fileLimpiar(archivoApareado);
+	memoriaLiberar(comando);
+	memoriaLiberar(archivoApareado);
+	memoriaLiberar(archivoReduccion);
+	memoriaLiberar(archivoScript);
+	memoriaLiberar(temporales);
+	return resultado;
+}
+
+void reduccionLocalTerminar(int resultado, Socket unSocket) {
+	if(resultado != ERROR)
+		reduccionLocalExito(unSocket);
+	else
+		reduccionLocalFracaso(unSocket);
+}
+
+void reduccionLocalExito(Socket unSocket) {
+	imprimirMensaje(archivoLog,"[REDUCCION LOCAL] La operacion termino con exito");
+	mensajeEnviar(unSocket, EXITO, NULL, 0);
+}
+
+void reduccionLocalFracaso(Socket unSocket) {
+	imprimirMensaje(archivoLog,"[REDUCCION LOCAL] La operacion fracaso");
+	mensajeEnviar(unSocket, FRACASO, NULL, 0);
+}
+
+String reduccionLocalCrearScript(ReduccionLocal* reduccion) {
+	//TODO ver .pl
+	String path = string_from_format("%s./scriptTemporal", RUTA_TEMPS);
+	File file = fileAbrir(path , ESCRITURA);
+	fwrite(reduccion->script, sizeof(char), reduccion->sizeScript-1, file);
+	fileCerrar(file);
+	return path;
+}
+
+String reduccionLocalObtenerTemporales(ReduccionLocal reduccion) {
+	String temporales = stringCrear((TEMPSIZE+stringLongitud(RUTA_TEMPS))*reduccion.cantidadTemporales + reduccion.cantidadTemporales-1);
+	int indice;
+	for(indice=0; indice < reduccion.cantidadTemporales; indice++) {
+		String buffer = reduccion.temporales+TEMPSIZE*indice;
+		stringConcatenar(temporales, RUTA_TEMPS);
+		stringConcatenar(temporales, buffer);
+		stringConcatenar(temporales, " ");
+	}
+	return temporales;
 }
 
 //--------------------------------------- Funciones de DataBin -------------------------------------
@@ -237,7 +330,7 @@ void dataBinConfigurar() {
 
 void dataBinAbrir() {
 	dataBin = fileAbrir(configuracion->rutaDataBin, LECTURA);
-	if(dataBin == NULL){
+	if(dataBin == NULL) {
 		imprimirMensaje(archivoLog,ROJO"[ERROR] No se pudo abrir el archivo data.bin"BLANCO);
 		exit(EXIT_FAILURE);
 	}
@@ -282,74 +375,6 @@ BloqueWorker getBloque(Entero numeroBloque) {
 	return bloque;
 }
 
-String reduccionScriptTemporal(ReduccionLocal* reduccion) {
-	String path = string_from_format("%s./scriptTemporal.pl", RUTA_TEMPS);
-	File file = fileAbrir(path , ESCRITURA);
-	fwrite(reduccion->script, sizeof(char), reduccion->sizeScript-1, file);
-	fileCerrar(file);
-	return path;
-}
-
-ReduccionLocal reduccionLocalRecibirDatos(Puntero datos) {
-	ReduccionLocal reduccion;
-	memcpy(&reduccion.sizeScript, datos, sizeof(Entero));
-	reduccion.script = memoriaAlocar(reduccion.sizeScript);
-	memcpy(reduccion.script, datos+sizeof(Entero), reduccion.sizeScript);
-	memcpy(&reduccion.cantidadTemporales,datos+INTSIZE+reduccion.sizeScript,INTSIZE);//origen
-	reduccion.temporales = memoriaAlocar(reduccion.cantidadTemporales*TEMPSIZE);
-	memcpy(reduccion.temporales, datos+INTSIZE*2+reduccion.sizeScript, reduccion.cantidadTemporales*TEMPSIZE);
-	memcpy(reduccion.temporalReduccion, datos+INTSIZE*2+reduccion.sizeScript+reduccion.cantidadTemporales*TEMPSIZE, TEMPSIZE);
-	return reduccion;
-}
-
-
-
-void reduccionLocalFracaso(int resultado, Socket unSocket) {
-	if(resultado == ERROR) {
-		imprimirMensaje(archivoLog,"[REDUCCION LOCAL] La operacion fracaso");
-		mensajeEnviar(unSocket, FRACASO, NULL, 0);
-	}
-}
-
-void reduccionLocalIniciar(Mensaje* mensaje, Socket unSocket){
-	ReduccionLocal reduccion = reduccionLocalRecibirDatos(mensaje->datos);
-	String temporales = stringCrear((TEMPSIZE+stringLongitud(RUTA_TEMPS))*reduccion.cantidadTemporales + reduccion.cantidadTemporales-1);
-	int indice;
-	for(indice=0; indice < reduccion.cantidadTemporales; indice++) {
-		String buffer = reduccion.temporales+TEMPSIZE*indice;
-		stringConcatenar(temporales, RUTA_TEMPS);
-		stringConcatenar(temporales, buffer);
-		stringConcatenar(temporales, " ");
-	}
-	String archivoApareado = string_from_format("%s%sApareado", RUTA_TEMPS, reduccion.temporalReduccion);
-	String archivoReduccion = string_from_format("%s%s", RUTA_TEMPS, reduccion.temporalReduccion);
-	String scriptPath = reduccionScriptTemporal(&reduccion);
-	String comando = string_from_format("chmod 0755 %s", scriptPath);
-	int resultado = system(comando);
-	reduccionLocalFracaso(resultado, unSocket);
-	memoriaLiberar(comando);
-	if(resultado != ERROR) {
-		comando = string_from_format("sort -m %s > %s", temporales, archivoApareado);
-		String comando2 = string_from_format("cat %s | %s > %s", archivoApareado, scriptPath, archivoReduccion);
-		printf("%s\n", temporales);
-		printf("%s\n", scriptPath);
-		printf("%s\n", archivoReduccion);
-		resultado = system(comando);
-		system(comando2);
-		reduccionLocalFracaso(resultado, unSocket);
-		if(resultado != ERROR) {
-			imprimirMensaje(archivoLog,"[REDUCCION LOCAL] Operacion terminada existosamente");
-			mensajeEnviar(unSocket, EXITO, NULL, 0);
-		}
-	}
-	//fileLimpiar(scriptPath);
-	//fileLimpiar(archivoApareado);
-	memoriaLiberar(archivoApareado);
-	memoriaLiberar(archivoReduccion);
-	memoriaLiberar(scriptPath);
-	memoriaLiberar(temporales);
-}
-
 /*
 //2da etapa
 int reduccionLocal(char* codigo,int sizeCodigo,char* origen,char* destino){
@@ -376,7 +401,7 @@ int reduccionLocal(char* codigo,int sizeCodigo,char* origen,char* destino){
 	}
 	return 0;
 }
-*/
+
 
 locOri* getOrigenesLocales(char* origen){
 	locOri* origenes;
@@ -421,10 +446,10 @@ char* appendL(locOri* origen){
 		VRegistros[i]=NULL;
 		VLineasiguiente[i]=1;
 		arch = fopen(origen->ruta[i],"r");
-		/*fseek(arch,MB*origen,SEEK_SET);
+		fseek(arch,MB*origen,SEEK_SET);
 		int i;
 		char c;
-		int cc = 0;*/
+		int cc = 0
 		c = fgetc(arch);
 		if(c=="\n"){
 			VLineasiguiente[i] = VLineasiguiente[i] +1;
@@ -535,7 +560,7 @@ int registroMayorOrden(char** VRegistros,int cant){
 	}
 	return posicion;
 }
-/*
+
 //3ra etapa
 int reduccionGlobal(char* codigo, int sizeCodigo,char* origen,char* destino){
 	lGlobOri* listaOri;
@@ -569,7 +594,7 @@ int reduccionGlobal(char* codigo, int sizeCodigo,char* origen,char* destino){
 	//for(i=0;(i-1)==origenes->cant;i++){
 	return 0;
 }
-*/
+
 
 lGlobOri* getOrigenesGlobales(char* origen){
 	lGlobOri* origenes;
@@ -668,7 +693,7 @@ char* appendG(lGlobOri* origenes){
 		}
 
 		//etapa local
-		/*VRegistros[i]=NULL;
+		VRegistros[i]=NULL;
 		VLineasiguiente[i]=1;
 		fseek(arch,MB*origen,SEEK_SET);
 		int i;
@@ -684,7 +709,7 @@ char* appendG(lGlobOri* origenes){
 			buffer = realloc(buffer,sizeof(char)*(cc+1));
 			buffer[cc]=c;
 			cc++;
-		}*/
+		}
 
 		if(buffer!=NULL){
 			VRegistros[i]= realloc(VRegistros[i],sizeof(char)*(cc+1));
@@ -830,3 +855,4 @@ datosReg* PasaRegistro(char* ruta,int NroReg){
 	Reg->NumReg=NroReg+1;
 	return Reg;
 }
+*/

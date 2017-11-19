@@ -55,28 +55,6 @@ typedef struct {
 	char temporalReduccion[12];
 } ReduccionLocal;
 
-typedef struct {
-	char* ruta;
-	char* ip;
-	int puerto;
-} globOri;
-
-typedef struct {
-	int cant;
-	void** oris;
-} lGlobOri;
-
-typedef struct {
-	int cant;
-	char** ruta;
-} locOri;
-
-typedef struct {
-	int sizebuffer;
-	char* buffer;
-	int NumReg;
-} datosReg;
-
 typedef void* BloqueWorker;
 
 //--------------------------------------- Globales -------------------------------------
@@ -88,7 +66,6 @@ Socket listenerWorker;
 Socket listenerMaster;
 File dataBin;
 Puntero punteroDataBin;
-int pid;
 int estadoWorker;
 int dataBinBloques;
 int dataBinTamanio;
@@ -111,6 +88,7 @@ void configuracionSenial(int senial);
 void configuracionIniciar();
 
 //--------------------------------------- Funciones de Master -------------------------------------
+
 void masterAceptarConexion();
 void masterAtenderOperacion(Socket unSocket);
 void masterEjecutarOperacion(Socket unSocket);
@@ -119,11 +97,25 @@ void masterEjecutarOperacion(Socket unSocket);
 
 int transformacionEjecutar(Transformacion* transformacion);
 void transformacionIniciar(Mensaje* mensaje, Socket unSocket);
-int transformacionEjecutar(Transformacion* transformacion);
+void transformacionDestruir(Transformacion* transformacion);
 void transformacionExito(Entero numeroBloque, Socket unSocket);
 void transformacionFracaso(Entero numeroBloque, Socket unSocket);
-String transformacionBloqueTemporal(Transformacion* transformacion);
-String transformacionScriptTemporal(Transformacion* transformacion);
+void transformacionRecibirScript(Transformacion* transformacion, Mensaje* mensaje);
+void transformacionRecibirBloque(Transformacion* transformacion, Puntero datos);
+void transformacionCrearNieto(Transformacion* transformacion, Socket unSocket);
+String transformacionCrearBloqueTemporal(Transformacion* transformacion);
+String transformacionCrearScriptTemporal(Transformacion* transformacion);
+
+//--------------------------------------- Funciones de Reduccion Local -------------------------------------
+
+void reduccionLocalIniciar(Mensaje* mensaje, Socket unSocket);
+ReduccionLocal reduccionLocalRecibirTemporales(Puntero datos);
+int reduccionLocalEjecutar(ReduccionLocal reduccion, String temporales);
+void reduccionLocalTerminar(int resultado, Socket unSocket);
+void reduccionLocalExito(Socket unSocket);
+void reduccionLocalFracaso(Socket unSocket);
+String reduccionLocalCrearScript(ReduccionLocal* reduccion);
+String reduccionLocalObtenerTemporales(ReduccionLocal reduccion);
 
 //--------------------------------------- Funciones de DataBin -------------------------------------
 
@@ -135,10 +127,40 @@ BloqueWorker bloqueBuscar(Entero numeroBloque);
 BloqueWorker getBloque(Entero numeroBloque);
 
 
-String reduccionScriptTemporal(ReduccionLocal* reduccion);
 
 
-int reduccionLocalEjecutar(char*,char*,char*);
+
+
+
+
+
+
+
+
+
+
+typedef struct {
+	char* ruta;
+	char* ip;
+	int puerto;
+} globOri;
+
+typedef struct {
+	int cant;
+	void** oris;
+} lGlobOri;
+
+typedef struct {
+	int cant;
+	char** ruta;
+} locOri;
+
+typedef struct {
+	int sizebuffer;
+	char* buffer;
+	int NumReg;
+} datosReg;
+
 locOri* getOrigenesLocales(char*);
 char* appendL(locOri*);
 int reduccionGlobalEjecutar(char*,char*,char*);

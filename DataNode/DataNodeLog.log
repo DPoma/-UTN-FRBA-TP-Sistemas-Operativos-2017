@@ -1,0 +1,5 @@
+[INFO] 10:28:46:632 DataNode/(4316:4316): [CONFIGURACION] Nombre Nodo: NODO1
+[INFO] 10:28:46:652 DataNode/(4316:4316): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data1.bin
+[INFO] 10:28:46:658 DataNode/(4316:4316): [DATABIN] Cantidad de bloques 100
+[INFO] 10:28:46:689 DataNode/(4316:4316): [CONEXION] Estableciendo conexion con File System (IP: 127.0.0.1 | Puerto 5040)
+[INFO] 10:28:46:693 DataNode/(4316:4316): [CONEXION] Conexion establecida con el File System
