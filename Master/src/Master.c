@@ -283,6 +283,7 @@ void reduccionLocal(Mensaje* m){
 
 	Mensaje* mensaje = mensajeRecibir(sWorker);
 	if(mensaje->header.operacion==DESCONEXION){
+		mensaje->header.operacion=FRACASO;
 		puts("AHHHH");
 	}
 	imprimirMensaje(archivoLog,mensaje->header.operacion==EXITO?"[EJECUCION]REDUCCION LOCAL EXISTOSA"

@@ -455,7 +455,7 @@ void actualizarTablaEstados(int etapa,void* datos,int actualizando,Socket master
 			Entrada reducGlobal;
 			darDatosEntrada(&reducGlobal);
 			darPathTemporal(&reducGlobal.pathTemporal,'g');
-			reducGlobal.etapa=REDUCLOCAL;
+			reducGlobal.etapa=REDUCGLOBAL;
 			Dir nodoMenorCarga=entradaA->nodo;
 			int menorCargaI=1000; //
 			void menorCarga(Worker* worker){
