@@ -12,7 +12,7 @@
 
 int main(void) {
 	workerIniciar();
-	workerAtenderMasters();
+	workerAtenderProcesos();
 	workerFinalizar();
 	return EXIT_SUCCESS;
 }
@@ -24,16 +24,80 @@ void workerIniciar() {
 	estadoWorker = ACTIVADO;
 }
 
-void workerAtenderMasters() {
+void workerAtenderProcesos() {
 	listenerMaster = socketCrearListener(configuracion->puertoMaster);
 	listenerWorker = socketCrearListener(configuracion->puertoWorker);
-	while(estadoWorker)
-		masterAceptarConexion();
+	Hilo listenerMaster;
+	Hilo listenerWorker;
+	hiloCrear(&listenerMaster, (Puntero)workerAtenderMasters, NULL);
+	hiloCrear(&listenerWorker, (Puntero)workerAtenderWorkers, NULL);
 }
 
-void workerFinalizar() {
-	imprimirMensaje(archivoLog, "[EJECUCION] Proceso Worker finalizado");
+void workerAtenderMasters() {
+	while(estadoWorker)
+		workerAceptarMaster();
 }
+
+void workerAtenderWorkers() {
+	while(estadoWorker)
+		workerAceptarWorker();
+}
+
+void workerAceptarMaster() {
+	Socket nuevoSocket = socketAceptar(listenerMaster, ID_MASTER);
+	if(nuevoSocket != ERROR)
+		masterAtenderOperacion(nuevoSocket);
+	else
+		imprimirMensaje(archivoLog, "[ERROR] Error en el accept(), hoy no es tu dia papu");
+}
+
+void workerAceptarWorker() {
+	Socket nuevoSocket = socketAceptar(listenerWorker, ID_WORKER);
+	if(nuevoSocket != ERROR)
+		workerAtenderOperacion(nuevoSocket);
+	else
+		imprimirMensaje(archivoLog, "[ERROR] Error en el accept(), hoy no es tu dia papu");
+}
+
+void masterAtenderOperacion(Socket unSocket) {
+	pid_t pid = fork();
+	if(pid == 0) {
+		socketCerrar(listenerMaster);
+		masterRealizarOperacion(unSocket);
+	}
+	else if(pid > 0)
+		socketCerrar(unSocket);
+	else
+		imprimirMensaje(archivoLog, "[ERROR] Error en el fork(), estas jodido");
+}
+
+void masterRealizarOperacion(Socket unSocket) {
+	imprimirMensaje(archivoLog, "[CONEXION] Proceso Master conectado exitosamente");
+	Mensaje* mensaje = mensajeRecibir(unSocket);
+	switch(mensaje->header.operacion) {
+		case DESCONEXION: imprimirMensaje(archivoLog, "[AVISO] El Master  se desconecto"); break;
+		case TRANSFORMACION: transformacion(mensaje, unSocket); break;
+		case REDUCCION_LOCAL: reduccionLocal(mensaje, unSocket); break;
+		case REDUCCION_GLOBAL: reduccionGlobal(mensaje, unSocket); break;
+	}
+	mensajeDestruir(mensaje);
+	exit(EXIT_SUCCESS);
+}
+
+void workerAtenderOperacion(Socket socketWorker) {
+	Mensaje* mensaje = mensajeRecibir(socketWorker);
+	String pathReduccionLocal = string_from_format("%s%s", RUTA_TEMP, (String)mensaje->datos);
+	mensajeDestruir(mensaje); //TODO puede morir aca ver
+	File archivoReduccionLocal = fileAbrir(pathReduccionLocal, LECTURA);
+	String buffer = stringCrear(BLOQUE);
+	while(fgets(buffer, BLOQUE, archivoReduccionLocal) != NULL)
+		mensajeEnviar(socketWorker, NULO, buffer, stringLongitud(buffer));
+	fileCerrar(archivoReduccionLocal);
+}
+
+
+
+
 
 
 //--------------------------------------- Funciones de Configuracion -------------------------------------
@@ -106,44 +170,6 @@ void configuracionSenial(int senial) {
 	imprimirMensaje(archivoLog, "[EJECUCION] Proceso Worker finalizado");
 }
 
-//--------------------------------------- Funciones de Master -------------------------------------
-
-void masterAceptarConexion() {
-	Socket nuevoSocket = socketAceptar(listenerMaster, ID_MASTER);
-	if(nuevoSocket != ERROR)
-		masterAtenderOperacion(nuevoSocket);
-	else
-		imprimirMensaje(archivoLog, "[ERROR] Error en el accept(), hoy no es tu dia papu");
-}
-
-void masterAtenderOperacion(Socket unSocket) {
-	pid_t pid = fork();
-	if(pid == 0) {
-		socketCerrar(listenerMaster);
-		masterEjecutarOperacion(unSocket);
-	}
-	else if(pid > 0)
-		socketCerrar(unSocket);
-	else
-		imprimirMensaje(archivoLog, "[ERROR] Error en el fork(), estas jodido");
-}
-
-void masterEjecutarOperacion(Socket unSocket) {
-	imprimirMensaje(archivoLog, "[CONEXION] Proceso Master conectado exitosamente");
-	Mensaje* mensaje = mensajeRecibir(unSocket);
-	switch(mensaje->header.operacion) {
-		case DESCONEXION: imprimirMensaje(archivoLog, "[AVISO] El Master  se desconecto"); break;
-		case TRANSFORMACION: transformacion(mensaje, unSocket); break;
-		case REDUCCION_LOCAL: reduccionLocal(mensaje, unSocket); break;
-		case REDUCCION_GLOBAL: reduccionGlobal(mensaje, unSocket); break;
-		case APAREO_GLOBAL: apareoGlobalEnviarTemporales();
-		case ALMACENADO: break;
-		case PASAREG: break;
-	}
-	mensajeDestruir(mensaje);
-	exit(EXIT_SUCCESS);
-}
-
 //--------------------------------------- Funciones de Transformacion -------------------------------------
 
 void transformacion(Mensaje* mensaje, Socket unSocket) {
@@ -167,7 +193,7 @@ void transformacion(Mensaje* mensaje, Socket unSocket) {
 int transformacionEjecutar(Transformacion* transformacion) {
 	String pathBloque = transformacionCrearBloqueTemporal(transformacion);
 	String pathScript = transformacionCrearScriptTemporal(transformacion);
-	String pathDestino = string_from_format("%s%s", RUTA_TEMPS, transformacion->archivoTemporal);
+	String pathDestino = string_from_format("%s%s", RUTA_TEMP, transformacion->nombreResultado);
 	String comando = string_from_format("cat %s | sh %s | sort > %s", pathBloque, pathScript, pathDestino);
 	int resultado = system(comando);
 	fileLimpiar(pathBloque);
@@ -196,15 +222,15 @@ void transformacionFracaso(Entero numeroBloque, Socket unSocket) {
 }
 
 void transformacionRecibirScript(Transformacion* transformacion, Mensaje* mensaje) {
-	transformacion->sizeScript = mensaje->header.tamanio;
-	transformacion->script = memoriaAlocar(transformacion->sizeScript);
-	memcpy(transformacion->script, mensaje->datos, transformacion->sizeScript);
+	transformacion->scriptSize = mensaje->header.tamanio;
+	transformacion->script = memoriaAlocar(transformacion->scriptSize);
+	memcpy(transformacion->script, mensaje->datos, transformacion->scriptSize);
 }
 
 void transformacionRecibirBloque(Transformacion* transformacion, Puntero datos) {
 	memcpy(&transformacion->numeroBloque, datos, sizeof(Entero));
 	memcpy(&transformacion->bytesUtilizados, datos+sizeof(Entero), sizeof(Entero));
-	memcpy(transformacion->archivoTemporal, datos+sizeof(Entero)*2, 12);
+	memcpy(transformacion->nombreResultado, datos+sizeof(Entero)*2, 12);
 }
 
 void transformacionCrearNieto(Transformacion* transformacion, Socket unSocket) {
@@ -225,7 +251,7 @@ void transformacionDestruir(Transformacion* transformacion) {
 }
 
 String transformacionCrearBloqueTemporal(Transformacion* transformacion) {
-	String path = string_from_format("%sbloqueTemporal%i", RUTA_TEMPS, transformacion->numeroBloque);
+	String path = string_from_format("%sbloqueTemporal%i", RUTA_TEMP, transformacion->numeroBloque);
 	File file = fileAbrir(path, ESCRITURA);
 	Puntero puntero = getBloque(transformacion->numeroBloque);
 	fwrite(puntero, sizeof(char), transformacion->bytesUtilizados, file);
@@ -234,9 +260,9 @@ String transformacionCrearBloqueTemporal(Transformacion* transformacion) {
 }
 
 String transformacionCrearScriptTemporal(Transformacion* transformacion) {
-	String path = string_from_format("%sscriptTemporal%i", RUTA_TEMPS, transformacion->numeroBloque);
+	String path = string_from_format("%sscriptTemporal%i", RUTA_TEMP, transformacion->numeroBloque);
 	File file = fileAbrir(path , ESCRITURA);
-	fwrite(transformacion->script, sizeof(char), transformacion->sizeScript, file);
+	fwrite(transformacion->script, sizeof(char), transformacion->scriptSize, file);
 	fileCerrar(file);
 	return path;
 }
@@ -252,20 +278,20 @@ void reduccionLocal(Mensaje* mensaje, Socket unSocket) {
 
 ReduccionLocal reduccionLocalRecibirTemporales(Puntero datos) {
 	ReduccionLocal reduccion;
-	memcpy(&reduccion.sizeScript, datos, sizeof(Entero));
-	reduccion.script = memoriaAlocar(reduccion.sizeScript);
-	memcpy(reduccion.script, datos+sizeof(Entero), reduccion.sizeScript);
-	memcpy(&reduccion.cantidadTemporales,datos+INTSIZE+reduccion.sizeScript,INTSIZE);//origen
-	reduccion.temporales = memoriaAlocar(reduccion.cantidadTemporales*TEMPSIZE);
-	memcpy(reduccion.temporales, datos+INTSIZE*2+reduccion.sizeScript, reduccion.cantidadTemporales*TEMPSIZE);
-	memcpy(reduccion.temporalReduccion, datos+INTSIZE*2+reduccion.sizeScript+reduccion.cantidadTemporales*TEMPSIZE, TEMPSIZE);
+	memcpy(&reduccion.scriptSize, datos, sizeof(Entero));
+	reduccion.script = memoriaAlocar(reduccion.scriptSize);
+	memcpy(reduccion.script, datos+sizeof(Entero), reduccion.scriptSize);
+	memcpy(&reduccion.cantidadTemporales,datos+INTSIZE+reduccion.scriptSize,INTSIZE);//origen
+	reduccion.nombresTemporales = memoriaAlocar(reduccion.cantidadTemporales*TEMPSIZE);
+	memcpy(reduccion.nombresTemporales, datos+INTSIZE*2+reduccion.scriptSize, reduccion.cantidadTemporales*TEMPSIZE);
+	memcpy(reduccion.nombreResultado, datos+INTSIZE*2+reduccion.scriptSize+reduccion.cantidadTemporales*TEMPSIZE, TEMPSIZE);
 	return reduccion;
 }
 
 int reduccionLocalEjecutar(ReduccionLocal reduccion, String temporales) {
-	String archivoApareado = string_from_format("%s%sApareado", RUTA_TEMPS, reduccion.temporalReduccion);
-	String archivoReduccion = string_from_format("%s%s", RUTA_TEMPS, reduccion.temporalReduccion);
-	String archivoScript = reduccionLocalCrearScript(&reduccion);
+	String archivoApareado = string_from_format("%s%sApareado", RUTA_TEMP, reduccion.nombreResultado);
+	String archivoReduccion = string_from_format("%s%s", RUTA_TEMP, reduccion.nombreResultado);
+	String archivoScript = reduccionLocalCrearScript(reduccion);
 	String comando = string_from_format("chmod 0755 %s", archivoScript);
 	int resultado = system(comando);
 	memoriaLiberar(comando);
@@ -300,20 +326,20 @@ void reduccionLocalFracaso(Socket unSocket) {
 	mensajeEnviar(unSocket, FRACASO, NULL, 0);
 }
 
-String reduccionLocalCrearScript(ReduccionLocal* reduccion) {
-	String path = string_from_format("%s./scriptTemporal", RUTA_TEMPS);
+String reduccionLocalCrearScript(ReduccionLocal reduccion) {
+	String path = string_from_format("%s./scriptTemporal", RUTA_TEMP);
 	File file = fileAbrir(path , ESCRITURA);
-	fwrite(reduccion->script, sizeof(char), reduccion->sizeScript-1, file);
+	fwrite(reduccion.script, sizeof(char), reduccion.scriptSize-1, file);
 	fileCerrar(file);
 	return path;
 }
 
 String reduccionLocalObtenerTemporales(ReduccionLocal reduccion) {
-	String temporales = stringCrear((TEMPSIZE+stringLongitud(RUTA_TEMPS))*reduccion.cantidadTemporales + reduccion.cantidadTemporales-1);
+	String temporales = stringCrear((TEMPSIZE+stringLongitud(RUTA_TEMP))*reduccion.cantidadTemporales + reduccion.cantidadTemporales-1);
 	int indice;
 	for(indice=0; indice < reduccion.cantidadTemporales; indice++) {
-		String buffer = reduccion.temporales+TEMPSIZE*indice;
-		stringConcatenar(temporales, RUTA_TEMPS);
+		String buffer = reduccion.nombresTemporales+TEMPSIZE*indice;
+		stringConcatenar(temporales, RUTA_TEMP);
 		stringConcatenar(temporales, buffer);
 		stringConcatenar(temporales, " ");
 	}
@@ -322,8 +348,9 @@ String reduccionLocalObtenerTemporales(ReduccionLocal reduccion) {
 
 //--------------------------------------- Funciones de Reduccion Global -------------------------------------
 
-int reduccionGlobalAtenderWorker(ReduccionGlobal reduccion) {
-	Socket unSocket = socketCrearCliente(direccion.ip, direccion.puerto, ID_WORKER);
+void reduccionGlobalAtenderWorker(ReduccionGlobal reduccion) {
+	Socket unSocket = socketCrearCliente(reduccion.nodos, ID_WORKER);
+	mensajeEnviar(unSocket, NULO, reduccion.nombresTemporales);
 	Mensaje* mensaje = mensajeRecibir(unSocket);
 	//todo sincronizar
 	fileAbrir(reduccion.archivoReduccion, "a+");
@@ -331,29 +358,20 @@ int reduccionGlobalAtenderWorker(ReduccionGlobal reduccion) {
 	fileCerrar(reduccion.archivoReduccion);
 }
 
-void workerAtender(Socket socketWorker) {
-	File archivoReduccionLocal = fileAbrir(pathReduccionLocal, LECTURA);
-	String buffer = stringCrear(BLOQUE);
-	while(fgets(buffer, BLOQUE, archivoReduccionLocal) != NULL)
-		mensajeEnviar(socketWorker, APAREO_LINEA, buffer, stringLongitud(buffer));
-	fileCerrar(archivoReduccionLocal);
-}
-
-void workerAceptarWorker() {
-	Socket nuevoSocket = socketAceptar(listenerWorker, ID_WORKER);
-	if(nuevoSocket != ERROR)
-		workerAtender(nuevoSocket);
-	else
-		imprimirMensaje(archivoLog, "[ERROR] Error en el accept(), hoy no es tu dia papu");
-}
-
 void reduccionGlobalGenerarArchivo(ReduccionGlobal reduccion) {
+	reduccion.rutaArchivoApareo = string_from_format("%s%Apareo", RUTA_TEMP, reduccion.nombreResultado);
 	int indice;
-	for(indice=0; indice < cantidadWorkers; indice++) {
+	for(indice=0; indice < reduccion.cantidadWorkers; indice++) {
 		Hilo hilo;
-		hiloCrear(&hilo, (Puntero)reduccionGlobalAtenderWorker, direccion);
+		hiloCrear(&hilo, (Puntero)reduccionGlobalAtenderWorker, &reduccion);
 	}
 
+}
+
+ReduccionGlobal reduccionGlobalRecibirDatos(Puntero datos) {
+	ReduccionGlobal reduccion;
+	//TODO
+	return reduccion;
 }
 
 void reduccionGlobal(Mensaje* mensaje, Socket unSocket) {
@@ -363,19 +381,27 @@ void reduccionGlobal(Mensaje* mensaje, Socket unSocket) {
 	reduccionGlobalTerminar(resultado, unSocket);
 }
 
+String reduccionGlobalCrearScript(ReduccionGlobal reduccion) {
+	String path = string_from_format("%s./scriptTemporal", RUTA_TEMP);
+	File file = fileAbrir(path , ESCRITURA);
+	fwrite(reduccion.script, sizeof(char), reduccion.scriptSize-1, file);
+	fileCerrar(file);
+	return path;
+}
+
 int reduccionGlobalEjecutar(ReduccionGlobal reduccion) {
-	String archivoReduccion = string_from_format("%s%s", RUTA_TEMPS, reduccion.temporalReduccion);
-	String archivoScript = reduccionLocalCrearScript(&reduccion);
+	String archivoScript = reduccionGlobalCrearScript(reduccion);
+	String archivoSalida = string_from_format("%s%s", RUTA_TEMP, reduccion.nombreResultado);
 	String comando = string_from_format("chmod 0755 %s", archivoScript);
 	int resultado = system(comando);
 	memoriaLiberar(comando);
 	if(resultado != ERROR) {
-		comando = string_from_format("sort %s | %s > %s", reduccion.script, archivoReduccion);
+		comando = string_from_format("sort %s | %s > %s", reduccion.script, archivoSalida);
 		resultado = system(comando);
 	}
 	fileLimpiar(archivoScript);
 	memoriaLiberar(comando);
-	memoriaLiberar(archivoReduccion);
+	memoriaLiberar(archivoSalida);
 	memoriaLiberar(archivoScript);
 	return resultado;
 }

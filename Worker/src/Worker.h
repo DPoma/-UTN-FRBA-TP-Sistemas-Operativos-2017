@@ -25,7 +25,7 @@
 
 #define RUTA_CONFIG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Worker/NodoConfig.conf"
 #define RUTA_LOG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Worker/WorkerLog.log"
-#define RUTA_TEMPS "/home/utnso/Escritorio/temp/"
+#define RUTA_TEMP "/home/utnso/Escritorio/temp/"
 
 //--------------------------------------- Estructuras -------------------------------------
 
@@ -40,27 +40,30 @@ typedef struct {
 } Configuracion;
 
 typedef struct {
-	int sizeScript;
+	int scriptSize;
 	String script;
 	int numeroBloque;
 	int bytesUtilizados;
-	char archivoTemporal[12];
+	char nombreResultado[12];
 } Transformacion;
 
 typedef struct {
-	int sizeScript;
+	int scriptSize;
 	String script;
 	int cantidadTemporales;
-	String temporales;
-	char temporalReduccion[12];
+	String nombresTemporales;
+	char nombreResultado[12];
 } ReduccionLocal;
 
 typedef struct {
-	int sizeScript;
+	Dir* nodos;
+	int scriptSize;
 	String script;
 	int cantidadTemporales;
-	String temporales;
-	char temporalReduccion[12];
+	String nombresTemporales;
+	String rutaArchivoApareo;
+	char nombreResultado[12];
+	int cantidadWorkers;
 } ReduccionGlobal;
 
 typedef void* BloqueWorker;
@@ -83,8 +86,11 @@ int dataBinTamanio;
 void workerIniciar();
 void workerAtenderMasters();
 void workerFinalizar();
-void masterAceptarConexion();
-void masterEjecutarOperacion(Socket unSocket);
+void workerAceptarMaster();
+void masterRealizarOperacion(Socket unSocket);
+void workerAtenderProcesos();
+void workerAtenderWorkers();
+void workerAceptarWorker();
 
 //--------------------------------------- Funciones de Configuracion  -------------------------------------
 
@@ -97,9 +103,9 @@ void configuracionIniciar();
 
 //--------------------------------------- Funciones de Master -------------------------------------
 
-void masterAceptarConexion();
+void workerAceptarMaster();
 void masterAtenderOperacion(Socket unSocket);
-void masterEjecutarOperacion(Socket unSocket);
+void masterRealizarOperacion(Socket unSocket);
 
 //--------------------------------------- Funciones de Transformacion -------------------------------------
 
@@ -122,13 +128,16 @@ int reduccionLocalEjecutar(ReduccionLocal reduccion, String temporales);
 void reduccionLocalTerminar(int resultado, Socket unSocket);
 void reduccionLocalExito(Socket unSocket);
 void reduccionLocalFracaso(Socket unSocket);
-String reduccionLocalCrearScript(ReduccionLocal* reduccion);
+String reduccionLocalCrearScript(ReduccionLocal reduccion);
 String reduccionLocalObtenerTemporales(ReduccionLocal reduccion);
 
 //--------------------------------------- Funciones de Reduccion Local -------------------------------------
 
-void reduccionGlobalIniciar(Mensaje* mensaje, Socket unSocket);
-void reduccionGlobalEjecutar();
+void reduccionGlobal(Mensaje* mensaje, Socket unSocket);
+int reduccionGlobalEjecutar(ReduccionGlobal reduccion);
+void reduccionGlobalTerminar(int resultado, Socket unSocket);
+void reduccionGlobalExito(Socket unSocket);
+void reduccionGlobalFracaso(Socket unSocket);
 
 //--------------------------------------- Funciones de DataBin -------------------------------------
 
@@ -138,46 +147,3 @@ Puntero dataBinMapear();
 void dataBinConfigurar();
 BloqueWorker bloqueBuscar(Entero numeroBloque);
 BloqueWorker getBloque(Entero numeroBloque);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-typedef struct {
-	char* ruta;
-	char* ip;
-	int puerto;
-} globOri;
-
-typedef struct {
-	int cant;
-	void** oris;
-} lGlobOri;
-
-typedef struct {
-	int cant;
-	char** ruta;
-} locOri;
-
-typedef struct {
-	int sizebuffer;
-	char* buffer;
-	int NumReg;
-} datosReg;
-
-locOri* getOrigenesLocales(char*);
-char* appendL(locOri*);
-int reduccionGlobalEjecutar(char*,char*,char*);
-lGlobOri* getOrigenesGlobales(char*);
-char* appendG(lGlobOri*);
-datosReg* PasaRegistro(char*,int);
-
