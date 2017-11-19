@@ -17,6 +17,7 @@
 #define REDUCCION_LOCAL 304
 #define REDUCCION_GLOBAL 305
 #define ALMACENADO_FINAL 306
+#define ENVIAR_TEMPORAL 307
 
 #define INTSIZE sizeof(Entero)
 #define TEMPSIZE 12
@@ -55,21 +56,19 @@ typedef struct {
 } ReduccionLocal;
 
 typedef struct {
-	Dir* nodos;
+	Dir nodo;
+	char temporal[TEMPSIZE];
+} ReduccionGlobalNodo ;
+
+typedef struct {
+	ReduccionGlobalNodo* nodos;
 	int scriptSize;
 	String script;
-	int cantidadTemporales;
-	String nombresTemporales;
+	int cantidadNodos;
 	String rutaArchivoApareo;
 	char nombreResultado[12];
 	int cantidadWorkers;
 } ReduccionGlobal;
-
-typedef struct {
-	Dir nodo;
-	String nombreReduccionLocal;
-	String pathArchivoApareo;
-} PedidoWorker;
 
 typedef void* BloqueWorker;
 

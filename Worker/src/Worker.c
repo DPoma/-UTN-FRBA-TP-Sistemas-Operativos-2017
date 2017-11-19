@@ -26,20 +26,27 @@ void workerIniciar() {
 void workerAtenderProcesos() {
 	listenerMaster = socketCrearListener(configuracion->puertoMaster);
 	listenerWorker = socketCrearListener(configuracion->puertoWorker);
-	Hilo listenerMaster;
-	Hilo listenerWorker;
-	hiloCrear(&listenerMaster, (Puntero)workerAtenderMasters, NULL);
-	hiloCrear(&listenerWorker, (Puntero)workerAtenderWorkers, NULL);
+	pid_t pid = fork();
+	if(pid == 0)
+		workerAtenderWorkers();
+	else if(pid > 0)
+		workerAtenderMasters();
+	else
+		imprimirMensaje(archivoLog, "[ERROR] Error en el fork(), estas jodido");
 }
 
 void workerAtenderMasters() {
-	while(estadoWorker)
+	while(estadoWorker) {
+		socketCerrar(listenerWorker);
 		workerAceptarMaster();
+	}
 }
 
 void workerAtenderWorkers() {
-	while(estadoWorker)
+	while(estadoWorker) {
+		socketCerrar(listenerMaster);
 		workerAceptarWorker();
+	}
 }
 
 void workerAceptarMaster() {
@@ -354,20 +361,29 @@ void reduccionGlobalAtenderWorker(PedidoWorker* pedido) {
 }
 
 void reduccionGlobalGenerarArchivo(ReduccionGlobal reduccion) {
-	PedidoWorker pedido;
-	pedido.pathArchivoApareo = string_from_format("%s%Apareo", RUTA_TEMP, reduccion.nombreResultado);
+	Lista listaSockets = listaCrear();
+	ReduccionGlobalNodo pedido;
 	int indice;
 	for(indice=0; indice < reduccion.cantidadWorkers; indice++) {
-		memcpy(&pedido.nodo, reduccion.nodos+indice, DIRSIZE);
-		memcpy(pedido.nombreReduccionLocal, reduccion.nombresTemporales+TEMPSIZE*indice, TEMPSIZE);
-		Hilo hilo;
-		hiloCrear(&hilo, (Puntero)reduccionGlobalAtenderWorker, &pedido);
+		pedido = reduccion.nodos[indice];
+		if(*(int*)pedido.nodo != 0) {
+			Socket socket = socketCrearCliente(pedido.nodo.ip, pedido.nodo.port, ID_WORKER);
+			mensajeEnviar(socket, ENVIAR_TEMPORAL, pedido.temporal, TEMPSIZE);
+			listaAgregarElementoM(listaSockets, socket, sizeof(Socket));
+		}
 	}
 }
 
 ReduccionGlobal reduccionGlobalRecibirDatos(Puntero datos) {
 	ReduccionGlobal reduccion;
-	//TODO
+	memcpy(&reduccion.scriptSize, (Entero*)datos, sizeof(Entero));
+	memcpy(reduccion.script, datos+sizeof(Entero), reduccion.scriptSize);
+	memcpy(&reduccion.cantidadNodos, datos+sizeof(Entero)+reduccion.scriptSize, sizeof(Entero));
+	reduccion.nodos = memoriaAlocar(reduccion.cantidadNodos*sizeof(ReduccionGlobalNodo));
+	int indice;
+	for(indice = 0; indice < reduccion.cantidadNodos; indice++)
+		reduccion.nodos[indice] = *(ReduccionGlobalNodo*)(datos+sizeof(Entero)*2+reduccion.scriptSize+sizeof(ReduccionGlobalNodo)*indice);
+	memcpy(reduccion.nombreResultado, datos+sizeof(Entero)*2+reduccion.scriptSize+sizeof(ReduccionGlobalNodo)*reduccion.cantidadNodos, TEMPSIZE);
 	return reduccion;
 }
 
