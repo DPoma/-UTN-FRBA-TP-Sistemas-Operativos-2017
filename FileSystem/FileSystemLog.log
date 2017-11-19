@@ -12,3 +12,6 @@
 [INFO] 00:19:26:30 FileSystem/(3768:3774): [CONEXION] El proceso Yama se ha conectado
 [INFO] 00:36:27:411 FileSystem/(3768:3774): [CONEXION] El proceso YAMA se ha desconectado
 [INFO] 00:36:28:899 FileSystem/(3768:3774): [CONEXION] El proceso Yama se ha conectado
+[INFO] 00:46:43:859 FileSystem/(3768:3774): [CONEXION] El proceso YAMA se ha desconectado
+[INFO] 00:46:48:730 FileSystem/(3768:4098): [33m[AVISO] NODO2 desconectado[0m
+[INFO] 00:46:52:109 FileSystem/(3768:4046): [33m[AVISO] NODO1 desconectado[0m

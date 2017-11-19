@@ -45,3 +45,5 @@
 [INFO] 00:36:43:960 YAMA/(4697:4697): bloque 127.0.0.1 5090 10 asignado a worker 127.0.0.1 5090
 [INFO] 00:36:43:960 YAMA/(4697:4697): bloque 127.0.0.1 5090 11 asignado a worker 127.0.0.1 5090
 [INFO] 00:36:43:960 YAMA/(4697:4697): [] planificacion terminada
+[INFO] 00:46:35:405 YAMA/(4697:4697): [RECEPCION] desconexion de master
+[INFO] 00:46:35:405 YAMA/(4697:4697): [CONEXION] Proceso Master 6 se ha desconectado

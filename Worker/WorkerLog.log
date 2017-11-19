@@ -1,18 +1,5 @@
-[INFO] 00:36:17:979 Worker/(4692:4692): [CONFIGURACION] Nombre: NODO2
-[INFO] 00:36:17:980 Worker/(4692:4692): [CONFIGURACION] Esperando conexiones de Master (Puerto: 5090)
-[INFO] 00:36:17:980 Worker/(4692:4692): [CONFIGURACION] Esperando conexiones de Woker (Puerto: 5999)
-[INFO] 00:36:17:980 Worker/(4692:4692): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data.bin
-[INFO] 00:36:17:980 Worker/(4692:4692): [CONFIGURACION] Cantidad de bloques: 50
-[INFO] 00:36:43:973 Worker/(4692:4706): [CONEXION] Proceso Master conectado exitosamente
-[INFO] 00:36:44:64 Worker/(4692:4708): [DATABIN] El bloque N°0 fue leido
-[INFO] 00:36:44:934 Worker/(4692:4710): [DATABIN] El bloque N°1 fue leido
-[INFO] 00:36:45:541 Worker/(4692:4714): [DATABIN] El bloque N°2 fue leido
-[INFO] 00:36:45:992 Worker/(4692:4716): [DATABIN] El bloque N°3 fue leido
-[INFO] 00:36:46:341 Worker/(4692:4718): [DATABIN] El bloque N°4 fue leido
-[INFO] 00:36:46:764 Worker/(4692:4720): [DATABIN] El bloque N°5 fue leido
-[INFO] 00:36:47:181 Worker/(4692:4722): [DATABIN] El bloque N°6 fue leido
-[INFO] 00:36:47:532 Worker/(4692:4724): [DATABIN] El bloque N°7 fue leido
-[INFO] 00:36:47:894 Worker/(4692:4726): [DATABIN] El bloque N°8 fue leido
-[INFO] 00:36:48:304 Worker/(4692:4728): [DATABIN] El bloque N°9 fue leido
-[INFO] 00:36:48:828 Worker/(4692:4730): [DATABIN] El bloque N°10 fue leido
-[INFO] 00:36:49:287 Worker/(4692:4732): [DATABIN] El bloque N°11 fue leido
+[INFO] 00:48:23:735 Worker/(4932:4932): [CONFIGURACION] Nombre: NODO2
+[INFO] 00:48:23:740 Worker/(4932:4932): [CONFIGURACION] Esperando conexiones de Master (Puerto: 5090)
+[INFO] 00:48:23:740 Worker/(4932:4932): [CONFIGURACION] Esperando conexiones de Woker (Puerto: 5999)
+[INFO] 00:48:23:740 Worker/(4932:4932): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data.bin
+[INFO] 00:48:23:740 Worker/(4932:4932): [CONFIGURACION] Cantidad de bloques: 50
