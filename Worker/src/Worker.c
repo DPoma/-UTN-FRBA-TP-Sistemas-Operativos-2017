@@ -26,7 +26,7 @@ void workerIniciar() {
 
 void workerAtenderMasters() {
 	listenerMaster = socketCrearListener(configuracion->puertoMaster);
-	//listenerWorker = socketCrearListener(configuracion->puertoWorker);
+	listenerWorker = socketCrearListener(configuracion->puertoWorker);
 	while(estadoWorker)
 		masterAceptarConexion();
 }
@@ -34,6 +34,7 @@ void workerAtenderMasters() {
 void workerFinalizar() {
 	imprimirMensaje(archivoLog, "[EJECUCION] Proceso Worker finalizado");
 }
+
 
 //--------------------------------------- Funciones de Configuracion -------------------------------------
 
@@ -127,6 +128,14 @@ void masterAtenderOperacion(Socket unSocket) {
 		imprimirMensaje(archivoLog, "[ERROR] Error en el fork(), estas jodido");
 }
 
+void apareoGlobalEnviarTemporales() {
+	File archivoReduccionLocal = fileAbrir(pathReduccionLocal, LECTURA);
+	String buffer = stringCrear(BLOQUE);
+	while(fgets(buffer, BLOQUE, archivoReduccionLocal) != NULL)
+		mensajeEnviar(socketWorker, APAREO_LINEA, buffer, stringLongitud(buffer));
+	fileCerrar(archivoReduccionLocal);
+}
+
 void masterEjecutarOperacion(Socket unSocket) {
 	imprimirMensaje(archivoLog, "[CONEXION] Proceso Master conectado exitosamente");
 	Mensaje* mensaje = mensajeRecibir(unSocket);
@@ -135,6 +144,7 @@ void masterEjecutarOperacion(Socket unSocket) {
 		case TRANSFORMACION: transformacionIniciar(mensaje, unSocket); break;
 		case REDUCCION_LOCAL: reduccionLocalIniciar(mensaje, unSocket); break;
 		case REDUCCION_GLOBAL: break;
+		case APAREO_GLOBAL: apareoGlobalEnviarTemporales();
 		case ALMACENADO: break;
 		case PASAREG: break;
 	}
@@ -239,7 +249,7 @@ String transformacionCrearScriptTemporal(Transformacion* transformacion) {
 	return path;
 }
 
-//--------------------------------------- Funciones de Reduccion -------------------------------------
+//--------------------------------------- Funciones de Reduccion Local -------------------------------------
 
 void reduccionLocalIniciar(Mensaje* mensaje, Socket unSocket) {
 	ReduccionLocal reduccion = reduccionLocalRecibirTemporales(mensaje->datos);
@@ -316,6 +326,57 @@ String reduccionLocalObtenerTemporales(ReduccionLocal reduccion) {
 		stringConcatenar(temporales, " ");
 	}
 	return temporales;
+}
+
+//--------------------------------------- Funciones de Reduccion Global -------------------------------------
+
+int apareoEscribir(ReduccionGlobal reduccion) {
+	Mensaje* mensaje = mensajeRecibir(unSocket);
+	//todo sincronizar
+	fwrite(mensaje->datos, sizeof(char), mensaje->header.tamanio, reduccion.archivoReduccion);
+
+}
+
+
+void reduccionGlobalIniciar(Mensaje* mensaje, Socket unSocket) {
+	ReduccionGlobal reduccion = reduccionGlobalRecibirDatos(mensaje->datos);
+	reduccionGlobalGenerarArchivo(reduccion);
+	int resultado = reduccionGlobalEjecutar(reduccion);
+	reduccionGlobalTerminar(resultado, unSocket);
+}
+
+int reduccionGlobalEjecutar(ReduccionGlobal reduccion) {
+	String archivoReduccion = string_from_format("%s%s", RUTA_TEMPS, reduccion.temporalReduccion);
+	String archivoScript = reduccionLocalCrearScript(&reduccion);
+	String comando = string_from_format("chmod 0755 %s", archivoScript);
+	int resultado = system(comando);
+	memoriaLiberar(comando);
+	if(resultado != ERROR) {
+		comando = string_from_format("sort %s | %s > %s", reduccion.script, archivoReduccion);
+		resultado = system(comando);
+	}
+	fileLimpiar(archivoScript);
+	memoriaLiberar(comando);
+	memoriaLiberar(archivoReduccion);
+	memoriaLiberar(archivoScript);
+	return resultado;
+}
+
+void reduccionGlobalTerminar(int resultado, Socket unSocket) {
+	if(resultado != ERROR)
+		reduccionGlobalExito(unSocket);
+	else
+		reduccionGlobalFracaso(unSocket);
+}
+
+void reduccionGlobalExito(Socket unSocket) {
+	imprimirMensaje(archivoLog,"[REDUCCION GLOBAL] La operacion termino con exito");
+	mensajeEnviar(unSocket, EXITO, NULL, 0);
+}
+
+void reduccionGlobalFracaso(Socket unSocket) {
+	imprimirMensaje(archivoLog,"[REDUCCION GLOBAL] La operacion fracaso");
+	mensajeEnviar(unSocket, FRACASO, NULL, 0);
 }
 
 //--------------------------------------- Funciones de DataBin -------------------------------------

@@ -55,6 +55,14 @@ typedef struct {
 	char temporalReduccion[12];
 } ReduccionLocal;
 
+typedef struct {
+	int sizeScript;
+	String script;
+	int cantidadTemporales;
+	String temporales;
+	char temporalReduccion[12];
+} ReduccionGlobal;
+
 typedef void* BloqueWorker;
 
 //--------------------------------------- Globales -------------------------------------
@@ -116,6 +124,11 @@ void reduccionLocalExito(Socket unSocket);
 void reduccionLocalFracaso(Socket unSocket);
 String reduccionLocalCrearScript(ReduccionLocal* reduccion);
 String reduccionLocalObtenerTemporales(ReduccionLocal reduccion);
+
+//--------------------------------------- Funciones de Reduccion Local -------------------------------------
+
+void reduccionGlobalIniciar(Mensaje* mensaje, Socket unSocket);
+void reduccionGlobalEjecutar();
 
 //--------------------------------------- Funciones de DataBin -------------------------------------
 
