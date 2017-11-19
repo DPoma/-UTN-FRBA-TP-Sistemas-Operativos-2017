@@ -20,10 +20,12 @@
 #define ALMACENADO 306
 #define CIERRE 307
 #define PASAREG 308
+#define INTSIZE sizeof(Entero)
+#define TEMPSIZE 12
 
 #define RUTA_CONFIG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Worker/NodoConfig.conf"
 #define RUTA_LOG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Worker/WorkerLog.log"
-#define RUTA_TEMPS "/home/utnso/Escritorio/temp"
+#define RUTA_TEMPS "/home/utnso/Escritorio/temp/"
 
 //--------------------------------------- Estructuras -------------------------------------
 
@@ -44,6 +46,14 @@ typedef struct {
 	int bytesUtilizados;
 	char archivoTemporal[12];
 } Transformacion;
+
+typedef struct {
+	int sizeScript;
+	String script;
+	int cantidadTemporales;
+	String temporales;
+	char temporalReduccion[12];
+} ReduccionLocal;
 
 typedef struct {
 	char* ruta;

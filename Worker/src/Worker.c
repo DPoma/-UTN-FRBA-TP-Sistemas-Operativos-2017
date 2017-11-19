@@ -118,10 +118,12 @@ void masterAceptarConexion() {
 void masterAtenderOperacion(Socket unSocket) {
 	int estado;
 	pid_t pid = fork();
-	if(pid == 0)
+	if(pid == 0) {
+		socketCerrar(listenerMaster);
 		masterEjecutarOperacion(unSocket);
+	}
 	else if(pid > 0)
-		waitpid(pid, &estado, NULO);
+		socketCerrar(unSocket);
 	else
 		imprimirMensaje(archivoLog, "[ERROR] Error en el fork(), estas jodido");
 }
@@ -129,14 +131,15 @@ void masterAtenderOperacion(Socket unSocket) {
 void masterEjecutarOperacion(Socket unSocket) {
 	imprimirMensaje(archivoLog, "[CONEXION] Proceso Master conectado exitosamente");
 	Mensaje* mensaje = mensajeRecibir(unSocket);
-	switch(mensaje->header.operacion){
+	switch(mensaje->header.operacion) {
 		case DESCONEXION: imprimirMensaje(archivoLog, "[AVISO] El Master  se desconecto"); break;
 		case TRANSFORMACION: transformacionIniciar(mensaje, unSocket); break;
-		case REDUCCION_LOCAL: break;
+		case REDUCCION_LOCAL: reduccionLocalIniciar(mensaje, unSocket); break;
 		case REDUCCION_GLOBAL: break;
 		case ALMACENADO: break;
 		case PASAREG: break;
 	}
+	mensajeDestruir(mensaje);
 	exit(EXIT_SUCCESS);
 }
 
@@ -185,7 +188,7 @@ void transformacionIniciar(Mensaje* mensaje, Socket unSocket) {
 int transformacionEjecutar(Transformacion* transformacion) {
 	String pathBloque = transformacionBloqueTemporal(transformacion);
 	String pathScript = transformacionScriptTemporal(transformacion);
-	String pathDestino = string_from_format("%s/%s", RUTA_TEMPS, transformacion->archivoTemporal);
+	String pathDestino = string_from_format("%s%s", RUTA_TEMPS, transformacion->archivoTemporal);
 	String comando = string_from_format("cat %s | sh %s | sort > %s", pathBloque, pathScript, pathDestino);
 	int resultado = system(comando);
 	fileLimpiar(pathBloque);
@@ -208,7 +211,7 @@ void transformacionFracaso(Entero numeroBloque, Socket unSocket) {
 }
 
 String transformacionBloqueTemporal(Transformacion* transformacion) {
-	String path = string_from_format("%s/bloqueTemporal%i", RUTA_TEMPS, transformacion->numeroBloque);
+	String path = string_from_format("%sbloqueTemporal%i", RUTA_TEMPS, transformacion->numeroBloque);
 	File file = fileAbrir(path, ESCRITURA);
 	Puntero puntero = getBloque(transformacion->numeroBloque);
 	fwrite(puntero, sizeof(char), transformacion->bytesUtilizados, file);
@@ -217,7 +220,7 @@ String transformacionBloqueTemporal(Transformacion* transformacion) {
 }
 
 String transformacionScriptTemporal(Transformacion* transformacion) {
-	String path = string_from_format("%s/scriptTemporal%i", RUTA_TEMPS, transformacion->numeroBloque);
+	String path = string_from_format("%sscriptTemporal%i", RUTA_TEMPS, transformacion->numeroBloque);
 	File file = fileAbrir(path , ESCRITURA);
 	fwrite(transformacion->script, sizeof(char), transformacion->sizeScript, file);
 	fileCerrar(file);
@@ -279,33 +282,89 @@ BloqueWorker getBloque(Entero numeroBloque) {
 	return bloque;
 }
 
-/*
+String reduccionScriptTemporal(ReduccionLocal* reduccion) {
+	String path = string_from_format("%sscriptTemporal", RUTA_TEMPS);
+	File file = fileAbrir(path , ESCRITURA);
+	fwrite(reduccion->script, sizeof(char), reduccion->sizeScript, file);
+	fileCerrar(file);
+	return path;
+}
+
+ReduccionLocal reduccionLocalRecibirDatos(Puntero datos) {
+	ReduccionLocal reduccion;
+	memcpy(&reduccion.sizeScript, datos, sizeof(Entero));
+	memcpy(reduccion.script, datos+sizeof(Entero), reduccion.sizeScript);
+	memcpy(&reduccion.cantidadTemporales,datos+INTSIZE+reduccion.sizeScript,INTSIZE);//origen
+	memcpy(reduccion.temporales, datos+INTSIZE*2+reduccion.sizeScript, reduccion.cantidadTemporales*TEMPSIZE);
+	memcpy(reduccion.temporalReduccion, datos+INTSIZE*2+reduccion.sizeScript+reduccion.cantidadTemporales*TEMPSIZE, TEMPSIZE);
+	return reduccion;
+}
+
+
+
+void reduccionLocalFracaso(int resultado, Socket unSocket) {
+	if(resultado == ERROR) {
+		imprimirMensaje(archivoLog,"[REDUCCION LOCAL] La operacion fracaso");
+		mensajeEnviar(unSocket, FRACASO, NULL, 0);
+	}
+}
+
+int reduccionLocalIniciar(Mensaje* mensaje, Socket unSocket){
+	ReduccionLocal reduccion = reduccionLocalRecibirDatos(mensaje->datos);
+	String temporales = stringCrear((TEMPSIZE+stringLongitud(RUTA_TEMPS))*reduccion.cantidadTemporales + reduccion.cantidadTemporales-1);
+	int indice;
+	for(indice=0; indice < reduccion.cantidadTemporales; indice++) {
+		String buffer = reduccion.temporales+TEMPSIZE*indice;
+		stringConcatenar(temporales, RUTA_TEMPS);
+		stringConcatenar(temporales, buffer);
+		stringConcatenar(temporales, " ");
+	}
+	String archivoApareado = string_from_format("%s%sApareado", RUTA_TEMPS, reduccion.temporalReduccion);
+	String archivoReduccion = string_from_format("%s%s", RUTA_TEMPS, reduccion.temporalReduccion);
+	String scriptPath = reduccionScriptTemporal(reduccion);
+	String comando = string_from_format("chmod 0755 %s", scriptPath);
+	int resultado = system(comando);
+	reduccionLocalFracaso(resultado);
+	memoriaLiberar(comando);
+	comando = string_from_format("sort -m %s > %s | sh %s > %s", temporales, archivoApareado, scriptPath, archivoReduccion);
+	resultado = system(comando);
+	reduccionLocalFracaso(resultado);
+	fileLimpiar(scriptPath);
+	//fileLimpiar(archivoApareado);
+	memoriaLiberar(archivoApareado);
+	memoriaLiberar(archivoReduccion);
+	memoriaLiberar(scriptPath);
+	memoriaLiberar(temporales);
+
+
+}
+
 //2da etapa
-int reduccionLocal(char* codigo,int sizeCodigo,char* origen,char destino[TEMPSIZE]){
+int reduccionLocal(char* codigo,int sizeCodigo,char* origen,char* destino){
 	locOri* listaOri;
 	listaOri = getOrigenesLocales(origen);
 	int i=0;
 	char* archApendado = appendL(listaOri);
 	char* patharchdes = string_from_format("%s%s",RUTA_TEMPS,destino);
-	String fileScript=transformacionScriptTemporal( codigo, origen, sizeCodigo);
+	//char* fileScript=transformacionScriptTemporal(codigo, origen, sizeCodigo);
 	//doy privilegios a script
 	char* commando = string_from_format("chmod 0755 %s",fileScript);
 	system(commando);
-	free (commando);
+	memoriaLiberar(commando);
 	//paso buffer a script y resultado script a sort
 	char* command = string_from_format("cat %s | sh %s | sort > %s",archApendado,fileScript,patharchdes);
 	system(command);
 	fileLimpiar(archApendado);
 	fileLimpiar(fileScript);
-	free (command);
-	free(patharchdes);
+	memoriaLiberar (command);
+	memoriaLiberar(patharchdes);
 	while(listaOri->ruta[i]!=NULL){
-		free(listaOri->ruta[i]);
+		memoriaLiberar(listaOri->ruta[i]);
 		i++;
 	}
 	return 0;
 }
-*/
+
 
 locOri* getOrigenesLocales(char* origen){
 	locOri* origenes;
