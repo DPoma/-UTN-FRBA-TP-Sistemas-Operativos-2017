@@ -1,0 +1,52 @@
+[INFO] 03:58:26:550 Master/(15078:15078): [CONEXION] Configuracion para conexion con YAMA (IP: 127.0.0.1 | Puerto: 5070)
+[INFO] 03:58:26:581 Master/(15078:15078): [CONEXION] Estableciendo Conexion con YAMA...
+[INFO] 03:58:26:615 Master/(15078:15078): [CONEXION] Conexion establecida con YAMA, enviando solicitud
+[INFO] 03:58:27:81 Master/(15078:15078): [MENSAJE] Lista de bloques recibida
+[INFO] 03:58:27:84 Master/(15078:15078): [RECEPCION] bloque 127.0.0.1 5090 0
+[INFO] 03:58:27:92 Master/(15078:15078): ] lista para nodo 127.0.0.1 5090 armada, lista #1
+[INFO] 03:58:27:93 Master/(15078:15078): [RECEPCION] bloque 127.0.0.1 5090 1
+[INFO] 03:58:27:108 Master/(15078:15078): [RECEPCION] bloque 127.0.0.1 5090 2
+[INFO] 03:58:27:109 Master/(15078:15078): [RECEPCION] bloque 127.0.0.1 5090 3
+[INFO] 03:58:27:119 Master/(15078:15078): [RECEPCION] bloque 127.0.0.1 5090 4
+[INFO] 03:58:27:119 Master/(15078:15078): [RECEPCION] bloque 127.0.0.1 5090 5
+[INFO] 03:58:27:119 Master/(15078:15078): [RECEPCION] bloque 127.0.0.1 5090 6
+[INFO] 03:58:27:120 Master/(15078:15078): [RECEPCION] bloque 127.0.0.1 5090 7
+[INFO] 03:58:27:120 Master/(15078:15078): [RECEPCION] bloque 127.0.0.1 5090 8
+[INFO] 03:58:27:120 Master/(15078:15078): [RECEPCION] bloque 127.0.0.1 5090 9
+[INFO] 03:58:27:121 Master/(15078:15078): [RECEPCION] bloque 127.0.0.1 5090 10
+[INFO] 03:58:27:121 Master/(15078:15078): [RECEPCION] bloque 127.0.0.1 5090 11
+[INFO] 03:58:27:179 Master/(15078:15087): [CONEXION] Estableciendo conexion con Worker (IP: 127.0.0.1 | PUERTO: 5090
+[INFO] 03:58:27:197 Master/(15078:15087): [CONEXION] Enviando bloque 0 t03582778
+[INFO] 03:58:27:197 Master/(15078:15087): [CONEXION] Enviando bloque 1 t03582778
+[INFO] 03:58:27:198 Master/(15078:15087): [CONEXION] Enviando bloque 2 t03582778
+[INFO] 03:58:27:199 Master/(15078:15087): [CONEXION] Enviando bloque 3 t03582778
+[INFO] 03:58:27:199 Master/(15078:15087): [CONEXION] Enviando bloque 4 t03582778
+[INFO] 03:58:27:200 Master/(15078:15087): [CONEXION] Enviando bloque 5 t03582778
+[INFO] 03:58:27:201 Master/(15078:15087): [CONEXION] Enviando bloque 6 t03582778
+[INFO] 03:58:27:203 Master/(15078:15087): [CONEXION] Enviando bloque 7 t03582778
+[INFO] 03:58:27:203 Master/(15078:15087): [CONEXION] Enviando bloque 8 t03582778
+[INFO] 03:58:27:211 Master/(15078:15087): [CONEXION] Enviando bloque 9 t03582778
+[INFO] 03:58:27:215 Master/(15078:15087): [CONEXION] Enviando bloque 10 t03582778
+[INFO] 03:58:27:215 Master/(15078:15087): [CONEXION] Enviando bloque 11 t03582778
+[INFO] 03:58:27:628 Master/(15078:15087): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
+[INFO] 03:58:29:65 Master/(15078:15087): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
+[INFO] 03:58:30:531 Master/(15078:15087): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
+[INFO] 03:58:31:868 Master/(15078:15087): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
+[INFO] 03:58:33:290 Master/(15078:15087): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
+[INFO] 03:58:34:719 Master/(15078:15087): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
+[INFO] 03:58:36:152 Master/(15078:15087): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
+[INFO] 03:58:37:589 Master/(15078:15087): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
+[INFO] 03:58:38:963 Master/(15078:15087): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
+[INFO] 03:58:40:301 Master/(15078:15087): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
+[INFO] 03:58:41:762 Master/(15078:15087): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
+[INFO] 03:58:43:166 Master/(15078:15087): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
+[INFO] 03:58:44:312 Master/(15078:15197): [EJECUCION]REDUCCION LOCAL EXISTOSA
+[INFO] 03:58:44:324 Master/(15078:15078): [EJECUCION]Terminando proceso
+[INFO] 03:58:44:500 Master/(15078:15078): [METRICA]Job tardo 0.000000 segundos en ejecutarse
+[INFO] 03:58:44:514 Master/(15078:15078): [METRICA]Transformacion promedio  tardo 0.000000 segundos en ejecutarse
+[INFO] 03:58:44:523 Master/(15078:15078): [METRICA]Reduccion local promedio tardo 0.000000 segundos en ejecutarse
+[INFO] 03:58:44:525 Master/(15078:15078): [METRICA]Transformaciones: 134550288,Reducciones locales:134550276
+[INFO] 03:58:44:530 Master/(15078:15078): [METRICA]Reducccion Global tardo 0.000000 segundos en ejecutarse
+[INFO] 03:58:44:532 Master/(15078:15078): [METRICA]Almacenado tardo 0.000000 segundos en ejecutarse
+[INFO] 03:58:44:541 Master/(15078:15078): [METRICA]Cantidad de fallos: 134550292
+[INFO] 03:58:44:544 Master/(15078:15078): [METRICA]Tareas realizadas en paralelo: 134550300

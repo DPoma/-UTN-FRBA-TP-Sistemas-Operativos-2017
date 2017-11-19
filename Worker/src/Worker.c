@@ -283,9 +283,9 @@ BloqueWorker getBloque(Entero numeroBloque) {
 }
 
 String reduccionScriptTemporal(ReduccionLocal* reduccion) {
-	String path = string_from_format("%sscriptTemporal", RUTA_TEMPS);
+	String path = string_from_format("%s./scriptTemporal.pl", RUTA_TEMPS);
 	File file = fileAbrir(path , ESCRITURA);
-	fwrite(reduccion->script, sizeof(char), reduccion->sizeScript, file);
+	fwrite(reduccion->script, sizeof(char), reduccion->sizeScript-1, file);
 	fileCerrar(file);
 	return path;
 }
@@ -329,15 +329,20 @@ void reduccionLocalIniciar(Mensaje* mensaje, Socket unSocket){
 	reduccionLocalFracaso(resultado, unSocket);
 	memoriaLiberar(comando);
 	if(resultado != ERROR) {
-		comando = string_from_format("sort -m %s > %s | sh %s > %s", temporales, archivoApareado, scriptPath, archivoReduccion);
+		comando = string_from_format("sort -m %s > %s", temporales, archivoApareado);
+		String comando2 = string_from_format("cat %s | %s > %s", archivoApareado, scriptPath, archivoReduccion);
+		printf("%s\n", temporales);
+		printf("%s\n", scriptPath);
+		printf("%s\n", archivoReduccion);
 		resultado = system(comando);
+		system(comando2);
 		reduccionLocalFracaso(resultado, unSocket);
 		if(resultado != ERROR) {
 			imprimirMensaje(archivoLog,"[REDUCCION LOCAL] Operacion terminada existosamente");
 			mensajeEnviar(unSocket, EXITO, NULL, 0);
 		}
 	}
-	fileLimpiar(scriptPath);
+	//fileLimpiar(scriptPath);
 	//fileLimpiar(archivoApareado);
 	memoriaLiberar(archivoApareado);
 	memoriaLiberar(archivoReduccion);
