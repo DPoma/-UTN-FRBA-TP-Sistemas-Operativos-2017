@@ -13,15 +13,14 @@
 #define FRACASO -800
 #define EXITO 1
 #define DESCONEXION 0
-#define ABORTAR 301
 #define TRANSFORMACION 303
 #define REDUCCION_LOCAL 304
 #define REDUCCION_GLOBAL 305
-#define ALMACENADO 306
-#define CIERRE 307
-#define PASAREG 308
+#define ALMACENADO_FINAL 306
+
 #define INTSIZE sizeof(Entero)
 #define TEMPSIZE 12
+#define DIRSIZE 40
 
 #define RUTA_CONFIG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Worker/NodoConfig.conf"
 #define RUTA_LOG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Worker/WorkerLog.log"
@@ -66,6 +65,12 @@ typedef struct {
 	int cantidadWorkers;
 } ReduccionGlobal;
 
+typedef struct {
+	Dir nodo;
+	String nombreReduccionLocal;
+	String pathArchivoApareo;
+} PedidoWorker;
+
 typedef void* BloqueWorker;
 
 //--------------------------------------- Globales -------------------------------------
@@ -91,6 +96,7 @@ void masterRealizarOperacion(Socket unSocket);
 void workerAtenderProcesos();
 void workerAtenderWorkers();
 void workerAceptarWorker();
+void workerAtenderOperacion(Socket socketWorker) ;
 
 //--------------------------------------- Funciones de Configuracion  -------------------------------------
 

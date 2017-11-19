@@ -13,7 +13,6 @@
 int main(void) {
 	workerIniciar();
 	workerAtenderProcesos();
-	workerFinalizar();
 	return EXIT_SUCCESS;
 }
 
@@ -94,11 +93,6 @@ void workerAtenderOperacion(Socket socketWorker) {
 		mensajeEnviar(socketWorker, NULO, buffer, stringLongitud(buffer));
 	fileCerrar(archivoReduccionLocal);
 }
-
-
-
-
-
 
 //--------------------------------------- Funciones de Configuracion -------------------------------------
 
@@ -348,24 +342,26 @@ String reduccionLocalObtenerTemporales(ReduccionLocal reduccion) {
 
 //--------------------------------------- Funciones de Reduccion Global -------------------------------------
 
-void reduccionGlobalAtenderWorker(ReduccionGlobal reduccion) {
-	Socket unSocket = socketCrearCliente(reduccion.nodos, ID_WORKER);
-	mensajeEnviar(unSocket, NULO, reduccion.nombresTemporales);
+void reduccionGlobalAtenderWorker(PedidoWorker* pedido) {
+	Socket unSocket = socketCrearCliente(pedido->nodo.ip, pedido->nodo.port, ID_WORKER);
+	mensajeEnviar(unSocket, NULO, pedido->nombreReduccionLocal, TEMPSIZE);
 	Mensaje* mensaje = mensajeRecibir(unSocket);
 	//todo sincronizar
-	fileAbrir(reduccion.archivoReduccion, "a+");
-	fwrite(mensaje->datos, sizeof(char), mensaje->header.tamanio, reduccion.archivoReduccion);
-	fileCerrar(reduccion.archivoReduccion);
+	File archivo = fileAbrir(pedido->pathArchivoApareo, "a+");
+	fwrite(mensaje->datos, sizeof(char), mensaje->header.tamanio, archivo);
+	fileCerrar(archivo);
 }
 
 void reduccionGlobalGenerarArchivo(ReduccionGlobal reduccion) {
-	reduccion.rutaArchivoApareo = string_from_format("%s%Apareo", RUTA_TEMP, reduccion.nombreResultado);
+	PedidoWorker pedido;
+	pedido.pathArchivoApareo = string_from_format("%s%Apareo", RUTA_TEMP, reduccion.nombreResultado);
 	int indice;
 	for(indice=0; indice < reduccion.cantidadWorkers; indice++) {
+		memcpy(&pedido.nodo, reduccion.nodos+indice, DIRSIZE);
+		memcpy(pedido.nombreReduccionLocal, reduccion.nombresTemporales+TEMPSIZE*indice, TEMPSIZE);
 		Hilo hilo;
-		hiloCrear(&hilo, (Puntero)reduccionGlobalAtenderWorker, &reduccion);
+		hiloCrear(&hilo, (Puntero)reduccionGlobalAtenderWorker, &pedido);
 	}
-
 }
 
 ReduccionGlobal reduccionGlobalRecibirDatos(Puntero datos) {
