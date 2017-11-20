@@ -16,8 +16,7 @@
 int main(void) {
 	yamaIniciar();
 	yamaAtender();
-	imprimirMensaje(archivoLog, "[EJECUCION] Proceso YAMA finalizado");
-	return EXIT_SUCCESS;
+	return EXIT_FAILURE;//nunca se va a leer
 }
 
 void yamaIniciar() {
@@ -27,10 +26,16 @@ void yamaIniciar() {
 	archivoLog=archivoLogCrear(RUTA_LOG, "YAMA");
 	configuracion=malloc(sizeof(Configuracion));
 	configurar();
-	void sighandler(){ //como no maneja variables locales no importa que se vaya de scope
+	void sigreconfig(){ //como no maneja variables locales no importa que se vaya de scope
 		configuracion->reconfigurar=true;
 	}
-	signal(SIGUSR1,sighandler);
+	signal(SIGUSR1,sigreconfig);
+	void  sigsalir(){
+		imprimirMensaje(archivoLog, "[EJECUCION] Proceso YAMA finalizado");
+		exit(EXIT_SUCCESS);
+	}
+	signal(SIGINT,sigsalir);
+
 
 	servidor = malloc(sizeof(Servidor));
 	imprimirMensaje2(archivoLog, "[CONEXION] Realizando conexion con File System (IP: %s | Puerto %s)", configuracion->ipFileSystem, configuracion->puertoFileSystem);
@@ -49,8 +54,9 @@ void yamaIniciar() {
 }
 
 void configurar(){
-	char* campos[8] = {"IP_PROPIO","PUERTO_MASTER","IP_FILESYSTEM","PUERTO_FILESYSTEM","RETARDO_PLANIFICACION","ALGORITMO_BALANCEO","DISPONIBILIDAD_BASE"};
+	char* campos[7] = {"IP_PROPIA","PUERTO_MASTER","IP_FILESYSTEM","PUERTO_FILESYSTEM","RETARDO_PLANIFICACION","ALGORITMO_BALANCEO","DISPONIBILIDAD_BASE"};
 	ArchivoConfig archivoConfig = archivoConfigCrear(RUTA_CONFIG, campos);
+	stringCopiar(configuracion->ipPropia,archivoConfigStringDe(archivoConfig, "IP_PROPIA"));
 	stringCopiar(configuracion->puertoMaster, archivoConfigStringDe(archivoConfig, "PUERTO_MASTER"));
 	stringCopiar(configuracion->ipFileSystem, archivoConfigStringDe(archivoConfig, "IP_FILESYSTEM"));
 	stringCopiar(configuracion->puertoFileSystem, archivoConfigStringDe(archivoConfig, "PUERTO_FILESYSTEM"));
@@ -95,7 +101,6 @@ void yamaAtender() {
 			if (listaSocketsContiene(socketI, &servidor->listaSelect)){ //se recibio algo
 				//podría disparar el thread aca
 				if(socketI==servidor->listenerMaster){
-
 					Socket nuevoSocket;
 					nuevoSocket = socketAceptar(socketI, ID_MASTER);
 					if(nuevoSocket != ERROR) {
@@ -161,7 +166,7 @@ void yamaAtender() {
 							}
 							return false;
 						}
-						moverAUsados(entradasDesconectadas);
+						moverAUsados((func)entradasDesconectadas);
 						if(jobDesconexion==-1)
 							log_info(archivoLog,"[EJECUCION] trabajo terminado");
 						else{
@@ -170,7 +175,7 @@ void yamaAtender() {
 									entrada->estado=ABORTADO;
 								}
 							}
-							list_iterate(tablaUsados,cazarEntradasDesconectadas);
+							list_iterate(tablaUsados,(func)cazarEntradasDesconectadas);
 						}
 
 
@@ -180,8 +185,8 @@ void yamaAtender() {
 							servidor->maximoSocket--; //no debería romper nada
 						log_info(archivoLog, "[CONEXION] Proceso Master %d se ha desconectado",socketI);
 					}else{
-						actualizarTablaEstados(*(int32_t*)mensaje->datos,mensaje->datos+INTSIZE,mensaje->header.operacion,socketI);
-						}
+						actualizarTablaEstados(mensaje,socketI);
+					}
 					mensajeDestruir(mensaje);
 				}
 			}
@@ -219,7 +224,7 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 			bool noRegistrado(Worker* worker){
 				return !stringIguales(worker->nodo.ip,nodo->ip)||!stringIguales(worker->nodo.port,nodo->port);
 			}
-			if(list_all_satisfy(workers,noRegistrado)){
+			if(list_all_satisfy(workers,(func)noRegistrado)){
 				Worker worker;
 				worker.conectado=true;
 				worker.carga=0;
@@ -248,7 +253,7 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 		void setearDisponibilidad(Worker* worker){
 			worker->disponibilidad=configuracion->disponibilidadBase;
 		}
-		list_iterate(workers,setearDisponibilidad);
+		list_iterate(workers,(func)setearDisponibilidad);
 	}else if(stringIguales(configuracion->algoritmoBalanceo,"W-Clock")){
 		int cargaMaxima=0;
 		void obtenerCargaMaxima(Worker* worker){
@@ -259,8 +264,8 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 			worker->disponibilidad=configuracion->disponibilidadBase
 					+cargaMaxima-worker->carga;
 		}
-		list_iterate(workers,obtenerCargaMaxima);
-		list_iterate(workers,setearDisponibilidad);
+		list_iterate(workers,(func)obtenerCargaMaxima);
+		list_iterate(workers,(func)setearDisponibilidad);
 	}else{
 		imprimirMensaje(archivoLog,"[] no se reconoce el algoritmo");
 		abort();
@@ -275,7 +280,7 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 				clock=dirToNum(worker->nodo);
 			}
 		}
-		list_iterate(workers,setearClock);
+		list_iterate(workers,(func)setearClock);
 	}
 	Worker* obtenerWorker(int* pos){
 		Worker* worker=list_get(workers,*pos);
@@ -327,7 +332,7 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 				void sumarDisponibilidadBase(Worker* worker){
 					worker->disponibilidad+=configuracion->disponibilidadBase;
 				}
-				list_iterate(workers,sumarDisponibilidadBase);
+				list_iterate(workers,(func)sumarDisponibilidadBase);
 			}
 			Worker* workerAdv=obtenerWorker(&clockAdv);
 			if(workerAdv->disponibilidad>0){
@@ -360,8 +365,10 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 	log_info(archivoLog,"[] planificacion terminada");
 }
 
-void actualizarTablaEstados(int etapa,void* datos,int actualizando,Socket masterid){
-	log_info(archivoLog,"etapa: %d",etapa);
+void actualizarTablaEstados(Mensaje* mensaje,Socket masterid){
+	int32_t etapa=*(int32_t*)mensaje->datos;
+	void* datos=mensaje->datos+INTSIZE;
+	int actualizando=mensaje->header.operacion;
 	Entrada* entradaA;
 	void registrarActualizacion(char* s){
 		log_info(archivoLog,"[RECEPCION] actualizacion de %s, %s",s,actualizando==EXITO?"exito":"fracaso");
@@ -373,23 +380,24 @@ void actualizarTablaEstados(int etapa,void* datos,int actualizando,Socket master
 		bool buscarEntrada(Entrada* entrada){
 			return nodoIguales(entrada->nodo,nodo)&&entrada->bloque==bloque;
 		}
-		entradaA=list_find(tablaEstados,buscarEntrada);
+		entradaA=list_find(tablaEstados,(func)buscarEntrada);
 	}else if(etapa==REDUCLOCAL){
 		registrarActualizacion("reduccion local");
 		Dir nodo=*((Dir*)datos);
 		bool buscarEntrada(Entrada* entrada){
 			return nodoIguales(entrada->nodo,nodo)&&entrada->masterid==masterid;
 		}
-		entradaA=list_find(tablaEstados,buscarEntrada);
+		entradaA=list_find(tablaEstados,(func)buscarEntrada);
 	}else{
 		if(etapa==REDUCGLOBAL) registrarActualizacion("reduccion global");
 		else registrarActualizacion("almacenado");
 		bool buscarEntrada(Entrada* entrada){
 			return entrada->masterid==masterid;
 		}
-		entradaA=list_find(tablaEstados,buscarEntrada);
+		entradaA=list_find(tablaEstados,(func)buscarEntrada);
 	}
 	entradaA->estado=actualizando;
+
 	void darDatosEntrada(Entrada* entrada){
 		entrada->nodo=entradaA->nodo;
 		entrada->job=entradaA->job;
@@ -409,8 +417,8 @@ void actualizarTablaEstados(int etapa,void* datos,int actualizando,Socket master
 				if(mismoJob(entrada))
 					entrada->estado=ABORTADO;
 			}
-			moverAUsados(mismoJob);
-			list_iterate(tablaUsados,abortarEntrada);
+			moverAUsados((func)mismoJob);
+			list_iterate(tablaUsados,(func)abortarEntrada);
 			mensajeEnviar(entradaA->masterid,ABORTAR,nullptr,0);
 		}
 		if(entradaA->etapa==TRANSFORMACION&&actualizando==FRACASO){
@@ -431,7 +439,7 @@ void actualizarTablaEstados(int etapa,void* datos,int actualizando,Socket master
 			bool buscarError(Entrada* entrada){
 				return entrada->estado==FRACASO;
 			}
-			list_add(tablaUsados,list_remove_by_condition(tablaEstados,buscarError));//mutex
+			list_add(tablaUsados,list_remove_by_condition(tablaEstados,(func)buscarError));//mutex
 		}else{
 			abortarJob();
 		}
@@ -441,16 +449,17 @@ void actualizarTablaEstados(int etapa,void* datos,int actualizando,Socket master
 		bool aux(Entrada* entrada){
 			return cond(entrada)&&entrada->estado!=EXITO;
 		}
-		return !list_any_satisfy(tablaEstados,aux);
+		return !list_any_satisfy(tablaEstados,(func)aux);
 	}
-	if(entradaA->etapa==TRANSFORMACION){
-		if(trabajoTerminado(mismoNodoJob)){
+	switch(entradaA->etapa){
+	case TRANSFORMACION:
+		if(trabajoTerminado((func)mismoNodoJob)){
 			log_info(archivoLog,"[REDUCLOCAL] creando entrada");
 			Entrada reducLocal;
 			darDatosEntrada(&reducLocal);
 			darPathTemporal(&reducLocal.pathTemporal,'l');
 			reducLocal.etapa=REDUCLOCAL;
-			Lista nodos=list_filter(tablaEstados,mismoNodoJob);
+			Lista nodos=list_filter(tablaEstados,(func)mismoNodoJob);
 			int tamanio=TEMPSIZE*(nodos->elements_count+1)+DIRSIZE;
 			void* dato=malloc(tamanio);
 			memcpy(dato,&reducLocal.nodo,DIRSIZE);
@@ -459,11 +468,11 @@ void actualizarTablaEstados(int etapa,void* datos,int actualizando,Socket master
 				memcpy(dato+i,((Entrada*)list_get(nodos,j))->pathTemporal,TEMPSIZE);
 			memcpy(dato+i,reducLocal.pathTemporal,TEMPSIZE);
 			mensajeEnviar(reducLocal.masterid,REDUCLOCAL,dato,tamanio);
-			moverAUsados(mismoNodoJob);
+			moverAUsados((func)mismoNodoJob);
 			list_addM(tablaEstados,&reducLocal,sizeof(Entrada));//mutex
 		}
-	}else if(entradaA->etapa==REDUCLOCAL){
-		if(trabajoTerminado(mismoJob)){
+	break;case REDUCLOCAL:
+		if(trabajoTerminado((func)mismoJob)){
 			log_info(archivoLog,"[REDUCGLBAL] creando entrada");
 			Entrada reducGlobal;
 			darDatosEntrada(&reducGlobal);
@@ -476,8 +485,8 @@ void actualizarTablaEstados(int etapa,void* datos,int actualizando,Socket master
 					nodoMenorCarga=worker->nodo;
 					menorCargaI=worker->carga;
 			}
-			list_iterate(workers,menorCarga);
-			Lista nodosReducidos=list_filter(tablaEstados,mismoJob);
+			list_iterate(workers,(func)menorCarga);
+			Lista nodosReducidos=list_filter(tablaEstados,(func)mismoJob);
 			int tamanio=(DIRSIZE+TEMPSIZE)*(nodosReducidos->elements_count+1);
 			void* dato=malloc(tamanio);
 			memcpy(dato,&nodoMenorCarga,DIRSIZE);
@@ -490,38 +499,35 @@ void actualizarTablaEstados(int etapa,void* datos,int actualizando,Socket master
 			memcpy(dato+i,reducGlobal.pathTemporal,TEMPSIZE);
 
 			mensajeEnviar(reducGlobal.masterid,REDUCGLOBAL,dato,tamanio);
-			moverAUsados(mismoJob);
+			moverAUsados((func)mismoJob);
 			list_addM(tablaEstados,&reducGlobal,sizeof(Entrada));//mutex
 		}
-	}else if(entradaA->etapa==REDUCGLOBAL){
+	break;case REDUCGLOBAL:{
 		log_info(archivoLog,"[ALMACENADO] creando entrada");
 		//no le veo sentido a que yama participe del almacenado final
 		//master lo podría hacer solo,  ya esta grande
-		Entrada* reducGlobal=list_find(tablaEstados,mismoJob);
+		Entrada* reducGlobal=list_find(tablaEstados,(func)mismoJob);
 		Entrada almacenado;
 		darDatosEntrada(&almacenado);
-		almacenado.pathTemporal="NombreArch?"; //TODO mostrar nombre archivo
-		//aca podría ponerle el nombre de archivo final, pero no lo tengo
-		//y no lo necesito, no vale la pena meter la comunicacion y la
-		//logica por algo que es estetico nomas
 		almacenado.etapa=ALMACENADO;
+		almacenado.pathTemporal=malloc(mensaje->header.tamanio-INTSIZE);
+		memcpy(almacenado.pathTemporal,datos,mensaje->header.tamanio-INTSIZE);
 		char dato[DIRSIZE+TEMPSIZE];
 		memcpy(dato,&reducGlobal->nodo,DIRSIZE);
 		memcpy(dato+DIRSIZE,reducGlobal->pathTemporal,TEMPSIZE);
 		mensajeEnviar(entradaA->masterid,ALMACENADO,dato,sizeof dato);
-		list_add(tablaUsados,list_remove_by_condition(tablaEstados,mismoJob));
+		list_add(tablaUsados,list_remove_by_condition(tablaEstados,(func)mismoJob));
 		list_addM(tablaEstados,&almacenado,sizeof(Entrada));
-	}else if(entradaA->etapa==ALMACENADO){
-		list_add(tablaUsados,list_remove_by_condition(tablaEstados,mismoJob));
+	}break;case ALMACENADO:
+		list_add(tablaUsados,list_remove_by_condition(tablaEstados,(func)mismoJob));
 		mensajeEnviar(entradaA->masterid,CIERRE,nullptr,0);
 	}
 }
 
 void dibujarTablaEstados(){
-	if(list_is_empty(tablaEstados))
+	if(list_is_empty(tablaEstados)&&list_is_empty(tablaUsados))
 		return;
 	pantallaLimpiar();
-	puts("\n");
 	puts("     J |   M |  N |    B |      ETAPA       |    TEMPORAL  |    ESTADO   |");
 	puts("     ---------------------------------------------------------------------");
 	void dibujarEntrada(Entrada* entrada){
@@ -530,7 +536,7 @@ void dibujarTablaEstados(){
 		case TRANSFORMACION: etapa="Transformacion"; break;
 		case REDUCLOCAL: etapa="Reduccion local"; break;
 		case REDUCGLOBAL: etapa="Reduccion global";break;
-		default: etapa="Almacenado final";
+		default: etapa="Almacenado";
 		}
 		switch(entrada->estado){
 		case EXITO: estado="Terminado"; break;
@@ -551,22 +557,22 @@ void dibujarTablaEstados(){
 					index=i;
 				i++;
 			}
-			list_iterate(masters,buscarMaster);
+			list_iterate(masters,(func)buscarMaster);
 			if(index==-1){
 				list_addM(masters,&masterid,sizeof(int));
 				return i;
 			}
 			return index;
 		}
-		printf("   %3d | %3d | %2d | %4s | %16s | %12s | %11s |\n",
+		printf(" %3d | %3d | %2d | %4s | %16s | %12s | %11s |\n",
 				entrada->job,masterToNum(entrada->masterid),dirToNum(entrada->nodo),bloque,
 				etapa,entrada->pathTemporal,estado);
 		if(doFree)
 			free(bloque);
 	}
-	list_iterate(tablaUsados,dibujarEntrada);
-	//puts("----");
-	list_iterate(tablaEstados,dibujarEntrada);
+	list_iterate(tablaUsados,(func)dibujarEntrada);
+	puts("----");
+	list_iterate(tablaEstados,(func)dibujarEntrada);
 }
 
 int dirToNum(Dir nodo){
@@ -576,7 +582,7 @@ int dirToNum(Dir nodo){
 			index=i;
 		i++;
 	}
-	list_iterate(workers,buscarIp);
+	list_iterate(workers,(func)buscarIp);
 	return index;
 }
 

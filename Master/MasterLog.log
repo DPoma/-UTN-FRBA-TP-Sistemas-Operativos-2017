@@ -1,62 +1,62 @@
-[INFO] 17:07:39:578 Master/(14161:14161): [CONEXION] Configuracion para conexion con YAMA (IP: 127.0.0.1 | Puerto: 5070)
-[INFO] 17:07:39:612 Master/(14161:14161): [CONEXION] Estableciendo Conexion con YAMA...
-[INFO] 17:07:39:646 Master/(14161:14161): [CONEXION] Conexion establecida con YAMA, enviando solicitud
-[INFO] 17:07:39:712 Master/(14161:14161): [MENSAJE] Lista de bloques recibida
-[INFO] 17:07:39:714 Master/(14161:14161): [RECEPCION] bloque 127.0.0.1 5090 0
-[INFO] 17:07:39:722 Master/(14161:14161): ] lista para nodo 127.0.0.1 5090 armada, lista #1
-[INFO] 17:07:39:722 Master/(14161:14161): [RECEPCION] bloque 127.0.0.1 5090 1
-[INFO] 17:07:39:735 Master/(14161:14161): [RECEPCION] bloque 127.0.0.1 5090 2
-[INFO] 17:07:39:736 Master/(14161:14161): [RECEPCION] bloque 127.0.0.1 5090 3
-[INFO] 17:07:39:742 Master/(14161:14161): [RECEPCION] bloque 127.0.0.1 5090 4
-[INFO] 17:07:39:743 Master/(14161:14161): [RECEPCION] bloque 127.0.0.1 5090 5
-[INFO] 17:07:39:743 Master/(14161:14161): [RECEPCION] bloque 127.0.0.1 5090 6
-[INFO] 17:07:39:743 Master/(14161:14161): [RECEPCION] bloque 127.0.0.1 5090 7
-[INFO] 17:07:39:746 Master/(14161:14161): [RECEPCION] bloque 127.0.0.1 5090 8
-[INFO] 17:07:39:747 Master/(14161:14161): [RECEPCION] bloque 127.0.0.1 5090 9
-[INFO] 17:07:39:747 Master/(14161:14161): [RECEPCION] bloque 127.0.0.1 5090 10
-[INFO] 17:07:39:747 Master/(14161:14161): [RECEPCION] bloque 127.0.0.1 5090 11
-[INFO] 17:07:39:787 Master/(14161:14166): [EJECUCION] comenzando transformacion
-[INFO] 17:07:39:812 Master/(14161:14166): [CONEXION] Estableciendo conexion con Worker (IP: 127.0.0.1 | PUERTO: 5090
-[INFO] 17:07:39:830 Master/(14161:14166): [CONEXION] Enviando bloque 0 t1707396950
-[INFO] 17:07:39:833 Master/(14161:14166): [CONEXION] Enviando bloque 1 t1707396970
-[INFO] 17:07:39:833 Master/(14161:14166): [CONEXION] Enviando bloque 2 t1707396971
-[INFO] 17:07:39:833 Master/(14161:14166): [CONEXION] Enviando bloque 3 t1707396980
-[INFO] 17:07:39:834 Master/(14161:14166): [CONEXION] Enviando bloque 4 t1707396981
-[INFO] 17:07:39:842 Master/(14161:14166): [CONEXION] Enviando bloque 5 t1707396982
-[INFO] 17:07:39:843 Master/(14161:14166): [CONEXION] Enviando bloque 6 t1707396983
-[INFO] 17:07:39:843 Master/(14161:14166): [CONEXION] Enviando bloque 7 t1707396984
-[INFO] 17:07:39:846 Master/(14161:14166): [CONEXION] Enviando bloque 8 t1707396985
-[INFO] 17:07:39:847 Master/(14161:14166): [CONEXION] Enviando bloque 9 t1707396986
-[INFO] 17:07:39:847 Master/(14161:14166): [CONEXION] Enviando bloque 10 t1707396987
-[INFO] 17:07:39:847 Master/(14161:14166): [CONEXION] Enviando bloque 11 t1707396988
-[INFO] 17:07:41:305 Master/(14161:14166): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
-[INFO] 17:07:41:534 Master/(14161:14166): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
-[INFO] 17:07:41:583 Master/(14161:14166): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
-[INFO] 17:07:41:630 Master/(14161:14166): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
-[INFO] 17:07:41:792 Master/(14161:14166): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
-[INFO] 17:07:41:907 Master/(14161:14166): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
-[INFO] 17:07:42:55 Master/(14161:14166): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
-[INFO] 17:07:42:92 Master/(14161:14166): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
-[INFO] 17:07:42:236 Master/(14161:14166): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
-[INFO] 17:07:42:285 Master/(14161:14166): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
-[INFO] 17:07:42:346 Master/(14161:14166): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
-[INFO] 17:07:42:608 Master/(14161:14166): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
-[INFO] 17:07:42:610 Master/(14161:14166): [EJECUCION] transformacion terminada
-[INFO] 17:07:42:642 Master/(14161:14275): [EJECUCION] comenzando reduccion local
-[INFO] 17:07:46:523 Master/(14161:14275): [EJECUCION]REDUCCION LOCAL EXISTOSA
-[INFO] 17:07:46:526 Master/(14161:14275): [EJECUCION] terminando reduccion local
-[INFO] 17:07:46:552 Master/(14161:14161): [EJECUCION] comenzando reduccion global
-[INFO] 17:07:53:885 Master/(14161:14161): [EJECUCION]REDUCCION GLOBAL EXISTOSA
-[INFO] 17:07:53:887 Master/(14161:14161): [EJECUCION] reduccion global terminada
-[INFO] 17:07:53:901 Master/(14161:14161): [EJECUCION] comenzando almacenado
-[INFO] 17:07:54:477 Master/(14161:14161): [EJECUCION] ALMACENADO FINAL EXITOSO
-[INFO] 17:07:54:478 Master/(14161:14161): [EJECUCION] almacenado terminado
-[INFO] 17:07:54:488 Master/(14161:14161): [EJECUCION]Terminando proceso
-[INFO] 17:07:54:599 Master/(14161:14161): [METRICA]Job tardo 0.000000 segundos en ejecutarse
-[INFO] 17:07:54:609 Master/(14161:14161): [METRICA]Transformacion promedio  tardo 0.000000 segundos en ejecutarse
-[INFO] 17:07:54:614 Master/(14161:14161): [METRICA]Reduccion local promedio tardo 0.000000 segundos en ejecutarse
-[INFO] 17:07:54:614 Master/(14161:14161): [METRICA]Transformaciones: 134550288,Reducciones locales:134550276
-[INFO] 17:07:54:616 Master/(14161:14161): [METRICA]Reducccion Global tardo 0.000000 segundos en ejecutarse
-[INFO] 17:07:54:618 Master/(14161:14161): [METRICA]Almacenado tardo 0.000000 segundos en ejecutarse
-[INFO] 17:07:54:621 Master/(14161:14161): [METRICA]Cantidad de fallos: 134550292
-[INFO] 17:07:54:622 Master/(14161:14161): [METRICA]Tareas realizadas en paralelo: 134550300
+[INFO] 20:27:29:441 Master/(5998:5998): [CONEXION] Configuracion para conexion con YAMA (IP: 127.0.0.1 | Puerto: 5070)
+[INFO] 20:27:29:441 Master/(5998:5998): [CONEXION] Estableciendo Conexion con YAMA...
+[INFO] 20:27:29:450 Master/(5998:5998): [CONEXION] Conexion establecida con YAMA, enviando solicitud
+[INFO] 20:27:29:477 Master/(5998:5998): [MENSAJE] Lista de bloques recibida
+[INFO] 20:27:29:477 Master/(5998:5998): [RECEPCION] bloque 127.0.0.1 5090 0
+[INFO] 20:27:29:477 Master/(5998:5998): ] lista para nodo 127.0.0.1 5090 armada, lista #1
+[INFO] 20:27:29:477 Master/(5998:5998): [RECEPCION] bloque 127.0.0.1 5090 1
+[INFO] 20:27:29:477 Master/(5998:5998): [RECEPCION] bloque 127.0.0.1 5090 2
+[INFO] 20:27:29:477 Master/(5998:5998): [RECEPCION] bloque 127.0.0.1 5090 3
+[INFO] 20:27:29:477 Master/(5998:5998): [RECEPCION] bloque 127.0.0.1 5090 4
+[INFO] 20:27:29:477 Master/(5998:5998): [RECEPCION] bloque 127.0.0.1 5090 5
+[INFO] 20:27:29:477 Master/(5998:5998): [RECEPCION] bloque 127.0.0.1 5090 6
+[INFO] 20:27:29:477 Master/(5998:5998): [RECEPCION] bloque 127.0.0.1 5090 7
+[INFO] 20:27:29:477 Master/(5998:5998): [RECEPCION] bloque 127.0.0.1 5090 8
+[INFO] 20:27:29:477 Master/(5998:5998): [RECEPCION] bloque 127.0.0.1 5090 9
+[INFO] 20:27:29:477 Master/(5998:5998): [RECEPCION] bloque 127.0.0.1 5090 10
+[INFO] 20:27:29:477 Master/(5998:5998): [RECEPCION] bloque 127.0.0.1 5090 11
+[INFO] 20:27:29:478 Master/(5998:6001): [EJECUCION] comenzando transformacion
+[INFO] 20:27:29:481 Master/(5998:6001): [CONEXION] Estableciendo conexion con Worker (IP: 127.0.0.1 | PUERTO: 5090
+[INFO] 20:27:29:481 Master/(5998:6001): [CONEXION] Enviando bloque 0 t2027294770
+[INFO] 20:27:29:481 Master/(5998:6001): [CONEXION] Enviando bloque 1 t2027294771
+[INFO] 20:27:29:481 Master/(5998:6001): [CONEXION] Enviando bloque 2 t2027294772
+[INFO] 20:27:29:481 Master/(5998:6001): [CONEXION] Enviando bloque 3 t2027294773
+[INFO] 20:27:29:481 Master/(5998:6001): [CONEXION] Enviando bloque 4 t2027294774
+[INFO] 20:27:29:481 Master/(5998:6001): [CONEXION] Enviando bloque 5 t2027294775
+[INFO] 20:27:29:481 Master/(5998:6001): [CONEXION] Enviando bloque 6 t2027294776
+[INFO] 20:27:29:481 Master/(5998:6001): [CONEXION] Enviando bloque 7 t2027294777
+[INFO] 20:27:29:482 Master/(5998:6001): [CONEXION] Enviando bloque 8 t2027294778
+[INFO] 20:27:29:482 Master/(5998:6001): [CONEXION] Enviando bloque 9 t2027294779
+[INFO] 20:27:29:482 Master/(5998:6001): [CONEXION] Enviando bloque 10 t202729477a
+[INFO] 20:27:29:482 Master/(5998:6001): [CONEXION] Enviando bloque 11 t202729477b
+[INFO] 20:27:33:142 Master/(5998:6001): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
+[INFO] 20:27:33:659 Master/(5998:6001): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
+[INFO] 20:27:33:868 Master/(5998:6001): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
+[INFO] 20:27:34:58 Master/(5998:6001): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
+[INFO] 20:27:34:148 Master/(5998:6001): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
+[INFO] 20:27:34:190 Master/(5998:6001): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
+[INFO] 20:27:34:267 Master/(5998:6001): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
+[INFO] 20:27:34:330 Master/(5998:6001): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
+[INFO] 20:27:34:549 Master/(5998:6001): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
+[INFO] 20:27:34:775 Master/(5998:6001): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
+[INFO] 20:27:34:794 Master/(5998:6001): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
+[INFO] 20:27:34:844 Master/(5998:6001): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
+[INFO] 20:27:34:844 Master/(5998:6001): [EJECUCION] transformacion terminada
+[INFO] 20:27:35:30 Master/(5998:6116): [EJECUCION] comenzando reduccion local
+[INFO] 20:27:35:839 Master/(5998:6116): [EJECUCION]REDUCCION LOCAL EXISTOSA
+[INFO] 20:27:35:839 Master/(5998:6116): [EJECUCION] terminando reduccion local
+[INFO] 20:27:35:848 Master/(5998:5998): [EJECUCION] comenzando reduccion global
+[INFO] 20:27:36:741 Master/(5998:5998): [EJECUCION]REDUCCION GLOBAL EXISTOSA
+[INFO] 20:27:36:741 Master/(5998:5998): [EJECUCION] reduccion global terminada
+[INFO] 20:27:36:754 Master/(5998:5998): [EJECUCION] comenzando almacenado
+[INFO] 20:27:37:172 Master/(5998:5998): [EJECUCION] ALMACENADO FINAL EXITOSO
+[INFO] 20:27:37:172 Master/(5998:5998): [EJECUCION] almacenado terminado
+[INFO] 20:27:37:184 Master/(5998:5998): [EJECUCION]Terminando proceso
+[INFO] 20:27:37:185 Master/(5998:5998): [METRICA]Job tardo -0.000000 segundos en ejecutarse
+[INFO] 20:27:37:185 Master/(5998:5998): [METRICA]Transformacion promedio  tardo -0.000000 segundos en ejecutarse
+[INFO] 20:27:37:185 Master/(5998:5998): [METRICA]Reduccion local promedio tardo -0.000000 segundos en ejecutarse
+[INFO] 20:27:37:185 Master/(5998:5998): [METRICA]Transformaciones: 134550288,Reducciones locales:134550276
+[INFO] 20:27:37:185 Master/(5998:5998): [METRICA]Reducccion Global tardo -0.000000 segundos en ejecutarse
+[INFO] 20:27:37:185 Master/(5998:5998): [METRICA]Almacenado tardo -0.000000 segundos en ejecutarse
+[INFO] 20:27:37:185 Master/(5998:5998): [METRICA]Cantidad de fallos: 134550292
+[INFO] 20:27:37:185 Master/(5998:5998): [METRICA]Tareas realizadas en paralelo: 134550300

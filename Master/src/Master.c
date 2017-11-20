@@ -297,7 +297,11 @@ void reduccionGlobal(Mensaje* m){
 	imprimirMensaje(archivoLog,mensaje->header.operacion==EXITO?"[EJECUCION]REDUCCION GLOBAL EXISTOSA"
 			:"[ERROR]FALLO EN LA RE_D_UCCION GLOBAL");
 	int32_t op=REDUCGLOBAL;
-	mensajeEnviar(socketYama,mensaje->header.operacion,&op,INTSIZE);
+	tamanio=INTSIZE+stringLongitud(archivoSalida)+1;
+	buffer=malloc(tamanio);
+	memcpy(buffer,&op,INTSIZE);
+	memcpy(buffer+INTSIZE,archivoSalida,stringLongitud(archivoSalida)+1);
+	mensajeEnviar(socketYama,mensaje->header.operacion,buffer,tamanio);
 	mensajeDestruir(mensaje);
 	socketCerrar(sWorker);
 	metricas.reducGlobal=transcurrido(tiempo);
@@ -319,6 +323,10 @@ void almacenado(Mensaje* m){
 	free(buffer);
 
 	Mensaje* mens=mensajeRecibir(sWorker);
+	if(mens->header.operacion==DESCONEXION){
+		mens->header.operacion=FRACASO;
+		puts("XHHHH");
+	}
 	imprimirMensaje(archivoLog,mens->header.operacion==EXITO?"[EJECUCION] ALMACENADO FINAL EXITOSO":"[ERROR] ALMACENADO FINAL FALLIDO");
 
 	int32_t op=ALMACENADO;
