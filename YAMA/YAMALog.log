@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 [INFO] 03:12:10:945 YAMA/(24209:24209): [CONEXION] Realizando conexion con File System (IP: 127.0.0.1 | Puerto 5060)
 [INFO] 03:12:11:124 YAMA/(24209:24209): [CONEXION] Conexion exitosa con File System
 [INFO] 03:12:11:152 YAMA/(24209:24209): [CONEXION] Esperando conexiones de un Master (Puerto 5070)
@@ -73,3 +74,84 @@
 [INFO] 03:12:47:391 YAMA/(24209:24209): etapa: 304
 [INFO] 03:12:47:391 YAMA/(24209:24209): [RECEPCION] actualizacion de reduccion local, exito
 [INFO] 03:12:47:399 YAMA/(24209:24209): [REDUCGLBAL] creando entrada
+=======
+[INFO] 02:49:20:743 YAMA/(4952:4952): [CONEXION] Realizando conexion con File System (IP: 127.0.0.1 | Puerto 5060)
+[INFO] 02:49:20:753 YAMA/(4952:4952): [CONEXION] Conexion exitosa con File System
+[INFO] 02:49:20:753 YAMA/(4952:4952): [CONEXION] Esperando conexiones de un Master (Puerto 5070)
+[INFO] 02:49:26:906 YAMA/(4952:4952): [CONEXION] Proceso Master 6 conectado exitosamente
+[INFO] 02:49:26:919 YAMA/(4952:4952): [RECEPCION] solicitud de master
+[INFO] 02:49:26:920 YAMA/(4952:4952): [ENVIO] path yamafs:/WBAN.csv de master #6 enviado al fileSystem
+[INFO] 02:49:26:932 YAMA/(4952:4952): [RECEPCION] lista de bloques para master #6 recibida
+[INFO] 02:49:26:932 YAMA/(4952:4952): [REGISTRO] bloque: 127.0.0.1 | 5090 | 0
+[INFO] 02:49:26:932 YAMA/(4952:4952): [REGISTRO] bloque2: 127.0.0.1 | 5090 | 0
+[INFO] 02:49:26:932 YAMA/(4952:4952): [REGISTRO] nodo direccion 127.0.0.1, puerto 5090
+[INFO] 02:49:26:932 YAMA/(4952:4952): [REGISTRO] bloque: 127.0.0.1 | 5090 | 1
+[INFO] 02:49:26:932 YAMA/(4952:4952): [REGISTRO] bloque2: 127.0.0.1 | 5090 | 1
+[INFO] 02:49:26:932 YAMA/(4952:4952): [REGISTRO] bloque: 127.0.0.1 | 5090 | 2
+[INFO] 02:49:26:932 YAMA/(4952:4952): [REGISTRO] bloque2: 127.0.0.1 | 5090 | 2
+[INFO] 02:49:26:932 YAMA/(4952:4952): [REGISTRO] bloque: 127.0.0.1 | 5090 | 3
+[INFO] 02:49:26:932 YAMA/(4952:4952): [REGISTRO] bloque2: 127.0.0.1 | 5090 | 3
+[INFO] 02:49:26:932 YAMA/(4952:4952): [REGISTRO] bloque: 127.0.0.1 | 5090 | 4
+[INFO] 02:49:26:932 YAMA/(4952:4952): [REGISTRO] bloque2: 127.0.0.1 | 5090 | 4
+[INFO] 02:49:26:932 YAMA/(4952:4952): [REGISTRO] bloque: 127.0.0.1 | 5090 | 5
+[INFO] 02:49:26:932 YAMA/(4952:4952): [REGISTRO] bloque2: 127.0.0.1 | 5090 | 5
+[INFO] 02:49:26:932 YAMA/(4952:4952): [REGISTRO] bloque: 127.0.0.1 | 5090 | 6
+[INFO] 02:49:26:932 YAMA/(4952:4952): [REGISTRO] bloque2: 127.0.0.1 | 5090 | 6
+[INFO] 02:49:26:932 YAMA/(4952:4952): [REGISTRO] bloque: 127.0.0.1 | 5090 | 7
+[INFO] 02:49:26:932 YAMA/(4952:4952): [REGISTRO] bloque2: 127.0.0.1 | 5090 | 7
+[INFO] 02:49:26:932 YAMA/(4952:4952): [REGISTRO] bloque: 127.0.0.1 | 5090 | 8
+[INFO] 02:49:26:932 YAMA/(4952:4952): [REGISTRO] bloque2: 127.0.0.1 | 5090 | 8
+[INFO] 02:49:26:932 YAMA/(4952:4952): [REGISTRO] bloque: 127.0.0.1 | 5090 | 9
+[INFO] 02:49:26:933 YAMA/(4952:4952): [REGISTRO] bloque2: 127.0.0.1 | 5090 | 9
+[INFO] 02:49:26:933 YAMA/(4952:4952): [REGISTRO] bloque: 127.0.0.1 | 5090 | 10
+[INFO] 02:49:26:933 YAMA/(4952:4952): [REGISTRO] bloque2: 127.0.0.1 | 5090 | 10
+[INFO] 02:49:26:933 YAMA/(4952:4952): [REGISTRO] bloque: 127.0.0.1 | 5090 | 11
+[INFO] 02:49:26:933 YAMA/(4952:4952): [REGISTRO] bloque2: 127.0.0.1 | 5090 | 11
+[INFO] 02:49:26:933 YAMA/(4952:4952): [REGISTRO] 24 bloques recibidos
+[INFO] 02:49:26:933 YAMA/(4952:4952): [REGISTRO] 12 bytes recibidos
+[INFO] 02:49:26:933 YAMA/(4952:4952): bloque 127.0.0.1 5090 0 asignado a worker 127.0.0.1 5090
+[INFO] 02:49:26:933 YAMA/(4952:4952): bloque 127.0.0.1 5090 1 asignado a worker 127.0.0.1 5090
+[INFO] 02:49:26:933 YAMA/(4952:4952): bloque 127.0.0.1 5090 2 asignado a worker 127.0.0.1 5090
+[INFO] 02:49:26:933 YAMA/(4952:4952): bloque 127.0.0.1 5090 3 asignado a worker 127.0.0.1 5090
+[INFO] 02:49:26:933 YAMA/(4952:4952): bloque 127.0.0.1 5090 4 asignado a worker 127.0.0.1 5090
+[INFO] 02:49:26:933 YAMA/(4952:4952): bloque 127.0.0.1 5090 5 asignado a worker 127.0.0.1 5090
+[INFO] 02:49:26:933 YAMA/(4952:4952): bloque 127.0.0.1 5090 6 asignado a worker 127.0.0.1 5090
+[INFO] 02:49:26:933 YAMA/(4952:4952): bloque 127.0.0.1 5090 7 asignado a worker 127.0.0.1 5090
+[INFO] 02:49:26:933 YAMA/(4952:4952): bloque 127.0.0.1 5090 8 asignado a worker 127.0.0.1 5090
+[INFO] 02:49:26:933 YAMA/(4952:4952): bloque 127.0.0.1 5090 9 asignado a worker 127.0.0.1 5090
+[INFO] 02:49:26:933 YAMA/(4952:4952): bloque 127.0.0.1 5090 10 asignado a worker 127.0.0.1 5090
+[INFO] 02:49:26:933 YAMA/(4952:4952): bloque 127.0.0.1 5090 11 asignado a worker 127.0.0.1 5090
+[INFO] 02:49:26:934 YAMA/(4952:4952): [] planificacion terminada
+[INFO] 02:49:27:781 YAMA/(4952:4952): etapa: 303
+[INFO] 02:49:27:781 YAMA/(4952:4952): [RECEPCION] actualizacion de transformacion, exito
+[INFO] 02:49:28:512 YAMA/(4952:4952): etapa: 303
+[INFO] 02:49:28:512 YAMA/(4952:4952): [RECEPCION] actualizacion de transformacion, exito
+[INFO] 02:49:29:174 YAMA/(4952:4952): etapa: 303
+[INFO] 02:49:29:175 YAMA/(4952:4952): [RECEPCION] actualizacion de transformacion, exito
+[INFO] 02:49:29:883 YAMA/(4952:4952): etapa: 303
+[INFO] 02:49:29:883 YAMA/(4952:4952): [RECEPCION] actualizacion de transformacion, exito
+[INFO] 02:49:30:662 YAMA/(4952:4952): etapa: 303
+[INFO] 02:49:30:662 YAMA/(4952:4952): [RECEPCION] actualizacion de transformacion, exito
+[INFO] 02:49:31:422 YAMA/(4952:4952): etapa: 303
+[INFO] 02:49:31:422 YAMA/(4952:4952): [RECEPCION] actualizacion de transformacion, exito
+[INFO] 02:49:32:130 YAMA/(4952:4952): etapa: 303
+[INFO] 02:49:32:130 YAMA/(4952:4952): [RECEPCION] actualizacion de transformacion, exito
+[INFO] 02:49:32:940 YAMA/(4952:4952): etapa: 303
+[INFO] 02:49:32:941 YAMA/(4952:4952): [RECEPCION] actualizacion de transformacion, exito
+[INFO] 02:49:33:754 YAMA/(4952:4952): etapa: 303
+[INFO] 02:49:33:754 YAMA/(4952:4952): [RECEPCION] actualizacion de transformacion, exito
+[INFO] 02:49:34:472 YAMA/(4952:4952): etapa: 303
+[INFO] 02:49:34:472 YAMA/(4952:4952): [RECEPCION] actualizacion de transformacion, exito
+[INFO] 02:49:35:226 YAMA/(4952:4952): etapa: 303
+[INFO] 02:49:35:226 YAMA/(4952:4952): [RECEPCION] actualizacion de transformacion, exito
+[INFO] 02:49:35:813 YAMA/(4952:4952): etapa: 303
+[INFO] 02:49:35:813 YAMA/(4952:4952): [RECEPCION] actualizacion de transformacion, exito
+[INFO] 02:49:35:813 YAMA/(4952:4952): [REDUCLOCAL] creando entrada
+[INFO] 02:49:37:619 YAMA/(4952:4952): etapa: 304
+[INFO] 02:49:37:619 YAMA/(4952:4952): [RECEPCION] actualizacion de reduccion local, exito
+[INFO] 02:49:37:619 YAMA/(4952:4952): [REDUCGLBAL] creando entrada
+[INFO] 02:49:38:653 YAMA/(4952:4952): etapa: 305
+[INFO] 02:49:38:654 YAMA/(4952:4952): [RECEPCION] actualizacion de reduccion global, fracaso
+[INFO] 02:49:39:423 YAMA/(4952:4952): [RECEPCION] desconexion de master
+[INFO] 02:49:39:423 YAMA/(4952:4952): [CONEXION] Proceso Master 6 se ha desconectado
+>>>>>>> 76be01cd79b60c73c092227e411f709294564f22

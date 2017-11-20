@@ -14,7 +14,6 @@ int main(int argc, String* argv) {
 	}
 	masterIniciar(argv);
 	masterAtender();
-	//mock4worker();
 	return EXIT_SUCCESS;
 
 }
