@@ -320,6 +320,10 @@ void reduccionGlobal(Mensaje* m){
 	mensajeDestruir(m);free(buffer);
 
 	Mensaje* mensaje = mensajeRecibir(sWorker);
+	if(mensaje->header.operacion==DESCONEXION){
+		mensaje->header.operacion=FRACASO;
+		puts("WHHHH");
+	}
 	imprimirMensaje(archivoLog,mensaje->header.operacion==EXITO?"[EJECUCION]REDUCCION GLOBAL EXISTOSA"
 			:"[ERROR]FALLO EN LA RE_D_UCCION GLOBAL");
 	int32_t op=REDUCGLOBAL;
