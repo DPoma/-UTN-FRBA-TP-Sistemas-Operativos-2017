@@ -103,7 +103,7 @@ void masterRealizarOperacion(Socket unSocket);
 void workerAtenderProcesos();
 void workerAtenderWorkers();
 void workerAceptarWorker();
-void workerAtenderOperacion(Mensaje* mensaje, Socket socketWorker);
+void reduccionGlobalConOtroWorker(Mensaje* mensaje, Socket socketWorker);
 
 //--------------------------------------- Funciones de Configuracion  -------------------------------------
 

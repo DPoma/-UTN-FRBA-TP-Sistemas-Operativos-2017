@@ -87,28 +87,10 @@ void masterRealizarOperacion(Socket unSocket) {
 		case REDUCCION_LOCAL: reduccionLocal(mensaje, unSocket); break;
 		case REDUCCION_GLOBAL: puts("REDUC GLOBAL"); reduccionGlobal(mensaje, unSocket); break;
 		case ALMACENADO_FINAL: almacenadoFinal(mensaje, unSocket); break;
-		case CONEXION_WORKER: workerAtenderOperacion(mensaje, unSocket);
+		case CONEXION_WORKER: reduccionGlobalConOtroWorker(mensaje, unSocket);
 	}
 	mensajeDestruir(mensaje);
 	exit(EXIT_SUCCESS);
-}
-
-void workerAtenderOperacion(Mensaje* mensaje, Socket socketWorker) {
-	printf("RECIBI TEMPORAL RDUC LOCAL %s\n", mensaje->datos);
-	String pathReduccionLocal = string_from_format("%s%s", RUTA_TEMP, (String)mensaje->datos);
-	mensajeDestruir(mensaje);
-	File archivoReduccionLocal = fileAbrir(pathReduccionLocal, LECTURA);
-	String buffer = stringCrear(BLOQUE);
-	while(fgets(buffer, BLOQUE, archivoReduccionLocal)) {
-		puts("ESPERANDO MENSAJE");
-		mensaje = mensajeRecibir(socketWorker);
-		if(mensaje->header.operacion == PEDIR_LINEA) {
-			puts("PIDIERON LINeA");
-			mensajeEnviar(socketWorker, 14, buffer, stringLongitud(buffer));
-		}
-	}
-	mensajeEnviar(socketWorker, EXITO, NULL, NULO);
-	fileCerrar(archivoReduccionLocal);
 }
 
 //--------------------------------------- Funciones de Configuracion -------------------------------------
@@ -245,15 +227,12 @@ void transformacionRecibirBloque(Transformacion* transformacion, Puntero datos) 
 }
 
 void transformacionCrearNieto(Transformacion* transformacion, Socket unSocket) {
-	int estado;
 	pid_t pid = fork();
 	if(pid == 0) {
 		int resultado = transformacionEjecutar(transformacion);
 		transformacionTerminar(resultado, unSocket, transformacion->numeroBloque);
 		exit(EXIT_SUCCESS);
 	}
-	else if(pid > 0)
-		waitpid(pid, &estado, NULO);
 }
 
 void transformacionDestruir(Transformacion* transformacion) {
@@ -366,6 +345,7 @@ void reduccionGlobalControlLineas(Lista listaApareados) {
 	}
 
 	listaEliminarDestruyendoPorCondicion(listaApareados, (Puntero)buscarLineaVacia, memoriaLiberar);
+	printf("LA LISTA TIENE %d apareos\n", listaApareados->elements_count);
 }
 
 Apareo* reduccionGlobalLineaMinima(Apareo* unApareo, Apareo* otroApareo) {
@@ -375,33 +355,39 @@ Apareo* reduccionGlobalLineaMinima(Apareo* unApareo, Apareo* otroApareo) {
 		if(unApareo->linea[indice] != otroApareo->linea[indice])
 			break;
 	}
+	puts("COMPARE LINEAS");
 	if(unApareo->linea[indice] < otroApareo->linea[indice])
 		return unApareo;
 	return otroApareo;
 }
 
 void reduccionGlobalAlgoritmoApareo(Lista listaApareados, String pathResultado) {
+	printf(" el arhcivo a escribir es %s\n", pathResultado);
 	puts("entre algorimo");
 	File archivoResultado = fileAbrir(pathResultado, ESCRITURA);
 	if(archivoResultado == NULL)
 		puts("ARCHIVO NULO");
-	printf("%d\n", listaApareados->elements_count);
 	int indice;
 	for(indice=0; indice < listaCantidadElementos(listaApareados); indice++) {
 		Apareo* apareo = listaObtenerElemento(listaApareados, indice);
 		apareo->linea = reduccionGlobalObtenerLinea(apareo->socketWorker);
 	}
 	Apareo* apareo = listaPrimerElemento(listaApareados);
-	printf("%d\n", listaApareados->elements_count);
 	while(!listaEstaVacia(listaApareados)) {
-		for(indice=0; indice < listaCantidadElementos(listaApareados); indice++)
+		for(indice=0; indice < listaCantidadElementos(listaApareados); indice++) {
 			apareo = reduccionGlobalLineaMinima(apareo, listaObtenerElemento(listaApareados, indice));
+		}
 		fwrite(apareo->linea, sizeof(char), stringLongitud(apareo->linea), archivoResultado);
+		printf("LA LINEA ESCRITA ES %s\n", apareo->linea);
+		puts("ESCRIBI UNA LINEA");
+		printf(" el arhcivo a escribir es %s\n", pathResultado);
 		memoriaLiberar(apareo->linea);
 		apareo->linea = reduccionGlobalObtenerLinea(apareo->socketWorker);
 		reduccionGlobalControlLineas(listaApareados);
 	}
+	puts("SALI DEL WHILE que mira si la liewsta esta vadia");
 	fileCerrar(archivoResultado);
+	puts("cerre el archivo");
 	listaDestruir(listaApareados);
 }
 
@@ -417,9 +403,33 @@ String reduccionGlobalGenerarArchivo(ReduccionGlobal reduccion) {
 		mensajeEnviar(apareo->socketWorker, CONEXION_WORKER, pedido.temporal, TEMPSIZE);
 		listaAgregarElemento(listaApareados, apareo);
 	}
-	String pathResultado = string_from_format("%s%s", RUTA_TEMP, reduccion.nombreResultado);
+	String pathResultado = string_from_format("%s%sApareo", RUTA_TEMP, reduccion.nombreResultado);
 	reduccionGlobalAlgoritmoApareo(listaApareados, pathResultado);
+	puts("saliendo de generar archivo");
 	return pathResultado;
+}
+
+void reduccionGlobalConOtroWorker(Mensaje* mensaje, Socket socketWorker) {
+	printf("RECIBI TEMPORAL RDUC LOCAL %s\n", mensaje->datos);
+	String pathReduccionLocal = string_from_format("%s%s", RUTA_TEMP, (String)mensaje->datos);
+	mensajeDestruir(mensaje);
+	File archivoReduccionLocal = fileAbrir(pathReduccionLocal, LECTURA);
+	String buffer = stringCrear(BLOQUE);
+	while(fgets(buffer, BLOQUE, archivoReduccionLocal)) {
+		puts("ESPERANDO MENSAJE");
+		mensaje = mensajeRecibir(socketWorker);
+		if(mensaje->header.operacion == PEDIR_LINEA) {
+			puts("PIDIERON LINeA");
+			mensajeEnviar(socketWorker, 14, buffer, stringLongitud(buffer));
+		}
+	}
+	puts("SALI DEl FGEtS");
+	mensaje = mensajeRecibir(socketWorker);
+	if(mensaje->header.operacion == PEDIR_LINEA) {
+		mensajeEnviar(socketWorker, EXITO, NULL, NULO);
+		puts("PIDIERON LINeA");
+	}
+	fileCerrar(archivoReduccionLocal);
 }
 
 String reduccionGlobalObtenerLinea(Socket unSocket) {
@@ -427,6 +437,7 @@ String reduccionGlobalObtenerLinea(Socket unSocket) {
 	puts("ENVIO PEDIR LINeA");
 	Mensaje* mensaje = mensajeRecibir(unSocket);
 	if(mensaje->header.operacion == EXITO) {
+		puts("LLEGO EXITO");
 		mensajeDestruir(mensaje);
 		socketCerrar(unSocket);
 		return NULL;
@@ -434,6 +445,7 @@ String reduccionGlobalObtenerLinea(Socket unSocket) {
 	if(mensaje->header.operacion == DESCONEXION)
 		exit(EXIT_FAILURE);
 	String linea = stringCrear(mensaje->header.tamanio);
+	memcpy(linea, mensaje->datos, mensaje->header.tamanio);
 	mensajeDestruir(mensaje);
 	return linea;
 }
@@ -478,16 +490,23 @@ String reduccionGlobalCrearScript(ReduccionGlobal reduccion) {
 }
 
 int reduccionGlobalEjecutar(ReduccionGlobal reduccion, String pathApareado) {
+	puts("PASO A EJECUTAR");
 	String archivoScript = reduccionGlobalCrearScript(reduccion);
+	puts("GENERE SCRIPT");
 	String archivoSalida = string_from_format("%s%s", RUTA_TEMP, reduccion.nombreResultado);
+	puts("ENGEERE SALIDA");
 	String comando = string_from_format("chmod 0755 %s", archivoScript);
 	int resultado = system(comando);
 	memoriaLiberar(comando);
+	//comando = string_from_format("chmod 0755 %s", pathApareado);
+	//resultado = system(comando);
+	//memoriaLiberar(comando);
 	if(resultado != ERROR) {
-		comando = string_from_format("%s %s > %s", archivoScript, pathApareado, archivoSalida);
+		puts("ENTRO A EJECUTAR COMANDO");
+		comando = string_from_format("cat %s | %s > %s", pathApareado, archivoScript, archivoSalida);
 		resultado = system(comando);
 	}
-	fileLimpiar(archivoScript);
+	//fileLimpiar(archivoScript);
 	memoriaLiberar(comando);
 	memoriaLiberar(archivoSalida);
 	memoriaLiberar(archivoScript);
