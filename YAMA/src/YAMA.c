@@ -340,6 +340,7 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 }
 
 void actualizarTablaEstados(int etapa,void* datos,int actualizando,Socket masterid){
+	log_info(archivoLog,"etapa: %d",etapa);
 	Entrada* entradaA;
 	void registrarActualizacion(char* s){
 		log_info(archivoLog,"[RECEPCION] actualizacion de %s, %s",s,actualizando==EXITO?"exito":"fracaso");
