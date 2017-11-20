@@ -70,40 +70,6 @@ void masterIniciar(String* argv) {
 	mensajeEnviar(socketYama,SOLICITUD,argv[3],stringLongitud(argv[3])+1);
 }
 
-void mock4worker(){
-	Mensaje* mensaje=mensajeRecibir(socketYama);
-	imprimirMensaje(archivoLog, "[MOCK] Recibo solo un bloque");
-	char bloque[INTSIZE*2+TEMPSIZE];
-	Dir Nodoworker;
-	memcpy(&Nodoworker,mensaje->datos,DIRSIZE);
-	memcpy(&bloque,mensaje->datos+DIRSIZE,INTSIZE*2+TEMPSIZE);
-	imprimirMensaje2(archivoLog, "[RECEPCION] bloque %s %s",Nodoworker.ip,Nodoworker.port);
-	socketWorker=socketCrearCliente(Nodoworker.ip,Nodoworker.port,ID_MASTER);
-	imprimirMensaje2(archivoLog,"[CONEXION] Estableciendo conexion con Worker (IP: %s | PUERTO: %s",Nodoworker.ip,Nodoworker.port);
-	//char* buffer= malloc(lenTransformacion+INTSIZE*2+TEMPSIZE);
-	//buffer = string_from_format(scriptTransformacion,bloque);
-	mensajeEnviar(socketWorker,TRANSFORMACION,scriptTransformacion,lenTransformacion);
-	//printf("%s",bloque);
-	mensajeEnviar(socketWorker,TRANSFORMACION,bloque,INTSIZE*2+TEMPSIZE);
-	while(1);
-	/*Mensaje* men =mensajeRecibir(socketWorker);
-	if (men->header.operacion==100){
-		printf("recibo para mandar");
-	}
-	printf("mande porque se me canto");
-	mensajeEnviar(socketWorker,TRANSFORMACION,mensaje->datos+DIRSIZE,INTSIZE*2+TEMPSIZE);
-	free(mensaje);
-	Mensaje* m = mensajeRecibir(socketWorker);
-	if (m->header.operacion==EXITO){
-		printf("transformacion exitosa");
-	}
-	else if (m->header.operacion==FRACASO){
-		printf("fallo transformacion");
-	}
-	else printf("WTF");
-	free(m);*/
-}
-
 void masterAtender(){
 	Mensaje* mensaje=mensajeRecibir(socketYama);
 	if(mensaje->header.operacion==ABORTAR){
@@ -307,7 +273,7 @@ void reduccionGlobal(Mensaje* m){
 	Dir nodo;
 	memcpy(&nodo,m->datos,DIRSIZE);
 	int cantDuplas=(m->header.tamanio-DIRSIZE-TEMPSIZE)/(TEMPSIZE+DIRSIZE);
-	int tamanio=(DIRSIZE+TEMPSIZE)*cantDuplas+TEMPSIZE+INTSIZE+lenReduccion;
+	int tamanio=(DIRSIZE+TEMPSIZE)*cantDuplas+TEMPSIZE+INTSIZE*2+lenReduccion;
 	void* buffer=malloc(tamanio);
 	memcpy(buffer,&lenReduccion,INTSIZE);//script
 	memcpy(buffer+INTSIZE,scriptReduccion,lenReduccion);

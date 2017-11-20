@@ -84,7 +84,7 @@ void masterRealizarOperacion(Socket unSocket) {
 		case DESCONEXION: imprimirMensaje(archivoLog, "[AVISO] El Master se desconecto"); break;
 		case TRANSFORMACION: transformacion(mensaje, unSocket); break;
 		case REDUCCION_LOCAL: reduccionLocal(mensaje, unSocket); break;
-		case REDUCCION_GLOBAL: reduccionGlobal(mensaje, unSocket); break;
+		case REDUCCION_GLOBAL: puts("REDUC GLOBAL"); reduccionGlobal(mensaje, unSocket); break;
 		case ALMACENADO_FINAL: almacenadoFinal(mensaje, unSocket); break;
 	}
 	mensajeDestruir(mensaje);
@@ -97,10 +97,12 @@ void workerAtenderOperacion(Socket socketWorker) {
 	mensajeDestruir(mensaje);
 	File archivoReduccionLocal = fileAbrir(pathReduccionLocal, LECTURA);
 	String buffer = stringCrear(BLOQUE);
-	while(fgets(buffer, BLOQUE, archivoReduccionLocal) != NULL)
+	while(fgets(buffer, BLOQUE, archivoReduccionLocal)) {
 		mensaje = mensajeRecibir(socketWorker);
 		if(mensaje->header.operacion == PEDIR_LINEA)
 			mensajeEnviar(socketWorker, NULO, buffer, stringLongitud(buffer));
+	}
+	mensajeEnviar(socketWorker, EXITO, NULL, NULO);
 	fileCerrar(archivoReduccionLocal);
 }
 
@@ -374,6 +376,7 @@ Apareo* reduccionGlobalLineaMinima(Apareo* unApareo, Apareo* otroApareo) {
 }
 
 void reduccionGlobalAlgoritmoApareo(Lista listaApareados, String pathResultado) {
+	puts("entre algorimo");
 	File archivoResultado = fileAbrir(pathResultado, ESCRITURA);
 	int indice;
 	for(indice=0; indice < listaCantidadElementos(listaApareados); indice++) {
@@ -399,6 +402,7 @@ String reduccionGlobalGenerarArchivo(ReduccionGlobal reduccion) {
 	ReduccionGlobalNodo pedido;
 	int indice;
 	for(indice=0; indice < reduccion.cantidadWorkers; indice++) {
+		puts("entro for");
 		pedido = reduccion.nodos[indice];
 		if(stringIguales(pedido.nodo.ip, "0")) {
 			Apareo* apareo = memoriaAlocar(sizeof(Apareo));
@@ -442,7 +446,9 @@ ReduccionGlobal reduccionGlobalRecibirDatos(Puntero datos) {
 
 void reduccionGlobal(Mensaje* mensaje, Socket unSocket) {
 	ReduccionGlobal reduccion = reduccionGlobalRecibirDatos(mensaje->datos);
+	puts("recibi datos de global");
 	String pathApareado = reduccionGlobalGenerarArchivo(reduccion);
+	printf("%s\n", pathApareado);
 	int resultado = reduccionGlobalEjecutar(reduccion, pathApareado);
 	reduccionGlobalTerminar(resultado, unSocket);
 }
