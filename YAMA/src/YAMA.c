@@ -340,6 +340,7 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 }
 
 void actualizarTablaEstados(int etapa,void* datos,int actualizando,Socket masterid){
+	log_info(archivoLog,"etapa: %d",etapa);
 	Entrada* entradaA;
 	void registrarActualizacion(char* s){
 		log_info(archivoLog,"[RECEPCION] actualizacion de %s, %s",s,actualizando==EXITO?"exito":"fracaso");
@@ -428,52 +429,56 @@ void actualizarTablaEstados(int etapa,void* datos,int actualizando,Socket master
 		}
 		return !list_any_satisfy(tablaEstados,aux);
 	}
-	if(entradaA->etapa==TRANSFORMACION&&trabajoTerminado(mismoNodoJob)){
-		log_info(archivoLog,"[REDUCLOCAL] creando entrada");
-		Entrada reducLocal;
-		darDatosEntrada(&reducLocal);
-		darPathTemporal(&reducLocal.pathTemporal,'l');
-		reducLocal.etapa=REDUCLOCAL;
-		Lista nodos=list_filter(tablaEstados,mismoNodoJob);
-		int tamanio=TEMPSIZE*(nodos->elements_count+1)+DIRSIZE;
-		void* dato=malloc(tamanio);
-		memcpy(dato,&reducLocal.nodo,DIRSIZE);
-		int i,j;
-		for(i=DIRSIZE,j=0;i<tamanio-TEMPSIZE;i+=TEMPSIZE,j++)
-			memcpy(dato+i,((Entrada*)list_get(nodos,j))->pathTemporal,TEMPSIZE);
-		memcpy(dato+i,reducLocal.pathTemporal,TEMPSIZE);
-		mensajeEnviar(reducLocal.masterid,REDUCLOCAL,dato,tamanio);
-		moverAUsados(mismoNodoJob);
-		list_addM(tablaEstados,&reducLocal,sizeof(Entrada));//mutex
-	}else if(entradaA->etapa==REDUCLOCAL&&trabajoTerminado(mismoJob)){
-		log_info(archivoLog,"[REDUCGLBAL] creando entrada");
-		Entrada reducGlobal;
-		darDatosEntrada(&reducGlobal);
-		darPathTemporal(&reducGlobal.pathTemporal,'g');
-		reducGlobal.etapa=REDUCGLOBAL;
-		Dir nodoMenorCarga=entradaA->nodo;
-		int menorCargaI=1000; //
-		void menorCarga(Worker* worker){
-			if(worker->carga<menorCargaI)
-				nodoMenorCarga=worker->nodo;
-				menorCargaI=worker->carga;
+	if(entradaA->etapa==TRANSFORMACION){
+		if(trabajoTerminado(mismoNodoJob)){
+			log_info(archivoLog,"[REDUCLOCAL] creando entrada");
+			Entrada reducLocal;
+			darDatosEntrada(&reducLocal);
+			darPathTemporal(&reducLocal.pathTemporal,'l');
+			reducLocal.etapa=REDUCLOCAL;
+			Lista nodos=list_filter(tablaEstados,mismoNodoJob);
+			int tamanio=TEMPSIZE*(nodos->elements_count+1)+DIRSIZE;
+			void* dato=malloc(tamanio);
+			memcpy(dato,&reducLocal.nodo,DIRSIZE);
+			int i,j;
+			for(i=DIRSIZE,j=0;i<tamanio-TEMPSIZE;i+=TEMPSIZE,j++)
+				memcpy(dato+i,((Entrada*)list_get(nodos,j))->pathTemporal,TEMPSIZE);
+			memcpy(dato+i,reducLocal.pathTemporal,TEMPSIZE);
+			mensajeEnviar(reducLocal.masterid,REDUCLOCAL,dato,tamanio);
+			moverAUsados(mismoNodoJob);
+			list_addM(tablaEstados,&reducLocal,sizeof(Entrada));//mutex
 		}
-		list_iterate(workers,menorCarga);
-		Lista nodosReducidos=list_filter(tablaEstados,mismoJob);
-		int tamanio=(DIRSIZE+TEMPSIZE)*(nodosReducidos->elements_count+1);
-		void* dato=malloc(tamanio);
-		memcpy(dato,&nodoMenorCarga,DIRSIZE);
-		int i,j;
-		for(i=DIRSIZE,j=0;i<tamanio-TEMPSIZE;i+=DIRSIZE+TEMPSIZE,j++){
-			Dir* nodoActual=&((Entrada*)list_get(nodosReducidos,j))->nodo;
-			memcpy(dato+i,nodoActual,DIRSIZE);
-			memcpy(dato+i+DIRSIZE,((Entrada*)list_get(nodosReducidos,j))->pathTemporal,TEMPSIZE);
-		}
-		memcpy(dato+i,reducGlobal.pathTemporal,TEMPSIZE);
+	}else if(entradaA->etapa==REDUCLOCAL){
+		if(trabajoTerminado(mismoJob)){
+			log_info(archivoLog,"[REDUCGLBAL] creando entrada");
+			Entrada reducGlobal;
+			darDatosEntrada(&reducGlobal);
+			darPathTemporal(&reducGlobal.pathTemporal,'g');
+			reducGlobal.etapa=REDUCGLOBAL;
+			Dir nodoMenorCarga=entradaA->nodo;
+			int menorCargaI=1000; //
+			void menorCarga(Worker* worker){
+				if(worker->carga<menorCargaI)
+					nodoMenorCarga=worker->nodo;
+					menorCargaI=worker->carga;
+			}
+			list_iterate(workers,menorCarga);
+			Lista nodosReducidos=list_filter(tablaEstados,mismoJob);
+			int tamanio=(DIRSIZE+TEMPSIZE)*(nodosReducidos->elements_count+1);
+			void* dato=malloc(tamanio);
+			memcpy(dato,&nodoMenorCarga,DIRSIZE);
+			int i,j;
+			for(i=DIRSIZE,j=0;i<tamanio-TEMPSIZE;i+=DIRSIZE+TEMPSIZE,j++){
+				Dir* nodoActual=&((Entrada*)list_get(nodosReducidos,j))->nodo;
+				memcpy(dato+i,nodoActual,DIRSIZE);
+				memcpy(dato+i+DIRSIZE,((Entrada*)list_get(nodosReducidos,j))->pathTemporal,TEMPSIZE);
+			}
+			memcpy(dato+i,reducGlobal.pathTemporal,TEMPSIZE);
 
-		mensajeEnviar(reducGlobal.masterid,REDUCGLOBAL,dato,tamanio);
-		moverAUsados(mismoJob);
-		list_addM(tablaEstados,&reducGlobal,sizeof(Entrada));//mutex
+			mensajeEnviar(reducGlobal.masterid,REDUCGLOBAL,dato,tamanio);
+			moverAUsados(mismoJob);
+			list_addM(tablaEstados,&reducGlobal,sizeof(Entrada));//mutex
+		}
 	}else if(entradaA->etapa==REDUCGLOBAL){
 		log_info(archivoLog,"[ALMACENADO] creando entrada");
 		//no le veo sentido a que yama participe del almacenado final

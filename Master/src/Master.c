@@ -161,7 +161,7 @@ void masterAtender(){
 	imprimirMensaje1(archivoLog,"[METRICA]Tareas realizadas en paralelo: %d",&metricas.maxParalelo);
 }
 void transformaciones(Lista bloques){
-	log_info(archivoLog,"[EJECUCION] comenzando transformacion");
+	imprimirMensaje(archivoLog,"[EJECUCION] comenzando transformacion");
 	tareasEnParalelo(1);
 	clock_t tiempo=clock();
 	t_queue* clocks=queue_create();
@@ -227,10 +227,10 @@ void transformaciones(Lista bloques){
 	mensajeEnviar(socketWorker, EXITO, NULL, 0);
 	socketCerrar(socketWorker);
 	tareasEnParalelo(-1);
-	log_info(archivoLog,"[EJECUCION] transformacion terminada");
+	imprimirMensaje(archivoLog,"[EJECUCION] transformacion terminada");
 }
 void reduccionLocal(Mensaje* m){
-	log_info(archivoLog,"[EJECUCION] comenzando reduccion local");
+	imprimirMensaje(archivoLog,"[EJECUCION] comenzando reduccion local");
 	tareasEnParalelo(1);
 	clock_t tiempo=clock();
 	Dir nodo;
@@ -270,10 +270,10 @@ void reduccionLocal(Mensaje* m){
 	metricas.reducLocalSum+=transcurrido(tiempo);
 	metricas.cantRedLoc++;
 	semaforoSignal(metricas.reducLocales);
-	log_info(archivoLog,"[EJECUCION] terminando reduccion local");
+	imprimirMensaje(archivoLog,"[EJECUCION] terminando reduccion local");
 }
 void reduccionGlobal(Mensaje* m){
-	log_info(archivoLog,"[EJECUCION] comenzando reduccion global");
+	imprimirMensaje(archivoLog,"[EJECUCION] comenzando reduccion global");
 	clock_t tiempo=clock();
 	Dir nodo;
 	memcpy(&nodo,m->datos,DIRSIZE);
@@ -302,10 +302,10 @@ void reduccionGlobal(Mensaje* m){
 	mensajeDestruir(mensaje);
 	socketCerrar(sWorker);
 	metricas.reducGlobal=transcurrido(tiempo);
-	log_info(archivoLog,"[EJECUCION] reduccion global terminada");
+	imprimirMensaje(archivoLog,"[EJECUCION] reduccion global terminada");
 }
 void almacenado(Mensaje* m){
-	log_info(archivoLog,"[EJECUCION] comenzando almacenado");
+	imprimirMensaje(archivoLog,"[EJECUCION] comenzando almacenado");
 	clock_t tiempo=clock();
 	Dir nodo;
 	memcpy(&nodo,m->datos,DIRSIZE);
@@ -327,7 +327,7 @@ void almacenado(Mensaje* m){
 	mensajeDestruir(mens);
 	socketCerrar(sWorker);
 	metricas.almacenado=transcurrido(tiempo);
-	log_info(archivoLog,"[EJECUCION] almacenado terminado");
+	imprimirMensaje(archivoLog,"[EJECUCION] almacenado terminado");
 }
 void tareasEnParalelo(int dtp){
 	semaforoWait(metricas.paralelos);
