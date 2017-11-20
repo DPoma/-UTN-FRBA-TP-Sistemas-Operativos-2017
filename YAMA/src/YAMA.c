@@ -153,6 +153,27 @@ void yamaAtender() {
 						free(pasoFs);
 					}else if(mensaje->header.operacion==DESCONEXION){
 						log_info(archivoLog,"[RECEPCION] desconexion de master");
+						int jobDesconexion=-1;
+						bool entradasDesconectadas(Entrada* entrada){
+							if(entrada->masterid==socketI){
+								jobDesconexion=entrada->job;
+								return true;
+							}
+							return false;
+						}
+						moverAUsados(entradasDesconectadas);
+						if(jobDesconexion==-1)
+							log_info(archivoLog,"[EJECUCION] trabajo terminado");
+						else{
+							void cazarEntradasDesconectadas(Entrada* entrada){
+								if(entrada->job==jobDesconexion){
+									entrada->estado=ABORTADO;
+								}
+							}
+							list_iterate(tablaUsados,cazarEntradasDesconectadas);
+						}
+
+
 						listaSocketsEliminar(socketI, &servidor->listaMaster);
 						socketCerrar(socketI);
 						if(socketI==servidor->maximoSocket)
@@ -369,13 +390,6 @@ void actualizarTablaEstados(int etapa,void* datos,int actualizando,Socket master
 		entradaA=list_find(tablaEstados,buscarEntrada);
 	}
 	entradaA->estado=actualizando;
-	void moverAUsados(bool(*cond)(void*)){
-		//mutex
-		Entrada* entrada;
-		while((entrada=list_remove_by_condition(tablaEstados,cond))){
-			list_add(tablaUsados,entrada);
-		}
-	}
 	void darDatosEntrada(Entrada* entrada){
 		entrada->nodo=entradaA->nodo;
 		entrada->job=entradaA->job;
@@ -596,7 +610,13 @@ void darPathTemporal(char** ret,char pre){
 	free(anterior);
 	anterior=anteriorTemp;
 }
-
+void moverAUsados(bool(*cond)(void*)){
+	//mutex
+	Entrada* entrada;
+	while((entrada=list_remove_by_condition(tablaEstados,cond))){
+		list_add(tablaUsados,entrada);
+	}
+}
 void retardo(){usleep(configuracion->retardoPlanificacion);}
 
 //version mas eficiente, negada y olvidada

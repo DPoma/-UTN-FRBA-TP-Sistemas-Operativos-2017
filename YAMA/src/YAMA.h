@@ -104,6 +104,7 @@ void yamaPlanificar(Socket,void*,int);
 void actualizarTablaEstados(int,void*,int,Socket);
 void dibujarTablaEstados();
 int dirToNum(Dir);
+void moverAUsados(bool(*)(void*));
 void retardo();
 
 
