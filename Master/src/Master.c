@@ -306,14 +306,14 @@ void reduccionGlobal(Mensaje* m){
 	clock_t tiempo=clock();
 	Dir nodo;
 	memcpy(&nodo,m->datos,DIRSIZE);
-	int cantTemps=(m->header.tamanio-DIRSIZE-TEMPSIZE)/TEMPSIZE;
-	int tamanio=(DIRSIZE+TEMPSIZE)*(cantTemps)+TEMPSIZE+INTSIZE+lenReduccion;
+	int cantDuplas=(m->header.tamanio-DIRSIZE-TEMPSIZE)/(TEMPSIZE+DIRSIZE);
+	int tamanio=(DIRSIZE+TEMPSIZE)*cantDuplas+TEMPSIZE+INTSIZE+lenReduccion;
 	void* buffer=malloc(tamanio);
 	memcpy(buffer,&lenReduccion,INTSIZE);//script
 	memcpy(buffer+INTSIZE,scriptReduccion,lenReduccion);
 
-	memcpy(buffer+INTSIZE+lenReduccion,&cantTemps,INTSIZE);//origen
-	memcpy(buffer+INTSIZE*2+lenReduccion,m->datos+DIRSIZE,tamanio-DIRSIZE);//y destino
+	memcpy(buffer+INTSIZE+lenReduccion,&cantDuplas,INTSIZE);//origen
+	memcpy(buffer+INTSIZE*2+lenReduccion,m->datos+DIRSIZE,m->header.tamanio-DIRSIZE);//y destino
 
 	Socket sWorker=socketCrearCliente(nodo.ip,nodo.port,ID_MASTER);
 	mensajeEnviar(sWorker,REDUCGLOBAL,buffer,tamanio);
