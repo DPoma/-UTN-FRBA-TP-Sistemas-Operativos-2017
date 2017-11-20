@@ -367,7 +367,7 @@ void actualizarTablaEstados(int etapa,void* datos,int actualizando,Socket master
 		}
 		entradaA=list_find(tablaEstados,buscarEntrada);
 	}
-
+	entradaA->estado=actualizando;
 	void moverAUsados(bool(*cond)(void*)){
 		//mutex
 		Entrada* entrada;
@@ -382,17 +382,20 @@ void actualizarTablaEstados(int etapa,void* datos,int actualizando,Socket master
 		entrada->estado=ENPROCESO;
 		entrada->bloque=-1;
 	}
-	entradaA->estado=actualizando;
-	if(actualizando==FRACASO||actualizando==ABORTADO){//todo sacar ABORTADO?
+	bool mismoJob(Entrada* entrada){
+		return entrada->job==entradaA->job;
+	}
+	bool mismoNodoJob(Entrada* entrada){
+		return mismoJob(entrada)&&nodoIguales(entrada->nodo,entradaA->nodo);
+	}
+	if(actualizando==FRACASO){
 		void abortarJob(){
-			bool abortarEntrada(Entrada* entrada){
-				if(entrada->job==entradaA->job){
+			void abortarEntrada(Entrada* entrada){
+				if(mismoJob(entrada))
 					entrada->estado=ABORTADO;
-					return true;
-				}
-				return false;
 			}
-			moverAUsados(abortarEntrada);
+			moverAUsados(mismoJob);
+			list_iterate(tablaUsados,abortarEntrada);
 			mensajeEnviar(entradaA->masterid,ABORTAR,nullptr,0);
 		}
 		if(entradaA->etapa==TRANSFORMACION&&actualizando==FRACASO){
@@ -425,12 +428,6 @@ void actualizarTablaEstados(int etapa,void* datos,int actualizando,Socket master
 		}
 		return !list_any_satisfy(tablaEstados,aux);
 	}
-	bool mismoJob(Entrada* entrada){
-		return entrada->job==entradaA->job;
-	}
-	bool mismoNodoJob(Entrada* entrada){
-		return mismoJob(entrada)&&nodoIguales(entrada->nodo,entradaA->nodo);
-	}
 	if(entradaA->etapa==TRANSFORMACION&&trabajoTerminado(mismoNodoJob)){
 		log_info(archivoLog,"[REDUCLOCAL] creando entrada");
 		Entrada reducLocal;
@@ -449,6 +446,7 @@ void actualizarTablaEstados(int etapa,void* datos,int actualizando,Socket master
 		moverAUsados(mismoNodoJob);
 		list_addM(tablaEstados,&reducLocal,sizeof(Entrada));//mutex
 	}else if(entradaA->etapa==REDUCLOCAL&&trabajoTerminado(mismoJob)){
+		log_info(archivoLog,"[REDUCGLBAL] creando entrada");
 		Entrada reducGlobal;
 		darDatosEntrada(&reducGlobal);
 		darPathTemporal(&reducGlobal.pathTemporal,'g');
@@ -477,6 +475,7 @@ void actualizarTablaEstados(int etapa,void* datos,int actualizando,Socket master
 		moverAUsados(mismoJob);
 		list_addM(tablaEstados,&reducGlobal,sizeof(Entrada));//mutex
 	}else if(entradaA->etapa==REDUCGLOBAL){
+		log_info(archivoLog,"[ALMACENADO] creando entrada");
 		//no le veo sentido a que yama participe del almacenado final
 		//master lo podría hacer solo,  ya esta grande
 		Entrada* reducGlobal=list_find(tablaEstados,mismoJob);
