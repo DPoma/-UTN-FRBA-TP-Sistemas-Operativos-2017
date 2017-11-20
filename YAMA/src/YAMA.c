@@ -500,7 +500,7 @@ void actualizarTablaEstados(int etapa,void* datos,int actualizando,Socket master
 		Entrada* reducGlobal=list_find(tablaEstados,mismoJob);
 		Entrada almacenado;
 		darDatosEntrada(&almacenado);
-		almacenado.pathTemporal="final";
+		almacenado.pathTemporal="NombreArch?"; //TODO mostrar nombre archivo
 		//aca podría ponerle el nombre de archivo final, pero no lo tengo
 		//y no lo necesito, no vale la pena meter la comunicacion y la
 		//logica por algo que es estetico nomas
@@ -521,20 +521,22 @@ void dibujarTablaEstados(){
 	if(list_is_empty(tablaEstados))
 		return;
 	pantallaLimpiar();
-	puts("Job  Master  Nodo  Bloque  Etapa  Temporal  Estado\n");
+	puts("\n");
+	puts("     J |   M |  N |    B |      ETAPA       |    TEMPORAL  |    ESTADO   |");
+	puts("     ---------------------------------------------------------------------");
 	void dibujarEntrada(Entrada* entrada){
 		char* etapa,*estado,*bloque; bool doFree=false;
 		switch(entrada->etapa){
-		case TRANSFORMACION: etapa="transformacion"; break;
-		case REDUCLOCAL: etapa="reduccion local"; break;
-		case REDUCGLOBAL: etapa="reduccion global";break;
-		default: etapa="almacenado";
+		case TRANSFORMACION: etapa="Transformacion"; break;
+		case REDUCLOCAL: etapa="Reduccion local"; break;
+		case REDUCGLOBAL: etapa="Reduccion global";break;
+		default: etapa="Almacenado final";
 		}
 		switch(entrada->estado){
-		case EXITO: estado="terminado"; break;
-		case FRACASO: estado="error"; break;
-		case ABORTADO: estado="abortado"; break;
-		default: estado="en proceso";
+		case EXITO: estado="Terminado"; break;
+		case FRACASO: estado="Error"; break;
+		case ABORTADO: estado="Abortado"; break;
+		default: estado="Procesando";
 		}
 		if(entrada->bloque==-1)
 			bloque="-";
@@ -556,14 +558,14 @@ void dibujarTablaEstados(){
 			}
 			return index;
 		}
-		printf("%d   %d       %d     %s  %s  %s  %s\n",
+		printf("   %3d | %3d | %2d | %4s | %16s | %12s | %11s |\n",
 				entrada->job,masterToNum(entrada->masterid),dirToNum(entrada->nodo),bloque,
 				etapa,entrada->pathTemporal,estado);
 		if(doFree)
 			free(bloque);
 	}
 	list_iterate(tablaUsados,dibujarEntrada);
-	puts("----");
+	//puts("----");
 	list_iterate(tablaEstados,dibujarEntrada);
 }
 
