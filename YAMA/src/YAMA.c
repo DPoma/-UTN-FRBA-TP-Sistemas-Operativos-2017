@@ -382,7 +382,6 @@ void actualizarTablaEstados(int etapa,void* datos,int actualizando,Socket master
 		entrada->estado=ENPROCESO;
 		entrada->bloque=-1;
 	}
-	entradaA->etapa=etapa;
 	entradaA->estado=actualizando;
 	if(actualizando==FRACASO||actualizando==ABORTADO){//todo sacar ABORTADO?
 		void abortarJob(){
@@ -495,7 +494,7 @@ void actualizarTablaEstados(int etapa,void* datos,int actualizando,Socket master
 		mensajeEnviar(entradaA->masterid,ALMACENADO,dato,sizeof dato);
 		list_add(tablaUsados,list_remove_by_condition(tablaEstados,mismoJob));
 		list_addM(tablaEstados,&almacenado,sizeof(Entrada));
-	}else{
+	}else if(entradaA->etapa==ALMACENADO){
 		list_add(tablaUsados,list_remove_by_condition(tablaEstados,mismoJob));
 		mensajeEnviar(entradaA->masterid,CIERRE,nullptr,0);
 	}
