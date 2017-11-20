@@ -466,14 +466,13 @@ void actualizarTablaEstados(int etapa,void* datos,int actualizando,Socket master
 		void* dato=malloc(tamanio);
 		memcpy(dato,&nodoMenorCarga,DIRSIZE);
 		int i,j;
-		void* nodoFalso=calloc(DIRSIZE,1);//tirar esto a worker
+		Dir nodoFalso={"0","0"};
 		for(i=DIRSIZE,j=0;i<tamanio-TEMPSIZE;i+=DIRSIZE+TEMPSIZE,j++){
 			Dir* nodoActual=&((Entrada*)list_get(nodosReducidos,j))->nodo;
-			memcpy(dato+i,nodoIguales(*nodoActual,nodoMenorCarga)?nodoActual:nodoFalso,DIRSIZE);
+			memcpy(dato+i,nodoIguales(*nodoActual,nodoMenorCarga)?nodoActual:&nodoFalso,DIRSIZE);
 			memcpy(dato+i+DIRSIZE,((Entrada*)list_get(nodosReducidos,j))->pathTemporal,TEMPSIZE);
 		}
 		memcpy(dato+i,reducGlobal.pathTemporal,TEMPSIZE);
-		free(nodoFalso);
 
 		mensajeEnviar(reducGlobal.masterid,REDUCGLOBAL,dato,tamanio);
 		moverAUsados(mismoJob);
