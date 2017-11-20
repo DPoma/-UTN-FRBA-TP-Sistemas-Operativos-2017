@@ -350,28 +350,79 @@ String reduccionLocalObtenerTemporales(ReduccionLocal reduccion) {
 
 //--------------------------------------- Funciones de Reduccion Global -------------------------------------
 
-void reduccionGlobalAtenderWorker(PedidoWorker* pedido) {
-	Socket unSocket = socketCrearCliente(pedido->nodo.ip, pedido->nodo.port, ID_WORKER);
-	mensajeEnviar(unSocket, NULO, pedido->nombreReduccionLocal, TEMPSIZE);
-	Mensaje* mensaje = mensajeRecibir(unSocket);
-	//todo sincronizar
-	File archivo = fileAbrir(pedido->pathArchivoApareo, "a+");
-	fwrite(mensaje->datos, sizeof(char), mensaje->header.tamanio, archivo);
-	fileCerrar(archivo);
+void reduccionGlobalControlLineas(Lista listaApareados) {
+
+	bool buscarLineaVacia(Apareo* apareo) {
+		return apareo->linea == NULL;
+	}
+
+	listaEliminarDestruyendoPorCondicion(listaApareados, (Puntero)buscarLineaVacia, memoriaLiberar);
 }
 
-void reduccionGlobalGenerarArchivo(ReduccionGlobal reduccion) {
-	Lista listaSockets = listaCrear();
+Apareo* reduccionGlobalLineaMinima(Apareo* unApareo, Apareo* otroApareo) {
+	int indice;
+	int longitudLineaMasCorta = stringLongitud(unApareo->linea) < stringLongitud(otroApareo->linea)? stringLongitud(unApareo->linea): stringLongitud(otroApareo->linea);
+	for(indice = 0; indice < longitudLineaMasCorta; indice++) {
+		if(unApareo->linea[indice] != otroApareo->linea[indice])
+			break;
+	}
+	if(unApareo->linea[indice] < otroApareo->linea[indice])
+		return unApareo;
+	return otroApareo;
+}
+
+void reduccionGlobalAlgoritmoApareo(Lista listaApareados, String pathResultado) {
+	File archivoResultado = fileAbrir(pathResultado, ESCRITURA);
+	int indice;
+	for(indice=0; indice < listaCantidadElementos(listaApareados); indice++) {
+		Apareo* apareo = listaObtenerElemento(listaApareados, indice);
+		apareo->linea = reduccionGlobalObtenerLinea(apareo->socketWorker);
+	}
+	Apareo* apareo = listaPrimerElemento(listaApareados);
+	while(!listaEstaVacia(listaApareados)) {
+		for(indice=0; indice < listaCantidadElementos(listaApareados); indice++)
+			apareo = reduccionGlobalLineaMinima(apareo, listaObtenerElemento(listaApareados, indice));
+		fwrite(apareo->linea, sizeof(char), stringLongitud(apareo->linea), archivoResultado);
+		memoriaLiberar(apareo->linea);
+		apareo->linea = reduccionGlobalObtenerLinea(apareo->socketWorker);
+		reduccionGlobalControlLineas(listaApareados);
+	}
+	fileCerrar(archivoResultado);
+	listaDestruir(listaApareados);
+}
+
+
+String reduccionGlobalGenerarArchivo(ReduccionGlobal reduccion) {
+	Lista listaApareados = listaCrear();
 	ReduccionGlobalNodo pedido;
 	int indice;
 	for(indice=0; indice < reduccion.cantidadWorkers; indice++) {
 		pedido = reduccion.nodos[indice];
-		if(*(int*)pedido.nodo != 0) {
-			Socket socket = socketCrearCliente(pedido.nodo.ip, pedido.nodo.port, ID_WORKER);
-			mensajeEnviar(socket, ENVIAR_TEMPORAL, pedido.temporal, TEMPSIZE);
-			listaAgregarElementoM(listaSockets, socket, sizeof(Socket));
+		if(stringIguales(pedido.nodo.ip, "0")) {
+			Apareo* apareo = memoriaAlocar(sizeof(Apareo));
+			apareo->socketWorker = socketCrearCliente(pedido.nodo.ip, pedido.nodo.port, ID_WORKER);
+			mensajeEnviar(apareo->socketWorker, ENVIAR_TEMPORAL, pedido.temporal, TEMPSIZE);
+			listaAgregarElemento(listaApareados, apareo);
 		}
 	}
+	String pathResultado = string_from_format("%s%s", RUTA_TEMP, reduccion.nombreResultado);
+	reduccionGlobalAlgoritmoApareo(listaApareados, pathResultado);
+	return pathResultado;
+}
+
+String reduccionGlobalObtenerLinea(Socket unSocket) {
+	mensajeEnviar(unSocket, PEDIR_LINEA, NULL, 0);
+	Mensaje* mensaje = mensajeRecibir(unSocket);
+	if(mensaje->header.operacion == EXITO) {
+		mensajeDestruir(mensaje);
+		socketCerrar(unSocket);
+		return NULL;
+	}
+	if(mensaje->header.operacion == DESCONEXION)
+		exit(EXIT_FAILURE);
+	String linea = stringCrear(mensaje->header.tamanio);
+	mensajeDestruir(mensaje);
+	return linea;
 }
 
 ReduccionGlobal reduccionGlobalRecibirDatos(Puntero datos) {
@@ -389,8 +440,8 @@ ReduccionGlobal reduccionGlobalRecibirDatos(Puntero datos) {
 
 void reduccionGlobal(Mensaje* mensaje, Socket unSocket) {
 	ReduccionGlobal reduccion = reduccionGlobalRecibirDatos(mensaje->datos);
-	reduccionGlobalGenerarArchivo(reduccion);
-	int resultado = reduccionGlobalEjecutar(reduccion);
+	String pathApareado = reduccionGlobalGenerarArchivo(reduccion);
+	int resultado = reduccionGlobalEjecutar(reduccion, pathApareado);
 	reduccionGlobalTerminar(resultado, unSocket);
 }
 
@@ -402,14 +453,14 @@ String reduccionGlobalCrearScript(ReduccionGlobal reduccion) {
 	return path;
 }
 
-int reduccionGlobalEjecutar(ReduccionGlobal reduccion) {
+int reduccionGlobalEjecutar(ReduccionGlobal reduccion, String pathApareado) {
 	String archivoScript = reduccionGlobalCrearScript(reduccion);
 	String archivoSalida = string_from_format("%s%s", RUTA_TEMP, reduccion.nombreResultado);
 	String comando = string_from_format("chmod 0755 %s", archivoScript);
 	int resultado = system(comando);
 	memoriaLiberar(comando);
 	if(resultado != ERROR) {
-		comando = string_from_format("sort %s | %s > %s", reduccion.script, archivoSalida);
+		comando = string_from_format("%s %s > %s", reduccion.script, pathApareado, archivoSalida);
 		resultado = system(comando);
 	}
 	fileLimpiar(archivoScript);

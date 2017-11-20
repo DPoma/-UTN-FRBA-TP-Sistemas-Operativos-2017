@@ -18,6 +18,8 @@
 #define REDUCCION_GLOBAL 305
 #define ALMACENADO_FINAL 306
 #define ENVIAR_TEMPORAL 307
+#define PEDIR_LINEA 308
+#define TERMINADO 309
 
 #define INTSIZE sizeof(Entero)
 #define TEMPSIZE 12
@@ -58,7 +60,12 @@ typedef struct {
 typedef struct {
 	Dir nodo;
 	char temporal[TEMPSIZE];
-} ReduccionGlobalNodo ;
+} ReduccionGlobalNodo;
+
+typedef struct {
+	String linea;
+	Socket socketWorker;
+} Apareo;
 
 typedef struct {
 	ReduccionGlobalNodo* nodos;
@@ -69,6 +76,8 @@ typedef struct {
 	char nombreResultado[12];
 	int cantidadWorkers;
 } ReduccionGlobal;
+
+
 
 typedef void* BloqueWorker;
 
@@ -139,10 +148,12 @@ String reduccionLocalObtenerTemporales(ReduccionLocal reduccion);
 //--------------------------------------- Funciones de Reduccion Global -------------------------------------
 
 void reduccionGlobal(Mensaje* mensaje, Socket unSocket);
-int reduccionGlobalEjecutar(ReduccionGlobal reduccion);
+int reduccionGlobalEjecutar(ReduccionGlobal reduccion, String path);
 void reduccionGlobalTerminar(int resultado, Socket unSocket);
 void reduccionGlobalExito(Socket unSocket);
 void reduccionGlobalFracaso(Socket unSocket);
+String reduccionGlobalObtenerLinea(Socket unSocket);
+String reduccionGlobalGenerarArchivo(ReduccionGlobal reduccion);
 
 //--------------------------------------- Funciones de Almacenado Final -------------------------------------
 
