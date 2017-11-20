@@ -466,10 +466,9 @@ void actualizarTablaEstados(int etapa,void* datos,int actualizando,Socket master
 		void* dato=malloc(tamanio);
 		memcpy(dato,&nodoMenorCarga,DIRSIZE);
 		int i,j;
-		Dir nodoFalso={"0","0"};
 		for(i=DIRSIZE,j=0;i<tamanio-TEMPSIZE;i+=DIRSIZE+TEMPSIZE,j++){
 			Dir* nodoActual=&((Entrada*)list_get(nodosReducidos,j))->nodo;
-			memcpy(dato+i,nodoIguales(*nodoActual,nodoMenorCarga)?nodoActual:&nodoFalso,DIRSIZE);
+			memcpy(dato+i,nodoActual,DIRSIZE);
 			memcpy(dato+i+DIRSIZE,((Entrada*)list_get(nodosReducidos,j))->pathTemporal,TEMPSIZE);
 		}
 		memcpy(dato+i,reducGlobal.pathTemporal,TEMPSIZE);
@@ -516,6 +515,7 @@ void dibujarTablaEstados(){
 		switch(entrada->estado){
 		case EXITO: estado="terminado"; break;
 		case FRACASO: estado="error"; break;
+		case ABORTADO: estado="abortado"; break;
 		default: estado="en proceso";
 		}
 		if(entrada->bloque==-1)
@@ -545,6 +545,7 @@ void dibujarTablaEstados(){
 			free(bloque);
 	}
 	list_iterate(tablaUsados,dibujarEntrada);
+	puts("----");
 	list_iterate(tablaEstados,dibujarEntrada);
 }
 
