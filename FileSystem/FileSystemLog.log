@@ -1,10 +1,25 @@
-[INFO] 14:39:25:587 FileSystem/(8877:8877): [EJECUCION] Proceso File System iniciado
-[INFO] 14:39:25:652 FileSystem/(8877:8877): [CONFIGURACION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 14:39:25:654 FileSystem/(8877:8877): [CONFIGURACION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 14:39:25:654 FileSystem/(8877:8877): [CONFIGURACION] Esperando conexiones de Workers (Puerto: 5080)
-[INFO] 14:39:25:655 FileSystem/(8877:8877): [CONFIGURACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
-[INFO] 14:39:25:712 FileSystem/(8877:8877): [33m[AVISO] Conecte los nodos necesarios al File System para estabilizarlo[0m
-[INFO] 14:39:26:954 FileSystem/(8877:8880): [33m[AVISO] NODO2 conectado[0m
-[INFO] 14:39:26:2 FileSystem/(8877:8880): [33m[AVISO] El File System esta estable[0m
-[INFO] 14:39:34:336 FileSystem/(8877:8880): [33m[AVISO] NODO1 conectado[0m
-[INFO] 14:39:35:930 FileSystem/(8877:8881): [CONEXION] El proceso Yama se ha conectado
+[INFO] 15:22:34:529 FileSystem/(10335:10335): [EJECUCION] Proceso File System iniciado
+[INFO] 15:22:34:654 FileSystem/(10335:10335): [CONFIGURACION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 15:22:34:659 FileSystem/(10335:10335): [CONFIGURACION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 15:22:34:659 FileSystem/(10335:10335): [CONFIGURACION] Esperando conexiones de Workers (Puerto: 5080)
+[INFO] 15:22:34:660 FileSystem/(10335:10335): [CONFIGURACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
+[INFO] 15:22:34:774 FileSystem/(10335:10335): [33m[AVISO] Conecte los nodos necesarios al File System para estabilizarlo[0m
+[INFO] 15:22:37:41 FileSystem/(10335:10339): [33m[AVISO] NODO2 conectado[0m
+[INFO] 15:22:37:53 FileSystem/(10335:10339): [33m[AVISO] El File System esta estable[0m
+[INFO] 15:22:43:965 FileSystem/(10335:10339): [33m[AVISO] NODO1 conectado[0m
+[INFO] 15:22:45:403 FileSystem/(10335:10340): [CONEXION] El proceso Yama se ha conectado
+[INFO] 15:23:08:396 FileSystem/(10335:10341): [ALMACENADO] Recibiendo archivo /home/utnso/Escritorio/temp/g1522594990 de un Worker
+
+[INFO] 15:23:08:623 FileSystem/(10335:10341): [ARCHIVO] El archivo g1522594990 fue copiado en File System
+[INFO] 15:25:29:443 FileSystem/(10335:10335): [DIRECTORIO] WBAN.csv (a)
+[INFO] 15:25:29:444 FileSystem/(10335:10335): [DIRECTORIO] g1522594990 (a)
+[INFO] 15:25:50:316 FileSystem/(10335:10335): [ERROR] El archivo no existe
+[INFO] 15:26:55:310 FileSystem/(10335:10335): [ARCHIVO] El archivo g1522594990 se copio en /home/utnso/Escritorio/Metadata/g1522594990
+[INFO] 15:26:56:390 FileSystem/(10335:10335): [ARCHIVO] El MD5 del archivo es 9d095a747e03300231d8bff0d4189c56  /home/utnso/Escritorio/Metadata/g1522594990
+
+[INFO] 15:30:52:896 FileSystem/(10335:10335): [ARCHIVO] El archivo /g1522594990 ha sido eliminado
+[INFO] 15:30:58:180 FileSystem/(10335:10340): [CONEXION] El proceso YAMA se ha desconectado
+[INFO] 15:31:03:695 FileSystem/(10335:10340): [CONEXION] El proceso Yama se ha conectado
+[INFO] 15:31:27:632 FileSystem/(10335:10341): [ALMACENADO] Recibiendo archivo /home/utnso/Escritorio/temp/g1531195340 de un Worker
+
+[INFO] 15:31:27:742 FileSystem/(10335:10341): [ARCHIVO] El archivo g1531195340 fue copiado en File System

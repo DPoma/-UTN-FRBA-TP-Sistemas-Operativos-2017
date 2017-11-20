@@ -357,9 +357,12 @@ Comando workerConfigurarComando(Mensaje* mensaje) {
 	comando.argumentos[1] = FLAG_T;
 	int tamanioPathLocal;
 	memcpy(&tamanioPathLocal, mensaje->datos, sizeof(Entero));
+	printf("el tamanio de path local es %d\n", tamanioPathLocal);
+	comando.argumentos[2] = stringCrear(tamanioPathLocal);
 	memcpy(comando.argumentos[2], mensaje->datos+sizeof(Entero), tamanioPathLocal);
 	int tamanioPathYama;
 	memcpy(&tamanioPathYama, mensaje->datos+sizeof(Entero)+tamanioPathLocal, sizeof(Entero));
+	//comando.argumentos[2] = stringCrear(tamanioPathYama);
 	//todo memcpy(comando.argumentos[3], mensaje->datos+sizeof(Entero)*2+tamanioPathLocal, tamanioPathYama);
 	comando.argumentos[3] = "yamafs:/";
 	return comando;
@@ -382,8 +385,9 @@ void workerListener() {
 		imprimirMensaje1(archivoLog, "[ALMACENADO] Recibiendo archivo %s de un Worker\n", comando.argumentos[2]);
 		mensajeDestruir(mensaje);
 		int resultado = archivoAlmacenar(&comando);
+		printf("el resultado de archivo almacenar es %d\n", resultado);
 		memoriaLiberar(comando.argumentos[3]);
-		memoriaLiberar(comando.argumentos[4]);
+		//memoriaLiberar(comando.argumentos[4]);
 		workerAvisarAlmacenado(resultado, socketWorker);
 	}
 }

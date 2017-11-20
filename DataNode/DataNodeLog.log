@@ -1,7 +1,7 @@
-[INFO] 14:39:34:283 DataNode/(8890:8890): [CONFIGURACION] Nombre Nodo: NODO1
-[INFO] 14:39:34:302 DataNode/(8890:8890): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data1.bin
-[INFO] 14:39:34:308 DataNode/(8890:8890): [DATABIN] Cantidad de bloques 100
-[INFO] 14:39:34:338 DataNode/(8890:8890): [CONEXION] Estableciendo conexion con File System (IP: 127.0.0.1 | Puerto 5040)
-[INFO] 14:39:34:341 DataNode/(8890:8890): [CONEXION] Conexion establecida con el File System
-[INFO] 14:39:57:122 DataNode/(8890:8890): [31m[CONEXION] Conexion finalizada con File System[0m
-[INFO] 14:39:57:125 DataNode/(8890:8890): [EJECUCION] Proceso Data Node finalizado
+[INFO] 15:22:43:911 DataNode/(10346:10346): [CONFIGURACION] Nombre Nodo: NODO1
+[INFO] 15:22:43:931 DataNode/(10346:10346): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data1.bin
+[INFO] 15:22:43:937 DataNode/(10346:10346): [DATABIN] Cantidad de bloques 100
+[INFO] 15:22:43:966 DataNode/(10346:10346): [CONEXION] Estableciendo conexion con File System (IP: 127.0.0.1 | Puerto 5040)
+[INFO] 15:22:43:969 DataNode/(10346:10346): [CONEXION] Conexion establecida con el File System
+[INFO] 15:23:08:591 DataNode/(10346:10346): [DATABIN] El bloque N°12 fue escrito
+[INFO] 15:31:27:742 DataNode/(10346:10346): [DATABIN] El bloque N°12 fue escrito

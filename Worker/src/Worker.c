@@ -527,12 +527,12 @@ void reduccionGlobalFracaso(Socket unSocket) {
 
 //--------------------------------------- Funciones de Almacenado Final -------------------------------------
 
-void almacenadoFracaso(Socket unSocket) {
+void almacenadoExitoso(Socket unSocket) {
 	imprimirMensaje(archivoLog,"[ALMACENADO FINAL] La operacion se realizo con exito");
 	mensajeEnviar(unSocket, EXITO, NULL, 0);
 }
 
-void almacenadoExitoso(Socket unSocket) {
+void almacenadoFracaso(Socket unSocket) {
 	imprimirMensaje(archivoLog,"[ALMACENADO FINAL] La operacion fracaso");
 	mensajeEnviar(unSocket, FRACASO, NULL, 0);
 }
@@ -546,17 +546,23 @@ void almacenadoTerminar(int resultado, Socket unSocket) {
 
 void almacenadoFinal(Mensaje* mensaje, Socket socketMaster) {
 	String pathArchivo = string_from_format("%s%s", RUTA_TEMP, mensaje->datos);
+	printf("el temporal es% s\n", mensaje->datos);
+	printf("el path yama es% s\n", mensaje->datos+TEMPSIZE);
+	printf("path archivo es %s\n", pathArchivo);
 	Entero tamanioPathArchivo = stringLongitud(pathArchivo)+1;
+	printf("path archivo tamanio es %d\n", tamanioPathArchivo);
 	Entero tamanioPathYama = stringLongitud(mensaje->datos+TEMPSIZE)+1;
+	printf("path yama tamanio es %d\n", tamanioPathYama);
 	String buffer = stringCrear(tamanioPathArchivo+tamanioPathYama+2*sizeof(Entero));
 	memcpy(buffer, &tamanioPathArchivo, sizeof(Entero));
 	memcpy(buffer+sizeof(Entero), pathArchivo, tamanioPathArchivo);
 	memcpy(buffer+sizeof(Entero)+tamanioPathArchivo, &tamanioPathYama, sizeof(Entero));
 	memcpy(buffer+sizeof(Entero)*2+tamanioPathArchivo, mensaje->datos+TEMPSIZE, tamanioPathYama);
+	int tamanioBuffer = sizeof(Entero)*2+tamanioPathArchivo+tamanioPathYama;
 	imprimirMensaje2(archivoLog,"[ALMACENADO FINAL] Estableciendo conexion con el File System (IP:%s | Puerto:%s)", configuracion->ipFileSystem, configuracion->puertoFileSystemWorker);
 	Socket socketFileSystem =socketCrearCliente(configuracion->ipFileSystem, configuracion->puertoFileSystemWorker, ID_WORKER);
 	imprimirMensaje(archivoLog,"[ALMACENADO FINAL] Conexion existosa con el File System");
-	mensajeEnviar(socketFileSystem, ALMACENADO_FINAL, mensaje->datos, mensaje->header.tamanio);
+	mensajeEnviar(socketFileSystem, ALMACENADO_FINAL, buffer, tamanioBuffer);
 	imprimirMensaje1(archivoLog,"[ALMACENADO FINAL] Guardando el archivo %s en el File System", (String)mensaje->datos);
 	Mensaje* mensajeOperacion = mensajeRecibir(socketFileSystem);
 	almacenadoTerminar(mensajeOperacion->header.operacion, socketMaster);
