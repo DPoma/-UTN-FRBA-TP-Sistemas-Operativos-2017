@@ -1,0 +1,18 @@
+[INFO] 02:49:26:264 FileSystem/(23035:23035): [EJECUCION] Proceso File System iniciado
+[INFO] 02:49:26:416 FileSystem/(23035:23035): [CONFIGURACION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 02:49:26:422 FileSystem/(23035:23035): [CONFIGURACION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 02:49:26:422 FileSystem/(23035:23035): [CONFIGURACION] Esperando conexiones de Workers (Puerto: 5080)
+[INFO] 02:49:26:423 FileSystem/(23035:23035): [CONFIGURACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
+[INFO] 02:49:26:554 FileSystem/(23035:23035): [33m[AVISO] Conecte los nodos necesarios al File System para estabilizarlo[0m
+[INFO] 02:49:38:6 FileSystem/(23035:23038): [33m[AVISO] NODO1 conectado[0m
+[INFO] 02:49:38:35 FileSystem/(23035:23038): [33m[AVISO] El File System esta estable[0m
+[INFO] 02:49:44:826 FileSystem/(23035:23038): [33m[AVISO] NODO2 conectado[0m
+[INFO] 02:50:12:318 FileSystem/(23035:23039): [CONEXION] El proceso Yama se ha conectado
+[INFO] 02:54:13:187 FileSystem/(23035:23039): [CONEXION] El proceso YAMA se ha desconectado
+[INFO] 02:54:27:53 FileSystem/(23035:23039): [CONEXION] El proceso Yama se ha conectado
+[INFO] 02:55:14:136 FileSystem/(23035:23039): [CONEXION] El proceso YAMA se ha desconectado
+[INFO] 02:55:16:363 FileSystem/(23035:23039): [CONEXION] El proceso Yama se ha conectado
+[INFO] 03:09:28:609 FileSystem/(23035:23039): [CONEXION] El proceso YAMA se ha desconectado
+[INFO] 03:09:33:966 FileSystem/(23035:23039): [CONEXION] El proceso Yama se ha conectado
+[INFO] 03:12:08:38 FileSystem/(23035:23039): [CONEXION] El proceso YAMA se ha desconectado
+[INFO] 03:12:11:107 FileSystem/(23035:23039): [CONEXION] El proceso Yama se ha conectado

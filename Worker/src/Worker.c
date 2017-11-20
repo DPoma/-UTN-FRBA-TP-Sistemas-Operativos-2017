@@ -25,31 +25,21 @@ void workerIniciar() {
 
 void workerAtenderProcesos() {
 	listenerMaster = socketCrearListener(configuracion->puertoMaster);
-	listenerWorker = socketCrearListener(configuracion->puertoWorker);
-	pid_t pid = fork();
-	if(pid == 0)
-		workerAtenderWorkers();
-	else if(pid > 0)
-		workerAtenderMasters();
-	else
-		imprimirMensaje(archivoLog, "[ERROR] Error en el fork(), estas jodido");
+	//listenerWorker = socketCrearListener(configuracion->puertoWorker);
+	workerAtenderMasters();
 }
 
 void workerAtenderMasters() {
 	while(estadoWorker) {
-		socketCerrar(listenerWorker);
+		//socketCerrar(listenerWorker);
 		workerAceptarMaster();
 	}
 }
 
-void workerAtenderWorkers() {
-	while(estadoWorker) {
-		socketCerrar(listenerMaster);
-		workerAceptarWorker();
-	}
-}
+
 
 void workerAceptarMaster() {
+	puts("ACEPTE MASTER");
 	Socket nuevoSocket = socketAceptar(listenerMaster, ID_MASTER);
 	if(nuevoSocket != ERROR)
 		masterAtenderOperacion(nuevoSocket);
@@ -57,13 +47,24 @@ void workerAceptarMaster() {
 		imprimirMensaje(archivoLog, "[ERROR] Error en el accept(), hoy no es tu dia papu");
 }
 
+/*
+ *
+void workerAtenderWorkers() {
+	while(estadoWorker) {
+		socketCerrar(listenerMaster);
+		workerAceptarWorker();
+	}
+}
+
 void workerAceptarWorker() {
+	puts("ACEPTE WORKER");
 	Socket nuevoSocket = socketAceptar(listenerWorker, ID_WORKER);
 	if(nuevoSocket != ERROR)
 		workerAtenderOperacion(nuevoSocket);
 	else
 		imprimirMensaje(archivoLog, "[ERROR] Error en el accept(), hoy no es tu dia papu");
 }
+*/
 
 void masterAtenderOperacion(Socket unSocket) {
 	pid_t pid = fork();
@@ -86,21 +87,25 @@ void masterRealizarOperacion(Socket unSocket) {
 		case REDUCCION_LOCAL: reduccionLocal(mensaje, unSocket); break;
 		case REDUCCION_GLOBAL: puts("REDUC GLOBAL"); reduccionGlobal(mensaje, unSocket); break;
 		case ALMACENADO_FINAL: almacenadoFinal(mensaje, unSocket); break;
+		case CONEXION_WORKER: workerAtenderOperacion(mensaje, unSocket);
 	}
 	mensajeDestruir(mensaje);
 	exit(EXIT_SUCCESS);
 }
 
-void workerAtenderOperacion(Socket socketWorker) {
-	Mensaje* mensaje = mensajeRecibir(socketWorker);
+void workerAtenderOperacion(Mensaje* mensaje, Socket socketWorker) {
+	printf("RECIBI TEMPORAL RDUC LOCAL %s\n", mensaje->datos);
 	String pathReduccionLocal = string_from_format("%s%s", RUTA_TEMP, (String)mensaje->datos);
 	mensajeDestruir(mensaje);
 	File archivoReduccionLocal = fileAbrir(pathReduccionLocal, LECTURA);
 	String buffer = stringCrear(BLOQUE);
 	while(fgets(buffer, BLOQUE, archivoReduccionLocal)) {
+		puts("ESPERANDO MENSAJE");
 		mensaje = mensajeRecibir(socketWorker);
-		if(mensaje->header.operacion == PEDIR_LINEA)
-			mensajeEnviar(socketWorker, NULO, buffer, stringLongitud(buffer));
+		if(mensaje->header.operacion == PEDIR_LINEA) {
+			puts("PIDIERON LINeA");
+			mensajeEnviar(socketWorker, 14, buffer, stringLongitud(buffer));
+		}
 	}
 	mensajeEnviar(socketWorker, EXITO, NULL, NULO);
 	fileCerrar(archivoReduccionLocal);
@@ -378,12 +383,16 @@ Apareo* reduccionGlobalLineaMinima(Apareo* unApareo, Apareo* otroApareo) {
 void reduccionGlobalAlgoritmoApareo(Lista listaApareados, String pathResultado) {
 	puts("entre algorimo");
 	File archivoResultado = fileAbrir(pathResultado, ESCRITURA);
+	if(archivoResultado == NULL)
+		puts("ARCHIVO NULO");
+	printf("%d\n", listaApareados->elements_count);
 	int indice;
 	for(indice=0; indice < listaCantidadElementos(listaApareados); indice++) {
 		Apareo* apareo = listaObtenerElemento(listaApareados, indice);
 		apareo->linea = reduccionGlobalObtenerLinea(apareo->socketWorker);
 	}
 	Apareo* apareo = listaPrimerElemento(listaApareados);
+	printf("%d\n", listaApareados->elements_count);
 	while(!listaEstaVacia(listaApareados)) {
 		for(indice=0; indice < listaCantidadElementos(listaApareados); indice++)
 			apareo = reduccionGlobalLineaMinima(apareo, listaObtenerElemento(listaApareados, indice));
@@ -396,20 +405,17 @@ void reduccionGlobalAlgoritmoApareo(Lista listaApareados, String pathResultado) 
 	listaDestruir(listaApareados);
 }
 
-
 String reduccionGlobalGenerarArchivo(ReduccionGlobal reduccion) {
 	Lista listaApareados = listaCrear();
 	ReduccionGlobalNodo pedido;
 	int indice;
-	for(indice=0; indice < reduccion.cantidadWorkers; indice++) {
+	for(indice=0; indice < reduccion.cantidadNodos; indice++) {
 		puts("entro for");
 		pedido = reduccion.nodos[indice];
-		if(stringIguales(pedido.nodo.ip, "0")) {
-			Apareo* apareo = memoriaAlocar(sizeof(Apareo));
-			apareo->socketWorker = socketCrearCliente(pedido.nodo.ip, pedido.nodo.port, ID_WORKER);
-			mensajeEnviar(apareo->socketWorker, ENVIAR_TEMPORAL, pedido.temporal, TEMPSIZE);
-			listaAgregarElemento(listaApareados, apareo);
-		}
+		Apareo* apareo = memoriaAlocar(sizeof(Apareo));
+		apareo->socketWorker = socketCrearCliente(pedido.nodo.ip, pedido.nodo.port, ID_MASTER);
+		mensajeEnviar(apareo->socketWorker, CONEXION_WORKER, pedido.temporal, TEMPSIZE);
+		listaAgregarElemento(listaApareados, apareo);
 	}
 	String pathResultado = string_from_format("%s%s", RUTA_TEMP, reduccion.nombreResultado);
 	reduccionGlobalAlgoritmoApareo(listaApareados, pathResultado);
@@ -418,6 +424,7 @@ String reduccionGlobalGenerarArchivo(ReduccionGlobal reduccion) {
 
 String reduccionGlobalObtenerLinea(Socket unSocket) {
 	mensajeEnviar(unSocket, PEDIR_LINEA, NULL, 0);
+	puts("ENVIO PEDIR LINeA");
 	Mensaje* mensaje = mensajeRecibir(unSocket);
 	if(mensaje->header.operacion == EXITO) {
 		mensajeDestruir(mensaje);
@@ -434,17 +441,26 @@ String reduccionGlobalObtenerLinea(Socket unSocket) {
 ReduccionGlobal reduccionGlobalRecibirDatos(Puntero datos) {
 	ReduccionGlobal reduccion;
 	memcpy(&reduccion.scriptSize, (Entero*)datos, sizeof(Entero));
+	reduccion.script = memoriaAlocar(reduccion.scriptSize);
+	printf("%d\n", reduccion.scriptSize);
 	memcpy(reduccion.script, datos+sizeof(Entero), reduccion.scriptSize);
 	memcpy(&reduccion.cantidadNodos, datos+sizeof(Entero)+reduccion.scriptSize, sizeof(Entero));
+	printf("%d\n", reduccion.cantidadNodos);
 	reduccion.nodos = memoriaAlocar(reduccion.cantidadNodos*sizeof(ReduccionGlobalNodo));
 	int indice;
-	for(indice = 0; indice < reduccion.cantidadNodos; indice++)
+	for(indice = 0; indice < reduccion.cantidadNodos; indice++) {
 		reduccion.nodos[indice] = *(ReduccionGlobalNodo*)(datos+sizeof(Entero)*2+reduccion.scriptSize+sizeof(ReduccionGlobalNodo)*indice);
+		printf("%s\n", reduccion.nodos[indice].nodo.ip);
+		printf("%s\n", reduccion.nodos[indice].nodo.port);
+		printf("%s\n", reduccion.nodos[indice].temporal);
+	}
 	memcpy(reduccion.nombreResultado, datos+sizeof(Entero)*2+reduccion.scriptSize+sizeof(ReduccionGlobalNodo)*reduccion.cantidadNodos, TEMPSIZE);
+	printf("%s\n", reduccion.nombreResultado);
 	return reduccion;
 }
 
 void reduccionGlobal(Mensaje* mensaje, Socket unSocket) {
+	puts("deserializando");
 	ReduccionGlobal reduccion = reduccionGlobalRecibirDatos(mensaje->datos);
 	puts("recibi datos de global");
 	String pathApareado = reduccionGlobalGenerarArchivo(reduccion);
@@ -468,7 +484,7 @@ int reduccionGlobalEjecutar(ReduccionGlobal reduccion, String pathApareado) {
 	int resultado = system(comando);
 	memoriaLiberar(comando);
 	if(resultado != ERROR) {
-		comando = string_from_format("%s %s > %s", reduccion.script, pathApareado, archivoSalida);
+		comando = string_from_format("%s %s > %s", archivoScript, pathApareado, archivoSalida);
 		resultado = system(comando);
 	}
 	fileLimpiar(archivoScript);

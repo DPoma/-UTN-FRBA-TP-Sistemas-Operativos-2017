@@ -1,0 +1,48 @@
+[INFO] 03:12:23:94 Master/(24219:24219): [CONEXION] Configuracion para conexion con YAMA (IP: 127.0.0.1 | Puerto: 5070)
+[INFO] 03:12:24:295 Master/(24219:24219): [CONEXION] Estableciendo Conexion con YAMA...
+[INFO] 03:12:24:723 Master/(24219:24219): [CONEXION] Conexion establecida con YAMA, enviando solicitud
+[INFO] 03:12:25:466 Master/(24219:24219): [MENSAJE] Lista de bloques recibida
+[INFO] 03:12:25:500 Master/(24219:24219): [RECEPCION] bloque 127.0.0.1 5090 0
+[INFO] 03:12:25:544 Master/(24219:24219): ] lista para nodo 127.0.0.1 5090 armada, lista #1
+[INFO] 03:12:25:547 Master/(24219:24219): [RECEPCION] bloque 127.0.0.1 5090 1
+[INFO] 03:12:25:635 Master/(24219:24219): [RECEPCION] bloque 127.0.0.1 5090 2
+[INFO] 03:12:25:643 Master/(24219:24219): [RECEPCION] bloque 127.0.0.1 5090 3
+[INFO] 03:12:25:647 Master/(24219:24219): [RECEPCION] bloque 127.0.0.1 5090 4
+[INFO] 03:12:25:650 Master/(24219:24219): [RECEPCION] bloque 127.0.0.1 5090 5
+[INFO] 03:12:25:655 Master/(24219:24219): [RECEPCION] bloque 127.0.0.1 5090 6
+[INFO] 03:12:25:670 Master/(24219:24219): [RECEPCION] bloque 127.0.0.1 5090 7
+[INFO] 03:12:25:675 Master/(24219:24219): [RECEPCION] bloque 127.0.0.1 5090 8
+[INFO] 03:12:25:878 Master/(24219:24219): [RECEPCION] bloque 127.0.0.1 5090 9
+[INFO] 03:12:25:908 Master/(24219:24219): [RECEPCION] bloque 127.0.0.1 5090 10
+[INFO] 03:12:25:909 Master/(24219:24219): [RECEPCION] bloque 127.0.0.1 5090 11
+[INFO] 03:12:26:251 Master/(24219:24226): [EJECUCION] comenzando transformacion
+[INFO] 03:12:26:330 Master/(24219:24226): [CONEXION] Estableciendo conexion con Worker (IP: 127.0.0.1 | PUERTO: 5090
+[INFO] 03:12:26:392 Master/(24219:24226): [CONEXION] Enviando bloque 0 t0312253610
+[INFO] 03:12:26:399 Master/(24219:24226): [CONEXION] Enviando bloque 1 t0312253850
+[INFO] 03:12:26:403 Master/(24219:24226): [CONEXION] Enviando bloque 2 t0312253910
+[INFO] 03:12:26:407 Master/(24219:24226): [CONEXION] Enviando bloque 3 t0312253920
+[INFO] 03:12:26:409 Master/(24219:24226): [CONEXION] Enviando bloque 4 t0312253921
+[INFO] 03:12:26:413 Master/(24219:24226): [CONEXION] Enviando bloque 5 t0312253980
+[INFO] 03:12:26:559 Master/(24219:24226): [CONEXION] Enviando bloque 6 t0312253990
+[INFO] 03:12:26:561 Master/(24219:24226): [CONEXION] Enviando bloque 7 t0312253991
+[INFO] 03:12:26:562 Master/(24219:24226): [CONEXION] Enviando bloque 8 t0312253992
+[INFO] 03:12:26:579 Master/(24219:24226): [CONEXION] Enviando bloque 9 t0312254000
+[INFO] 03:12:26:584 Master/(24219:24226): [CONEXION] Enviando bloque 10 t0312254001
+[INFO] 03:12:26:594 Master/(24219:24226): [CONEXION] Enviando bloque 11 t0312254002
+[INFO] 03:12:27:654 Master/(24219:24226): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
+[INFO] 03:12:32:628 Master/(24219:24226): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
+[INFO] 03:12:33:993 Master/(24219:24226): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
+[INFO] 03:12:35:331 Master/(24219:24226): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
+[INFO] 03:12:36:732 Master/(24219:24226): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
+[INFO] 03:12:38:73 Master/(24219:24226): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
+[INFO] 03:12:39:436 Master/(24219:24226): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
+[INFO] 03:12:40:728 Master/(24219:24226): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
+[INFO] 03:12:42:40 Master/(24219:24226): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
+[INFO] 03:12:43:466 Master/(24219:24226): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
+[INFO] 03:12:44:856 Master/(24219:24226): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
+[INFO] 03:12:46:222 Master/(24219:24226): [TRANSFORMACION] Transformacion realizada con exito en el Worker 127.0.0.1
+[INFO] 03:12:46:224 Master/(24219:24226): [EJECUCION] transformacion terminada
+[INFO] 03:12:46:351 Master/(24219:24335): [EJECUCION] comenzando reduccion local
+[INFO] 03:12:47:381 Master/(24219:24335): [EJECUCION]REDUCCION LOCAL EXISTOSA
+[INFO] 03:12:47:383 Master/(24219:24335): [EJECUCION] terminando reduccion local
+[INFO] 03:12:47:415 Master/(24219:24219): [EJECUCION] comenzando reduccion global

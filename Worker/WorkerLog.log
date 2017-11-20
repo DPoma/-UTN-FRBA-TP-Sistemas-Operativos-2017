@@ -1,0 +1,35 @@
+[INFO] 03:12:17:188 Worker/(24215:24215): [CONFIGURACION] Nombre: NODO2
+[INFO] 03:12:17:210 Worker/(24215:24215): [CONFIGURACION] Esperando conexiones de Master (Puerto: 5090)
+[INFO] 03:12:17:212 Worker/(24215:24215): [CONFIGURACION] Esperando conexiones de Woker (Puerto: 5999)
+[INFO] 03:12:17:218 Worker/(24215:24215): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data2.bin
+[INFO] 03:12:17:219 Worker/(24215:24215): [CONFIGURACION] Cantidad de bloques: 100
+[INFO] 03:12:26:672 Worker/(24215:24227): [CONEXION] Proceso Master conectado exitosamente
+[INFO] 03:12:26:876 Worker/(24215:24228): [DATABIN] El bloque N°0 fue leido
+[INFO] 03:12:27:648 Worker/(24215:24228): [TRANSFORMACION] Transformacion exitosa en bloque N°0 de Master d
+[INFO] 03:12:32:486 Worker/(24215:24238): [DATABIN] El bloque N°1 fue leido
+[INFO] 03:12:32:627 Worker/(24215:24238): [TRANSFORMACION] Transformacion exitosa en bloque N°1 de Master d
+[INFO] 03:12:33:817 Worker/(24215:24247): [DATABIN] El bloque N°2 fue leido
+[INFO] 03:12:33:992 Worker/(24215:24247): [TRANSFORMACION] Transformacion exitosa en bloque N°2 de Master d
+[INFO] 03:12:35:203 Worker/(24215:24256): [DATABIN] El bloque N°3 fue leido
+[INFO] 03:12:35:330 Worker/(24215:24256): [TRANSFORMACION] Transformacion exitosa en bloque N°3 de Master d
+[INFO] 03:12:36:588 Worker/(24215:24265): [DATABIN] El bloque N°4 fue leido
+[INFO] 03:12:36:732 Worker/(24215:24265): [TRANSFORMACION] Transformacion exitosa en bloque N°4 de Master d
+[INFO] 03:12:37:914 Worker/(24215:24274): [DATABIN] El bloque N°5 fue leido
+[INFO] 03:12:38:72 Worker/(24215:24274): [TRANSFORMACION] Transformacion exitosa en bloque N°5 de Master d
+[INFO] 03:12:39:277 Worker/(24215:24283): [DATABIN] El bloque N°6 fue leido
+[INFO] 03:12:39:435 Worker/(24215:24283): [TRANSFORMACION] Transformacion exitosa en bloque N°6 de Master d
+[INFO] 03:12:40:555 Worker/(24215:24292): [DATABIN] El bloque N°7 fue leido
+[INFO] 03:12:40:727 Worker/(24215:24292): [TRANSFORMACION] Transformacion exitosa en bloque N°7 de Master d
+[INFO] 03:12:41:878 Worker/(24215:24301): [DATABIN] El bloque N°8 fue leido
+[INFO] 03:12:42:39 Worker/(24215:24301): [TRANSFORMACION] Transformacion exitosa en bloque N°8 de Master d
+[INFO] 03:12:43:323 Worker/(24215:24310): [DATABIN] El bloque N°9 fue leido
+[INFO] 03:12:43:465 Worker/(24215:24310): [TRANSFORMACION] Transformacion exitosa en bloque N°9 de Master d
+[INFO] 03:12:44:627 Worker/(24215:24319): [DATABIN] El bloque N°10 fue leido
+[INFO] 03:12:44:855 Worker/(24215:24319): [TRANSFORMACION] Transformacion exitosa en bloque N°10 de Master d
+[INFO] 03:12:46:74 Worker/(24215:24328): [DATABIN] El bloque N°11 fue leido
+[INFO] 03:12:46:221 Worker/(24215:24328): [TRANSFORMACION] Transformacion exitosa en bloque N°11 de Master d
+[INFO] 03:12:46:438 Worker/(24215:24338): [CONEXION] Proceso Master conectado exitosamente
+[INFO] 03:12:47:379 Worker/(24215:24338): [REDUCCION LOCAL] La operacion termino con exito
+[INFO] 03:12:47:655 Worker/(24215:24345): [CONEXION] Proceso Master conectado exitosamente
+[INFO] 03:12:47:864 Worker/(24215:24348): [CONEXION] Proceso Master conectado exitosamente
+[INFO] 03:12:51:62 Worker/(24215:24227): [CONEXION] Fin de envio de bloques a transformar

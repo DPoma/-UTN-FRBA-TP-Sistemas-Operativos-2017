@@ -19,7 +19,7 @@
 #define ALMACENADO_FINAL 306
 #define ENVIAR_TEMPORAL 307
 #define PEDIR_LINEA 308
-#define TERMINADO 309
+#define CONEXION_WORKER 309
 
 #define INTSIZE sizeof(Entero)
 #define TEMPSIZE 12
@@ -74,7 +74,6 @@ typedef struct {
 	int cantidadNodos;
 	String rutaArchivoApareo;
 	char nombreResultado[12];
-	int cantidadWorkers;
 } ReduccionGlobal;
 
 
@@ -104,7 +103,7 @@ void masterRealizarOperacion(Socket unSocket);
 void workerAtenderProcesos();
 void workerAtenderWorkers();
 void workerAceptarWorker();
-void workerAtenderOperacion(Socket socketWorker) ;
+void workerAtenderOperacion(Mensaje* mensaje, Socket socketWorker);
 
 //--------------------------------------- Funciones de Configuracion  -------------------------------------
 
