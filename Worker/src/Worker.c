@@ -81,7 +81,7 @@ void masterRealizarOperacion(Socket unSocket) {
 	imprimirMensaje(archivoLog, "[CONEXION] Proceso Master conectado exitosamente");
 	Mensaje* mensaje = mensajeRecibir(unSocket);
 	switch(mensaje->header.operacion) {
-		case DESCONEXION: imprimirMensaje(archivoLog, "[AVISO] El Master  se desconecto"); break;
+		case DESCONEXION: imprimirMensaje(archivoLog, "[AVISO] El Master se desconecto"); break;
 		case TRANSFORMACION: transformacion(mensaje, unSocket); break;
 		case REDUCCION_LOCAL: reduccionLocal(mensaje, unSocket); break;
 		case REDUCCION_GLOBAL: reduccionGlobal(mensaje, unSocket); break;
@@ -94,11 +94,13 @@ void masterRealizarOperacion(Socket unSocket) {
 void workerAtenderOperacion(Socket socketWorker) {
 	Mensaje* mensaje = mensajeRecibir(socketWorker);
 	String pathReduccionLocal = string_from_format("%s%s", RUTA_TEMP, (String)mensaje->datos);
-	mensajeDestruir(mensaje); //TODO puede morir aca ver
+	mensajeDestruir(mensaje);
 	File archivoReduccionLocal = fileAbrir(pathReduccionLocal, LECTURA);
 	String buffer = stringCrear(BLOQUE);
 	while(fgets(buffer, BLOQUE, archivoReduccionLocal) != NULL)
-		mensajeEnviar(socketWorker, NULO, buffer, stringLongitud(buffer));
+		mensaje = mensajeRecibir(socketWorker);
+		if(mensaje->header.operacion == PEDIR_LINEA)
+			mensajeEnviar(socketWorker, NULO, buffer, stringLongitud(buffer));
 	fileCerrar(archivoReduccionLocal);
 }
 
@@ -301,8 +303,8 @@ int reduccionLocalEjecutar(ReduccionLocal reduccion, String temporales) {
 		comando = string_from_format("sort -m %s | cat | %s > %s", temporales, archivoScript, archivoReduccion);
 		resultado = system(comando);
 	}
-	//fileLimpiar(archivoScript);
-	//fileLimpiar(archivoApareado);
+	fileLimpiar(archivoScript);
+	fileLimpiar(archivoApareado);
 	memoriaLiberar(comando);
 	memoriaLiberar(archivoApareado);
 	memoriaLiberar(archivoReduccion);
