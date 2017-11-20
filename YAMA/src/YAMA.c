@@ -382,6 +382,7 @@ void actualizarTablaEstados(int etapa,void* datos,int actualizando,Socket master
 		entrada->estado=ENPROCESO;
 		entrada->bloque=-1;
 	}
+	entradaA->etapa=etapa;
 	entradaA->estado=actualizando;
 	if(actualizando==FRACASO||actualizando==ABORTADO){//todo sacar ABORTADO?
 		void abortarJob(){
