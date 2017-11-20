@@ -1,37 +1,40 @@
-[INFO] 11:40:00:147 Worker/(6507:6507): [CONFIGURACION] Nombre: NODO1
-[INFO] 11:40:00:191 Worker/(6507:6507): [CONFIGURACION] Esperando conexiones de Master (Puerto: 5090)
-[INFO] 11:40:00:192 Worker/(6507:6507): [CONFIGURACION] Esperando conexiones de Woker (Puerto: 5999)
-[INFO] 11:40:00:206 Worker/(6507:6507): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data1.bin
-[INFO] 11:40:00:207 Worker/(6507:6507): [CONFIGURACION] Cantidad de bloques: 100
-[INFO] 11:40:12:251 Worker/(6507:6517): [CONEXION] Proceso Master conectado exitosamente
-[INFO] 11:40:12:275 Worker/(6507:6518): [DATABIN] El bloque N°0 fue leido
-[INFO] 11:40:12:355 Worker/(6507:6519): [DATABIN] El bloque N°1 fue leido
-[INFO] 11:40:12:387 Worker/(6507:6520): [DATABIN] El bloque N°2 fue leido
-[INFO] 11:40:12:412 Worker/(6507:6521): [DATABIN] El bloque N°3 fue leido
-[INFO] 11:40:12:419 Worker/(6507:6523): [DATABIN] El bloque N°4 fue leido
-[INFO] 11:40:12:472 Worker/(6507:6524): [DATABIN] El bloque N°5 fue leido
-[INFO] 11:40:12:489 Worker/(6507:6525): [DATABIN] El bloque N°6 fue leido
-[INFO] 11:40:12:523 Worker/(6507:6526): [DATABIN] El bloque N°7 fue leido
-[INFO] 11:40:12:566 Worker/(6507:6527): [DATABIN] El bloque N°8 fue leido
-[INFO] 11:40:12:596 Worker/(6507:6533): [DATABIN] El bloque N°9 fue leido
-[INFO] 11:40:12:599 Worker/(6507:6534): [DATABIN] El bloque N°10 fue leido
-[INFO] 11:40:12:644 Worker/(6507:6536): [DATABIN] El bloque N°11 fue leido
-[INFO] 11:40:13:616 Worker/(6507:6518): [TRANSFORMACION] Transformacion exitosa en bloque N°0 de Master d
-[INFO] 11:40:13:786 Worker/(6507:6536): [TRANSFORMACION] Transformacion exitosa en bloque N°11 de Master d
-[INFO] 11:40:13:801 Worker/(6507:6519): [TRANSFORMACION] Transformacion exitosa en bloque N°1 de Master d
-[INFO] 11:40:13:966 Worker/(6507:6520): [TRANSFORMACION] Transformacion exitosa en bloque N°2 de Master d
-[INFO] 11:40:14:67 Worker/(6507:6521): [TRANSFORMACION] Transformacion exitosa en bloque N°3 de Master d
-[INFO] 11:40:14:226 Worker/(6507:6525): [TRANSFORMACION] Transformacion exitosa en bloque N°6 de Master d
-[INFO] 11:40:14:332 Worker/(6507:6523): [TRANSFORMACION] Transformacion exitosa en bloque N°4 de Master d
-[INFO] 11:40:14:469 Worker/(6507:6533): [TRANSFORMACION] Transformacion exitosa en bloque N°9 de Master d
-[INFO] 11:40:14:504 Worker/(6507:6524): [TRANSFORMACION] Transformacion exitosa en bloque N°5 de Master d
-[INFO] 11:40:14:654 Worker/(6507:6527): [TRANSFORMACION] Transformacion exitosa en bloque N°8 de Master d
-[INFO] 11:40:14:660 Worker/(6507:6526): [TRANSFORMACION] Transformacion exitosa en bloque N°7 de Master d
-[INFO] 11:40:14:873 Worker/(6507:6534): [TRANSFORMACION] Transformacion exitosa en bloque N°10 de Master d
-[INFO] 11:40:14:878 Worker/(6507:6517): [CONEXION] Fin de envio de bloques a transformar
-[INFO] 11:40:15:156 Worker/(6507:6646): [CONEXION] Proceso Master conectado exitosamente
-[INFO] 11:40:18:830 Worker/(6507:6646): [REDUCCION LOCAL] La operacion termino con exito
-[INFO] 11:40:19:97 Worker/(6507:6658): [CONEXION] Proceso Master conectado exitosamente
-[INFO] 11:40:19:519 Worker/(6507:6660): [CONEXION] Proceso Master conectado exitosamente
-[INFO] 11:40:26:985 Worker/(6507:6658): [REDUCCION GLOBAL] La operacion termino con exito
-[INFO] 11:40:27:285 Worker/(6507:6669): [CONEXION] Proceso Master conectado exitosamente
+[INFO] 14:39:39:209 Worker/(8898:8898): [CONFIGURACION] Nombre: NODO1
+[INFO] 14:39:39:228 Worker/(8898:8898): [CONFIGURACION] Esperando conexiones de Master (Puerto: 5090)
+[INFO] 14:39:39:235 Worker/(8898:8898): [CONFIGURACION] Ruta archivo data.bin: /home/utnso/Escritorio/data1.bin
+[INFO] 14:39:39:236 Worker/(8898:8898): [CONFIGURACION] Cantidad de bloques: 100
+[INFO] 14:39:40:804 Worker/(8898:8911): [CONEXION] Proceso Master conectado exitosamente
+[INFO] 14:39:40:828 Worker/(8898:8912): [DATABIN] El bloque N°0 fue leido
+[INFO] 14:39:40:903 Worker/(8898:8913): [DATABIN] El bloque N°1 fue leido
+[INFO] 14:39:40:921 Worker/(8898:8914): [DATABIN] El bloque N°2 fue leido
+[INFO] 14:39:40:981 Worker/(8898:8915): [DATABIN] El bloque N°3 fue leido
+[INFO] 14:39:41:5 Worker/(8898:8916): [DATABIN] El bloque N°4 fue leido
+[INFO] 14:39:41:47 Worker/(8898:8918): [DATABIN] El bloque N°5 fue leido
+[INFO] 14:39:41:105 Worker/(8898:8920): [DATABIN] El bloque N°7 fue leido
+[INFO] 14:39:41:113 Worker/(8898:8919): [DATABIN] El bloque N°6 fue leido
+[INFO] 14:39:41:155 Worker/(8898:8921): [DATABIN] El bloque N°8 fue leido
+[INFO] 14:39:41:209 Worker/(8898:8927): [DATABIN] El bloque N°9 fue leido
+[INFO] 14:39:41:230 Worker/(8898:8929): [DATABIN] El bloque N°10 fue leido
+[INFO] 14:39:41:278 Worker/(8898:8931): [DATABIN] El bloque N°11 fue leido
+[INFO] 14:39:42:142 Worker/(8898:8912): [TRANSFORMACION] Transformacion exitosa en bloque N°0 de Master d
+[INFO] 14:39:42:322 Worker/(8898:8913): [TRANSFORMACION] Transformacion exitosa en bloque N°1 de Master d
+[INFO] 14:39:42:409 Worker/(8898:8931): [TRANSFORMACION] Transformacion exitosa en bloque N°11 de Master d
+[INFO] 14:39:42:513 Worker/(8898:8914): [TRANSFORMACION] Transformacion exitosa en bloque N°2 de Master d
+[INFO] 14:39:42:650 Worker/(8898:8915): [TRANSFORMACION] Transformacion exitosa en bloque N°3 de Master d
+[INFO] 14:39:42:827 Worker/(8898:8916): [TRANSFORMACION] Transformacion exitosa en bloque N°4 de Master d
+[INFO] 14:39:42:934 Worker/(8898:8919): [TRANSFORMACION] Transformacion exitosa en bloque N°6 de Master d
+[INFO] 14:39:43:70 Worker/(8898:8927): [TRANSFORMACION] Transformacion exitosa en bloque N°9 de Master d
+[INFO] 14:39:43:164 Worker/(8898:8918): [TRANSFORMACION] Transformacion exitosa en bloque N°5 de Master d
+[INFO] 14:39:43:202 Worker/(8898:8920): [TRANSFORMACION] Transformacion exitosa en bloque N°7 de Master d
+[INFO] 14:39:43:242 Worker/(8898:8921): [TRANSFORMACION] Transformacion exitosa en bloque N°8 de Master d
+[INFO] 14:39:43:563 Worker/(8898:8929): [TRANSFORMACION] Transformacion exitosa en bloque N°10 de Master d
+[INFO] 14:39:43:570 Worker/(8898:8911): [CONEXION] Fin de envio de bloques a transformar
+[INFO] 14:39:43:918 Worker/(8898:9021): [CONEXION] Proceso Master conectado exitosamente
+[INFO] 14:39:47:688 Worker/(8898:9021): [REDUCCION LOCAL] La operacion termino con exito
+[INFO] 14:39:47:965 Worker/(8898:9030): [CONEXION] Proceso Master conectado exitosamente
+[INFO] 14:39:48:337 Worker/(8898:9033): [CONEXION] Proceso Master conectado exitosamente
+[INFO] 14:39:55:907 Worker/(8898:9030): [REDUCCION GLOBAL] La operacion termino con exito
+[INFO] 14:39:56:246 Worker/(8898:9041): [CONEXION] Proceso Master conectado exitosamente
+[INFO] 14:39:56:326 Worker/(8898:9041): [ALMACENADO FINAL] Estableciendo conexion con el File System (IP:127.0.0.1 | Puerto:5080)
+[INFO] 14:39:56:449 Worker/(8898:9041): [ALMACENADO FINAL] Conexion existosa con el File System
+[INFO] 14:39:56:497 Worker/(8898:9041): [ALMACENADO FINAL] Guardando el archivo g1439477210 en el File System
+[INFO] 14:39:57:253 Worker/(8898:9041): [ALMACENADO FINAL] La operacion se realizo con exito

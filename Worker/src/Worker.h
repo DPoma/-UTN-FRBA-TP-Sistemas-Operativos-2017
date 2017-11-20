@@ -32,11 +32,11 @@
 //--------------------------------------- Estructuras -------------------------------------
 
 typedef struct {
-	char ipFileSytem[20];
-	char puertoFileSystem[20];
-	char nombreNodo[10];
+	char ipFileSystem[20];
+	char puertoFileSystemDataNode[20];
+	char puertoFileSystemWorker[20];
 	char puertoMaster[20];
-	char puertoWorker[20];
+	char nombreNodo[10];
 	char rutaDataBin[255];
 	char ipPropia[20];
 } Configuracion;

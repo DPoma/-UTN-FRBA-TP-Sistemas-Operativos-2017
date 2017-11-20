@@ -355,13 +355,13 @@ Comando workerConfigurarComando(Mensaje* mensaje) {
 	Comando comando;
 	comando.argumentos[0] = CPFROM;
 	comando.argumentos[1] = FLAG_T;
-	int tamanioLocal = (Entero)mensaje->datos;
-	comando.argumentos[2] = stringCrear(tamanioLocal);
-	memcpy(comando.argumentos[2], mensaje->datos+sizeof(Entero), tamanioLocal);
-	int tamanioYama;
-	memcpy(&tamanioYama, mensaje->datos+sizeof(Entero)+tamanioLocal, sizeof(Entero));
-	comando.argumentos[3] = stringCrear(tamanioYama);
-	memcpy(comando.argumentos[3], mensaje->datos+sizeof(Entero)*2+tamanioLocal, tamanioYama);
+	int tamanioPathLocal;
+	memcpy(&tamanioPathLocal, mensaje->datos, sizeof(Entero));
+	memcpy(comando.argumentos[2], mensaje->datos+sizeof(Entero), tamanioPathLocal);
+	int tamanioPathYama;
+	memcpy(&tamanioPathYama, mensaje->datos+sizeof(Entero)+tamanioPathLocal, sizeof(Entero));
+	//todo memcpy(comando.argumentos[3], mensaje->datos+sizeof(Entero)*2+tamanioPathLocal, tamanioPathYama);
+	comando.argumentos[3] = "yamafs:/";
 	return comando;
 }
 
@@ -376,8 +376,10 @@ void workerListener() {
 	hiloDetach(pthread_self());
 	while(estadoControlIgualA(ACTIVADO)) {
 		Socket socketWorker = socketAceptar(listenerWorker, ID_WORKER);
+		puts("ACEPTE WORKER");
 		Mensaje* mensaje = mensajeRecibir(socketWorker);
 		Comando comando = workerConfigurarComando(mensaje);
+		imprimirMensaje1(archivoLog, "[ALMACENADO] Recibiendo archivo %s de un Worker\n", comando.argumentos[2]);
 		mensajeDestruir(mensaje);
 		int resultado = archivoAlmacenar(&comando);
 		memoriaLiberar(comando.argumentos[3]);
