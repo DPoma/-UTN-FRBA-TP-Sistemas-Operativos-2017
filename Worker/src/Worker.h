@@ -18,8 +18,9 @@
 #define REDUCCION_GLOBAL 305
 #define ALMACENADO_FINAL 306
 #define ENVIAR_TEMPORAL 307
-#define PEDIR_LINEA 308
-#define CONEXION_WORKER 309
+#define ENVIAR_LINEA 308
+#define PEDIR_LINEA 309
+#define CONEXION_WORKER 310
 
 #define INTSIZE sizeof(Entero)
 #define TEMPSIZE 12
@@ -95,7 +96,7 @@ int dataBinTamanio;
 
 void workerIniciar();
 void workerAtenderMasters();
-void workerFinalizar();
+void masterDesconectar();
 void workerAceptarMaster();
 void masterRealizarOperacion(Socket unSocket);
 void workerAtenderProcesos();
@@ -125,9 +126,9 @@ void transformacion(Mensaje* mensaje, Socket unSocket);
 void transformacionDestruir(Transformacion* transformacion);
 void transformacionExito(Entero numeroBloque, Socket unSocket);
 void transformacionFracaso(Entero numeroBloque, Socket unSocket);
-void transformacionRecibirScript(Transformacion* transformacion, Mensaje* mensaje);
+void transformacionObtenerScript(Transformacion* transformacion, Mensaje* mensaje);
 void transformacionFinalizar(Socket unSocket, int* estado);
-void transformacionRecibirBloque(Transformacion* transformacion, Socket unSocket, Puntero datos);
+void transformacionProcesarBloque(Transformacion* transformacion, Socket unSocket, Puntero datos);
 String transformacionCrearBloque(Transformacion* transformacion);
 String transformacionCrearScript(Transformacion* transformacion);
 
@@ -157,7 +158,7 @@ void reduccionGlobalDestruir(ReduccionGlobal* reduccion);
 void reduccionGlobalFinalizar(int resultado, Socket unSocket);
 void reduccionGlobalExito(Socket unSocket);
 void reduccionGlobalFracaso(Socket unSocket);
-String reduccionGlobalRecibirLinea(Socket unSocket);
+String reduccionGlobalEncargadoPedirLinea(Socket unSocket);
 Apareo* reduccionGlobalLineaMasCorta(Apareo* unApareo, Apareo* otroApareo);
 void reduccionGlobalControlarLineas(Lista listaApareados);
 
