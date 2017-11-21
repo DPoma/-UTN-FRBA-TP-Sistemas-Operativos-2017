@@ -148,20 +148,20 @@ void masterAtender(){
 	metricas.proceso=transcurrido(metricas.procesoC);
 	imprimirMensaje(archivoLog,"[EJECUCION]Terminando proceso");
 	void mostrarTranscurrido(double dt,char* tarea){
-		imprimirMensaje2(archivoLog,"[METRICA]%s tardo %f segundos en ejecutarse",tarea,&dt);
+		printf("[METRICA]%s tardo %f segundos en ejecutarse\n",tarea,dt);
+		log_info(archivoLog,"[METRICA]%s tardo %f segundos en ejecutarse",tarea,dt);
 	}
 	mostrarTranscurrido(metricas.proceso,"Job");
 	mostrarTranscurrido(metricas.transformacionSum/metricas.cantTrans,"Transformacion promedio ");
 	mostrarTranscurrido(metricas.reducLocalSum/metricas.cantRedLoc,"Reduccion local promedio");
-	imprimirMensaje2(archivoLog,"[METRICA]Transformaciones: %d,Reducciones locales:%d",&metricas.cantTrans,&metricas.cantRedLoc);
+	imprimirMensaje2(archivoLog,"[METRICA]Transformaciones: %d,Reducciones locales:%d",(void*)metricas.cantTrans,(void*)metricas.cantRedLoc);
 	mostrarTranscurrido(metricas.reducGlobal,"Reducccion Global");
 	mostrarTranscurrido(metricas.almacenado,"Almacenado");
-	imprimirMensaje1(archivoLog,"[METRICA]Cantidad de fallos: %d",&metricas.fallos);
-	imprimirMensaje1(archivoLog,"[METRICA]Tareas realizadas en paralelo: %d",&metricas.maxParalelo);
+	imprimirMensaje1(archivoLog,"[METRICA]Cantidad de fallos: %d",(void*)metricas.fallos);
+	imprimirMensaje1(archivoLog,"[METRICA]Tareas realizadas en paralelo: %d",(void*)metricas.maxParalelo);
 }
 void transformaciones(Lista bloques){
 	imprimirMensaje(archivoLog,"[EJECUCION] comenzando transformacion");
-	tareasEnParalelo(1);
 	clock_t tiempo=clock();
 	t_queue* clocks=queue_create();
 	WorkerTransformacion* dir = list_get(bloques,0);
@@ -174,6 +174,7 @@ void transformaciones(Lista bloques){
 	semaforoSignal(metricas.transformaciones);
 	do{
 		for(;enviados<bloques->elements_count;enviados++){
+			tareasEnParalelo(1);
 			clock_t* inicio=malloc(sizeof(clock_t));
 			*inicio=clock();
 			queue_push(clocks,inicio);
@@ -198,6 +199,7 @@ void transformaciones(Lista bloques){
 				memcpy(buffer+INTSIZE+DIRSIZE,mensaje->datos,INTSIZE);
 				mensajeEnviar(socketYama,mensaje->header.operacion,buffer,sizeof buffer);
 				mensajeDestruir(mensaje);
+				tareasEnParalelo(-1);
 			}
 			if(mensaje->header.operacion==EXITO){
 				imprimirMensaje1(archivoLog, "[TRANSFORMACION] Transformacion realizada con exito en el Worker %s",dir->dir.ip);
@@ -225,7 +227,6 @@ void transformaciones(Lista bloques){
 	}while(enviados<bloques->elements_count);
 	mensajeEnviar(socketWorker, EXITO, NULL, 0);
 	socketCerrar(socketWorker);
-	tareasEnParalelo(-1);
 	imprimirMensaje(archivoLog,"[EJECUCION] transformacion terminada");
 }
 void reduccionLocal(Mensaje* m){
@@ -297,7 +298,11 @@ void reduccionGlobal(Mensaje* m){
 	imprimirMensaje(archivoLog,mensaje->header.operacion==EXITO?"[EJECUCION]REDUCCION GLOBAL EXISTOSA"
 			:"[ERROR]FALLO EN LA RE_D_UCCION GLOBAL");
 	int32_t op=REDUCGLOBAL;
-	mensajeEnviar(socketYama,mensaje->header.operacion,&op,INTSIZE);
+	tamanio=INTSIZE+stringLongitud(archivoSalida)+1;
+	buffer=malloc(tamanio);
+	memcpy(buffer,&op,INTSIZE);
+	memcpy(buffer+INTSIZE,archivoSalida,stringLongitud(archivoSalida)+1);
+	mensajeEnviar(socketYama,mensaje->header.operacion,buffer,tamanio);
 	mensajeDestruir(mensaje);
 	socketCerrar(sWorker);
 	metricas.reducGlobal=transcurrido(tiempo);
@@ -319,6 +324,10 @@ void almacenado(Mensaje* m){
 	free(buffer);
 
 	Mensaje* mens=mensajeRecibir(sWorker);
+	if(mens->header.operacion==DESCONEXION){
+		mens->header.operacion=FRACASO;
+		puts("XHHHH");
+	}
 	imprimirMensaje(archivoLog,mens->header.operacion==EXITO?"[EJECUCION] ALMACENADO FINAL EXITOSO":"[ERROR] ALMACENADO FINAL FALLIDO");
 
 	int32_t op=ALMACENADO;

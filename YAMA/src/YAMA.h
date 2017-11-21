@@ -40,7 +40,10 @@
 #define ENPROCESO 2
 #define ABORTADO 3
 
+typedef void* func;
+
 typedef struct {
+	char ipPropia[50];
 	char puertoMaster[50];
 	char puertoErrores[50];
 	char ipFileSystem[50];
@@ -81,7 +84,7 @@ typedef struct{
 	Dir nodoAlt;
 	int32_t bloqueAlt;
 	int etapa;
-	char* pathTemporal; //podría usar char[12] y no usar memoria dinamica, despues ver
+	char* pathTemporal;
 	int estado;
 } Entrada;
 
@@ -101,7 +104,7 @@ void archivoConfigObtenerCampos();
 void yamaIniciar();
 void yamaAtender();
 void yamaPlanificar(Socket,void*,int);
-void actualizarTablaEstados(int,void*,int,Socket);
+void actualizarTablaEstados(Mensaje*,Socket);
 void dibujarTablaEstados();
 int dirToNum(Dir);
 void moverAUsados(bool(*)(void*));
