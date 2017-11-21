@@ -159,7 +159,7 @@ void transformacion(Mensaje* mensaje, Socket unSocket) {
 		Mensaje* otroMensaje = mensajeRecibir(unSocket);
 		switch(otroMensaje->header.operacion) {
 		case DESCONEXION: masterDesconectar(unSocket); break;
-		case TRANSFORMACION: transformacionProcesarBloque(transformacion, unSocket, otroMensaje->datos); break;
+		case TRANSFORMACION: transformacionProcesarBloque(transformacion, otroMensaje, unSocket); break;
 		case EXITO: transformacionFinalizar(unSocket, &estado); break;
 		}
 		mensajeDestruir(otroMensaje);
@@ -175,6 +175,7 @@ int transformacionEjecutar(Transformacion* transformacion) {
 	int resultado = system(comando);
 	fileLimpiar(pathBloque);
 	fileLimpiar(pathScript);
+	memoriaLiberar(comando);
 	memoriaLiberar(pathScript);
 	memoriaLiberar(pathDestino);
 	memoriaLiberar(pathBloque);
@@ -221,13 +222,14 @@ void transformacionObtenerBloque(Transformacion* transformacion, Puntero datos) 
 	memcpy(transformacion->nombreResultado, datos+sizeof(Entero)*2, 12);
 }
 
-void transformacionProcesarBloque(Transformacion* transformacion, Socket unSocket, Puntero datos) {
-	transformacionObtenerBloque(transformacion, datos);
+void transformacionProcesarBloque(Transformacion* transformacion, Mensaje* mensaje, Socket unSocket) {
+	transformacionObtenerBloque(transformacion, mensaje->datos);
 	pid_t pid = fork();
 	if(pid == 0) {
 		int resultado = transformacionEjecutar(transformacion);
 		transformacionFinalizarBloque(resultado, unSocket, transformacion->numeroBloque);
-		//todo probar transformacionDestruir(transformacion);
+		transformacionDestruir(transformacion);
+		mensajeDestruir(mensaje);
 		exit(EXIT_SUCCESS);
 	}
 }

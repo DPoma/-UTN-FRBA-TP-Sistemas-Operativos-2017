@@ -128,7 +128,7 @@ void transformacionExito(Entero numeroBloque, Socket unSocket);
 void transformacionFracaso(Entero numeroBloque, Socket unSocket);
 void transformacionObtenerScript(Transformacion* transformacion, Mensaje* mensaje);
 void transformacionFinalizar(Socket unSocket, int* estado);
-void transformacionProcesarBloque(Transformacion* transformacion, Socket unSocket, Puntero datos);
+void transformacionProcesarBloque(Transformacion* transformacion, Mensaje* mensaje, Socket unSocket);
 String transformacionCrearBloque(Transformacion* transformacion);
 String transformacionCrearScript(Transformacion* transformacion);
 
