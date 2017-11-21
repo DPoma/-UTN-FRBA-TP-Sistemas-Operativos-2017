@@ -386,7 +386,8 @@ void reduccionGlobalConOtroWorker(Mensaje* mensaje, Socket socketWorker) {
 	while(fgets(buffer, BLOQUE, archivoReduccionLocal)) {
 		mensaje = mensajeRecibir(socketWorker);
 		if(mensaje->header.operacion == PEDIR_LINEA) {
-			mensajeEnviar(socketWorker, 14, buffer, stringLongitud(buffer));
+			//printf("%s", buffer);
+			mensajeEnviar(socketWorker, 14, buffer, stringLongitud(buffer)+1);
 		}
 	}
 	mensaje = mensajeRecibir(socketWorker);
@@ -409,6 +410,7 @@ String reduccionGlobalObtenerLinea(Socket unSocket) {
 		exit(EXIT_FAILURE);
 	String linea = stringCrear(mensaje->header.tamanio);
 	memcpy(linea, mensaje->datos, mensaje->header.tamanio);
+	printf("Recibi %s", linea);
 	mensajeDestruir(mensaje);
 	return linea;
 }
