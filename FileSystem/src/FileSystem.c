@@ -351,19 +351,34 @@ BloqueYama yamaConvertirBloque(BloqueWorker* bloque) {
 
 //--------------------------------------- Funciones de Worker -------------------------------------
 
-Comando workerConfigurarComando(Mensaje* mensaje) {
+
+void workerDestruirDatos(AlmacenadoFinal* almacenado) {
+	memoriaLiberar(almacenado->pathLocal);
+	memoriaLiberar(almacenado->pathYama);
+	memoriaLiberar(almacenado);
+}
+
+AlmacenadoFinal* workerRecibirDatos(Mensaje* mensaje) {
+	AlmacenadoFinal* almacenado = memoriaAlocar(sizeof(AlmacenadoFinal));
+	memcpy(&almacenado->pathLocalSize, mensaje->datos, sizeof(Entero));
+	printf("%d\n", almacenado->pathLocalSize);
+	almacenado->pathLocal = stringCrear(almacenado->pathLocalSize);
+	memcpy(almacenado->pathLocal, mensaje->datos+sizeof(Entero), almacenado->pathLocalSize);
+	printf("%s\n", almacenado->pathLocal);
+	memcpy(&almacenado->pathYamaSize, mensaje->datos+sizeof(Entero)+almacenado->pathLocalSize, sizeof(Entero));
+	printf("%d\n", almacenado->pathYamaSize);
+	almacenado->pathYama = stringCrear(almacenado->pathYamaSize);
+	memcpy(almacenado->pathYama, mensaje->datos+sizeof(Entero)*2+almacenado->pathLocalSize, almacenado->pathYamaSize);
+	printf("%s\n", almacenado->pathYama);
+	return almacenado;
+}
+
+Comando workerConfigurarComando(AlmacenadoFinal* almacenado) {
 	Comando comando;
 	comando.argumentos[0] = CPFROM;
 	comando.argumentos[1] = FLAG_T;
-	int tamanioPathLocal;
-	memcpy(&tamanioPathLocal, mensaje->datos, sizeof(Entero));
-	printf("el tamanio de path local es %d\n", tamanioPathLocal);
-	comando.argumentos[2] = stringCrear(tamanioPathLocal);
-	memcpy(comando.argumentos[2], mensaje->datos+sizeof(Entero), tamanioPathLocal);
-	int tamanioPathYama;
-	memcpy(&tamanioPathYama, mensaje->datos+sizeof(Entero)+tamanioPathLocal, sizeof(Entero));
-	//comando.argumentos[2] = stringCrear(tamanioPathYama);
-	//todo memcpy(comando.argumentos[3], mensaje->datos+sizeof(Entero)*2+tamanioPathLocal, tamanioPathYama);
+	comando.argumentos[2] = almacenado->pathLocal;
+	//comando.argumentos[3] = almacenado->pathYama;
 	comando.argumentos[3] = "yamafs:/";
 	return comando;
 }
@@ -379,15 +394,15 @@ void workerListener() {
 	hiloDetach(pthread_self());
 	while(estadoControlIgualA(ACTIVADO)) {
 		Socket socketWorker = socketAceptar(listenerWorker, ID_WORKER);
-		puts("ACEPTE WORKER");
 		Mensaje* mensaje = mensajeRecibir(socketWorker);
-		Comando comando = workerConfigurarComando(mensaje);
-		imprimirMensaje1(archivoLog, "[ALMACENADO] Recibiendo archivo %s de un Worker\n", comando.argumentos[2]);
+		AlmacenadoFinal* almacenado = workerRecibirDatos(mensaje);
 		mensajeDestruir(mensaje);
+		Comando comando = workerConfigurarComando(almacenado);
+		imprimirMensaje1(archivoLog, "[ALMACENADO] Recibiendo archivo %s de un Worker\n", comando.argumentos[2]);
 		int resultado = archivoAlmacenar(&comando);
-		printf("el resultado de archivo almacenar es %d\n", resultado);
-		memoriaLiberar(comando.argumentos[3]);
-		//memoriaLiberar(comando.argumentos[4]);
+		workerDestruirDatos(almacenado);
+		memoriaLiberar(comando.argumentos[2]);
+		//memoriaLiberar(comando.argumentos[3]);
 		workerAvisarAlmacenado(resultado, socketWorker);
 	}
 }

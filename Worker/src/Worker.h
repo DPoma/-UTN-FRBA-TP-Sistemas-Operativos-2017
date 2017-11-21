@@ -76,8 +76,6 @@ typedef struct {
 	char nombreResultado[12];
 } ReduccionGlobal;
 
-
-
 typedef void* BloqueWorker;
 
 //--------------------------------------- Globales -------------------------------------
@@ -128,17 +126,18 @@ void transformacionDestruir(Transformacion* transformacion);
 void transformacionExito(Entero numeroBloque, Socket unSocket);
 void transformacionFracaso(Entero numeroBloque, Socket unSocket);
 void transformacionRecibirScript(Transformacion* transformacion, Mensaje* mensaje);
-void transformacionRecibirBloque(Transformacion* transformacion, Puntero datos);
-void transformacionCrearNieto(Transformacion* transformacion, Socket unSocket);
-String transformacionCrearBloqueTemporal(Transformacion* transformacion);
-String transformacionCrearScriptTemporal(Transformacion* transformacion);
+void transformacionFinalizar(Socket unSocket, int* estado);
+void transformacionRecibirBloque(Transformacion* transformacion, Socket unSocket, Puntero datos);
+String transformacionCrearBloque(Transformacion* transformacion);
+String transformacionCrearScript(Transformacion* transformacion);
+
 
 //--------------------------------------- Funciones de Reduccion Local -------------------------------------
 
 void reduccionLocal(Mensaje* mensaje, Socket unSocket);
-ReduccionLocal reduccionLocalRecibirTemporales(Puntero datos);
+ReduccionLocal reduccionLocalRecibirDatos(Puntero datos);
 int reduccionLocalEjecutar(ReduccionLocal reduccion, String temporales);
-void reduccionLocalTerminar(int resultado, Socket unSocket);
+void reduccionLocalFinalizar(int resultado, Socket unSocket);
 void reduccionLocalExito(Socket unSocket);
 void reduccionLocalFracaso(Socket unSocket);
 String reduccionLocalCrearScript(ReduccionLocal reduccion);
@@ -148,7 +147,7 @@ String reduccionLocalObtenerTemporales(ReduccionLocal reduccion);
 
 void reduccionGlobal(Mensaje* mensaje, Socket unSocket);
 int reduccionGlobalEjecutar(ReduccionGlobal reduccion, String path);
-void reduccionGlobalTerminar(int resultado, Socket unSocket);
+void reduccionGlobalFinalizar(int resultado, Socket unSocket);
 void reduccionGlobalExito(Socket unSocket);
 void reduccionGlobalFracaso(Socket unSocket);
 String reduccionGlobalObtenerLinea(Socket unSocket);
@@ -156,10 +155,11 @@ String reduccionGlobalGenerarArchivo(ReduccionGlobal reduccion);
 
 //--------------------------------------- Funciones de Almacenado Final -------------------------------------
 
-void almacenadoFracaso(Socket unSocket);
-void almacenadoExitoso(Socket unSocket);
-void almacenadoTerminar(int resultado, Socket unSocket);
 void almacenadoFinal(Mensaje* mensaje, Socket socketMaster);
+int almacenadoFinalEnviar(Puntero buffer, int tamanio, String pathYama);
+void almacenadoFinalFinalizar(int resultado, Socket unSocket);
+void almacenadoFinalFracaso(Socket unSocket);
+void almacenadoFinalExito(Socket unSocket);
 
 //--------------------------------------- Funciones de DataBin -------------------------------------
 

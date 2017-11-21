@@ -173,6 +173,13 @@ typedef struct __attribute__((packed)) {
 	Entero bytesUtilizados;
 } BloqueYama;
 
+typedef struct {
+	Entero pathLocalSize;
+	String pathLocal;
+	Entero pathYamaSize;
+	String pathYama;
+} AlmacenadoFinal;
+
 //--------------------------------------- Globales -------------------------------------
 
 String campos[MAX_CAMPOS];
