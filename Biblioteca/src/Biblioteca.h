@@ -280,7 +280,7 @@ bool handShakeIdsIguales(int idEnviada, int idEsperada);
 
 //--------------------------------------- Funciones varias -------------------------------------
 
-void configuracionSenial(int senial);
+void configuracionSenialHijo(int senial);
 void imprimirMensajeProceso(String mensaje);
 void fileLimpiar(String ruta);
 int bitmapCalculo(int cantidadBloques);

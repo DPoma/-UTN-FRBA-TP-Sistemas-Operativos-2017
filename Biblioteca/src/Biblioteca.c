@@ -161,7 +161,7 @@ void mensajeAvisarDesconexion(Mensaje* mensaje) {
 }
 
 bool mensajeConexionFinalizada(int bytes) {
-	return bytes == NULO;
+	return bytes == NULO || bytes == ERROR;
 }
 
 void mensajeRevisarConexion(Mensaje* mensaje, Socket socketReceptor, int bytes) {
@@ -175,7 +175,7 @@ void mensajeObtenerDatos(Mensaje* mensaje, Socket socketReceptor) {
 	int tamanioDato = mensaje->header.tamanio;
 	if(tamanioDato==0){
 		mensaje->datos=NULL;
-		return;//el recv no se banca el 0
+		return;
 	}
 	mensaje->datos = malloc(tamanioDato);
 	int bytes = socketRecibir(socketReceptor, mensaje->datos, tamanioDato);

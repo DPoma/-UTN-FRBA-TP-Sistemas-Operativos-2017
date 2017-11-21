@@ -88,6 +88,7 @@ Socket listenerWorker;
 Socket listenerMaster;
 File dataBin;
 Puntero punteroDataBin;
+pid_t pidPadre;
 int estadoWorker;
 int dataBinBloques;
 int dataBinTamanio;
@@ -102,8 +103,7 @@ void masterRealizarOperacion(Socket unSocket);
 void workerAtenderProcesos();
 void workerAtenderWorkers();
 void workerAceptarWorker();
-void reduccionGlobalEnviarLinea(Mensaje* mensaje, Socket socketWorker);
-
+void workerFinalizar();
 //--------------------------------------- Funciones de Configuracion  -------------------------------------
 
 void configuracionImprimir(Configuracion* configuracion);
@@ -161,6 +161,7 @@ void reduccionGlobalFracaso(Socket unSocket);
 String reduccionGlobalEncargadoPedirLinea(Socket unSocket);
 Apareo* reduccionGlobalLineaMasCorta(Apareo* unApareo, Apareo* otroApareo);
 void reduccionGlobalControlarLineas(Lista listaApareados);
+void reduccionGlobalEnviarLinea(Mensaje* mensaje, Socket socketWorker);
 
 //--------------------------------------- Funciones de Almacenado Final -------------------------------------
 

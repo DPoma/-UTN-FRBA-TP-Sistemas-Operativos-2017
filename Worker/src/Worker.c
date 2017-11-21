@@ -13,7 +13,7 @@
 int main(void) {
 	workerIniciar();
 	workerAtenderProcesos();
-	//imprimirMensaje1(archivoLog, "[OPERACION] Operacion Finalizada");
+	workerFinalizar();
 	return EXIT_SUCCESS;
 }
 
@@ -21,6 +21,7 @@ int main(void) {
 
 void workerIniciar() {
 	configuracionIniciar();
+	pidPadre = getpid();
 	estadoWorker = ACTIVADO;
 }
 
@@ -34,8 +35,6 @@ void workerAceptarMaster() {
 	Socket nuevoSocket = socketAceptar(listenerMaster, ID_MASTER);
 	if(nuevoSocket != ERROR)
 		masterAtenderOperacion(nuevoSocket);
-	else
-		imprimirMensaje(archivoLog, "[ERROR] Error en el accept(), hoy no es tu dia papu");
 }
 
 void masterAtenderOperacion(Socket unSocket) {
@@ -75,9 +74,11 @@ void workerDesconectar(Socket unSocket) {
 	//exit(EXIT_SUCCESS);
 }
 
-void workerFinalizarOperacion() {
-	imprimirMensaje(archivoLog, "[CONEXION] Un Master se desconecto");
-	exit(EXIT_SUCCESS);
+void workerFinalizar() {
+	sleep(5);
+	imprimirMensaje(archivoLog, "[EJECUCION] Proceso Worker finalizado");
+	memoriaLiberar(configuracion);
+	archivoLogDestruir(archivoLog);
 }
 
 //--------------------------------------- Funciones de Configuracion -------------------------------------
@@ -101,7 +102,7 @@ void configuracionIniciar() {
 	configuracion = configuracionCrear(RUTA_CONFIG, (void*)configuracionLeerArchivoConfig, campos);
 	configuracionImprimir(configuracion);
 	dataBinConfigurar();
-	//senialAsignarFuncion(SIGINT, configuracionSenial);
+	senialAsignarFuncion(SIGINT, configuracionSenial);
 }
 
 void configuracionIniciarLog() {
@@ -146,7 +147,10 @@ void configuracionCalcularBloques() {
 
 void configuracionSenial(int senial) {
 	puts("");
-	imprimirMensaje(archivoLog, "[EJECUCION] Proceso Worker finalizado");
+	if(getpid() != pidPadre)
+		exit(EXIT_SUCCESS);
+	estadoWorker = DESACTIVADO;
+	shutdown(listenerMaster, SHUT_RDWR);
 }
 
 //--------------------------------------- Funciones de Transformacion -------------------------------------
@@ -183,7 +187,7 @@ int transformacionEjecutar(Transformacion* transformacion) {
 }
 
 void transformacionFinalizar(Socket unSocket, int* estado) {
-	imprimirMensaje(archivoLog, "[CONEXION] Etapa de transformacion finalizada");
+	imprimirMensaje(archivoLog, "[CONEXION] Master #(id master?): Etapa de transformacion finalizada");
 	socketCerrar(unSocket);
 	*estado = DESACTIVADO;
 }
@@ -196,12 +200,12 @@ void transformacionFinalizarBloque(int resultado, Socket unSocket, Entero numero
 }
 
 void transformacionExito(Entero numeroBloque, Socket unSocket) {
-	imprimirMensaje1(archivoLog,"[TRANSFORMACION] Transformacion exitosa en bloque N°%i de Master #(id master?)", (int*)numeroBloque);
+	imprimirMensaje1(archivoLog,"[TRANSFORMACION] Master #(id master?): Operacion finalizada en bloque N°%d", (int*)numeroBloque);
 	mensajeEnviar(unSocket, EXITO, &numeroBloque, sizeof(Entero));
 }
 
 void transformacionFracaso(Entero numeroBloque, Socket unSocket) {
-	imprimirMensaje(archivoLog,"[TRANSFORMACION] transformacion Fracaso");
+	imprimirMensaje1(archivoLog,"[TRANSFORMACION] Master #(id master?): Operacion fallida en bloque N°%d", (int*)numeroBloque);
 	mensajeEnviar(unSocket, FRACASO, &numeroBloque, sizeof(Entero));
 }
 
@@ -309,13 +313,13 @@ void reduccionLocalDestruir(ReduccionLocal* reduccion) {
 
 void reduccionLocalExito(Socket unSocket) {
 	//TODO ver en caso que master este desconectado
-	imprimirMensaje(archivoLog,"[REDUCCION LOCAL] La operacion termino con exito");
+	imprimirMensaje(archivoLog,"[REDUCCION LOCAL] Master #(id master?): Operacion finalizada");
 	mensajeEnviar(unSocket, EXITO, NULL, 0);
 }
 
 void reduccionLocalFracaso(Socket unSocket) {
 	//TODO ver en caso que master este desconectado
-	imprimirMensaje(archivoLog,"[REDUCCION LOCAL] La operacion fracaso");
+	imprimirMensaje(archivoLog,"[REDUCCION LOCAL] Master #(id master?): Operacion fallida");
 	mensajeEnviar(unSocket, FRACASO, NULL, 0);
 }
 
@@ -400,12 +404,12 @@ void reduccionGlobalDestruir(ReduccionGlobal* reduccion) {
 }
 
 void reduccionGlobalExito(Socket unSocket) {
-	imprimirMensaje(archivoLog,"[REDUCCION GLOBAL] La operacion termino con exito");
+	imprimirMensaje(archivoLog,"[REDUCCION GLOBAL] Master #(id master?): Operacion finalizada");
 	mensajeEnviar(unSocket, EXITO, NULL, 0);
 }
 
 void reduccionGlobalFracaso(Socket unSocket) {
-	imprimirMensaje(archivoLog,"[REDUCCION GLOBAL] La operacion fracaso");
+	imprimirMensaje(archivoLog,"[REDUCCION GLOBAL] Master #(id master?): Operacion fallida");
 	mensajeEnviar(unSocket, FRACASO, NULL, 0);
 }
 
@@ -572,12 +576,12 @@ void almacenadoFinalFinalizar(int resultado, Socket unSocket) {
 }
 
 void almacenadoFinalExito(Socket unSocket) {
-	imprimirMensaje(archivoLog,"[ALMACENADO FINAL] La operacion se realizo con exito");
+	imprimirMensaje(archivoLog,"[ALMACENADO FINAL] Master #(id master?): Operacion finalizada");
 	mensajeEnviar(unSocket, EXITO, NULL, 0);
 }
 
 void almacenadoFinalFracaso(Socket unSocket) {
-	imprimirMensaje(archivoLog,"[ALMACENADO FINAL] La operacion fracaso");
+	imprimirMensaje(archivoLog,"[ALMACENADO FINAL] Master #(id master?): Operacion fallida");
 	mensajeEnviar(unSocket, FRACASO, NULL, 0);
 }
 

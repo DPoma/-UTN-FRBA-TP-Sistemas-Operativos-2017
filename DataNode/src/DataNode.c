@@ -25,7 +25,7 @@ void dataNodeIniciar() {
 	dataNodeActivar();
 	dataBinConfigurar();
 	dataNodeConectarAFS();
-	senialAsignarFuncion(SIGINT, configuracionSenial);
+	senialAsignarFuncion(SIGINT, configuracionSenialHijo);
 }
 
 void dataNodeAtenderFileSystem(){
@@ -128,7 +128,7 @@ void configuracionIniciar() {
 	configuracionImprimir(configuracion);
 }
 
-void configuracionSenial(int senial) {
+void configuracionSenialHijo(int senial) {
 	mensajeEnviar(socketFileSystem, DESCONEXION, VACIO, ACTIVADO);
 	dataNodeDesactivar();
 	puts("");
