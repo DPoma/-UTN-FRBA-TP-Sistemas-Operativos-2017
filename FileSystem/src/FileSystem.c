@@ -377,9 +377,11 @@ Comando workerConfigurarComando(AlmacenadoFinal* almacenado) {
 	Comando comando;
 	comando.argumentos[0] = CPFROM;
 	comando.argumentos[1] = FLAG_T;
-	comando.argumentos[2] = almacenado->pathLocal;
+	comando.argumentos[2] = memoriaAlocar(100);
+	stringCopiar(comando.argumentos[2],almacenado->pathLocal);
 	//comando.argumentos[3] = almacenado->pathYama;
-	comando.argumentos[3] = "yamafs:/";
+	comando.argumentos[3] = memoriaAlocar(40);
+	stringCopiar(comando.argumentos[3], "yamafs:/");
 	return comando;
 }
 
