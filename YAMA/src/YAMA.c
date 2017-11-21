@@ -113,22 +113,6 @@ void yamaAtender() {
 					if(mensaje->header.operacion==ERROR_ARCHIVO){
 						log_info(archivoLog,"[ERROR] El path no existe en el File System");
 						mensajeEnviar(*(Entero*)mensaje->datos,ABORTAR,NULL,0);
-//					}else if(mensaje->header.operacion==666){ //todo esto no debería existir? worker me tendría que ir pasando los errores
-//						log_info(archivoLog,"[RECEPCION] Un nodo se desconeto");
-//						char nodoDesconectado[20];
-//						strncpy(nodoDesconectado,mensaje->datos,20);
-//						bool nodoDesconectadoF(Worker* worker){
-//							return stringIguales(worker->nodo.ip,nodoDesconectado);
-//						}
-//						((Worker*)list_find(workers,nodoDesconectadoF))->conectado=false;
-//						void cazarEntradasDesconectadas(Entrada* entrada){
-//							if(stringIguales(entrada->nodo.ip,nodoDesconectado)){
-//								actualizarTablaEstados(entrada,FRACASO);
-//							}
-//						}
-						//list_iterate(tablaEstados,cazarEntradasDesconectadas);
-						//podría romper por estar recorriendo una lista con una funcion
-						//que puede modificar la lista, pero no deberia
 					}else if(mensaje->header.operacion==DESCONEXION){
 						imprimirMensaje(archivoLog,"[ERROR] FileSystem desconectado");
 						abort();
@@ -528,8 +512,8 @@ void dibujarTablaEstados(){
 	if(list_is_empty(tablaEstados)&&list_is_empty(tablaUsados))
 		return;
 	pantallaLimpiar();
-	puts("     J |   M |  N |    B |      ETAPA       |    TEMPORAL  |    ESTADO   |");
-	puts("     ---------------------------------------------------------------------");
+	puts(" J |   M |  N |    B |      ETAPA       |    TEMPORAL  |    ESTADO   |");
+	puts("---------------------------------------------------------------------");
 	void dibujarEntrada(Entrada* entrada){
 		char* etapa,*estado,*bloque; bool doFree=false;
 		switch(entrada->etapa){
