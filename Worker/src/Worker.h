@@ -60,7 +60,7 @@ typedef struct {
 typedef struct {
 	Dir nodo;
 	char temporal[TEMPSIZE];
-} ReduccionGlobalNodo;
+} Nodo;
 
 typedef struct {
 	String linea;
@@ -68,11 +68,11 @@ typedef struct {
 } Apareo;
 
 typedef struct {
-	ReduccionGlobalNodo* nodos;
+	Nodo* nodos;
 	int scriptSize;
 	String script;
 	int cantidadNodos;
-	String rutaArchivoApareo;
+	String pathApareo;
 	char nombreResultado[12];
 } ReduccionGlobal;
 
@@ -101,7 +101,7 @@ void masterRealizarOperacion(Socket unSocket);
 void workerAtenderProcesos();
 void workerAtenderWorkers();
 void workerAceptarWorker();
-void reduccionGlobalConOtroWorker(Mensaje* mensaje, Socket socketWorker);
+void reduccionGlobalEnviarLinea(Mensaje* mensaje, Socket socketWorker);
 
 //--------------------------------------- Funciones de Configuracion  -------------------------------------
 
@@ -135,23 +135,31 @@ String transformacionCrearScript(Transformacion* transformacion);
 //--------------------------------------- Funciones de Reduccion Local -------------------------------------
 
 void reduccionLocal(Mensaje* mensaje, Socket unSocket);
-ReduccionLocal reduccionLocalRecibirDatos(Puntero datos);
-int reduccionLocalEjecutar(ReduccionLocal reduccion, String temporales);
+ReduccionLocal* reduccionLocalRecibirDatos(Puntero datos);
+int reduccionLocalEjecutar(ReduccionLocal* reduccion, String temporales);
+String reduccionLocalCrearScript(ReduccionLocal* reduccion);
+String reduccionLocalObtenerTemporales(ReduccionLocal* reduccion);
+void reduccionLocalDestruir(ReduccionLocal* reduccion);
 void reduccionLocalFinalizar(int resultado, Socket unSocket);
 void reduccionLocalExito(Socket unSocket);
 void reduccionLocalFracaso(Socket unSocket);
-String reduccionLocalCrearScript(ReduccionLocal reduccion);
-String reduccionLocalObtenerTemporales(ReduccionLocal reduccion);
 
 //--------------------------------------- Funciones de Reduccion Global -------------------------------------
 
 void reduccionGlobal(Mensaje* mensaje, Socket unSocket);
-int reduccionGlobalEjecutar(ReduccionGlobal reduccion, String path);
+ReduccionGlobal* reduccionGlobalRecibirDatos(Puntero datos);
+int reduccionGlobalEjecutar(ReduccionGlobal* reduccion);
+void reduccionGlobalAparearTemporales(ReduccionGlobal* reduccion);
+void reduccionGlobalAlgoritmoApareo(ReduccionGlobal* reduccion, Lista listaApareados);
+String reduccionGlobalCrearScript(ReduccionGlobal* reduccion);
+void reduccionGlobalRealizarConexiones(ReduccionGlobal* reduccion, Lista listaApareados);
+void reduccionGlobalDestruir(ReduccionGlobal* reduccion);
 void reduccionGlobalFinalizar(int resultado, Socket unSocket);
 void reduccionGlobalExito(Socket unSocket);
 void reduccionGlobalFracaso(Socket unSocket);
-String reduccionGlobalObtenerLinea(Socket unSocket);
-String reduccionGlobalGenerarArchivo(ReduccionGlobal reduccion);
+String reduccionGlobalRecibirLinea(Socket unSocket);
+Apareo* reduccionGlobalLineaMasCorta(Apareo* unApareo, Apareo* otroApareo);
+void reduccionGlobalControlarLineas(Lista listaApareados);
 
 //--------------------------------------- Funciones de Almacenado Final -------------------------------------
 
