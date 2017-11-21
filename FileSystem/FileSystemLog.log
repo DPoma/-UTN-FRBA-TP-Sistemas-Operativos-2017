@@ -1,110 +1,18 @@
-[INFO] 15:22:34:529 FileSystem/(10335:10335): [EJECUCION] Proceso File System iniciado
-[INFO] 15:22:34:654 FileSystem/(10335:10335): [CONFIGURACION] Esperando conexion de YAMA (Puerto: 5060)
-[INFO] 15:22:34:659 FileSystem/(10335:10335): [CONFIGURACION] Esperando conexiones de Data Nodes (Puerto: 5040)
-[INFO] 15:22:34:659 FileSystem/(10335:10335): [CONFIGURACION] Esperando conexiones de Workers (Puerto: 5080)
-[INFO] 15:22:34:660 FileSystem/(10335:10335): [CONFIGURACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
-[INFO] 15:22:34:774 FileSystem/(10335:10335): [33m[AVISO] Conecte los nodos necesarios al File System para estabilizarlo[0m
-[INFO] 15:22:37:41 FileSystem/(10335:10339): [33m[AVISO] NODO2 conectado[0m
-[INFO] 15:22:37:53 FileSystem/(10335:10339): [33m[AVISO] El File System esta estable[0m
-[INFO] 15:22:43:965 FileSystem/(10335:10339): [33m[AVISO] NODO1 conectado[0m
-[INFO] 15:22:45:403 FileSystem/(10335:10340): [CONEXION] El proceso Yama se ha conectado
-[INFO] 15:23:08:396 FileSystem/(10335:10341): [ALMACENADO] Recibiendo archivo /home/utnso/Escritorio/temp/g1522594990 de un Worker
+[INFO] 23:38:14:286 FileSystem/(7651:7651): [EJECUCION] Proceso File System iniciado
+[INFO] 23:38:14:347 FileSystem/(7651:7651): [CONFIGURACION] Esperando conexion de YAMA (Puerto: 5060)
+[INFO] 23:38:14:349 FileSystem/(7651:7651): [CONFIGURACION] Esperando conexiones de Data Nodes (Puerto: 5040)
+[INFO] 23:38:14:349 FileSystem/(7651:7651): [CONFIGURACION] Esperando conexiones de Workers (Puerto: 5080)
+[INFO] 23:38:14:350 FileSystem/(7651:7651): [CONFIGURACION] Ruta de metadata: /home/utnso/Escritorio/Metadata
+[INFO] 23:38:14:424 FileSystem/(7651:7651): [33m[AVISO] Conecte los nodos necesarios al File System para estabilizarlo[0m
+[INFO] 23:38:16:986 FileSystem/(7651:7654): [33m[AVISO] NODO1 conectado[0m
+[INFO] 23:38:16:998 FileSystem/(7651:7654): [33m[AVISO] El File System esta estable[0m
+[INFO] 23:38:23:746 FileSystem/(7651:7654): [33m[AVISO] NODO2 conectado[0m
+[INFO] 23:38:24:973 FileSystem/(7651:7655): [CONEXION] El proceso Yama se ha conectado
+[INFO] 23:38:31:704 FileSystem/(7651:7656): [ALMACENADO] Recibiendo archivo /home/utnso/Escritorio/temp/g2338316080 de un Worker
 
-[INFO] 15:23:08:623 FileSystem/(10335:10341): [ARCHIVO] El archivo g1522594990 fue copiado en File System
-[INFO] 15:25:29:443 FileSystem/(10335:10335): [DIRECTORIO] WBAN.csv (a)
-[INFO] 15:25:29:444 FileSystem/(10335:10335): [DIRECTORIO] g1522594990 (a)
-[INFO] 15:25:50:316 FileSystem/(10335:10335): [ERROR] El archivo no existe
-[INFO] 15:26:55:310 FileSystem/(10335:10335): [ARCHIVO] El archivo g1522594990 se copio en /home/utnso/Escritorio/Metadata/g1522594990
-[INFO] 15:26:56:390 FileSystem/(10335:10335): [ARCHIVO] El MD5 del archivo es 9d095a747e03300231d8bff0d4189c56  /home/utnso/Escritorio/Metadata/g1522594990
+[INFO] 23:38:31:812 FileSystem/(7651:7656): [ARCHIVO] El archivo g2338316080 fue copiado en File System
+[INFO] 23:41:48:311 FileSystem/(7651:7655): [CONEXION] El proceso YAMA se ha desconectado
+[INFO] 23:41:49:343 FileSystem/(7651:7655): [CONEXION] El proceso Yama se ha conectado
+[INFO] 23:42:38:181 FileSystem/(7651:7656): [ALMACENADO] Recibiendo archivo /home/utnso/Escritorio/temp/g2342377580 de un Worker
 
-[INFO] 15:30:52:896 FileSystem/(10335:10335): [ARCHIVO] El archivo /g1522594990 ha sido eliminado
-[INFO] 15:30:58:180 FileSystem/(10335:10340): [CONEXION] El proceso YAMA se ha desconectado
-[INFO] 15:31:03:695 FileSystem/(10335:10340): [CONEXION] El proceso Yama se ha conectado
-[INFO] 15:31:27:632 FileSystem/(10335:10341): [ALMACENADO] Recibiendo archivo /home/utnso/Escritorio/temp/g1531195340 de un Worker
-
-[INFO] 15:31:27:742 FileSystem/(10335:10341): [ARCHIVO] El archivo g1531195340 fue copiado en File System
-[INFO] 15:52:09:568 FileSystem/(10335:10340): [CONEXION] El proceso YAMA se ha desconectado
-[INFO] 15:52:11:481 FileSystem/(10335:10340): [CONEXION] El proceso Yama se ha conectado
-[INFO] 15:52:52:905 FileSystem/(10335:10341): [ALMACENADO] Recibiendo archivo /home/utnso/Escritorio/temp/g1552447100 de un Worker
-
-[INFO] 15:52:53:18 FileSystem/(10335:10341): [ARCHIVO] El archivo g1552447100 fue copiado en File System
-[INFO] 15:56:03:881 FileSystem/(10335:10340): [CONEXION] El proceso YAMA se ha desconectado
-[INFO] 15:56:06:126 FileSystem/(10335:10340): [CONEXION] El proceso Yama se ha conectado
-[INFO] 15:56:27:532 FileSystem/(10335:10341): [ALMACENADO] Recibiendo archivo /home/utnso/Escritorio/temp/g1556196010 de un Worker
-
-[INFO] 15:56:27:628 FileSystem/(10335:10341): [ARCHIVO] El archivo g1556196010 fue copiado en File System
-[INFO] 15:59:29:418 FileSystem/(10335:10340): [CONEXION] El proceso YAMA se ha desconectado
-[INFO] 15:59:31:507 FileSystem/(10335:10340): [CONEXION] El proceso Yama se ha conectado
-[INFO] 15:59:47:984 FileSystem/(10335:10341): [ALMACENADO] Recibiendo archivo /home/utnso/Escritorio/temp/g1559395220 de un Worker
-
-[INFO] 15:59:48:81 FileSystem/(10335:10341): [ARCHIVO] El archivo g1559395220 fue copiado en File System
-[INFO] 16:23:25:955 FileSystem/(10335:10340): [CONEXION] El proceso YAMA se ha desconectado
-[INFO] 16:23:28:369 FileSystem/(10335:10340): [CONEXION] El proceso Yama se ha conectado
-[INFO] 16:23:47:412 FileSystem/(10335:10341): [ALMACENADO] Recibiendo archivo /home/utnso/Escritorio/temp/g1623388350 de un Worker
-
-[INFO] 16:23:47:512 FileSystem/(10335:10341): [ARCHIVO] El archivo g1623388350 fue copiado en File System
-[INFO] 16:33:48:209 FileSystem/(10335:10340): [CONEXION] El proceso YAMA se ha desconectado
-[INFO] 16:33:50:406 FileSystem/(10335:10340): [CONEXION] El proceso Yama se ha conectado
-[INFO] 16:34:11:871 FileSystem/(10335:10341): [ALMACENADO] Recibiendo archivo /home/utnso/Escritorio/temp/g1634032880 de un Worker
-
-[INFO] 16:34:11:970 FileSystem/(10335:10341): [ARCHIVO] El archivo g1634032880 fue copiado en File System
-[INFO] 16:39:52:990 FileSystem/(10335:10340): [CONEXION] El proceso YAMA se ha desconectado
-[INFO] 16:39:55:698 FileSystem/(10335:10340): [CONEXION] El proceso Yama se ha conectado
-[INFO] 16:40:14:719 FileSystem/(10335:10341): [ALMACENADO] Recibiendo archivo /home/utnso/Escritorio/temp/g1640062880 de un Worker
-
-[INFO] 16:40:14:822 FileSystem/(10335:10341): [ARCHIVO] El archivo g1640062880 fue copiado en File System
-[INFO] 16:42:02:364 FileSystem/(10335:10340): [CONEXION] El proceso YAMA se ha desconectado
-[INFO] 16:42:04:121 FileSystem/(10335:10340): [CONEXION] El proceso Yama se ha conectado
-[INFO] 16:42:21:569 FileSystem/(10335:10341): [ALMACENADO] Recibiendo archivo /home/utnso/Escritorio/temp/g1642131160 de un Worker
-
-[INFO] 16:42:21:668 FileSystem/(10335:10341): [ARCHIVO] El archivo g1642131160 fue copiado en File System
-[INFO] 16:44:56:37 FileSystem/(10335:10340): [CONEXION] El proceso YAMA se ha desconectado
-[INFO] 16:44:58:462 FileSystem/(10335:10340): [CONEXION] El proceso Yama se ha conectado
-[INFO] 16:45:14:423 FileSystem/(10335:10341): [ALMACENADO] Recibiendo archivo /home/utnso/Escritorio/temp/g16450736 de un Worker
-
-[INFO] 16:45:14:523 FileSystem/(10335:10341): [ARCHIVO] El archivo g16450736 fue copiado en File System
-[INFO] 16:47:11:699 FileSystem/(10335:10340): [CONEXION] El proceso YAMA se ha desconectado
-[INFO] 16:47:18:242 FileSystem/(10335:10340): [CONEXION] El proceso Yama se ha conectado
-[INFO] 16:47:35:74 FileSystem/(10335:10341): [ALMACENADO] Recibiendo archivo /home/utnso/Escritorio/temp/g1647266790 de un Worker
-
-[INFO] 16:47:35:179 FileSystem/(10335:10341): [ARCHIVO] El archivo g1647266790 fue copiado en File System
-[INFO] 16:49:44:798 FileSystem/(10335:10340): [CONEXION] El proceso YAMA se ha desconectado
-[INFO] 16:49:47:241 FileSystem/(10335:10340): [CONEXION] El proceso Yama se ha conectado
-[INFO] 16:50:04:355 FileSystem/(10335:10341): [ALMACENADO] Recibiendo archivo /home/utnso/Escritorio/temp/g1649564990 de un Worker
-
-[INFO] 16:50:04:447 FileSystem/(10335:10341): [ARCHIVO] El archivo g1649564990 fue copiado en File System
-[INFO] 16:51:31:76 FileSystem/(10335:10340): [CONEXION] El proceso YAMA se ha desconectado
-[INFO] 16:51:33:78 FileSystem/(10335:10340): [CONEXION] El proceso Yama se ha conectado
-[INFO] 16:51:53:132 FileSystem/(10335:10341): [ALMACENADO] Recibiendo archivo /home/utnso/Escritorio/temp/g1651444050 de un Worker
-
-[INFO] 16:51:53:235 FileSystem/(10335:10341): [ARCHIVO] El archivo g1651444050 fue copiado en File System
-[INFO] 16:52:49:662 FileSystem/(10335:10340): [CONEXION] El proceso YAMA se ha desconectado
-[INFO] 16:52:53:143 FileSystem/(10335:10340): [CONEXION] El proceso Yama se ha conectado
-[INFO] 16:53:11:753 FileSystem/(10335:10341): [ALMACENADO] Recibiendo archivo /home/utnso/Escritorio/temp/g1653044140 de un Worker
-
-[INFO] 16:53:11:842 FileSystem/(10335:10341): [ARCHIVO] El archivo g1653044140 fue copiado en File System
-[INFO] 16:54:41:683 FileSystem/(10335:10340): [CONEXION] El proceso YAMA se ha desconectado
-[INFO] 16:54:44:51 FileSystem/(10335:10340): [CONEXION] El proceso Yama se ha conectado
-[INFO] 16:55:00:925 FileSystem/(10335:10341): [ALMACENADO] Recibiendo archivo /home/utnso/Escritorio/temp/g1654535460 de un Worker
-
-[INFO] 16:55:01:24 FileSystem/(10335:10341): [ARCHIVO] El archivo g1654535460 fue copiado en File System
-[INFO] 16:56:25:339 FileSystem/(10335:10340): [CONEXION] El proceso YAMA se ha desconectado
-[INFO] 16:56:27:195 FileSystem/(10335:10340): [CONEXION] El proceso Yama se ha conectado
-[INFO] 16:56:43:707 FileSystem/(10335:10341): [ALMACENADO] Recibiendo archivo /home/utnso/Escritorio/temp/g1656352240 de un Worker
-
-[INFO] 16:56:43:811 FileSystem/(10335:10341): [ARCHIVO] El archivo g1656352240 fue copiado en File System
-[INFO] 16:58:47:896 FileSystem/(10335:10340): [CONEXION] El proceso YAMA se ha desconectado
-[INFO] 16:58:53:499 FileSystem/(10335:10340): [CONEXION] El proceso Yama se ha conectado
-[INFO] 16:59:09:923 FileSystem/(10335:10341): [ALMACENADO] Recibiendo archivo /home/utnso/Escritorio/temp/g1659019010 de un Worker
-
-[INFO] 16:59:10:29 FileSystem/(10335:10341): [ARCHIVO] El archivo g1659019010 fue copiado en File System
-[INFO] 17:06:36:572 FileSystem/(10335:10340): [CONEXION] El proceso YAMA se ha desconectado
-[INFO] 17:06:38:486 FileSystem/(10335:10340): [CONEXION] El proceso Yama se ha conectado
-[INFO] 17:06:56:882 FileSystem/(10335:10341): [ALMACENADO] Recibiendo archivo /home/utnso/Escritorio/temp/g17065014 de un Worker
-
-[INFO] 17:06:56:977 FileSystem/(10335:10341): [ARCHIVO] El archivo g17065014 fue copiado en File System
-[INFO] 17:07:35:899 FileSystem/(10335:10340): [CONEXION] El proceso YAMA se ha desconectado
-[INFO] 17:07:37:731 FileSystem/(10335:10340): [CONEXION] El proceso Yama se ha conectado
-[INFO] 17:07:54:380 FileSystem/(10335:10341): [ALMACENADO] Recibiendo archivo /home/utnso/Escritorio/temp/g1707465430 de un Worker
-
-[INFO] 17:07:54:475 FileSystem/(10335:10341): [ARCHIVO] El archivo g1707465430 fue copiado en File System
+[INFO] 23:42:38:266 FileSystem/(7651:7656): [ARCHIVO] El archivo g2342377580 fue copiado en File System
