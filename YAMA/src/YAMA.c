@@ -47,6 +47,7 @@ void yamaIniciar() {
 		imprimirMensaje(archivoLog, ROJO"[ERROR] El File System no se encuentra estable"BLANCO);
 		exit(EXIT_FAILURE);
 	}
+	mensajeDestruir(mensaje);
 	workers=list_create();
 	tablaEstados=list_create();
 	tablaUsados=list_create();
@@ -345,7 +346,7 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 	free(dato);
 
 	list_add_all(tablaEstados,tablaEstadosJob); //mutex
-	list_destroy(tablaEstadosJob);
+	list_destroy(tablaEstadosJob);list_destroy(bloques);list_destroy(byteses);
 	log_info(archivoLog,"[] planificacion terminada");
 }
 
@@ -453,6 +454,8 @@ void actualizarTablaEstados(Mensaje* mensaje,Socket masterid){
 			memcpy(dato+i,reducLocal.pathTemporal,TEMPSIZE);
 			mensajeEnviar(reducLocal.masterid,REDUCLOCAL,dato,tamanio);
 			moverAUsados((func)mismoNodoJob);
+			free(dato);
+			list_destroy(nodos);
 			list_addM(tablaEstados,&reducLocal,sizeof(Entrada));//mutex
 		}
 	break;case REDUCLOCAL:
@@ -484,6 +487,8 @@ void actualizarTablaEstados(Mensaje* mensaje,Socket masterid){
 
 			mensajeEnviar(reducGlobal.masterid,REDUCGLOBAL,dato,tamanio);
 			moverAUsados((func)mismoJob);
+			free(dato);
+			list_destroy(nodosReducidos);
 			list_addM(tablaEstados,&reducGlobal,sizeof(Entrada));//mutex
 		}
 	break;case REDUCGLOBAL:{
@@ -599,7 +604,7 @@ void darPathTemporal(char** ret,char pre){
 	else
 		agregado='0';
 	(*ret)[10]=agregado;
-	free(anterior);
+	free(anterior);free(temp);
 	anterior=anteriorTemp;
 }
 void moverAUsados(bool(*cond)(void*)){
