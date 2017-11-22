@@ -77,13 +77,8 @@
 #define NORMAL 1
 #define INESTABLE 0
 #define ESTABLE 1
-
-#define FRACASO -800
 #define EXITO 1
-#define DESCONEXION 0
-#define ABORTAR 301
-#define ALMACENADO 306
-#define CIERRE 307
+#define FRACASO -800
 
 #define ACEPTAR_DATANODE 100
 #define LEER_BLOQUE 101
@@ -95,6 +90,9 @@
 #define ACEPTAR_YAMA 200
 #define ENVIAR_BLOQUES 201
 #define ERROR_ARCHIVO 202
+
+#define ALMACENADO_FINAL 306
+#define ALMACENAR_BLOQUE 307
 
 //--------------------------------------- Estructuras -------------------------------------
 
@@ -273,7 +271,15 @@ void yamaControlar();
 BloqueYama* yamaConvertirArchivo(Archivo* archivo, Entero idMaster);
 void yamaEnviarBloques(Puntero path);
 
+//--------------------------------------- Funciones de Worker -------------------------------------
+
 void workerListener();
+int workerAlmacenarArchivo(Archivo* archivo, Socket socketWorker);
+int workerAlmacenarBloque(Archivo* archivo, Mensaje* mensaje, Entero* numeroBloque, int* resultado);
+void workerAvisarAlmacenado(int resultado, Socket unSocket);
+Comando workerConfigurarComando(AlmacenadoFinal* almacenado);
+AlmacenadoFinal* workerRecibirDatos(Mensaje* mensaje);
+void workerDestruirDatos(AlmacenadoFinal* almacenado);
 
 //--------------------------------------- Funciones de Consola -------------------------------------
 

@@ -350,7 +350,6 @@ BloqueYama yamaConvertirBloque(BloqueWorker* bloque) {
 
 //--------------------------------------- Funciones de Worker -------------------------------------
 
-
 void workerDestruirDatos(AlmacenadoFinal* almacenado) {
 	memoriaLiberar(almacenado->pathLocal);
 	memoriaLiberar(almacenado->pathYama);
@@ -391,6 +390,58 @@ void workerAvisarAlmacenado(int resultado, Socket unSocket) {
 		mensajeEnviar(unSocket, FRACASO, NULL, 0);
 }
 
+int workerAlmacenarBloque(Archivo* archivo, Mensaje* mensaje, Entero* numeroBloque, int* resultado) {
+	*resultado = bloqueGuardar(archivo, mensaje->datos, mensaje->header.tamanio, *numeroBloque);
+	if(*resultado == ERROR)
+		return DESACTIVADO;
+	*numeroBloque = *numeroBloque + 1;
+	return ACTIVADO;
+}
+
+int workerAlmacenarArchivo(Archivo* archivo, Socket socketWorker) {
+	int estado = ACTIVADO;
+	int resultado = OK;
+	Entero numeroBloque = 0;
+	while(estado) {
+		Mensaje* mensaje = mensajeRecibir(socketWorker);
+		switch(mensaje->header.operacion) {
+			case DESCONEXION: estado = DESACTIVADO; socketCerrar(socketWorker); resultado = ERROR; break;
+			case ALMACENAR_BLOQUE: estado = workerAlmacenarBloque(archivo, mensaje, &numeroBloque, &resultado); break;
+			case ALMACENADO_FINAL: estado = DESACTIVADO;
+		}
+	}
+	return resultado;
+}
+
+int workerAlmacenadoFinal(String pathYama, Socket socketWorker) {
+	if(!rutaValida(pathYama)) {
+		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
+		return ERROR;
+	}
+	String rutaDecente = stringTomarDesdePosicion(pathYama, MAX_PREFIJO);
+	Directorio* directorio = directorioBuscar(rutaDecente);
+	if(directorio == NULL) {
+		imprimirMensaje(archivoLog, "[ERROR] El directorio ingresado no existe");
+		return ERROR;
+	}
+	String nombreArchivo = rutaObtenerUltimoNombre(pathYama);
+	if(archivoExiste(directorio->identificador, nombreArchivo)) {
+		imprimirMensaje(archivoLog, "[ERROR] Un archivo con ese nombre ya existe en el directorio destino");
+		memoriaLiberar(nombreArchivo);
+		return ERROR;
+	}
+	if(directorioExiste(directorio->identificador, nombreArchivo)) {
+		imprimirMensaje(archivoLog, "[ERROR] Un directorio con ese nombre ya existe en el directorio destino");
+		memoriaLiberar(nombreArchivo);
+		return ERROR;
+	}
+	Archivo* archivo = archivoCrear(nombreArchivo, directorio->identificador, ARCHIVO_TEXTO);
+	memoriaLiberar(nombreArchivo);
+	int estado = workerAlmacenarArchivo(archivo, socketWorker);
+	archivoControlar(archivo, estado);
+	return estado;
+}
+
 void workerListener() {
 	hiloDetach(pthread_self());
 	while(estadoControlIgualA(ACTIVADO)) {
@@ -398,12 +449,8 @@ void workerListener() {
 		Mensaje* mensaje = mensajeRecibir(socketWorker);
 		AlmacenadoFinal* almacenado = workerRecibirDatos(mensaje);
 		mensajeDestruir(mensaje);
-		Comando comando = workerConfigurarComando(almacenado);
-		imprimirMensaje1(archivoLog, "[ALMACENADO] Recibiendo archivo %s de un Worker\n", comando.argumentos[2]);
-		int resultado = archivoAlmacenar(&comando);
+		int resultado = workerAlmacenadoFinal(pathYama,socketWorker);
 		workerDestruirDatos(almacenado);
-		memoriaLiberar(comando.argumentos[2]);
-		//memoriaLiberar(comando.argumentos[3]);
 		workerAvisarAlmacenado(resultado, socketWorker);
 	}
 }
@@ -1812,7 +1859,7 @@ int archivoAlmacenarBinario(Archivo* archivo, File file) {
 	return estado;
 }
 
-int almacenadoFinalEnviarArchivo(Archivo* archivo, File file) {
+int archivoAlmacenarTexto(Archivo* archivo, File file) {
 	String buffer = stringCrear(BLOQUE+1);
 	String datos = stringCrear(BLOQUE);
 	int bytesDisponibles = BLOQUE;
@@ -1894,7 +1941,7 @@ int archivoAlmacenar(Comando* comando) {
 	if(stringIguales(comando->argumentos[1], FLAG_B))
 		estado = archivoAlmacenarBinario(archivo, file);
 	else
-		estado = almacenadoFinalEnviarArchivo(archivo, file);
+		estado = archivoAlmacenarTexto(archivo, file);
 	fileCerrar(file);
 	archivoControlar(archivo, estado);
 	return estado;
