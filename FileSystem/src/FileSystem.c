@@ -795,7 +795,6 @@ void comandoCrearDirectorio(Comando* comando) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return;
 	}
-	rutaYamaDecente(comando, 1);
 	if(stringIguales(comando->argumentos[1], RAIZ)) {
 		imprimirMensaje(archivoLog,"[ERROR] El directorio raiz no puede ser creado");
 		return;
@@ -833,7 +832,6 @@ void comandoRenombrar(Comando* comando) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return;
 	}
-	rutaYamaDecente(comando, 1);
 	if(stringIguales(comando->argumentos[1], RAIZ)) {
 		imprimirMensaje(archivoLog,"[ERROR] El directorio raiz no puede ser renombrado");
 		return;
@@ -878,12 +876,10 @@ void comandoMover(Comando* comando) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return;
 	}
-	rutaYamaDecente(comando, 1);
 	if(!rutaValida(comando->argumentos[2])) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return;
 	}
-	rutaYamaDecente(comando, 2);
 	if(stringIguales(comando->argumentos[1], RAIZ)) {
 		imprimirMensaje(archivoLog,"[ERROR] El directorio raiz no puede ser movido");
 		return;
@@ -956,7 +952,6 @@ void comandoEliminarCopia(Comando* comando) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return;
 	}
-	rutaYamaDecente(comando, 2);
 	if(stringIguales(comando->argumentos[2], RAIZ)) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return;
@@ -1004,7 +999,6 @@ void comandoEliminarDirectorio(Comando* comando) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return;
 	}
-	rutaYamaDecente(comando, 2);
 	if(stringIguales(ruta, RAIZ)) {
 		imprimirMensaje(archivoLog,"[ERROR] El directorio raiz no puede ser eliminado");
 		return;
@@ -1027,7 +1021,6 @@ void comandoEliminarArchivo(Comando* comando) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return;
 	}
-	rutaYamaDecente(comando, 1);
 	if(stringIguales(comando->argumentos[1], RAIZ)) {
 		imprimirMensaje(archivoLog,"[ERROR] El directorio raiz no puede ser eliminado");
 		return;
@@ -1054,7 +1047,6 @@ void comandoListarDirectorio(Comando* comando) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return;
 	}
-	rutaYamaDecente(comando, 1);
 	if(stringIguales(comando->argumentos[1], RAIZ)) {
 		directorioMostrarArchivos(0);
 		return;
@@ -1071,7 +1063,6 @@ void comandoInformacionArchivo(Comando* comando) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return;
 	}
-	rutaYamaDecente(comando, 1);
 	if(stringIguales(comando->argumentos[1], RAIZ)) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return;
@@ -1110,7 +1101,6 @@ void comandoCopiarBloque(Comando* comando) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return;
 	}
-	rutaYamaDecente(comando, 1);
 	if(stringIguales(comando->argumentos[1], RAIZ)) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return;
@@ -1183,7 +1173,7 @@ void comandoCopiarArchivoAYamaFS(Comando* comando) {
 }
 
 int comandoCopiarArchivoDeYamaFS(Comando* comando) {
-	if(!rutaValida(comando->argumentos[1])) {
+	if(!rutaValida(comando->argumentos[1])  || !rutaTienePrefijoYama(comando->argumentos[1])) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return ERROR;
 	}
@@ -1884,7 +1874,7 @@ int archivoAlmacenar(Comando* comando) {
 		imprimirMensaje(archivoLog, "[ERROR] Flag invalido");
 		return ERROR;
 	}
-	if(!rutaValida(comando->argumentos[3])) {
+	if(rutaValidaAlmacenar(comando->argumentos[3])) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return ERROR;
 	}
@@ -1934,7 +1924,6 @@ int archivoLeer(Comando* comando) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return ERROR;
 	}
-	rutaYamaDecente(comando, 1);
 	Archivo* archivo = archivoBuscarPorRuta(comando->argumentos[1]);
 	if(archivo == NULL) {
 		imprimirMensaje(archivoLog,"[ERROR] El archivo no existe");
@@ -2771,8 +2760,7 @@ bool rutaTienePrefijoYama(String ruta) {
 
 bool rutaValida(String ruta) {
 	return 	rutaTieneAlMenosUnaBarra(ruta) &&
-			rutaBarrasEstanSeparadas(ruta) &&
-			rutaTienePrefijoYama(ruta);
+			rutaBarrasEstanSeparadas(ruta);
 }
 
 String* rutaSeparar(String ruta) {
@@ -2826,6 +2814,21 @@ void rutaYamaDecente(Comando* comando, int indice) {
 	String rutaDecente = stringTomarDesdePosicion(comando->argumentos[indice], MAX_PREFIJO);
 	memoriaLiberar(comando->argumentos[indice]);
 	comando->argumentos[indice] = rutaDecente;
+}
+
+bool rutaValidaAlmacenar(String ruta) {
+	return !rutaValida(ruta)
+			|| !rutaTienePrefijoYama(ruta)
+			|| !rutaParaArchivo(ruta);
+}
+
+bool rutaParaArchivo(String ruta) {
+	int indice;
+	for(indice=0; ruta[indice] != FIN; indice++);
+	if(indice == 0)
+		return false;
+	else
+	return ruta[indice-1] != BARRA;
 }
 
 //--------------------------------------- Funciones de Estado ------------------------------------
@@ -2976,15 +2979,18 @@ void semaforosDestruir() {
 
 
 //todo algoritmo en leer
-//todo volver ruta a la normalidad, solo usarlo en cpto y cpfrom
-//todo comando repetir directorio
-//todo ver si paso un directorio en cpfrom
-//todo ver listar directorio y archivos
+//todo nodo no se desconecta sin format
+
 //todo si el nodo esta desconectado DEJARLO FIJO
 //todo el databin cambia en tiempo de ejecucion NO
-//todo nodo no se desconecta sin format
+
+
+//todo ver listar directorio y archivos
+
 //todo barra mas alla del bloque
+
 //todo ver leaks
+//todo comando repetir directorio
 //todo sacar o dejar colores
 //todo deploy
 

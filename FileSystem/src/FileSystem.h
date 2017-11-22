@@ -511,6 +511,8 @@ void rutaBufferDestruir();
 void rutaYamaDecente(Comando* comando, int indice);
 bool rutaTienePrefijoYama(String ruta);
 String rutaObtenerDirectorio(String pathArchivo);
+bool rutaValidaAlmacenar(String ruta);
+bool rutaParaArchivo(String ruta);
 
 //--------------------------------------- Funciones de Estado ------------------------------------
 
