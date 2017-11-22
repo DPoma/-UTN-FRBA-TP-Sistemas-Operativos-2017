@@ -79,7 +79,12 @@ typedef struct {
 	char nombreResultado[12];
 } ReduccionGlobal;
 
-typedef void* BloqueWorker;
+typedef struct __attribute__((packed)) {
+	Entero bytesUtilizados;
+	char datos[BLOQUE];
+} BloqueWorker;
+
+typedef void* Bloque;
 
 //--------------------------------------- Globales -------------------------------------
 
@@ -181,5 +186,5 @@ void dataBinAbrir();
 void configuracionCalcularBloques();
 Puntero dataBinMapear();
 void dataBinConfigurar();
-BloqueWorker bloqueBuscar(Entero numeroBloque);
-BloqueWorker getBloque(Entero numeroBloque);
+Bloque bloqueBuscar(Entero numeroBloque);
+Bloque getBloque(Entero numeroBloque);

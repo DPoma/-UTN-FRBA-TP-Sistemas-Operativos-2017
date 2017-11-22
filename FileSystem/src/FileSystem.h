@@ -134,7 +134,7 @@ typedef struct {
 	int bytesUtilizados;
 	int numeroBloque;
 	Lista listaCopias;
-} BloqueWorker;
+} Bloque;
 
 typedef struct {
 	char nombreNodo[MAX_NODO];
@@ -172,6 +172,7 @@ typedef struct __attribute__((packed)) {
 	Entero bytesUtilizados;
 } BloqueYama;
 
+
 typedef struct {
 	Entero pathLocalSize;
 	String pathLocal;
@@ -207,7 +208,7 @@ String rutaArchivos;
 String rutaNodos;
 String rutaBuffer;
 Nodo* nodoBuffer;
-BloqueWorker* bloqueBuffer;
+Bloque* bloqueBuffer;
 Archivo* archivoBuffer;
 Mutex* mutexTarea;
 Mutex* mutexRuta;
@@ -467,20 +468,20 @@ Direccion nodoObtenerDireccion(String nombreNodo);
 
 //--------------------------------------- Funciones de Bloque -------------------------------------
 
-BloqueWorker* bloqueCrear(int bytes, int numero);
-void bloqueDestruir(BloqueWorker* bloque);
-int copiaGuardarEnNodo(BloqueWorker* bloque, Nodo* nodo);
-int copiaEnviarANodo(BloqueWorker* bloque, Nodo* nodo, String buffer);
-int bloqueEnviarCopias(BloqueWorker* bloque, String buffer);
+Bloque* bloqueCrear(int bytes, int numero);
+void bloqueDestruir(Bloque* bloque);
+int copiaGuardarEnNodo(Bloque* bloque, Nodo* nodo);
+int copiaEnviarANodo(Bloque* bloque, Nodo* nodo, String buffer);
+int bloqueEnviarCopias(Bloque* bloque, String buffer);
 int bloqueGuardar(Archivo* archivo, String buffer, size_t bytes, Entero numeroBloque);
-bool bloqueOrdenarPorNumero(BloqueWorker* unBloque, BloqueWorker* otroBloque);
+bool bloqueOrdenarPorNumero(Bloque* unBloque, Bloque* otroBloque);
 void bloqueCopiar(Nodo* nodo, Puntero datos, int* estado);
 void bloqueLeer(Nodo* nodo, Puntero datos, int* estado);
 void bloqueCopiarArchivo(Nodo* nodo, Puntero datos, int* estado);
-bool bloqueDisponible(BloqueWorker* bloque);
+bool bloqueDisponible(Bloque* bloque);
 BloqueNodo* bloqueNodoCrear(Entero numeroBloque, String buffer, int tamanioUtilizado);
-BloqueYama yamaConvertirBloque(BloqueWorker* bloque);
-bool bloqueEstaEnNodo(BloqueWorker* bloque, Nodo* nodo);
+BloqueYama yamaConvertirBloque(Bloque* bloque);
+bool bloqueEstaEnNodo(Bloque* bloque, Nodo* nodo);
 
 //--------------------------------------- Funciones de Copia -------------------------------------
 

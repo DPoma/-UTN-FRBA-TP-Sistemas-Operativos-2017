@@ -564,32 +564,38 @@ int almacenadoFinalEnviarArchivo(String pathArchivo, String pathYama, Socket soc
 	mensajeEnviar(socketFileSystem, ALMACENAR_PATH, pathYama, stringLongitud(pathYama)+1);
 	File file = fileAbrir(pathArchivo, LECTURA);
 	String buffer = stringCrear(BLOQUE+1);
-	String datos = stringCrear(BLOQUE);
+	BloqueWorker* bloqueWorker = memoriaAlocar(sizeof(BloqueWorker));
+	memset(bloqueWorker->datos, '\0', BLOQUE);
 	int bytesDisponibles = BLOQUE;
 	int indiceDatos = 0;
 	int estado = OK;
 	while(fgets(buffer, BLOQUE, file) != NULL) {
 		int tamanioBuffer = stringLongitud(buffer);
 		if(tamanioBuffer <= bytesDisponibles) {
-			memcpy(datos+indiceDatos, buffer, tamanioBuffer);
+			memcpy(bloqueWorker->datos+indiceDatos, buffer, tamanioBuffer);
 			bytesDisponibles -= tamanioBuffer;
 			indiceDatos += tamanioBuffer;
 		}
 		else {
-			mensajeEnviar(socketFileSystem, ALMACENAR_BLOQUE, datos, BLOQUE-bytesDisponibles);
-			memoriaLiberar(datos);
-			datos = stringCrear(BLOQUE);
+			bloqueWorker->bytesUtilizados = BLOQUE-bytesDisponibles;
+			mensajeEnviar(socketFileSystem, ALMACENAR_BLOQUE, bloqueWorker, sizeof(BloqueWorker));
+			memoriaLiberar(bloqueWorker);
+			bloqueWorker = memoriaAlocar(sizeof(BloqueWorker));
+			memset(bloqueWorker->datos, '\0', BLOQUE);
 			bytesDisponibles = BLOQUE;
 			indiceDatos = 0;
-			memcpy(datos+indiceDatos, buffer, tamanioBuffer);
+			memcpy(bloqueWorker->datos+indiceDatos, buffer, tamanioBuffer);
 			bytesDisponibles -= tamanioBuffer;
 			indiceDatos += tamanioBuffer;
 		}
 	}
-	if(estado != ERROR && !stringEstaVacio(buffer))
-		mensajeEnviar(socketFileSystem, ALMACENAR_BLOQUE, datos, BLOQUE-bytesDisponibles);
+	if(estado != ERROR && !stringEstaVacio(buffer)) {
+		bloqueWorker->bytesUtilizados = BLOQUE-bytesDisponibles;
+		printf("ENVIO %d\n", bloqueWorker->bytesUtilizados);
+		mensajeEnviar(socketFileSystem, ALMACENAR_BLOQUE, bloqueWorker, sizeof(BloqueWorker));
+	}
 	mensajeEnviar(socketFileSystem, ALMACENADO_FINAL, NULL, NULO);
-	memoriaLiberar(datos);
+	memoriaLiberar(bloqueWorker);
 	memoriaLiberar(buffer);
 	fileCerrar(file);
 	return estado;
@@ -664,13 +670,13 @@ Puntero dataBinMapear() {
 
 //--------------------------------------- Funciones de Bloque -------------------------------------
 
-BloqueWorker bloqueBuscar(Entero numeroBloque) {
-	BloqueWorker bloque = punteroDataBin + (BLOQUE * numeroBloque);
+Bloque bloqueBuscar(Entero numeroBloque) {
+	Bloque bloque = punteroDataBin + (BLOQUE * numeroBloque);
 	return bloque;
 }
 
-BloqueWorker getBloque(Entero numeroBloque) {
-	BloqueWorker bloque = bloqueBuscar(numeroBloque);
+Bloque getBloque(Entero numeroBloque) {
+	Bloque bloque = bloqueBuscar(numeroBloque);
 	imprimirMensaje1(archivoLog, "[DATABIN] El bloque N°%i fue leido", (int*)numeroBloque);
 	return bloque;
 }
