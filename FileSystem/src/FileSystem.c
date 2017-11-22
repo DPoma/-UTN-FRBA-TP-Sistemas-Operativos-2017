@@ -298,7 +298,6 @@ void yamaFinalizar(int* estado) {
 void yamaEnviarBloques(Puntero datos) {
 	int idMaster = *(Entero*)datos;
 	String rutaDecente = stringTomarDesdePosicion(datos+sizeof(Entero), MAX_PREFIJO);
-	//todo por que toma un tamaño fijo aca? no deberia ser el tamaño del mensaje - INTSIZE?
 	Archivo* archivo = archivoBuscarPorRuta(rutaDecente);
 	memoriaLiberar(rutaDecente);
 	if(archivo == NULL) {
@@ -1813,7 +1812,7 @@ int archivoAlmacenarBinario(Archivo* archivo, File file) {
 	return estado;
 }
 
-int archivoAlmacenarTexto(Archivo* archivo, File file) {
+int almacenadoFinalEnviarArchivo(Archivo* archivo, File file) {
 	String buffer = stringCrear(BLOQUE+1);
 	String datos = stringCrear(BLOQUE);
 	int bytesDisponibles = BLOQUE;
@@ -1895,7 +1894,7 @@ int archivoAlmacenar(Comando* comando) {
 	if(stringIguales(comando->argumentos[1], FLAG_B))
 		estado = archivoAlmacenarBinario(archivo, file);
 	else
-		estado = archivoAlmacenarTexto(archivo, file);
+		estado = almacenadoFinalEnviarArchivo(archivo, file);
 	fileCerrar(file);
 	archivoControlar(archivo, estado);
 	return estado;
@@ -2905,7 +2904,16 @@ void semaforosDestruir() {
 	memoriaLiberar(mutexEstado);
 }
 
-//TODO el databin cambia en tiempo de ejecucion
-//TODO el bitmap esta bien con 1 y 0 o binario
+//todo almacenado final (IMP)
+//todo si el nodo esta desconectado (dejar el ip y puerto?) (IMP)
+//todo arreglar para que el fs tome el nombre del archivo (IMP)
+//todo persistir bitmap (IMP)
 
+//TODO el databin cambia en tiempo de ejecucion
 //TODO nodo no se desconecta sin format
+//todo barra mas alla del bloqeu
+//todo dejar rollback o calcular bloque
+//todo ver recv en reduc global
+//todo ver send en reduc global
+//todo probar definitivamente
+//todo deploy

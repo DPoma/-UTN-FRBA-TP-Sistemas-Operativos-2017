@@ -166,10 +166,12 @@ void reduccionGlobalEnviarLinea(Mensaje* mensaje, Socket socketWorker);
 //--------------------------------------- Funciones de Almacenado Final -------------------------------------
 
 void almacenadoFinal(Mensaje* mensaje, Socket socketMaster);
-int almacenadoFinalEnviar(Puntero buffer, int tamanio, String pathYama);
+int almacenadoFinalEnviar(String pathArchivo, String pathYama);
+int almacenadoFinalEnviarArchivo(String pathArchivo, Socket socketFileSystem);
 void almacenadoFinalFinalizar(int resultado, Socket unSocket);
 void almacenadoFinalFracaso(Socket unSocket);
 void almacenadoFinalExito(Socket unSocket);
+Socket almacenadoFinalConectarAFileSystem();
 
 //--------------------------------------- Funciones de DataBin -------------------------------------
 

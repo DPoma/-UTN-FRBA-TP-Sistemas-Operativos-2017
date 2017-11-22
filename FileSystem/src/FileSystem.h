@@ -410,7 +410,7 @@ bool archivoListaTodosDisponibles();
 void archivoListaDestruir();
 void archivoGuardar(Archivo* archivo);
 void archivoControlar(Archivo* archivo, int estado);
-int archivoAlmacenarTexto(Archivo* archivo, File file);
+int almacenadoFinalEnviarArchivo(Archivo* archivo, File file);
 int archivoAlmacenarBinario(Archivo* archivo, File file);
 
 //--------------------------------------- Funciones de Nodo -------------------------------------
