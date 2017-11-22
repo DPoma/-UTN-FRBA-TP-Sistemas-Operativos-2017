@@ -389,26 +389,33 @@ int workerAlmacenadoFinal(String pathYama, Socket socketWorker) {
 		return ERROR;
 	}
 	String rutaDecente = stringTomarDesdePosicion(pathYama, MAX_PREFIJO);
-	/*todo
-	Directorio* directorio = directorioBuscar(rutaDecente);
+	String rutaDirectorio = rutaObtenerDirectorio(rutaDecente);
+	Directorio* directorio = directorioBuscar(rutaDirectorio);
 	if(directorio == NULL) {
+		memoriaLiberar(rutaDirectorio);
+		memoriaLiberar(rutaDecente);
 		imprimirMensaje(archivoLog, "[ERROR] El directorio ingresado no existe");
 		return ERROR;
 	}
-	*/
 	String nombreArchivo = rutaObtenerUltimoNombre(rutaDecente);
-	if(archivoExiste(0, nombreArchivo)) {
+	if(archivoExiste(directorio->identificador, nombreArchivo)) {
 		imprimirMensaje(archivoLog, "[ERROR] Un archivo con ese nombre ya existe en el directorio destino");
 		memoriaLiberar(nombreArchivo);
+		memoriaLiberar(rutaDirectorio);
+		memoriaLiberar(rutaDecente);
 		return ERROR;
 	}
-	if(directorioExiste(0, nombreArchivo)) {
+	if(directorioExiste(directorio->identificador, nombreArchivo)) {
 		imprimirMensaje(archivoLog, "[ERROR] Un directorio con ese nombre ya existe en el directorio destino");
 		memoriaLiberar(nombreArchivo);
+		memoriaLiberar(rutaDirectorio);
+		memoriaLiberar(rutaDecente);
 		return ERROR;
 	}
-	Archivo* archivo = archivoCrear(nombreArchivo, 0, ARCHIVO_TEXTO);
+	Archivo* archivo = archivoCrear(nombreArchivo, directorio->identificador, ARCHIVO_TEXTO);
 	memoriaLiberar(nombreArchivo);
+	memoriaLiberar(rutaDirectorio);
+	memoriaLiberar(rutaDecente);
 	int estado = workerAlmacenarArchivo(archivo, socketWorker);
 	archivoControlar(archivo, estado);
 	return estado;
@@ -420,9 +427,9 @@ void workerListener() {
 		Socket socketWorker = socketAceptar(listenerWorker, ID_WORKER);
 		Mensaje* mensaje = mensajeRecibir(socketWorker);
 		String pathYama = string_from_format("%s", mensaje->datos);
-		printf("%s\n", pathYama);
 		mensajeDestruir(mensaje);
 		int resultado = workerAlmacenadoFinal(pathYama,socketWorker);
+		memoriaLiberar(pathYama);
 		workerAvisarAlmacenado(resultado, socketWorker);
 	}
 }
@@ -1876,39 +1883,36 @@ int archivoAlmacenar(Comando* comando) {
 		return ERROR;
 	}
 	rutaYamaDecente(comando, 3);
-	Directorio* directorio = directorioBuscar(comando->argumentos[3]);
+	String rutaDirectorio = rutaObtenerDirectorio(comando->argumentos[3]);
+	Directorio* directorio = directorioBuscar(rutaDirectorio);
 	if(directorio == NULL) {
+		memoriaLiberar(rutaDirectorio);
 		imprimirMensaje(archivoLog, "[ERROR] El directorio ingresado no existe");
 		return ERROR;
 	}
-	String nombreArchivo = rutaObtenerUltimoNombre(comando->argumentos[2]);
+	String nombreArchivo = rutaObtenerUltimoNombre(comando->argumentos[3]);
 	if(archivoExiste(directorio->identificador, nombreArchivo)) {
 		imprimirMensaje(archivoLog, "[ERROR] Un archivo con ese nombre ya existe en el directorio destino");
 		memoriaLiberar(nombreArchivo);
+		memoriaLiberar(rutaDirectorio);
 		return ERROR;
 	}
 	if(directorioExiste(directorio->identificador, nombreArchivo)) {
 		imprimirMensaje(archivoLog, "[ERROR] Un directorio con ese nombre ya existe en el directorio destino");
 		memoriaLiberar(nombreArchivo);
+		memoriaLiberar(rutaDirectorio);
 		return ERROR;
 	}
 	File file = fileAbrir(comando->argumentos[2], LECTURA);
 	if(file == NULL) {
 		imprimirMensaje(archivoLog, "[ERROR] El archivo a copiar no existe");
 		memoriaLiberar(nombreArchivo);
-		return ERROR;
-	}
-	//TODO ver
-	int cantidadBloques = nodoBloquesLibresTotales();
-	int bloquesArchivo = archivoCantidadBloques(comando->argumentos[2]) * MAX_COPIAS;
-	if(cantidadBloques < bloquesArchivo) {
-		imprimirMensaje(archivoLog, "[ERROR] No hay suficientes bloques libres");
-		fileCerrar(file);
-		memoriaLiberar(nombreArchivo);
+		memoriaLiberar(rutaDirectorio);
 		return ERROR;
 	}
 	Archivo* archivo = archivoCrear(nombreArchivo, directorio->identificador, comando->argumentos[1]);
 	memoriaLiberar(nombreArchivo);
+	memoriaLiberar(rutaDirectorio);
 	int estado = NULO;
 	if(stringIguales(comando->argumentos[1], FLAG_B))
 		estado = archivoAlmacenarBinario(archivo, file);
@@ -2759,6 +2763,21 @@ String* rutaSeparar(String ruta) {
 	return directorios;
 }
 
+String rutaObtenerDirectorio(String pathArchivo) {
+	int indice;
+	int ultimaBarra;
+	for(indice=0; pathArchivo[indice] != FIN; indice++)
+		if(pathArchivo[indice] == BARRA)
+			ultimaBarra = indice;
+	String pathDirectorio;
+	if(ultimaBarra != NULO)
+		pathDirectorio = stringTomarDesdeInicio(pathArchivo, ultimaBarra);
+	else
+		pathDirectorio = string_from_format("/");
+	return pathDirectorio;
+}
+
+
 void rutaBufferCrear() {
 	mutexBloquear(mutexRuta);
 	rutaBuffer = stringCrear(MAX_STRING);
@@ -2923,15 +2942,13 @@ void semaforosDestruir() {
 	memoriaLiberar(mutexEstado);
 }
 
-//todo almacenado final (IMP)
-//todo si el nodo esta desconectado (dejar el ip y puerto?) (IMP)
 //todo arreglar para que el fs tome el nombre del archivo (IMP)
+//todo si el nodo esta desconectado (dejar el ip y puerto?) (IMP)
 //todo persistir bitmap (IMP)
 
 //TODO el databin cambia en tiempo de ejecucion
 //TODO nodo no se desconecta sin format
 //todo barra mas alla del bloqeu
-//todo dejar rollback o calcular bloque
 //todo ver recv en reduc global
 //todo ver send en reduc global
 //todo probar definitivamente
