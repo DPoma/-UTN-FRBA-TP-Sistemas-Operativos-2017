@@ -60,6 +60,7 @@ void masterRealizarOperacion(Socket unSocket) {
 		case CONEXION_WORKER: reduccionGlobalEnviarLinea(mensaje, unSocket); break;
 	}
 	mensajeDestruir(mensaje);
+	workerFinalizar();
 	exit(EXIT_SUCCESS);
 }
 
@@ -71,12 +72,9 @@ void masterDesconectar(Socket unSocket) {
 void workerDesconectar(Socket unSocket) {
 	socketCerrar(unSocket);
 	imprimirMensaje(archivoLog, "[CONEXION] Un Worker se desconecto");
-	//exit(EXIT_SUCCESS);
 }
 
 void workerFinalizar() {
-	sleep(5);
-	imprimirMensaje(archivoLog, "[EJECUCION] Proceso Worker finalizado");
 	memoriaLiberar(configuracion);
 	archivoLogDestruir(archivoLog);
 }
@@ -147,10 +145,10 @@ void configuracionCalcularBloques() {
 
 void configuracionSenial(int senial) {
 	puts("");
-	if(getpid() != pidPadre)
-		exit(EXIT_SUCCESS);
-	estadoWorker = DESACTIVADO;
-	shutdown(listenerMaster, SHUT_RDWR);
+	if(getpid() == pidPadre) {
+		estadoWorker = DESACTIVADO;
+		shutdown(listenerMaster, SHUT_RDWR);
+	}
 }
 
 //--------------------------------------- Funciones de Transformacion -------------------------------------
@@ -162,9 +160,9 @@ void transformacion(Mensaje* mensaje, Socket unSocket) {
 	while(estado) {
 		Mensaje* otroMensaje = mensajeRecibir(unSocket);
 		switch(otroMensaje->header.operacion) {
-		case DESCONEXION: masterDesconectar(unSocket); break;
-		case TRANSFORMACION: transformacionProcesarBloque(transformacion, otroMensaje, unSocket); break;
-		case EXITO: transformacionFinalizar(unSocket, &estado); break;
+			case DESCONEXION: masterDesconectar(unSocket); break;
+			case TRANSFORMACION: transformacionProcesarBloque(transformacion, mensaje, otroMensaje, unSocket); break;
+			case EXITO: transformacionFinalizar(unSocket, &estado); break;
 		}
 		mensajeDestruir(otroMensaje);
 	}
@@ -226,14 +224,16 @@ void transformacionObtenerBloque(Transformacion* transformacion, Puntero datos) 
 	memcpy(transformacion->nombreResultado, datos+sizeof(Entero)*2, 12);
 }
 
-void transformacionProcesarBloque(Transformacion* transformacion, Mensaje* mensaje, Socket unSocket) {
-	transformacionObtenerBloque(transformacion, mensaje->datos);
+void transformacionProcesarBloque(Transformacion* transformacion, Mensaje* mensaje, Mensaje* otroMensaje, Socket unSocket) {
+	transformacionObtenerBloque(transformacion, otroMensaje->datos);
 	pid_t pid = fork();
 	if(pid == 0) {
 		int resultado = transformacionEjecutar(transformacion);
 		transformacionFinalizarBloque(resultado, unSocket, transformacion->numeroBloque);
 		transformacionDestruir(transformacion);
 		mensajeDestruir(mensaje);
+		mensajeDestruir(otroMensaje);
+		workerFinalizar();
 		exit(EXIT_SUCCESS);
 	}
 }
@@ -401,6 +401,7 @@ void reduccionGlobalDestruir(ReduccionGlobal* reduccion) {
 	memoriaLiberar(reduccion->nodos);
 	memoriaLiberar(reduccion->script);
 	memoriaLiberar(reduccion->pathApareo);
+	memoriaLiberar(reduccion);
 }
 
 void reduccionGlobalExito(Socket unSocket) {
@@ -495,13 +496,18 @@ void reduccionGlobalEsperarPedido(Socket socketWorker, Puntero buffer) {
 
 void reduccionGlobalEnviarLinea(Mensaje* mensaje, Socket socketWorker) {
 	imprimirMensaje(archivoLog, "[CONEXION] Proceso Worker conectado existosamente");
-	String pathReduccionLocal = string_from_format("%s%s", RUTA_TEMP, (String)mensaje->datos);
-	File archivoReduccionLocal = fileAbrir(pathReduccionLocal, LECTURA);
+	String pathReduccionGlobal= string_from_format("%s%s", RUTA_TEMP, (String)mensaje->datos);
+	File archivoReduccionGlobal = fileAbrir(pathReduccionGlobal, LECTURA);
+	memoriaLiberar(pathReduccionGlobal);
 	String buffer = stringCrear(BLOQUE);
-	while(fgets(buffer, BLOQUE, archivoReduccionLocal))
+	while(fgets(buffer, BLOQUE, archivoReduccionGlobal)) {
 		reduccionGlobalEsperarPedido(socketWorker, buffer);
+		memoriaLiberar(buffer);
+		buffer = stringCrear(BLOQUE);
+	}
+	memoriaLiberar(buffer);
 	reduccionGlobalEsperarPedido(socketWorker, NULL);
-	fileCerrar(archivoReduccionLocal);
+	fileCerrar(archivoReduccionGlobal);
 }
 
 String reduccionGlobalCopiarLinea(Mensaje* mensaje) {

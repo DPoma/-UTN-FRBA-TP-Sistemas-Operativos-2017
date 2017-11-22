@@ -173,7 +173,7 @@ void mensajeRevisarConexion(Mensaje* mensaje, Socket socketReceptor, int bytes) 
 
 void mensajeObtenerDatos(Mensaje* mensaje, Socket socketReceptor) {
 	int tamanioDato = mensaje->header.tamanio;
-	if(tamanioDato==0){
+	if(tamanioDato==0) {
 		mensaje->datos=NULL;
 		return;
 	}
