@@ -350,38 +350,6 @@ BloqueYama yamaConvertirBloque(BloqueWorker* bloque) {
 
 //--------------------------------------- Funciones de Worker -------------------------------------
 
-void workerDestruirDatos(AlmacenadoFinal* almacenado) {
-	memoriaLiberar(almacenado->pathLocal);
-	memoriaLiberar(almacenado->pathYama);
-	memoriaLiberar(almacenado);
-}
-
-AlmacenadoFinal* workerRecibirDatos(Mensaje* mensaje) {
-	AlmacenadoFinal* almacenado = memoriaAlocar(sizeof(AlmacenadoFinal));
-	memcpy(&almacenado->pathLocalSize, mensaje->datos, sizeof(Entero));
-	printf("%d\n", almacenado->pathLocalSize);
-	almacenado->pathLocal = stringCrear(almacenado->pathLocalSize);
-	memcpy(almacenado->pathLocal, mensaje->datos+sizeof(Entero), almacenado->pathLocalSize);
-	printf("%s\n", almacenado->pathLocal);
-	memcpy(&almacenado->pathYamaSize, mensaje->datos+sizeof(Entero)+almacenado->pathLocalSize, sizeof(Entero));
-	printf("%d\n", almacenado->pathYamaSize);
-	almacenado->pathYama = stringCrear(almacenado->pathYamaSize);
-	memcpy(almacenado->pathYama, mensaje->datos+sizeof(Entero)*2+almacenado->pathLocalSize, almacenado->pathYamaSize);
-	printf("%s\n", almacenado->pathYama);
-	return almacenado;
-}
-
-Comando workerConfigurarComando(AlmacenadoFinal* almacenado) {
-	Comando comando;
-	comando.argumentos[0] = CPFROM;
-	comando.argumentos[1] = FLAG_T;
-	comando.argumentos[2] = memoriaAlocar(100);
-	stringCopiar(comando.argumentos[2],almacenado->pathLocal);
-	//comando.argumentos[3] = almacenado->pathYama;
-	comando.argumentos[3] = memoriaAlocar(40);
-	stringCopiar(comando.argumentos[3], "yamafs:/");
-	return comando;
-}
 
 void workerAvisarAlmacenado(int resultado, Socket unSocket) {
 	if(resultado != ERROR)
@@ -419,23 +387,25 @@ int workerAlmacenadoFinal(String pathYama, Socket socketWorker) {
 		return ERROR;
 	}
 	String rutaDecente = stringTomarDesdePosicion(pathYama, MAX_PREFIJO);
+	/*todo
 	Directorio* directorio = directorioBuscar(rutaDecente);
 	if(directorio == NULL) {
 		imprimirMensaje(archivoLog, "[ERROR] El directorio ingresado no existe");
 		return ERROR;
 	}
-	String nombreArchivo = rutaObtenerUltimoNombre(pathYama);
-	if(archivoExiste(directorio->identificador, nombreArchivo)) {
+	*/
+	String nombreArchivo = rutaObtenerUltimoNombre(rutaDecente);
+	if(archivoExiste(0, nombreArchivo)) {
 		imprimirMensaje(archivoLog, "[ERROR] Un archivo con ese nombre ya existe en el directorio destino");
 		memoriaLiberar(nombreArchivo);
 		return ERROR;
 	}
-	if(directorioExiste(directorio->identificador, nombreArchivo)) {
+	if(directorioExiste(0, nombreArchivo)) {
 		imprimirMensaje(archivoLog, "[ERROR] Un directorio con ese nombre ya existe en el directorio destino");
 		memoriaLiberar(nombreArchivo);
 		return ERROR;
 	}
-	Archivo* archivo = archivoCrear(nombreArchivo, directorio->identificador, ARCHIVO_TEXTO);
+	Archivo* archivo = archivoCrear(nombreArchivo, 0, ARCHIVO_TEXTO);
 	memoriaLiberar(nombreArchivo);
 	int estado = workerAlmacenarArchivo(archivo, socketWorker);
 	archivoControlar(archivo, estado);
@@ -447,10 +417,10 @@ void workerListener() {
 	while(estadoControlIgualA(ACTIVADO)) {
 		Socket socketWorker = socketAceptar(listenerWorker, ID_WORKER);
 		Mensaje* mensaje = mensajeRecibir(socketWorker);
-		AlmacenadoFinal* almacenado = workerRecibirDatos(mensaje);
+		String pathYama = string_from_format("%s", mensaje->datos);
+		printf("%s\n", pathYama);
 		mensajeDestruir(mensaje);
 		int resultado = workerAlmacenadoFinal(pathYama,socketWorker);
-		workerDestruirDatos(almacenado);
 		workerAvisarAlmacenado(resultado, socketWorker);
 	}
 }

@@ -93,6 +93,7 @@
 
 #define ALMACENADO_FINAL 306
 #define ALMACENAR_BLOQUE 307
+#define ALMACENAR_PATH 308
 
 //--------------------------------------- Estructuras -------------------------------------
 

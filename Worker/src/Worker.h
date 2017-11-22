@@ -18,10 +18,11 @@
 #define REDUCCION_GLOBAL 305
 #define ALMACENADO_FINAL 306
 #define ALMACENAR_BLOQUE 307
-#define ENVIAR_TEMPORAL 308
-#define ENVIAR_LINEA 309
-#define PEDIR_LINEA 310
-#define CONEXION_WORKER 311
+#define ALMACENAR_PATH 308
+#define ENVIAR_TEMPORAL 309
+#define ENVIAR_LINEA 310
+#define PEDIR_LINEA 311
+#define CONEXION_WORKER 312
 
 #define INTSIZE sizeof(Entero)
 #define TEMPSIZE 12
@@ -167,8 +168,8 @@ void reduccionGlobalEnviarLinea(Mensaje* mensaje, Socket socketWorker);
 //--------------------------------------- Funciones de Almacenado Final -------------------------------------
 
 void almacenadoFinal(Mensaje* mensaje, Socket socketMaster);
-int almacenadoFinalEnviar(String pathArchivo, String pathYama);
-int almacenadoFinalEnviarArchivo(String pathArchivo, Socket socketFileSystem);
+int almacenadoFinalEjecutar(String pathArchivo, String pathYama);
+int almacenadoFinalEnviarArchivo(String pathArchivo, String pathYama, Socket socketFileSystem);
 void almacenadoFinalFinalizar(int resultado, Socket unSocket);
 void almacenadoFinalFracaso(Socket unSocket);
 void almacenadoFinalExito(Socket unSocket);

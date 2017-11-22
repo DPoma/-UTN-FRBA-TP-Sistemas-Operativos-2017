@@ -545,14 +545,14 @@ String reduccionGlobalCrearScript(ReduccionGlobal* reduccion) {
 
 void almacenadoFinal(Mensaje* mensaje, Socket socketMaster) {
 	String pathArchivo = string_from_format("%s%s", RUTA_TEMP, mensaje->datos);
-	int resultado = almacenadoFinalEnviar(pathArchivo, mensaje->datos+TEMPSIZE);
+	int resultado = almacenadoFinalEjecutar(pathArchivo, mensaje->datos+TEMPSIZE);
 	memoriaLiberar(pathArchivo);
 	almacenadoFinalFinalizar(resultado, socketMaster);
 }
 
-int almacenadoFinalEnviar(String pathArchivo, String pathYama) {
+int almacenadoFinalEjecutar(String pathArchivo, String pathYama) {
 	Socket socketFileSystem =  almacenadoFinalConectarAFileSystem();
-	int resultado = almacenadoFinalEnviarArchivo(pathArchivo, socketFileSystem);
+	int resultado = almacenadoFinalEnviarArchivo(pathArchivo, pathYama, socketFileSystem);
 	imprimirMensaje1(archivoLog,"[ALMACENADO FINAL] Guardando archivo en %s", pathYama);
 	Mensaje* mensaje = mensajeRecibir(socketFileSystem);
 	resultado = mensaje->header.operacion;
@@ -560,14 +560,8 @@ int almacenadoFinalEnviar(String pathArchivo, String pathYama) {
 	return resultado;
 }
 
-Socket almacenadoFinalConectarAFileSystem() {
-	imprimirMensaje2(archivoLog,"[ALMACENADO FINAL] Estableciendo conexion con el File System (IP:%s | Puerto:%s)", configuracion->ipFileSystem, configuracion->puertoFileSystemWorker);
-	Socket socketFileSystem =socketCrearCliente(configuracion->ipFileSystem, configuracion->puertoFileSystemWorker, ID_WORKER);
-	imprimirMensaje(archivoLog,"[ALMACENADO FINAL] Conexion existosa con el File System");
-	return socketFileSystem;
-}
-
-int almacenadoFinalEnviarArchivo(String pathArchivo, Socket socketFileSystem) {
+int almacenadoFinalEnviarArchivo(String pathArchivo, String pathYama, Socket socketFileSystem) {
+	mensajeEnviar(socketFileSystem, ALMACENAR_PATH, pathYama, stringLongitud(pathYama)+1);
 	File file = fileAbrir(pathArchivo, LECTURA);
 	String buffer = stringCrear(BLOQUE+1);
 	String datos = stringCrear(BLOQUE);
@@ -582,7 +576,7 @@ int almacenadoFinalEnviarArchivo(String pathArchivo, Socket socketFileSystem) {
 			indiceDatos += tamanioBuffer;
 		}
 		else {
-			mensajeEnviar(socketFileSystem, ALMACENADO_FINAL, datos, BLOQUE-bytesDisponibles);
+			mensajeEnviar(socketFileSystem, ALMACENAR_BLOQUE, datos, BLOQUE-bytesDisponibles);
 			memoriaLiberar(datos);
 			datos = stringCrear(BLOQUE);
 			bytesDisponibles = BLOQUE;
@@ -593,12 +587,21 @@ int almacenadoFinalEnviarArchivo(String pathArchivo, Socket socketFileSystem) {
 		}
 	}
 	if(estado != ERROR && !stringEstaVacio(buffer))
-		mensajeEnviar(socketFileSystem, ALMACENADO_FINAL, datos, BLOQUE-bytesDisponibles);
+		mensajeEnviar(socketFileSystem, ALMACENAR_BLOQUE, datos, BLOQUE-bytesDisponibles);
+	mensajeEnviar(socketFileSystem, ALMACENADO_FINAL, NULL, NULO);
 	memoriaLiberar(datos);
 	memoriaLiberar(buffer);
 	fileCerrar(file);
 	return estado;
 }
+
+Socket almacenadoFinalConectarAFileSystem() {
+	imprimirMensaje2(archivoLog,"[ALMACENADO FINAL] Estableciendo conexion con el File System (IP:%s | Puerto:%s)", configuracion->ipFileSystem, configuracion->puertoFileSystemWorker);
+	Socket socketFileSystem =socketCrearCliente(configuracion->ipFileSystem, configuracion->puertoFileSystemWorker, ID_WORKER);
+	imprimirMensaje(archivoLog,"[ALMACENADO FINAL] Conexion existosa con el File System");
+	return socketFileSystem;
+}
+
 
 void almacenadoFinalFinalizar(int resultado, Socket unSocket) {
 	if(resultado == EXITO)
