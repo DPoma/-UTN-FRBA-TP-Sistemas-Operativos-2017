@@ -2393,13 +2393,6 @@ Nodo* nodoActualizar(Nodo* nodoTemporal) {
 	Nodo* nodo = nodoBuscarPorNombre(nodoTemporal->nombre);
 	nodoEstado(nodo, ACTIVADO);
 	nodoSocket(nodo, nodoTemporal->socket);
-	if(nodo->bloquesTotales != nodoTemporal->bloquesTotales) {
-		bitmapDestruir(nodo->bitmap);
-		nodo->bitmap = bitmapCrear(nodoTemporal->bloquesTotales);
-		nodo->bloquesTotales = nodoTemporal->bloquesTotales;
-		nodo->bloquesLibres = nodoTemporal->bloquesTotales;
-		imprimirMensaje1(archivoLog, AMARILLO"[AVISO] El %s cambio su archivo de datos, formatee para guardar los cambios"BLANCO, nodo->nombre);
-	}
 	stringCopiar(nodo->ip, nodoTemporal->ip);
 	stringCopiar(nodo->puerto, nodoTemporal->puerto);
 	nodoDestruir(nodoTemporal);
@@ -2475,8 +2468,8 @@ void nodoRecuperarPersistencia() {
 		nodoEstado(nodo, DESACTIVADO);
 		nodoMensaje(nodo, DESACTIVADO);
 		nodoSocket(nodo, ERROR);
-		stringCopiar(nodo->ip, "NULL");
-		stringCopiar(nodo->puerto, "NULL");
+		stringCopiar(nodo->ip, "-");
+		stringCopiar(nodo->puerto, "-");
 		nodo->tareasRealizadas = 0;
 		memoriaLiberar(lineaNombre);
 		memoriaLiberar(lineaTotales);
@@ -2980,20 +2973,12 @@ void semaforosDestruir() {
 
 //todo algoritmo en leer
 //todo nodo no se desconecta sin format
-
-//todo si el nodo esta desconectado DEJARLO FIJO
-//todo el databin cambia en tiempo de ejecucion NO
-
-
-//todo ver listar directorio y archivos
-
 //todo barra mas alla del bloque
-
 //todo ver leaks
-//todo comando repetir directorio
 //todo sacar o dejar colores
 //todo deploy
-
+//todo comando repetir directorio
+//todo ver listar directorio y archivos
 
 //todo ver recv en reduc global
 //todo ver send en reduc global
