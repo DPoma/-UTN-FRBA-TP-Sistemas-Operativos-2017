@@ -160,7 +160,7 @@ void transformacion(Mensaje* mensaje, Socket unSocket) {
 	while(estado) {
 		Mensaje* otroMensaje = mensajeRecibir(unSocket);
 		switch(otroMensaje->header.operacion) {
-			case DESCONEXION: masterDesconectar(unSocket); break;
+			case DESCONEXION: masterDesconectar(unSocket); estado = DESACTIVADO; break;
 			case TRANSFORMACION: transformacionProcesarBloque(transformacion, mensaje, otroMensaje, unSocket); break;
 			case EXITO: transformacionFinalizar(unSocket, &estado); break;
 		}
@@ -185,7 +185,7 @@ int transformacionEjecutar(Transformacion* transformacion) {
 }
 
 void transformacionFinalizar(Socket unSocket, int* estado) {
-	imprimirMensaje(archivoLog, "[CONEXION] Master #(id master?): Etapa de transformacion finalizada");
+	imprimirMensaje(archivoLog, "[CONEXION] Master #(id?): Etapa de transformacion finalizada");
 	socketCerrar(unSocket);
 	*estado = DESACTIVADO;
 }
@@ -198,12 +198,12 @@ void transformacionFinalizarBloque(int resultado, Socket unSocket, Entero numero
 }
 
 void transformacionExito(Entero numeroBloque, Socket unSocket) {
-	imprimirMensaje1(archivoLog,"[TRANSFORMACION] Master #(id master?): Operacion finalizada en bloque N°%d", (int*)numeroBloque);
+	imprimirMensaje1(archivoLog,"[TRANSFORMACION] Master #(id?): Operacion finalizada en bloque N°%d", (int*)numeroBloque);
 	mensajeEnviar(unSocket, EXITO, &numeroBloque, sizeof(Entero));
 }
 
 void transformacionFracaso(Entero numeroBloque, Socket unSocket) {
-	imprimirMensaje1(archivoLog,"[TRANSFORMACION] Master #(id master?): Operacion fallida en bloque N°%d", (int*)numeroBloque);
+	imprimirMensaje1(archivoLog,"[TRANSFORMACION] Master #(id?): Operacion fallida en bloque N°%d", (int*)numeroBloque);
 	mensajeEnviar(unSocket, FRACASO, &numeroBloque, sizeof(Entero));
 }
 
@@ -312,14 +312,12 @@ void reduccionLocalDestruir(ReduccionLocal* reduccion) {
 }
 
 void reduccionLocalExito(Socket unSocket) {
-	//TODO ver en caso que master este desconectado
-	imprimirMensaje(archivoLog,"[REDUCCION LOCAL] Master #(id master?): Operacion finalizada");
+	imprimirMensaje(archivoLog,"[REDUCCION LOCAL] Master #(id?): Operacion finalizada");
 	mensajeEnviar(unSocket, EXITO, NULL, 0);
 }
 
 void reduccionLocalFracaso(Socket unSocket) {
-	//TODO ver en caso que master este desconectado
-	imprimirMensaje(archivoLog,"[REDUCCION LOCAL] Master #(id master?): Operacion fallida");
+	imprimirMensaje(archivoLog,"[REDUCCION LOCAL] Master #(id?): Operacion fallida");
 	mensajeEnviar(unSocket, FRACASO, NULL, 0);
 }
 
@@ -405,12 +403,12 @@ void reduccionGlobalDestruir(ReduccionGlobal* reduccion) {
 }
 
 void reduccionGlobalExito(Socket unSocket) {
-	imprimirMensaje(archivoLog,"[REDUCCION GLOBAL] Master #(id master?): Operacion finalizada");
+	imprimirMensaje(archivoLog,"[REDUCCION GLOBAL] Master #(id?): Operacion finalizada");
 	mensajeEnviar(unSocket, EXITO, NULL, 0);
 }
 
 void reduccionGlobalFracaso(Socket unSocket) {
-	imprimirMensaje(archivoLog,"[REDUCCION GLOBAL] Master #(id master?): Operacion fallida");
+	imprimirMensaje(archivoLog,"[REDUCCION GLOBAL] Master #(id?): Operacion fallida");
 	mensajeEnviar(unSocket, FRACASO, NULL, 0);
 }
 
@@ -565,7 +563,6 @@ int almacenadoFinalEnviar(Puntero buffer, int tamanio, String pathYama) {
 	imprimirMensaje2(archivoLog,"[ALMACENADO FINAL] Estableciendo conexion con el File System (IP:%s | Puerto:%s)", configuracion->ipFileSystem, configuracion->puertoFileSystemWorker);
 	Socket socketFileSystem =socketCrearCliente(configuracion->ipFileSystem, configuracion->puertoFileSystemWorker, ID_WORKER);
 	imprimirMensaje(archivoLog,"[ALMACENADO FINAL] Conexion existosa con el File System");
-	//todo validar error si socket muere
 	mensajeEnviar(socketFileSystem, ALMACENADO_FINAL, buffer, tamanio);
 	imprimirMensaje1(archivoLog,"[ALMACENADO FINAL] Guardando %s", pathYama);
 	Mensaje* mensaje = mensajeRecibir(socketFileSystem);
@@ -582,12 +579,12 @@ void almacenadoFinalFinalizar(int resultado, Socket unSocket) {
 }
 
 void almacenadoFinalExito(Socket unSocket) {
-	imprimirMensaje(archivoLog,"[ALMACENADO FINAL] Master #(id master?): Operacion finalizada");
+	imprimirMensaje(archivoLog,"[ALMACENADO FINAL] Master #(id?): Operacion finalizada");
 	mensajeEnviar(unSocket, EXITO, NULL, 0);
 }
 
 void almacenadoFinalFracaso(Socket unSocket) {
-	imprimirMensaje(archivoLog,"[ALMACENADO FINAL] Master #(id master?): Operacion fallida");
+	imprimirMensaje(archivoLog,"[ALMACENADO FINAL] Master #(id?): Operacion fallida");
 	mensajeEnviar(unSocket, FRACASO, NULL, 0);
 }
 
@@ -645,3 +642,5 @@ BloqueWorker getBloque(Entero numeroBloque) {
 	imprimirMensaje1(archivoLog, "[DATABIN] El bloque N°%i fue leido", (int*)numeroBloque);
 	return bloque;
 }
+
+//TODO validar si los mensaje enviar, cuando muere el socket

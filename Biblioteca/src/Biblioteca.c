@@ -68,13 +68,15 @@ void socketSelect(int cantidadSockets, ListaSockets* listaSockets) {
 
 int socketRecibir(Socket socketEmisor, Puntero buffer, int tamanioBuffer) {
 	int estado = recv(socketEmisor, buffer, tamanioBuffer, MSG_WAITALL);
-	socketError(estado, "recv");
+	if(estado == ERROR)
+		perror("recv");
 	return estado;
 }
 
 int socketEnviar(Socket socketReceptor, Puntero mensaje, int tamanioMensaje) {
 	int estado = send(socketReceptor, mensaje, tamanioMensaje, NULO);
-	socketError(estado, "send");
+	if(estado == ERROR)
+		perror("send");
 	return estado;
 }
 
