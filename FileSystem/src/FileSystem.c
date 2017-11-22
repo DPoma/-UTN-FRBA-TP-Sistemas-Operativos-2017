@@ -2440,12 +2440,23 @@ void nodoPersistirBitmap(Nodo* nodo) {
 	String ruta = string_from_format("%s/%s", rutaDirectorioBitmaps, nodo->nombre);
 	File archivo = fileAbrir(ruta, ESCRITURA);
 	memoriaLiberar(ruta);
+	printf("Tamanio bitmap %s = %d\n", nodo->nombre ,nodo->bitmap->size);
+	fwrite(nodo->bitmap->bitarray, sizeof(char), nodo->bitmap->size, archivo);
+	fileCerrar(archivo);
+}
+
+/*
+void nodoPersistirBitmap(Nodo* nodo) {
+	String ruta = string_from_format("%s/%s", rutaDirectorioBitmaps, nodo->nombre);
+	File archivo = fileAbrir(ruta, ESCRITURA);
+	memoriaLiberar(ruta);
 	int indice;
 	for(indice = 0; indice < nodo->bloquesTotales; indice++)
 		fprintf(archivo, "%i", bitmapBitOcupado(nodo->bitmap, indice));
 	fprintf(archivo, "\n");
 	fileCerrar(archivo);
 }
+*/
 
 void nodoRecuperarPersistencia() {
 	File file = fileAbrir(rutaArchivos, LECTURA);
@@ -2489,6 +2500,21 @@ void nodoRecuperarPersistenciaBitmap(Nodo* nodo) {
 		return;
 	}
 	nodo->bitmap = bitmapCrear(nodo->bloquesTotales);
+	printf("Tamanio bitmap recuperado %s = %d\n", nodo->nombre ,nodo->bitmap->size);
+	fread(nodo->bitmap->bitarray, sizeof(char), nodo->bitmap->size, file);
+	memoriaLiberar(ruta);
+	fileCerrar(file);
+}
+/*
+void nodoRecuperarPersistenciaBitmap(Nodo* nodo) {
+	String ruta = string_from_format("%s/%s", rutaDirectorioBitmaps, nodo->nombre);
+	File file = fileAbrir(ruta, LECTURA);
+	if(file == NULL) {
+		imprimirMensaje1(archivoLog, "[ERROR] No se encontro el archivo %s", rutaNodos);
+		memoriaLiberar(ruta);
+		return;
+	}
+	nodo->bitmap = bitmapCrear(nodo->bloquesTotales);
 	int indice;
 	for(indice = 0; indice < nodo->bloquesTotales; indice++) {
 		int bit = fgetc(file);
@@ -2498,7 +2524,7 @@ void nodoRecuperarPersistenciaBitmap(Nodo* nodo) {
 	memoriaLiberar(ruta);
 	fileCerrar(file);
 }
-
+*/
 //--------------------------------------- Funciones de Bloque-------------------------------------
 
 Bloque* bloqueCrear(int bytes, int numero) {
@@ -2942,14 +2968,17 @@ void semaforosDestruir() {
 	memoriaLiberar(mutexEstado);
 }
 
-//todo arreglar para que el fs tome el nombre del archivo (IMP)
-//todo si el nodo esta desconectado (dejar el ip y puerto?) (IMP)
-//todo persistir bitmap (IMP)
-
-//TODO el databin cambia en tiempo de ejecucion
-//TODO nodo no se desconecta sin format
-//todo barra mas alla del bloqeu
-//todo ver recv en reduc global
-//todo ver send en reduc global
+//todo persistir bitmap (IMP) (2 hs)
 //todo probar definitivamente
 //todo deploy
+
+//todo ver recv en reduc global
+//todo ver send en reduc global
+//todo ver desconexion entre workers
+
+//todo detalles
+
+//todo si el nodo esta desconectado DEJARLO FIJO
+//todo el databin cambia en tiempo de ejecucion NO
+//todo nodo no se desconecta sin format
+//todo barra mas alla del bloqeu

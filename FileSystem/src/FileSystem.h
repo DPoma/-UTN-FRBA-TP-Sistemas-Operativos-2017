@@ -150,7 +150,7 @@ typedef struct {
 	int tareasRealizadas;
 	int bloquesLibres;
 	int bloquesTotales;
-	Bitmap* bitmap;
+	Bitmap bitmap;
 	Socket socket;
 } Nodo;
 
@@ -196,7 +196,7 @@ Hilo hiloYama;
 Lista listaDirectorios;
 Lista listaArchivos;
 Lista listaNodos;
-Bitmap* bitmapDirectorios;
+Bitmap bitmapDirectorios;
 Socket listenerYama;
 Socket listenerDataNode;
 Socket listenerWorker;

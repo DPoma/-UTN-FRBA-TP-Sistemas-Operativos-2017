@@ -80,7 +80,7 @@ typedef pthread_t Hilo;
 typedef t_list* Lista;
 typedef FILE* File;
 typedef int32_t Entero;
-typedef t_bitarray* BitArray;
+typedef t_bitarray* Bitmap;
 
 //--------------------------------------- Estructuras -------------------------------------
 
@@ -107,10 +107,6 @@ typedef struct {
 	String ip;
 } Conexion;
 
-typedef struct {
-	String bits;
-	BitArray controlBits;
-} Bitmap;
 
 //--------------------------------------- Funciones para Socket -------------------------------------
 
@@ -284,4 +280,10 @@ void configuracionSenialHijo(int senial);
 void imprimirMensajeProceso(String mensaje);
 void fileLimpiar(String ruta);
 int bitmapCalculo(int cantidadBloques);
-void bitmapDestruir(Bitmap* bitmap);
+Bitmap bitmapCrear(int cantidadBloques);
+void bitmapLiberarBit(Bitmap bitmap, int posicion);
+void bitmapDestruir(Bitmap bitmap);
+void bitmapOcuparBit(Bitmap bitmap, int posicion);
+bool bitmapBitOcupado(Bitmap bitmap, int posicion);
+size_t bitmapCantidadBits(Bitmap bitmap);
+int bitmapCalculo(int cantidadBloques);

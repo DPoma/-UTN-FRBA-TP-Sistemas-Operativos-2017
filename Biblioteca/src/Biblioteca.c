@@ -781,37 +781,34 @@ void fileLimpiar(String ruta) {
 
 //--------------------------------------- Funciones de Bitmap -------------------------------------
 
-Bitmap* bitmapCrear(int cantidadBloques) {
+Bitmap bitmapCrear(int cantidadBloques) {
 	int tamanioBytes = bitmapCalculo(cantidadBloques);
-	Bitmap* bitmap = malloc(sizeof(Bitmap));
-	bitmap->bits = malloc(tamanioBytes);
-	bitmap->controlBits = bitarray_create_with_mode(bitmap->bits, tamanioBytes, LSB_FIRST);
-	int i;
-	for(i=0; i< tamanioBytes*8; i++)
-		bitarray_clean_bit(bitmap->controlBits, i);
+	char* bits = malloc(tamanioBytes);
+	Bitmap bitmap = bitarray_create_with_mode(bits, tamanioBytes, LSB_FIRST);
+	int indice;
+	for(indice = 0; indice < tamanioBytes*8; indice++)
+		bitarray_clean_bit(bitmap, indice);
 	return bitmap;
 }
 
-void bitmapDestruir(Bitmap* bitmap) {
-	bitarray_destroy(bitmap->controlBits);
-	memoriaLiberar(bitmap->bits);
-	memoriaLiberar(bitmap);
+void bitmapDestruir(Bitmap bitmap) {
+	bitarray_destroy(bitmap);
 }
 
-void bitmapLiberarBit(Bitmap* bitmap, int posicion) {
-	bitarray_clean_bit(bitmap->controlBits, posicion);
+void bitmapLiberarBit(Bitmap bitmap, int posicion) {
+	bitarray_clean_bit(bitmap, posicion);
 }
 
-void bitmapOcuparBit(Bitmap* bitmap, int posicion) {
-	bitarray_set_bit(bitmap->controlBits, posicion);
+void bitmapOcuparBit(Bitmap bitmap, int posicion) {
+	bitarray_set_bit(bitmap, posicion);
 }
 
-bool bitmapBitOcupado(Bitmap* bitmap, int posicion) {
-	return bitarray_test_bit(bitmap->controlBits, posicion);
+bool bitmapBitOcupado(Bitmap bitmap, int posicion) {
+	return bitarray_test_bit(bitmap, posicion);
 }
 
-size_t bitmapCantidadBits(Bitmap* bitmap) {
-	return bitarray_get_max_bit(bitmap->controlBits);
+size_t bitmapCantidadBits(Bitmap bitmap) {
+	return bitarray_get_max_bit(bitmap);
 }
 
 int bitmapCalculo(int cantidadBloques) {
