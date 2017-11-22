@@ -792,6 +792,7 @@ Bitmap bitmapCrear(int cantidadBloques) {
 }
 
 void bitmapDestruir(Bitmap bitmap) {
+	memoriaLiberar(bitmap->bitarray);
 	bitarray_destroy(bitmap);
 }
 
@@ -812,6 +813,5 @@ size_t bitmapCantidadBits(Bitmap bitmap) {
 }
 
 int bitmapCalculo(int cantidadBloques) {
-
 	return (int)ceil((double)cantidadBloques/(double)8);
 }

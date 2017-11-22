@@ -359,7 +359,6 @@ void workerAvisarAlmacenado(int resultado, Socket unSocket) {
 }
 
 int workerAlmacenarBloque(Archivo* archivo, Mensaje* mensaje, Entero* numeroBloque, int* resultado) {
-	printf("ME LLEGO %d\n", *(Entero*)mensaje->datos);
 	*resultado = bloqueGuardar(archivo, mensaje->datos+sizeof(Entero), *(Entero*)mensaje->datos, *numeroBloque);
 	if(*resultado == ERROR)
 		return DESACTIVADO;
@@ -424,14 +423,23 @@ int workerAlmacenadoFinal(String pathYama, Socket socketWorker) {
 void workerListener() {
 	hiloDetach(pthread_self());
 	while(estadoControlIgualA(ACTIVADO)) {
-		Socket socketWorker = socketAceptar(listenerWorker, ID_WORKER);
-		Mensaje* mensaje = mensajeRecibir(socketWorker);
-		String pathYama = string_from_format("%s", mensaje->datos);
-		mensajeDestruir(mensaje);
-		int resultado = workerAlmacenadoFinal(pathYama,socketWorker);
-		memoriaLiberar(pathYama);
-		workerAvisarAlmacenado(resultado, socketWorker);
+		Socket unSocket = socketAceptar(listenerWorker, ID_WORKER);
+		if(unSocket != ERROR) {
+			Socket* socketWorker = memoriaAlocar(sizeof(Socket));
+			*socketWorker = unSocket;
+			hiloCrear(&hiloWorker, (Puntero)workerAtender, socketWorker);
+		}
 	}
+}
+
+void workerAtender(Socket* socketWorker) {
+	Mensaje* mensaje = mensajeRecibir(*socketWorker);
+	String pathYama = string_from_format("%s", mensaje->datos);
+	mensajeDestruir(mensaje);
+	int resultado = workerAlmacenadoFinal(pathYama,*socketWorker);
+	memoriaLiberar(pathYama);
+	memoriaLiberar(socketWorker);
+	workerAvisarAlmacenado(resultado, *socketWorker);
 }
 
 //--------------------------------------- Funciones de Consola -------------------------------------
@@ -1088,10 +1096,7 @@ void comandoInformacionArchivo(Comando* comando) {
 	printf("[ARCHIVO] Bloques: %i\n", listaCantidadElementos(archivo->listaBloques));
 	for(indice = 0; indice < listaCantidadElementos(archivo->listaBloques); indice++) {
 		Bloque* bloque = listaObtenerElemento(archivo->listaBloques, indice);
-		if(archivoBinario(archivo))
-			printf("[ARCHIVO] Bloque %i: %i bytes\n", indice, BLOQUE);
-		else
-			printf("[ARCHIVO] Bloque %i: %i bytes\n", indice, bloque->bytesUtilizados);
+		printf("[ARCHIVO] Bloque %i: %i bytes\n", indice, bloque->bytesUtilizados);
 		int indiceCopia;
 		for(indiceCopia = 0; indiceCopia < listaCantidadElementos(bloque->listaCopias); indiceCopia++) {
 			Copia* copiaBloque = listaObtenerElemento(bloque->listaCopias, indiceCopia);
@@ -1354,6 +1359,7 @@ void comandoFinalizar() {
 	estadoControlDesactivar();
 	shutdown(listenerDataNode, SHUT_RDWR);
 	shutdown(listenerYama, SHUT_RDWR);
+	shutdown(listenerWorker, SHUT_RDWR);
 	socketCerrar(listenerYama);
 	socketCerrar(listenerWorker);
 	nodoDesconectarATodos();
@@ -1385,14 +1391,14 @@ void directorioMostrarArchivos(int identificadorPadre) {
 	for(indice=0; indice<directorioListaCantidad(); indice++) {
 		Directorio* directorio = directorioListaObtener(indice);
 		if(directorio->identificadorPadre == identificadorPadre) {
-			imprimirMensaje1(archivoLog, "[DIRECTORIO] %s (d)", directorio->nombre);
+			imprimirMensaje1(archivoLog, "[DIRECTORIO] (d) %s ", directorio->nombre);
 			flag = ACTIVADO;
 		}
 	}
 	for(indice=0; indice < archivoListaCantidad(); indice++) {
 		Archivo* archivo = archivoListaObtener(indice);
 		if(archivo->identificadorPadre == identificadorPadre) {
-			imprimirMensaje1(archivoLog, "[DIRECTORIO] %s (a)", archivo->nombre);
+			imprimirMensaje1(archivoLog, "[DIRECTORIO] (a) %s", archivo->nombre);
 			flag = ACTIVADO;
 		}
 	}
@@ -2199,9 +2205,9 @@ void nodoListaOrdenarPorActividad() {
 	mutexDesbloquear(mutexListaNodos);
 }
 
-void nodoListaOrdenarPorBloquesLibres() {
+void nodoListaOrdenarPorUtilizacion() {
 	mutexBloquear(mutexListaNodos);
-	listaOrdenar(listaNodos, (Puntero)nodoOrdenarPorBloquesLibres);
+	listaOrdenar(listaNodos, (Puntero)nodoOrdenarPorUtilizacion);
 	mutexDesbloquear(mutexListaNodos);
 }
 
@@ -2248,8 +2254,10 @@ int nodoBuscarBloqueLibre(Nodo* nodo) {
 			return ERROR;
 }
 
-bool nodoOrdenarPorBloquesLibres(Nodo* unNodo, Nodo* otroNodo) {
-	return unNodo->bloquesLibres > otroNodo->bloquesLibres;
+bool nodoOrdenarPorUtilizacion(Nodo* unNodo, Nodo* otroNodo) {
+	double porcentajeUnNodo = (double)(unNodo->bloquesTotales - unNodo->bloquesLibres) / (double)unNodo->bloquesTotales;
+	double porcentajeOtroNodo = (double)(otroNodo->bloquesTotales - otroNodo->bloquesLibres) / (double)otroNodo->bloquesTotales;
+	return porcentajeUnNodo < porcentajeOtroNodo;
 }
 
 bool nodoOrdenarPorActividad(Nodo* unNodo, Nodo* otroNodo) {
@@ -2440,7 +2448,6 @@ void nodoPersistirBitmap(Nodo* nodo) {
 	String ruta = string_from_format("%s/%s", rutaDirectorioBitmaps, nodo->nombre);
 	File archivo = fileAbrir(ruta, ESCRITURA);
 	memoriaLiberar(ruta);
-	printf("Tamanio bitmap %s = %d\n", nodo->nombre ,nodo->bitmap->size);
 	fwrite(nodo->bitmap->bitarray, sizeof(char), nodo->bitmap->size, archivo);
 	fileCerrar(archivo);
 }
@@ -2500,7 +2507,6 @@ void nodoRecuperarPersistenciaBitmap(Nodo* nodo) {
 		return;
 	}
 	nodo->bitmap = bitmapCrear(nodo->bloquesTotales);
-	printf("Tamanio bitmap recuperado %s = %d\n", nodo->nombre ,nodo->bitmap->size);
 	fread(nodo->bitmap->bitarray, sizeof(char), nodo->bitmap->size, file);
 	memoriaLiberar(ruta);
 	fileCerrar(file);
@@ -2544,7 +2550,7 @@ int bloqueEnviarCopias(Bloque* bloque, String buffer) {
 	int copiasEnviadas = 0;
 	int indice = 0;
 	mutexBloquear(mutexTarea);
-	nodoListaOrdenarPorBloquesLibres();
+	nodoListaOrdenarPorUtilizacion();
 	for(indice = 0; indice < nodoListaCantidad() && copiasEnviadas < MAX_COPIAS; indice++) {
 		Nodo* nodo = nodoListaObtener(indice);
 		if(nodoDisponible(nodo)) {
@@ -2968,17 +2974,23 @@ void semaforosDestruir() {
 	memoriaLiberar(mutexEstado);
 }
 
-//todo persistir bitmap (IMP) (2 hs)
-//todo probar definitivamente
+
+//todo algoritmo en leer
+//todo volver ruta a la normalidad, solo usarlo en cpto y cpfrom
+//todo comando repetir directorio
+//todo ver si paso un directorio en cpfrom
+//todo ver listar directorio y archivos
+//todo si el nodo esta desconectado DEJARLO FIJO
+//todo el databin cambia en tiempo de ejecucion NO
+//todo nodo no se desconecta sin format
+//todo barra mas alla del bloque
+//todo ver leaks
+//todo sacar o dejar colores
 //todo deploy
+
 
 //todo ver recv en reduc global
 //todo ver send en reduc global
 //todo ver desconexion entre workers
 
-//todo detalles
-
-//todo si el nodo esta desconectado DEJARLO FIJO
-//todo el databin cambia en tiempo de ejecucion NO
-//todo nodo no se desconecta sin format
-//todo barra mas alla del bloqeu
+//todo probar definitivamente

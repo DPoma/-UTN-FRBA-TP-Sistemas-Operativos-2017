@@ -173,11 +173,16 @@ int transformacionEjecutar(Transformacion* transformacion) {
 	String pathBloque = transformacionCrearBloque(transformacion);
 	String pathScript = transformacionCrearScript(transformacion);
 	String pathDestino = string_from_format("%s%s", RUTA_TEMP, transformacion->nombreResultado);
-	String comando = string_from_format("cat %s | sh %s | sort > %s", pathBloque, pathScript, pathDestino);
+	String comando = string_from_format("chmod 0777 %s", pathScript);
 	int resultado = system(comando);
+	memoriaLiberar(comando);
+	if(resultado != ERROR) {
+		comando = string_from_format("cat %s | sh %s | sort > %s", pathBloque, pathScript, pathDestino);
+		resultado = system(comando);
+		memoriaLiberar(comando);
+	}
 	fileLimpiar(pathBloque);
 	fileLimpiar(pathScript);
-	memoriaLiberar(comando);
 	memoriaLiberar(pathScript);
 	memoriaLiberar(pathDestino);
 	memoriaLiberar(pathBloque);
@@ -281,7 +286,7 @@ int reduccionLocalEjecutar(ReduccionLocal* reduccion, String temporales) {
 	String archivoApareado = string_from_format("%s%sApareo", RUTA_TEMP, reduccion->nombreResultado);
 	String archivoReduccion = string_from_format("%s%s", RUTA_TEMP, reduccion->nombreResultado);
 	String archivoScript = reduccionLocalCrearScript(reduccion);
-	String comando = string_from_format("chmod 0755 %s", archivoScript);
+	String comando = string_from_format("chmod 0777 %s", archivoScript);
 	int resultado = system(comando);
 	memoriaLiberar(comando);
 	if(resultado != ERROR) {
@@ -374,7 +379,7 @@ void reduccionGlobalAparearTemporales(ReduccionGlobal* reduccion) {
 int reduccionGlobalEjecutar(ReduccionGlobal* reduccion) {
 	String archivoScript = reduccionGlobalCrearScript(reduccion);
 	String archivoSalida = string_from_format("%s%s", RUTA_TEMP, reduccion->nombreResultado);
-	String comando = string_from_format("chmod 0755 %s", archivoScript);
+	String comando = string_from_format("chmod 0777 %s", archivoScript);
 	int resultado = system(comando);
 	memoriaLiberar(comando);
 	if(resultado != ERROR) {

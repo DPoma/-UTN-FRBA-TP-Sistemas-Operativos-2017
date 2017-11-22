@@ -282,6 +282,7 @@ void workerAvisarAlmacenado(int resultado, Socket unSocket);
 Comando workerConfigurarComando(AlmacenadoFinal* almacenado);
 AlmacenadoFinal* workerRecibirDatos(Mensaje* mensaje);
 void workerDestruirDatos(AlmacenadoFinal* almacenado);
+void workerAtender(Socket* socketWorker);
 
 //--------------------------------------- Funciones de Consola -------------------------------------
 
@@ -433,7 +434,7 @@ void nodoFormatear(Nodo* nodo);
 void nodoFormatearConectados();
 void nodoVerificarBloquesLibres(Nodo* nodo);
 bool nodoTieneBloquesLibres(Nodo* nodo);
-bool nodoOrdenarPorBloquesLibres(Nodo* unNodo, Nodo* otroNodo);
+bool nodoOrdenarPorUtilizacion(Nodo* unNodo, Nodo* otroNodo);
 int nodoBuscarBloqueLibre(Nodo* nodo);
 Nodo* nodoBuscarPorNombre(String nombre);
 void nodoRecuperarPersistenciaBitmap(Nodo* nodo);
