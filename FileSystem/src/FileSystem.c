@@ -2987,7 +2987,6 @@ void semaforosDestruir() {
 
 
 //todo barra mas alla del bloque
-//todo deploy
 
 //todo ver leaks
 //todo sacar o dejar colores

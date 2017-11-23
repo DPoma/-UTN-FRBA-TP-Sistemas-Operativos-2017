@@ -1,0 +1,28 @@
+echo "Tirando Magia"
+cd ../
+echo "Instalando Commons"
+git clone https://github.com/sisoputnfrba/so-commons-library
+cd so-commons-library
+make install
+cd ../
+echo "Compilando Procesos"
+cd tp-2017-2c-El-legado-del-Esqui/FileSystem/Debug
+rm FileSystem
+make FileSystem
+cd ../../YAMA/Debug
+rm YAMA
+make YAMA
+cd ../../Worker/Debug
+rm Worker
+make Worker
+cd ../../Master/Debug
+rm Master
+make Master
+cd ../../DataNode/Debug
+rm DataNode
+make DataNode
+cd ../../../
+echo "Creando directorio de temporales"
+mkdir tmp
+echo "Bajando scripts de prueba"
+git clone https://github.com/iago64/SO-Nombres-Dataset

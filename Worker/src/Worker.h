@@ -30,7 +30,7 @@
 
 #define RUTA_CONFIG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Worker/NodoConfig.conf"
 #define RUTA_LOG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Worker/WorkerLog.log"
-#define RUTA_TEMP "/home/utnso/Escritorio/temp/"
+#define RUTA_TEMP "/home/utnso/Escritorio/tmp/"
 
 //--------------------------------------- Estructuras -------------------------------------
 
