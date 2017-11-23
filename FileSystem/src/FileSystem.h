@@ -71,7 +71,7 @@
 #define MAX_COPIAS 2
 #define MAX_TIPOS 10
 #define MAX_ARGS 5
-#define MAX_CAMPOS 4
+#define MAX_CAMPOS 5
 #define MAX_PREFIJO 7
 #define NUEVO 0
 #define NORMAL 1
@@ -107,6 +107,7 @@ typedef struct {
 	char puertoDataNode[MAX_PUERTO];
 	char puertoWorker[MAX_PUERTO];
 	char rutaMetadata[MAX_NOMBRE];
+	char ipPropia[MAX_PUERTO];
 } Configuracion;
 
 typedef struct {

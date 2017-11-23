@@ -77,7 +77,7 @@ void yamaAtender() {
 	listaSocketsLimpiar(&servidor->listaMaster);
 	listaSocketsLimpiar(&servidor->listaSelect);
 	imprimirMensaje1(archivoLog, "[CONEXION] Esperando conexiones de un Master (Puerto %s)", configuracion->puertoMaster);
-	servidor->listenerMaster = socketCrearListener(configuracion->puertoMaster);
+	servidor->listenerMaster = socketCrearListener(configuracion->ipPropia, configuracion->puertoMaster);
 	listaSocketsAgregar(servidor->listenerMaster, &servidor->listaMaster);
 	listaSocketsAgregar(servidor->fileSystem,&servidor->listaMaster);
 	void servidorControlarMaximoSocket(Socket unSocket) {

@@ -26,7 +26,7 @@ void workerIniciar() {
 }
 
 void workerAtenderProcesos() {
-	listenerMaster = socketCrearListener(configuracion->puertoMaster);
+	listenerMaster = socketCrearListener(configuracion->ipPropia, configuracion->puertoMaster);
 	while(estadoWorker)
 		workerAceptarMaster();
 }

@@ -36,9 +36,9 @@ void fileSystemIniciar(String flag) {
 
 void fileSystemAtenderProcesos() {
 	socketYama = ERROR;
-	listenerDataNode = socketCrearListener(configuracion->puertoDataNode);
-	listenerYama = socketCrearListener(configuracion->puertoYama);
-	listenerWorker = socketCrearListener(configuracion->puertoWorker);
+	listenerDataNode = socketCrearListener(configuracion->ipPropia,configuracion->puertoDataNode);
+	listenerYama = socketCrearListener(configuracion->ipPropia,configuracion->puertoYama);
+	listenerWorker = socketCrearListener(configuracion->ipPropia,configuracion->puertoWorker);
 	hiloCrear(&hiloDataNode, (Puntero)dataNodeListener, NULL);
 	hiloCrear(&hiloYama, (Puntero)yamaListener, NULL);
 	hiloCrear(&hiloWorker, (Puntero)workerListener, NULL);
@@ -74,6 +74,7 @@ Configuracion* configuracionLeerArchivo(ArchivoConfig archivoConfig) {
 	stringCopiar(configuracion->puertoDataNode, archivoConfigStringDe(archivoConfig, "PUERTO_DATANODE"));
 	stringCopiar(configuracion->puertoWorker, archivoConfigStringDe(archivoConfig, "PUERTO_WORKER"));
 	stringCopiar(configuracion->rutaMetadata, archivoConfigStringDe(archivoConfig, "RUTA_METADATA"));
+	stringCopiar(configuracion->ipPropia, archivoConfigStringDe(archivoConfig, "IP_PROPIA"));
 	archivoConfigDestruir(archivoConfig);
 	return configuracion;
 }
@@ -90,6 +91,7 @@ void configuracionIniciarCampos() {
 	campos[1] = "PUERTO_DATANODE";
 	campos[2] = "PUERTO_WORKER";
 	campos[3] = "RUTA_METADATA";
+	campos[4] = "IP_PROPIA";
 }
 
 void configuracionIniciar() {

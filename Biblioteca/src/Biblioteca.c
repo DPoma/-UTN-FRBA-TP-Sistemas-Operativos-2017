@@ -103,10 +103,10 @@ void socketError(int estado, String error) {
 	}
 }
 
-Socket socketCrearListener(String puerto) {
+Socket socketCrearListener(String ip, String puerto) {
 	Conexion conexion;
 	conexion.tamanioAddress = sizeof(conexion.address);
-	Socket listener = socketCrear(&conexion, IP_LOCAL, puerto);
+	Socket listener = socketCrear(&conexion, ip, puerto);
 	socketRedireccionar(listener);
 	socketBindear(&conexion, listener);
 	socketEscuchar(listener, LISTEN);

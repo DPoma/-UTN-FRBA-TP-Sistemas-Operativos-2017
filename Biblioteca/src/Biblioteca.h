@@ -125,7 +125,7 @@ bool socketSonIguales(Socket unSocket, Socket otroSocket);
 bool socketSonDistintos(Socket unSocket, Socket otroSocket);
 bool socketEsMayor(Socket unSocket, Socket otroSocket);
 void socketError(int estado, String error);
-Socket socketCrearListener(String puerto);
+Socket socketCrearListener(String ip, String puerto);
 Socket socketCrearCliente(String ip, String puerto, int idProceso);
 
 //--------------------------------------- Funciones para ListaSocket -------------------------------------
