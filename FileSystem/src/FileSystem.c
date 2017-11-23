@@ -183,6 +183,7 @@ void dataNodeRechazar(Nodo* nuevoNodo) {
 void dataNodeAceptarReconexion(Nodo* nuevoNodo) {
 	mutexBloquear(mutexTarea);
 	Nodo* nodo = nodoActualizar(nuevoNodo);
+	nodoLimpiarActividades();
 	nodoAceptar(nodo);
 	if(estadoFileSystemIgualA(INESTABLE) && archivoListaTodosDisponibles()) {
 		mutexBloquear(mutexEstadoFileSystem);
@@ -1835,13 +1836,19 @@ int archivoAlmacenarBinario(Archivo* archivo, File file) {
 }
 
 int archivoAlmacenarTexto(Archivo* archivo, File file) {
-	String buffer = stringCrear(BLOQUE+1);
+	String buffer = stringCrear(BLOQUE+2);
 	String datos = stringCrear(BLOQUE);
 	int bytesDisponibles = BLOQUE;
 	int indiceDatos = 0;
 	int estado = OK;
 	int numeroBloque = 0;
 	while(fgets(buffer, BLOQUE, file) != NULL) {
+		if(stringLongitud(buffer) > BLOQUE) {
+			memoriaLiberar(buffer);
+			memoriaLiberar(datos);
+			imprimirMensaje(archivoLog,"[ERROR] Un registro es mas grande que el bloque");
+			return ERROR;
+		}
 		int tamanioBuffer = stringLongitud(buffer);
 		if(tamanioBuffer <= bytesDisponibles) {
 			memcpy(datos+indiceDatos, buffer, tamanioBuffer);
@@ -1862,8 +1869,15 @@ int archivoAlmacenarTexto(Archivo* archivo, File file) {
 			indiceDatos += tamanioBuffer;
 		}
 	}
-	if(estado != ERROR && !stringEstaVacio(buffer))
+	if(estado != ERROR && !stringEstaVacio(buffer))  {
+		if(stringLongitud(buffer) > BLOQUE) {
+			memoriaLiberar(buffer);
+			memoriaLiberar(datos);
+			imprimirMensaje(archivoLog,"[ERROR] Un registro es mas grande que el bloque");
+			return ERROR;
+		}
 		estado = bloqueGuardar(archivo, datos, BLOQUE-bytesDisponibles, numeroBloque);
+	}
 	memoriaLiberar(datos);
 	memoriaLiberar(buffer);
 	return estado;
@@ -2572,11 +2586,12 @@ void nodoActivarDesconexion(Nodo* nodo, int* estado) {
 }
 
 void bloqueLeer(Nodo* nodo, Puntero datos, int* estado) {
-	String buffer = stringCrear(BLOQUE+1);
-	memcpy(buffer, datos, BLOQUE);
-	buffer[BLOQUE] = FIN;
-	printf("%s", buffer);
-	memoriaLiberar(buffer);
+	//String buffer = stringCrear(BLOQUE+1);
+	//memcpy(buffer, datos, BLOQUE);
+	//buffer[BLOQUE] = FIN;
+	printf("%.1048576s", (String)datos);
+	//printf("%s", buffer);
+	//memoriaLiberar(buffer);
 	nodoActivarDesconexion(nodo, estado);
 	semaforoSignal(semaforoTarea);
 }
@@ -2971,12 +2986,11 @@ void semaforosDestruir() {
 }
 
 
-//todo algoritmo en leer
-//todo nodo no se desconecta sin format
 //todo barra mas alla del bloque
+//todo deploy
+
 //todo ver leaks
 //todo sacar o dejar colores
-//todo deploy
 //todo comando repetir directorio
 //todo ver listar directorio y archivos
 

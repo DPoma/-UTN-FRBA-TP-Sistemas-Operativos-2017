@@ -129,7 +129,7 @@ void configuracionIniciar() {
 }
 
 void configuracionSenialHijo(int senial) {
-	mensajeEnviar(socketFileSystem, DESCONEXION, VACIO, ACTIVADO);
+	mensajeEnviar(socketFileSystem, DESCONEXION, NULL, NULO);
 	dataNodeDesactivar();
 	puts("");
 }
