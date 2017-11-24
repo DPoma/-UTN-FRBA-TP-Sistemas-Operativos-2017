@@ -128,14 +128,14 @@ void masterRealizarOperacion(Socket unSocket);
 
 //--------------------------------------- Funciones de Transformacion -------------------------------------
 
-int transformacionEjecutar(Transformacion* transformacion);
+int transformacionEjecutar(Transformacion* transformacion, String pathScript);
 void transformacion(Mensaje* mensaje, Socket unSocket);
 void transformacionDestruir(Transformacion* transformacion);
 void transformacionExito(Entero numeroBloque, Socket unSocket);
 void transformacionFracaso(Entero numeroBloque, Socket unSocket);
 void transformacionObtenerScript(Transformacion* transformacion, Mensaje* mensaje);
 void transformacionFinalizar(Socket unSocket, int* estado);
-void transformacionProcesarBloque(Transformacion* transformacion, Mensaje* mensaje, Mensaje* otroMensaje, Socket unSocket);
+void transformacionProcesarBloque(Transformacion* transformacion, Mensaje* mensaje, Mensaje* otroMensaje, Socket unSocket, String pathScript);
 String transformacionCrearBloque(Transformacion* transformacion);
 String transformacionCrearScript(Transformacion* transformacion);
 

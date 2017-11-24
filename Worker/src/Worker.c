@@ -156,34 +156,35 @@ void configuracionSenial(int senial) {
 void transformacion(Mensaje* mensaje, Socket unSocket) {
 	Transformacion* transformacion = memoriaAlocar(sizeof(Transformacion));
 	transformacionObtenerScript(transformacion, mensaje);
+	String pathScript = transformacionCrearScript(transformacion);
 	int estado = ACTIVADO;
 	while(estado) {
 		Mensaje* otroMensaje = mensajeRecibir(unSocket);
 		switch(otroMensaje->header.operacion) {
 			case DESCONEXION: masterDesconectar(unSocket); estado = DESACTIVADO; break;
-			case TRANSFORMACION: transformacionProcesarBloque(transformacion, mensaje, otroMensaje, unSocket); break;
+			case TRANSFORMACION: transformacionProcesarBloque(transformacion, mensaje, otroMensaje, unSocket, pathScript); break;
 			case EXITO: transformacionFinalizar(unSocket, &estado); break;
 		}
 		mensajeDestruir(otroMensaje);
 	}
+	fileLimpiar(pathScript);
+	memoriaLiberar(pathScript);
 	transformacionDestruir(transformacion);
 }
 
-int transformacionEjecutar(Transformacion* transformacion) {
+int transformacionEjecutar(Transformacion* transformacion, String pathScript) {
 	String pathBloque = transformacionCrearBloque(transformacion);
-	String pathScript = transformacionCrearScript(transformacion);
+
 	String pathDestino = string_from_format("%s%s", RUTA_TEMP, transformacion->nombreResultado);
 	String comando = string_from_format("chmod 0777 %s", pathScript);
 	int resultado = system(comando);
 	memoriaLiberar(comando);
 	if(resultado != ERROR) {
-		comando = string_from_format("cat %s | sh %s | sort > %s", pathBloque, pathScript, pathDestino);
+		comando = string_from_format("cat %s |  %s | sort > %s", pathBloque, pathScript, pathDestino);
 		resultado = system(comando);
 		memoriaLiberar(comando);
 	}
 	fileLimpiar(pathBloque);
-	fileLimpiar(pathScript);
-	memoriaLiberar(pathScript);
 	memoriaLiberar(pathDestino);
 	memoriaLiberar(pathBloque);
 	return resultado;
@@ -229,11 +230,11 @@ void transformacionObtenerBloque(Transformacion* transformacion, Puntero datos) 
 	memcpy(transformacion->nombreResultado, datos+sizeof(Entero)*2, 12);
 }
 
-void transformacionProcesarBloque(Transformacion* transformacion, Mensaje* mensaje, Mensaje* otroMensaje, Socket unSocket) {
+void transformacionProcesarBloque(Transformacion* transformacion, Mensaje* mensaje, Mensaje* otroMensaje, Socket unSocket, String pathScript) {
 	transformacionObtenerBloque(transformacion, otroMensaje->datos);
 	pid_t pid = fork();
 	if(pid == 0) {
-		int resultado = transformacionEjecutar(transformacion);
+		int resultado = transformacionEjecutar(transformacion, pathScript);
 		transformacionFinalizarBloque(resultado, unSocket, transformacion->numeroBloque);
 		transformacionDestruir(transformacion);
 		mensajeDestruir(mensaje);
@@ -246,8 +247,10 @@ void transformacionProcesarBloque(Transformacion* transformacion, Mensaje* mensa
 String transformacionCrearScript(Transformacion* transformacion) {
 	String path = string_from_format("%s%sScript", RUTA_TEMP, transformacion->nombreResultado);
 	File file = fileAbrir(path , ESCRITURA);
+	memoriaLiberar(path);
 	fwrite(transformacion->script, sizeof(char), transformacion->scriptSize, file);
 	fileCerrar(file);
+	path = string_from_format("%s./%sScript", RUTA_TEMP, transformacion->nombreResultado);
 	return path;
 }
 
