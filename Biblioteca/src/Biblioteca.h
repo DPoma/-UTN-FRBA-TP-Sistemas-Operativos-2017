@@ -138,7 +138,7 @@ void listaSocketsLimpiar(ListaSockets* listaSockets);
 //--------------------------------------- Funciones para Mensaje -------------------------------------
 
 void* mensajeCrear(int operacion, Puntero dato, int tamanioDato);
-void mensajeEnviar(Socket socketReceptor, int operacion, Puntero dato, int tamanioDato);
+int mensajeEnviar(int socketReceptor, Entero operacion, void* dato, Entero tamanioDato);
 bool mensajeOperacionIgualA(Mensaje* mensaje, int operacion);
 Mensaje* mensajeRecibir(Socket socketEmisor);
 void mensajeDestruir(Mensaje* mensaje);

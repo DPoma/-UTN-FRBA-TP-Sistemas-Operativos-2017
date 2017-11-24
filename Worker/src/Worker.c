@@ -432,9 +432,9 @@ int reduccionGlobalRealizarConexiones(ReduccionGlobal* reduccion, Lista listaApa
 			resultado = ERROR;
 			break;
 		}
-		mensajeEnviar(apareo->socketWorker, CONEXION_WORKER, reduccion->nodos[indice].temporal, TEMPSIZE);
-		//if(resultado == ERROR)
-			//break;
+		resultado = mensajeEnviar(apareo->socketWorker, CONEXION_WORKER, reduccion->nodos[indice].temporal, TEMPSIZE);
+		if(resultado == ERROR)
+			break;
 		listaAgregarElemento(listaApareados, apareo);
 	}
 	return resultado;
@@ -509,35 +509,45 @@ Apareo* reduccionGlobalLineaMasCorta(Apareo* unApareo, Apareo* otroApareo) {
 		return otroApareo;
 }
 
-void reduccionGlobalEnviarRespuesta(Socket socketWorker, Puntero buffer) {
+int reduccionGlobalEnviarRespuesta(Socket socketWorker, Puntero buffer) {
+	int resultado;
 	if(buffer != NULL)
-		mensajeEnviar(socketWorker, ENVIAR_LINEA, buffer, stringLongitud(buffer)+1);
+		resultado = mensajeEnviar(socketWorker, ENVIAR_LINEA, buffer, stringLongitud(buffer)+1);
 	else
-		mensajeEnviar(socketWorker, ENVIAR_LINEA, NULL, NULO);
+		resultado = mensajeEnviar(socketWorker, ENVIAR_LINEA, NULL, NULO);
+	return resultado;
 }
 
-void reduccionGlobalEsperarPedido(Socket socketWorker, Puntero buffer) {
+int reduccionGlobalEsperarPedido(Socket socketWorker, Puntero buffer) {
+	int resultado = OK;
 	Mensaje* mensaje = mensajeRecibir(socketWorker);
 	if(mensaje->header.operacion == PEDIR_LINEA)
-		reduccionGlobalEnviarRespuesta(socketWorker, buffer);
-	else
+		resultado = reduccionGlobalEnviarRespuesta(socketWorker, buffer);
+	else {
 		workerDesconectar(socketWorker);
+		resultado = ERROR;
+	}
 	mensajeDestruir(mensaje);
+	return resultado;
 }
 
 void reduccionGlobalEnviarLinea(Mensaje* mensaje, Socket socketWorker) {
 	imprimirMensaje(archivoLog, "[CONEXION] Proceso Worker conectado existosamente");
+	int resultado = OK;
 	String pathReduccionGlobal= string_from_format("%s%s", RUTA_TEMP, (String)mensaje->datos);
 	File archivoReduccionGlobal = fileAbrir(pathReduccionGlobal, LECTURA);
 	memoriaLiberar(pathReduccionGlobal);
 	String buffer = stringCrear(BLOQUE);
 	while(fgets(buffer, BLOQUE, archivoReduccionGlobal)) {
-		reduccionGlobalEsperarPedido(socketWorker, buffer);
+		resultado = reduccionGlobalEsperarPedido(socketWorker, buffer);
+		if(resultado == ERROR)
+			break;
 		memoriaLiberar(buffer);
 		buffer = stringCrear(BLOQUE);
 	}
 	memoriaLiberar(buffer);
-	reduccionGlobalEsperarPedido(socketWorker, NULL);
+	if(resultado != ERROR)
+		reduccionGlobalEsperarPedido(socketWorker, NULL);
 	fileCerrar(archivoReduccionGlobal);
 }
 
@@ -551,7 +561,9 @@ String reduccionGlobalCopiarLinea(Mensaje* mensaje) {
 
 String reduccionGlobalEncargadoPedirLinea(Socket unSocket) {
 	String linea = NULL;
-	mensajeEnviar(unSocket, PEDIR_LINEA, NULL, NULO);
+	int resultado = mensajeEnviar(unSocket, PEDIR_LINEA, NULL, NULO);
+	if(resultado == ERROR)
+			return "ERROR";
 	Mensaje* mensaje = mensajeRecibir(unSocket);
 	if(mensaje->header.operacion == ENVIAR_LINEA)
 		linea = reduccionGlobalCopiarLinea(mensaje);
