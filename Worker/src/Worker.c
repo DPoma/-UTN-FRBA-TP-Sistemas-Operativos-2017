@@ -204,7 +204,7 @@ void transformacionFinalizarBloque(int resultado, Socket unSocket, Entero numero
 }
 
 void transformacionExito(Entero numeroBloque, Socket unSocket) {
-	imprimirMensaje1(archivoLog,"[TRANSFORMACION] Master #(id?): Operacion finalizada en bloque N°%d", (int*)numeroBloque);
+	imprimirMensaje1(archivoLog,"[TRANSFORMACION] Master #(id?): Operacion finalizada con exito en bloque N°%d", (int*)numeroBloque);
 	mensajeEnviar(unSocket, EXITO, &numeroBloque, sizeof(Entero));
 }
 
@@ -320,7 +320,7 @@ void reduccionLocalDestruir(ReduccionLocal* reduccion) {
 }
 
 void reduccionLocalExito(Socket unSocket) {
-	imprimirMensaje(archivoLog,"[REDUCCION LOCAL] Master #(id?): Operacion finalizada");
+	imprimirMensaje(archivoLog,"[REDUCCION LOCAL] Master #(id?): Operacion finalizada con exito");
 	mensajeEnviar(unSocket, EXITO, NULL, 0);
 }
 
@@ -373,10 +373,11 @@ ReduccionGlobal* reduccionGlobalRecibirDatos(Puntero datos) {
 	return reduccion;
 }
 
-void reduccionGlobalAparearTemporales(ReduccionGlobal* reduccion) {
+int reduccionGlobalAparearTemporales(ReduccionGlobal* reduccion) {
 	Lista listaApareados = listaCrear();
-	reduccionGlobalAlgoritmoApareo(reduccion, listaApareados);
+	int resultado = reduccionGlobalAlgoritmoApareo(reduccion, listaApareados);
 	listaDestruirConElementos(listaApareados, (Puntero)memoriaLiberar);
+	return resultado;
 }
 
 int reduccionGlobalEjecutar(ReduccionGlobal* reduccion) {
@@ -411,7 +412,7 @@ void reduccionGlobalDestruir(ReduccionGlobal* reduccion) {
 }
 
 void reduccionGlobalExito(Socket unSocket) {
-	imprimirMensaje(archivoLog,"[REDUCCION GLOBAL] Master #(id?): Operacion finalizada");
+	imprimirMensaje(archivoLog,"[REDUCCION GLOBAL] Master #(id?): Operacion finalizada con exito");
 	mensajeEnviar(unSocket, EXITO, NULL, 0);
 }
 
@@ -420,22 +421,34 @@ void reduccionGlobalFracaso(Socket unSocket) {
 	mensajeEnviar(unSocket, FRACASO, NULL, 0);
 }
 
-void reduccionGlobalRealizarConexiones(ReduccionGlobal* reduccion, Lista listaApareados) {
+int reduccionGlobalRealizarConexiones(ReduccionGlobal* reduccion, Lista listaApareados) {
+	int resultado = OK;
 	int indice;
 	for(indice=0; indice < reduccion->cantidadNodos; indice++) {
 		Apareo* apareo = memoriaAlocar(sizeof(Apareo));
 		apareo->socketWorker = socketCrearCliente(reduccion->nodos[indice].nodo.ip, reduccion->nodos[indice].nodo.port, ID_MASTER);
+		if(apareo->socketWorker == ERROR) {
+			resultado = ERROR;
+			break;
+		}
 		mensajeEnviar(apareo->socketWorker, CONEXION_WORKER, reduccion->nodos[indice].temporal, TEMPSIZE);
 		listaAgregarElemento(listaApareados, apareo);
 	}
+	return resultado;
 }
 
-void reduccionGlobalObtenerLineas(Lista listaApareados) {
+int reduccionGlobalObtenerLineas(Lista listaApareados) {
 	int indice;
+	int resultado = OK;
 	for(indice=0; indice < listaCantidadElementos(listaApareados); indice++) {
 		Apareo* apareo = listaObtenerElemento(listaApareados, indice);
 		apareo->linea = reduccionGlobalEncargadoPedirLinea(apareo->socketWorker);
+		if(stringIguales(apareo->linea, "ERROR")) {
+			resultado = ERROR;
+			break;
+		}
 	}
+	return resultado;
 }
 
 void reduccionGlobalCompararLineas(Lista listaApareados, Apareo* apareo) {
@@ -446,26 +459,35 @@ void reduccionGlobalCompararLineas(Lista listaApareados, Apareo* apareo) {
 	}
 }
 
-void reduccionGlobalEscribirLinea(Apareo* apareo, File archivoResultado) {
+int reduccionGlobalEscribirLinea(Apareo* apareo, File archivoResultado) {
+	int resultado = OK;
 	fwrite(apareo->linea, sizeof(char), stringLongitud(apareo->linea), archivoResultado);
 	memoriaLiberar(apareo->linea);
 	apareo->linea = reduccionGlobalEncargadoPedirLinea(apareo->socketWorker);
+	if(stringIguales(apareo->linea, "ERROR"))
+		resultado = ERROR;
+	return resultado;
 }
 
-void reduccionGlobalAlgoritmoApareo(ReduccionGlobal* reduccion, Lista listaApareados) {
-	reduccionGlobalRealizarConexiones(reduccion, listaApareados);
-	//if(resultado == ERROR)
-		//return resultado;
-	reduccion->pathApareo = string_from_format("%s%sApareo", RUTA_TEMP, reduccion->nombreResultado);
-	File archivoResultado = fileAbrir(reduccion->pathApareo, ESCRITURA);
-	reduccionGlobalObtenerLineas(listaApareados);
-	Apareo* apareo = listaPrimerElemento(listaApareados);
-	while(!listaEstaVacia(listaApareados)) {
-		reduccionGlobalCompararLineas(listaApareados, apareo);
-		reduccionGlobalEscribirLinea(apareo, archivoResultado);
-		reduccionGlobalControlarLineas(listaApareados);
+int reduccionGlobalAlgoritmoApareo(ReduccionGlobal* reduccion, Lista listaApareados) {
+	int resultado = reduccionGlobalRealizarConexiones(reduccion, listaApareados);
+	if(resultado != ERROR) {
+		reduccion->pathApareo = string_from_format("%s%sApareo", RUTA_TEMP, reduccion->nombreResultado);
+		File archivoResultado = fileAbrir(reduccion->pathApareo, ESCRITURA);
+		resultado = reduccionGlobalObtenerLineas(listaApareados);
+		if(resultado != ERROR) {
+			Apareo* apareo = listaPrimerElemento(listaApareados);
+			while(!listaEstaVacia(listaApareados)) {
+				reduccionGlobalCompararLineas(listaApareados, apareo);
+				resultado = reduccionGlobalEscribirLinea(apareo, archivoResultado);
+				if(resultado == ERROR)
+					break;
+				reduccionGlobalControlarLineas(listaApareados);
+			}
+		}
+		fileCerrar(archivoResultado);
 	}
-	fileCerrar(archivoResultado);
+	return resultado;
 }
 
 Apareo* reduccionGlobalLineaMasCorta(Apareo* unApareo, Apareo* otroApareo) {
@@ -625,7 +647,7 @@ void almacenadoFinalFinalizar(int resultado, Socket unSocket) {
 }
 
 void almacenadoFinalExito(Socket unSocket) {
-	imprimirMensaje(archivoLog,"[ALMACENADO FINAL] Master #(id?): Operacion finalizada");
+	imprimirMensaje(archivoLog,"[ALMACENADO FINAL] Master #(id?): Operacion finalizada con exito");
 	mensajeEnviar(unSocket, EXITO, NULL, 0);
 }
 
