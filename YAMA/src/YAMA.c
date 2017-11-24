@@ -351,10 +351,22 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 }
 
 void actualizarTablaEstados(Mensaje* mensaje,Socket masterid){
+	Entrada* entradaA;
+	if(mensaje->header.operacion==DESCONEXION_NODO){
+		Dir* nodo=(Dir*)mensaje->datos;
+		imprimirMensaje2(archivoLog,"[CONEXION] Nodo %s %s desconectado",nodo->ip,nodo->port);
+		bool buscarEntrada(Entrada* entrada){
+			return nodoIguales(entrada->nodo,nodo)&&entrada->masterid==masterid;
+		}
+		while((entradaA=list_find(tablaEstados,buscarEntrada))){
+			actualizarEntrada(entradaA,FRACASO,nullptr);
+		}
+		return;
+	}
+
 	int32_t etapa=*(int32_t*)mensaje->datos;
 	void* datos=mensaje->datos+INTSIZE;
 	int actualizando=mensaje->header.operacion;
-	Entrada* entradaA;
 	void registrarActualizacion(char* s){
 		log_info(archivoLog,"[RECEPCION] actualizacion de %s, %s",s,actualizando==EXITO?"exito":"fracaso");
 	}
@@ -384,8 +396,12 @@ void actualizarTablaEstados(Mensaje* mensaje,Socket masterid){
 	}
 	if(!entradaA){
 		puts("UR DONE");
+		abort();
 	}
+	actualizarEntrada(entradaA,actualizando,mensaje);
+}
 
+void actualizarEntrada(Entrada* entradaA,int actualizando, Mensaje* mensaje){
 	entradaA->estado=actualizando;
 
 	void darDatosEntrada(Entrada* entrada){
@@ -505,7 +521,7 @@ void actualizarTablaEstados(Mensaje* mensaje,Socket masterid){
 		darDatosEntrada(&almacenado);
 		almacenado.etapa=ALMACENADO;
 		almacenado.pathTemporal=malloc(mensaje->header.tamanio-INTSIZE);
-		memcpy(almacenado.pathTemporal,datos,mensaje->header.tamanio-INTSIZE);
+		memcpy(almacenado.pathTemporal,mensaje->datos+INTSIZE,mensaje->header.tamanio-INTSIZE);
 		char dato[DIRSIZE+TEMPSIZE];
 		memcpy(dato,&reducGlobal->nodo,DIRSIZE);
 		memcpy(dato+DIRSIZE,reducGlobal->pathTemporal,TEMPSIZE);

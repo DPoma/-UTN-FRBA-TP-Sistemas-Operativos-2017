@@ -37,6 +37,8 @@
 #define ALMACENADO 306
 #define CIERRE 307
 
+#define DESCONEXION_NODO 308
+
 #define ENPROCESO 2
 #define ABORTADO 3
 

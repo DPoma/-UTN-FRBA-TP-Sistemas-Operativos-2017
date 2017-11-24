@@ -196,6 +196,9 @@ void transformaciones(Lista bloques){
 			Mensaje* mensaje = mensajeRecibir(socketWorker);
 			if(mensaje->header.operacion==DESCONEXION){
 				puts("UR DONE");
+				mensajeEnviar(socketYama,DESCONEXION_NODO,&dir->dir,DIRSIZE);
+				pthread_detach(pthread_self());
+				return;
 			}
 			//a demas de decir exito o fracaso devuelve el numero de bloque
 			void enviarActualizacion(){
@@ -263,8 +266,8 @@ void reduccionLocal(Mensaje* m){
 
 	Mensaje* mensaje = mensajeRecibir(sWorker);
 	if(mensaje->header.operacion==DESCONEXION){
+		imprimirMensaje(archivoLog,"[ERROR] Worker desconectado");
 		mensaje->header.operacion=FRACASO;
-		puts("AHHHH");
 	}
 	imprimirMensaje(archivoLog,mensaje->header.operacion==EXITO?"[EJECUCION] reduccion local exitosa"
 			:"[ERROR] fallo en la reduccion local");
@@ -304,8 +307,8 @@ void reduccionGlobal(Mensaje* m){
 
 	Mensaje* mensaje = mensajeRecibir(sWorker);
 	if(mensaje->header.operacion==DESCONEXION){
+		imprimirMensaje(archivoLog,"[ERROR] Worker desconectado");
 		mensaje->header.operacion=FRACASO;
-		puts("WHHHH");
 	}
 	imprimirMensaje(archivoLog,mensaje->header.operacion==EXITO?"[EJECUCION] reduccion global exitosa"
 			:"[ERROR] reduccion global fallida");
@@ -338,8 +341,8 @@ void almacenado(Mensaje* m){
 
 	Mensaje* mens=mensajeRecibir(sWorker);
 	if(mens->header.operacion==DESCONEXION){
+		imprimirMensaje(archivoLog,"[ERROR] Worker desconectado");
 		mens->header.operacion=FRACASO;
-		puts("XHHHH");
 	}
 	imprimirMensaje(archivoLog,mens->header.operacion==EXITO?"[EJECUCION] ALMACENADO EXITOSO":"[ERROR] ALMACENADO FALLIDO");
 
