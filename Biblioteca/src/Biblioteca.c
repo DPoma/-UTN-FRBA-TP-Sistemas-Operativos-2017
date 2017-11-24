@@ -150,10 +150,11 @@ void* mensajeCrear(int32_t operacion, void* dato, int32_t tamanioDato){
 	return buffer;
 }
 
-void mensajeEnviar(int socketReceptor, int32_t operacion, void* dato, int32_t tamanioDato) {
+int mensajeEnviar(int socketReceptor, int32_t operacion, void* dato, int32_t tamanioDato) {
 	void* buffer = mensajeCrear(operacion, dato, tamanioDato);
-	socketEnviar(socketReceptor, buffer, sizeof(Header)+tamanioDato);
+	int resultado = socketEnviar(socketReceptor, buffer, sizeof(Header)+tamanioDato);
 	free(buffer);
+	return resultado;
 }
 
 void mensajeAvisarDesconexion(Mensaje* mensaje) {
