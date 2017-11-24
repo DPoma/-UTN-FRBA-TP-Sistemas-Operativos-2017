@@ -50,6 +50,7 @@ void masterIniciar(String* argv) {
 	semaforoIniciar2(&metricas.reducLocales,1);
 
 	void leerArchivo(File archScript,char** script,int* len){
+		//todo validar
 		fseek(archScript, 0, SEEK_END);
 		long posicion = ftell(archScript);
 		fseek(archScript, 0, SEEK_SET);

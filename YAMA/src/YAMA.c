@@ -77,7 +77,7 @@ void yamaAtender() {
 	listaSocketsLimpiar(&servidor->listaMaster);
 	listaSocketsLimpiar(&servidor->listaSelect);
 	imprimirMensaje1(archivoLog, "[CONEXION] Esperando conexiones de un Master (Puerto %s)", configuracion->puertoMaster);
-	servidor->listenerMaster = socketCrearListener(configuracion->puertoMaster);
+	servidor->listenerMaster = socketCrearListener(configuracion->ipPropia, configuracion->puertoMaster);
 	listaSocketsAgregar(servidor->listenerMaster, &servidor->listaMaster);
 	listaSocketsAgregar(servidor->fileSystem,&servidor->listaMaster);
 	void servidorControlarMaximoSocket(Socket unSocket) {
@@ -510,6 +510,15 @@ void actualizarTablaEstados(Mensaje* mensaje,Socket masterid){
 	}break;case ALMACENADO:
 		list_add(tablaUsados,list_remove_by_condition(tablaEstados,(func)mismoJob));
 		mensajeEnviar(entradaA->masterid,CIERRE,nullptr,0);
+		/*todo
+		void levantarCarga(Worker* worker){
+			bool jobLiberado(int* jobA){
+				return jobA==entradaA->job;
+			}
+			list_remove_by_condition(worker->cargas,jobLiberado);
+			
+		}
+		*/
 	}
 }
 
