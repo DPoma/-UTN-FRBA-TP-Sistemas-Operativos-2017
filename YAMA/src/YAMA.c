@@ -592,6 +592,7 @@ void darPathTemporal(char** ret,char pre){
 	(*ret)[10]='0';
 	(*ret)[11]='\0';
 	char* anteriorTemp=string_duplicate(*ret);
+	if(anterior) log_info(archivoLog,"%s == %s",*ret,anterior);
 	if(stringIguales(*ret,anterior))
 		if(agregado=='9')
 			agregado='a';

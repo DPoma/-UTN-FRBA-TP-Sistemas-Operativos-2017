@@ -85,7 +85,6 @@ void masterAtender(){
 	}
 	Lista listas=list_create();
 	for(i=0;i<mensaje->header.tamanio;i+=DIRSIZE+INTSIZE*2+TEMPSIZE){
-		metricas.cantTrans++;
 		WorkerTransformacion bloque;
 		memcpy(&bloque.dir,mensaje->datos+i,DIRSIZE);
 		memcpy(&bloque.bloque,mensaje->datos+i+DIRSIZE,INTSIZE);
