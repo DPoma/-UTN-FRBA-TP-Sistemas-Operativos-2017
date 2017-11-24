@@ -356,9 +356,9 @@ void actualizarTablaEstados(Mensaje* mensaje,Socket masterid){
 		Dir* nodo=(Dir*)mensaje->datos;
 		imprimirMensaje2(archivoLog,"[CONEXION] Nodo %s %s desconectado",nodo->ip,nodo->port);
 		bool buscarEntrada(Entrada* entrada){
-			return nodoIguales(entrada->nodo,nodo)&&entrada->masterid==masterid;
+			return nodoIguales(entrada->nodo,*nodo)&&entrada->masterid==masterid;
 		}
-		while((entradaA=list_find(tablaEstados,buscarEntrada))){
+		while((entradaA=list_find(tablaEstados,(func)buscarEntrada))){
 			actualizarEntrada(entradaA,FRACASO,nullptr);
 		}
 		return;
@@ -425,21 +425,29 @@ void actualizarEntrada(Entrada* entradaA,int actualizando, Mensaje* mensaje){
 			}
 			moverAUsados((func)mismoJob);
 			list_iterate(tablaUsados,(func)abortarEntrada);
+			log_info(archivoLog,"[] Abortando master #%d",(int)entradaA->masterid);
 			mensajeEnviar(entradaA->masterid,ABORTAR,nullptr,0);
 		}
 		if(entradaA->etapa==TRANSFORMACION&&actualizando==FRACASO){
 			if(nodoIguales(entradaA->nodo,entradaA->nodoAlt)){
+				log_info(archivoLog,"[] no hay mas copias para salvar el error");
 				abortarJob();
 				return;
 			}
 			Entrada alternativa;
 			darDatosEntrada(&alternativa);
+			alternativa.etapa=TRANSFORMACION;
 			alternativa.nodo=entradaA->nodoAlt;
+			alternativa.nodoAlt=entradaA->nodoAlt;
 			alternativa.bloque=entradaA->bloqueAlt;
-			char dato[DIRSIZE+INTSIZE*2];
+			alternativa.bytes=entradaA->bytes;
+			log_info(archivoLog,"BLOQUE ALT=%d",entradaA->bloqueAlt);
+			darPathTemporal(&alternativa.pathTemporal,'t');
+			char dato[DIRSIZE+INTSIZE*2+TEMPSIZE];
 			memcpy(dato,&alternativa.nodo,DIRSIZE);
 			memcpy(dato+DIRSIZE,&alternativa.bloque,INTSIZE);
 			memcpy(dato+DIRSIZE+INTSIZE,&alternativa.bytes,INTSIZE);
+			memcpy(dato+DIRSIZE+INTSIZE*2,alternativa.pathTemporal,TEMPSIZE);
 			mensajeEnviar(alternativa.masterid,TRANSFORMACION,dato,sizeof dato);
 			list_addM(tablaEstados,&alternativa,sizeof(Entrada));
 			bool buscarError(Entrada* entrada){
@@ -613,16 +621,18 @@ void darPathTemporal(char** ret,char pre){
 	*ret=malloc(TEMPSIZE); //12
 	int i,j=1;
 	(*ret)[0]=pre;
-	for(i=0;i<12;i++){
+	for(i=0;i<stringLongitud(temp);i++){
 		if(temp[i]==':')
 			continue;
 		(*ret)[j]=temp[i];
 		j++;
 	}
-	(*ret)[10]='0';
-	(*ret)[11]='\0';
+	log_info(archivoLog,"temp |%s|",temp);
+	int endof=stringLongitud(temp)-3;
+	(*ret)[endof+1]='0';
+	(*ret)[endof+2]='\0';
 	char* anteriorTemp=string_duplicate(*ret);
-	if(anterior) log_info(archivoLog,"|%s| == |%s|",*ret,anterior);
+	if(anterior) log_info(archivoLog,"ant |%s|, new |%s|",anterior,*ret);
 	if(stringIguales(*ret,anterior))
 		if(agregado=='9')
 			agregado='a';
@@ -634,7 +644,8 @@ void darPathTemporal(char** ret,char pre){
 			agregado++;
 	else
 		agregado='0';
-	(*ret)[10]=agregado;
+	(*ret)[endof+1]=agregado;
+	log_info(archivoLog,"then |%s|",*ret);
 	free(anterior);free(temp);
 	anterior=anteriorTemp;
 }

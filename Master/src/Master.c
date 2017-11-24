@@ -120,9 +120,10 @@ void masterAtender(){
 		switch(m->header.operacion){
 		case TRANSFORMACION://hubo error y se recibió un bloque alternativo
 			metricas.fallos++;
-			memcpy(&alternativo.bloque,mensaje->datos+i+DIRSIZE,INTSIZE);
-			memcpy(&alternativo.bytes,mensaje->datos+i+DIRSIZE+INTSIZE,INTSIZE);
-			memcpy(&alternativo.temp,mensaje->datos+i+DIRSIZE+INTSIZE*2,TEMPSIZE);
+			memcpy(&alternativo.dir,m->datos,DIRSIZE);
+			memcpy(&alternativo.bloque,m->datos+DIRSIZE,INTSIZE);
+			memcpy(&alternativo.bytes,m->datos+DIRSIZE+INTSIZE,INTSIZE);
+			memcpy(&alternativo.temp,m->datos+DIRSIZE+INTSIZE*2,TEMPSIZE);
 			semaforoSignal(recepcionAlternativo);
 			mensajeDestruir(m);
 			break;
