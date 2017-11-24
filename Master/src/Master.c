@@ -86,7 +86,6 @@ void masterAtender(){
 	}
 	Lista listas=list_create();
 	for(i=0;i<mensaje->header.tamanio;i+=DIRSIZE+INTSIZE*2+TEMPSIZE){
-		metricas.cantTrans++;
 		WorkerTransformacion bloque;
 		memcpy(&bloque.dir,mensaje->datos+i,DIRSIZE);
 		memcpy(&bloque.bloque,mensaje->datos+i+DIRSIZE,INTSIZE);
@@ -195,6 +194,9 @@ void transformaciones(Lista bloques){
 		}
 		for(;respondidos<enviados;respondidos++){
 			Mensaje* mensaje = mensajeRecibir(socketWorker);
+			if(mensaje->header.operacion==DESCONEXION){
+				puts("UR DONE");
+			}
 			//a demas de decir exito o fracaso devuelve el numero de bloque
 			void enviarActualizacion(){
 				char buffer[INTSIZE*2+DIRSIZE];
