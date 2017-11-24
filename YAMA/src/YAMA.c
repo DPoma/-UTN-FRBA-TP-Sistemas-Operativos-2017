@@ -274,8 +274,8 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 		*pos=*pos+1%workers->elements_count;
 		return obtenerWorker(pos);
 	}
-	Worker* workerClock=obtenerWorker(&clock);
 	for(i=0;i<bloques->elements_count;i+=2){
+		Worker* workerClock=obtenerWorker(&clock);
 		Bloque* bloque0 = list_get(bloques,i);
 		Bloque* bloque1 = list_get(bloques,i+1);
 		int* bytes=list_get(byteses,i/2);
@@ -363,6 +363,7 @@ void actualizarTablaEstados(Mensaje* mensaje,Socket masterid){
 		Dir nodo=*((Dir*)datos);
 		int32_t bloque=*((int32_t*)(datos+DIRSIZE));
 		bool buscarEntrada(Entrada* entrada){
+			printf("%s %s %d == %s %s %d\n",entrada->nodo.ip,entrada->nodo.port,entrada->bloque,nodo.ip,nodo.port,bloque);
 			return nodoIguales(entrada->nodo,nodo)&&entrada->bloque==bloque;
 		}
 		entradaA=list_find(tablaEstados,(func)buscarEntrada);
@@ -381,6 +382,10 @@ void actualizarTablaEstados(Mensaje* mensaje,Socket masterid){
 		}
 		entradaA=list_find(tablaEstados,(func)buscarEntrada);
 	}
+	if(!entradaA){
+		puts("UR DONE");
+	}
+
 	entradaA->estado=actualizando;
 
 	void darDatosEntrada(Entrada* entrada){
@@ -601,7 +606,7 @@ void darPathTemporal(char** ret,char pre){
 	(*ret)[10]='0';
 	(*ret)[11]='\0';
 	char* anteriorTemp=string_duplicate(*ret);
-	if(anterior) log_info(archivoLog,"%s == %s",*ret,anterior);
+	if(anterior) log_info(archivoLog,"|%s| == |%s|",*ret,anterior);
 	if(stringIguales(*ret,anterior))
 		if(agregado=='9')
 			agregado='a';
