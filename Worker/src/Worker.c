@@ -353,8 +353,9 @@ String reduccionLocalObtenerTemporales(ReduccionLocal* reduccion) {
 
 void reduccionGlobal(Mensaje* mensaje, Socket unSocket) {
 	ReduccionGlobal* reduccion = reduccionGlobalRecibirDatos(mensaje->datos);
-	reduccionGlobalAparearTemporales(reduccion);
-	int resultado = reduccionGlobalEjecutar(reduccion);
+	int resultado = reduccionGlobalAparearTemporales(reduccion);
+	if(resultado != ERROR)
+		resultado = reduccionGlobalEjecutar(reduccion);
 	reduccionGlobalDestruir(reduccion);
 	reduccionGlobalFinalizar(resultado, unSocket);
 }
@@ -432,6 +433,8 @@ int reduccionGlobalRealizarConexiones(ReduccionGlobal* reduccion, Lista listaApa
 			break;
 		}
 		mensajeEnviar(apareo->socketWorker, CONEXION_WORKER, reduccion->nodos[indice].temporal, TEMPSIZE);
+		//if(resultado == ERROR)
+			//break;
 		listaAgregarElemento(listaApareados, apareo);
 	}
 	return resultado;

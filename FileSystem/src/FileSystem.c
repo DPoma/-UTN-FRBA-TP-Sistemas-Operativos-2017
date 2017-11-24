@@ -440,9 +440,9 @@ void workerAtender(Socket* socketWorker) {
 	String pathYama = string_from_format("%s", mensaje->datos);
 	mensajeDestruir(mensaje);
 	int resultado = workerAlmacenadoFinal(pathYama,*socketWorker);
+	workerAvisarAlmacenado(resultado, *socketWorker);
 	memoriaLiberar(pathYama);
 	memoriaLiberar(socketWorker);
-	workerAvisarAlmacenado(resultado, *socketWorker);
 }
 
 //--------------------------------------- Funciones de Consola -------------------------------------
@@ -2987,16 +2987,17 @@ void semaforosDestruir() {
 	memoriaLiberar(mutexEstado);
 }
 
-
-//todo barra mas alla del bloque
-
+//todo con clean borrar metadata si existiera, el format la vuelve a crear
+//todo memory leak en yamaatender
+//todo poner al script de transformacion el pid del fork
+//todo md5 yamafs cambiar
+//todo agregar nombre en datanode
 //todo ver leaks
 //todo sacar o dejar colores
 //todo comando repetir directorio
-//todo ver listar directorio y archivos
 
+
+//todo barra mas alla del bloque
+//todo worker muere por desconexion de un master
 //todo ver recv en reduc global
 //todo ver send en reduc global
-//todo ver desconexion entre workers
-
-//todo probar definitivamente
