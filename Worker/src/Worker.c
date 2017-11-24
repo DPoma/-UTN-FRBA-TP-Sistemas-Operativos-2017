@@ -156,34 +156,35 @@ void configuracionSenial(int senial) {
 void transformacion(Mensaje* mensaje, Socket unSocket) {
 	Transformacion* transformacion = memoriaAlocar(sizeof(Transformacion));
 	transformacionObtenerScript(transformacion, mensaje);
+	String pathScript = transformacionCrearScript(transformacion);
 	int estado = ACTIVADO;
 	while(estado) {
 		Mensaje* otroMensaje = mensajeRecibir(unSocket);
 		switch(otroMensaje->header.operacion) {
 			case DESCONEXION: masterDesconectar(unSocket); estado = DESACTIVADO; break;
-			case TRANSFORMACION: transformacionProcesarBloque(transformacion, mensaje, otroMensaje, unSocket); break;
+			case TRANSFORMACION: transformacionProcesarBloque(transformacion, mensaje, otroMensaje, unSocket, pathScript); break;
 			case EXITO: transformacionFinalizar(unSocket, &estado); break;
 		}
 		mensajeDestruir(otroMensaje);
 	}
+	fileLimpiar(pathScript);
+	memoriaLiberar(pathScript);
 	transformacionDestruir(transformacion);
 }
 
-int transformacionEjecutar(Transformacion* transformacion) {
+int transformacionEjecutar(Transformacion* transformacion, String pathScript) {
 	String pathBloque = transformacionCrearBloque(transformacion);
-	String pathScript = transformacionCrearScript(transformacion);
+
 	String pathDestino = string_from_format("%s%s", RUTA_TEMP, transformacion->nombreResultado);
 	String comando = string_from_format("chmod 0777 %s", pathScript);
 	int resultado = system(comando);
 	memoriaLiberar(comando);
 	if(resultado != ERROR) {
-		comando = string_from_format("cat %s | sh %s | sort > %s", pathBloque, pathScript, pathDestino);
+		comando = string_from_format("cat %s |  %s | sort > %s", pathBloque, pathScript, pathDestino);
 		resultado = system(comando);
 		memoriaLiberar(comando);
 	}
 	fileLimpiar(pathBloque);
-	fileLimpiar(pathScript);
-	memoriaLiberar(pathScript);
 	memoriaLiberar(pathDestino);
 	memoriaLiberar(pathBloque);
 	return resultado;
@@ -203,7 +204,7 @@ void transformacionFinalizarBloque(int resultado, Socket unSocket, Entero numero
 }
 
 void transformacionExito(Entero numeroBloque, Socket unSocket) {
-	imprimirMensaje1(archivoLog,"[TRANSFORMACION] Master #(id?): Operacion finalizada en bloque N°%d", (int*)numeroBloque);
+	imprimirMensaje1(archivoLog,"[TRANSFORMACION] Master #(id?): Operacion finalizada con exito en bloque N°%d", (int*)numeroBloque);
 	mensajeEnviar(unSocket, EXITO, &numeroBloque, sizeof(Entero));
 }
 
@@ -229,11 +230,11 @@ void transformacionObtenerBloque(Transformacion* transformacion, Puntero datos) 
 	memcpy(transformacion->nombreResultado, datos+sizeof(Entero)*2, 12);
 }
 
-void transformacionProcesarBloque(Transformacion* transformacion, Mensaje* mensaje, Mensaje* otroMensaje, Socket unSocket) {
+void transformacionProcesarBloque(Transformacion* transformacion, Mensaje* mensaje, Mensaje* otroMensaje, Socket unSocket, String pathScript) {
 	transformacionObtenerBloque(transformacion, otroMensaje->datos);
 	pid_t pid = fork();
 	if(pid == 0) {
-		int resultado = transformacionEjecutar(transformacion);
+		int resultado = transformacionEjecutar(transformacion, pathScript);
 		transformacionFinalizarBloque(resultado, unSocket, transformacion->numeroBloque);
 		transformacionDestruir(transformacion);
 		mensajeDestruir(mensaje);
@@ -246,8 +247,10 @@ void transformacionProcesarBloque(Transformacion* transformacion, Mensaje* mensa
 String transformacionCrearScript(Transformacion* transformacion) {
 	String path = string_from_format("%s%sScript", RUTA_TEMP, transformacion->nombreResultado);
 	File file = fileAbrir(path , ESCRITURA);
+	memoriaLiberar(path);
 	fwrite(transformacion->script, sizeof(char), transformacion->scriptSize, file);
 	fileCerrar(file);
+	path = string_from_format("%s./%sScript", RUTA_TEMP, transformacion->nombreResultado);
 	return path;
 }
 
@@ -317,7 +320,7 @@ void reduccionLocalDestruir(ReduccionLocal* reduccion) {
 }
 
 void reduccionLocalExito(Socket unSocket) {
-	imprimirMensaje(archivoLog,"[REDUCCION LOCAL] Master #(id?): Operacion finalizada");
+	imprimirMensaje(archivoLog,"[REDUCCION LOCAL] Master #(id?): Operacion finalizada con exito");
 	mensajeEnviar(unSocket, EXITO, NULL, 0);
 }
 
@@ -370,10 +373,11 @@ ReduccionGlobal* reduccionGlobalRecibirDatos(Puntero datos) {
 	return reduccion;
 }
 
-void reduccionGlobalAparearTemporales(ReduccionGlobal* reduccion) {
+int reduccionGlobalAparearTemporales(ReduccionGlobal* reduccion) {
 	Lista listaApareados = listaCrear();
-	reduccionGlobalAlgoritmoApareo(reduccion, listaApareados);
+	int resultado = reduccionGlobalAlgoritmoApareo(reduccion, listaApareados);
 	listaDestruirConElementos(listaApareados, (Puntero)memoriaLiberar);
+	return resultado;
 }
 
 int reduccionGlobalEjecutar(ReduccionGlobal* reduccion) {
@@ -408,7 +412,7 @@ void reduccionGlobalDestruir(ReduccionGlobal* reduccion) {
 }
 
 void reduccionGlobalExito(Socket unSocket) {
-	imprimirMensaje(archivoLog,"[REDUCCION GLOBAL] Master #(id?): Operacion finalizada");
+	imprimirMensaje(archivoLog,"[REDUCCION GLOBAL] Master #(id?): Operacion finalizada con exito");
 	mensajeEnviar(unSocket, EXITO, NULL, 0);
 }
 
@@ -417,22 +421,34 @@ void reduccionGlobalFracaso(Socket unSocket) {
 	mensajeEnviar(unSocket, FRACASO, NULL, 0);
 }
 
-void reduccionGlobalRealizarConexiones(ReduccionGlobal* reduccion, Lista listaApareados) {
+int reduccionGlobalRealizarConexiones(ReduccionGlobal* reduccion, Lista listaApareados) {
+	int resultado = OK;
 	int indice;
 	for(indice=0; indice < reduccion->cantidadNodos; indice++) {
 		Apareo* apareo = memoriaAlocar(sizeof(Apareo));
 		apareo->socketWorker = socketCrearCliente(reduccion->nodos[indice].nodo.ip, reduccion->nodos[indice].nodo.port, ID_MASTER);
+		if(apareo->socketWorker == ERROR) {
+			resultado = ERROR;
+			break;
+		}
 		mensajeEnviar(apareo->socketWorker, CONEXION_WORKER, reduccion->nodos[indice].temporal, TEMPSIZE);
 		listaAgregarElemento(listaApareados, apareo);
 	}
+	return resultado;
 }
 
-void reduccionGlobalObtenerLineas(Lista listaApareados) {
+int reduccionGlobalObtenerLineas(Lista listaApareados) {
 	int indice;
+	int resultado = OK;
 	for(indice=0; indice < listaCantidadElementos(listaApareados); indice++) {
 		Apareo* apareo = listaObtenerElemento(listaApareados, indice);
 		apareo->linea = reduccionGlobalEncargadoPedirLinea(apareo->socketWorker);
+		if(stringIguales(apareo->linea, "ERROR")) {
+			resultado = ERROR;
+			break;
+		}
 	}
+	return resultado;
 }
 
 void reduccionGlobalCompararLineas(Lista listaApareados, Apareo* apareo) {
@@ -443,26 +459,35 @@ void reduccionGlobalCompararLineas(Lista listaApareados, Apareo* apareo) {
 	}
 }
 
-void reduccionGlobalEscribirLinea(Apareo* apareo, File archivoResultado) {
+int reduccionGlobalEscribirLinea(Apareo* apareo, File archivoResultado) {
+	int resultado = OK;
 	fwrite(apareo->linea, sizeof(char), stringLongitud(apareo->linea), archivoResultado);
 	memoriaLiberar(apareo->linea);
 	apareo->linea = reduccionGlobalEncargadoPedirLinea(apareo->socketWorker);
+	if(stringIguales(apareo->linea, "ERROR"))
+		resultado = ERROR;
+	return resultado;
 }
 
-void reduccionGlobalAlgoritmoApareo(ReduccionGlobal* reduccion, Lista listaApareados) {
-	reduccionGlobalRealizarConexiones(reduccion, listaApareados);
-	//if(resultado == ERROR)
-		//return resultado;
-	reduccion->pathApareo = string_from_format("%s%sApareo", RUTA_TEMP, reduccion->nombreResultado);
-	File archivoResultado = fileAbrir(reduccion->pathApareo, ESCRITURA);
-	reduccionGlobalObtenerLineas(listaApareados);
-	Apareo* apareo = listaPrimerElemento(listaApareados);
-	while(!listaEstaVacia(listaApareados)) {
-		reduccionGlobalCompararLineas(listaApareados, apareo);
-		reduccionGlobalEscribirLinea(apareo, archivoResultado);
-		reduccionGlobalControlarLineas(listaApareados);
+int reduccionGlobalAlgoritmoApareo(ReduccionGlobal* reduccion, Lista listaApareados) {
+	int resultado = reduccionGlobalRealizarConexiones(reduccion, listaApareados);
+	if(resultado != ERROR) {
+		reduccion->pathApareo = string_from_format("%s%sApareo", RUTA_TEMP, reduccion->nombreResultado);
+		File archivoResultado = fileAbrir(reduccion->pathApareo, ESCRITURA);
+		resultado = reduccionGlobalObtenerLineas(listaApareados);
+		if(resultado != ERROR) {
+			Apareo* apareo = listaPrimerElemento(listaApareados);
+			while(!listaEstaVacia(listaApareados)) {
+				reduccionGlobalCompararLineas(listaApareados, apareo);
+				resultado = reduccionGlobalEscribirLinea(apareo, archivoResultado);
+				if(resultado == ERROR)
+					break;
+				reduccionGlobalControlarLineas(listaApareados);
+			}
+		}
+		fileCerrar(archivoResultado);
 	}
-	fileCerrar(archivoResultado);
+	return resultado;
 }
 
 Apareo* reduccionGlobalLineaMasCorta(Apareo* unApareo, Apareo* otroApareo) {
@@ -622,7 +647,7 @@ void almacenadoFinalFinalizar(int resultado, Socket unSocket) {
 }
 
 void almacenadoFinalExito(Socket unSocket) {
-	imprimirMensaje(archivoLog,"[ALMACENADO FINAL] Master #(id?): Operacion finalizada");
+	imprimirMensaje(archivoLog,"[ALMACENADO FINAL] Master #(id?): Operacion finalizada con exito");
 	mensajeEnviar(unSocket, EXITO, NULL, 0);
 }
 

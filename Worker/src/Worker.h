@@ -128,14 +128,14 @@ void masterRealizarOperacion(Socket unSocket);
 
 //--------------------------------------- Funciones de Transformacion -------------------------------------
 
-int transformacionEjecutar(Transformacion* transformacion);
+int transformacionEjecutar(Transformacion* transformacion, String pathScript);
 void transformacion(Mensaje* mensaje, Socket unSocket);
 void transformacionDestruir(Transformacion* transformacion);
 void transformacionExito(Entero numeroBloque, Socket unSocket);
 void transformacionFracaso(Entero numeroBloque, Socket unSocket);
 void transformacionObtenerScript(Transformacion* transformacion, Mensaje* mensaje);
 void transformacionFinalizar(Socket unSocket, int* estado);
-void transformacionProcesarBloque(Transformacion* transformacion, Mensaje* mensaje, Mensaje* otroMensaje, Socket unSocket);
+void transformacionProcesarBloque(Transformacion* transformacion, Mensaje* mensaje, Mensaje* otroMensaje, Socket unSocket, String pathScript);
 String transformacionCrearBloque(Transformacion* transformacion);
 String transformacionCrearScript(Transformacion* transformacion);
 
@@ -157,10 +157,10 @@ void reduccionLocalFracaso(Socket unSocket);
 void reduccionGlobal(Mensaje* mensaje, Socket unSocket);
 ReduccionGlobal* reduccionGlobalRecibirDatos(Puntero datos);
 int reduccionGlobalEjecutar(ReduccionGlobal* reduccion);
-void reduccionGlobalAparearTemporales(ReduccionGlobal* reduccion);
-void reduccionGlobalAlgoritmoApareo(ReduccionGlobal* reduccion, Lista listaApareados);
+int reduccionGlobalAparearTemporales(ReduccionGlobal* reduccion);
+int reduccionGlobalAlgoritmoApareo(ReduccionGlobal* reduccion, Lista listaApareados);
 String reduccionGlobalCrearScript(ReduccionGlobal* reduccion);
-void reduccionGlobalRealizarConexiones(ReduccionGlobal* reduccion, Lista listaApareados);
+int reduccionGlobalRealizarConexiones(ReduccionGlobal* reduccion, Lista listaApareados);
 void reduccionGlobalDestruir(ReduccionGlobal* reduccion);
 void reduccionGlobalFinalizar(int resultado, Socket unSocket);
 void reduccionGlobalExito(Socket unSocket);

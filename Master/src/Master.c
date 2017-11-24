@@ -194,6 +194,9 @@ void transformaciones(Lista bloques){
 		}
 		for(;respondidos<enviados;respondidos++){
 			Mensaje* mensaje = mensajeRecibir(socketWorker);
+			if(mensaje->header.operacion==DESCONEXION){
+				puts("UR DONE");
+			}
 			//a demas de decir exito o fracaso devuelve el numero de bloque
 			void enviarActualizacion(){
 				char buffer[INTSIZE*2+DIRSIZE];
