@@ -95,9 +95,9 @@ void yamaAtender() {
 		Socket socketI;
 		Socket maximoSocket = servidor->maximoSocket;
 		for(socketI = 0; socketI <= maximoSocket; socketI++){
-			retardo();
 			if (listaSocketsContiene(socketI, &servidor->listaSelect)){ //se recibio algo
 				//podría disparar el thread aca
+				retardo();
 				if(socketI==servidor->listenerMaster){
 					Socket nuevoSocket;
 					nuevoSocket = socketAceptar(socketI, ID_MASTER);
@@ -156,6 +156,7 @@ void yamaAtender() {
 								}
 							}
 							list_iterate(tablaUsados,(func)cazarEntradasDesconectadas);
+							liberarCargas(jobDesconexion);
 						}
 						log_info(archivoLog,"[EJECUCION] trabajo terminado");
 
@@ -491,7 +492,7 @@ void actualizarEntrada(Entrada* entradaA,int actualizando, Mensaje* mensaje){
 			list_destroy(nodos);
 			list_addM(tablaEstados,&reducLocal,sizeof(Entrada));//mutex
 		}
-		//manejar caso bizarro
+		//manejar caso bizarro todo or not todo
 	break;case REDUCLOCAL:
 		if(trabajoTerminado((func)mismoJob)){
 			log_info(archivoLog,"[REDUCGLBAL] creando entrada");
