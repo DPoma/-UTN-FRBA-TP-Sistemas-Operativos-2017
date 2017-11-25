@@ -66,7 +66,13 @@ typedef struct {
 Servidor* servidor;
 
 typedef struct{
+	int job;
+	int carga;
+} CargaJob;
+
+typedef struct{
 	bool conectado;
+	Lista cargas;
 	uint32_t carga; //son uint32_t porque lo pide el tp, yo usaria ints
 	uint32_t tareasRealizadas;
 	uint32_t disponibilidad;
@@ -111,6 +117,8 @@ void actualizarEntrada(Entrada*,int,Mensaje*);
 void dibujarTablaEstados();
 int dirToNum(Dir);
 void moverAUsados(bool(*)(void*));
+void aumentarCarga(Worker*,int,int);
+void liberarCargas(int);
 void retardo();
 
 

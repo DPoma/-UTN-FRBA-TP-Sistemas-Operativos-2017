@@ -33,6 +33,8 @@
 #define CIERRE 307
 #define DESCONEXION_NODO 308
 
+typedef void* func;
+
 typedef struct {
 	char ipYama[50];
 	char puertoYama[50];

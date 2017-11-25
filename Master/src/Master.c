@@ -113,7 +113,7 @@ void masterAtender(){
 	mensajeDestruir(mensaje);
 	for(i=0;i<listas->elements_count;i++){
 		pthread_t hilo;
-		pthread_create(&hilo,NULL,&transformaciones,list_get(listas,i));
+		pthread_create(&hilo,NULL,(func)&transformaciones,list_get(listas,i));
 	}
 	while(estadoMaster==ACTIVADO){
 		Mensaje* m=mensajeRecibir(socketYama);
@@ -129,13 +129,13 @@ void masterAtender(){
 			break;
 		case REDUCLOCAL:{
 			pthread_t hilo;
-			pthread_create(&hilo,NULL,&reduccionLocal,m);
+			pthread_create(&hilo,NULL,(func)&reduccionLocal,m);
 		}break;
 		case REDUCGLOBAL:{
 			void list_obliterate(t_list* list){
 				list_destroy_and_destroy_elements(list,free);
 			}
-			list_destroy_and_destroy_elements(listas,list_obliterate);}
+			list_destroy_and_destroy_elements(listas,(func)list_obliterate);}
 			reduccionGlobal(m);
 			break;
 		case ALMACENADO:
