@@ -2318,7 +2318,7 @@ bool nodoDesconectado(Nodo* nodo) {
 
 void nodoVerificarBloquesLibres(Nodo* nodo) {
 	if(nodo->bloquesLibres == NULO) {
-		imprimirMensaje1(archivoLog, "[AVISO] El %s tiene todos sus bloques ocupados", nodo->nombre);
+		imprimirMensaje1(archivoLog, AMARILLO"[AVISO] El %s tiene todos sus bloques ocupados"BLANCO, nodo->nombre);
 	}
 }
 
@@ -3016,11 +3016,5 @@ void semaforosDestruir() {
 	memoriaLiberar(mutexEstado);
 }
 
-
 //todo memory leak en yamaatender
-//todo agregar nombre en datanode
-//todo sacar o dejar colores
-//todo comando repetir directorio
-
-
 //todo barra mas alla del bloque
