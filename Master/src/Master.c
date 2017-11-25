@@ -113,28 +113,29 @@ void masterAtender(){
 	mensajeDestruir(mensaje);
 	for(i=0;i<listas->elements_count;i++){
 		pthread_t hilo;
-		pthread_create(&hilo,NULL,&transformaciones,list_get(listas,i));
+		pthread_create(&hilo,NULL,(func)&transformaciones,list_get(listas,i));
 	}
 	while(estadoMaster==ACTIVADO){
 		Mensaje* m=mensajeRecibir(socketYama);
 		switch(m->header.operacion){
 		case TRANSFORMACION://hubo error y se recibió un bloque alternativo
 			metricas.fallos++;
-			memcpy(&alternativo.bloque,mensaje->datos+i+DIRSIZE,INTSIZE);
-			memcpy(&alternativo.bytes,mensaje->datos+i+DIRSIZE+INTSIZE,INTSIZE);
-			memcpy(&alternativo.temp,mensaje->datos+i+DIRSIZE+INTSIZE*2,TEMPSIZE);
+			memcpy(&alternativo.dir,m->datos,DIRSIZE);
+			memcpy(&alternativo.bloque,m->datos+DIRSIZE,INTSIZE);
+			memcpy(&alternativo.bytes,m->datos+DIRSIZE+INTSIZE,INTSIZE);
+			memcpy(&alternativo.temp,m->datos+DIRSIZE+INTSIZE*2,TEMPSIZE);
 			semaforoSignal(recepcionAlternativo);
 			mensajeDestruir(m);
 			break;
 		case REDUCLOCAL:{
 			pthread_t hilo;
-			pthread_create(&hilo,NULL,&reduccionLocal,m);
+			pthread_create(&hilo,NULL,(func)&reduccionLocal,m);
 		}break;
 		case REDUCGLOBAL:{
 			void list_obliterate(t_list* list){
 				list_destroy_and_destroy_elements(list,free);
 			}
-			list_destroy_and_destroy_elements(listas,list_obliterate);}
+			list_destroy_and_destroy_elements(listas,(func)list_obliterate);}
 			reduccionGlobal(m);
 			break;
 		case ALMACENADO:
@@ -196,6 +197,9 @@ void transformaciones(Lista bloques){
 			Mensaje* mensaje = mensajeRecibir(socketWorker);
 			if(mensaje->header.operacion==DESCONEXION){
 				puts("UR DONE");
+				mensajeEnviar(socketYama,DESCONEXION_NODO,&dir->dir,DIRSIZE);
+				pthread_detach(pthread_self());
+				return;
 			}
 			//a demas de decir exito o fracaso devuelve el numero de bloque
 			void enviarActualizacion(){
@@ -263,8 +267,8 @@ void reduccionLocal(Mensaje* m){
 
 	Mensaje* mensaje = mensajeRecibir(sWorker);
 	if(mensaje->header.operacion==DESCONEXION){
+		imprimirMensaje(archivoLog,"[ERROR] Worker desconectado");
 		mensaje->header.operacion=FRACASO;
-		puts("AHHHH");
 	}
 	imprimirMensaje(archivoLog,mensaje->header.operacion==EXITO?"[EJECUCION] reduccion local exitosa"
 			:"[ERROR] fallo en la reduccion local");
@@ -304,8 +308,8 @@ void reduccionGlobal(Mensaje* m){
 
 	Mensaje* mensaje = mensajeRecibir(sWorker);
 	if(mensaje->header.operacion==DESCONEXION){
+		imprimirMensaje(archivoLog,"[ERROR] Worker desconectado");
 		mensaje->header.operacion=FRACASO;
-		puts("WHHHH");
 	}
 	imprimirMensaje(archivoLog,mensaje->header.operacion==EXITO?"[EJECUCION] reduccion global exitosa"
 			:"[ERROR] reduccion global fallida");
@@ -338,8 +342,8 @@ void almacenado(Mensaje* m){
 
 	Mensaje* mens=mensajeRecibir(sWorker);
 	if(mens->header.operacion==DESCONEXION){
+		imprimirMensaje(archivoLog,"[ERROR] Worker desconectado");
 		mens->header.operacion=FRACASO;
-		puts("XHHHH");
 	}
 	imprimirMensaje(archivoLog,mens->header.operacion==EXITO?"[EJECUCION] ALMACENADO EXITOSO":"[ERROR] ALMACENADO FALLIDO");
 

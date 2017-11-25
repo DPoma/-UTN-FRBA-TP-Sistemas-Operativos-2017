@@ -37,6 +37,8 @@
 #define ALMACENADO 306
 #define CIERRE 307
 
+#define DESCONEXION_NODO 308
+
 #define ENPROCESO 2
 #define ABORTADO 3
 
@@ -64,7 +66,13 @@ typedef struct {
 Servidor* servidor;
 
 typedef struct{
+	int job;
+	int carga;
+} CargaJob;
+
+typedef struct{
 	bool conectado;
+	Lista cargas;
 	uint32_t carga; //son uint32_t porque lo pide el tp, yo usaria ints
 	uint32_t tareasRealizadas;
 	uint32_t disponibilidad;
@@ -105,9 +113,12 @@ void yamaIniciar();
 void yamaAtender();
 void yamaPlanificar(Socket,void*,int);
 void actualizarTablaEstados(Mensaje*,Socket);
+void actualizarEntrada(Entrada*,int,Mensaje*);
 void dibujarTablaEstados();
 int dirToNum(Dir);
 void moverAUsados(bool(*)(void*));
+void aumentarCarga(Worker*,int,int);
+void liberarCargas(int);
 void retardo();
 
 
