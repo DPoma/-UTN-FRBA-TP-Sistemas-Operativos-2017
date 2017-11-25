@@ -50,7 +50,10 @@ void masterIniciar(String* argv) {
 	semaforoIniciar2(&metricas.reducLocales,1);
 
 	void leerArchivo(File archScript,char** script,int* len){
-		//todo validar
+		if(!archScript){
+			puts("no se pudo abrir un archivo de script");
+			abort();
+		}
 		fseek(archScript, 0, SEEK_END);
 		long posicion = ftell(archScript);
 		fseek(archScript, 0, SEEK_SET);
@@ -166,6 +169,7 @@ void masterAtender(){
 	imprimirMensaje1(archivoLog,"[METRICA]Tareas realizadas en paralelo: %d",(void*)metricas.maxParalelo);
 }
 void transformaciones(Lista bloques){
+	tareasEnParalelo(1);
 	clock_t tiempo=clock();
 	t_queue* clocks=queue_create();
 	WorkerTransformacion* dir = list_get(bloques,0);
@@ -179,7 +183,7 @@ void transformaciones(Lista bloques){
 	semaforoSignal(metricas.transformaciones);
 	do{
 		for(;enviados<bloques->elements_count;enviados++){
-			tareasEnParalelo(1);
+			//tareasEnParalelo(1);
 			clock_t* inicio=malloc(sizeof(clock_t));
 			*inicio=clock();
 			queue_push(clocks,inicio);
@@ -210,7 +214,7 @@ void transformaciones(Lista bloques){
 				memcpy(buffer+INTSIZE+DIRSIZE,mensaje->datos,INTSIZE);
 				mensajeEnviar(socketYama,mensaje->header.operacion,buffer,sizeof buffer);
 				mensajeDestruir(mensaje);
-				tareasEnParalelo(-1);
+				//tareasEnParalelo(-1);
 			}
 			if(mensaje->header.operacion==EXITO){
 				imprimirMensaje1(archivoLog, "[TRANSFORMACION] Transformacion realizada con exito en el Worker %s",dir->dir.ip);
@@ -241,6 +245,7 @@ void transformaciones(Lista bloques){
 	mensajeEnviar(socketWorker, EXITO, NULL, 0);
 	socketCerrar(socketWorker);
 	queue_destroy(clocks);
+	tareasEnParalelo(-1);
 	imprimirMensaje2(archivoLog,"[EJECUCION] transformacion terminada de nodo %s %s",dir->dir.ip,dir->dir.port);
 	pthread_detach(pthread_self());
 }

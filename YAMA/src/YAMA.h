@@ -71,7 +71,6 @@ typedef struct{
 } CargaJob;
 
 typedef struct{
-	bool conectado;
 	Lista cargas;
 	uint32_t carga; //son uint32_t porque lo pide el tp, yo usaria ints
 	uint32_t tareasRealizadas;

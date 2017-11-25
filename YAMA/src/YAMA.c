@@ -206,7 +206,6 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 			}
 			if(list_all_satisfy(workers,(func)noRegistrado)){
 				Worker worker;
-				worker.conectado=true;
 				worker.carga=0;
 				worker.tareasRealizadas=0;
 				worker.nodo=*nodo;
@@ -269,11 +268,7 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 		list_iterate(workers,(func)setearClock);
 	}
 	Worker* obtenerWorker(int* pos){
-		Worker* worker=list_get(workers,*pos);
-		if(worker->conectado)
-			return worker;
-		*pos=*pos+1%workers->elements_count;
-		return obtenerWorker(pos);
+		return list_get(workers,*pos);
 	}
 	for(i=0;i<bloques->elements_count;i+=2){
 		Worker* workerClock=obtenerWorker(&clock);
@@ -285,7 +280,6 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 			aumentarCarga(worker,job,1);
 			log_info(archivoLog,"bloque %s %s %d asignado a worker %s %s",bloque->nodo.ip,bloque->nodo.port,bloque->bloque,worker->nodo.ip,worker->nodo.port);
 			worker->disponibilidad--;
-			worker->tareasRealizadas++;
 			Entrada* entrada=list_get(tablaEstadosJob,i/2);
 			entrada->nodo=worker->nodo;
 			entrada->bloque=bloque->bloque;
@@ -362,6 +356,12 @@ void actualizarTablaEstados(Mensaje* mensaje,Socket masterid){
 		while((entradaA=list_find(tablaEstados,(func)buscarEntrada))){
 			actualizarEntrada(entradaA,FRACASO,nullptr);
 		}
+		//bool buscarWorker(Worker* worker){
+		//	return nodoIguales(worker->nodo,*nodo);
+		//}
+		//list_remove_by_condition(workers,(func)buscarWorker);
+		//no lo saco de la lista porque dirToNum lo necesita
+		//tampoco toco la carga porque levantarCarga la va a mover a 0 de todas formas
 		return;
 	}
 
@@ -431,6 +431,7 @@ void actualizarEntrada(Entrada* entradaA,int actualizando, Mensaje* mensaje){
 			liberarCargas(entradaA->job);
 		}
 		if(entradaA->etapa==TRANSFORMACION&&actualizando==FRACASO){
+			log_info(archivoLog,"%s --- %s",entradaA->nodo.port,entradaA->nodoAlt.port);
 			if(nodoIguales(entradaA->nodo,entradaA->nodoAlt)){
 				log_info(archivoLog,"[] no hay mas copias para salvar el error");
 				abortarJob();
@@ -458,10 +459,9 @@ void actualizarEntrada(Entrada* entradaA,int actualizando, Mensaje* mensaje){
 			bool buscarWorker(Worker* worker){
 				return nodoIguales(worker->nodo,alternativa.nodo);
 			}
-			aumentarCarga(list_find(workers,buscarWorker),alternativa.job,1);
-		}else{
+			aumentarCarga(list_find(workers,(func)buscarWorker),alternativa.job,1);
+		}else
 			abortarJob();
-		}
 		return;
 	}
 	bool trabajoTerminado(bool(*cond)(void*)){
@@ -629,12 +629,12 @@ void darPathTemporal(char** ret,char pre){
 		(*ret)[j]=temp[i];
 		j++;
 	}
-	log_info(archivoLog,"temp |%s|",temp);
+	//log_info(archivoLog,"temp |%s|",temp);
 	int endof=stringLongitud(temp)-3;
 	(*ret)[endof+1]='0';
 	(*ret)[endof+2]='\0';
 	char* anteriorTemp=string_duplicate(*ret);
-	if(anterior) log_info(archivoLog,"ant |%s|, new |%s|",anterior,*ret);
+	//if(anterior) log_info(archivoLog,"ant |%s|, new |%s|",anterior,*ret);
 	if(stringIguales(*ret,anterior))
 		if(agregado=='9')
 			agregado='a';
@@ -647,7 +647,7 @@ void darPathTemporal(char** ret,char pre){
 	else
 		agregado='0';
 	(*ret)[endof+1]=agregado;
-	log_info(archivoLog,"then |%s|",*ret);
+	//log_info(archivoLog,"then |%s|",*ret);
 	free(anterior);free(temp);
 	anterior=anteriorTemp;
 }
@@ -660,6 +660,7 @@ void moverAUsados(bool(*cond)(void*)){
 }
 void aumentarCarga(Worker* worker,int jobb,int aumento){
 	worker->carga+=aumento;
+	worker->tareasRealizadas+=aumento;
 	bool cargaJobActual(CargaJob* carga){
 		return carga->job==jobb;
 	}
