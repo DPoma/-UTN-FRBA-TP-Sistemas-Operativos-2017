@@ -29,6 +29,7 @@
 #define ID_BITMAPS 14
 #define ID_HELP 15
 #define ID_EXIT 16
+#define ID_MKNDIR 17
 #define FORMAT "format"
 #define RM "rm"
 #define RMB "rm -b"
@@ -45,6 +46,7 @@
 #define INFO "info"
 #define NODES "nodes"
 #define BITMAPS "bitmaps"
+#define MKNDIR "mkndir"
 #define HELP "help"
 #define EXIT "exit"
 #define FLAG_C "--clean"
@@ -332,13 +334,14 @@ void comandoEliminarArchivo(Comando* comando);
 void comandoRenombrar(Comando* comando);
 void comandoMover(Comando* comando);
 void comandoMostrarArchivo(Comando* comando);
-void comandoCrearDirectorio(Comando* comando);
+int comandoCrearDirectorio(Comando* comando);
 void comandoCopiarArchivoAYamaFS(Comando* comando);
 int comandoCopiarArchivoDeYamaFS(Comando* comando);
 void comandoCopiarBloque(Comando* comando);
 void comandoObtenerMD5DeArchivo(Comando* comando);
 void comandoListarDirectorio(Comando* comando);
 void comandoInformacionArchivo(Comando* comando);
+void comandoCrearVariosDirectorios(Comando* comando);
 void comandoInformacionNodos();
 void comandoInformacionBitmaps();
 void comandoAyuda();
@@ -499,6 +502,7 @@ void metadataCrear();
 void metadataEliminar();
 void metadataIniciar();
 void metadataRecuperar();
+bool metadataExiste();
 
 //--------------------------------------- Funciones de Ruta ------------------------------------
 
