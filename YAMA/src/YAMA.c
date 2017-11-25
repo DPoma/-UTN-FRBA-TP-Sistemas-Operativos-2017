@@ -258,10 +258,10 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 
 	int clock=0;
 	{
-		int mayorDisponibilidad=0;
+		Worker* aux=list_get(workers,0);
 		void setearClock(Worker* worker){
-			if(worker->disponibilidad>mayorDisponibilidad){
-				mayorDisponibilidad=worker->disponibilidad;
+			if(worker->disponibilidad>aux->disponibilidad||(worker->disponibilidad==aux->disponibilidad&&worker->tareasRealizadas<aux->tareasRealizadas)){
+				aux=worker;
 				clock=dirToNum(worker->nodo);
 			}
 		}
@@ -431,7 +431,6 @@ void actualizarEntrada(Entrada* entradaA,int actualizando, Mensaje* mensaje){
 			liberarCargas(entradaA->job);
 		}
 		if(entradaA->etapa==TRANSFORMACION&&actualizando==FRACASO){
-			log_info(archivoLog,"%s --- %s",entradaA->nodo.port,entradaA->nodoAlt.port);
 			if(nodoIguales(entradaA->nodo,entradaA->nodoAlt)){
 				log_info(archivoLog,"[] no hay mas copias para salvar el error");
 				abortarJob();
@@ -492,6 +491,7 @@ void actualizarEntrada(Entrada* entradaA,int actualizando, Mensaje* mensaje){
 			list_destroy(nodos);
 			list_addM(tablaEstados,&reducLocal,sizeof(Entrada));//mutex
 		}
+		//manejar caso bizarro
 	break;case REDUCLOCAL:
 		if(trabajoTerminado((func)mismoJob)){
 			log_info(archivoLog,"[REDUCGLBAL] creando entrada");
