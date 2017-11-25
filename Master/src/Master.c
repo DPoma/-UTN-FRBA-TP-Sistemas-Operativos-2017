@@ -169,12 +169,6 @@ void masterAtender(){
 	imprimirMensaje1(archivoLog,"[METRICA]Tareas realizadas en paralelo: %d",(void*)metricas.maxParalelo);
 }
 void transformaciones(Lista bloques){
-	void imprimir(WorkerTransformacion* bloque){
-		printf("-%d\n",bloque->bloque);
-	}
-	list_iterate(bloques,imprimir);
-
-
 	tareasEnParalelo(1);
 	clock_t tiempo=clock();
 	t_queue* clocks=queue_create();
@@ -218,6 +212,7 @@ void transformaciones(Lista bloques){
 				memcpy(buffer,&op,INTSIZE);
 				memcpy(buffer+INTSIZE,&dir->dir,DIRSIZE);
 				memcpy(buffer+INTSIZE+DIRSIZE,mensaje->datos,INTSIZE);
+				printf("BLOQUE %d\n",*(int*)(int32_t*)mensaje->datos);
 				mensajeEnviar(socketYama,mensaje->header.operacion,buffer,sizeof buffer);
 				mensajeDestruir(mensaje);
 				//tareasEnParalelo(-1);
