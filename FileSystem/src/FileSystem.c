@@ -339,15 +339,6 @@ BloqueYama yamaConvertirBloque(Bloque* bloque) {
 	bloqueYama.numeroBloqueCopia1 = copia1->bloqueNodo;
 	bloqueYama.numeroBloqueCopia2 = copia2->bloqueNodo;
 	bloqueYama.bytesUtilizados = bloque->bytesUtilizados;
-
-	printf("ip bloque 1 %s\n", direccion1.ip);
-	printf("puerto bloque 1 %s\n", direccion1.puerto);
-	printf("ip bloque 2 %s\n", direccion2.ip);
-	printf("puerto bloque 2 %s\n", direccion2.puerto);
-	printf("numero b1 %d\n", bloqueYama.numeroBloqueCopia1);
-	printf("numero b2 %d\n", bloqueYama.numeroBloqueCopia2);
-	printf("bytes utiles %d\n", bloqueYama.bytesUtilizados);
-
 	return bloqueYama;
 }
 
