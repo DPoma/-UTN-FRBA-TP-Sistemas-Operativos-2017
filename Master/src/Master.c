@@ -169,6 +169,12 @@ void masterAtender(){
 	imprimirMensaje1(archivoLog,"[METRICA]Tareas realizadas en paralelo: %d",(void*)metricas.maxParalelo);
 }
 void transformaciones(Lista bloques){
+	void imprimir(WorkerTransformacion* bloque){
+		printf("-%d\n",bloque->bloque);
+	}
+	list_iterate(bloques,imprimir);
+
+
 	tareasEnParalelo(1);
 	clock_t tiempo=clock();
 	t_queue* clocks=queue_create();
