@@ -547,6 +547,8 @@ int consolaIdentificarComando(String comando) {
 		return ID_HELP;
 	if(stringIguales(comando, BITMAPS))
 		return ID_BITMAPS;
+	if(stringIguales(comando, MKNDIR))
+		return ID_MKNDIR;
 	if(stringIguales(comando, EXIT))
 		return ID_EXIT;
 	else
@@ -565,7 +567,8 @@ bool consolaComandoTipoUno(String comando) {
 bool consolaComandoTipoDos(String comando) {
 	return stringIguales(comando, RENAME) ||
 			stringIguales(comando, MV) ||
-			stringIguales(comando, CPTO);
+			stringIguales(comando, CPTO) ||
+			stringIguales(comando, MKNDIR);
 }
 
 bool consolaComandoTipoTres(String comando) {
@@ -581,7 +584,8 @@ bool consolaComandoExiste(String comando) {
 			stringIguales(comando, EXIT) ||
 			stringIguales(comando, HELP) ||
 			stringIguales(comando, NODES) ||
-			stringIguales(comando, BITMAPS);
+			stringIguales(comando, BITMAPS) ||
+			stringIguales(comando, MKNDIR);
 }
 
 bool consolaValidarComandoSinTipo(String* subcadenas) {
@@ -721,6 +725,7 @@ void consolaEjecutarComando(Comando* comando) {
 		case ID_INFO: comandoInformacionArchivo(comando); break;
 		case ID_NODES: comandoInformacionNodos(); break;
 		case ID_BITMAPS: comandoInformacionBitmaps(); break;
+		case ID_MKNDIR: comandoCrearVariosDirectorios(comando); break;
 		case ID_HELP: comandoAyuda(); break;
 		case ID_EXIT: comandoFinalizar();break;
 		default: comandoError(); break;
@@ -793,21 +798,27 @@ void comandoFormatearFileSystem() {
 	imprimirMensaje(archivoLog, AMARILLO"[AVISO] El File System esta estable"BLANCO);
 }
 
-void comandoCrearDirectorio(Comando* comando) {
+int comandoCrearDirectorio(Comando* comando) {
 	if(!rutaValida(comando->argumentos[1])) {
 		imprimirMensaje(archivoLog,"[ERROR] La ruta ingresada no es valida");
-		return;
+		return ERROR;
 	}
 	if(stringIguales(comando->argumentos[1], RAIZ)) {
 		imprimirMensaje(archivoLog,"[ERROR] El directorio raiz no puede ser creado");
-		return;
+		return ERROR;
 	}
 	Archivo* archivo = archivoBuscarPorRuta(comando->argumentos[1]);
 	if(archivo != NULL) {
-		imprimirMensaje(archivoLog,"[ERROR] Un archivo o directorio posee el mismo nombre");
-		return;
+		imprimirMensaje(archivoLog,"[ERROR] Un archivo ya tiene el mismo nombre");
+		return ERROR;
+	}
+	Directorio* directorio = directorioBuscar(comando->argumentos[1]);
+	if(directorio != NULL) {
+		imprimirMensaje(archivoLog,"[ERROR] Un directorio ya tiene el mismo nombre");
+		return ERROR;
 	}
 	ControlDirectorio* control = directorioControlCrear(comando->argumentos[1]);
+	int resultado = OK;
 	while(stringValido(control->nombreDirectorio)) {
 		directorioBuscarIdentificador(control);
 		if (directorioExisteIdentificador(control->identificadorDirectorio))
@@ -815,10 +826,12 @@ void comandoCrearDirectorio(Comando* comando) {
 		int estado = directorioCrearDirectoriosRestantes(control, comando->argumentos[1]);
 		if(estado == ERROR) {
 			imprimirMensaje(archivoLog,"[ERROR] Se alcanzo el limite de directorios permitidos (100)");
+			resultado = ERROR;
 			break;
 		}
 		if(estado == -2) {
 			imprimirMensaje(archivoLog,"[ERROR] El nombre del directorio es demasiado largo");
+			resultado = ERROR;
 			break;
 		}
 	directorioControlSetearNombre(control);
@@ -828,6 +841,7 @@ void comandoCrearDirectorio(Comando* comando) {
 		memoriaLiberar(control->nombresDirectorios[indice]);
 	memoriaLiberar(control->nombresDirectorios);
 	memoriaLiberar(control);
+	return resultado;
 }
 
 void comandoRenombrar(Comando* comando) {
@@ -1324,6 +1338,21 @@ void comandoInformacionBitmaps() {
 		puts("");
 		puts("------------------------------------------");
 	}
+}
+
+void comandoCrearVariosDirectorios(Comando* comando) {
+	int indice;
+	int cantidadDirectorios = atoi(comando->argumentos[2]);
+	int resultado;
+	String base = comando->argumentos[1];
+	for(indice = 0; indice < cantidadDirectorios; indice++) {
+		comando->argumentos[1] = string_from_format("%s%i", base, indice);
+		resultado = comandoCrearDirectorio(comando);
+		memoriaLiberar(comando->argumentos[1]);
+		if(resultado == ERROR)
+			break;
+	}
+	comando->argumentos[1] = base;
 }
 
 void comandoAyuda() {
@@ -2987,17 +3016,11 @@ void semaforosDestruir() {
 	memoriaLiberar(mutexEstado);
 }
 
-//todo con clean borrar metadata si existiera, el format la vuelve a crear
+
 //todo memory leak en yamaatender
-//todo poner al script de transformacion el pid del fork
-//todo md5 yamafs cambiar
 //todo agregar nombre en datanode
-//todo ver leaks
 //todo sacar o dejar colores
 //todo comando repetir directorio
 
 
 //todo barra mas alla del bloque
-//todo worker muere por desconexion de un master
-//todo ver recv en reduc global
-//todo ver send en reduc global
