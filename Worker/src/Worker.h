@@ -47,8 +47,8 @@ typedef struct {
 typedef struct {
 	int scriptSize;
 	String script;
-	int numeroBloque;
-	int bytesUtilizados;
+	Entero numeroBloque;
+	Entero bytesUtilizados;
 	char nombreResultado[12];
 } Transformacion;
 

@@ -167,14 +167,13 @@ void transformacion(Mensaje* mensaje, Socket unSocket) {
 		}
 		mensajeDestruir(otroMensaje);
 	}
-	fileLimpiar(pathScript);
+	//fileLimpiar(pathScript);
 	memoriaLiberar(pathScript);
 	transformacionDestruir(transformacion);
 }
 
 int transformacionEjecutar(Transformacion* transformacion, String pathScript) {
 	String pathBloque = transformacionCrearBloque(transformacion);
-
 	String pathDestino = string_from_format("%s%s", RUTA_TEMP, transformacion->nombreResultado);
 	String comando = string_from_format("chmod 0777 %s", pathScript);
 	int resultado = system(comando);
@@ -205,11 +204,13 @@ void transformacionFinalizarBloque(int resultado, Socket unSocket, Entero numero
 
 void transformacionExito(Entero numeroBloque, Socket unSocket) {
 	imprimirMensaje1(archivoLog,"[TRANSFORMACION] Master #(id?): Operacion finalizada con exito en bloque N°%d", (int*)numeroBloque);
+	printf("NUMERO EN %d\n", numeroBloque);
 	mensajeEnviar(unSocket, EXITO, &numeroBloque, sizeof(Entero));
 }
 
 void transformacionFracaso(Entero numeroBloque, Socket unSocket) {
 	imprimirMensaje1(archivoLog,"[TRANSFORMACION] Master #(id?): Operacion fallida en bloque N°%d", (int*)numeroBloque);
+	printf("NUMERO EN %d\n", numeroBloque);
 	mensajeEnviar(unSocket, FRACASO, &numeroBloque, sizeof(Entero));
 }
 
@@ -226,8 +227,11 @@ void transformacionObtenerScript(Transformacion* transformacion, Mensaje* mensaj
 
 void transformacionObtenerBloque(Transformacion* transformacion, Puntero datos) {
 	memcpy(&transformacion->numeroBloque, datos, sizeof(Entero));
+	printf("NUM BLOQUE %d\n" ,transformacion->numeroBloque);
 	memcpy(&transformacion->bytesUtilizados, datos+sizeof(Entero), sizeof(Entero));
+	printf("bytes utli %d\n" ,transformacion->bytesUtilizados);
 	memcpy(transformacion->nombreResultado, datos+sizeof(Entero)*2, 12);
+	printf("nombr eresultado %s\n" ,transformacion->nombreResultado);
 }
 
 void transformacionProcesarBloque(Transformacion* transformacion, Mensaje* mensaje, Mensaje* otroMensaje, Socket unSocket, String pathScript) {

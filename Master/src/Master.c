@@ -194,6 +194,9 @@ void transformaciones(Lista bloques){
 			memcpy(data,&wt->bloque,INTSIZE);
 			memcpy(data+INTSIZE,&wt->bytes,INTSIZE);
 			memcpy(data+INTSIZE*2,wt->temp,TEMPSIZE);
+			printf("el numero bloqu es %d\n",wt->bloque);
+			printf("el bytes es es %d\n", wt->bytes);
+			printf("el temporal es %s\n", wt->temp);
 			mensajeEnviar(socketWorker,TRANSFORMACION,data,tamanio);
 			imprimirMensaje2(archivoLog,"[CONEXION] Enviando bloque %d %s",(int*)wt->bloque,wt->temp);
 		}
@@ -212,6 +215,7 @@ void transformaciones(Lista bloques){
 				memcpy(buffer,&op,INTSIZE);
 				memcpy(buffer+INTSIZE,&dir->dir,DIRSIZE);
 				memcpy(buffer+INTSIZE+DIRSIZE,mensaje->datos,INTSIZE);
+				printf("BLOQUE %d\n",*(int32_t*)mensaje->datos);
 				mensajeEnviar(socketYama,mensaje->header.operacion,buffer,sizeof buffer);
 				mensajeDestruir(mensaje);
 				//tareasEnParalelo(-1);
