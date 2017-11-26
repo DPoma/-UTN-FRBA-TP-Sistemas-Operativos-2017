@@ -44,7 +44,7 @@ void masterAtenderOperacion(Socket unSocket) {
 	else if(pid > 0)
 		socketCerrar(unSocket);
 	else
-		imprimirMensaje(archivoLog, "[ERROR] Error en el fork(), estas jodido");
+		imprimirMensaje(archivoLog, ROJO"[ERROR] Error en el fork(), estas jodido"BLANCO);
 }
 
 void masterRealizarOperacion(Socket unSocket) {
@@ -127,13 +127,13 @@ void configuracionIniciarCampos() {
 void configuracionCalcularBloques() {
 	int descriptorArchivo = open(configuracion->rutaDataBin, O_CLOEXEC | O_RDWR);
 	if (descriptorArchivo == ERROR) {
-		imprimirMensaje(archivoLog, "[ERROR] Fallo el open()");
+		imprimirMensaje(archivoLog, ROJO"[ERROR] Fallo el open()"BLANCO);
 		perror("open");
 		exit(EXIT_FAILURE);
 	}
 	struct stat estadoArchivo;
 	if (fstat(descriptorArchivo, &estadoArchivo) == ERROR) {
-		imprimirMensaje(archivoLog, "[ERROR] Fallo el fstat()");
+		imprimirMensaje(archivoLog, ROJO"[ERROR] Fallo el fstat()"BLANCO);
 		perror("fstat");
 		exit(EXIT_FAILURE);
 	}
@@ -160,15 +160,6 @@ void transformacion(Mensaje* mensaje, Socket unSocket) {
 	int estado = ACTIVADO;
 	while(estado) {
 		Mensaje* otroMensaje = mensajeRecibir(unSocket);
-		int bloque;
-		int bytes;
-		char temporal[12];
-		memcpy(&bloque, otroMensaje->datos, sizeof(Entero));
-		printf("MASTER ENVIO BLOQUE NUMERO %d\n" ,bloque);
-		memcpy(&bytes, otroMensaje->datos+sizeof(Entero), sizeof(Entero));
-		printf("MASTER ENVIO BYTES UTILZADOS %d\n" ,bytes);
-		memcpy(temporal,otroMensaje->datos+sizeof(Entero)*2, 12);
-		printf("MASTER ENVIO TEMPORAL CON NOMBRE %s\n" ,temporal);
 		switch(otroMensaje->header.operacion) {
 			case DESCONEXION: masterDesconectar(unSocket); estado = DESACTIVADO; break;
 			case TRANSFORMACION: transformacionProcesarBloque(transformacion, mensaje, otroMensaje, unSocket, pathScript); break;
@@ -176,7 +167,7 @@ void transformacion(Mensaje* mensaje, Socket unSocket) {
 		}
 		mensajeDestruir(otroMensaje);
 	}
-	//fileLimpiar(pathScript);
+	fileLimpiar(pathScript);
 	memoriaLiberar(pathScript);
 	transformacionDestruir(transformacion);
 }
@@ -199,7 +190,7 @@ int transformacionEjecutar(Transformacion* transformacion, String pathScript) {
 }
 
 void transformacionFinalizar(Socket unSocket, int* estado) {
-	imprimirMensaje(archivoLog, "[CONEXION] Master #(id?): Etapa de transformacion finalizada");
+	imprimirMensaje(archivoLog, AMARILLO"[AVISO] Master #(id?): Transformaciones finalizadas con exito"BLANCO);
 	socketCerrar(unSocket);
 	*estado = DESACTIVADO;
 }
@@ -213,13 +204,11 @@ void transformacionFinalizarBloque(int resultado, Socket unSocket, Entero numero
 
 void transformacionExito(Entero numeroBloque, Socket unSocket) {
 	imprimirMensaje1(archivoLog,"[TRANSFORMACION] Master #(id?): Operacion finalizada con exito en bloque N°%d", (int*)numeroBloque);
-	printf("NUMERO EN %d\n", numeroBloque);
 	mensajeEnviar(unSocket, EXITO, &numeroBloque, sizeof(Entero));
 }
 
 void transformacionFracaso(Entero numeroBloque, Socket unSocket) {
 	imprimirMensaje1(archivoLog,"[TRANSFORMACION] Master #(id?): Operacion fallida en bloque N°%d", (int*)numeroBloque);
-	printf("NUMERO EN %d\n", numeroBloque);
 	mensajeEnviar(unSocket, FRACASO, &numeroBloque, sizeof(Entero));
 }
 
@@ -236,11 +225,8 @@ void transformacionObtenerScript(Transformacion* transformacion, Mensaje* mensaj
 
 void transformacionObtenerBloque(Transformacion* transformacion, Puntero datos) {
 	memcpy(&transformacion->numeroBloque, datos, sizeof(Entero));
-	printf("NUM BLOQUE %d\n" ,transformacion->numeroBloque);
 	memcpy(&transformacion->bytesUtilizados, datos+sizeof(Entero), sizeof(Entero));
-	printf("bytes utli %d\n" ,transformacion->bytesUtilizados);
 	memcpy(transformacion->nombreResultado, datos+sizeof(Entero)*2, 12);
-	printf("nombr eresultado %s\n" ,transformacion->nombreResultado);
 }
 
 void transformacionProcesarBloque(Transformacion* transformacion, Mensaje* mensaje, Mensaje* otroMensaje, Socket unSocket, String pathScript) {
@@ -292,7 +278,7 @@ ReduccionLocal* reduccionLocalRecibirDatos(Puntero datos) {
 	memcpy(&reduccion->scriptSize, datos, sizeof(Entero));
 	reduccion->script = memoriaAlocar(reduccion->scriptSize);
 	memcpy(reduccion->script, datos+sizeof(Entero), reduccion->scriptSize);
-	memcpy(&reduccion->cantidadTemporales,datos+INTSIZE+reduccion->scriptSize,INTSIZE);//origen
+	memcpy(&reduccion->cantidadTemporales,datos+INTSIZE+reduccion->scriptSize,INTSIZE);
 	reduccion->nombresTemporales = memoriaAlocar(reduccion->cantidadTemporales*TEMPSIZE);
 	memcpy(reduccion->nombresTemporales, datos+INTSIZE*2+reduccion->scriptSize, reduccion->cantidadTemporales*TEMPSIZE);
 	memcpy(reduccion->nombreResultado, datos+INTSIZE*2+reduccion->scriptSize+reduccion->cantidadTemporales*TEMPSIZE, TEMPSIZE);
@@ -334,12 +320,12 @@ void reduccionLocalDestruir(ReduccionLocal* reduccion) {
 }
 
 void reduccionLocalExito(Socket unSocket) {
-	imprimirMensaje(archivoLog,"[REDUCCION LOCAL] Master #(id?): Operacion finalizada con exito");
+	imprimirMensaje(archivoLog,AMARILLO"[AVISO] Master #(id?): Reduccion local realizada con exito"BLANCO);
 	mensajeEnviar(unSocket, EXITO, NULL, 0);
 }
 
 void reduccionLocalFracaso(Socket unSocket) {
-	imprimirMensaje(archivoLog,"[REDUCCION LOCAL] Master #(id?): Operacion fallida");
+	imprimirMensaje(archivoLog, AMARILLO"[AVISO] Master #(id?): Reduccion local fallida"BLANCO);
 	mensajeEnviar(unSocket, FRACASO, NULL, 0);
 }
 
@@ -427,12 +413,12 @@ void reduccionGlobalDestruir(ReduccionGlobal* reduccion) {
 }
 
 void reduccionGlobalExito(Socket unSocket) {
-	imprimirMensaje(archivoLog,"[REDUCCION GLOBAL] Master #(id?): Operacion finalizada con exito");
+	imprimirMensaje(archivoLog,AMARILLO"[AVISO] Master #(id?): Reduccion global realizada con exito"BLANCO);
 	mensajeEnviar(unSocket, EXITO, NULL, 0);
 }
 
 void reduccionGlobalFracaso(Socket unSocket) {
-	imprimirMensaje(archivoLog,"[REDUCCION GLOBAL] Master #(id?): Operacion fallida");
+	imprimirMensaje(archivoLog,AMARILLO"[AVISO] Master #(id?): Reduccion global fallida"BLANCO);
 	mensajeEnviar(unSocket, FRACASO, NULL, 0);
 }
 
@@ -650,7 +636,6 @@ int almacenadoFinalEnviarArchivo(String pathArchivo, String pathYama, Socket soc
 	}
 	if(estado != ERROR && !stringEstaVacio(buffer)) {
 		bloqueWorker->bytesUtilizados = BLOQUE-bytesDisponibles;
-		printf("ENVIO %d\n", bloqueWorker->bytesUtilizados);
 		mensajeEnviar(socketFileSystem, ALMACENAR_BLOQUE, bloqueWorker, sizeof(BloqueWorker));
 	}
 	mensajeEnviar(socketFileSystem, ALMACENADO_FINAL, NULL, NULO);
@@ -661,9 +646,9 @@ int almacenadoFinalEnviarArchivo(String pathArchivo, String pathYama, Socket soc
 }
 
 Socket almacenadoFinalConectarAFileSystem() {
-	imprimirMensaje2(archivoLog,"[ALMACENADO FINAL] Estableciendo conexion con el File System (IP:%s | Puerto:%s)", configuracion->ipFileSystem, configuracion->puertoFileSystemWorker);
+	imprimirMensaje2(archivoLog,"[ALMACENADO FINAL] Conectando a File System (IP:%s | Puerto:%s)", configuracion->ipFileSystem, configuracion->puertoFileSystemWorker);
 	Socket socketFileSystem =socketCrearCliente(configuracion->ipFileSystem, configuracion->puertoFileSystemWorker, ID_WORKER);
-	imprimirMensaje(archivoLog,"[ALMACENADO FINAL] Conexion existosa con el File System");
+	imprimirMensaje(archivoLog,"[ALMACENADO FINAL] Conexion existosa con File System");
 	return socketFileSystem;
 }
 
@@ -676,12 +661,12 @@ void almacenadoFinalFinalizar(int resultado, Socket unSocket) {
 }
 
 void almacenadoFinalExito(Socket unSocket) {
-	imprimirMensaje(archivoLog,"[ALMACENADO FINAL] Master #(id?): Operacion finalizada con exito");
+	imprimirMensaje(archivoLog,AMARILLO"[AVISO] Master #(id?): Almacenado final realizado con exito"BLANCO);
 	mensajeEnviar(unSocket, EXITO, NULL, 0);
 }
 
 void almacenadoFinalFracaso(Socket unSocket) {
-	imprimirMensaje(archivoLog,"[ALMACENADO FINAL] Master #(id?): Operacion fallida");
+	imprimirMensaje(archivoLog,AMARILLO"[AVISO] Master #(id?): Almacenado final fallido"BLANCO);
 	mensajeEnviar(unSocket, FRACASO, NULL, 0);
 }
 

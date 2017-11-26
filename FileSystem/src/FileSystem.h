@@ -336,7 +336,7 @@ void comandoMover(Comando* comando);
 void comandoMostrarArchivo(Comando* comando);
 int comandoCrearDirectorio(Comando* comando);
 void comandoCopiarArchivoAYamaFS(Comando* comando);
-int comandoCopiarArchivoDeYamaFS(Comando* comando);
+int comandoCopiarArchivoDeYamaFS(Comando* comando, int rutaYama);
 void comandoCopiarBloque(Comando* comando);
 void comandoObtenerMD5DeArchivo(Comando* comando);
 void comandoListarDirectorio(Comando* comando);
