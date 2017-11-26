@@ -56,11 +56,11 @@ WorkerTransformacion alternativo;
 Semaforo* errorBloque;
 Semaforo* recepcionAlternativo;
 
+
 String campos[2];
 Configuracion* configuracion;
 ArchivoLog archivoLog;
 Socket socketYama;
-Socket socketWorker;
 int estadoMaster;
 char* scriptTransformacion;
 int32_t lenTransformacion;
