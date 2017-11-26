@@ -190,7 +190,7 @@ int transformacionEjecutar(Transformacion* transformacion, String pathScript) {
 }
 
 void transformacionFinalizar(Socket unSocket, int* estado) {
-	imprimirMensaje(archivoLog, AMARILLO"[AVISO] Master #(id?): Transformaciones finalizadas con exito"BLANCO);
+	imprimirMensaje(archivoLog, AMARILLO"[AVISO] Master #(id?): Transformaciones realizadas con exito"BLANCO);
 	socketCerrar(unSocket);
 	*estado = DESACTIVADO;
 }

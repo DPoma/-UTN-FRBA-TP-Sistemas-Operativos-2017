@@ -278,6 +278,11 @@ void yamaAceptar() {
 		yamaAtender(&estado);
 }
 
+void yamaDesconectar() {
+	if(socketYama != ERROR)
+		mensajeEnviar(socketYama, DESCONEXION, NULL, NULO);
+}
+
 void yamaRechazar() {
 	socketCerrar(socketYama);
 	imprimirMensaje(archivoLog, ROJO"[ERROR] YAMA fue rechazado, el File System no esta estable"BLANCO);
@@ -377,11 +382,11 @@ int workerAlmacenarArchivo(Archivo* archivo, Socket socketWorker) {
 }
 
 int workerAlmacenadoFinal(String pathYama, Socket socketWorker) {
-	if(!rutaValida(pathYama)) {
+	String rutaDecente = stringTomarDesdePosicion(pathYama, MAX_PREFIJO);
+	if(!rutaValida(rutaDecente)) {
 		imprimirMensaje(archivoLog, ROJO"[ERROR] La ruta ingresada no es valida"BLANCO);
 		return ERROR;
 	}
-	String rutaDecente = stringTomarDesdePosicion(pathYama, MAX_PREFIJO);
 	String rutaDirectorio = rutaObtenerDirectorio(rutaDecente);
 	Directorio* directorio = directorioBuscar(rutaDirectorio);
 	if(directorio == NULL) {
@@ -1182,7 +1187,7 @@ void comandoCopiarArchivoAYamaFS(Comando* comando) {
 
 int comandoCopiarArchivoDeYamaFS(Comando* comando, int rutaYama) {
 	if(rutaYama == ACTIVADO) {
-		if(!rutaValida(comando->argumentos[1])  || !rutaTienePrefijoYama(comando->argumentos[1])) {
+		if((!rutaTieneAlMenosUnaBarra(comando->argumentos[1]) || !rutaBarrasEstanSeparadas(comando->argumentos[1])) || !rutaTienePrefijoYama(comando->argumentos[1])) {
 			imprimirMensaje(archivoLog,ROJO"[ERROR] La ruta ingresada no es valida"BLANCO);
 			return ERROR;
 		}
@@ -1246,7 +1251,8 @@ int comandoCopiarArchivoDeYamaFS(Comando* comando, int rutaYama) {
 		}
 	}
 	nodoLimpiarActividades();
-	imprimirMensaje2(archivoLog, "[ARCHIVO] El archivo %s se copio en %s", archivo->nombre, comando->argumentos[2]);
+	if(rutaYama == ACTIVADO)
+		imprimirMensaje2(archivoLog, "[ARCHIVO] El archivo %s se copio en %s", archivo->nombre, comando->argumentos[2]);
 	return OK;
 }
 
@@ -1290,11 +1296,15 @@ void comandoObtenerMD5DeArchivo(Comando* comando) {
 		close(descriptores[0]);
 	}
 	memcpy(MD5Archivo+longitudMensaje, "\0", 1);
-	printf("[ARCHIVO] El MD5 del archivo es %s", MD5Archivo);
-	log_info(archivoLog,"[ARCHIVO] El MD5 del archivo es %s", MD5Archivo);
+	int indice;
+	for(indice = 0; MD5Archivo[indice] != ESPACIO; indice++);
+	String md5 = stringTomarDesdeInicio(MD5Archivo, indice);
+	printf("[ARCHIVO] El MD5 del archivo es %s\n", md5);
+	log_info(archivoLog,"[ARCHIVO] El MD5 del archivo es %s", md5);
 	fileLimpiar(ruta);
 	memoriaLiberar(ruta);
 	memoriaLiberar(MD5Archivo);
+	memoriaLiberar(md5);
 	memoriaLiberar(nombreArchivo);
 }
 
@@ -1383,6 +1393,7 @@ void comandoFinalizar() {
 	shutdown(listenerWorker, SHUT_RDWR);
 	socketCerrar(listenerYama);
 	socketCerrar(listenerWorker);
+	yamaDesconectar();
 	nodoDesconectarATodos();
 }
 
@@ -1918,7 +1929,7 @@ int archivoAlmacenar(Comando* comando) {
 		imprimirMensaje(archivoLog, ROJO"[ERROR] Flag invalido"BLANCO);
 		return ERROR;
 	}
-	if(rutaValidaAlmacenar(comando->argumentos[3])) {
+	if(rutaInvalidaAlmacenar(comando->argumentos[3])) {
 		imprimirMensaje(archivoLog,ROJO"[ERROR] La ruta ingresada no es valida"BLANCO);
 		return ERROR;
 	}
@@ -2397,7 +2408,7 @@ void nodoFormatearConectados() {
 void nodoDesconectar(Nodo* nodo) {
 	if(nodoConectado(nodo)) {
 		mutexBloquear(mutexSocket);
-		mensajeEnviar(nodo->socket, DESCONEXION, VACIO, ACTIVADO);
+		mensajeEnviar(nodo->socket, DESCONEXION, NULL, NULO);
 		mutexDesbloquear(mutexSocket);
 	}
 }
@@ -2444,7 +2455,7 @@ Nodo* nodoActualizar(Nodo* nodoTemporal) {
 }
 
 void nodoAceptar(Nodo* nodo) {
-	mensajeEnviar(nodo->socket, ACEPTAR_DATANODE, VACIO, OK);
+	mensajeEnviar(nodo->socket, ACEPTAR_DATANODE, NULL, NULO);
 	Hilo dataNode;
 	hiloCrear(&dataNode, (Puntero)dataNodeHilo, nodo);
 	imprimirMensaje1(archivoLog, AMARILLO"[AVISO] %s conectado"BLANCO, nodo->nombre);
@@ -2760,7 +2771,8 @@ bool rutaTienePrefijoYama(String ruta) {
 }
 
 bool rutaValida(String ruta) {
-	return 	rutaTieneAlMenosUnaBarra(ruta) &&
+	return 	caracterIguales(ruta[0], BARRA) &&
+			rutaTieneAlMenosUnaBarra(ruta) &&
 			rutaBarrasEstanSeparadas(ruta);
 }
 
@@ -2817,10 +2829,11 @@ void rutaYamaDecente(Comando* comando, int indice) {
 	comando->argumentos[indice] = rutaDecente;
 }
 
-bool rutaValidaAlmacenar(String ruta) {
-	return !rutaValida(ruta)
-			|| !rutaTienePrefijoYama(ruta)
-			|| !rutaParaArchivo(ruta);
+bool rutaInvalidaAlmacenar(String ruta) {
+	return !rutaTieneAlMenosUnaBarra(ruta) ||
+			!rutaBarrasEstanSeparadas(ruta) ||
+			!rutaTienePrefijoYama(ruta) ||
+			!rutaParaArchivo(ruta);
 }
 
 bool rutaParaArchivo(String ruta) {
@@ -2978,8 +2991,5 @@ void semaforosDestruir() {
 	memoriaLiberar(mutexEstado);
 }
 
-//todo memory leak en yamaatender
 //todo barra mas alla del bloque
-//todo ver si los workers no tienen data race
-//todo borrar metadata y crearla al formatear
 //todo que pasa si borro un bloque y le envio a yama uno solo
