@@ -272,12 +272,11 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 		return list_get(workers,*pos);
 	}
 	for(i=0;i<bloques->elements_count;i+=2){
-		Worker* workerClock=obtenerWorker(&clock);
+		Worker* workerClock;
 		Bloque* bloque0 = list_get(bloques,i);
 		Bloque* bloque1 = list_get(bloques,i+1);
 		int* bytes=list_get(byteses,i/2);
 		void asignarBloque(Worker* worker,Bloque* bloque,Bloque* alt){
-
 			aumentarCarga(worker,job,1);
 			log_info(archivoLog,"bloque %s %s %d asignado a worker %s %s",bloque->nodo.ip,bloque->nodo.port,bloque->bloque,worker->nodo.ip,worker->nodo.port);
 			worker->disponibilidad--;
@@ -290,21 +289,23 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 			entrada->etapa=TRANSFORMACION;
 			entrada->estado=ENPROCESO;
 		}
-
-		bool encontrado=false;
-		if(nodoIguales(workerClock->nodo,bloque0->nodo)){
-			asignarBloque(workerClock,bloque0,bloque1);
-			encontrado=true;
-		}else if(nodoIguales(workerClock->nodo,bloque1->nodo)){
-			asignarBloque(workerClock,bloque1,bloque0);
-			encontrado=true;
-		}
-		if(encontrado){
-			clock=(clock+1)%workers->elements_count;
-			Worker* workerTest=obtenerWorker(&clock);
-			if(workerTest->disponibilidad==0)
-				workerTest->disponibilidad=configuracion->disponibilidadBase;
-			continue;
+		compararBloque:
+		workerClock=obtenerWorker(&clock);
+		if(nodoIguales(workerClock->nodo,bloque0->nodo)||nodoIguales(workerClock->nodo,bloque1->nodo)){
+			if(workerClock->disponibilidad>0){
+				if(nodoIguales(workerClock->nodo,bloque0->nodo)){
+					asignarBloque(workerClock,bloque0,bloque1);
+					continue;
+				}
+				if(nodoIguales(workerClock->nodo,bloque1->nodo)){
+					asignarBloque(workerClock,bloque1,bloque0);
+					continue;
+				}
+			}else{
+				workerClock->disponibilidad=configuracion->disponibilidadBase;
+				clock=(clock+1)%workers->elements_count;
+				goto compararBloque;
+			}
 		}
 		int clockAdv=clock;
 		while(1){
@@ -377,7 +378,7 @@ void actualizarTablaEstados(Mensaje* mensaje,Socket masterid){
 		Dir nodo=*((Dir*)datos);
 		int32_t bloque=*((int32_t*)(datos+DIRSIZE));
 		bool buscarEntrada(Entrada* entrada){
-			printf("%s %s %d == %s %s %d\n",entrada->nodo.ip,entrada->nodo.port,entrada->bloque,nodo.ip,nodo.port,bloque);
+			//printf("%s %s %d == %s %s %d\n",entrada->nodo.ip,entrada->nodo.port,entrada->bloque,nodo.ip,nodo.port,bloque);
 			return nodoIguales(entrada->nodo,nodo)&&entrada->bloque==bloque;
 		}
 		entradaA=list_find(tablaEstados,(func)buscarEntrada);
@@ -492,7 +493,7 @@ void actualizarEntrada(Entrada* entradaA,int actualizando, Mensaje* mensaje){
 			list_destroy(nodos);
 			list_addM(tablaEstados,&reducLocal,sizeof(Entrada));//mutex
 		}
-		//manejar caso bizarro todo or not todo
+
 	break;case REDUCLOCAL:
 		if(trabajoTerminado((func)mismoJob)){
 			log_info(archivoLog,"[REDUCGLBAL] creando entrada");

@@ -64,7 +64,7 @@ void masterIniciar(String* argv) {
 		fclose(archScript);
 	}
 	leerArchivo(fopen(argv[1],"r+"),&scriptTransformacion,&lenTransformacion);
-	leerArchivo(fopen(argv[2], "r+"),&scriptReduccion,&lenReduccion);
+	leerArchivo(fopen(argv[2],"r+"),&scriptReduccion,&lenReduccion);
 	archivoSalida=argv[4];
 
 	imprimirMensaje2(archivoLog,"[CONEXION] Estableciendo Conexion con YAMA...", configuracion->ipYama, configuracion->puertoYama);
