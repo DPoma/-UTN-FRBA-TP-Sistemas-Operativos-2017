@@ -174,7 +174,7 @@ void transformaciones(Lista bloques){
 	t_queue* clocks=queue_create();
 	WorkerTransformacion* dir = list_get(bloques,0);
 	imprimirMensaje2(archivoLog,"[EJECUCION] comenzando transformacion de nodo %s %s",&dir->dir.ip,&dir->dir.port);
-	socketWorker=socketCrearCliente(dir->dir.ip,dir->dir.port,ID_MASTER);
+	Socket socketWorker=socketCrearCliente(dir->dir.ip,dir->dir.port,ID_MASTER);
 	imprimirMensaje2(archivoLog,"[CONEXION] Estableciendo conexion con Worker (IP: %s | PUERTO: %s",dir->dir.ip,dir->dir.port);
 	mensajeEnviar(socketWorker,TRANSFORMACION,scriptTransformacion,lenTransformacion);
 	int enviados=0,respondidos=0;
