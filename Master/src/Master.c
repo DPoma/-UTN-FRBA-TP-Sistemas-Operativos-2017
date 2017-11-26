@@ -189,19 +189,20 @@ void transformaciones(Lista bloques){
 			queue_push(clocks,inicio);
 
 			WorkerTransformacion* wt=list_get(bloques,enviados);
-			int tamanio=INTSIZE*2+TEMPSIZE;
-			char data[tamanio];
+			char data[INTSIZE*2+TEMPSIZE];
 			memcpy(data,&wt->bloque,INTSIZE);
 			memcpy(data+INTSIZE,&wt->bytes,INTSIZE);
 			memcpy(data+INTSIZE*2,wt->temp,TEMPSIZE);
 			printf("el numero bloqu es %d\n",wt->bloque);
 			printf("el bytes es es %d\n", wt->bytes);
 			printf("el temporal es %s\n", wt->temp);
-			mensajeEnviar(socketWorker,TRANSFORMACION,data,tamanio);
+			mensajeEnviar(socketWorker,TRANSFORMACION,data,sizeof data);
 			imprimirMensaje2(archivoLog,"[CONEXION] Enviando bloque %d %s",(int*)wt->bloque,wt->temp);
 		}
 		for(;respondidos<enviados;respondidos++){
 			Mensaje* mensaje = mensajeRecibir(socketWorker);
+			printf("OPERACION %d\n",(int)mensaje->header.operacion);
+			printf("BLOQUE %d\n",*(int*)(int32_t*)mensaje->datos);
 			if(mensaje->header.operacion==DESCONEXION){
 				puts("UR DONE");
 				mensajeEnviar(socketYama,DESCONEXION_NODO,&dir->dir,DIRSIZE);
@@ -215,18 +216,17 @@ void transformaciones(Lista bloques){
 				memcpy(buffer,&op,INTSIZE);
 				memcpy(buffer+INTSIZE,&dir->dir,DIRSIZE);
 				memcpy(buffer+INTSIZE+DIRSIZE,mensaje->datos,INTSIZE);
-				printf("BLOQUE %d\n",*(int32_t*)mensaje->datos);
 				mensajeEnviar(socketYama,mensaje->header.operacion,buffer,sizeof buffer);
 				mensajeDestruir(mensaje);
 				//tareasEnParalelo(-1);
 			}
 			if(mensaje->header.operacion==EXITO){
-				imprimirMensaje1(archivoLog, "[TRANSFORMACION] Transformacion realizada con exito en el Worker %s",dir->dir.ip);
+				imprimirMensaje2(archivoLog, "[TRANSFORMACION] Transformacion realizada con exito en el Worker %s %s",dir->dir.ip,dir->dir.port);
 				enviarActualizacion();
 			}else{
 				semaforoWait(errorBloque);
+				imprimirMensaje2(archivoLog,"[TRANSFORMACION] Transformacion fallida en el Worker %s %s",dir->dir.ip,dir->dir.port);
 				enviarActualizacion();
-				imprimirMensaje1(archivoLog,"[TRANSFORMACION] Transformacion fallida en el Worker %i",&socketWorker);
 				semaforoWait(recepcionAlternativo);
 				list_addM(bloques,&alternativo,sizeof alternativo);
 				semaforoSignal(errorBloque);

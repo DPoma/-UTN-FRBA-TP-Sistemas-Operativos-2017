@@ -44,8 +44,8 @@ typedef struct {
 
 typedef struct{
 	Dir dir;
-	int bloque;
-	int bytes;
+	int32_t bloque;
+	int32_t bytes;
 	char temp[TEMPSIZE];
 } WorkerTransformacion;
 WorkerTransformacion alternativo;
