@@ -160,6 +160,15 @@ void transformacion(Mensaje* mensaje, Socket unSocket) {
 	int estado = ACTIVADO;
 	while(estado) {
 		Mensaje* otroMensaje = mensajeRecibir(unSocket);
+		int bloque;
+		int bytes;
+		char temporal[12];
+		memcpy(&bloque, otroMensaje->datos, sizeof(Entero));
+		printf("MASTER ENVIO BLOQUE NUMERO %d\n" ,bloque);
+		memcpy(&bytes, otroMensaje->datos+sizeof(Entero), sizeof(Entero));
+		printf("MASTER ENVIO BYTES UTILZADOS %d\n" ,bytes);
+		memcpy(temporal,otroMensaje->datos+sizeof(Entero)*2, 12);
+		printf("MASTER ENVIO TEMPORAL CON NOMBRE %s\n" ,temporal);
 		switch(otroMensaje->header.operacion) {
 			case DESCONEXION: masterDesconectar(unSocket); estado = DESACTIVADO; break;
 			case TRANSFORMACION: transformacionProcesarBloque(transformacion, mensaje, otroMensaje, unSocket, pathScript); break;
