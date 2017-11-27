@@ -1933,6 +1933,50 @@ int byteValido(String datos) {
 	return indice;
 }
 
+int archivoAlmacenarTexto1(Archivo* archivo, File file) {
+	String buffer = stringCrear(BLOQUE+2);
+	String datos = stringCrear(BLOQUE);
+	int bytesDisponibles = BLOQUE;
+	int indiceDatos = 0;
+	int estado = OK;
+	int numeroBloque = 0;
+	int control = 0;
+	int cont = 0;
+	while(fgets(buffer, BLOQUE, file)) {
+	cont++;
+	control += byteValido(buffer);
+		int tamanioBuffer = byteValido(buffer);
+		if(tamanioBuffer <= bytesDisponibles) {
+			memcpy(datos+indiceDatos, buffer, tamanioBuffer);
+			bytesDisponibles -= tamanioBuffer;
+			indiceDatos += tamanioBuffer;
+			}
+		else {
+			estado = bloqueGuardar(archivo, datos, BLOQUE-bytesDisponibles, numeroBloque);
+			if(estado == ERROR)
+				break;
+			memoriaLiberar(datos);
+			datos = stringCrear(BLOQUE);
+			bytesDisponibles = BLOQUE;
+			indiceDatos = 0;
+			numeroBloque++;
+			memcpy(datos+indiceDatos, buffer, tamanioBuffer);
+			bytesDisponibles -= tamanioBuffer;
+			indiceDatos += tamanioBuffer;
+		}
+	}
+	if(estado != ERROR)  {
+		int tamanioBuffer = byteValido(buffer);
+		memcpy(datos+indiceDatos, buffer, tamanioBuffer);
+		bytesDisponibles -= tamanioBuffer;
+		estado = bloqueGuardar(archivo, datos, BLOQUE-bytesDisponibles, numeroBloque);
+	}
+	printf("%d\n", control);
+	memoriaLiberar(datos);
+	memoriaLiberar(buffer);
+	return estado;
+}
+
 int archivoAlmacenarTexto3(Archivo* archivo, File file) {
 	String buffer = stringCrear(BLOQUE+2);
 	String datos = stringCrear(BLOQUE);
@@ -1978,6 +2022,7 @@ int archivoAlmacenarTexto3(Archivo* archivo, File file) {
 		bytesDisponibles -= tamanioBuffer;
 		estado = bloqueGuardar(archivo, datos, BLOQUE-bytesDisponibles, numeroBloque);
 	}
+	printf("barras %d\n", barras);
 	memoriaLiberar(datos);
 	memoriaLiberar(buffer);
 	return estado;
@@ -2078,7 +2123,7 @@ int archivoAlmacenar(Comando* comando) {
 	if(stringIguales(comando->argumentos[1], FLAG_B))
 		estado = archivoAlmacenarBinario(archivo, file);
 	else
-		estado = archivoAlmacenarTexto3(archivo, file);
+		estado = archivoAlmacenarTexto(archivo, file);
 	fileCerrar(file);
 	archivoControlar(archivo, estado);
 	return estado;
