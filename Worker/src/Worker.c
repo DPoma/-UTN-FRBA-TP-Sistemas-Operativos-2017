@@ -179,7 +179,7 @@ int transformacionEjecutar(Transformacion* transformacion, String pathScript) {
 	int resultado = system(comando);
 	memoriaLiberar(comando);
 	if(resultado != ERROR) {
-		comando = string_from_format("cat %s |  %s | sort > %s", pathBloque, pathScript, pathDestino);
+		comando = string_from_format("cat %s | %s | sort > %s", pathBloque, pathScript, pathDestino);
 		resultado = system(comando);
 		memoriaLiberar(comando);
 	}
@@ -293,7 +293,7 @@ int reduccionLocalEjecutar(ReduccionLocal* reduccion, String temporales) {
 	int resultado = system(comando);
 	memoriaLiberar(comando);
 	if(resultado != ERROR) {
-		comando = string_from_format("sort -m %s | cat | %s > %s", temporales, archivoScript, archivoReduccion);
+		comando = string_from_format("sort -m %s | sort | cat | %s > %s", temporales, archivoScript, archivoReduccion);
 		resultado = system(comando);
 	}
 	fileLimpiar(archivoScript);
@@ -477,10 +477,6 @@ int reduccionGlobalEscribirLinea(Apareo* apareo, Lista listaApareados, File arch
 		printf("cant lista %d\n", listaApareados->elements_count);
 		reduccionGlobalControlarLineas(listaApareados);
 		printf("cant lista %d\n", listaApareados->elements_count);
-		apareo = listaPrimerElemento(listaApareados);
-		if(apareo->linea == NULL) {
-			puts("EL NUEVO APAREO TAMBIEN TIENE NULO");
-		}
 	}
 	if(stringIguales(apareo->linea, "ERROR"))
 		resultado = ERROR;
