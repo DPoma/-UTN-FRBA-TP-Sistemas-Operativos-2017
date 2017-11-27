@@ -228,12 +228,12 @@ void dataBinConfigurar() {
 
 Bloque getBloque(Entero numeroBloque) {
 	Bloque bloque = bloqueBuscar(numeroBloque);
-	imprimirMensaje1(archivoLog, "[DATABIN] El bloque N°%i fue leido", (int*)numeroBloque);
+	imprimirMensaje2(archivoLog, "[DATABIN] El bloque N°%i del %s fue leido", (int*)numeroBloque, configuracion->nombreNodo);
 	return bloque;
 }
 
 void setBloque(Entero numeroBloque, Puntero datos) {
 	Bloque bloque = bloqueBuscar(numeroBloque);
 	memcpy(bloque, datos, BLOQUE);
-	imprimirMensaje1(archivoLog, "[DATABIN] El bloque N°%i fue escrito", (int*)numeroBloque);
+	imprimirMensaje2(archivoLog, "[DATABIN] El bloque N°%i del %s fue escrito", (int*)numeroBloque, configuracion->nombreNodo);
 }

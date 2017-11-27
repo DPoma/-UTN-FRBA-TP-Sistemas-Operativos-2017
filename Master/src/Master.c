@@ -134,11 +134,11 @@ void masterAtender(){
 			pthread_t hilo;
 			pthread_create(&hilo,NULL,(func)&reduccionLocal,m);
 		}break;
-		case REDUCGLOBAL:{
-			void list_obliterate(t_list* list){
-				list_destroy_and_destroy_elements(list,free);
-			}
-			list_destroy_and_destroy_elements(listas,(func)list_obliterate);}
+		case REDUCGLOBAL://{
+//			void list_obliterate(t_list* list){
+//				list_destroy_and_destroy_elements(list,free);
+//			}
+//			list_destroy_and_destroy_elements(listas,(func)list_obliterate);}
 			reduccionGlobal(m);
 			break;
 		case ALMACENADO:
@@ -193,6 +193,9 @@ void transformaciones(Lista bloques){
 			memcpy(data,&wt->bloque,INTSIZE);
 			memcpy(data+INTSIZE,&wt->bytes,INTSIZE);
 			memcpy(data+INTSIZE*2,wt->temp,TEMPSIZE);
+			printf("el numero bloqu es %d\n",wt->bloque);
+			printf("el bytes es es %d\n", wt->bytes);
+			printf("el temporal es %s\n", wt->temp);
 			mensajeEnviar(socketWorker,TRANSFORMACION,data,sizeof data);
 			imprimirMensaje2(archivoLog,"[CONEXION] Enviando bloque %d %s",(int*)wt->bloque,wt->temp);
 		}

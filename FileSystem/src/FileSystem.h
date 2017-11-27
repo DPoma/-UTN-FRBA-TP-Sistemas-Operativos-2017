@@ -336,7 +336,7 @@ void comandoMover(Comando* comando);
 void comandoMostrarArchivo(Comando* comando);
 int comandoCrearDirectorio(Comando* comando);
 void comandoCopiarArchivoAYamaFS(Comando* comando);
-int comandoCopiarArchivoDeYamaFS(Comando* comando);
+int comandoCopiarArchivoDeYamaFS(Comando* comando, int rutaYama);
 void comandoCopiarBloque(Comando* comando);
 void comandoObtenerMD5DeArchivo(Comando* comando);
 void comandoListarDirectorio(Comando* comando);
@@ -516,7 +516,7 @@ void rutaBufferDestruir();
 void rutaYamaDecente(Comando* comando, int indice);
 bool rutaTienePrefijoYama(String ruta);
 String rutaObtenerDirectorio(String pathArchivo);
-bool rutaValidaAlmacenar(String ruta);
+bool rutaInvalidaAlmacenar(String ruta);
 bool rutaParaArchivo(String ruta);
 
 //--------------------------------------- Funciones de Estado ------------------------------------
