@@ -1876,176 +1876,21 @@ int archivoAlmacenarBinario(Archivo* archivo, File file) {
 	return estado;
 }
 
-/*
-int archivoAlmacenarTexto2(Archivo* archivo, File file) {
+int archivoAlmacenarTexto(Archivo* archivo, File file) {
 	String buffer = stringCrear(BLOQUE+1);
 	String datos = stringCrear(BLOQUE);
 	int bytesDisponibles = BLOQUE;
 	int indiceDatos = 0;
 	int estado = OK;
 	int numeroBloque = 0;
-	int ultimaLinea = 0;
-	size_t bytes;
-	int caracter;
-	int indice;
-
-	int indice = 0;
-	for(indice = 0; indice <= BLOQUE; indice++)
-		if(buffer[indice] == '\n' && indice <= bytesDisponibles)
-			ultimaLinea = indice;
-
-		estado = bloqueGuardar(archivo, datos, ultimaLinea+1, numeroBloque);
-		if(estado == ERROR)
-			return ERROR;
-		numeroBloque++;
-		datos = stringCrear(BLOQUE);
-		bytesDisponibles = BLOQUE;
-		indiceDatos = 0;
-		if(ultimaLinea != indice) {
-			memcpy(datos, buffer+ultimaLinea, BLOQUE-ultimaLinea);
-			indiceDatos = BLOQUE-ultimaLinea-1;
-			bytesDisponibles -= indiceDatos;
-	for(indice = 0; fread(buffer, sizeof(char), BLOQUE, file)) == BLOQUE; indice++);
-	if(buffer[indice] != '\n')
-		memcpy(datos, buffer, sizeof(char));
-
-
-
-	if(bytes > 0)
-		estado = bloqueGuardar(archivo, datos, BLOQUE-bytesDisponibles, numeroBloque);
-	memoriaLiberar(datos);
-	memoriaLiberar(buffer);
-	return estado;
-
-
-	if(bytes > 0)
-		estado = bloqueGuardar(archivo, datos, BLOQUE-bytesDisponibles, numeroBloque);
-	memoriaLiberar(datos);
-	memoriaLiberar(buffer);
-	return estado;
-}
-}
-*/
-
-int byteValido(String datos) {
-	int indice = 0;
-	for(indice = 0; datos[indice] != '\n'; indice++);
-	return indice;
-}
-
-int archivoAlmacenarTexto1(Archivo* archivo, File file) {
-	String buffer = stringCrear(BLOQUE+2);
-	String datos = stringCrear(BLOQUE);
-	int bytesDisponibles = BLOQUE;
-	int indiceDatos = 0;
-	int estado = OK;
-	int numeroBloque = 0;
-	int control = 0;
-	int cont = 0;
-	while(fgets(buffer, BLOQUE, file)) {
-	cont++;
-	control += byteValido(buffer);
-		int tamanioBuffer = byteValido(buffer);
-		if(tamanioBuffer <= bytesDisponibles) {
-			memcpy(datos+indiceDatos, buffer, tamanioBuffer);
-			bytesDisponibles -= tamanioBuffer;
-			indiceDatos += tamanioBuffer;
-			}
-		else {
-			estado = bloqueGuardar(archivo, datos, BLOQUE-bytesDisponibles, numeroBloque);
-			if(estado == ERROR)
-				break;
-			memoriaLiberar(datos);
-			datos = stringCrear(BLOQUE);
-			bytesDisponibles = BLOQUE;
-			indiceDatos = 0;
-			numeroBloque++;
-			memcpy(datos+indiceDatos, buffer, tamanioBuffer);
-			bytesDisponibles -= tamanioBuffer;
-			indiceDatos += tamanioBuffer;
+	ssize_t tamanioBuffer;
+	size_t limite = BLOQUE;
+	while((tamanioBuffer = getline(&buffer, &limite,  file)) != ERROR) {
+		if(tamanioBuffer > BLOQUE) {
+			estado = ERROR;
+			imprimirMensaje(archivoLog, ROJO"[ERROR] El registro leido es demasiado largo"BLANCO);
+			break;
 		}
-	}
-	if(estado != ERROR)  {
-		int tamanioBuffer = byteValido(buffer);
-		memcpy(datos+indiceDatos, buffer, tamanioBuffer);
-		bytesDisponibles -= tamanioBuffer;
-		estado = bloqueGuardar(archivo, datos, BLOQUE-bytesDisponibles, numeroBloque);
-	}
-	printf("%d\n", control);
-	memoriaLiberar(datos);
-	memoriaLiberar(buffer);
-	return estado;
-}
-
-int archivoAlmacenarTexto3(Archivo* archivo, File file) {
-	String buffer = stringCrear(BLOQUE+2);
-	String datos = stringCrear(BLOQUE);
-	int bytesDisponibles = BLOQUE;
-	int indiceDatos = 0;
-	int estado = OK;
-	int numeroBloque = 0;
-	long control = 0;
-	long i;
-	int c;
-	int barras = 0;
-	for(i = 0;(c = fgetc(file)) != EOF; i++) {
-		memcpy(buffer+i, &c, sizeof(char));
-		if(c == '\n') {
-		barras++;
-		int tamanioBuffer = i+1;
-		control +=tamanioBuffer;
-		if(tamanioBuffer <= bytesDisponibles) {
-			memcpy(datos+indiceDatos, buffer, tamanioBuffer);
-			bytesDisponibles -= tamanioBuffer;
-			indiceDatos += tamanioBuffer;
-			i = -1;
-		}
-		else {
-			estado = bloqueGuardar(archivo, datos, BLOQUE-bytesDisponibles, numeroBloque);
-			if(estado == ERROR)
-				break;
-			memoriaLiberar(datos);
-			datos = stringCrear(BLOQUE);
-			bytesDisponibles = BLOQUE;
-			indiceDatos = 0;
-			i = -1;
-			numeroBloque++;
-			memcpy(datos+indiceDatos, buffer, tamanioBuffer);
-			bytesDisponibles -= tamanioBuffer;
-			indiceDatos += tamanioBuffer;
-		}
-		}
-	}
-	if(estado != ERROR && i != 0)  {
-		int tamanioBuffer = i;
-		memcpy(datos+indiceDatos, buffer, tamanioBuffer);
-		bytesDisponibles -= tamanioBuffer;
-		estado = bloqueGuardar(archivo, datos, BLOQUE-bytesDisponibles, numeroBloque);
-	}
-	printf("barras %d\n", barras);
-	memoriaLiberar(datos);
-	memoriaLiberar(buffer);
-	return estado;
-}
-
-
-
-
-int archivoAlmacenarTexto(Archivo* archivo, File file) {
-	String buffer = stringCrear(BLOQUE+2);
-	String datos = stringCrear(BLOQUE);
-	int bytesDisponibles = BLOQUE;
-	int indiceDatos = 0;
-	int estado = OK;
-	int numeroBloque = 0;
-	while(fgets(buffer, BLOQUE, file) != NULL) {
-		if(stringLongitud(buffer) > BLOQUE) {
-			memoriaLiberar(buffer);
-			memoriaLiberar(datos);
-			imprimirMensaje(archivoLog,ROJO"[ERROR] Un registro es mas grande que el bloque"BLANCO);
-			return ERROR;
-		}
-		int tamanioBuffer = stringLongitud(buffer);
 		if(tamanioBuffer <= bytesDisponibles) {
 			memcpy(datos+indiceDatos, buffer, tamanioBuffer);
 			bytesDisponibles -= tamanioBuffer;
@@ -2065,15 +1910,8 @@ int archivoAlmacenarTexto(Archivo* archivo, File file) {
 			indiceDatos += tamanioBuffer;
 		}
 	}
-	if(estado != ERROR && !stringEstaVacio(buffer))  {
-		if(stringLongitud(buffer) > BLOQUE) {
-			memoriaLiberar(buffer);
-			memoriaLiberar(datos);
-			imprimirMensaje(archivoLog, ROJO"[ERROR] Un registro es mas grande que el bloque"BLANCO);
-			return ERROR;
-		}
+	if(estado != ERROR && bytesDisponibles < BLOQUE)
 		estado = bloqueGuardar(archivo, datos, BLOQUE-bytesDisponibles, numeroBloque);
-	}
 	memoriaLiberar(datos);
 	memoriaLiberar(buffer);
 	return estado;
@@ -3147,3 +2985,4 @@ void semaforosDestruir() {
 }
 
 //todo que pasa si borro un bloque y le envio a yama uno solo
+//todo rename no deber permitir barras
