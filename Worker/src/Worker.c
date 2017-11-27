@@ -286,20 +286,18 @@ ReduccionLocal* reduccionLocalRecibirDatos(Puntero datos) {
 }
 
 int reduccionLocalEjecutar(ReduccionLocal* reduccion, String temporales) {
-	String archivoApareado = string_from_format("%s%sAp", RUTA_TEMP, reduccion->nombreResultado);
 	String archivoReduccion = string_from_format("%s%s", RUTA_TEMP, reduccion->nombreResultado);
 	String archivoScript = reduccionLocalCrearScript(reduccion);
 	String comando = string_from_format("chmod 0777 %s", archivoScript);
 	int resultado = system(comando);
 	memoriaLiberar(comando);
 	if(resultado != ERROR) {
-		comando = string_from_format("sort -m %s | sort | cat | %s > %s", temporales, archivoScript, archivoReduccion);
+		printf("MIS TEMPORALES SON %s\n", temporales);
+		comando = string_from_format("sort -m %s | sort | cat | %s | sort > %s", temporales, archivoScript, archivoReduccion);
 		resultado = system(comando);
 	}
 	fileLimpiar(archivoScript);
-	fileLimpiar(archivoApareado);
 	memoriaLiberar(comando);
-	memoriaLiberar(archivoApareado);
 	memoriaLiberar(archivoReduccion);
 	memoriaLiberar(archivoScript);
 	memoriaLiberar(temporales);
@@ -390,7 +388,7 @@ int reduccionGlobalEjecutar(ReduccionGlobal* reduccion) {
 	int resultado = system(comando);
 	memoriaLiberar(comando);
 	if(resultado != ERROR) {
-		comando = string_from_format("cat %s | %s > %s", reduccion->pathApareo, archivoScript, archivoSalida);
+		comando = string_from_format("sort %s | cat | %s > %s", reduccion->pathApareo, archivoScript, archivoSalida);
 		resultado = system(comando);
 	}
 	fileLimpiar(archivoScript);
