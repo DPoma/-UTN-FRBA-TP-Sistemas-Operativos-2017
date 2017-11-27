@@ -845,6 +845,10 @@ void comandoRenombrar(Comando* comando) {
 		imprimirMensaje(archivoLog,ROJO"[ERROR] La ruta ingresada no es valida"BLANCO);
 		return;
 	}
+	if(rutaValida(comando->argumentos[2])) {
+		imprimirMensaje(archivoLog,ROJO"[ERROR] El nombre no es valido"BLANCO);
+		return;
+	}
 	if(stringIguales(comando->argumentos[1], RAIZ)) {
 		imprimirMensaje(archivoLog,ROJO"[ERROR] El directorio raiz no puede ser renombrado"BLANCO);
 		return;
@@ -1193,12 +1197,6 @@ int comandoCopiarArchivoDeYamaFS(Comando* comando, int rutaYama) {
 		}
 		rutaYamaDecente(comando, 1);
 	}
-	else {
-		if(!rutaValida(comando->argumentos[1])) {
-			imprimirMensaje(archivoLog,ROJO"[ERROR] La ruta ingresada no es valida"BLANCO);
-			return ERROR;
-		}
-	}
 	Archivo* archivo = archivoBuscarPorRuta(comando->argumentos[1]);
 	if(archivo == NULL) {
 		imprimirMensaje(archivoLog, ROJO"[ERROR] El archivo no existe"BLANCO);
@@ -1261,6 +1259,10 @@ void comandoMostrarArchivo(Comando* comando) {
 }
 
 void comandoObtenerMD5DeArchivo(Comando* comando) {
+	if(!rutaValida(comando->argumentos[1])) {
+		imprimirMensaje(archivoLog,ROJO"[ERROR] La ruta ingresada no es valida"BLANCO);
+		return;
+	}
 	String nombreArchivo = rutaObtenerUltimoNombre(comando->argumentos[1]);
 	String MD5Archivo = memoriaAlocar(MAX_STRING);
 	String ruta = string_from_format("%s/%s", configuracion->rutaMetadata, nombreArchivo);
@@ -2983,6 +2985,3 @@ void semaforosDestruir() {
 	memoriaLiberar(mutexSocket);
 	memoriaLiberar(mutexEstado);
 }
-
-//todo que pasa si borro un bloque y le envio a yama uno solo
-//todo rename no deber permitir barras

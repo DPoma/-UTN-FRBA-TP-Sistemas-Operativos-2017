@@ -162,7 +162,14 @@ void bloqueObtenerParaCopiarArchivo(Puntero datos) {
 void bloqueEscribir(Puntero datos) {
 	Entero numeroBloque;
 	memcpy(&numeroBloque, datos, sizeof(Entero));
-	setBloque(numeroBloque, datos+sizeof(Entero));
+	if(bloqueValido(numeroBloque))
+		setBloque(numeroBloque, datos+sizeof(Entero));
+	else
+		imprimirMensaje(archivoLog, ROJO"[ERROR] El bloque no existe"BLANCO);
+}
+
+bool bloqueValido(Entero numeroBloque) {
+	return numeroBloque >= 0 && numeroBloque < dataBinBloques;
 }
 
 //--------------------------------------- Funciones de DataBin -------------------------------------

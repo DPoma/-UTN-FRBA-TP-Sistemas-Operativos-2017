@@ -84,7 +84,7 @@ void bloqueEscribir(Puntero datos);
 void bloqueObtenerParaLeer(Puntero datos);
 void bloqueObtenerParaCopiar(Puntero datos);
 void bloqueObtenerParaCopiarArchivo(Puntero datos);
-
+bool bloqueValido(Entero numeroBloque);
 //--------------------------------------- Interfaz con File System -------------------------------------
 
 Puntero getBloque(Entero numeroBloque);
