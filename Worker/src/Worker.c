@@ -292,8 +292,7 @@ int reduccionLocalEjecutar(ReduccionLocal* reduccion, String temporales) {
 	int resultado = system(comando);
 	memoriaLiberar(comando);
 	if(resultado != ERROR) {
-		printf("MIS TEMPORALES SON %s\n", temporales);
-		comando = string_from_format("sort -m %s | sort | cat | %s | sort > %s", temporales, archivoScript, archivoReduccion);
+		comando = string_from_format("sort -m %s | cat | %s > %s", temporales, archivoScript, archivoReduccion);
 		resultado = system(comando);
 	}
 	fileLimpiar(archivoScript);
@@ -352,6 +351,7 @@ String reduccionLocalObtenerTemporales(ReduccionLocal* reduccion) {
 //--------------------------------------- Funciones de Reduccion Global -------------------------------------
 
 void reduccionGlobal(Mensaje* mensaje, Socket unSocket) {
+	imprimirMensaje1(archivoLog, AMARILLO"[AVISO] Master #id: %s es el encargado de la reduccion global"BLANCO, configuracion->nombreNodo);
 	ReduccionGlobal* reduccion = reduccionGlobalRecibirDatos(mensaje->datos);
 	int resultado = reduccionGlobalAparearTemporales(reduccion);
 	if(resultado != ERROR)
@@ -464,18 +464,11 @@ void reduccionGlobalCompararLineas(Lista listaApareados, Apareo* apareo) {
 
 int reduccionGlobalEscribirLinea(Apareo* apareo, Lista listaApareados, File archivoResultado) {
 	int resultado = OK;
-	if(apareo->linea == NULL)
-		puts("VOY A ESCRIBIR LINEA NULA ESTA MAAAAAAAAAAL");
 	fwrite(apareo->linea, sizeof(char), stringLongitud(apareo->linea), archivoResultado);
 	memoriaLiberar(apareo->linea);
 	apareo->linea = reduccionGlobalEncargadoPedirLinea(apareo->socketWorker);
-	if(apareo->linea == NULL) {
-		printf("la direccion del apareo A MORIR es %p\n", apareo);
-		printf("la direccion del apareo A MORIR linea es %p\n", apareo->linea);
-		printf("cant lista %d\n", listaApareados->elements_count);
+	if(apareo->linea == NULL)
 		reduccionGlobalControlarLineas(listaApareados);
-		printf("cant lista %d\n", listaApareados->elements_count);
-	}
 	if(stringIguales(apareo->linea, "ERROR"))
 		resultado = ERROR;
 	return resultado;
@@ -497,7 +490,6 @@ int reduccionGlobalAlgoritmoApareo(ReduccionGlobal* reduccion, Lista listaAparea
 				if(resultado == ERROR)
 					break;
 			}
-			printf("SaLI DEL WHILE con resultado %d\n", resultado);
 		}
 		fileCerrar(archivoResultado);
 	}
@@ -506,17 +498,6 @@ int reduccionGlobalAlgoritmoApareo(ReduccionGlobal* reduccion, Lista listaAparea
 
 Apareo* reduccionGlobalLineaMasCorta(Apareo* unApareo, Apareo* otroApareo) {
 	int longitudLineaMasCorta;
-	if(unApareo->linea == NULL || otroApareo->linea == NULL) {
-		if(unApareo->linea != NULL)
-			printf("%s\n", unApareo->linea);
-		else
-			puts("LA DE Un APAREO ES NULA");
-		if(otroApareo->linea != NULL)
-			printf("%s\n", otroApareo->linea);
-		else
-			puts("LA OTRO APAREO (LA NUEVA SERIA) ES NULA");
-		imprimirMensaje(archivoLog, AMARILLO"ENTRO CON UNA LINEA NULA, ALGO FALLO"BLANCO);
-	}
 	if(stringLongitud(unApareo->linea) < stringLongitud(otroApareo->linea))
 		longitudLineaMasCorta = stringLongitud(unApareo->linea);
 	else
@@ -557,7 +538,6 @@ void reduccionGlobalEnviarLinea(Mensaje* mensaje, Socket socketWorker) {
 	imprimirMensaje(archivoLog, "[CONEXION] Proceso Worker conectado existosamente");
 	int resultado = OK;
 	String pathReduccionLocal= string_from_format("%s%s", RUTA_TEMP, (String)mensaje->datos);
-	printf("MI REDUC LOCAL ES %s\n", pathReduccionLocal);
 	File archivoReduccionLocal = fileAbrir(pathReduccionLocal, LECTURA);
 	memoriaLiberar(pathReduccionLocal);
 	String buffer = stringCrear(BLOQUE);
@@ -568,19 +548,13 @@ void reduccionGlobalEnviarLinea(Mensaje* mensaje, Socket socketWorker) {
 		memoriaLiberar(buffer);
 		buffer = stringCrear(BLOQUE);
 	}
-	if(resultado != ERROR)
-		puts("SALI DEL FGETS");
 	memoriaLiberar(buffer);
 	if(resultado != ERROR)
 		reduccionGlobalEsperarPedido(socketWorker, NULL);
-	if(resultado != ERROR)
-		puts("ENVIE LINEA NNULA");
 	fileCerrar(archivoReduccionLocal);
 }
 
 String reduccionGlobalCopiarLinea(Mensaje* mensaje) {
-	if(mensaje->datos == NULL)
-		puts("RECIBI LINEA NULA");
 	if(mensaje->datos == NULL)
 		return NULL;
 	String linea = stringCrear(mensaje->header.tamanio);
@@ -603,13 +577,8 @@ String reduccionGlobalEncargadoPedirLinea(Socket unSocket) {
 }
 
 void reduccionGlobalControlarLineas(Lista listaApareados) {
-	bool flag = 0;
-	bool buscarLineaVacia(Apareo* apareo) {if(apareo->linea == NULL) {puts("ENCONTRE LINEA NULA, DEBERIA BORRARLA"); flag = 1;} return apareo->linea == NULL;}
-	if(flag)
-		printf("cant lista %d\n", listaApareados->elements_count);
+	bool buscarLineaVacia(Apareo* apareo) {return apareo->linea == NULL;}
 	listaEliminarDestruyendoPorCondicion(listaApareados, (Puntero)buscarLineaVacia, memoriaLiberar);
-	if(flag)
-		printf("cant lista despues de desturir %d\n", listaApareados->elements_count);
 }
 
 String reduccionGlobalCrearScript(ReduccionGlobal* reduccion) {

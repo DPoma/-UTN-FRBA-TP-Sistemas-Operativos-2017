@@ -373,3 +373,39 @@ void tareasEnParalelo(int dtp){
 double transcurrido(clock_t tiempo){
 	return ((double)(clock()-tiempo)/CLOCKS_PER_SEC);
 }
+
+
+
+/* MAGIA
+
+time_t obtenerTiempo() {
+	time_t tiempo = time(0);
+	return tiempo;
+}
+
+char* mostrarTiempo(time_t tiempo) {
+	struct tm *tlocal = localtime(&tiempo);
+	char* fecha = malloc(MAX);
+	strftime(fecha,MAX,"%d/%m/%y | %H:%M:%S", tlocal);
+	return fecha;
+}
+
+void informacionPrograma(Programa* programa) {
+	sem_wait(&mutexTiempo);
+	sem_wait(&mutexOutput);
+	char* tiempoInicio = mostrarTiempo(programa->tiempoInicio);
+	char* tiempoFinal = mostrarTiempo(obtenerTiempo());
+	puts("------------------------------------------------------------");
+	printf("ID PROCESO: %i\n", programa->pid);
+	printf("FECHA DE INICIO: %s\n", tiempoInicio);
+	printf("FECHA DE FINALIZACION: %s\n", tiempoFinal);
+	printf("CANTIDAD DE IMPRESIONES %i\n", programa->impresiones);
+	printf("TIEMPO DE EJECUCION: %f SEGUNDOS\n", difftime(obtenerTiempo(), programa->tiempoInicio));
+	puts("------------------------------------------------------------");
+	sem_post(&mutexOutput);
+	free(tiempoInicio);
+	free(tiempoFinal);
+	sem_post(&mutexTiempo);
+}
+
+*/
