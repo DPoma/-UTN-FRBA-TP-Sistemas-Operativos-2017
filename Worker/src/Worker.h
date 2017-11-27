@@ -169,6 +169,7 @@ String reduccionGlobalEncargadoPedirLinea(Socket unSocket);
 Apareo* reduccionGlobalLineaMasCorta(Apareo* unApareo, Apareo* otroApareo);
 void reduccionGlobalControlarLineas(Lista listaApareados);
 void reduccionGlobalEnviarLinea(Mensaje* mensaje, Socket socketWorker);
+int reduccionGlobalEscribirLinea(Apareo* apareo, Lista listaApareados, File archivoResultado);
 
 //--------------------------------------- Funciones de Almacenado Final -------------------------------------
 

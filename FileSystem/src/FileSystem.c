@@ -300,7 +300,7 @@ void yamaAtender(int* estado) {
 void yamaFinalizar(int* estado) {
 	socketCerrar(socketYama);
 	*estado = DESACTIVADO;
-	imprimirMensaje(archivoLog, AMARILLO"[CONEXION] YAMA desconectado"BLANCO);
+	imprimirMensaje(archivoLog, AMARILLO"[AVISO] YAMA desconectado"BLANCO);
 }
 
 void yamaEnviarBloques(Puntero datos) {
