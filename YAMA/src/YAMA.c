@@ -642,8 +642,9 @@ void darPathTemporal(char** ret,char pre){
 			agregado='a';
 		else if(agregado=='z')
 			agregado='A';
-		else if(agregado=='Y')
-			usleep(1000);
+		else if(agregado=='Y'){
+			usleep(10000);agregado++;
+		}
 		else
 			agregado++;
 	else

@@ -245,12 +245,12 @@ void transformacionProcesarBloque(Transformacion* transformacion, Mensaje* mensa
 
 String transformacionCrearScript(Transformacion* transformacion) {
 	pid_t pid = getpid();
-	String path = string_from_format("%sScriptTransf%i", RUTA_TEMP, pid);
+	String path = string_from_format("%sScriptTransf%d", RUTA_TEMP, (int)pid);
 	File file = fileAbrir(path , ESCRITURA);
 	memoriaLiberar(path);
 	fwrite(transformacion->script, sizeof(char), transformacion->scriptSize, file);
 	fileCerrar(file);
-	path = string_from_format("%s./ScriptTransf%i", RUTA_TEMP, pid);
+	path = string_from_format("%s./ScriptTransf%d", RUTA_TEMP, (int)pid);
 	return path;
 }
 

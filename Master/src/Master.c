@@ -134,11 +134,11 @@ void masterAtender(){
 			pthread_t hilo;
 			pthread_create(&hilo,NULL,(func)&reduccionLocal,m);
 		}break;
-		case REDUCGLOBAL:{
-			void list_obliterate(t_list* list){
-				list_destroy_and_destroy_elements(list,free);
-			}
-			list_destroy_and_destroy_elements(listas,(func)list_obliterate);}
+		case REDUCGLOBAL://{
+//			void list_obliterate(t_list* list){
+//				list_destroy_and_destroy_elements(list,free);
+//			}
+//			list_destroy_and_destroy_elements(listas,(func)list_obliterate);}
 			reduccionGlobal(m);
 			break;
 		case ALMACENADO:
