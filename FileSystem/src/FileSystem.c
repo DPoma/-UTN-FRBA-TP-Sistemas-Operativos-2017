@@ -1876,6 +1876,116 @@ int archivoAlmacenarBinario(Archivo* archivo, File file) {
 	return estado;
 }
 
+/*
+int archivoAlmacenarTexto2(Archivo* archivo, File file) {
+	String buffer = stringCrear(BLOQUE+1);
+	String datos = stringCrear(BLOQUE);
+	int bytesDisponibles = BLOQUE;
+	int indiceDatos = 0;
+	int estado = OK;
+	int numeroBloque = 0;
+	int ultimaLinea = 0;
+	size_t bytes;
+	int caracter;
+	int indice;
+
+	int indice = 0;
+	for(indice = 0; indice <= BLOQUE; indice++)
+		if(buffer[indice] == '\n' && indice <= bytesDisponibles)
+			ultimaLinea = indice;
+
+		estado = bloqueGuardar(archivo, datos, ultimaLinea+1, numeroBloque);
+		if(estado == ERROR)
+			return ERROR;
+		numeroBloque++;
+		datos = stringCrear(BLOQUE);
+		bytesDisponibles = BLOQUE;
+		indiceDatos = 0;
+		if(ultimaLinea != indice) {
+			memcpy(datos, buffer+ultimaLinea, BLOQUE-ultimaLinea);
+			indiceDatos = BLOQUE-ultimaLinea-1;
+			bytesDisponibles -= indiceDatos;
+	for(indice = 0; fread(buffer, sizeof(char), BLOQUE, file)) == BLOQUE; indice++);
+	if(buffer[indice] != '\n')
+		memcpy(datos, buffer, sizeof(char));
+
+
+
+	if(bytes > 0)
+		estado = bloqueGuardar(archivo, datos, BLOQUE-bytesDisponibles, numeroBloque);
+	memoriaLiberar(datos);
+	memoriaLiberar(buffer);
+	return estado;
+
+
+	if(bytes > 0)
+		estado = bloqueGuardar(archivo, datos, BLOQUE-bytesDisponibles, numeroBloque);
+	memoriaLiberar(datos);
+	memoriaLiberar(buffer);
+	return estado;
+}
+}
+*/
+
+int byteValido(String datos) {
+	int indice = 0;
+	for(indice = 0; datos[indice] != '\n'; indice++);
+	return indice;
+}
+
+int archivoAlmacenarTexto3(Archivo* archivo, File file) {
+	String buffer = stringCrear(BLOQUE+2);
+	String datos = stringCrear(BLOQUE);
+	int bytesDisponibles = BLOQUE;
+	int indiceDatos = 0;
+	int estado = OK;
+	int numeroBloque = 0;
+	long control = 0;
+	long i;
+	int c;
+	int barras = 0;
+	for(i = 0;(c = fgetc(file)) != EOF; i++) {
+		memcpy(buffer+i, &c, sizeof(char));
+		if(c == '\n') {
+		barras++;
+		int tamanioBuffer = i+1;
+		control +=tamanioBuffer;
+		if(tamanioBuffer <= bytesDisponibles) {
+			memcpy(datos+indiceDatos, buffer, tamanioBuffer);
+			bytesDisponibles -= tamanioBuffer;
+			indiceDatos += tamanioBuffer;
+			i = -1;
+		}
+		else {
+			estado = bloqueGuardar(archivo, datos, BLOQUE-bytesDisponibles, numeroBloque);
+			if(estado == ERROR)
+				break;
+			memoriaLiberar(datos);
+			datos = stringCrear(BLOQUE);
+			bytesDisponibles = BLOQUE;
+			indiceDatos = 0;
+			i = -1;
+			numeroBloque++;
+			memcpy(datos+indiceDatos, buffer, tamanioBuffer);
+			bytesDisponibles -= tamanioBuffer;
+			indiceDatos += tamanioBuffer;
+		}
+		}
+	}
+	if(estado != ERROR && i != 0)  {
+		int tamanioBuffer = i;
+		memcpy(datos+indiceDatos, buffer, tamanioBuffer);
+		bytesDisponibles -= tamanioBuffer;
+		estado = bloqueGuardar(archivo, datos, BLOQUE-bytesDisponibles, numeroBloque);
+	}
+	memoriaLiberar(datos);
+	memoriaLiberar(buffer);
+	return estado;
+}
+
+
+
+
 int archivoAlmacenarTexto(Archivo* archivo, File file) {
 	String buffer = stringCrear(BLOQUE+2);
 	String datos = stringCrear(BLOQUE);
@@ -1968,7 +2078,7 @@ int archivoAlmacenar(Comando* comando) {
 	if(stringIguales(comando->argumentos[1], FLAG_B))
 		estado = archivoAlmacenarBinario(archivo, file);
 	else
-		estado = archivoAlmacenarTexto(archivo, file);
+		estado = archivoAlmacenarTexto3(archivo, file);
 	fileCerrar(file);
 	archivoControlar(archivo, estado);
 	return estado;
@@ -2991,5 +3101,4 @@ void semaforosDestruir() {
 	memoriaLiberar(mutexEstado);
 }
 
-//todo barra mas alla del bloque
 //todo que pasa si borro un bloque y le envio a yama uno solo
