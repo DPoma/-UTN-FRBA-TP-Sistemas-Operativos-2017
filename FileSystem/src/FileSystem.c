@@ -2038,7 +2038,7 @@ int archivoAlmacenarTexto(Archivo* archivo, File file) {
 	int indiceDatos = 0;
 	int estado = OK;
 	int numeroBloque = 0;
-	while(fgets(buffer, BLOQUE, file) != NULL) {
+	while(fgets(buffer, BLOQUE, file)) {
 		if(stringLongitud(buffer) > BLOQUE) {
 			memoriaLiberar(buffer);
 			memoriaLiberar(datos);
@@ -2074,6 +2074,47 @@ int archivoAlmacenarTexto(Archivo* archivo, File file) {
 		}
 		estado = bloqueGuardar(archivo, datos, BLOQUE-bytesDisponibles, numeroBloque);
 	}
+	memoriaLiberar(datos);
+	memoriaLiberar(buffer);
+	return estado;
+}
+
+int archivoAlmacenarTextoDani(Archivo* archivo, File file) {
+	String buffer = stringCrear(BLOQUE+2);
+	String datos = stringCrear(BLOQUE);
+	int bytesDisponibles = BLOQUE;
+	int indiceDatos = 0;
+	int estado = OK;
+	int numeroBloque = 0;
+	while(fgets(buffer, BLOQUE, file)) {
+		if(strlen(buffer)+1==BLOQUE&&buffer[BLOQUE-1]!='\n') {
+			memoriaLiberar(buffer);
+			memoriaLiberar(datos);
+			imprimirMensaje(archivoLog,ROJO"[ERROR] Un registro es mas grande que el bloque"BLANCO);
+			return ERROR;
+		}
+		int tamanioBuffer = stringLongitud(buffer);
+		if(tamanioBuffer <= bytesDisponibles) {
+			memcpy(datos+indiceDatos, buffer, tamanioBuffer);
+			bytesDisponibles -= tamanioBuffer;
+			indiceDatos += tamanioBuffer;
+		}
+		else {
+			estado = bloqueGuardar(archivo, datos, BLOQUE-bytesDisponibles, numeroBloque);
+			if(estado == ERROR)
+				break;
+			memoriaLiberar(datos);
+			datos = stringCrear(BLOQUE);
+			bytesDisponibles = BLOQUE;
+			indiceDatos = 0;
+			numeroBloque++;
+			memcpy(datos+indiceDatos, buffer, tamanioBuffer);
+			bytesDisponibles -= tamanioBuffer;
+			indiceDatos += tamanioBuffer;
+		}
+	}
+	if(estado != ERROR && !stringEstaVacio(buffer))
+		estado = bloqueGuardar(archivo, datos, BLOQUE-bytesDisponibles, numeroBloque);
 	memoriaLiberar(datos);
 	memoriaLiberar(buffer);
 	return estado;
@@ -2123,7 +2164,7 @@ int archivoAlmacenar(Comando* comando) {
 	if(stringIguales(comando->argumentos[1], FLAG_B))
 		estado = archivoAlmacenarBinario(archivo, file);
 	else
-		estado = archivoAlmacenarTexto(archivo, file);
+		estado = archivoAlmacenarTextoDani(archivo, file);
 	fileCerrar(file);
 	archivoControlar(archivo, estado);
 	return estado;
