@@ -9,7 +9,7 @@
 
 #include "../../Biblioteca/src/Biblioteca.c"
 
-#define RUTA_CONFIG "YAMA.conf"
+#define RUTA_CONFIG "YAMA.config"
 
 #define INTSIZE sizeof(int32_t)
 #define TEMPSIZE 12

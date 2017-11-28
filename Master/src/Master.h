@@ -13,7 +13,7 @@
 #include <time.h>
 #include "commons/collections/queue.h"
 
-#define RUTA_CONFIG "Master.conf"
+#define RUTA_CONFIG "Master.config"
 
 #define DIRSIZE sizeof(Dir)
 #define INTSIZE sizeof(int32_t)

@@ -10,7 +10,7 @@
 
 //--------------------------------------- Constantes -------------------------------------
 
-#define RUTA_CONFIG "FileSystem.conf"
+#define RUTA_CONFIG "FileSystem.config"
 
 #define ID_FORMAT 1
 #define ID_RM 2

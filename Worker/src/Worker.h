@@ -28,7 +28,7 @@
 #define TEMPSIZE 12
 #define DIRSIZE 40
 
-#define RUTA_CONFIG "Nodo.conf"
+#define RUTA_CONFIG "Nodo.config"
 
 //--------------------------------------- Estructuras -------------------------------------
 

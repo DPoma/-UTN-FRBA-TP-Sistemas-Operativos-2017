@@ -10,7 +10,7 @@
 
 //--------------------------------------- Constantes -------------------------------------
 
-#define RUTA_CONFIG "../../Worker/Debug/Nodo.conf"
+#define RUTA_CONFIG "../../Worker/Debug/Nodo.config"
 
 #define ACEPTACION 100
 #define LEER_BLOQUE 101
