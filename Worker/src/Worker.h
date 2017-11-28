@@ -28,20 +28,22 @@
 #define TEMPSIZE 12
 #define DIRSIZE 40
 
-#define RUTA_CONFIG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Worker/NodoConfig.conf"
-#define RUTA_LOG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Worker/WorkerLog.log"
-#define RUTA_TEMP "/home/utnso/Escritorio/tmp/"
+#define RUTA_CONFIG "Nodo.conf"
 
 //--------------------------------------- Estructuras -------------------------------------
 
 typedef struct {
+	char ipPropia[20];
 	char ipFileSystem[20];
 	char puertoFileSystemDataNode[20];
 	char puertoFileSystemWorker[20];
 	char puertoMaster[20];
 	char nombreNodo[10];
-	char rutaDataBin[255];
-	char ipPropia[20];
+	char tamanioDataBin[10];
+	char rutaDataBin[150];
+	char rutaLogDataNode[150];
+	char rutaLogWorker[150];
+	char rutaTemporales[150];
 } Configuracion;
 
 typedef struct {
@@ -49,7 +51,7 @@ typedef struct {
 	String script;
 	Entero numeroBloque;
 	Entero bytesUtilizados;
-	char nombreResultado[12];
+	char nombreResultado[TEMPSIZE];
 } Transformacion;
 
 typedef struct {
@@ -57,7 +59,7 @@ typedef struct {
 	String script;
 	int cantidadTemporales;
 	String nombresTemporales;
-	char nombreResultado[12];
+	char nombreResultado[TEMPSIZE];
 } ReduccionLocal;
 
 typedef struct {
@@ -76,7 +78,7 @@ typedef struct {
 	String script;
 	int cantidadNodos;
 	String pathApareo;
-	char nombreResultado[12];
+	char nombreResultado[TEMPSIZE];
 } ReduccionGlobal;
 
 typedef struct __attribute__((packed)) {
@@ -90,10 +92,9 @@ typedef void* Bloque;
 
 Configuracion* configuracion;
 ArchivoLog archivoLog;
-String campos[7];
+String campos[11];
 Socket listenerWorker;
 Socket listenerMaster;
-File dataBin;
 Puntero punteroDataBin;
 pid_t pidPadre;
 int estadoWorker;
@@ -183,7 +184,7 @@ Socket almacenadoFinalConectarAFileSystem();
 
 //--------------------------------------- Funciones de DataBin -------------------------------------
 
-void dataBinAbrir();
+void dataBinCrear();
 void configuracionCalcularBloques();
 Puntero dataBinMapear();
 void dataBinConfigurar();

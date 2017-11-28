@@ -21,18 +21,20 @@ void masterIniciar(String* argv) {
 	metricas.procesoC=time(0);
 	metricas.maxParalelo=metricas.paralelo=metricas.fallos=metricas.cantRedLoc=metricas.cantTrans=0;
 	pantallaLimpiar();
-	archivoLog = archivoLogCrear(RUTA_LOG, "Master");
 	imprimirMensajeProceso("# PROCESO MASTER");
 	campos[0] = "IP_YAMA";
 	campos[1] = "PUERTO_YAMA";
+	campos[2] = "RUTA_LOG";
 	Configuracion* configuracionLeerArchivo(ArchivoConfig archivoConfig){
 		Configuracion* configuracion = memoriaAlocar(sizeof(Configuracion));
 		stringCopiar(configuracion->ipYama, archivoConfigStringDe(archivoConfig, "IP_YAMA"));
 		stringCopiar(configuracion->puertoYama, archivoConfigStringDe(archivoConfig, "PUERTO_YAMA"));
+		stringCopiar(configuracion->rutaLog, archivoConfigStringDe(archivoConfig, "RUTA_LOG"));
 		archivoConfigDestruir(archivoConfig);
 		return configuracion;
 	}
 	configuracion = configuracionCrear(RUTA_CONFIG, (Puntero)configuracionLeerArchivo, campos);
+	archivoLog = archivoLogCrear(configuracion->rutaLog, "Master");
 	void configuracionSenial(int senial){
 		estadoMaster=DESACTIVADO;
 	}

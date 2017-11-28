@@ -21,6 +21,7 @@ int main(void) {
 
 void workerIniciar() {
 	configuracionIniciar();
+	mkdir(configuracion->rutaTemporales, 0777);
 	pidPadre = getpid();
 	estadoWorker = ACTIVADO;
 }
@@ -89,15 +90,18 @@ Configuracion* configuracionLeerArchivoConfig(ArchivoConfig archivoConfig) {
 	stringCopiar(configuracion->nombreNodo, archivoConfigStringDe(archivoConfig, "NOMBRE_NODO"));
 	stringCopiar(configuracion->puertoMaster, archivoConfigStringDe(archivoConfig, "PUERTO_MASTER"));
 	stringCopiar(configuracion->rutaDataBin, archivoConfigStringDe(archivoConfig, "RUTA_DATABIN"));
+	stringCopiar(configuracion->tamanioDataBin, archivoConfigStringDe(archivoConfig, "TAMANIO_DATABIN"));
+	stringCopiar(configuracion->rutaTemporales, archivoConfigStringDe(archivoConfig, "RUTA_TEMPORALES"));
 	stringCopiar(configuracion->ipPropia, archivoConfigStringDe(archivoConfig, "IP_PROPIA"));
+	stringCopiar(configuracion->rutaLogWorker, archivoConfigStringDe(archivoConfig, "RUTA_LOG_WORKER"));
 	archivoConfigDestruir(archivoConfig);
 	return configuracion;
 }
 
 void configuracionIniciar() {
-	configuracionIniciarLog();
 	configuracionIniciarCampos();
 	configuracion = configuracionCrear(RUTA_CONFIG, (void*)configuracionLeerArchivoConfig, campos);
+	configuracionIniciarLog();
 	configuracionImprimir(configuracion);
 	dataBinConfigurar();
 	senialAsignarFuncion(SIGINT, configuracionSenial);
@@ -106,7 +110,7 @@ void configuracionIniciar() {
 void configuracionIniciarLog() {
 	pantallaLimpiar();
 	imprimirMensajeProceso("# PROCESO WORKER");
-	archivoLog = archivoLogCrear(RUTA_LOG, "Worker");
+	archivoLog = archivoLogCrear(configuracion->rutaLogWorker, "Worker");
 }
 
 void configuracionImprimir(Configuracion* configuracion) {
@@ -122,6 +126,10 @@ void configuracionIniciarCampos() {
 	campos[4] = "NOMBRE_NODO";
 	campos[5] = "RUTA_DATABIN";
 	campos[6] = "IP_PROPIA";
+	campos[7] = "TAMANIO_DATABIN";
+	campos[8] = "RUTA_LOG_DATANODE";
+	campos[9] = "RUTA_LOG_WORKER";
+	campos[10] = "RUTA_TEMPORALES";
 }
 
 void configuracionCalcularBloques() {
@@ -174,7 +182,7 @@ void transformacion(Mensaje* mensaje, Socket unSocket) {
 
 int transformacionEjecutar(Transformacion* transformacion, String pathScript) {
 	String pathBloque = transformacionCrearBloque(transformacion);
-	String pathDestino = string_from_format("%s%s", RUTA_TEMP, transformacion->nombreResultado);
+	String pathDestino = string_from_format("%s/%s", configuracion->rutaTemporales, transformacion->nombreResultado);
 	String comando = string_from_format("chmod 0777 %s", pathScript);
 	int resultado = system(comando);
 	memoriaLiberar(comando);
@@ -246,17 +254,17 @@ void transformacionProcesarBloque(Transformacion* transformacion, Mensaje* mensa
 
 String transformacionCrearScript(Transformacion* transformacion) {
 	pid_t pid = getpid();
-	String path = string_from_format("%sScriptTransf%d", RUTA_TEMP, (int)pid);
+	String path = string_from_format("%s/scriptTransf%d", configuracion->rutaTemporales, (int)pid);
 	File file = fileAbrir(path , ESCRITURA);
 	memoriaLiberar(path);
 	fwrite(transformacion->script, sizeof(char), transformacion->scriptSize, file);
 	fileCerrar(file);
-	path = string_from_format("%s./ScriptTransf%d", RUTA_TEMP, (int)pid);
+	path = string_from_format("%s/./scriptTransf%d", configuracion->rutaTemporales, (int)pid);
 	return path;
 }
 
 String transformacionCrearBloque(Transformacion* transformacion) {
-	String path = string_from_format("%s%sBloque", RUTA_TEMP, transformacion->nombreResultado);
+	String path = string_from_format("%s/%sBloque", configuracion->rutaTemporales, transformacion->nombreResultado);
 	File file = fileAbrir(path, ESCRITURA);
 	Puntero puntero = getBloque(transformacion->numeroBloque);
 	fwrite(puntero, sizeof(char), transformacion->bytesUtilizados, file);
@@ -287,7 +295,7 @@ ReduccionLocal* reduccionLocalRecibirDatos(Puntero datos) {
 }
 
 int reduccionLocalEjecutar(ReduccionLocal* reduccion, String temporales) {
-	String archivoReduccion = string_from_format("%s%s", RUTA_TEMP, reduccion->nombreResultado);
+	String archivoReduccion = string_from_format("%s/%s", configuracion->rutaTemporales, reduccion->nombreResultado);
 	String archivoScript = reduccionLocalCrearScript(reduccion);
 	String comando = string_from_format("chmod 0777 %s", archivoScript);
 	int resultado = system(comando);
@@ -328,21 +336,22 @@ void reduccionLocalFracaso(Socket unSocket) {
 }
 
 String reduccionLocalCrearScript(ReduccionLocal* reduccion) {
-	String path = string_from_format("%sscriptReducL%s", RUTA_TEMP, reduccion->nombreResultado);
+	String path = string_from_format("%s/scriptReducL%s", configuracion->rutaTemporales, reduccion->nombreResultado);
 	File file = fileAbrir(path , ESCRITURA);
 	memoriaLiberar(path);
 	fwrite(reduccion->script, sizeof(char), reduccion->scriptSize-1, file);
 	fileCerrar(file);
-	path = string_from_format("%s./scriptReducL%s", RUTA_TEMP, reduccion->nombreResultado);
+	path = string_from_format("%s/./scriptReducL%s", configuracion->rutaTemporales, reduccion->nombreResultado);
 	return path;
 }
 
 String reduccionLocalObtenerTemporales(ReduccionLocal* reduccion) {
-	String temporales = stringCrear((TEMPSIZE+stringLongitud(RUTA_TEMP))*reduccion->cantidadTemporales + reduccion->cantidadTemporales);
+	String temporales = stringCrear((TEMPSIZE+stringLongitud(configuracion->rutaTemporales)+1)*reduccion->cantidadTemporales + reduccion->cantidadTemporales);
 	int indice;
 	for(indice=0; indice < reduccion->cantidadTemporales; indice++) {
 		String buffer = reduccion->nombresTemporales+TEMPSIZE*indice;
-		stringConcatenar(temporales, RUTA_TEMP);
+		stringConcatenar(temporales, configuracion->rutaTemporales);
+		stringConcatenar(temporales, "/");
 		stringConcatenar(temporales, buffer);
 		stringConcatenar(temporales, " ");
 	}
@@ -386,7 +395,7 @@ int reduccionGlobalAparearTemporales(ReduccionGlobal* reduccion) {
 int reduccionGlobalEjecutar(ReduccionGlobal* reduccion) {
 	imprimirMensaje(archivoLog,"[REDUCCION GLOBAL] Apareo de archivos finalizado");
 	String archivoScript = reduccionGlobalCrearScript(reduccion);
-	String archivoSalida = string_from_format("%s%s", RUTA_TEMP, reduccion->nombreResultado);
+	String archivoSalida = string_from_format("%s/%s", configuracion->rutaTemporales, reduccion->nombreResultado);
 	String comando = string_from_format("chmod 0777 %s", archivoScript);
 	int resultado = system(comando);
 	memoriaLiberar(comando);
@@ -480,7 +489,7 @@ int reduccionGlobalEscribirLinea(Apareo* apareo, Lista listaApareados, File arch
 int reduccionGlobalAlgoritmoApareo(ReduccionGlobal* reduccion, Lista listaApareados) {
 	int resultado = reduccionGlobalRealizarConexiones(reduccion, listaApareados);
 	if(resultado != ERROR) {
-		reduccion->pathApareo = string_from_format("%s%sAp", RUTA_TEMP, reduccion->nombreResultado);
+		reduccion->pathApareo = string_from_format("%s/%sAp", configuracion->rutaTemporales, reduccion->nombreResultado);
 		File archivoResultado = fileAbrir(reduccion->pathApareo, ESCRITURA);
 		resultado = reduccionGlobalObtenerLineas(listaApareados);
 		if(resultado != ERROR) {
@@ -551,7 +560,7 @@ int reduccionGlobalEsperarPedido(Socket socketWorker, Puntero buffer) {
 void reduccionGlobalEnviarLinea(Mensaje* mensaje, Socket socketWorker) {
 	imprimirMensaje(archivoLog, "[CONEXION] Proceso Worker conectado existosamente");
 	int resultado = OK;
-	String pathReduccionLocal= string_from_format("%s%s", RUTA_TEMP, (String)mensaje->datos);
+	String pathReduccionLocal= string_from_format("%s/%s", configuracion->rutaTemporales, (String)mensaje->datos);
 	File archivoReduccionLocal = fileAbrir(pathReduccionLocal, LECTURA);
 	memoriaLiberar(pathReduccionLocal);
 	String buffer = stringCrear(BLOQUE);
@@ -596,19 +605,19 @@ void reduccionGlobalDestruirLineaNula(Lista listaApareados) {
 }
 
 String reduccionGlobalCrearScript(ReduccionGlobal* reduccion) {
-	String path = string_from_format("%sscriptReducG%s", RUTA_TEMP, reduccion->nombreResultado);
+	String path = string_from_format("%s/scriptReducG%s", configuracion->rutaTemporales, reduccion->nombreResultado);
 	File file = fileAbrir(path , ESCRITURA);
 	memoriaLiberar(path);
 	fwrite(reduccion->script, sizeof(char), reduccion->scriptSize-1, file);
 	fileCerrar(file);
-	path = string_from_format("%s./scriptReducG%s", RUTA_TEMP, reduccion->nombreResultado);
+	path = string_from_format("%s/./scriptReducG%s", configuracion->rutaTemporales, reduccion->nombreResultado);
 	return path;
 }
 
 //--------------------------------------- Funciones de Almacenado Final -------------------------------------
 
 void almacenadoFinal(Mensaje* mensaje, Socket socketMaster) {
-	String pathArchivo = string_from_format("%s%s", RUTA_TEMP, mensaje->datos);
+	String pathArchivo = string_from_format("%s/%s", configuracion->rutaTemporales, mensaje->datos);
 	int resultado = almacenadoFinalEjecutar(pathArchivo, mensaje->datos+TEMPSIZE);
 	memoriaLiberar(pathArchivo);
 	almacenadoFinalFinalizar(resultado, socketMaster);
@@ -692,18 +701,20 @@ void almacenadoFinalFracaso(Socket unSocket) {
 //--------------------------------------- Funciones de DataBin -------------------------------------
 
 void dataBinConfigurar() {
-	dataBinAbrir();
+	dataBinCrear();
 	punteroDataBin = dataBinMapear();
 	configuracionCalcularBloques();
 }
 
-void dataBinAbrir() {
-	dataBin = fileAbrir(configuracion->rutaDataBin, LECTURA);
-	if(dataBin == NULL) {
-		imprimirError(archivoLog,"[ERROR] No se pudo abrir el archivo data.bin");
-		exit(EXIT_FAILURE);
+void dataBinCrear() {
+	File archivo = fileAbrir(configuracion->rutaDataBin, LECTURA);
+	if(archivo == NULL) {
+		String comando = string_from_format("truncate -s %s %s", configuracion->tamanioDataBin, configuracion->rutaDataBin);
+		system(comando);
+		memoriaLiberar(comando);
 	}
-	fileCerrar(dataBin);
+	else
+		fileCerrar(archivo);
 }
 
 Puntero dataBinMapear() {

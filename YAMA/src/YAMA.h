@@ -9,11 +9,7 @@
 
 #include "../../Biblioteca/src/Biblioteca.c"
 
-#define EVENT_SIZE (sizeof(struct inotify_event)+24)
-#define BUF_LEN (1024*EVENT_SIZE)
-#define RUTA_NOTIFY "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/YAMA";
-#define RUTA_CONFIG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/YAMA/YAMAConfig.conf"
-#define RUTA_LOG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/YAMA/YAMALog.log"
+#define RUTA_CONFIG "YAMA.conf"
 
 #define INTSIZE sizeof(int32_t)
 #define TEMPSIZE 12
@@ -54,6 +50,7 @@ typedef struct {
 	char algoritmoBalanceo[50];
 	int disponibilidadBase;
 	bool reconfigurar;
+	char rutaLog[150];
 } Configuracion;
 
 typedef struct {

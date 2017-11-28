@@ -21,8 +21,3 @@ make Master
 cd ../../DataNode/Debug
 rm DataNode
 make DataNode
-cd ../../../
-echo "Creando directorio de temporales"
-mkdir tmp
-echo "Bajando scripts de prueba"
-git clone https://github.com/iago64/SO-Nombres-Dataset

@@ -95,7 +95,9 @@ Configuracion* configuracionLeerArchivo(ArchivoConfig archivoConfig) {
 	stringCopiar(configuracion->nombreNodo, archivoConfigStringDe(archivoConfig, "NOMBRE_NODO"));
 	stringCopiar(configuracion->puertoMaster, archivoConfigStringDe(archivoConfig, "PUERTO_MASTER"));
 	stringCopiar(configuracion->rutaDataBin, archivoConfigStringDe(archivoConfig, "RUTA_DATABIN"));
+	stringCopiar(configuracion->tamanioDataBin, archivoConfigStringDe(archivoConfig, "TAMANIO_DATABIN"));
 	stringCopiar(configuracion->ipPropia, archivoConfigStringDe(archivoConfig, "IP_PROPIA"));
+	stringCopiar(configuracion->rutaLogDataNode, archivoConfigStringDe(archivoConfig, "RUTA_LOG_DATANODE"));
 	archivoConfigDestruir(archivoConfig);
 	return configuracion;
 }
@@ -113,18 +115,22 @@ void configuracionIniciarCampos() {
 	campos[4] = "NOMBRE_NODO";
 	campos[5] = "RUTA_DATABIN";
 	campos[6] = "IP_PROPIA";
+	campos[7] = "TAMANIO_DATABIN";
+	campos[8] = "RUTA_LOG_DATANODE";
+	campos[9] = "RUTA_LOG_WORKER";
+	campos[10] = "RUTA_TEMPORALES";
 }
 
 void configuracionIniciarLog() {
 	pantallaLimpiar();
 	imprimirMensajeProceso("# PROCESO DATA NODE");
-	archivoLog = archivoLogCrear(RUTA_LOG, "DataNode");
+	archivoLog = archivoLogCrear(configuracion->rutaLogDataNode, "DataNode");
 }
 
 void configuracionIniciar() {
-	configuracionIniciarLog();
 	configuracionIniciarCampos();
 	configuracion = configuracionCrear(RUTA_CONFIG, (Puntero)configuracionLeerArchivo, campos);
+	configuracionIniciarLog();
 	configuracionImprimir(configuracion);
 }
 
@@ -174,13 +180,15 @@ bool bloqueValido(Entero numeroBloque) {
 
 //--------------------------------------- Funciones de DataBin -------------------------------------
 
-void dataBinAbrir() {
-	dataBin = fileAbrir(configuracion->rutaDataBin, LECTURA);
-	if(dataBin == NULL){
-		imprimirError(archivoLog,"[ERROR] No se pudo abrir el archivo data.bin");
-		exit(EXIT_FAILURE);
+void dataBinCrear() {
+	File archivo = fileAbrir(configuracion->rutaDataBin, LECTURA);
+	if(archivo == NULL) {
+		String comando = string_from_format("truncate -s %s %s", configuracion->tamanioDataBin, configuracion->rutaDataBin);
+		system(comando);
+		memoriaLiberar(comando);
 	}
-	fileCerrar(dataBin);
+	else
+		fileCerrar(archivo);
 }
 
 Puntero dataBinMapear() {
@@ -226,7 +234,7 @@ void configuracionCalcularBloques() {
 }
 
 void dataBinConfigurar() {
-	dataBinAbrir();
+	dataBinCrear();
 	punteroDataBin = dataBinMapear();
 	configuracionCalcularBloques();
 }

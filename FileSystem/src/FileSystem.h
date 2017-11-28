@@ -10,8 +10,7 @@
 
 //--------------------------------------- Constantes -------------------------------------
 
-#define RUTA_CONFIG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/FileSystem/FileSystemConfig.conf"
-#define RUTA_LOG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/FileSystem/FileSystemLog.log"
+#define RUTA_CONFIG "FileSystem.conf"
 
 #define ID_FORMAT 1
 #define ID_RM 2
@@ -72,8 +71,9 @@
 #define MAX_NODO 10
 #define MAX_COPIAS 2
 #define MAX_TIPOS 10
+#define MAX_LOG 150
 #define MAX_ARGS 5
-#define MAX_CAMPOS 5
+#define MAX_CAMPOS 6
 #define MAX_PREFIJO 7
 #define NUEVO 0
 #define NORMAL 1
@@ -110,6 +110,7 @@ typedef struct {
 	char puertoWorker[MAX_PUERTO];
 	char rutaMetadata[MAX_NOMBRE];
 	char ipPropia[MAX_PUERTO];
+	char rutaLog[MAX_LOG];
 } Configuracion;
 
 typedef struct {

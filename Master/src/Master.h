@@ -13,8 +13,7 @@
 #include <time.h>
 #include "commons/collections/queue.h"
 
-#define RUTA_CONFIG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Master/MasterConfig.conf"
-#define RUTA_LOG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Master/MasterLog.log"
+#define RUTA_CONFIG "Master.conf"
 
 #define DIRSIZE sizeof(Dir)
 #define INTSIZE sizeof(int32_t)
@@ -38,8 +37,7 @@ typedef void* func;
 typedef struct {
 	char ipYama[50];
 	char puertoYama[50];
-	char ipWorker[50];
-	char puertoWorker[50];
+	char rutaLog[150];
 } Configuracion;
 
 typedef struct{
@@ -57,7 +55,7 @@ Semaforo* errorBloque;
 Semaforo* recepcionAlternativo;
 
 
-String campos[2];
+String campos[3];
 Configuracion* configuracion;
 ArchivoLog archivoLog;
 Socket socketYama;

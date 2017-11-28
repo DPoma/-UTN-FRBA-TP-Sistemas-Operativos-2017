@@ -75,6 +75,7 @@ Configuracion* configuracionLeerArchivo(ArchivoConfig archivoConfig) {
 	stringCopiar(configuracion->puertoWorker, archivoConfigStringDe(archivoConfig, "PUERTO_WORKER"));
 	stringCopiar(configuracion->rutaMetadata, archivoConfigStringDe(archivoConfig, "RUTA_METADATA"));
 	stringCopiar(configuracion->ipPropia, archivoConfigStringDe(archivoConfig, "IP_PROPIA"));
+	stringCopiar(configuracion->rutaLog, archivoConfigStringDe(archivoConfig, "RUTA_LOG"));
 	archivoConfigDestruir(archivoConfig);
 	return configuracion;
 }
@@ -92,19 +93,20 @@ void configuracionIniciarCampos() {
 	campos[2] = "PUERTO_WORKER";
 	campos[3] = "RUTA_METADATA";
 	campos[4] = "IP_PROPIA";
+	campos[5] = "RUTA_LOG";
 }
 
 void configuracionIniciar() {
-	configuracionIniciarLog();
 	configuracionIniciarCampos();
 	configuracion = configuracionCrear(RUTA_CONFIG, (Puntero)configuracionLeerArchivo, campos);
+	configuracionIniciarLog();
 	configuracionIniciarRutas();
 	configuracionImprimir(configuracion);
 }
 
 void configuracionIniciarLog() {
 	imprimirMensajeProceso("# PROCESO FILE SYSTEM");
-	archivoLog = archivoLogCrear(RUTA_LOG, "FileSystem");
+	archivoLog = archivoLogCrear(configuracion->rutaLog, "FileSystem");
 	imprimirMensaje(archivoLog, "[EJECUCION] Proceso File System iniciado");
 }
 
@@ -284,6 +286,7 @@ void yamaDesconectar() {
 
 void yamaRechazar() {
 	socketCerrar(socketYama);
+	socketYama = ERROR;
 	imprimirError(archivoLog, "[ERROR] YAMA fue rechazado, el File System no esta estable");
 }
 
@@ -1401,7 +1404,7 @@ void comandoFinalizar() {
 }
 
 void comandoError() {
-	imprimirError(archivoLog, "[ERROR] Comando invalido, ingrese help para mas ayuda");
+	imprimirError(archivoLog, "[ERROR] Comando invalido, ingrese 'help' ver los comandos disponibles");
 }
 
 //--------------------------------------- Funciones de Directorio -------------------------------------

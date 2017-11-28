@@ -20,9 +20,9 @@ void yamaIniciar() {
 	pantallaLimpiar();
 	estadoYama=ACTIVADO;
 	imprimirMensajeProceso("# PROCESO YAMA");
-	archivoLog=archivoLogCrear(RUTA_LOG, "YAMA");
 	configuracion=malloc(sizeof(Configuracion));
 	configurar();
+	archivoLog=archivoLogCrear(configuracion->rutaLog, "YAMA");
 	void sigreconfig(){ //como no maneja variables locales no importa que se vaya de scope
 		configuracion->reconfigurar=true;
 	}
@@ -52,7 +52,7 @@ void yamaIniciar() {
 }
 
 void configurar(){
-	char* campos[7] = {"IP_PROPIA","PUERTO_MASTER","IP_FILESYSTEM","PUERTO_FILESYSTEM","RETARDO_PLANIFICACION","ALGORITMO_BALANCEO","DISPONIBILIDAD_BASE"};
+	char* campos[8] = {"IP_PROPIA","PUERTO_MASTER","IP_FILESYSTEM","PUERTO_FILESYSTEM","RETARDO_PLANIFICACION","ALGORITMO_BALANCEO","DISPONIBILIDAD_BASE", "RUTA_LOG"};
 	ArchivoConfig archivoConfig = archivoConfigCrear(RUTA_CONFIG, campos);
 	stringCopiar(configuracion->ipPropia,archivoConfigStringDe(archivoConfig, "IP_PROPIA"));
 	stringCopiar(configuracion->puertoMaster, archivoConfigStringDe(archivoConfig, "PUERTO_MASTER"));
@@ -61,6 +61,7 @@ void configurar(){
 	configuracion->retardoPlanificacion = archivoConfigEnteroDe(archivoConfig, "RETARDO_PLANIFICACION");
 	stringCopiar(configuracion->algoritmoBalanceo, archivoConfigStringDe(archivoConfig, "ALGORITMO_BALANCEO"));
 	configuracion->disponibilidadBase = archivoConfigEnteroDe(archivoConfig, "DISPONIBILIDAD_BASE");
+	stringCopiar(configuracion->rutaLog, archivoConfigStringDe(archivoConfig, "RUTA_LOG"));
 	configuracion->reconfigurar=false;
 	archivoConfigDestruir(archivoConfig);
 }

@@ -10,8 +10,7 @@
 
 //--------------------------------------- Constantes -------------------------------------
 
-#define RUTA_CONFIG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/Worker/NodoConfig.conf"
-#define RUTA_LOG "/home/utnso/Escritorio/tp-2017-2c-El-legado-del-Esqui/DataNode/DataNodeLog.log"
+#define RUTA_CONFIG "../../Worker/Debug/Nodo.conf"
 
 #define ACEPTACION 100
 #define LEER_BLOQUE 101
@@ -23,18 +22,21 @@
 
 //--------------------------------------- Estructuras -------------------------------------
 
-typedef void* Bloque;
-
 typedef struct {
+	char ipPropia[20];
 	char ipFileSystem[20];
 	char puertoFileSystemDataNode[20];
 	char puertoFileSystemWorker[20];
 	char puertoMaster[20];
 	char nombreNodo[10];
-	char rutaDataBin[255];
-	char ipPropia[20];
+	char tamanioDataBin[10];
+	char rutaDataBin[150];
+	char rutaLogDataNode[150];
+	char rutaLogWorker[150];
+	char rutaTemporales[150];
 } Configuracion;
 
+typedef void* Bloque;
 
 //--------------------------------------- Variables Globales -------------------------------------
 
@@ -42,11 +44,10 @@ int estadoDataNode;
 int dataBinTamanio;
 Entero dataBinBloques;
 Puntero punteroDataBin;
-String campos[7];
+String campos[11];
 Socket socketFileSystem;
 Configuracion* configuracion;
 ArchivoLog archivoLog;
-File dataBin;
 Hilo hiloControl;
 
 //--------------------------------------- Funciones de Configuracion -------------------------------------
@@ -71,7 +72,7 @@ void dataNodeAceptado();
 
 //--------------------------------------- Funciones de DataBin -------------------------------------
 
-void dataBinAbrir();
+void dataBinCrear();
 void configuracionCalcularBloques();
 Puntero dataBinMapear();
 Puntero dataBinUbicarPuntero(Entero numeroBloque);
