@@ -506,7 +506,14 @@ Apareo* reduccionGlobalLineaMasCorta(Apareo* unApareo, Apareo* otroApareo) {
 	for(indice = 0; indice < longitudLineaMasCorta; indice++)
 		if(unApareo->linea[indice] != otroApareo->linea[indice])
 			break;
-	if(unApareo->linea[indice] < otroApareo->linea[indice])
+	int acomodarCriterioSort(char c){
+		if(c>='a'&&c<='z')
+			return c+100;
+		if(c>='A'&&c<='Z'||c>='0'&&c<='9')
+			return c;
+		return 0;
+	}
+	if(acomodarCriterioSort(unApareo->linea[indice]) < acomodarCriterioSort(otroApareo->linea[indice]))
 		return unApareo;
 	else
 		return otroApareo;

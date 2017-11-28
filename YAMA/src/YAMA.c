@@ -507,6 +507,7 @@ void actualizarEntrada(Entrada* entradaA,int actualizando, Mensaje* mensaje){
 					workerMenorCarga=worker;
 			}
 			list_iterate(workers,(func)menorCarga);
+			reducGlobal.nodo=workerMenorCarga->nodo;
 			Lista nodosReducidos=list_filter(tablaEstados,(func)mismoJob);
 			aumentarCarga(workerMenorCarga,entradaA->job,ceil((double)nodosReducidos->elements_count/2.0));
 
