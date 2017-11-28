@@ -236,6 +236,7 @@ void transformacionProcesarBloque(Transformacion* transformacion, Mensaje* mensa
 		int resultado = transformacionEjecutar(transformacion, pathScript);
 		transformacionFinalizarBloque(resultado, unSocket, transformacion->numeroBloque);
 		transformacionDestruir(transformacion);
+		memoriaLiberar(pathScript);
 		mensajeDestruir(mensaje);
 		mensajeDestruir(otroMensaje);
 		workerFinalizar();
@@ -337,7 +338,7 @@ String reduccionLocalCrearScript(ReduccionLocal* reduccion) {
 }
 
 String reduccionLocalObtenerTemporales(ReduccionLocal* reduccion) {
-	String temporales = stringCrear((TEMPSIZE+stringLongitud(RUTA_TEMP))*reduccion->cantidadTemporales + reduccion->cantidadTemporales-1);
+	String temporales = stringCrear((TEMPSIZE+stringLongitud(RUTA_TEMP))*reduccion->cantidadTemporales + reduccion->cantidadTemporales);
 	int indice;
 	for(indice=0; indice < reduccion->cantidadTemporales; indice++) {
 		String buffer = reduccion->nombresTemporales+TEMPSIZE*indice;
@@ -464,12 +465,12 @@ void reduccionGlobalCompararLineas(Lista listaApareados, Apareo* apareo) {
 }
 
 int reduccionGlobalEscribirLinea(Apareo* apareo, Lista listaApareados, File archivoResultado) {
+	if(apareo->linea == NULL)
+		puts("LLEGO LINEA NULA");
 	int resultado = OK;
 	fwrite(apareo->linea, sizeof(char), stringLongitud(apareo->linea), archivoResultado);
 	memoriaLiberar(apareo->linea);
 	apareo->linea = reduccionGlobalEncargadoPedirLinea(apareo->socketWorker);
-	if(apareo->linea == NULL)
-		reduccionGlobalControlarLineas(listaApareados);
 	if(stringIguales(apareo->linea, "ERROR"))
 		resultado = ERROR;
 	return resultado;
@@ -484,8 +485,12 @@ int reduccionGlobalAlgoritmoApareo(ReduccionGlobal* reduccion, Lista listaAparea
 		if(resultado != ERROR) {
 			Apareo* apareo = listaPrimerElemento(listaApareados);
 			while(!listaEstaVacia(listaApareados)) {
-				if(apareo->linea == NULL)
+				if(apareo->linea == NULL) {
+					reduccionGlobalDestruirLineaNula(listaApareados);
+					if(listaEstaVacia(listaApareados))
+						break;
 					apareo = listaPrimerElemento(listaApareados);
+				}
 				reduccionGlobalCompararLineas(listaApareados, apareo);
 				resultado = reduccionGlobalEscribirLinea(apareo, listaApareados, archivoResultado);
 				if(resultado == ERROR)
@@ -510,7 +515,7 @@ Apareo* reduccionGlobalLineaMasCorta(Apareo* unApareo, Apareo* otroApareo) {
 	int acomodarCriterioSort(char c){
 		if(c>='a'&&c<='z')
 			return c+100;
-		if(c>='A'&&c<='Z'||c>='0'&&c<='9')
+		if((c>='A'&&c<='Z') || (c>='0'&&c<='9'))
 			return c;
 		return 0;
 	}
@@ -584,7 +589,7 @@ String reduccionGlobalEncargadoPedirLinea(Socket unSocket) {
 	return linea;
 }
 
-void reduccionGlobalControlarLineas(Lista listaApareados) {
+void reduccionGlobalDestruirLineaNula(Lista listaApareados) {
 	bool buscarLineaVacia(Apareo* apareo) {return apareo->linea == NULL;}
 	listaEliminarDestruyendoPorCondicion(listaApareados, (Puntero)buscarLineaVacia, memoriaLiberar);
 }

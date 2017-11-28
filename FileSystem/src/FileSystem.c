@@ -432,6 +432,7 @@ void workerListener() {
 }
 
 void workerAtender(Socket* socketWorker) {
+	hiloDetach(pthread_self());
 	Mensaje* mensaje = mensajeRecibir(*socketWorker);
 	String pathYama = string_from_format("%s", mensaje->datos);
 	mensajeDestruir(mensaje);
