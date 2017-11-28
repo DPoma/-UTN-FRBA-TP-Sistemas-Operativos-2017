@@ -688,97 +688,6 @@ bool stringIguales(String s1, String s2) {
 bool stringDistintos(String unString, String otroString) {
 	return !stringIguales(unString, otroString);
 }
-//--------------------------------------- Funciones de Impresion -------------------------------------
-
-void imprimirMensaje(ArchivoLog archivoLog, String mensaje) {
-	puts(mensaje);
-	log_info(archivoLog, mensaje);
-}
-
-void imprimirMensaje1(ArchivoLog archivoLog, String mensaje, void* algo1) {
-	printf(mensaje, algo1 );
-	puts("");
-	log_info(archivoLog, mensaje, algo1);
-}
-
-void imprimirMensaje2(ArchivoLog archivoLog, String mensaje, void* algo1, void* algo2) {
-	printf(mensaje, algo1, algo2);
-	puts("");
-	log_info(archivoLog, mensaje, algo1, algo2);
-}
-
-void imprimirMensaje3(ArchivoLog archivoLog, String mensaje, void* algo1, void* algo2, void* algo3) {
-	printf(mensaje, algo1, algo2, algo3);
-	puts("");
-	log_info(archivoLog, mensaje, algo1, algo2, algo3);
-}
-
-void imprimirMensaje4(ArchivoLog archivoLog, String mensaje, void* algo1, void* algo2, void* algo3, void* algo4) {
-	printf(mensaje, algo1, algo2, algo3, algo4);
-	puts("");
-	log_info(archivoLog, mensaje, algo1, algo2, algo3, algo4);
-}
-
-
-void imprimirMensajeProceso(String mensaje) {
-	puts("-------------------------------------------------------------------------");
-	puts(mensaje);
-	puts("-------------------------------------------------------------------------");
-}
-
-//--------------------------------------- Funciones de Senial -------------------------------------
-
-void senialAsignarFuncion(int unaSenial, void(*funcion)(int)) {
-	signal(unaSenial, funcion);
-}
-
-//--------------------------------------- Funciones de Memoria -------------------------------------
-
-Puntero memoriaAlocar(size_t dato) {
-	return malloc(dato);
-}
-
-void memoriaLiberar(Puntero puntero) {
-	if(puntero != NULL)
-		free(puntero);
-}
-
-//--------------------------------------- Funciones varias -------------------------------------
-
-void pantallaLimpiar() {
-	system("clear");
-}
-
-int caracterObtener() {
-	return getchar();
-}
-
-
-bool caracterDistintos(char unCaracter, char otroCaracter) {
-	return unCaracter != otroCaracter;
-}
-
-bool caracterIguales(char unCaracter, char otroCaracter) {
-	return unCaracter == otroCaracter;
-}
-
-
-File fileAbrir(String rutaArchivo, String modoApertura) {
-	File archivo = fopen(rutaArchivo, modoApertura);
-	return archivo;
-}
-
-void fileCerrar(File unArchivo) {
-	fclose(unArchivo);
-}
-
-void fileLimpiar(String ruta) {
-	File archivo = fopen(ruta, "r");
-	if(archivo != NULL) {
-		remove(ruta);
-		fclose(archivo);
-	}
-}
 
 //--------------------------------------- Funciones de Bitmap -------------------------------------
 
@@ -815,4 +724,167 @@ size_t bitmapCantidadBits(Bitmap bitmap) {
 
 int bitmapCalculo(int cantidadBloques) {
 	return (int)ceil((double)cantidadBloques/(double)8);
+}
+
+//--------------------------------------- Funciones de Impresion -------------------------------------
+
+void imprimirMensaje(ArchivoLog archivoLog, String mensaje) {
+	puts(mensaje);
+	log_info(archivoLog, mensaje);
+}
+
+void imprimirMensaje1(ArchivoLog archivoLog, String mensaje, void* algo1) {
+	printf(mensaje, algo1 );
+	puts("");
+	log_info(archivoLog, mensaje, algo1);
+}
+
+void imprimirMensaje2(ArchivoLog archivoLog, String mensaje, void* algo1, void* algo2) {
+	printf(mensaje, algo1, algo2);
+	puts("");
+	log_info(archivoLog, mensaje, algo1, algo2);
+}
+
+void imprimirMensaje3(ArchivoLog archivoLog, String mensaje, void* algo1, void* algo2, void* algo3) {
+	printf(mensaje, algo1, algo2, algo3);
+	puts("");
+	log_info(archivoLog, mensaje, algo1, algo2, algo3);
+}
+
+void imprimirMensaje4(ArchivoLog archivoLog, String mensaje, void* algo1, void* algo2, void* algo3, void* algo4) {
+	printf(mensaje, algo1, algo2, algo3, algo4);
+	puts("");
+	log_info(archivoLog, mensaje, algo1, algo2, algo3, algo4);
+}
+
+void imprimirAviso(ArchivoLog archivoLog, String mensaje) {
+	printf(AMARILLO);
+	puts(mensaje);
+	printf(BLANCO);
+	log_info(archivoLog, mensaje);
+}
+
+void imprimirAviso1(ArchivoLog archivoLog, String mensaje, void* algo1) {
+	printf(AMARILLO);
+	printf(mensaje, algo1 );
+	printf(BLANCO);
+	puts("");
+	log_info(archivoLog, mensaje, algo1);
+}
+
+void imprimirAviso2(ArchivoLog archivoLog, String mensaje, void* algo1, void* algo2) {
+	printf(AMARILLO);
+	printf(mensaje, algo1, algo2);
+	printf(BLANCO);
+	puts("");
+	log_info(archivoLog, mensaje, algo1, algo2);
+}
+
+void imprimirAviso3(ArchivoLog archivoLog, String mensaje, void* algo1, void* algo2, void* algo3) {
+	printf(AMARILLO);
+	printf(mensaje, algo1, algo2, algo3);
+	printf(BLANCO);
+	puts("");
+	log_info(archivoLog, mensaje, algo1, algo2, algo3);
+}
+
+void imprimirAviso4(ArchivoLog archivoLog, String mensaje, void* algo1, void* algo2, void* algo3, void* algo4) {
+	printf(AMARILLO);
+	printf(mensaje, algo1, algo2, algo3, algo4);
+	printf(BLANCO);
+	puts("");
+	log_info(archivoLog, mensaje, algo1, algo2, algo3, algo4);
+}
+
+void imprimirError(ArchivoLog archivoLog, String mensaje) {
+	printf(ROJO);
+	puts(mensaje);
+	printf(BLANCO);
+	log_info(archivoLog, mensaje);
+}
+void imprimirError1(ArchivoLog archivoLog, String mensaje, void* algo1) {
+	printf(ROJO);
+	printf(mensaje, algo1);
+	printf(BLANCO);
+	puts("");
+	log_info(archivoLog, mensaje, algo1);
+}
+
+void imprimirError2(ArchivoLog archivoLog, String mensaje, void* algo1, void* algo2) {
+	printf(ROJO);
+	printf(mensaje, algo1, algo2);
+	printf(BLANCO);
+	puts("");
+	log_info(archivoLog, mensaje, algo1, algo2);
+}
+
+void imprimirError3(ArchivoLog archivoLog, String mensaje, void* algo1, void* algo2, void* algo3) {
+	printf(ROJO);
+	printf(mensaje, algo1, algo2, algo3);
+	printf(BLANCO);
+	puts("");
+	log_info(archivoLog, mensaje, algo1, algo2, algo3);
+}
+
+void imprimirError4(ArchivoLog archivoLog, String mensaje, void* algo1, void* algo2, void* algo3, void* algo4) {
+	printf(ROJO);
+	printf(mensaje, algo1, algo2, algo3, algo4);
+	printf(BLANCO);
+	puts("");
+	log_info(archivoLog, mensaje, algo1, algo2, algo3, algo4);
+}
+
+void imprimirMensajeProceso(String mensaje) {
+	puts("-------------------------------------------------------------------------");
+	puts(mensaje);
+	puts("-------------------------------------------------------------------------");
+}
+
+//--------------------------------------- Funciones varias -------------------------------------
+
+void senialAsignarFuncion(int unaSenial, void(*funcion)(int)) {
+	signal(unaSenial, funcion);
+}
+
+Puntero memoriaAlocar(size_t dato) {
+	return malloc(dato);
+}
+
+void memoriaLiberar(Puntero puntero) {
+	if(puntero != NULL)
+		free(puntero);
+}
+
+void pantallaLimpiar() {
+	system("clear");
+}
+
+int caracterObtener() {
+	return getchar();
+}
+
+
+bool caracterDistintos(char unCaracter, char otroCaracter) {
+	return unCaracter != otroCaracter;
+}
+
+bool caracterIguales(char unCaracter, char otroCaracter) {
+	return unCaracter == otroCaracter;
+}
+
+File fileAbrir(String rutaArchivo, String modoApertura) {
+	File archivo = fopen(rutaArchivo, modoApertura);
+	return archivo;
+}
+
+void fileCerrar(File unArchivo) {
+	fclose(unArchivo);
+}
+
+void fileLimpiar(String ruta) {
+	File archivo = fopen(ruta, "r");
+	if(archivo != NULL) {
+		remove(ruta);
+		fclose(archivo);
+	}
 }

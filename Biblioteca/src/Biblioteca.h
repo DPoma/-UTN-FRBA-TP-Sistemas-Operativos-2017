@@ -108,7 +108,6 @@ typedef struct {
 	String ip;
 } Conexion;
 
-
 //--------------------------------------- Funciones para Socket -------------------------------------
 
 void socketConfigurar(Conexion* conexion, String ip, String puerto);
@@ -185,7 +184,6 @@ void archivoLogValidar(String rutaArchivo);
 
 //--------------------------------------- Funciones para Semaforo -------------------------------------
 
-
 void semaforoIniciar(Semaforo* semaforo, unsigned int valor);
 void semaforoWait(Semaforo* semaforo);
 void semaforoSignal(Semaforo* semaforo);
@@ -242,6 +240,7 @@ void* listaPrimerElemento(Lista lista);
 bool listaTieneElementos(Lista lista);
 
 //--------------------------------------- Funciones para String -------------------------------------
+
 String stringCrear();
 bool stringContiene(String unString, String otroString);
 String stringConvertirEntero(int entero);
@@ -275,11 +274,8 @@ bool handShakeRealizado(Mensaje* mensaje);
 bool handShakeAceptado(Mensaje* mensaje);
 bool handShakeIdsIguales(int idEnviada, int idEsperada);
 
-//--------------------------------------- Funciones varias -------------------------------------
+//--------------------------------------- Funciones de Bitmap -------------------------------------
 
-void configuracionSenialHijo(int senial);
-void imprimirMensajeProceso(String mensaje);
-void fileLimpiar(String ruta);
 int bitmapCalculo(int cantidadBloques);
 Bitmap bitmapCrear(int cantidadBloques);
 void bitmapLiberarBit(Bitmap bitmap, int posicion);
@@ -288,3 +284,13 @@ void bitmapOcuparBit(Bitmap bitmap, int posicion);
 bool bitmapBitOcupado(Bitmap bitmap, int posicion);
 size_t bitmapCantidadBits(Bitmap bitmap);
 int bitmapCalculo(int cantidadBloques);
+
+//--------------------------------------- Funciones varias -------------------------------------
+
+File fileAbrir(String rutaArchivo, String modoApertura);
+void fileCerrar(File unArchivo);
+Puntero memoriaAlocar(size_t dato);
+void memoriaLiberar(Puntero puntero);
+void configuracionSenialHijo(int senial);
+void imprimirMensajeProceso(String mensaje);
+void fileLimpiar(String ruta);

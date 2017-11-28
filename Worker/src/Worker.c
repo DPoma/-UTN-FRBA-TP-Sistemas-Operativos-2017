@@ -44,7 +44,7 @@ void masterAtenderOperacion(Socket unSocket) {
 	else if(pid > 0)
 		socketCerrar(unSocket);
 	else
-		imprimirMensaje(archivoLog, ROJO"[ERROR] Error en el fork(), estas jodido"BLANCO);
+		imprimirError(archivoLog, "[ERROR] Error en el fork(), estas jodido");
 }
 
 void masterRealizarOperacion(Socket unSocket) {
@@ -127,13 +127,13 @@ void configuracionIniciarCampos() {
 void configuracionCalcularBloques() {
 	int descriptorArchivo = open(configuracion->rutaDataBin, O_CLOEXEC | O_RDWR);
 	if (descriptorArchivo == ERROR) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] Fallo el open()"BLANCO);
+		imprimirError(archivoLog,"[ERROR] Fallo el open()");
 		perror("open");
 		exit(EXIT_FAILURE);
 	}
 	struct stat estadoArchivo;
 	if (fstat(descriptorArchivo, &estadoArchivo) == ERROR) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] Fallo el fstat()"BLANCO);
+		imprimirError(archivoLog, "[ERROR] Fallo el fstat()");
 		perror("fstat");
 		exit(EXIT_FAILURE);
 	}
@@ -190,7 +190,7 @@ int transformacionEjecutar(Transformacion* transformacion, String pathScript) {
 }
 
 void transformacionFinalizar(Socket unSocket, int* estado) {
-	imprimirMensaje(archivoLog, AMARILLO"[AVISO] Master #(id?): Transformaciones realizadas con exito"BLANCO);
+	imprimirAviso(archivoLog, "[AVISO] Master #(id?): Transformaciones realizadas con exito");
 	socketCerrar(unSocket);
 	*estado = DESACTIVADO;
 }
@@ -318,12 +318,12 @@ void reduccionLocalDestruir(ReduccionLocal* reduccion) {
 }
 
 void reduccionLocalExito(Socket unSocket) {
-	imprimirMensaje(archivoLog,AMARILLO"[AVISO] Master #(id?): Reduccion local realizada con exito"BLANCO);
+	imprimirAviso(archivoLog,"[AVISO] Master #(id?): Reduccion local realizada con exito");
 	mensajeEnviar(unSocket, EXITO, NULL, 0);
 }
 
 void reduccionLocalFracaso(Socket unSocket) {
-	imprimirMensaje(archivoLog, AMARILLO"[AVISO] Master #(id?): Reduccion local fallida"BLANCO);
+	imprimirAviso(archivoLog, "[AVISO] Master #(id?): Reduccion local fallida");
 	mensajeEnviar(unSocket, FRACASO, NULL, 0);
 }
 
@@ -352,7 +352,7 @@ String reduccionLocalObtenerTemporales(ReduccionLocal* reduccion) {
 //--------------------------------------- Funciones de Reduccion Global -------------------------------------
 
 void reduccionGlobal(Mensaje* mensaje, Socket unSocket) {
-	imprimirMensaje1(archivoLog, AMARILLO"[AVISO] Master #id: %s es el encargado de la reduccion global"BLANCO, configuracion->nombreNodo);
+	imprimirAviso1(archivoLog, "[AVISO] Master #id: %s es el encargado de la reduccion global", configuracion->nombreNodo);
 	ReduccionGlobal* reduccion = reduccionGlobalRecibirDatos(mensaje->datos);
 	int resultado = reduccionGlobalAparearTemporales(reduccion);
 	if(resultado != ERROR)
@@ -416,12 +416,12 @@ void reduccionGlobalDestruir(ReduccionGlobal* reduccion) {
 }
 
 void reduccionGlobalExito(Socket unSocket) {
-	imprimirMensaje(archivoLog,AMARILLO"[AVISO] Master #(id?): Reduccion global realizada con exito"BLANCO);
+	imprimirAviso(archivoLog,"[AVISO] Master #(id?): Reduccion global realizada con exito");
 	mensajeEnviar(unSocket, EXITO, NULL, 0);
 }
 
 void reduccionGlobalFracaso(Socket unSocket) {
-	imprimirMensaje(archivoLog,AMARILLO"[AVISO] Master #(id?): Reduccion global fallida"BLANCO);
+	imprimirAviso(archivoLog,"[AVISO] Master #(id?): Reduccion global fallida");
 	mensajeEnviar(unSocket, FRACASO, NULL, 0);
 }
 
@@ -680,13 +680,13 @@ void almacenadoFinalFinalizar(int resultado, Socket unSocket) {
 }
 
 void almacenadoFinalExito(Socket unSocket) {
-	imprimirMensaje(archivoLog,AMARILLO"[AVISO] Master #(id?): Almacenado final realizado con exito"BLANCO);
-	mensajeEnviar(unSocket, EXITO, NULL, 0);
+	imprimirAviso(archivoLog,"[AVISO] Master #(id?): Almacenado final realizado con exito");
+	mensajeEnviar(unSocket, EXITO, NULL, NULO);
 }
 
 void almacenadoFinalFracaso(Socket unSocket) {
-	imprimirMensaje(archivoLog,AMARILLO"[AVISO] Master #(id?): Almacenado final fallido"BLANCO);
-	mensajeEnviar(unSocket, FRACASO, NULL, 0);
+	imprimirAviso(archivoLog,"[AVISO] Master #(id?): Almacenado final fallido");
+	mensajeEnviar(unSocket, FRACASO, NULL, NULO);
 }
 
 //--------------------------------------- Funciones de DataBin -------------------------------------
@@ -700,7 +700,7 @@ void dataBinConfigurar() {
 void dataBinAbrir() {
 	dataBin = fileAbrir(configuracion->rutaDataBin, LECTURA);
 	if(dataBin == NULL) {
-		imprimirMensaje(archivoLog,ROJO"[ERROR] No se pudo abrir el archivo data.bin"BLANCO);
+		imprimirError(archivoLog,"[ERROR] No se pudo abrir el archivo data.bin");
 		exit(EXIT_FAILURE);
 	}
 	fileCerrar(dataBin);
@@ -710,20 +710,20 @@ Puntero dataBinMapear() {
 	Puntero Puntero;
 	int descriptorArchivo = open(configuracion->rutaDataBin, O_CLOEXEC | O_RDWR);
 	if (descriptorArchivo == ERROR) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] Fallo el open()"BLANCO);
+		imprimirError(archivoLog, "[ERROR] Fallo el open()");
 		perror("open");
 		exit(EXIT_FAILURE);
 	}
 	struct stat estadoArchivo;
 	if (fstat(descriptorArchivo, &estadoArchivo) == ERROR) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] Fallo el fstat()"BLANCO);
+		imprimirError(archivoLog, "[ERROR] Fallo el fstat()");
 		perror("fstat");
 		exit(EXIT_FAILURE);
 	}
 	dataBinTamanio = estadoArchivo.st_size;
-	Puntero = mmap(0, dataBinTamanio, PROT_WRITE | PROT_READ | PROT_EXEC, MAP_SHARED, descriptorArchivo, 0);
+	Puntero = mmap(NULO, dataBinTamanio, PROT_WRITE | PROT_READ | PROT_EXEC, MAP_SHARED, descriptorArchivo, NULO);
 	if (Puntero == MAP_FAILED) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] Fallo el mmap(), corran por sus vidas"BLANCO);
+		imprimirError(archivoLog, "[ERROR] Fallo el mmap(), corran por sus vidas");
 		perror("mmap");
 		exit(EXIT_FAILURE);
 	}

@@ -58,12 +58,12 @@ void fileSystemFinalizar() {
 
 void fileSystemReiniciar() {
 	metadataIniciar();
-	imprimirMensaje(archivoLog, AMARILLO"[AVISO] Debe conectar los nodos y luego formatear el File System"BLANCO);
+	imprimirAviso(archivoLog, "[AVISO] Debe conectar los nodos y luego formatear el File System");
 }
 
 void fileSystemRecuperar() {
 	metadataRecuperar();
-	imprimirMensaje(archivoLog, AMARILLO"[AVISO] Conecte los nodos necesarios al File System"BLANCO);
+	imprimirAviso(archivoLog, "[AVISO] Conecte los nodos necesarios al File System");
 }
 
 //--------------------------------------- Funciones de Configuracion -------------------------------------
@@ -191,11 +191,10 @@ void dataNodeAceptarReconexion(Nodo* nuevoNodo) {
 		mutexBloquear(mutexEstadoFileSystem);
 		estadoFileSystem = ESTABLE;
 		mutexDesbloquear(mutexEstadoFileSystem);
-		imprimirMensaje(archivoLog, AMARILLO"[AVISO] El File System esta estable"BLANCO);
+		imprimirAviso(archivoLog, "[AVISO] El File System esta estable");
 	}
 	mutexDesbloquear(mutexTarea);
 }
-
 
 void dataNodeHilo(Nodo* nodo) {
 	hiloDetach(pthread_self());
@@ -218,7 +217,7 @@ void dataNodeAtender(Nodo* nodo, int* estado) {
 void dataNodeDestruir(Nodo* nodo, int* estado) {
 	*estado = DESACTIVADO;
 	socketCerrar(nodo->socket);
-	imprimirMensaje1(archivoLog, AMARILLO"[AVISO] %s desconectado"BLANCO, nodo->nombre);
+	imprimirAviso1(archivoLog, "[AVISO] %s desconectado", nodo->nombre);
 	int posicion = nodoListaPosicion(nodo);
 	mutexBloquear(mutexListaNodos);
 	listaEliminarDestruyendoElemento(listaNodos, posicion , (Puntero)nodoDestruir);
@@ -232,7 +231,7 @@ void dataNodeDesactivar(Nodo* nodo, int* estado) {
 		socketCerrar(nodo->socket);
 		nodoSocket(nodo, ERROR);
 		*estado = DESACTIVADO;
-		imprimirMensaje1(archivoLog, AMARILLO"[AVISO] %s desconectado"BLANCO, nodo->nombre);
+		imprimirAviso1(archivoLog, "[AVISO] %s desconectado", nodo->nombre);
 	}
 	mutexDesbloquear(mutexTarea);
 
@@ -271,8 +270,8 @@ void yamaControlar() {
 }
 
 void yamaAceptar() {
-	mensajeEnviar(socketYama, ACEPTAR_YAMA, NULL, 0);
-	imprimirMensaje(archivoLog, AMARILLO"[AVISO] YAMA conectado"BLANCO);
+	mensajeEnviar(socketYama, ACEPTAR_YAMA, NULL, NULO);
+	imprimirAviso(archivoLog, "[AVISO] YAMA conectado");
 	int estado = ACTIVADO;
 	while(estado)
 		yamaAtender(&estado);
@@ -285,7 +284,7 @@ void yamaDesconectar() {
 
 void yamaRechazar() {
 	socketCerrar(socketYama);
-	imprimirMensaje(archivoLog, ROJO"[ERROR] YAMA fue rechazado, el File System no esta estable"BLANCO);
+	imprimirError(archivoLog, "[ERROR] YAMA fue rechazado, el File System no esta estable");
 }
 
 void yamaAtender(int* estado) {
@@ -300,7 +299,7 @@ void yamaAtender(int* estado) {
 void yamaFinalizar(int* estado) {
 	socketCerrar(socketYama);
 	*estado = DESACTIVADO;
-	imprimirMensaje(archivoLog, AMARILLO"[AVISO] YAMA desconectado"BLANCO);
+	imprimirAviso(archivoLog, "[AVISO] YAMA desconectado");
 }
 
 void yamaEnviarBloques(Puntero datos) {
@@ -309,7 +308,7 @@ void yamaEnviarBloques(Puntero datos) {
 	Archivo* archivo = archivoBuscarPorRuta(rutaDecente);
 	memoriaLiberar(rutaDecente);
 	if(archivo == NULL) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] El archivo solicitado por YAMA no existe"BLANCO);
+		imprimirError(archivoLog, "[ERROR] El archivo solicitado por YAMA no existe");
 		mensajeEnviar(socketYama, ERROR_ARCHIVO, &idMaster, sizeof(Entero));
 		return;
 	}
@@ -384,7 +383,7 @@ int workerAlmacenarArchivo(Archivo* archivo, Socket socketWorker) {
 int workerAlmacenadoFinal(String pathYama, Socket socketWorker) {
 	String rutaDecente = stringTomarDesdePosicion(pathYama, MAX_PREFIJO);
 	if(!rutaValida(rutaDecente)) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] La ruta ingresada no es valida"BLANCO);
+		imprimirError(archivoLog, "[ERROR] La ruta ingresada no es valida");
 		return ERROR;
 	}
 	String rutaDirectorio = rutaObtenerDirectorio(rutaDecente);
@@ -392,19 +391,19 @@ int workerAlmacenadoFinal(String pathYama, Socket socketWorker) {
 	if(directorio == NULL) {
 		memoriaLiberar(rutaDirectorio);
 		memoriaLiberar(rutaDecente);
-		imprimirMensaje(archivoLog, ROJO"[ERROR] El directorio ingresado no existe"BLANCO);
+		imprimirError(archivoLog, "[ERROR] El directorio ingresado no existe");
 		return ERROR;
 	}
 	String nombreArchivo = rutaObtenerUltimoNombre(rutaDecente);
 	if(archivoExiste(directorio->identificador, nombreArchivo)) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] Un archivo con ese nombre ya existe en el directorio destino"BLANCO);
+		imprimirError(archivoLog, "[ERROR] Un archivo con ese nombre ya existe en el directorio destino");
 		memoriaLiberar(nombreArchivo);
 		memoriaLiberar(rutaDirectorio);
 		memoriaLiberar(rutaDecente);
 		return ERROR;
 	}
 	if(directorioExiste(directorio->identificador, nombreArchivo)) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] Un directorio con ese nombre ya existe en el directorio destino"BLANCO);
+		imprimirError(archivoLog, "[ERROR] Un directorio con ese nombre ya existe en el directorio destino");
 		memoriaLiberar(nombreArchivo);
 		memoriaLiberar(rutaDirectorio);
 		memoriaLiberar(rutaDecente);
@@ -738,11 +737,12 @@ String consolaLeerEntrada() {
 	int indice;
 	int caracterLeido;
 	char* cadena = memoriaAlocar(MAX_STRING);
+	printf(BLANCO);
 	for(indice = 0; caracterDistintos((caracterLeido= caracterObtener()),ENTER) && indice < MAX_STRING; indice++)
 		cadena[indice] = caracterLeido;
 	if(indice == MAX_STRING) {
 		memoriaLiberar(cadena);
-		imprimirMensaje(archivoLog, ROJO"[ERROR] Entrada demasiado larga"BLANCO);
+		imprimirError(archivoLog, "[ERROR] Entrada demasiado larga");
 		return NULL;
 	}
 	else
@@ -765,7 +765,7 @@ void consolaEjecutar() {
 		return;
 	}
 	if(consolaSinFormatear()) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] Primero debe formatear el File System para utilizarlo"BLANCO);
+		imprimirError(archivoLog, "[ERROR] Primero debe formatear el File System para utilizarlo");
 		memoriaLiberar(entrada);
 		return;
 	}
@@ -792,26 +792,26 @@ void comandoFormatearFileSystem() {
 	metadataIniciar();
 	estadoFileSystemEstable();
 	imprimirMensaje(archivoLog, "[FORMATEO] El File System fue formateado");
-	imprimirMensaje(archivoLog, AMARILLO"[AVISO] El File System esta estable"BLANCO);
+	imprimirAviso(archivoLog, "[AVISO] El File System esta estable");
 }
 
 int comandoCrearDirectorio(Comando* comando) {
 	if(!rutaValida(comando->argumentos[1])) {
-		imprimirMensaje(archivoLog,ROJO"[ERROR] La ruta ingresada no es valida"BLANCO);
+		imprimirError(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return ERROR;
 	}
 	if(stringIguales(comando->argumentos[1], RAIZ)) {
-		imprimirMensaje(archivoLog,ROJO"[ERROR] El directorio raiz no puede ser creado"BLANCO);
+		imprimirError(archivoLog,"[ERROR] El directorio raiz no puede ser creado");
 		return ERROR;
 	}
 	Archivo* archivo = archivoBuscarPorRuta(comando->argumentos[1]);
 	if(archivo != NULL) {
-		imprimirMensaje(archivoLog,ROJO"[ERROR] Un archivo ya tiene el mismo nombre"BLANCO);
+		imprimirError(archivoLog,"[ERROR] Un archivo ya tiene el mismo nombre");
 		return ERROR;
 	}
 	Directorio* directorio = directorioBuscar(comando->argumentos[1]);
 	if(directorio != NULL) {
-		imprimirMensaje(archivoLog,ROJO"[ERROR] Un directorio ya tiene el mismo nombre"BLANCO);
+		imprimirError(archivoLog,"[ERROR] Un directorio ya tiene el mismo nombre");
 		return ERROR;
 	}
 	ControlDirectorio* control = directorioControlCrear(comando->argumentos[1]);
@@ -822,12 +822,12 @@ int comandoCrearDirectorio(Comando* comando) {
 			directorioControlarEntradas(control, comando->argumentos[1]);
 		int estado = directorioCrearDirectoriosRestantes(control, comando->argumentos[1]);
 		if(estado == ERROR) {
-			imprimirMensaje(archivoLog, ROJO"[ERROR] Se alcanzo el limite de directorios permitidos (100)"BLANCO);
+			imprimirError(archivoLog, "[ERROR] Se alcanzo el limite de directorios permitidos (100)");
 			resultado = ERROR;
 			break;
 		}
 		if(estado == -2) {
-			imprimirMensaje(archivoLog, ROJO"[ERROR] El nombre del directorio es demasiado largo"BLANCO);
+			imprimirError(archivoLog, "[ERROR] El nombre del directorio es demasiado largo");
 			resultado = ERROR;
 			break;
 		}
@@ -843,27 +843,27 @@ int comandoCrearDirectorio(Comando* comando) {
 
 void comandoRenombrar(Comando* comando) {
 	if(!rutaValida(comando->argumentos[1])) {
-		imprimirMensaje(archivoLog,ROJO"[ERROR] La ruta ingresada no es valida"BLANCO);
+		imprimirError(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return;
 	}
 	if(rutaValida(comando->argumentos[2])) {
-		imprimirMensaje(archivoLog,ROJO"[ERROR] El nombre no es valido"BLANCO);
+		imprimirError(archivoLog,"[ERROR] El nombre no es valido");
 		return;
 	}
 	if(stringIguales(comando->argumentos[1], RAIZ)) {
-		imprimirMensaje(archivoLog,ROJO"[ERROR] El directorio raiz no puede ser renombrado"BLANCO);
+		imprimirError(archivoLog,"[ERROR] El directorio raiz no puede ser renombrado");
 		return;
 	}
 	Directorio* directorio = directorioBuscar(comando->argumentos[1]);
 	Archivo* archivo = archivoBuscarPorRuta(comando->argumentos[1]);
 	if(archivo == NULL && directorio == NULL) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] El archivo o directorio no existe"BLANCO);
+		imprimirError(archivoLog, "[ERROR] El archivo o directorio no existe");
 		return;
 	}
 	if(directorio != NULL) {
 		int existeArchivo = archivoExiste(directorio->identificadorPadre, comando->argumentos[2]);
 		if(directorioExiste(directorio->identificadorPadre, comando->argumentos[2]) || existeArchivo) {
-			imprimirMensaje(archivoLog, ROJO"[ERROR] El nuevo nombre para el directorio ya existe"BLANCO);
+			imprimirError(archivoLog, "[ERROR] El nuevo nombre para el directorio ya existe");
 			return;
 		}
 		stringCopiar(directorio->nombre, comando->argumentos[2]);
@@ -891,15 +891,15 @@ void comandoRenombrar(Comando* comando) {
 
 void comandoMover(Comando* comando) {
 	if(!rutaValida(comando->argumentos[1])) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] La ruta ingresada no es valida"BLANCO);
+		imprimirError(archivoLog, "[ERROR] La ruta ingresada no es valida");
 		return;
 	}
 	if(!rutaValida(comando->argumentos[2])) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] La ruta ingresada no es valida"BLANCO);
+		imprimirError(archivoLog, "[ERROR] La ruta ingresada no es valida");
 		return;
 	}
 	if(stringIguales(comando->argumentos[1], RAIZ)) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] El directorio raiz no puede ser movido"BLANCO);
+		imprimirError(archivoLog, "[ERROR] El directorio raiz no puede ser movido");
 		return;
 	}
 	Directorio* directorioNuevoPadre;
@@ -908,27 +908,27 @@ void comandoMover(Comando* comando) {
 	else
 		directorioNuevoPadre = directorioBuscar(comando->argumentos[2]);
 	if(directorioNuevoPadre == NULL) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] El directorio destino no existe"BLANCO);
+		imprimirError(archivoLog, "[ERROR] El directorio destino no existe");
 		return;
 	}
 	Archivo* archivo = archivoBuscarPorRuta(comando->argumentos[1]);
 	Directorio* directorio = directorioBuscar(comando->argumentos[1]);
 	if(archivo == NULL && directorio == NULL) {
-		imprimirMensaje(archivoLog,ROJO"[ERROR] El archivo o directorio no existe"BLANCO);
+		imprimirError(archivoLog,"[ERROR] El archivo o directorio no existe");
 		return;
 	}
 	if(directorio != NULL) {
 		int existeArchivo = archivoExiste(directorioNuevoPadre->identificador, directorio->nombre);
 		if(directorioExiste(directorioNuevoPadre->identificador, directorio->nombre) || existeArchivo)  {
-			imprimirMensaje(archivoLog, ROJO"[ERROR] El directorio destino  ya tiene un archivo o directorio con el mismo nombre"BLANCO);
+			imprimirError(archivoLog, "[ERROR] El directorio destino  ya tiene un archivo o directorio con el mismo nombre");
 			return;
 		}
 		if(directorioEsHijoDe(directorioNuevoPadre, directorio)) {
-			imprimirMensaje(archivoLog, ROJO"[ERROR] El directorio no puede moverse a uno de sus subdirectorios"BLANCO);
+			imprimirError(archivoLog, "[ERROR] El directorio no puede moverse a uno de sus subdirectorios");
 			return;
 		}
 		if(directorioNuevoPadre->identificador == directorio->identificador) {
-			imprimirMensaje(archivoLog, ROJO"[ERROR] El directorio no puede moverse a si mismo"BLANCO);
+			imprimirError(archivoLog, "[ERROR] El directorio no puede moverse a si mismo");
 			return;
 		}
 
@@ -941,7 +941,7 @@ void comandoMover(Comando* comando) {
 	else {
 		int existeDirectorio = directorioExiste(directorioNuevoPadre->identificador, archivo->nombre);
 		if(archivoExiste(directorioNuevoPadre->identificador, archivo->nombre) || existeDirectorio) {
-			imprimirMensaje(archivoLog, ROJO"[ERROR] El directorio destino  ya tiene un archivo o directorio con el mismo nombre"BLANCO);
+			imprimirError(archivoLog, "[ERROR] El directorio destino  ya tiene un archivo o directorio con el mismo nombre");
 			return;
 		}
 		String rutaArchivo = string_from_format("%s/%i/%s", rutaDirectorioArchivos, archivo->identificadorPadre, archivo->nombre);
@@ -967,24 +967,24 @@ void comandoEliminar(Comando* comando) {
 
 void comandoEliminarCopia(Comando* comando) {
 	if(!rutaValida(comando->argumentos[2])) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] La ruta ingresada no es valida"BLANCO);
+		imprimirError(archivoLog, "[ERROR] La ruta ingresada no es valida");
 		return;
 	}
 	if(stringIguales(comando->argumentos[2], RAIZ)) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] La ruta ingresada no es valida"BLANCO);
+		imprimirError(archivoLog, "[ERROR] La ruta ingresada no es valida");
 		return;
 	}
 	if(!consolaArgumentoEsNumero(comando->argumentos[3])) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] El numero de bloque no es valido"BLANCO);
+		imprimirError(archivoLog, "[ERROR] El numero de bloque no es valido");
 		return;
 	}
 	if(!consolaArgumentoEsNumero(comando->argumentos[4])) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] El numero de copia del bloque no es valido"BLANCO);
+		imprimirError(archivoLog, "[ERROR] El numero de copia del bloque no es valido");
 		return;
 	}
 	Archivo* archivo = archivoBuscarPorRuta(comando->argumentos[2]);
 	if(archivo == NULL) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] El archivo no existe"BLANCO);
+		imprimirError(archivoLog, "[ERROR] El archivo no existe");
 		return;
 	}
 	int numeroBloque = atoi(comando->argumentos[3]);
@@ -992,16 +992,16 @@ void comandoEliminarCopia(Comando* comando) {
 	Bloque* bloque = listaObtenerElemento(archivo->listaBloques, numeroBloque);
 
 	if(bloque == NULL) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] El numero de bloque no existe"BLANCO);
+		imprimirError(archivoLog, "[ERROR] El numero de bloque no existe");
 		return;
 	}
 	Copia* copia = listaObtenerElemento(bloque->listaCopias, numeroCopia);
 	if(copia == NULL) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] El numero de copia no existe"BLANCO);
+		imprimirError(archivoLog, "[ERROR] El numero de copia no existe");
 		return;
 	}
 	if(listaCantidadElementos(bloque->listaCopias) == 1) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] No se puede eliminar la copia ya que es la ultima"BLANCO);
+		imprimirError(archivoLog, "[ERROR] No se puede eliminar la copia ya que es la ultima");
 		return;
 	}
 	listaEliminarDestruyendoElemento(bloque->listaCopias, numeroCopia, (Puntero)copiaDestruir);
@@ -1014,20 +1014,20 @@ void comandoEliminarCopia(Comando* comando) {
 void comandoEliminarDirectorio(Comando* comando) {
 	String ruta = comando->argumentos[2];
 	if(!rutaValida(ruta)) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] La ruta ingresada no es valida"BLANCO);
+		imprimirError(archivoLog, "[ERROR] La ruta ingresada no es valida");
 		return;
 	}
 	if(stringIguales(ruta, RAIZ)) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] El directorio raiz no puede ser eliminado"BLANCO);
+		imprimirError(archivoLog, "[ERROR] El directorio raiz no puede ser eliminado");
 		return;
 	}
 	Directorio* directorio = directorioBuscar(ruta);
 	if(directorio == NULL) {
-		imprimirMensaje(archivoLog,ROJO"[ERROR] El directorio no existe"BLANCO);
+		imprimirError(archivoLog,"[ERROR] El directorio no existe");
 		return;
 	}
 	if(directorioTieneAlgo(directorio->identificador))
-		imprimirMensaje1(archivoLog,ROJO"[ERROR] El directorio %s no esta vacio"BLANCO,ruta);
+		imprimirError1(archivoLog,"[ERROR] El directorio %s no esta vacio",ruta);
 	else {
 		directorioEliminar(directorio->identificador);
 		imprimirMensaje1(archivoLog,"[DIRECTORIO] El directorio %s ha sido eliminado",ruta);
@@ -1036,16 +1036,16 @@ void comandoEliminarDirectorio(Comando* comando) {
 
 void comandoEliminarArchivo(Comando* comando) {
 	if(!rutaValida(comando->argumentos[1])) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] La ruta ingresada no es valida"BLANCO);
+		imprimirError(archivoLog, "[ERROR] La ruta ingresada no es valida");
 		return;
 	}
 	if(stringIguales(comando->argumentos[1], RAIZ)) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] El directorio raiz no puede ser eliminado"BLANCO);
+		imprimirError(archivoLog, "[ERROR] El directorio raiz no puede ser eliminado");
 		return;
 	}
 	Archivo* archivo = archivoBuscarPorRuta(comando->argumentos[1]);
 	if(archivo == NULL) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] El archivo no existe"BLANCO);
+		imprimirError(archivoLog, "[ERROR] El archivo no existe");
 		return;
 	}
 	int posicion = archivoListaPosicion(archivo);
@@ -1062,7 +1062,7 @@ void comandoEliminarArchivo(Comando* comando) {
 
 void comandoListarDirectorio(Comando* comando) {
 	if(!rutaValida(comando->argumentos[1])) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] La ruta ingresada no es valida"BLANCO);
+		imprimirError(archivoLog, "[ERROR] La ruta ingresada no es valida");
 		return;
 	}
 	if(stringIguales(comando->argumentos[1], RAIZ)) {
@@ -1073,21 +1073,21 @@ void comandoListarDirectorio(Comando* comando) {
 	if(directorio != NULL)
 		directorioMostrarArchivos(directorio->identificador);
 	else
-		imprimirMensaje(archivoLog, ROJO"[ERROR] El directorio no existe"BLANCO);
+		imprimirError(archivoLog, "[ERROR] El directorio no existe");
 }
 
 void comandoInformacionArchivo(Comando* comando) {
 	if(!rutaValida(comando->argumentos[1])) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] La ruta ingresada no es valida"BLANCO);
+		imprimirError(archivoLog, "[ERROR] La ruta ingresada no es valida");
 		return;
 	}
 	if(stringIguales(comando->argumentos[1], RAIZ)) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] La ruta ingresada no es valida"BLANCO);
+		imprimirError(archivoLog, "[ERROR] La ruta ingresada no es valida");
 		return;
 	}
 	Archivo* archivo = archivoBuscarPorRuta(comando->argumentos[1]);
 	if(archivo == NULL) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] El archivo no existe"BLANCO);
+		imprimirError(archivoLog, "[ERROR] El archivo no existe");
 		return;
 	}
 	printf("[ARCHIVO] Nombre: %s\n", archivo->nombre);
@@ -1116,45 +1116,45 @@ void comandoInformacionArchivo(Comando* comando) {
 
 void comandoCopiarBloque(Comando* comando) {
 	if(!rutaValida(comando->argumentos[1])) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] La ruta ingresada no es valida"BLANCO);
+		imprimirError(archivoLog, "[ERROR] La ruta ingresada no es valida");
 		return;
 	}
 	if(stringIguales(comando->argumentos[1], RAIZ)) {
-		imprimirMensaje(archivoLog,ROJO"[ERROR] La ruta ingresada no es valida"BLANCO);
+		imprimirError(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return;
 	}
 	if(!consolaArgumentoEsNumero(comando->argumentos[2])) {
-		imprimirMensaje(archivoLog,ROJO"[ERROR] El numero de bloque no es valido"BLANCO);
+		imprimirError(archivoLog,"[ERROR] El numero de bloque no es valido");
 		return;
 	}
 	Archivo* archivo = archivoBuscarPorRuta(comando->argumentos[1]);
 	if(archivo == NULL) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] El archivo no existe"BLANCO);
+		imprimirError(archivoLog, "[ERROR] El archivo no existe");
 		return;
 	}
 	Nodo* nodoReceptor = nodoBuscarPorNombre(comando->argumentos[3]);
 	if(nodoReceptor == NULL) {
-		imprimirMensaje(archivoLog,ROJO"[ERROR] El nodo no existe"BLANCO);
+		imprimirError(archivoLog,"[ERROR] El nodo no existe");
 		return;
 	}
 	if(nodoBuscarBloqueLibre(nodoReceptor) == ERROR) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] El Nodo no tiene bloques libres"BLANCO);
+		imprimirError(archivoLog, "[ERROR] El Nodo no tiene bloques libres");
 		return;
 	}
 	Entero numeroBloque = atoi(comando->argumentos[2]);
 	Bloque* bloque = listaObtenerElemento(archivo->listaBloques, numeroBloque);
 	if(bloque == NULL) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] El numero de bloque no existe"BLANCO);
+		imprimirError(archivoLog, "[ERROR] El numero de bloque no existe");
 		return;
 	}
 	if(bloqueEstaEnNodo(bloque, nodoReceptor)) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] El Nodo ya posee una copia del bloque"BLANCO);
+		imprimirError(archivoLog, "[ERROR] El Nodo ya posee una copia del bloque");
 		return;
 	}
 	mutexBloquear(mutexTarea);
 	if(nodoDesconectado(nodoReceptor)) {
 		mutexDesbloquear(mutexTarea);
-		imprimirMensaje(archivoLog, ROJO"[ERROR] El nodo que va a guardar la nueva copia no esta conectado"BLANCO);
+		imprimirError(archivoLog, "[ERROR] El nodo que va a guardar la nueva copia no esta conectado");
 		return;
 	}
 	int indice;
@@ -1193,23 +1193,23 @@ void comandoCopiarArchivoAYamaFS(Comando* comando) {
 int comandoCopiarArchivoDeYamaFS(Comando* comando, int rutaYama) {
 	if(rutaYama == ACTIVADO) {
 		if((!rutaTieneAlMenosUnaBarra(comando->argumentos[1]) || !rutaBarrasEstanSeparadas(comando->argumentos[1])) || !rutaTienePrefijoYama(comando->argumentos[1])) {
-			imprimirMensaje(archivoLog,ROJO"[ERROR] La ruta ingresada no es valida"BLANCO);
+			imprimirError(archivoLog,"[ERROR] La ruta ingresada no es valida");
 			return ERROR;
 		}
 		rutaYamaDecente(comando, 1);
 	}
 	Archivo* archivo = archivoBuscarPorRuta(comando->argumentos[1]);
 	if(archivo == NULL) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] El archivo no existe"BLANCO);
+		imprimirError(archivoLog, "[ERROR] El archivo no existe");
 		return ERROR;
 	}
 	if(!archivoDisponible(archivo)) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] El archivo no esta disponible"BLANCO);
+		imprimirError(archivoLog, "[ERROR] El archivo no esta disponible");
 		return ERROR;
 	}
 	File file = fileAbrir(comando->argumentos[2], ESCRITURA);
 	if(file == NULL) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] La ruta es invalida"BLANCO);
+		imprimirError(archivoLog, "[ERROR] La ruta es invalida");
 		return ERROR;
 	}
 	fileCerrar(file);
@@ -1240,7 +1240,7 @@ int comandoCopiarArchivoDeYamaFS(Comando* comando, int rutaYama) {
 		}
 		mutexDesbloquear(mutexTarea);
 		if(copiaSinEnviar) {
-			imprimirMensaje1(archivoLog, ROJO"[ERROR] No se pudo leer el bloque N°%d, se aborta la operacion"BLANCO, (int*)indice);
+			imprimirError1(archivoLog, "[ERROR] No se pudo leer el bloque N°%d, se aborta la operacion", (int*)indice);
 			mutexBloquear(mutexRuta);
 			fileLimpiar(rutaBuffer);
 			mutexDesbloquear(mutexRuta);
@@ -1261,7 +1261,7 @@ void comandoMostrarArchivo(Comando* comando) {
 
 void comandoObtenerMD5DeArchivo(Comando* comando) {
 	if(!rutaValida(comando->argumentos[1])) {
-		imprimirMensaje(archivoLog,ROJO"[ERROR] La ruta ingresada no es valida"BLANCO);
+		imprimirError(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return;
 	}
 	String nombreArchivo = rutaObtenerUltimoNombre(comando->argumentos[1]);
@@ -1282,7 +1282,7 @@ void comandoObtenerMD5DeArchivo(Comando* comando) {
 	pipe(descriptores);
 	pidHijo = fork();
 	if(pidHijo == ERROR)
-		imprimirMensaje(archivoLog, ROJO"[ERROR] Fallo el fork (Estas en problemas amigo)"BLANCO);
+		imprimirError(archivoLog, "[ERROR] Fallo el fork (Estas en problemas amigo)");
 	else if(pidHijo == 0) {
 		close(descriptores[0]);
 		close(1);
@@ -1401,7 +1401,7 @@ void comandoFinalizar() {
 }
 
 void comandoError() {
-	imprimirMensaje(archivoLog, ROJO"[ERROR] Comando invalido"BLANCO);
+	imprimirError(archivoLog, "[ERROR] Comando invalido, ingrese help para mas ayuda");
 }
 
 //--------------------------------------- Funciones de Directorio -------------------------------------
@@ -1494,7 +1494,7 @@ ControlDirectorio* directorioControlCrear(String rutaDirectorio) {
 
 void directorioControlarEntradas(ControlDirectorio* control, String path) {
 	if(control->nombresDirectorios[control->indiceNombresDirectorios + 1] == NULL)
-		imprimirMensaje(archivoLog, ROJO"[ERROR] El archivo o directorio ya existe"BLANCO);
+		imprimirError(archivoLog, "[ERROR] El archivo o directorio ya existe");
 	else
 		control->identificadorPadre = control->identificadorDirectorio;
 	control->indiceNombresDirectorios++;
@@ -1735,7 +1735,7 @@ void directorioRecuperarPersistencia() {
 	File file = fileAbrir(rutaArchivos, LECTURA);
 	bitmapDirectoriosCrear();
 	if(file == NULL) {
-		imprimirMensaje1(archivoLog, ROJO"[ERROR] No se encontro el archivo %s"BLANCO, rutaDirectorios);
+		imprimirError1(archivoLog, "[ERROR] No se encontro el archivo %s", rutaDirectorios);
 		return;
 	}
 	fileCerrar(file);
@@ -1891,7 +1891,7 @@ int archivoAlmacenarTexto(Archivo* archivo, File file) {
 	while((tamanioBuffer = getline(&buffer, &limite,  file)) != ERROR) {
 		if(tamanioBuffer > BLOQUE) {
 			estado = ERROR;
-			imprimirMensaje(archivoLog, ROJO"[ERROR] El registro leido es demasiado largo"BLANCO);
+			imprimirError(archivoLog, "[ERROR] El registro leido es demasiado largo");
 			break;
 		}
 		if(tamanioBuffer <= bytesDisponibles) {
@@ -1922,11 +1922,11 @@ int archivoAlmacenarTexto(Archivo* archivo, File file) {
 
 int archivoAlmacenar(Comando* comando) {
 	if(consolaflagInvalido(comando->argumentos[1])) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] Flag invalido"BLANCO);
+		imprimirError(archivoLog, "[ERROR] Flag invalido");
 		return ERROR;
 	}
 	if(rutaInvalidaAlmacenar(comando->argumentos[3])) {
-		imprimirMensaje(archivoLog,ROJO"[ERROR] La ruta ingresada no es valida"BLANCO);
+		imprimirError(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return ERROR;
 	}
 	rutaYamaDecente(comando, 3);
@@ -1934,25 +1934,25 @@ int archivoAlmacenar(Comando* comando) {
 	Directorio* directorio = directorioBuscar(rutaDirectorio);
 	if(directorio == NULL) {
 		memoriaLiberar(rutaDirectorio);
-		imprimirMensaje(archivoLog, ROJO"[ERROR] El directorio ingresado no existe"BLANCO);
+		imprimirError(archivoLog, "[ERROR] El directorio ingresado no existe");
 		return ERROR;
 	}
 	String nombreArchivo = rutaObtenerUltimoNombre(comando->argumentos[3]);
 	if(archivoExiste(directorio->identificador, nombreArchivo)) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] Un archivo con ese nombre ya existe en el directorio destino"BLANCO);
+		imprimirError(archivoLog, "[ERROR] Un archivo con ese nombre ya existe en el directorio destino");
 		memoriaLiberar(nombreArchivo);
 		memoriaLiberar(rutaDirectorio);
 		return ERROR;
 	}
 	if(directorioExiste(directorio->identificador, nombreArchivo)) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] Un directorio con ese nombre ya existe en el directorio destino"BLANCO);
+		imprimirError(archivoLog, "[ERROR] Un directorio con ese nombre ya existe en el directorio destino");
 		memoriaLiberar(nombreArchivo);
 		memoriaLiberar(rutaDirectorio);
 		return ERROR;
 	}
 	File file = fileAbrir(comando->argumentos[2], LECTURA);
 	if(file == NULL) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] El archivo a copiar no existe"BLANCO);
+		imprimirError(archivoLog, "[ERROR] El archivo a copiar no existe");
 		memoriaLiberar(nombreArchivo);
 		memoriaLiberar(rutaDirectorio);
 		return ERROR;
@@ -1972,16 +1972,16 @@ int archivoAlmacenar(Comando* comando) {
 
 int archivoLeer(Comando* comando) {
 	if(!rutaValida(comando->argumentos[1])) {
-		imprimirMensaje(archivoLog,ROJO"[ERROR] La ruta ingresada no es valida"BLANCO);
+		imprimirError(archivoLog,"[ERROR] La ruta ingresada no es valida");
 		return ERROR;
 	}
 	Archivo* archivo = archivoBuscarPorRuta(comando->argumentos[1]);
 	if(archivo == NULL) {
-		imprimirMensaje(archivoLog,ROJO"[ERROR] El archivo no existe"BLANCO);
+		imprimirError(archivoLog,"[ERROR] El archivo no existe");
 		return ERROR;
 	}
 	if(!archivoDisponible(archivo)) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] El archivo no esta disponible"BLANCO);
+		imprimirError(archivoLog, "[ERROR] El archivo no esta disponible");
 		return ERROR;
 	}
 	listaOrdenar(archivo->listaBloques, (Puntero)bloqueOrdenarPorNumero);
@@ -2005,7 +2005,7 @@ int archivoLeer(Comando* comando) {
 		}
 		mutexDesbloquear(mutexTarea);
 		if(bloqueSinImprimir) {
-			imprimirMensaje1(archivoLog,ROJO"[ERROR] No se pudo leer el bloque N°%d"BLANCO, (int*)numeroBloque);
+			imprimirError1(archivoLog,"[ERROR] No se pudo leer el bloque N°%d", (int*)numeroBloque);
 			nodoLimpiarActividades();
 			semaforoSignal(semaforoTarea);
 			return ERROR;
@@ -2104,7 +2104,7 @@ void archivoPersistirControl(){
 void archivoRecuperarPersistencia() {
 	File file = fileAbrir(rutaArchivos, LECTURA);
 	if(file == NULL) {
-		imprimirMensaje1(archivoLog, ROJO"[ERROR] No se encontro el archivo %s"BLANCO, rutaArchivos);
+		imprimirError1(archivoLog, "[ERROR] No se encontro el archivo %s", rutaArchivos);
 		return;
 	}
 	fileCerrar(file);
@@ -2129,7 +2129,7 @@ void archivoRecuperarPersistenciaDetallada(String nombre, int padre) {
 	String ruta = string_from_format("%s/%i/%s", rutaDirectorioArchivos, padre, nombre);
 	File file = fileAbrir(ruta, LECTURA);
 	if(file == NULL) {
-		imprimirMensaje1(archivoLog, ROJO"[ERROR] No se encontro el archivo %s"BLANCO, ruta);
+		imprimirError1(archivoLog, "[ERROR] No se encontro el archivo %s", ruta);
 		memoriaLiberar(ruta);
 		memoriaLiberar(nombre);
 		return;
@@ -2324,7 +2324,7 @@ bool nodoDesconectado(Nodo* nodo) {
 
 void nodoVerificarBloquesLibres(Nodo* nodo) {
 	if(nodo->bloquesLibres == NULO) {
-		imprimirMensaje1(archivoLog, AMARILLO"[AVISO] El %s tiene todos sus bloques ocupados"BLANCO, nodo->nombre);
+		imprimirAviso1(archivoLog, "[AVISO] El %s tiene todos sus bloques ocupados", nodo->nombre);
 	}
 }
 
@@ -2336,7 +2336,7 @@ bool nodoDisponible(Nodo* nodo) {
 bool nodoNuevo(Nodo* nuevoNodo) {
 	Nodo* nodo = nodoBuscarPorNombre(nuevoNodo->nombre);
 	if(nodo == NULL) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] No se permite conexiones de nuevos Nodos"BLANCO);
+		imprimirError(archivoLog, "[ERROR] No se permite conexiones de nuevos Nodos");
 		return true;
 	}
 	return false;
@@ -2347,7 +2347,7 @@ bool nodoEstaConectado(Nodo* nuevoNodo) {
 	if(nodo == NULL)
 		return false;
 	if(nodoConectado(nodo)) {
-		imprimirMensaje(archivoLog, ROJO"[ERROR] Un nodo con ese nombre ya esta conectado"BLANCO);
+		imprimirError(archivoLog, "[ERROR] Un nodo con ese nombre ya esta conectado");
 		return true;
 	}
 	return false;
@@ -2456,7 +2456,7 @@ void nodoAceptar(Nodo* nodo) {
 	mensajeEnviar(nodo->socket, ACEPTAR_DATANODE, NULL, NULO);
 	Hilo dataNode;
 	hiloCrear(&dataNode, (Puntero)dataNodeHilo, nodo);
-	imprimirMensaje1(archivoLog, AMARILLO"[AVISO] %s conectado"BLANCO, nodo->nombre);
+	imprimirAviso1(archivoLog, "[AVISO] %s conectado", nodo->nombre);
 }
 
 void nodoPersistir() {
@@ -2490,7 +2490,7 @@ void nodoPersistirBitmap(Nodo* nodo) {
 void nodoRecuperarPersistencia() {
 	File file = fileAbrir(rutaArchivos, LECTURA);
 	if(file == NULL) {
-		imprimirMensaje1(archivoLog, ROJO"[ERROR] No se encontro el archivo %s"BLANCO, rutaNodos);
+		imprimirError1(archivoLog, "[ERROR] No se encontro el archivo %s", rutaNodos);
 		return;
 	}
 	fileCerrar(file);
@@ -2524,7 +2524,7 @@ void nodoRecuperarPersistenciaBitmap(Nodo* nodo) {
 	String ruta = string_from_format("%s/%s", rutaDirectorioBitmaps, nodo->nombre);
 	File file = fileAbrir(ruta, LECTURA);
 	if(file == NULL) {
-		imprimirMensaje1(archivoLog, ROJO"[ERROR] No se encontro el archivo %s"BLANCO, rutaNodos);
+		imprimirError1(archivoLog, "[ERROR] No se encontro el archivo %s", rutaNodos);
 		memoriaLiberar(ruta);
 		return;
 	}
@@ -2563,7 +2563,7 @@ int bloqueEnviarCopias(Bloque* bloque, String buffer) {
 	}
 	mutexDesbloquear(mutexTarea);
 	if(copiasEnviadas < MAX_COPIAS) {
-		imprimirMensaje1(archivoLog, ROJO"[ERROR] El bloque N°%i no pudo copiarse porque no hay nodos disponibles"BLANCO, (int*)bloque->numeroBloque);
+		imprimirError1(archivoLog, "[ERROR] El bloque N°%i no pudo copiarse porque no hay nodos disponibles", (int*)bloque->numeroBloque);
 		return ERROR;
 	}
 	return OK;

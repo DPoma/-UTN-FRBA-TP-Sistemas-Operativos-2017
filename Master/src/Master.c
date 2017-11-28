@@ -9,7 +9,7 @@
 
 int main(int argc, String* argv) {
 	if(argc != 5) {
-		puts(ROJO"[ERROR] Faltan o sobran argumentos"BLANCO);
+		imprimirError(archivoLog, "[ERROR] Faltan o sobran argumentos");
 		abort();
 	}
 	masterIniciar(argv);
@@ -50,7 +50,7 @@ void masterIniciar(String* argv) {
 
 	void leerArchivo(File archScript,char** script,int* len){
 		if(!archScript){
-			imprimirMensaje(archivoLog, ROJO"[ERROR] Archivo de script invalido"BLANCO);
+			imprimirError(archivoLog, "[ERROR] Archivo de script invalido");
 			abort();
 		}
 		fseek(archScript, 0, SEEK_END);
@@ -75,10 +75,10 @@ void masterIniciar(String* argv) {
 void masterAtender(){
 	Mensaje* mensaje=mensajeRecibir(socketYama);
 	if(mensaje->header.operacion==ABORTAR){
-		imprimirMensaje(archivoLog, ROJO"[ERROR] Path de YAMA FS invalido, abortando proceso"BLANCO);
+		imprimirError(archivoLog, "[ERROR] Path de YAMA FS invalido, abortando proceso");
 		abort();
 	}else if(mensaje->header.operacion==DESCONEXION){
-		imprimirMensaje(archivoLog, ROJO"[ERROR] YAMA desconectado"BLANCO);
+		imprimirError(archivoLog, "[ERROR] YAMA desconectado");
 		abort();
 	}
 	imprimirMensaje(archivoLog, "[RECEPCION] Lista de bloques recibida");
@@ -148,7 +148,7 @@ void masterAtender(){
 			mensajeDestruir(m);
 			break;
 		case ABORTAR:
-			imprimirMensaje(archivoLog,AMARILLO"[AVISO] Abortando proceso"BLANCO);
+			imprimirAviso(archivoLog,"[AVISO] Abortando proceso");
 			abort();
 		}
 	}
@@ -172,7 +172,7 @@ void transformaciones(Lista bloques){
 	time_t tiempo=time(0);
 	t_queue* clocks=queue_create();
 	WorkerTransformacion* dir = list_get(bloques,0);
-	imprimirMensaje1(archivoLog, AMARILLO"[AVISO] Comenzando transformacion en %s"BLANCO ,&dir->dir.nombre);
+	imprimirAviso1(archivoLog, "[AVISO] Comenzando transformacion en %s" ,&dir->dir.nombre);
 	imprimirMensaje3(archivoLog,"[CONEXION] Estableciendo conexion con %s (IP: %s | PUERTO: %s)", dir->dir.nombre ,dir->dir.ip,dir->dir.port);
 	Socket socketWorker=socketCrearCliente(dir->dir.ip,dir->dir.port,ID_MASTER);
 	imprimirMensaje1(archivoLog,"[CONEXION] Conexion establecida con %s", dir->dir.nombre);
@@ -245,7 +245,7 @@ void transformaciones(Lista bloques){
 	socketCerrar(socketWorker);
 	queue_destroy(clocks);
 	tareasEnParalelo(-1);
-	imprimirMensaje1(archivoLog, AMARILLO"[AVISO] Transformaciones terminadas en %s"BLANCO, dir->dir.nombre);
+	imprimirAviso1(archivoLog, "[AVISO] Transformaciones terminadas en %s", dir->dir.nombre);
 	pthread_detach(pthread_self());
 }
 void reduccionLocal(Mensaje* m){
@@ -253,7 +253,7 @@ void reduccionLocal(Mensaje* m){
 	time_t tiempo=time(0);
 	Dir nodo;
 	memcpy(&nodo,m->datos,DIRSIZE);
-	imprimirMensaje1(archivoLog,AMARILLO"[AVISO] Comenzando reduccion local en %s"BLANCO, nodo.nombre);
+	imprimirAviso1(archivoLog,"[AVISO] Comenzando reduccion local en %s", nodo.nombre);
 	int32_t cantTemps=(m->header.tamanio-DIRSIZE-TEMPSIZE)/TEMPSIZE;
 	int tamanio=cantTemps*TEMPSIZE+TEMPSIZE+lenReduccion+INTSIZE*2;
 	void* buffer=malloc(tamanio);
@@ -273,11 +273,13 @@ void reduccionLocal(Mensaje* m){
 
 	Mensaje* mensaje = mensajeRecibir(sWorker);
 	if(mensaje->header.operacion==DESCONEXION){
-		imprimirMensaje1(archivoLog, ROJO"[ERROR] %s desconectado"BLANCO, nodo.nombre);
+		imprimirError1(archivoLog, "[ERROR] %s desconectado", nodo.nombre);
 		mensaje->header.operacion=FRACASO;
 	}
-	imprimirMensaje1(archivoLog,mensaje->header.operacion==EXITO?AMARILLO"[AVISO] Reduccion local exitosa en %s"BLANCO
-			:ROJO"[ERROR] Reduccion local fallida en %s"BLANCO, nodo.nombre);
+	if(mensaje->header.operacion==EXITO)
+		imprimirAviso1(archivoLog,"[AVISO] Reduccion local exitosa en %s", nodo.nombre);
+	else
+		imprimirError1(archivoLog, "[ERROR] Reduccion local fallida en %s", nodo.nombre);
 	char bufferY[INTSIZE+DIRSIZE];
 	int32_t op=REDUCLOCAL;
 	memcpy(bufferY,&op,INTSIZE);
@@ -298,7 +300,7 @@ void reduccionGlobal(Mensaje* m){
 	time_t tiempo=time(0);
 	Dir nodo;
 	memcpy(&nodo,m->datos,DIRSIZE);
-	imprimirMensaje1(archivoLog,AMARILLO"[AVISO] Comenzando reduccion global en %s"BLANCO, nodo.nombre);
+	imprimirAviso1(archivoLog,"[AVISO] Comenzando reduccion global en %s", nodo.nombre);
 	int cantDuplas=(m->header.tamanio-DIRSIZE-TEMPSIZE)/(TEMPSIZE+DIRSIZE);
 	int tamanio=(DIRSIZE+TEMPSIZE)*cantDuplas+TEMPSIZE+INTSIZE*2+lenReduccion;
 	void* buffer=malloc(tamanio);
@@ -319,8 +321,10 @@ void reduccionGlobal(Mensaje* m){
 		imprimirMensaje(archivoLog,"[ERROR] Worker desconectado");
 		mensaje->header.operacion=FRACASO;
 	}
-	imprimirMensaje1(archivoLog,mensaje->header.operacion==EXITO?AMARILLO"[AVISO] Reduccion global exitosa en %s"BLANCO
-			:ROJO"[ERROR] Reduccion global fallida en %s"BLANCO, nodo.nombre);
+	if(mensaje->header.operacion==EXITO)
+		imprimirAviso1(archivoLog, "[AVISO] Reduccion global exitosa en %s", nodo.nombre);
+	else
+		imprimirError1(archivoLog, "[ERROR] Reduccion global fallida en %s", nodo.nombre);
 	int32_t op=REDUCGLOBAL;
 	tamanio=INTSIZE+stringLongitud(archivoSalida)+1;
 	buffer=malloc(tamanio);
@@ -333,11 +337,12 @@ void reduccionGlobal(Mensaje* m){
 	metricas.reducGlobal=transcurrido(tiempo);
 	//imprimirMensaje(archivoLog,"[EJECUCION] Reduccion global terminada");
 }
+
 void almacenado(Mensaje* m){
 	time_t tiempo=time(0);
 	Dir nodo;
 	memcpy(&nodo,m->datos,DIRSIZE);
-	imprimirMensaje1(archivoLog,AMARILLO"[AVISO] Comenzando almacenado final en %s"BLANCO, nodo.nombre);
+	imprimirAviso1(archivoLog,"[AVISO] Comenzando almacenado final en %s", nodo.nombre);
 	imprimirMensaje3(archivoLog,"[CONEXION] Estableciendo conexion con %s (IP: %s | PUERTO: %s)", nodo.nombre ,nodo.ip,nodo.port);
 	Socket sWorker=socketCrearCliente(nodo.ip,nodo.port,ID_MASTER);
 	imprimirMensaje1(archivoLog,"[CONEXION] Conexion establecida con %s", nodo.nombre);
@@ -351,12 +356,13 @@ void almacenado(Mensaje* m){
 
 	Mensaje* mens=mensajeRecibir(sWorker);
 	if(mens->header.operacion==DESCONEXION){
-		imprimirMensaje1(archivoLog, ROJO"[ERROR] %s desconectado"BLANCO, nodo.nombre);
+		imprimirError1(archivoLog, "[ERROR] %s desconectado", nodo.nombre);
 		mens->header.operacion=FRACASO;
 	}
-	imprimirMensaje(archivoLog,mens->header.operacion==EXITO? AMARILLO"[EJECUCION] Almacenado final realizado con exito en el File System"BLANCO
-			:ROJO"[ERROR] Almacenado fallido en el File System"BLANCO);
-
+	if(mens->header.operacion==EXITO)
+		imprimirAviso(archivoLog, "[AVISO] Almacenado final realizado con exito en el File System");
+	else
+		imprimirError(archivoLog, "[ERROR] Almacenado fallido en el File System");
 	int32_t op=ALMACENADO;
 	mensajeEnviar(socketYama,mens->header.operacion,&op,INTSIZE);
 	mensajeDestruir(mens);
