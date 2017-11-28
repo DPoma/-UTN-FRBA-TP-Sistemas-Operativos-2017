@@ -165,6 +165,7 @@ typedef struct __attribute__((packed)) {
 typedef struct __attribute__((packed)) {
 	char ip[MAX_IP];
 	char puerto[MAX_PUERTO];
+	char nombre[MAX_NOMBRE];
 } Direccion;
 
 typedef struct __attribute__((packed)) {

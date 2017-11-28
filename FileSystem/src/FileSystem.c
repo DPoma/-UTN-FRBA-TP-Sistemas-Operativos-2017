@@ -2381,8 +2381,10 @@ Direccion nodoObtenerDireccion(String nombreNodo) {
 	Direccion direccion;
 	stringLimpiar(direccion.ip, 20);
 	stringLimpiar(direccion.puerto, 20);
+	stringLimpiar(direccion.nombre, 20);
 	stringCopiar(direccion.ip, nodo->ip);
 	stringCopiar(direccion.puerto, nodo->puerto);
+	stringCopiar(direccion.nombre, nodo->nombre);
 	return direccion;
 }
 

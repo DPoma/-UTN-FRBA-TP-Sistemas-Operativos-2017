@@ -33,7 +33,6 @@ void masterIniciar(String* argv) {
 		return configuracion;
 	}
 	configuracion = configuracionCrear(RUTA_CONFIG, (Puntero)configuracionLeerArchivo, campos);
-	imprimirMensaje2(archivoLog, "[CONEXION] Configuracion para conexion con YAMA (IP: %s | Puerto: %s)", configuracion->ipYama, configuracion->puertoYama);
 	void configuracionSenial(int senial){
 		estadoMaster=DESACTIVADO;
 	}
@@ -51,7 +50,7 @@ void masterIniciar(String* argv) {
 
 	void leerArchivo(File archScript,char** script,int* len){
 		if(!archScript){
-			puts("no se pudo abrir un archivo de script");
+			imprimirMensaje(archivoLog, ROJO"[ERROR] Archivo de script invalido"BLANCO);
 			abort();
 		}
 		fseek(archScript, 0, SEEK_END);
@@ -67,7 +66,7 @@ void masterIniciar(String* argv) {
 	leerArchivo(fopen(argv[2],"r+"),&scriptReduccion,&lenReduccion);
 	archivoSalida=argv[4];
 
-	imprimirMensaje2(archivoLog,"[CONEXION] Estableciendo Conexion con YAMA...", configuracion->ipYama, configuracion->puertoYama);
+	imprimirMensaje2(archivoLog, "[CONEXION] Estableciendo conexion con YAMA (IP: %s | Puerto: %s)", configuracion->ipYama, configuracion->puertoYama);
 	socketYama = socketCrearCliente(configuracion->ipYama, configuracion->puertoYama, ID_MASTER);
 	imprimirMensaje(archivoLog, "[CONEXION] Conexion establecida con YAMA, enviando solicitud");
 	mensajeEnviar(socketYama,SOLICITUD,argv[3],stringLongitud(argv[3])+1);
@@ -76,13 +75,13 @@ void masterIniciar(String* argv) {
 void masterAtender(){
 	Mensaje* mensaje=mensajeRecibir(socketYama);
 	if(mensaje->header.operacion==ABORTAR){
-		imprimirMensaje(archivoLog, ROJO"[ERROR] Path invalido, abortando proceso"BLANCO);
+		imprimirMensaje(archivoLog, ROJO"[ERROR] Path de YAMA FS invalido, abortando proceso"BLANCO);
 		abort();
 	}else if(mensaje->header.operacion==DESCONEXION){
-		imprimirMensaje(archivoLog,"[ERROR] yama desconectado");
+		imprimirMensaje(archivoLog, ROJO"[ERROR] YAMA desconectado"BLANCO);
 		abort();
 	}
-	imprimirMensaje(archivoLog, "[MENSAJE] Lista de bloques recibida");
+	imprimirMensaje(archivoLog, "[RECEPCION] Lista de bloques recibida");
 	int i;
 	bool mismoNodo(Dir a,Dir b){
 		return stringIguales(a.ip,b.ip)&&stringIguales(a.port,b.port);//podría comparar solo ip
@@ -94,7 +93,7 @@ void masterAtender(){
 		memcpy(&bloque.bloque,mensaje->datos+i+DIRSIZE,INTSIZE);
 		memcpy(&bloque.bytes,mensaje->datos+i+DIRSIZE+INTSIZE,INTSIZE);
 		memcpy(bloque.temp,mensaje->datos+i+DIRSIZE+INTSIZE*2,TEMPSIZE);
-		imprimirMensaje3(archivoLog, "[RECEPCION] bloque %s %s %d",bloque.dir.ip,bloque.dir.port,(int*)bloque.bloque);
+		imprimirMensaje2(archivoLog, "[RECEPCION] Bloque N°%d de %s recibido", (int*)bloque.bloque, bloque.dir.nombre);
 		int j;
 		bool flag=false;
 		for(j=0;j<listas->elements_count;j++){
@@ -110,7 +109,7 @@ void masterAtender(){
 			Lista nodo=list_create();
 			list_addM(nodo, &bloque,sizeof(WorkerTransformacion));
 			list_add(listas,nodo);
-			imprimirMensaje3(archivoLog,"] lista para nodo %s %s armada, lista #%d",bloque.dir.ip,bloque.dir.port,(int*)listas->elements_count);
+			imprimirMensaje2(archivoLog,"[RECEPCION] Lista para %s armada (#%d)",bloque.dir.nombre, (int*)listas->elements_count);
 		}
 	}
 	mensajeDestruir(mensaje);
@@ -149,33 +148,34 @@ void masterAtender(){
 			mensajeDestruir(m);
 			break;
 		case ABORTAR:
-			imprimirMensaje(archivoLog,"[ABORTO] Abortando proceso");
+			imprimirMensaje(archivoLog,AMARILLO"[AVISO] Abortando proceso"BLANCO);
 			abort();
 		}
 	}
 	metricas.proceso=transcurrido(metricas.procesoC);
-	imprimirMensaje(archivoLog,"[EJECUCION]Terminando proceso");
+	imprimirMensaje(archivoLog,"[EJECUCION] Terminando proceso");
 	void mostrarTranscurrido(double dt,char* tarea){
-		printf("[METRICA]%s tardo %f segundos en ejecutarse\n",tarea,dt);
+		printf("[METRICA] %s tardo %f segundos en ejecutarse\n",tarea,dt);
 		log_info(archivoLog,"[METRICA]%s tardo %f segundos en ejecutarse",tarea,dt);
 	}
 	mostrarTranscurrido(metricas.proceso,"Job");
-	mostrarTranscurrido(metricas.transformacionSum/metricas.cantTrans,"Transformacion promedio ");
+	mostrarTranscurrido(metricas.transformacionSum/metricas.cantTrans,"Transformacion promedio");
 	mostrarTranscurrido(metricas.reducLocalSum/metricas.cantRedLoc,"Reduccion local promedio");
-	imprimirMensaje2(archivoLog,"[METRICA]Transformaciones: %d,Reducciones locales:%d",(void*)metricas.cantTrans,(void*)metricas.cantRedLoc);
+	imprimirMensaje2(archivoLog,"[METRICA] Transformaciones: %d,Reducciones locales:%d",(void*)metricas.cantTrans,(void*)metricas.cantRedLoc);
 	mostrarTranscurrido(metricas.reducGlobal,"Reducccion Global");
 	mostrarTranscurrido(metricas.almacenado,"Almacenado");
-	imprimirMensaje1(archivoLog,"[METRICA]Cantidad de fallos: %d",(void*)metricas.fallos);
-	imprimirMensaje1(archivoLog,"[METRICA]Tareas realizadas en paralelo: %d",(void*)metricas.maxParalelo);
+	imprimirMensaje1(archivoLog,"[METRICA] Cantidad de fallos: %d",(void*)metricas.fallos);
+	imprimirMensaje1(archivoLog,"[METRICA] Tareas realizadas en paralelo: %d",(void*)metricas.maxParalelo);
 }
 void transformaciones(Lista bloques){
 	tareasEnParalelo(1);
 	time_t tiempo=time(0);
 	t_queue* clocks=queue_create();
 	WorkerTransformacion* dir = list_get(bloques,0);
-	imprimirMensaje2(archivoLog,"[EJECUCION] comenzando transformacion de nodo %s %s",&dir->dir.ip,&dir->dir.port);
+	imprimirMensaje1(archivoLog, AMARILLO"[AVISO] Comenzando transformacion en %s"BLANCO ,&dir->dir.nombre);
+	imprimirMensaje3(archivoLog,"[CONEXION] Estableciendo conexion con %s (IP: %s | PUERTO: %s)", dir->dir.nombre ,dir->dir.ip,dir->dir.port);
 	Socket socketWorker=socketCrearCliente(dir->dir.ip,dir->dir.port,ID_MASTER);
-	imprimirMensaje2(archivoLog,"[CONEXION] Estableciendo conexion con Worker (IP: %s | PUERTO: %s",dir->dir.ip,dir->dir.port);
+	imprimirMensaje1(archivoLog,"[CONEXION] Conexion establecida con %s", dir->dir.nombre);
 	mensajeEnviar(socketWorker,TRANSFORMACION,scriptTransformacion,lenTransformacion);
 	int enviados=0,respondidos=0;
 	semaforoWait(metricas.transformaciones);
@@ -194,7 +194,7 @@ void transformaciones(Lista bloques){
 			memcpy(data+INTSIZE,&wt->bytes,INTSIZE);
 			memcpy(data+INTSIZE*2,wt->temp,TEMPSIZE);
 			mensajeEnviar(socketWorker,TRANSFORMACION,data,sizeof data);
-			imprimirMensaje2(archivoLog,"[CONEXION] Enviando bloque %d %s",(int*)wt->bloque,wt->temp);
+			imprimirMensaje2(archivoLog,"[TRANSFORMACION] Solicitando bloque N°%d (%s)",(int*)wt->bloque,wt->temp);
 		}
 		for(;respondidos<enviados;respondidos++){
 			Mensaje* mensaje = mensajeRecibir(socketWorker);
@@ -216,11 +216,11 @@ void transformaciones(Lista bloques){
 				//tareasEnParalelo(-1);
 			}
 			if(mensaje->header.operacion==EXITO){
-				imprimirMensaje2(archivoLog, "[TRANSFORMACION] Transformacion realizada con exito en el Worker %s %s",dir->dir.ip,dir->dir.port);
+			imprimirMensaje2(archivoLog, "[TRANSFORMACION] Operacion realizada con exito en bloque N°%d de %s", (int*)dir->bloque, dir->dir.nombre);
 				enviarActualizacion();
 			}else{
 				semaforoWait(errorBloque);
-				imprimirMensaje2(archivoLog,"[TRANSFORMACION] Transformacion fallida en el Worker %s %s",dir->dir.ip,dir->dir.port);
+				imprimirMensaje1(archivoLog, "[TRANSFORMACION] Operacion fallida en %s", dir->dir.nombre);
 				enviarActualizacion();
 				semaforoWait(recepcionAlternativo);
 				list_addM(bloques,&alternativo,sizeof alternativo);
@@ -245,7 +245,7 @@ void transformaciones(Lista bloques){
 	socketCerrar(socketWorker);
 	queue_destroy(clocks);
 	tareasEnParalelo(-1);
-	imprimirMensaje2(archivoLog,"[EJECUCION] transformacion terminada de nodo %s %s",dir->dir.ip,dir->dir.port);
+	imprimirMensaje1(archivoLog, AMARILLO"[AVISO] Transformaciones terminadas en %s"BLANCO, dir->dir.nombre);
 	pthread_detach(pthread_self());
 }
 void reduccionLocal(Mensaje* m){
@@ -253,7 +253,7 @@ void reduccionLocal(Mensaje* m){
 	time_t tiempo=time(0);
 	Dir nodo;
 	memcpy(&nodo,m->datos,DIRSIZE);
-	imprimirMensaje2(archivoLog,"[EJECUCION] comenzando reduccion local de nodo %s %s",nodo.ip,nodo.port);
+	imprimirMensaje1(archivoLog,AMARILLO"[AVISO] Comenzando reduccion local en %s"BLANCO, nodo.nombre);
 	int32_t cantTemps=(m->header.tamanio-DIRSIZE-TEMPSIZE)/TEMPSIZE;
 	int tamanio=cantTemps*TEMPSIZE+TEMPSIZE+lenReduccion+INTSIZE*2;
 	void* buffer=malloc(tamanio);
@@ -265,17 +265,19 @@ void reduccionLocal(Mensaje* m){
 
 	memcpy(buffer+INTSIZE*2+lenReduccion+cantTemps*TEMPSIZE,m->datos+DIRSIZE+cantTemps*TEMPSIZE,TEMPSIZE);//destino
 
+	imprimirMensaje3(archivoLog,"[CONEXION] Estableciendo conexion con %s (IP: %s | PUERTO: %s)", nodo.nombre ,nodo.ip,nodo.port);
 	Socket sWorker=socketCrearCliente(nodo.ip,nodo.port,ID_MASTER);
+	imprimirMensaje1(archivoLog,"[CONEXION] Conexion establecida con %s", nodo.nombre);
 	mensajeEnviar(sWorker,REDUCLOCAL,buffer,tamanio);
 	mensajeDestruir(m);free(buffer);
 
 	Mensaje* mensaje = mensajeRecibir(sWorker);
 	if(mensaje->header.operacion==DESCONEXION){
-		imprimirMensaje(archivoLog,"[ERROR] Worker desconectado");
+		imprimirMensaje1(archivoLog, ROJO"[ERROR] %s desconectado"BLANCO, nodo.nombre);
 		mensaje->header.operacion=FRACASO;
 	}
-	imprimirMensaje(archivoLog,mensaje->header.operacion==EXITO?"[EJECUCION] reduccion local exitosa"
-			:"[ERROR] fallo en la reduccion local");
+	imprimirMensaje1(archivoLog,mensaje->header.operacion==EXITO?AMARILLO"[AVISO] Reduccion local exitosa en %s"BLANCO
+			:ROJO"[ERROR] Reduccion local fallida en %s"BLANCO, nodo.nombre);
 	char bufferY[INTSIZE+DIRSIZE];
 	int32_t op=REDUCLOCAL;
 	memcpy(bufferY,&op,INTSIZE);
@@ -289,14 +291,14 @@ void reduccionLocal(Mensaje* m){
 	metricas.reducLocalSum+=transcurrido(tiempo);
 	metricas.cantRedLoc++;
 	semaforoSignal(metricas.reducLocales);
-	imprimirMensaje2(archivoLog,"[EJECUCION] terminando reduccion local de nodo %s %s",nodo.ip,nodo.port);
+	//imprimirMensaje2(archivoLog,"[EJECUCION] terminando reduccion local de nodo %s %s",nodo.ip,nodo.port);
 	pthread_detach(pthread_self());
 }
 void reduccionGlobal(Mensaje* m){
-	imprimirMensaje(archivoLog,"[EJECUCION] comenzando reduccion global");
 	time_t tiempo=time(0);
 	Dir nodo;
 	memcpy(&nodo,m->datos,DIRSIZE);
+	imprimirMensaje1(archivoLog,AMARILLO"[AVISO] Comenzando reduccion global en %s"BLANCO, nodo.nombre);
 	int cantDuplas=(m->header.tamanio-DIRSIZE-TEMPSIZE)/(TEMPSIZE+DIRSIZE);
 	int tamanio=(DIRSIZE+TEMPSIZE)*cantDuplas+TEMPSIZE+INTSIZE*2+lenReduccion;
 	void* buffer=malloc(tamanio);
@@ -306,7 +308,9 @@ void reduccionGlobal(Mensaje* m){
 	memcpy(buffer+INTSIZE+lenReduccion,&cantDuplas,INTSIZE);//origen
 	memcpy(buffer+INTSIZE*2+lenReduccion,m->datos+DIRSIZE,m->header.tamanio-DIRSIZE);//y destino
 
+	imprimirMensaje3(archivoLog,"[CONEXION] Estableciendo conexion con %s (IP: %s | PUERTO: %s)", nodo.nombre ,nodo.ip,nodo.port);
 	Socket sWorker=socketCrearCliente(nodo.ip,nodo.port,ID_MASTER);
+	imprimirMensaje1(archivoLog,"[CONEXION] Conexion establecida con %s", nodo.nombre);
 	mensajeEnviar(sWorker,REDUCGLOBAL,buffer,tamanio);
 	mensajeDestruir(m);free(buffer);
 
@@ -315,8 +319,8 @@ void reduccionGlobal(Mensaje* m){
 		imprimirMensaje(archivoLog,"[ERROR] Worker desconectado");
 		mensaje->header.operacion=FRACASO;
 	}
-	imprimirMensaje(archivoLog,mensaje->header.operacion==EXITO?"[EJECUCION] reduccion global exitosa"
-			:"[ERROR] reduccion global fallida");
+	imprimirMensaje1(archivoLog,mensaje->header.operacion==EXITO?AMARILLO"[AVISO] Reduccion global exitosa en %s"BLANCO
+			:ROJO"[ERROR] Reduccion global fallida en %s"BLANCO, nodo.nombre);
 	int32_t op=REDUCGLOBAL;
 	tamanio=INTSIZE+stringLongitud(archivoSalida)+1;
 	buffer=malloc(tamanio);
@@ -327,15 +331,16 @@ void reduccionGlobal(Mensaje* m){
 	mensajeDestruir(mensaje);
 	socketCerrar(sWorker);
 	metricas.reducGlobal=transcurrido(tiempo);
-	imprimirMensaje(archivoLog,"[EJECUCION] reduccion global terminada");
+	//imprimirMensaje(archivoLog,"[EJECUCION] Reduccion global terminada");
 }
 void almacenado(Mensaje* m){
-	imprimirMensaje(archivoLog,"[EJECUCION] comenzando almacenado");
 	time_t tiempo=time(0);
 	Dir nodo;
 	memcpy(&nodo,m->datos,DIRSIZE);
+	imprimirMensaje1(archivoLog,AMARILLO"[AVISO] Comenzando almacenado final en %s"BLANCO, nodo.nombre);
+	imprimirMensaje3(archivoLog,"[CONEXION] Estableciendo conexion con %s (IP: %s | PUERTO: %s)", nodo.nombre ,nodo.ip,nodo.port);
 	Socket sWorker=socketCrearCliente(nodo.ip,nodo.port,ID_MASTER);
-
+	imprimirMensaje1(archivoLog,"[CONEXION] Conexion establecida con %s", nodo.nombre);
 	int32_t tamanio=TEMPSIZE+stringLongitud(archivoSalida)+1;
 	void* buffer=malloc(tamanio);
 	memcpy(buffer,m->datos+DIRSIZE,TEMPSIZE);
@@ -346,17 +351,18 @@ void almacenado(Mensaje* m){
 
 	Mensaje* mens=mensajeRecibir(sWorker);
 	if(mens->header.operacion==DESCONEXION){
-		imprimirMensaje(archivoLog,"[ERROR] Worker desconectado");
+		imprimirMensaje1(archivoLog, ROJO"[ERROR] %s desconectado"BLANCO, nodo.nombre);
 		mens->header.operacion=FRACASO;
 	}
-	imprimirMensaje(archivoLog,mens->header.operacion==EXITO?"[EJECUCION] ALMACENADO EXITOSO":"[ERROR] ALMACENADO FALLIDO");
+	imprimirMensaje(archivoLog,mens->header.operacion==EXITO? AMARILLO"[EJECUCION] Almacenado final realizado con exito en el File System"BLANCO
+			:ROJO"[ERROR] Almacenado fallido en el File System"BLANCO);
 
 	int32_t op=ALMACENADO;
 	mensajeEnviar(socketYama,mens->header.operacion,&op,INTSIZE);
 	mensajeDestruir(mens);
 	socketCerrar(sWorker);
 	metricas.almacenado=transcurrido(tiempo);
-	imprimirMensaje(archivoLog,"[EJECUCION] almacenado terminado");
+	//imprimirMensaje(archivoLog,"[EJECUCION] almacenado terminado");
 }
 void tareasEnParalelo(int dtp){
 	semaforoWait(metricas.paralelos);

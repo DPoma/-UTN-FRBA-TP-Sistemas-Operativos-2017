@@ -376,7 +376,7 @@ ReduccionGlobal* reduccionGlobalRecibirDatos(Puntero datos) {
 }
 
 int reduccionGlobalAparearTemporales(ReduccionGlobal* reduccion) {
-	imprimirMensaje(archivoLog,"Realizando apareo");
+	imprimirMensaje(archivoLog,"[REDUCCION GLOBAL] Realizando apareo de archivos");
 	Lista listaApareados = listaCrear();
 	int resultado = reduccionGlobalAlgoritmoApareo(reduccion, listaApareados);
 	listaDestruirConElementos(listaApareados, (Puntero)memoriaLiberar);
@@ -384,6 +384,7 @@ int reduccionGlobalAparearTemporales(ReduccionGlobal* reduccion) {
 }
 
 int reduccionGlobalEjecutar(ReduccionGlobal* reduccion) {
+	imprimirMensaje(archivoLog,"[REDUCCION GLOBAL] Apareo de archivos finalizado");
 	String archivoScript = reduccionGlobalCrearScript(reduccion);
 	String archivoSalida = string_from_format("%s%s", RUTA_TEMP, reduccion->nombreResultado);
 	String comando = string_from_format("chmod 0777 %s", archivoScript);

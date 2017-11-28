@@ -97,6 +97,7 @@ typedef struct __attribute__((packed)){
 typedef struct __attribute__((__packed__)){
 	char ip[20];
 	char port[20];
+	char nombre[10];
 } Dir;
 
 typedef struct {
