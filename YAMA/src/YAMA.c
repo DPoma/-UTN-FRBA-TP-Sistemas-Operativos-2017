@@ -247,8 +247,7 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 				cargaMaxima=worker->carga;
 		}
 		void setearDisponibilidad(Worker* worker){
-			worker->disponibilidad=configuracion->disponibilidadBase
-					+cargaMaxima-worker->carga;
+			worker->disponibilidad=configuracion->disponibilidadBase+cargaMaxima-worker->carga;
 		}
 		list_iterate(workers,(func)obtenerCargaMaxima);
 		list_iterate(workers,(func)setearDisponibilidad);
@@ -508,8 +507,16 @@ void actualizarEntrada(Entrada* entradaA,int actualizando, Mensaje* mensaje){
 			}
 			list_iterate(workers,(func)menorCarga);
 			reducGlobal.nodo=workerMenorCarga->nodo;
+			int cantTemps=0;
+			void contarTransformaciones(Entrada* entrada){
+				if(entrada->etapa==TRANSFORMACION&&entrada->job==entradaA->job)
+					cantTemps++;
+			}
+			list_iterate(tablaEstados,(func)contarTransformaciones);
+			aumentarCarga(workerMenorCarga,entradaA->job,ceil((double)cantTemps/2.0));
+
+
 			Lista nodosReducidos=list_filter(tablaEstados,(func)mismoJob);
-			aumentarCarga(workerMenorCarga,entradaA->job,ceil((double)nodosReducidos->elements_count/2.0));
 
 			int tamanio=(DIRSIZE+TEMPSIZE)*(nodosReducidos->elements_count+1);
 			void* dato=malloc(tamanio);

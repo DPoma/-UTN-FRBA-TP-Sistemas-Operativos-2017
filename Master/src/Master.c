@@ -18,7 +18,7 @@ int main(int argc, String* argv) {
 
 }
 void masterIniciar(String* argv) {
-	metricas.procesoC=clock();
+	metricas.procesoC=time(0);
 	metricas.maxParalelo=metricas.paralelo=metricas.fallos=metricas.cantRedLoc=metricas.cantTrans=0;
 	pantallaLimpiar();
 	archivoLog = archivoLogCrear(RUTA_LOG, "Master");
@@ -170,7 +170,7 @@ void masterAtender(){
 }
 void transformaciones(Lista bloques){
 	tareasEnParalelo(1);
-	clock_t tiempo=clock();
+	time_t tiempo=time(0);
 	t_queue* clocks=queue_create();
 	WorkerTransformacion* dir = list_get(bloques,0);
 	imprimirMensaje2(archivoLog,"[EJECUCION] comenzando transformacion de nodo %s %s",&dir->dir.ip,&dir->dir.port);
@@ -184,8 +184,8 @@ void transformaciones(Lista bloques){
 	do{
 		for(;enviados<bloques->elements_count;enviados++){
 			//tareasEnParalelo(1);
-			clock_t* inicio=malloc(sizeof(clock_t));
-			*inicio=clock();
+			time_t* inicio=malloc(sizeof(time_t));
+			*inicio=time(0);
 			queue_push(clocks,inicio);
 
 			WorkerTransformacion* wt=list_get(bloques,enviados);
@@ -193,16 +193,11 @@ void transformaciones(Lista bloques){
 			memcpy(data,&wt->bloque,INTSIZE);
 			memcpy(data+INTSIZE,&wt->bytes,INTSIZE);
 			memcpy(data+INTSIZE*2,wt->temp,TEMPSIZE);
-			printf("el numero bloqu es %d\n",wt->bloque);
-			printf("el bytes es es %d\n", wt->bytes);
-			printf("el temporal es %s\n", wt->temp);
 			mensajeEnviar(socketWorker,TRANSFORMACION,data,sizeof data);
 			imprimirMensaje2(archivoLog,"[CONEXION] Enviando bloque %d %s",(int*)wt->bloque,wt->temp);
 		}
 		for(;respondidos<enviados;respondidos++){
 			Mensaje* mensaje = mensajeRecibir(socketWorker);
-			printf("OPERACION %d\n",(int)mensaje->header.operacion);
-			printf("BLOQUE %d\n",*(int*)(int32_t*)mensaje->datos);
 			if(mensaje->header.operacion==DESCONEXION){
 				puts("UR DONE");
 				mensajeEnviar(socketYama,DESCONEXION_NODO,&dir->dir,DIRSIZE);
@@ -255,7 +250,7 @@ void transformaciones(Lista bloques){
 }
 void reduccionLocal(Mensaje* m){
 	tareasEnParalelo(1);
-	clock_t tiempo=clock();
+	time_t tiempo=time(0);
 	Dir nodo;
 	memcpy(&nodo,m->datos,DIRSIZE);
 	imprimirMensaje2(archivoLog,"[EJECUCION] comenzando reduccion local de nodo %s %s",nodo.ip,nodo.port);
@@ -299,7 +294,7 @@ void reduccionLocal(Mensaje* m){
 }
 void reduccionGlobal(Mensaje* m){
 	imprimirMensaje(archivoLog,"[EJECUCION] comenzando reduccion global");
-	clock_t tiempo=clock();
+	time_t tiempo=time(0);
 	Dir nodo;
 	memcpy(&nodo,m->datos,DIRSIZE);
 	int cantDuplas=(m->header.tamanio-DIRSIZE-TEMPSIZE)/(TEMPSIZE+DIRSIZE);
@@ -336,7 +331,7 @@ void reduccionGlobal(Mensaje* m){
 }
 void almacenado(Mensaje* m){
 	imprimirMensaje(archivoLog,"[EJECUCION] comenzando almacenado");
-	clock_t tiempo=clock();
+	time_t tiempo=time(0);
 	Dir nodo;
 	memcpy(&nodo,m->datos,DIRSIZE);
 	Socket sWorker=socketCrearCliente(nodo.ip,nodo.port,ID_MASTER);
@@ -371,7 +366,7 @@ void tareasEnParalelo(int dtp){
 	semaforoSignal(metricas.paralelos);
 }
 double transcurrido(clock_t tiempo){
-	return ((double)(clock()-tiempo)/CLOCKS_PER_SEC);
+	return (double)(time(0)-tiempo);
 }
 
 

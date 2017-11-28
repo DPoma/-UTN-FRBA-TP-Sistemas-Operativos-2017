@@ -375,6 +375,7 @@ ReduccionGlobal* reduccionGlobalRecibirDatos(Puntero datos) {
 }
 
 int reduccionGlobalAparearTemporales(ReduccionGlobal* reduccion) {
+	imprimirMensaje(archivoLog,"Realizando apareo");
 	Lista listaApareados = listaCrear();
 	int resultado = reduccionGlobalAlgoritmoApareo(reduccion, listaApareados);
 	listaDestruirConElementos(listaApareados, (Puntero)memoriaLiberar);

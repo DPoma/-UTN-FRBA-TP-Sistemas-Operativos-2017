@@ -69,7 +69,7 @@ int32_t lenReduccion;
 char* archivoSalida;
 
 struct{
-	clock_t procesoC;
+	time_t procesoC;
 	double proceso;
 	double almacenado;
 	double reducGlobal;//por ahi es al pedo usar doubles
