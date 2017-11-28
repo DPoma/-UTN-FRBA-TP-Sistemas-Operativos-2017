@@ -562,7 +562,7 @@ void dibujarTablaEstados(){
 	if(list_is_empty(tablaEstados)&&list_is_empty(tablaUsados))
 		return;
 	pantallaLimpiar();
-	puts(" J |   M |  N |    B |      ETAPA       |    TEMPORAL  |    ESTADO   |");
+	puts(" J  |  M | N |   B |     ETAPA        |       TEMPORAL       |   ESTADO   |");
 	puts("---------------------------------------------------------------------");
 	void dibujarEntrada(Entrada* entrada){
 		char* etapa,*estado,*bloque; bool doFree=false;
@@ -570,7 +570,7 @@ void dibujarTablaEstados(){
 		case TRANSFORMACION: etapa="Transformacion"; break;
 		case REDUCLOCAL: etapa="Reduccion local"; break;
 		case REDUCGLOBAL: etapa="Reduccion global";break;
-		default: etapa="Almacenado";
+		default: etapa="Almacenado Final";
 		}
 		switch(entrada->estado){
 		case EXITO: estado="Terminado"; break;
@@ -598,7 +598,7 @@ void dibujarTablaEstados(){
 			}
 			return index;
 		}
-		printf(" %3d | %3d | %2d | %4s | %16s | %12s | %11s |\n",
+		printf(" %2d | %2d | %1d | %3s | %16s | %20s | %10s |\n",
 				entrada->job,masterToNum(entrada->masterid),dirToNum(entrada->nodo),bloque,
 				etapa,entrada->pathTemporal,estado);
 		if(doFree)

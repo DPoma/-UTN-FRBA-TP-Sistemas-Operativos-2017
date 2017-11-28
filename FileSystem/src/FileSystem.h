@@ -176,14 +176,6 @@ typedef struct __attribute__((packed)) {
 	Entero bytesUtilizados;
 } BloqueYama;
 
-
-typedef struct {
-	Entero pathLocalSize;
-	String pathLocal;
-	Entero pathYamaSize;
-	String pathYama;
-} AlmacenadoFinal;
-
 //--------------------------------------- Globales -------------------------------------
 
 String campos[MAX_CAMPOS];
@@ -283,9 +275,6 @@ void workerListener();
 int workerAlmacenarArchivo(Archivo* archivo, Socket socketWorker);
 int workerAlmacenarBloque(Archivo* archivo, Mensaje* mensaje, Entero* numeroBloque, int* resultado);
 void workerAvisarAlmacenado(int resultado, Socket unSocket);
-Comando workerConfigurarComando(AlmacenadoFinal* almacenado);
-AlmacenadoFinal* workerRecibirDatos(Mensaje* mensaje);
-void workerDestruirDatos(AlmacenadoFinal* almacenado);
 void workerAtender(Socket* socketWorker);
 
 //--------------------------------------- Funciones de Consola -------------------------------------
