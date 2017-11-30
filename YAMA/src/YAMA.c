@@ -28,6 +28,7 @@ void yamaIniciar() {
 	}
 	signal(SIGUSR1,sigreconfig);
 	void  sigsalir(){
+		puts("");
 		imprimirMensaje(archivoLog, "[EJECUCION] Proceso YAMA finalizado");
 		exit(EXIT_SUCCESS);
 	}
@@ -62,6 +63,10 @@ void configurar(){
 	stringCopiar(configuracion->algoritmoBalanceo, archivoConfigStringDe(archivoConfig, "ALGORITMO_BALANCEO"));
 	configuracion->disponibilidadBase = archivoConfigEnteroDe(archivoConfig, "DISPONIBILIDAD_BASE");
 	stringCopiar(configuracion->rutaLog, archivoConfigStringDe(archivoConfig, "RUTA_LOG"));
+	if(!stringIguales(configuracion->algoritmoBalanceo,"Clock")&&!stringIguales(configuracion->algoritmoBalanceo,"W-Clock")){
+		imprimirMensaje(archivoLog,"[ERRIR] no se reconoce el algoritmo");
+		abort();
+	}
 	configuracion->reconfigurar=false;
 	archivoConfigDestruir(archivoConfig);
 }
@@ -240,7 +245,7 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 			worker->disponibilidad=configuracion->disponibilidadBase;
 		}
 		list_iterate(workers,(func)setearDisponibilidad);
-	}else if(stringIguales(configuracion->algoritmoBalanceo,"W-Clock")){
+	}else{
 		int cargaMaxima=0;
 		void obtenerCargaMaxima(Worker* worker){
 			if(worker->carga>cargaMaxima)
@@ -251,9 +256,6 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 		}
 		list_iterate(workers,(func)obtenerCargaMaxima);
 		list_iterate(workers,(func)setearDisponibilidad);
-	}else{
-		imprimirMensaje(archivoLog,"[] no se reconoce el algoritmo");
-		abort();
 	}
 
 	int clock=0;
@@ -336,7 +338,7 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 
 	int tamanioEslabon=BLOCKSIZE+INTSIZE+TEMPSIZE;//dir,bloque,bytes,temp
 	int32_t tamanioDato=tamanioEslabon*tablaEstadosJob->elements_count;
-	void* dato=malloc(tamanioDato);
+	void* dato=stringCrear(tamanioDato);
 	for(i=0;i<tamanioDato;i+=tamanioEslabon){
 		Entrada* entrada=list_get(tablaEstadosJob,i/tamanioEslabon);
 		memcpy(dato+i,&entrada->nodo,DIRSIZE);
@@ -366,10 +368,9 @@ void actualizarTablaEstados(Mensaje* mensaje,Socket masterid){
 		bool buscarWorker(Worker* worker){
 			return nodoIguales(worker->nodo,*nodo);
 		}
-		((Worker*)list_find(workers,(func)buscarWorker))->conectado=false;
-		//list_remove_by_condition(workers,(func)buscarWorker);
-		//no lo saco de la lista porque dirToNum lo necesita, o no? todo
-		//tampoco toco la carga porque levantarCarga la va a mover a 0 de todas formas
+		Worker* about2die=list_remove_by_condition(workers,(func)buscarWorker);
+		list_iterate(about2die->cargas,free);
+		free(about2die);
 		return;
 	}
 
@@ -485,9 +486,16 @@ void actualizarEntrada(Entrada* entradaA,int actualizando, Mensaje* mensaje){
 		list_destroy(filtrada);
 		return ret;
 	}
-	switch(entradaA->etapa){
-	case TRANSFORMACION:
-		if(trabajoTerminado((func)mismoNodoJob)){
+	if(entradaA->etapa==TRANSFORMACION||entradaA->etapa==REDUCLOCAL){
+		bool hayTransformacion=false;
+		bool hayQueReducir(Entrada* entrada){
+			if(mismoNodoJob(entrada)){
+				if(entrada->etapa==TRANSFORMACION)
+					hayTransformacion=true;
+			}
+			return mismoNodoJob(entrada);
+		}
+		if(trabajoTerminado((func)hayQueReducir)&&hayTransformacion){
 			log_info(archivoLog,"[REDUCLOCAL] creando entrada");
 			Entrada reducLocal;
 			darDatosEntrada(&reducLocal);
@@ -495,7 +503,7 @@ void actualizarEntrada(Entrada* entradaA,int actualizando, Mensaje* mensaje){
 			reducLocal.etapa=REDUCLOCAL;
 			Lista nodos=list_filter(tablaEstados,(func)mismoNodoJob);
 			int tamanio=TEMPSIZE*(nodos->elements_count+1)+DIRSIZE;
-			void* dato=malloc(tamanio);
+			void* dato=stringCrear(tamanio);
 			memcpy(dato,&reducLocal.nodo,DIRSIZE);
 			int i,j;
 			for(i=DIRSIZE,j=0;i<tamanio-TEMPSIZE;i+=TEMPSIZE,j++)
@@ -507,8 +515,8 @@ void actualizarEntrada(Entrada* entradaA,int actualizando, Mensaje* mensaje){
 			list_destroy(nodos);
 			list_addM(tablaEstados,&reducLocal,sizeof(Entrada));//mutex
 		}
-		//if ya hubo reduc local? todo
-	break;case REDUCLOCAL:
+	}
+	if(entradaA->etapa==REDUCLOCAL){
 		if(trabajoTerminado((func)mismoJob)){
 			log_info(archivoLog,"[REDUCGLBAL] creando entrada");
 			Entrada reducGlobal;
@@ -517,7 +525,7 @@ void actualizarEntrada(Entrada* entradaA,int actualizando, Mensaje* mensaje){
 			reducGlobal.etapa=REDUCGLOBAL;
 			Worker* workerMenorCarga=list_get(workers,0);
 			void menorCarga(Worker* worker){
-				if(worker->conectado&&worker->carga<workerMenorCarga->carga)
+				if(worker->carga<workerMenorCarga->carga)
 					workerMenorCarga=worker;
 			}
 			list_iterate(workers,(func)menorCarga);
@@ -533,7 +541,7 @@ void actualizarEntrada(Entrada* entradaA,int actualizando, Mensaje* mensaje){
 			Lista nodosReducidos=list_filter(tablaEstados,(func)mismoJob);
 
 			int tamanio=(DIRSIZE+TEMPSIZE)*(nodosReducidos->elements_count+1);
-			void* dato=malloc(tamanio);
+			void* dato=stringCrear(tamanio);
 			memcpy(dato,&workerMenorCarga->nodo,DIRSIZE);
 			int i,j;
 			for(i=DIRSIZE,j=0;i<tamanio-TEMPSIZE;i+=DIRSIZE+TEMPSIZE,j++){
@@ -549,10 +557,7 @@ void actualizarEntrada(Entrada* entradaA,int actualizando, Mensaje* mensaje){
 			list_destroy(nodosReducidos);
 			list_addM(tablaEstados,&reducGlobal,sizeof(Entrada));//mutex
 		}
-		else if(trabajoTerminado((func)mismoNodoJob)){
-			//todo
-		}
-	break;case REDUCGLOBAL:{
+	}else if(entradaA->etapa==REDUCGLOBAL){
 		log_info(archivoLog,"[ALMACENADO] creando entrada");
 		//no le veo sentido a que yama participe del almacenado final
 		//master lo podría hacer solo,  ya esta grande
@@ -560,15 +565,15 @@ void actualizarEntrada(Entrada* entradaA,int actualizando, Mensaje* mensaje){
 		Entrada almacenado;
 		darDatosEntrada(&almacenado);
 		almacenado.etapa=ALMACENADO;
-		almacenado.pathTemporal=malloc(mensaje->header.tamanio-INTSIZE);
-		memcpy(almacenado.pathTemporal,mensaje->datos+INTSIZE,mensaje->header.tamanio-INTSIZE);
+		almacenado.pathTemporal=malloc(mensaje->header.tamanio-INTSIZE-7); // -7 para sacar el yamafs: feo
+		memcpy(almacenado.pathTemporal,mensaje->datos+INTSIZE+7,mensaje->header.tamanio-INTSIZE-7);
 		char dato[DIRSIZE+TEMPSIZE];
 		memcpy(dato,&reducGlobal->nodo,DIRSIZE);
 		memcpy(dato+DIRSIZE,reducGlobal->pathTemporal,TEMPSIZE);
 		mensajeEnviar(entradaA->masterid,ALMACENADO,dato,sizeof dato);
 		list_add(tablaUsados,list_remove_by_condition(tablaEstados,(func)mismoJob));
 		list_addM(tablaEstados,&almacenado,sizeof(Entrada));
-	}break;case ALMACENADO:
+	}else if(entradaA->etapa==ALMACENADO){
 		list_add(tablaUsados,list_remove_by_condition(tablaEstados,(func)mismoJob));
 		mensajeEnviar(entradaA->masterid,CIERRE,nullptr,0);
 		liberarCargas(entradaA->job);
@@ -579,8 +584,8 @@ void dibujarTablaEstados(){
 	if(list_is_empty(tablaEstados)&&list_is_empty(tablaUsados))
 		return;
 	pantallaLimpiar();
-	puts(" J  |  M | N |   B |     ETAPA        |       TEMPORAL       |   ESTADO   |");
-	puts("---------------------------------------------------------------------");
+	puts(" J  |  M |   N   |  B  |      ETAPA       |        SALIDA       |   ESTADO   |");
+	puts("------------------------------------------------------------------------------");
 	void dibujarEntrada(Entrada* entrada){
 		char* etapa,*estado,*bloque; bool doFree=false;
 		switch(entrada->etapa){
@@ -615,14 +620,14 @@ void dibujarTablaEstados(){
 			}
 			return index;
 		}
-		printf(" %2d | %2d | %6s | %3s | %16s | %14s | %10s |\n",
+		printf(" %2d | %2d | %5s | %3s | %16s | %19s | %10s |\n",
 				entrada->job,masterToNum(entrada->masterid),entrada->nodo.nombre,bloque,
 				etapa,entrada->pathTemporal,estado);
 		if(doFree)
 			free(bloque);
 	}
 	void dibujarCarga(Worker* worker){
-		printf("%s c: %d     ",worker->nodo.nombre,worker->carga);
+		printf(AMARILLO"%s c: %d     "BLANCO,worker->nodo.nombre,worker->carga);
 	}
 	list_iterate(tablaUsados,(func)dibujarEntrada);
 	puts("-.-|^|-.-");
@@ -690,6 +695,7 @@ void liberarCargas(int jobb){
 		}
 		CargaJob* levita=list_remove_by_condition(worker->cargas,(func)jobLiberado);
 		worker->carga-=levita->carga;
+		free(levita);
 	}
 	list_iterate(workers,(func)levantarCarga);
 }

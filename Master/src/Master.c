@@ -36,7 +36,8 @@ void masterIniciar(String* argv) {
 	configuracion = configuracionCrear(RUTA_CONFIG, (Puntero)configuracionLeerArchivo, campos);
 	archivoLog = archivoLogCrear(configuracion->rutaLog, "Master");
 	void configuracionSenial(int senial){
-		imprimirMensaje(archivoLog,"nv perro");
+		puts("");
+		imprimirMensaje(archivoLog,"[EJECUCION] Proceso Master finalizado");
 		exit(EXIT_SUCCESS);
 	}
 	senialAsignarFuncion(SIGINT, configuracionSenial);
@@ -76,7 +77,7 @@ void masterIniciar(String* argv) {
 void masterAtender(){
 	Mensaje* mensaje=mensajeRecibir(socketYama);
 	if(mensaje->header.operacion==ABORTAR){
-		imprimirError(archivoLog, "[ERROR] Path de YAMA FS invalido, abortando proceso");
+		imprimirError(archivoLog, "[ERROR] El archivo no existe o no esta disponible en YAMA FS");
 		abort();
 	}else if(mensaje->header.operacion==DESCONEXION){
 		imprimirError(archivoLog, "[ERROR] YAMA desconectado");
@@ -181,6 +182,9 @@ void masterAtender(){
 		printf("[METRICA] %s tardo %f segundos en ejecutarse\n",tarea,dt);
 		log_info(archivoLog,"[METRICA]%s tardo %f segundos en ejecutarse",tarea,dt);
 	}
+	//semaforoWait(metricas.transformaciones);
+	//semaforoWait(metricas.reducLocales);
+	//semaforoWait(metricas.paralelos);
 	mostrarTranscurrido(metricas.proceso,"Job");
 	mostrarTranscurrido(metricas.transformacionSum/metricas.cantTrans,"Transformacion promedio");
 	mostrarTranscurrido(metricas.reducLocalSum/metricas.cantRedLoc,"Reduccion local promedio");
@@ -200,7 +204,7 @@ void transformaciones(Lista bloques){
 	bool continuar=true;
 	imprimirAviso1(archivoLog, "[AVISO] Comenzando transformacion en %s" ,&self->dir.nombre);
 	imprimirMensaje3(archivoLog,"[CONEXION] Estableciendo conexion con %s (IP: %s | PUERTO: %s)", self->dir.nombre ,self->dir.ip,self->dir.port);
-	Socket socketWorker=socketCrearClienteMasterEspecialized(self->dir.ip,self->dir.port,ID_MASTER);
+	Socket socketWorker=socketCrearClienteMasterEspecialized(self->dir.ip,self->dir.port,ID_MASTER, self->dir.nombre);
 	if(socketWorker==ERROR){
 		mensajeEnviar(socketYama,DESCONEXION_NODO,&self->dir,DIRSIZE);
 		pthread_detach(pthread_self());
@@ -230,14 +234,18 @@ void transformaciones(Lista bloques){
 		for(;respondidos<enviados;respondidos++){
 			Mensaje* mensaje = mensajeRecibir(socketWorker);
 			if(mensaje->header.operacion==DESCONEXION){
-				imprimirMensaje1(archivoLog,"[ERROR] Nodo %s desconectado durante transformacion",self->dir.nombre);
+				imprimirError1(archivoLog,"[ERROR] %s desconectado durante transformacion",self->dir.nombre);
 				mensajeEnviar(socketYama,DESCONEXION_NODO,&self->dir,DIRSIZE);
 				pthread_detach(pthread_self());
 				return;
 			}
 			//a demas de decir exito o fracaso devuelve el numero de bloque
-			imprimirMensaje3(archivoLog, "[TRANSFORMACION] Operacion %s en bloque N°%d de %s",mensaje->header.operacion==EXITO?"exitosa":"fallida", *(int*)(int32_t*)mensaje->datos, self->dir.nombre);
+			if(mensaje->header.operacion==EXITO)
+				imprimirAviso2(archivoLog, "[TRANSFORMACION] Operacion existosa en bloque N°%d de %s", (int*)*(int32_t*)mensaje->datos, self->dir.nombre);
+			else
+				imprimirError2(archivoLog, "[TRANSFORMACION] Operacion fallida en bloque N°%d de %s", (int*)*(int32_t*)mensaje->datos, self->dir.nombre);
 			char buffer[INTSIZE*2+DIRSIZE];
+			stringLimpiar(buffer, INTSIZE*2+DIRSIZE);
 			int32_t op=TRANSFORMACION;
 			memcpy(buffer,&op,INTSIZE);
 			memcpy(buffer+INTSIZE,&self->dir,DIRSIZE);
@@ -291,9 +299,9 @@ void reduccionLocal(Mensaje* m){
 	memcpy(buffer+INTSIZE*2+lenReduccion+cantTemps*TEMPSIZE,m->datos+DIRSIZE+cantTemps*TEMPSIZE,TEMPSIZE);//destino
 
 	imprimirMensaje3(archivoLog,"[CONEXION] Estableciendo conexion con %s (IP: %s | PUERTO: %s)", nodo.nombre ,nodo.ip,nodo.port);
-	Socket sWorker=socketCrearClienteMasterEspecialized(nodo.ip,nodo.port,ID_MASTER);
+	Socket sWorker=socketCrearClienteMasterEspecialized(nodo.ip,nodo.port,ID_MASTER, nodo.nombre);
 	if(sWorker==ERROR){
-		mensajeEnviar(socketYama,DESCONEXION_NODO,&nodo,DIRSIZE);
+		mensajeEnviar(socketYama,FRACASO,&nodo,DIRSIZE);
 		pthread_detach(pthread_self());
 		return;
 	}
@@ -311,6 +319,7 @@ void reduccionLocal(Mensaje* m){
 	else
 		imprimirError1(archivoLog, "[ERROR] Reduccion local fallida en %s", nodo.nombre);
 	char bufferY[INTSIZE+DIRSIZE];
+	stringLimpiar(bufferY, INTSIZE+DIRSIZE);
 	int32_t op=REDUCLOCAL;
 	memcpy(bufferY,&op,INTSIZE);
 	memcpy(bufferY+INTSIZE,&nodo,DIRSIZE);
@@ -341,7 +350,7 @@ void reduccionGlobal(Mensaje* m){
 	memcpy(buffer+INTSIZE*2+lenReduccion,m->datos+DIRSIZE,m->header.tamanio-DIRSIZE);//y destino
 
 	imprimirMensaje3(archivoLog,"[CONEXION] Estableciendo conexion con %s (IP: %s | PUERTO: %s)", nodo.nombre ,nodo.ip,nodo.port);
-	Socket sWorker=socketCrearClienteMasterEspecialized(nodo.ip,nodo.port,ID_MASTER);
+	Socket sWorker=socketCrearClienteMasterEspecialized(nodo.ip,nodo.port,ID_MASTER, nodo.nombre);
 	if(sWorker==ERROR){
 		mensajeEnviar(socketYama,FRACASO,NULL,0);
 		return;
@@ -352,7 +361,7 @@ void reduccionGlobal(Mensaje* m){
 
 	Mensaje* mensaje = mensajeRecibir(sWorker);
 	if(mensaje->header.operacion==DESCONEXION){
-		imprimirMensaje(archivoLog,"[ERROR] Worker desconectado");
+		imprimirError1(archivoLog,"[ERROR] %s desconectado", nodo.nombre);
 		mensaje->header.operacion=FRACASO;
 	}
 	if(mensaje->header.operacion==EXITO)
@@ -361,7 +370,7 @@ void reduccionGlobal(Mensaje* m){
 		imprimirError1(archivoLog, "[ERROR] Reduccion global fallida en %s", nodo.nombre);
 	int32_t op=REDUCGLOBAL;
 	tamanio=INTSIZE+stringLongitud(archivoSalida)+1;
-	buffer=malloc(tamanio);
+	buffer=stringCrear(tamanio);
 	memcpy(buffer,&op,INTSIZE);
 	memcpy(buffer+INTSIZE,archivoSalida,stringLongitud(archivoSalida)+1);
 	mensajeEnviar(socketYama,mensaje->header.operacion,buffer,tamanio);
@@ -378,7 +387,7 @@ void almacenado(Mensaje* m){
 	memcpy(&nodo,m->datos,DIRSIZE);
 	imprimirAviso1(archivoLog,"[AVISO] Comenzando almacenado final en %s", nodo.nombre);
 	imprimirMensaje3(archivoLog,"[CONEXION] Estableciendo conexion con %s (IP: %s | PUERTO: %s)", nodo.nombre ,nodo.ip,nodo.port);
-	Socket sWorker=socketCrearClienteMasterEspecialized(nodo.ip,nodo.port,ID_MASTER);
+	Socket sWorker=socketCrearClienteMasterEspecialized(nodo.ip,nodo.port,ID_MASTER, nodo.nombre);
 	if(sWorker==ERROR){
 		mensajeEnviar(socketYama,FRACASO,NULL,0);
 		return;
@@ -432,11 +441,11 @@ bool socketConectarMasterEspecialized(Conexion* conexion, Socket unSocket) {
 	freeaddrinfo(conexion->informacion);
 	return estado!=ERROR;
 }
-Socket socketCrearClienteMasterEspecialized(String ip, String puerto, int idProceso) {
+Socket socketCrearClienteMasterEspecialized(String ip, String puerto, int idProceso, String nombre) {
 	Conexion conexion;
 	Socket unSocket = socketCrear(&conexion, ip, puerto);
 	if(!socketConectarMasterEspecialized(&conexion, unSocket)){
-		imprimirMensaje(archivoLog,"[ERROR] no se pudo conectar");
+		imprimirError1(archivoLog,"[ERROR] No se pudo realizar la conexion con %s", nombre);
 		return ERROR;
 	}
 	if(handShakeEnvioFallido(unSocket, idProceso))

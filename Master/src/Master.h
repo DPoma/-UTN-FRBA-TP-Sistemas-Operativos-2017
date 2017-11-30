@@ -102,4 +102,4 @@ void tareasEnParalelo(int);
 HiloTransformacion* buscarHilo(Dir);
 bool nodoIguales(Dir,Dir);
 bool socketConectarMasterEspecialized(Conexion*,Socket);
-Socket socketCrearClienteMasterEspecialized(String,String,int);
+Socket socketCrearClienteMasterEspecialized(String,String,int,String);

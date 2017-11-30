@@ -73,7 +73,6 @@ typedef struct{
 	uint32_t tareasRealizadas;
 	uint32_t disponibilidad;
 	Dir nodo;
-	bool conectado;
 } Worker;
 Lista workers;
 
