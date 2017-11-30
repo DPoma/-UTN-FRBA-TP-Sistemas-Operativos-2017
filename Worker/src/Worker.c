@@ -72,7 +72,8 @@ void masterDesconectar(Socket unSocket) {
 
 void workerDesconectar(Socket unSocket, String nombre) {
 	socketCerrar(unSocket);
-	imprimirError1(archivoLog, "[ERROR] %s desconectado", nombre);
+	if(stringDistintos(nombre, configuracion->nombreNodo))
+		imprimirError1(archivoLog, "[ERROR] %s desconectado", nombre);
 }
 
 void workerFinalizar() {
@@ -768,6 +769,6 @@ Bloque bloqueBuscar(Entero numeroBloque) {
 
 Bloque getBloque(Entero numeroBloque) {
 	Bloque bloque = bloqueBuscar(numeroBloque);
-	imprimirMensaje1(archivoLog, "[DATABIN] El bloque N°%i fue leido", (int*)numeroBloque);
+	imprimirMensaje2(archivoLog, "[DATABIN] Lectura en el bloque N°%i de %s", (int*)numeroBloque, configuracion->nombreNodo);
 	return bloque;
 }

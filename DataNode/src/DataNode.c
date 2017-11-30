@@ -70,7 +70,7 @@ void dataNodeDesactivar() {
 }
 
 void dataNodeAceptado() {
-	imprimirMensaje(archivoLog, "[CONEXION] Conexion establecida con el File System");
+	imprimirMensaje(archivoLog, "[CONEXION] Conexion establecida con File System");
 }
 
 void dataNodeConectarAFS() {
@@ -171,7 +171,7 @@ void bloqueEscribir(Puntero datos) {
 	if(bloqueValido(numeroBloque))
 		setBloque(numeroBloque, datos+sizeof(Entero));
 	else
-		imprimirError(archivoLog, "[ERROR] El bloque no existe");
+		imprimirError1(archivoLog, "[ERROR] El bloque N°%d no existe", (int*)numeroBloque);
 }
 
 bool bloqueValido(Entero numeroBloque) {
@@ -243,12 +243,12 @@ void dataBinConfigurar() {
 
 Bloque getBloque(Entero numeroBloque) {
 	Bloque bloque = bloqueBuscar(numeroBloque);
-	imprimirMensaje2(archivoLog, "[DATABIN] El bloque N°%i del %s fue leido", (int*)numeroBloque, configuracion->nombreNodo);
+	imprimirMensaje2(archivoLog, "[DATABIN] Lectura en el bloque N°%i de %s", (int*)numeroBloque, configuracion->nombreNodo);
 	return bloque;
 }
 
 void setBloque(Entero numeroBloque, Puntero datos) {
 	Bloque bloque = bloqueBuscar(numeroBloque);
 	memcpy(bloque, datos, BLOQUE);
-	imprimirMensaje2(archivoLog, "[DATABIN] El bloque N°%i del %s fue escrito", (int*)numeroBloque, configuracion->nombreNodo);
+	imprimirMensaje2(archivoLog, "[DATABIN] Escritura en el bloque N°%i de %s", (int*)numeroBloque, configuracion->nombreNodo);
 }

@@ -412,10 +412,11 @@ void archivoListaAgregar(Archivo* archivo);
 int archivoListaCantidad();
 bool archivoListaTodosDisponibles();
 void archivoListaDestruir();
-void archivoGuardar(Archivo* archivo);
-void archivoControlar(Archivo* archivo, int estado);
+void archivoGuardar(Archivo* archivo, String path);
+void archivoControlar(Archivo* archivo, int estado, String path);
 int almacenadoFinalEnviarArchivo(Archivo* archivo, File file);
 int archivoAlmacenarBinario(Archivo* archivo, File file);
+bool archivoDisponibleParaYama(Archivo* archivo);
 
 //--------------------------------------- Funciones de Nodo -------------------------------------
 
@@ -478,6 +479,7 @@ bool bloqueDisponible(Bloque* bloque);
 BloqueNodo* bloqueNodoCrear(Entero numeroBloque, String buffer, int tamanioUtilizado);
 BloqueYama yamaConvertirBloque(Bloque* bloque);
 bool bloqueEstaEnNodo(Bloque* bloque, Nodo* nodo);
+bool bloqueDisponibleParaYama(Bloque* bloque);
 
 //--------------------------------------- Funciones de Copia -------------------------------------
 
