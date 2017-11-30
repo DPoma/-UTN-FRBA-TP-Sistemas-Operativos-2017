@@ -77,10 +77,8 @@ void workerDesconectar(Socket unSocket, String nombre) {
 }
 
 void workerFinalizar() {
-	if(pidPadre == getpid()) {
-		sleep(2);
+	if(pidPadre == getpid())
 		imprimirMensaje(archivoLog, "[EJECUCION] Proceso Worker finalizado");
-	}
 	memoriaLiberar(configuracion);
 	archivoLogDestruir(archivoLog);
 }
@@ -157,14 +155,13 @@ void configuracionCalcularBloques() {
 }
 
 void configuracionSenial(int senial) {
-	puts("");
 	if(getpid() == pidPadre) {
+		puts("");
 		estadoWorker = DESACTIVADO;
 		shutdown(listenerMaster, SHUT_RDWR);
 	}
 	else
 		exit(EXIT_SUCCESS);
-		//mensajeEnviar(socketBuffer, DESCONEXION, NULL, NULO);
 }
 
 //--------------------------------------- Funciones de Transformacion -------------------------------------
@@ -421,6 +418,7 @@ int reduccionGlobalEjecutar(ReduccionGlobal* reduccion) {
 		resultado = system(comando);
 	}
 	fileLimpiar(archivoScript);
+	//todo fileLimpiar(reduccion->pathApareo);
 	memoriaLiberar(comando);
 	memoriaLiberar(archivoSalida);
 	memoriaLiberar(archivoScript);
