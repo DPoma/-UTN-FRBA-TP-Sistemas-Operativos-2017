@@ -220,8 +220,11 @@ void transformacionFinalizarBloque(int resultado, Socket unSocket, Entero numero
 }
 
 void transformacionExito(Entero numeroBloque, Socket unSocket) {
-	imprimirMensaje1(archivoLog,"[TRANSFORMACION] Master #(id?): Operacion finalizada con exito en bloque N°%d", (int*)numeroBloque);
-	mensajeEnviar(unSocket, EXITO, &numeroBloque, sizeof(Entero));
+	int resultado = mensajeEnviar(unSocket, EXITO, &numeroBloque, sizeof(Entero));
+	if(resultado != ERROR)
+		imprimirMensaje1(archivoLog,"[TRANSFORMACION] Master #(id?): Operacion finalizada con exito en bloque N°%d", (int*)numeroBloque);
+	else
+		imprimirMensaje1(archivoLog,"[TRANSFORMACION] Master #(id?): Operacion fallida en bloque N°%d", (int*)numeroBloque);
 }
 
 void transformacionFracaso(Entero numeroBloque, Socket unSocket) {
@@ -336,8 +339,11 @@ void reduccionLocalDestruir(ReduccionLocal* reduccion) {
 }
 
 void reduccionLocalExito(Socket unSocket) {
-	imprimirAviso(archivoLog,"[AVISO] Master #(id?): Reduccion local realizada con exito");
-	mensajeEnviar(unSocket, EXITO, NULL, NULO);
+	int resultado = mensajeEnviar(unSocket, EXITO, NULL, NULO);
+	if(resultado != ERROR)
+		imprimirAviso(archivoLog,"[AVISO] Master #(id?): Reduccion local realizada con exito");
+	else
+		imprimirError(archivoLog,"[ERROR] Master #(id?):Reduccion local fallida");
 }
 
 void reduccionLocalFracaso(Socket unSocket) {
@@ -436,13 +442,16 @@ void reduccionGlobalDestruir(ReduccionGlobal* reduccion) {
 }
 
 void reduccionGlobalExito(Socket unSocket) {
-	imprimirAviso(archivoLog,"[AVISO] Master #(id?): Reduccion global realizada con exito");
-	mensajeEnviar(unSocket, EXITO, NULL, 0);
+	int resultado = mensajeEnviar(unSocket, EXITO, NULL, NULO);
+	if(resultado != ERROR)
+		imprimirAviso(archivoLog,"[AVISO] Master #(id?): Reduccion global realizada con exito");
+	else
+		imprimirError(archivoLog,"[ERROR] Master #(id?): Reduccion global fallida");
 }
 
 void reduccionGlobalFracaso(Socket unSocket) {
+	mensajeEnviar(unSocket, FRACASO, NULL, NULO);
 	imprimirError(archivoLog,"[ERROR] Master #(id?): Reduccion global fallida");
-	mensajeEnviar(unSocket, FRACASO, NULL, 0);
 }
 
 int reduccionGlobalRealizarConexiones(ReduccionGlobal* reduccion, Lista listaApareados) {
@@ -707,8 +716,12 @@ void almacenadoFinalFinalizar(int resultado, Socket unSocket) {
 }
 
 void almacenadoFinalExito(Socket unSocket) {
-	imprimirAviso(archivoLog,"[AVISO] Master #(id?): Almacenado final realizado con exito");
-	mensajeEnviar(unSocket, EXITO, NULL, NULO);
+	int resultado = mensajeEnviar(unSocket, EXITO, NULL, NULO);
+	if(resultado != ERROR)
+		imprimirAviso(archivoLog,"[AVISO] Master #(id?): Almacenado final realizado con exito");
+	else
+		imprimirError(archivoLog,"[ERROR] Master #(id?): Almacenado final fallido");
+
 }
 
 void almacenadoFinalFracaso(Socket unSocket) {
