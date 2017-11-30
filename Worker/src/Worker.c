@@ -49,8 +49,8 @@ void masterAtenderOperacion(Socket unSocket) {
 }
 
 void masterRealizarOperacion(Socket unSocket) {
-	imprimirMensaje(archivoLog, "[CONEXION] Proceso Master conectado exitosamente");
 	socketCerrar(listenerMaster);
+	socketBuffer = unSocket;
 	Mensaje* mensaje = mensajeRecibir(unSocket);
 	switch(mensaje->header.operacion) {
 		case DESCONEXION: masterDesconectar(unSocket); break;
@@ -67,15 +67,19 @@ void masterRealizarOperacion(Socket unSocket) {
 
 void masterDesconectar(Socket unSocket) {
 	socketCerrar(unSocket);
-	imprimirMensaje(archivoLog, "[CONEXION] Un Master se desconecto");
+	imprimirError(archivoLog, "[ERROR] Master # desconectado"); //todo id master
 }
 
-void workerDesconectar(Socket unSocket) {
+void workerDesconectar(Socket unSocket, String nombre) {
 	socketCerrar(unSocket);
-	imprimirMensaje(archivoLog, "[CONEXION] Un Worker se desconecto");
+	imprimirError1(archivoLog, "[ERROR] %s desconectado", nombre);
 }
 
 void workerFinalizar() {
+	if(pidPadre == getpid()) {
+		sleep(2);
+		imprimirMensaje(archivoLog, "[EJECUCION] Proceso Worker finalizado");
+	}
 	memoriaLiberar(configuracion);
 	archivoLogDestruir(archivoLog);
 }
@@ -157,11 +161,15 @@ void configuracionSenial(int senial) {
 		estadoWorker = DESACTIVADO;
 		shutdown(listenerMaster, SHUT_RDWR);
 	}
+	else
+		exit(EXIT_SUCCESS);
+		//mensajeEnviar(socketBuffer, DESCONEXION, NULL, NULO);
 }
 
 //--------------------------------------- Funciones de Transformacion -------------------------------------
 
 void transformacion(Mensaje* mensaje, Socket unSocket) {
+	imprimirMensaje(archivoLog, "[CONEXION] Proceso Master conectado exitosamente");
 	Transformacion* transformacion = memoriaAlocar(sizeof(Transformacion));
 	transformacionObtenerScript(transformacion, mensaje);
 	String pathScript = transformacionCrearScript(transformacion);
@@ -275,6 +283,7 @@ String transformacionCrearBloque(Transformacion* transformacion) {
 //--------------------------------------- Funciones de Reduccion Local -------------------------------------
 
 void reduccionLocal(Mensaje* mensaje, Socket unSocket) {
+	imprimirMensaje(archivoLog, "[CONEXION] Proceso Master conectado exitosamente");
 	ReduccionLocal* reduccion = reduccionLocalRecibirDatos(mensaje->datos);
 	String temporales = reduccionLocalObtenerTemporales(reduccion);
 	int resultado = reduccionLocalEjecutar(reduccion, temporales);
@@ -327,12 +336,12 @@ void reduccionLocalDestruir(ReduccionLocal* reduccion) {
 
 void reduccionLocalExito(Socket unSocket) {
 	imprimirAviso(archivoLog,"[AVISO] Master #(id?): Reduccion local realizada con exito");
-	mensajeEnviar(unSocket, EXITO, NULL, 0);
+	mensajeEnviar(unSocket, EXITO, NULL, NULO);
 }
 
 void reduccionLocalFracaso(Socket unSocket) {
-	imprimirAviso(archivoLog, "[AVISO] Master #(id?): Reduccion local fallida");
-	mensajeEnviar(unSocket, FRACASO, NULL, 0);
+	imprimirError(archivoLog, "[ERROR] Master #(id?): Reduccion local fallida");
+	mensajeEnviar(unSocket, FRACASO, NULL, NULO);
 }
 
 String reduccionLocalCrearScript(ReduccionLocal* reduccion) {
@@ -361,6 +370,7 @@ String reduccionLocalObtenerTemporales(ReduccionLocal* reduccion) {
 //--------------------------------------- Funciones de Reduccion Global -------------------------------------
 
 void reduccionGlobal(Mensaje* mensaje, Socket unSocket) {
+	imprimirMensaje(archivoLog, "[CONEXION] Proceso Master conectado exitosamente");
 	imprimirAviso1(archivoLog, "[AVISO] Master #id: %s es el encargado de la reduccion global", configuracion->nombreNodo);
 	ReduccionGlobal* reduccion = reduccionGlobalRecibirDatos(mensaje->datos);
 	int resultado = reduccionGlobalAparearTemporales(reduccion);
@@ -430,7 +440,7 @@ void reduccionGlobalExito(Socket unSocket) {
 }
 
 void reduccionGlobalFracaso(Socket unSocket) {
-	imprimirAviso(archivoLog,"[AVISO] Master #(id?): Reduccion global fallida");
+	imprimirError(archivoLog,"[ERROR] Master #(id?): Reduccion global fallida");
 	mensajeEnviar(unSocket, FRACASO, NULL, 0);
 }
 
@@ -439,12 +449,17 @@ int reduccionGlobalRealizarConexiones(ReduccionGlobal* reduccion, Lista listaApa
 	int indice;
 	for(indice=0; indice < reduccion->cantidadNodos; indice++) {
 		Apareo* apareo = memoriaAlocar(sizeof(Apareo));
+		stringCopiar(apareo->nombre, reduccion->nodos[indice].nodo.nombre);
 		apareo->socketWorker = socketCrearCliente(reduccion->nodos[indice].nodo.ip, reduccion->nodos[indice].nodo.port, ID_MASTER);
 		if(apareo->socketWorker == ERROR) {
 			resultado = ERROR;
 			break;
 		}
-		resultado = mensajeEnviar(apareo->socketWorker, CONEXION_WORKER, reduccion->nodos[indice].temporal, TEMPSIZE);
+		String buffer = stringCrear(TEMPSIZE+10);
+		memcpy(buffer,reduccion->nodos[indice].temporal, TEMPSIZE);
+		memcpy(buffer+TEMPSIZE, configuracion->nombreNodo, 10);
+		resultado = mensajeEnviar(apareo->socketWorker, CONEXION_WORKER, buffer, TEMPSIZE+10);
+		memoriaLiberar(buffer);
 		if(resultado == ERROR)
 			break;
 		listaAgregarElemento(listaApareados, apareo);
@@ -457,7 +472,7 @@ int reduccionGlobalObtenerLineas(Lista listaApareados) {
 	int resultado = OK;
 	for(indice=0; indice < listaCantidadElementos(listaApareados); indice++) {
 		Apareo* apareo = listaObtenerElemento(listaApareados, indice);
-		apareo->linea = reduccionGlobalEncargadoPedirLinea(apareo->socketWorker);
+		apareo->linea = reduccionGlobalEncargadoPedirLinea(apareo);
 		if(stringIguales(apareo->linea, "ERROR")) {
 			resultado = ERROR;
 			break;
@@ -475,12 +490,10 @@ void reduccionGlobalCompararLineas(Lista listaApareados, Apareo* apareo) {
 }
 
 int reduccionGlobalEscribirLinea(Apareo* apareo, Lista listaApareados, File archivoResultado) {
-	if(apareo->linea == NULL)
-		puts("LLEGO LINEA NULA");
 	int resultado = OK;
 	fwrite(apareo->linea, sizeof(char), stringLongitud(apareo->linea), archivoResultado);
 	memoriaLiberar(apareo->linea);
-	apareo->linea = reduccionGlobalEncargadoPedirLinea(apareo->socketWorker);
+	apareo->linea = reduccionGlobalEncargadoPedirLinea(apareo);
 	if(stringIguales(apareo->linea, "ERROR"))
 		resultado = ERROR;
 	return resultado;
@@ -544,13 +557,13 @@ int reduccionGlobalEnviarRespuesta(Socket socketWorker, Puntero buffer) {
 	return resultado;
 }
 
-int reduccionGlobalEsperarPedido(Socket socketWorker, Puntero buffer) {
+int reduccionGlobalEsperarPedido(Socket socketWorker, Puntero buffer, String nombre) {
 	int resultado = OK;
 	Mensaje* mensaje = mensajeRecibir(socketWorker);
 	if(mensaje->header.operacion == PEDIR_LINEA)
 		resultado = reduccionGlobalEnviarRespuesta(socketWorker, buffer);
 	else {
-		workerDesconectar(socketWorker);
+		workerDesconectar(socketWorker, nombre);
 		resultado = ERROR;
 	}
 	mensajeDestruir(mensaje);
@@ -558,14 +571,15 @@ int reduccionGlobalEsperarPedido(Socket socketWorker, Puntero buffer) {
 }
 
 void reduccionGlobalEnviarLinea(Mensaje* mensaje, Socket socketWorker) {
-	imprimirMensaje(archivoLog, "[CONEXION] Proceso Worker conectado existosamente");
+	if(stringDistintos(configuracion->nombreNodo, (String)mensaje->datos+TEMPSIZE))
+		imprimirAviso1(archivoLog, "[AVISO] %s conectado para reduccion global", (String)mensaje->datos+TEMPSIZE);
 	int resultado = OK;
 	String pathReduccionLocal= string_from_format("%s/%s", configuracion->rutaTemporales, (String)mensaje->datos);
 	File archivoReduccionLocal = fileAbrir(pathReduccionLocal, LECTURA);
 	memoriaLiberar(pathReduccionLocal);
 	String buffer = stringCrear(BLOQUE);
 	while(fgets(buffer, BLOQUE, archivoReduccionLocal)) {
-		resultado = reduccionGlobalEsperarPedido(socketWorker, buffer);
+		resultado = reduccionGlobalEsperarPedido(socketWorker, buffer, (String)mensaje->datos+TEMPSIZE);
 		if(resultado == ERROR)
 			break;
 		memoriaLiberar(buffer);
@@ -573,7 +587,7 @@ void reduccionGlobalEnviarLinea(Mensaje* mensaje, Socket socketWorker) {
 	}
 	memoriaLiberar(buffer);
 	if(resultado != ERROR)
-		reduccionGlobalEsperarPedido(socketWorker, NULL);
+		reduccionGlobalEsperarPedido(socketWorker, NULL, (String)mensaje->datos+TEMPSIZE);
 	fileCerrar(archivoReduccionLocal);
 }
 
@@ -585,16 +599,18 @@ String reduccionGlobalCopiarLinea(Mensaje* mensaje) {
 	return linea;
 }
 
-String reduccionGlobalEncargadoPedirLinea(Socket unSocket) {
+String reduccionGlobalEncargadoPedirLinea(Apareo* apareo) {
 	String linea = NULL;
-	int resultado = mensajeEnviar(unSocket, PEDIR_LINEA, NULL, NULO);
+	int resultado = mensajeEnviar(apareo->socketWorker, PEDIR_LINEA, NULL, NULO);
 	if(resultado == ERROR)
 			return "ERROR";
-	Mensaje* mensaje = mensajeRecibir(unSocket);
+	Mensaje* mensaje = mensajeRecibir(apareo->socketWorker);
 	if(mensaje->header.operacion == ENVIAR_LINEA)
 		linea = reduccionGlobalCopiarLinea(mensaje);
-	else
-		workerDesconectar(unSocket);
+	else {
+			workerDesconectar(apareo->socketWorker, apareo->nombre);
+			linea = "ERROR";
+	}
 	mensajeDestruir(mensaje);
 	return linea;
 }
@@ -617,6 +633,7 @@ String reduccionGlobalCrearScript(ReduccionGlobal* reduccion) {
 //--------------------------------------- Funciones de Almacenado Final -------------------------------------
 
 void almacenadoFinal(Mensaje* mensaje, Socket socketMaster) {
+	imprimirMensaje(archivoLog, "[CONEXION] Proceso Master conectado exitosamente");
 	String pathArchivo = string_from_format("%s/%s", configuracion->rutaTemporales, mensaje->datos);
 	int resultado = almacenadoFinalEjecutar(pathArchivo, mensaje->datos+TEMPSIZE);
 	memoriaLiberar(pathArchivo);
@@ -694,7 +711,7 @@ void almacenadoFinalExito(Socket unSocket) {
 }
 
 void almacenadoFinalFracaso(Socket unSocket) {
-	imprimirAviso(archivoLog,"[AVISO] Master #(id?): Almacenado final fallido");
+	imprimirError(archivoLog,"[ERROR] Master #(id?): Almacenado final fallido");
 	mensajeEnviar(unSocket, FRACASO, NULL, NULO);
 }
 

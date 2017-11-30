@@ -2189,6 +2189,9 @@ Nodo* nodoCrear(Puntero datos, Socket nuevoSocket) {
 	nodo->bloquesLibres = nodo->bloquesTotales;
 	nodo->bitmap = bitmapCrear(nodo->bloquesTotales);
 	String* tokens = rutaSeparar(datos+sizeof(Entero));
+	stringLimpiar(nodo->nombre, MAX_NODO);
+	stringLimpiar(nodo->ip, MAX_IP);
+	stringLimpiar(nodo->puerto, MAX_PUERTO);
 	stringCopiar(nodo->nombre, tokens[0]);
 	stringCopiar(nodo->ip, tokens[1]);
 	stringCopiar(nodo->puerto, tokens[2]);

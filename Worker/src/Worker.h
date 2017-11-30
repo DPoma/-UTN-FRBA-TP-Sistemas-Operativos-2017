@@ -70,6 +70,7 @@ typedef struct {
 typedef struct {
 	String linea;
 	Socket socketWorker;
+	char nombre[10];
 } Apareo;
 
 typedef struct {
@@ -100,6 +101,7 @@ pid_t pidPadre;
 int estadoWorker;
 int dataBinBloques;
 int dataBinTamanio;
+Socket socketBuffer;
 
 //--------------------------------------- Funciones de Worker -------------------------------------
 
@@ -166,7 +168,7 @@ void reduccionGlobalDestruir(ReduccionGlobal* reduccion);
 void reduccionGlobalFinalizar(int resultado, Socket unSocket);
 void reduccionGlobalExito(Socket unSocket);
 void reduccionGlobalFracaso(Socket unSocket);
-String reduccionGlobalEncargadoPedirLinea(Socket unSocket);
+String reduccionGlobalEncargadoPedirLinea(Apareo* apareo);
 Apareo* reduccionGlobalLineaMasCorta(Apareo* unApareo, Apareo* otroApareo);
 void reduccionGlobalDestruirLineaNula(Lista listaApareados);
 void reduccionGlobalEnviarLinea(Mensaje* mensaje, Socket socketWorker);
