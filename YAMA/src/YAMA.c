@@ -366,7 +366,7 @@ void actualizarTablaEstados(Mensaje* mensaje,Socket masterid){
 		bool buscarWorker(Worker* worker){
 			return nodoIguales(worker->nodo,*nodo);
 		}
-		((Worker*)list_find(workers,buscarWorker))->conectado=false;
+		((Worker*)list_find(workers,(func)buscarWorker))->conectado=false;
 		//list_remove_by_condition(workers,(func)buscarWorker);
 		//no lo saco de la lista porque dirToNum lo necesita, o no? todo
 		//tampoco toco la carga porque levantarCarga la va a mover a 0 de todas formas
@@ -529,7 +529,6 @@ void actualizarEntrada(Entrada* entradaA,int actualizando, Mensaje* mensaje){
 			}
 			list_iterate(tablaUsados,(func)contarTransformaciones);
 			aumentarCarga(workerMenorCarga,entradaA->job,ceil((double)cantTemps/2.0));
-
 
 			Lista nodosReducidos=list_filter(tablaEstados,(func)mismoJob);
 
