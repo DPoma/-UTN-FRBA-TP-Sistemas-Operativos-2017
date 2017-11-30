@@ -337,7 +337,7 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 
 	int tamanioEslabon=BLOCKSIZE+INTSIZE+TEMPSIZE;//dir,bloque,bytes,temp
 	int32_t tamanioDato=tamanioEslabon*tablaEstadosJob->elements_count;
-	void* dato=malloc(tamanioDato);
+	void* dato=stringCrear(tamanioDato);
 	for(i=0;i<tamanioDato;i+=tamanioEslabon){
 		Entrada* entrada=list_get(tablaEstadosJob,i/tamanioEslabon);
 		memcpy(dato+i,&entrada->nodo,DIRSIZE);
@@ -496,7 +496,7 @@ void actualizarEntrada(Entrada* entradaA,int actualizando, Mensaje* mensaje){
 			reducLocal.etapa=REDUCLOCAL;
 			Lista nodos=list_filter(tablaEstados,(func)mismoNodoJob);
 			int tamanio=TEMPSIZE*(nodos->elements_count+1)+DIRSIZE;
-			void* dato=malloc(tamanio);
+			void* dato=stringCrear(tamanio);
 			memcpy(dato,&reducLocal.nodo,DIRSIZE);
 			int i,j;
 			for(i=DIRSIZE,j=0;i<tamanio-TEMPSIZE;i+=TEMPSIZE,j++)
@@ -535,7 +535,7 @@ void actualizarEntrada(Entrada* entradaA,int actualizando, Mensaje* mensaje){
 			Lista nodosReducidos=list_filter(tablaEstados,(func)mismoJob);
 
 			int tamanio=(DIRSIZE+TEMPSIZE)*(nodosReducidos->elements_count+1);
-			void* dato=malloc(tamanio);
+			void* dato=stringCrear(tamanio);
 			memcpy(dato,&workerMenorCarga->nodo,DIRSIZE);
 			int i,j;
 			for(i=DIRSIZE,j=0;i<tamanio-TEMPSIZE;i+=DIRSIZE+TEMPSIZE,j++){

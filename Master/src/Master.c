@@ -242,6 +242,7 @@ void transformaciones(Lista bloques){
 			else
 				imprimirError2(archivoLog, "[TRANSFORMACION] Operacion fallida en bloque N°%d de %s", (int*)*(int32_t*)mensaje->datos, self->dir.nombre);
 			char buffer[INTSIZE*2+DIRSIZE];
+			stringLimpiar(buffer, INTSIZE*2+DIRSIZE);
 			int32_t op=TRANSFORMACION;
 			memcpy(buffer,&op,INTSIZE);
 			memcpy(buffer+INTSIZE,&self->dir,DIRSIZE);
@@ -315,6 +316,7 @@ void reduccionLocal(Mensaje* m){
 	else
 		imprimirError1(archivoLog, "[ERROR] Reduccion local fallida en %s", nodo.nombre);
 	char bufferY[INTSIZE+DIRSIZE];
+	stringLimpiar(bufferY, INTSIZE+DIRSIZE);
 	int32_t op=REDUCLOCAL;
 	memcpy(bufferY,&op,INTSIZE);
 	memcpy(bufferY+INTSIZE,&nodo,DIRSIZE);
@@ -365,7 +367,7 @@ void reduccionGlobal(Mensaje* m){
 		imprimirError1(archivoLog, "[ERROR] Reduccion global fallida en %s", nodo.nombre);
 	int32_t op=REDUCGLOBAL;
 	tamanio=INTSIZE+stringLongitud(archivoSalida)+1;
-	buffer=malloc(tamanio);
+	buffer=stringCrear(tamanio);
 	memcpy(buffer,&op,INTSIZE);
 	memcpy(buffer+INTSIZE,archivoSalida,stringLongitud(archivoSalida)+1);
 	mensajeEnviar(socketYama,mensaje->header.operacion,buffer,tamanio);
