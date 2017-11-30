@@ -363,11 +363,12 @@ void actualizarTablaEstados(Mensaje* mensaje,Socket masterid){
 		while((entradaA=list_find(tablaEstados,(func)buscarEntrada))){
 			actualizarEntrada(entradaA,FRACASO,nullptr);
 		}
-		//bool buscarWorker(Worker* worker){
-		//	return nodoIguales(worker->nodo,*nodo);
-		//}
+		bool buscarWorker(Worker* worker){
+			return nodoIguales(worker->nodo,*nodo);
+		}
+		((Worker*)list_find(workers,buscarWorker))->conectado=false;
 		//list_remove_by_condition(workers,(func)buscarWorker);
-		//no lo saco de la lista porque dirToNum lo necesita
+		//no lo saco de la lista porque dirToNum lo necesita, o no? todo
 		//tampoco toco la carga porque levantarCarga la va a mover a 0 de todas formas
 		return;
 	}
@@ -473,9 +474,16 @@ void actualizarEntrada(Entrada* entradaA,int actualizando, Mensaje* mensaje){
 	}
 	bool trabajoTerminado(bool(*cond)(void*)){
 		bool aux(Entrada* entrada){
-			return cond(entrada)&&entrada->estado!=EXITO;
+			return entrada->estado==EXITO;
 		}
-		return !list_any_satisfy(tablaEstados,(func)aux);
+		Lista filtrada=list_filter(tablaEstados,cond);
+		if(list_is_empty(filtrada)){
+			list_destroy(filtrada);
+			return false;
+		}
+		bool ret=list_all_satisfy(filtrada,(func)aux);
+		list_destroy(filtrada);
+		return ret;
 	}
 	switch(entradaA->etapa){
 	case TRANSFORMACION:
@@ -509,14 +517,14 @@ void actualizarEntrada(Entrada* entradaA,int actualizando, Mensaje* mensaje){
 			reducGlobal.etapa=REDUCGLOBAL;
 			Worker* workerMenorCarga=list_get(workers,0);
 			void menorCarga(Worker* worker){
-				if(worker->carga<workerMenorCarga->carga)
+				if(worker->conectado&&worker->carga<workerMenorCarga->carga)
 					workerMenorCarga=worker;
 			}
 			list_iterate(workers,(func)menorCarga);
 			reducGlobal.nodo=workerMenorCarga->nodo;
 			int cantTemps=0;
 			void contarTransformaciones(Entrada* entrada){
-				if(entrada->etapa==TRANSFORMACION&&entrada->job==entradaA->job)
+				if(entrada->etapa==TRANSFORMACION&&entrada->estado==EXITO&&entrada->job==entradaA->job)
 					cantTemps++;
 			}
 			list_iterate(tablaUsados,(func)contarTransformaciones);
@@ -608,7 +616,7 @@ void dibujarTablaEstados(){
 			}
 			return index;
 		}
-		printf(" %2d | %2d | %1s | %3s | %16s | %20s | %10s |\n",
+		printf(" %2d | %2d | %6s | %3s | %16s | %14s | %10s |\n",
 				entrada->job,masterToNum(entrada->masterid),entrada->nodo.nombre,bloque,
 				etapa,entrada->pathTemporal,estado);
 		if(doFree)

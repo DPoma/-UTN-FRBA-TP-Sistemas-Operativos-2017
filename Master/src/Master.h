@@ -101,3 +101,5 @@ double transcurrido(clock_t);
 void tareasEnParalelo(int);
 HiloTransformacion* buscarHilo(Dir);
 bool nodoIguales(Dir,Dir);
+bool socketConectarMasterEspecialized(Conexion*,Socket);
+Socket socketCrearClienteMasterEspecialized(String,String,int);

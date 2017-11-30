@@ -35,11 +35,11 @@ void masterIniciar(String* argv) {
 	}
 	configuracion = configuracionCrear(RUTA_CONFIG, (Puntero)configuracionLeerArchivo, campos);
 	archivoLog = archivoLogCrear(configuracion->rutaLog, "Master");
-//	void configuracionSenial(int senial){
-//		estadoMaster=DESACTIVADO;
-//	}
-//	senialAsignarFuncion(SIGINT, configuracionSenial);
-//	estadoMaster=ACTIVADO;
+	void configuracionSenial(int senial){
+		imprimirMensaje(archivoLog,"nv perro");
+		exit(EXIT_SUCCESS);
+	}
+	senialAsignarFuncion(SIGINT, configuracionSenial);
 	void semaforoIniciar2(Semaforo** semaforo,int valor){
 		*semaforo=malloc(sizeof(Semaforo));
 		semaforoIniciar(*semaforo,valor);
@@ -200,7 +200,12 @@ void transformaciones(Lista bloques){
 	bool continuar=true;
 	imprimirAviso1(archivoLog, "[AVISO] Comenzando transformacion en %s" ,&self->dir.nombre);
 	imprimirMensaje3(archivoLog,"[CONEXION] Estableciendo conexion con %s (IP: %s | PUERTO: %s)", self->dir.nombre ,self->dir.ip,self->dir.port);
-	Socket socketWorker=socketCrearCliente(self->dir.ip,self->dir.port,ID_MASTER);
+	Socket socketWorker=socketCrearClienteMasterEspecialized(self->dir.ip,self->dir.port,ID_MASTER);
+	if(socketWorker==ERROR){
+		mensajeEnviar(socketYama,DESCONEXION_NODO,&self->dir,DIRSIZE);
+		pthread_detach(pthread_self());
+		return;
+	}
 	imprimirMensaje1(archivoLog,"[CONEXION] Conexion establecida con %s", self->dir.nombre);
 	mensajeEnviar(socketWorker,TRANSFORMACION,scriptTransformacion,lenTransformacion);
 	int enviados=0,respondidos=0;
@@ -286,7 +291,12 @@ void reduccionLocal(Mensaje* m){
 	memcpy(buffer+INTSIZE*2+lenReduccion+cantTemps*TEMPSIZE,m->datos+DIRSIZE+cantTemps*TEMPSIZE,TEMPSIZE);//destino
 
 	imprimirMensaje3(archivoLog,"[CONEXION] Estableciendo conexion con %s (IP: %s | PUERTO: %s)", nodo.nombre ,nodo.ip,nodo.port);
-	Socket sWorker=socketCrearCliente(nodo.ip,nodo.port,ID_MASTER);
+	Socket sWorker=socketCrearClienteMasterEspecialized(nodo.ip,nodo.port,ID_MASTER);
+	if(sWorker==ERROR){
+		mensajeEnviar(socketYama,DESCONEXION_NODO,&nodo,DIRSIZE);
+		pthread_detach(pthread_self());
+		return;
+	}
 	imprimirMensaje1(archivoLog,"[CONEXION] Conexion establecida con %s", nodo.nombre);
 	mensajeEnviar(sWorker,REDUCLOCAL,buffer,tamanio);
 	mensajeDestruir(m);free(buffer);
@@ -294,7 +304,7 @@ void reduccionLocal(Mensaje* m){
 	Mensaje* mensaje = mensajeRecibir(sWorker);
 	if(mensaje->header.operacion==DESCONEXION){
 		imprimirError1(archivoLog, "[ERROR] %s desconectado", nodo.nombre);
-		mensaje->header.operacion=FRACASO;
+		mensaje->header.operacion=FRACASO;//podría meterle DESCONEXION_NODO para que replanifique
 	}
 	if(mensaje->header.operacion==EXITO)
 		imprimirAviso1(archivoLog,"[AVISO] Reduccion local exitosa en %s", nodo.nombre);
@@ -331,7 +341,11 @@ void reduccionGlobal(Mensaje* m){
 	memcpy(buffer+INTSIZE*2+lenReduccion,m->datos+DIRSIZE,m->header.tamanio-DIRSIZE);//y destino
 
 	imprimirMensaje3(archivoLog,"[CONEXION] Estableciendo conexion con %s (IP: %s | PUERTO: %s)", nodo.nombre ,nodo.ip,nodo.port);
-	Socket sWorker=socketCrearCliente(nodo.ip,nodo.port,ID_MASTER);
+	Socket sWorker=socketCrearClienteMasterEspecialized(nodo.ip,nodo.port,ID_MASTER);
+	if(sWorker==ERROR){
+		mensajeEnviar(socketYama,FRACASO,NULL,0);
+		return;
+	}
 	imprimirMensaje1(archivoLog,"[CONEXION] Conexion establecida con %s", nodo.nombre);
 	mensajeEnviar(sWorker,REDUCGLOBAL,buffer,tamanio);
 	mensajeDestruir(m);free(buffer);
@@ -364,7 +378,11 @@ void almacenado(Mensaje* m){
 	memcpy(&nodo,m->datos,DIRSIZE);
 	imprimirAviso1(archivoLog,"[AVISO] Comenzando almacenado final en %s", nodo.nombre);
 	imprimirMensaje3(archivoLog,"[CONEXION] Estableciendo conexion con %s (IP: %s | PUERTO: %s)", nodo.nombre ,nodo.ip,nodo.port);
-	Socket sWorker=socketCrearCliente(nodo.ip,nodo.port,ID_MASTER);
+	Socket sWorker=socketCrearClienteMasterEspecialized(nodo.ip,nodo.port,ID_MASTER);
+	if(sWorker==ERROR){
+		mensajeEnviar(socketYama,FRACASO,NULL,0);
+		return;
+	}
 	imprimirMensaje1(archivoLog,"[CONEXION] Conexion establecida con %s", nodo.nombre);
 	int32_t tamanio=TEMPSIZE+stringLongitud(archivoSalida)+1;
 	void* buffer=malloc(tamanio);
@@ -409,38 +427,19 @@ HiloTransformacion* buscarHilo(Dir dir){
 	}
 	return list_find(transformandos,(func)aux);
 }
-
-
-/* MAGIA
-
-time_t obtenerTiempo() {
-	time_t tiempo = time(0);
-	return tiempo;
+bool socketConectarMasterEspecialized(Conexion* conexion, Socket unSocket) {
+	int estado = connect(unSocket, conexion->informacion->ai_addr, conexion->informacion->ai_addrlen);
+	freeaddrinfo(conexion->informacion);
+	return estado!=ERROR;
 }
-
-char* mostrarTiempo(time_t tiempo) {
-	struct tm *tlocal = localtime(&tiempo);
-	char* fecha = malloc(MAX);
-	strftime(fecha,MAX,"%d/%m/%y | %H:%M:%S", tlocal);
-	return fecha;
+Socket socketCrearClienteMasterEspecialized(String ip, String puerto, int idProceso) {
+	Conexion conexion;
+	Socket unSocket = socketCrear(&conexion, ip, puerto);
+	if(!socketConectarMasterEspecialized(&conexion, unSocket)){
+		imprimirMensaje(archivoLog,"[ERROR] no se pudo conectar");
+		return ERROR;
+	}
+	if(handShakeEnvioFallido(unSocket, idProceso))
+		handShakeError(unSocket);
+	return unSocket;
 }
-
-void informacionPrograma(Programa* programa) {
-	sem_wait(&mutexTiempo);
-	sem_wait(&mutexOutput);
-	char* tiempoInicio = mostrarTiempo(programa->tiempoInicio);
-	char* tiempoFinal = mostrarTiempo(obtenerTiempo());
-	puts("------------------------------------------------------------");
-	printf("ID PROCESO: %i\n", programa->pid);
-	printf("FECHA DE INICIO: %s\n", tiempoInicio);
-	printf("FECHA DE FINALIZACION: %s\n", tiempoFinal);
-	printf("CANTIDAD DE IMPRESIONES %i\n", programa->impresiones);
-	printf("TIEMPO DE EJECUCION: %f SEGUNDOS\n", difftime(obtenerTiempo(), programa->tiempoInicio));
-	puts("------------------------------------------------------------");
-	sem_post(&mutexOutput);
-	free(tiempoInicio);
-	free(tiempoFinal);
-	sem_post(&mutexTiempo);
-}
-
-*/
