@@ -28,6 +28,7 @@ void yamaIniciar() {
 	}
 	signal(SIGUSR1,sigreconfig);
 	void  sigsalir(){
+		puts("");
 		imprimirMensaje(archivoLog, "[EJECUCION] Proceso YAMA finalizado");
 		exit(EXIT_SUCCESS);
 	}
@@ -561,8 +562,8 @@ void actualizarEntrada(Entrada* entradaA,int actualizando, Mensaje* mensaje){
 		Entrada almacenado;
 		darDatosEntrada(&almacenado);
 		almacenado.etapa=ALMACENADO;
-		almacenado.pathTemporal=malloc(mensaje->header.tamanio-INTSIZE);
-		memcpy(almacenado.pathTemporal,mensaje->datos+INTSIZE,mensaje->header.tamanio-INTSIZE);
+		almacenado.pathTemporal=malloc(mensaje->header.tamanio-INTSIZE-7); // -7 para sacar el yamafs: feo
+		memcpy(almacenado.pathTemporal,mensaje->datos+INTSIZE+7,mensaje->header.tamanio-INTSIZE-7);
 		char dato[DIRSIZE+TEMPSIZE];
 		memcpy(dato,&reducGlobal->nodo,DIRSIZE);
 		memcpy(dato+DIRSIZE,reducGlobal->pathTemporal,TEMPSIZE);
@@ -580,8 +581,8 @@ void dibujarTablaEstados(){
 	if(list_is_empty(tablaEstados)&&list_is_empty(tablaUsados))
 		return;
 	pantallaLimpiar();
-	puts(" J  |  M | N |   B |     ETAPA        |       TEMPORAL       |   ESTADO   |");
-	puts("---------------------------------------------------------------------");
+	puts(" J  |  M |   N   |  B  |      ETAPA       |        SALIDA       |   ESTADO   |");
+	puts("------------------------------------------------------------------------------");
 	void dibujarEntrada(Entrada* entrada){
 		char* etapa,*estado,*bloque; bool doFree=false;
 		switch(entrada->etapa){
@@ -616,14 +617,14 @@ void dibujarTablaEstados(){
 			}
 			return index;
 		}
-		printf(" %2d | %2d | %6s | %3s | %16s | %14s | %10s |\n",
+		printf(" %2d | %2d | %5s | %3s | %16s | %19s | %10s |\n",
 				entrada->job,masterToNum(entrada->masterid),entrada->nodo.nombre,bloque,
 				etapa,entrada->pathTemporal,estado);
 		if(doFree)
 			free(bloque);
 	}
 	void dibujarCarga(Worker* worker){
-		printf("%s c: %d     ",worker->nodo.nombre,worker->carga);
+		printf(AMARILLO"%s c: %d     "BLANCO,worker->nodo.nombre,worker->carga);
 	}
 	list_iterate(tablaUsados,(func)dibujarEntrada);
 	puts("-.-|^|-.-");

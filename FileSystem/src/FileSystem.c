@@ -359,9 +359,9 @@ BloqueYama yamaConvertirBloque(Bloque* bloque) {
 
 void workerAvisarAlmacenado(int resultado, Socket unSocket) {
 	if(resultado != ERROR)
-		mensajeEnviar(unSocket, EXITO, NULL, 0);
+		mensajeEnviar(unSocket, EXITO, NULL, NULO);
 	else
-		mensajeEnviar(unSocket, FRACASO, NULL, 0);
+		mensajeEnviar(unSocket, FRACASO, NULL, NULO);
 }
 
 int workerAlmacenarBloque(Archivo* archivo, Mensaje* mensaje, Entero* numeroBloque, int* resultado) {

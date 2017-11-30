@@ -36,7 +36,8 @@ void masterIniciar(String* argv) {
 	configuracion = configuracionCrear(RUTA_CONFIG, (Puntero)configuracionLeerArchivo, campos);
 	archivoLog = archivoLogCrear(configuracion->rutaLog, "Master");
 	void configuracionSenial(int senial){
-		imprimirMensaje(archivoLog,"nv perro");
+		puts("");
+		imprimirMensaje(archivoLog,"[EJECUCION] Proceso Master finalizado");
 		exit(EXIT_SUCCESS);
 	}
 	senialAsignarFuncion(SIGINT, configuracionSenial);

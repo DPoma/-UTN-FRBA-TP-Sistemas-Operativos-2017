@@ -219,7 +219,7 @@ void transformacionFinalizarBloque(int resultado, Socket unSocket, Entero numero
 void transformacionExito(Entero numeroBloque, Socket unSocket) {
 	int resultado = mensajeEnviar(unSocket, EXITO, &numeroBloque, sizeof(Entero));
 	if(resultado != ERROR)
-		imprimirMensaje1(archivoLog,"[TRANSFORMACION] Master #(id?): Operacion finalizada con exito en bloque N°%d", (int*)numeroBloque);
+		imprimirMensaje1(archivoLog,"[TRANSFORMACION] Master #(id?): Operacion exitosa en bloque N°%d", (int*)numeroBloque);
 	else
 		imprimirMensaje1(archivoLog,"[TRANSFORMACION] Master #(id?): Operacion fallida en bloque N°%d", (int*)numeroBloque);
 }
