@@ -315,6 +315,11 @@ void yamaEnviarBloques(Puntero datos) {
 		mensajeEnviar(socketYama, ERROR_ARCHIVO, &idMaster, sizeof(Entero));
 		return;
 	}
+	if(!archivoDisponibleParaYama(archivo)) {
+		imprimirError(archivoLog, "[ERROR] El archivo solicitado por YAMA no tiene las copias suficientes");
+		mensajeEnviar(socketYama, ERROR_ARCHIVO, &idMaster, sizeof(Entero));
+		return;
+	}
 	int cantidad = listaCantidadElementos(archivo->listaBloques);
 	BloqueYama* bloques = yamaConvertirArchivo(archivo, idMaster);
 	mensajeEnviar(socketYama, ENVIAR_BLOQUES, bloques, sizeof(Entero)+sizeof(BloqueYama)*cantidad);
@@ -413,11 +418,11 @@ int workerAlmacenadoFinal(String pathYama, Socket socketWorker) {
 		return ERROR;
 	}
 	Archivo* archivo = archivoCrear(nombreArchivo, directorio->identificador, ARCHIVO_TEXTO);
+	int estado = workerAlmacenarArchivo(archivo, socketWorker);
+	archivoControlar(archivo, estado, rutaDecente);
 	memoriaLiberar(nombreArchivo);
 	memoriaLiberar(rutaDirectorio);
 	memoriaLiberar(rutaDecente);
-	int estado = workerAlmacenarArchivo(archivo, socketWorker);
-	archivoControlar(archivo, estado);
 	return estado;
 }
 
@@ -1216,6 +1221,8 @@ int comandoCopiarArchivoDeYamaFS(Comando* comando, int rutaYama) {
 		return ERROR;
 	}
 	fileCerrar(file);
+	if(rutaYama == ACTIVADO)
+		imprimirMensaje(archivoLog, "[ARCHIVO] Copiando archivo en el FS Local, espere un momento por favor...");
 	mutexBloquear(mutexRuta);
 	stringCopiar(rutaBuffer, comando->argumentos[2]);
 	mutexDesbloquear(mutexRuta);
@@ -1254,7 +1261,7 @@ int comandoCopiarArchivoDeYamaFS(Comando* comando, int rutaYama) {
 	}
 	nodoLimpiarActividades();
 	if(rutaYama == ACTIVADO)
-		imprimirMensaje2(archivoLog, "[ARCHIVO] El archivo %s se copio en %s", archivo->nombre, comando->argumentos[2]);
+		imprimirMensaje2(archivoLog, "[ARCHIVO] El archivo yamafs:%s se copio en %s", comando->argumentos[1], comando->argumentos[2]);
 	return OK;
 }
 
@@ -1305,8 +1312,8 @@ void comandoObtenerMD5DeArchivo(Comando* comando) {
 	int indice;
 	for(indice = 0; MD5Archivo[indice] != ESPACIO; indice++);
 	String md5 = stringTomarDesdeInicio(MD5Archivo, indice);
-	printf("[ARCHIVO] El MD5 del archivo es %s\n", md5);
-	log_info(archivoLog,"[ARCHIVO] El MD5 del archivo es %s", md5);
+	printf("[ARCHIVO] El MD5 de %s es %s\n", comando->argumentos[1], md5);
+	log_info(archivoLog,"[ARCHIVO] El MD5 de %s es %s", comando->argumentos[1], md5);
 	fileLimpiar(ruta);
 	memoriaLiberar(ruta);
 	memoriaLiberar(MD5Archivo);
@@ -1851,17 +1858,21 @@ bool archivoDisponible(Archivo* archivo) {
 	return listaCumplenTodos(archivo->listaBloques, (Puntero)bloqueDisponible);
 }
 
-void archivoGuardar(Archivo* archivo) {
+bool archivoDisponibleParaYama(Archivo* archivo) {
+	return listaCumplenTodos(archivo->listaBloques, (Puntero)bloqueDisponibleParaYama);
+}
+
+void archivoGuardar(Archivo* archivo, String path) {
 	archivoListaAgregar(archivo);
 	archivoPersistir(archivo);
 	archivoPersistirControl();
 	nodoPersistir();
-	imprimirMensaje1(archivoLog, "[ARCHIVO] El archivo %s fue copiado en File System", archivo->nombre);
+	imprimirMensaje1(archivoLog, "[ARCHIVO] El archivo %s fue copiado con exito", path);
 }
 
-void archivoControlar(Archivo* archivo, int estado) {
+void archivoControlar(Archivo* archivo, int estado, String path) {
 	if(estado != ERROR)
-		archivoGuardar(archivo);
+		archivoGuardar(archivo, path);
 	else
 		archivoDestruir(archivo);
 }
@@ -1960,6 +1971,7 @@ int archivoAlmacenar(Comando* comando) {
 		memoriaLiberar(rutaDirectorio);
 		return ERROR;
 	}
+	imprimirMensaje(archivoLog, "[ARCHIVO] Copiando archivo en YAMA FS, espere un momento por favor...");
 	Archivo* archivo = archivoCrear(nombreArchivo, directorio->identificador, comando->argumentos[1]);
 	memoriaLiberar(nombreArchivo);
 	memoriaLiberar(rutaDirectorio);
@@ -1969,7 +1981,7 @@ int archivoAlmacenar(Comando* comando) {
 	else
 		estado = archivoAlmacenarTexto(archivo, file);
 	fileCerrar(file);
-	archivoControlar(archivo, estado);
+	archivoControlar(archivo, estado, comando->argumentos[3]);
 	return estado;
 }
 
@@ -1987,6 +1999,7 @@ int archivoLeer(Comando* comando) {
 		imprimirError(archivoLog, "[ERROR] El archivo no esta disponible");
 		return ERROR;
 	}
+	imprimirMensaje1(archivoLog, "[ARCHIVO] Lectura de %s iniciada", comando->argumentos[1]);
 	listaOrdenar(archivo->listaBloques, (Puntero)bloqueOrdenarPorNumero);
 	int numeroBloque;
 	for(numeroBloque=0; numeroBloque < listaCantidadElementos(archivo->listaBloques); numeroBloque++) {
@@ -2015,6 +2028,7 @@ int archivoLeer(Comando* comando) {
 		}
 	}
 	nodoLimpiarActividades();
+	imprimirMensaje1(archivoLog, "[ARCHIVO] Lectura de %s finalizada", comando->argumentos[1]);
 	return OK;
 }
 
@@ -2622,6 +2636,10 @@ bool bloqueOrdenarPorNumero(Bloque* unBloque, Bloque* otroBloque) {
 
 bool bloqueDisponible(Bloque* bloque) {
 	return listaCumpleAlguno(bloque->listaCopias, (Puntero)copiaDisponible);
+}
+
+bool bloqueDisponibleParaYama(Bloque* bloque) {
+	return listaCantidadElementos(bloque->listaCopias) >= MAX_COPIAS;
 }
 
 int bloqueGuardar(Archivo* archivo, String buffer, size_t bytes, Entero numeroBloque) {
