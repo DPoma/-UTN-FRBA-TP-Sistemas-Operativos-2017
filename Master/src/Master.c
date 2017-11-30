@@ -35,17 +35,16 @@ void masterIniciar(String* argv) {
 	}
 	configuracion = configuracionCrear(RUTA_CONFIG, (Puntero)configuracionLeerArchivo, campos);
 	archivoLog = archivoLogCrear(configuracion->rutaLog, "Master");
-	void configuracionSenial(int senial){
-		estadoMaster=DESACTIVADO;
-	}
-	//senialAsignarFuncion(SIGINT, configuracionSenial);
-	estadoMaster=ACTIVADO;
+//	void configuracionSenial(int senial){
+//		estadoMaster=DESACTIVADO;
+//	}
+//	senialAsignarFuncion(SIGINT, configuracionSenial);
+//	estadoMaster=ACTIVADO;
 	void semaforoIniciar2(Semaforo** semaforo,int valor){
 		*semaforo=malloc(sizeof(Semaforo));
 		semaforoIniciar(*semaforo,valor);
 	}
-	semaforoIniciar2(&errorBloque,1);
-	semaforoIniciar2(&recepcionAlternativo,0);
+	semaforoIniciar2(&listaTransformandos,1);
 	semaforoIniciar2(&metricas.paralelos,1);
 	semaforoIniciar2(&metricas.transformaciones,1);
 	semaforoIniciar2(&metricas.reducLocales,1);
@@ -115,21 +114,43 @@ void masterAtender(){
 		}
 	}
 	mensajeDestruir(mensaje);
-	for(i=0;i<listas->elements_count;i++){
-		pthread_t hilo;
-		pthread_create(&hilo,NULL,(func)&transformaciones,list_get(listas,i));
+
+	transformandos=list_create();
+	void crearHiloTransformacion(Lista bloques){
+		HiloTransformacion* hilo=malloc(sizeof(HiloTransformacion));
+		hilo->dir=((WorkerTransformacion*)list_get(bloques,0))->dir;
+		hilo->bloquesExtra=queue_create();
+		pthread_create(&hilo->hilo,NULL,(func)&transformaciones,bloques);
+		list_add(transformandos,hilo);
 	}
-	while(estadoMaster==ACTIVADO){
+	for(i=0;i<listas->elements_count;i++){
+		semaforoWait(listaTransformandos);
+		crearHiloTransformacion(list_get(listas,i));
+		semaforoSignal(listaTransformandos);
+	}
+	while(true){
 		Mensaje* m=mensajeRecibir(socketYama);
 		switch(m->header.operacion){
 		case TRANSFORMACION://hubo error y se recibió un bloque alternativo
 			metricas.fallos++;
-			memcpy(&alternativo.dir,m->datos,DIRSIZE);
-			memcpy(&alternativo.bloque,m->datos+DIRSIZE,INTSIZE);
-			memcpy(&alternativo.bytes,m->datos+DIRSIZE+INTSIZE,INTSIZE);
-			memcpy(&alternativo.temp,m->datos+DIRSIZE+INTSIZE*2,TEMPSIZE);
-			semaforoSignal(recepcionAlternativo);
-			mensajeDestruir(m);
+			{
+				WorkerTransformacion* alternativo=malloc(sizeof(WorkerTransformacion));
+				alternativo->dir=*(Dir*)m->datos;
+				alternativo->bloque=*(int32_t*)(m->datos+DIRSIZE);
+				alternativo->bytes=*(int32_t*)(m->datos+DIRSIZE+INTSIZE);
+				memcpy(alternativo->temp,m->datos+DIRSIZE+INTSIZE*2,TEMPSIZE);
+
+				semaforoWait(listaTransformandos);
+				HiloTransformacion* hilo=buscarHilo(alternativo->dir);
+				if(hilo)
+					queue_push(hilo->bloquesExtra,alternativo);
+				else{
+					Lista bloque=list_create();
+					list_add(bloque,alternativo);
+					crearHiloTransformacion(bloque);
+				}
+				semaforoSignal(listaTransformandos);
+			}
 			break;
 		case REDUCLOCAL:{
 			pthread_t hilo;
@@ -146,14 +167,14 @@ void masterAtender(){
 			almacenado(m);
 			break;
 		case CIERRE:
-			estadoMaster=DESACTIVADO;
 			mensajeDestruir(m);
-			break;
+			goto cierre;
 		case ABORTAR:
 			imprimirAviso(archivoLog,"[AVISO] Abortando proceso");
 			abort();
 		}
 	}
+	cierre:
 	metricas.proceso=transcurrido(metricas.procesoC);
 	imprimirMensaje(archivoLog,"[EJECUCION] Terminando proceso");
 	void mostrarTranscurrido(double dt,char* tarea){
@@ -170,14 +191,17 @@ void masterAtender(){
 	imprimirMensaje1(archivoLog,"[METRICA] Tareas realizadas en paralelo: %d",(void*)metricas.maxParalelo);
 }
 void transformaciones(Lista bloques){
+	semaforoWait(listaTransformandos);
+	HiloTransformacion* self=buscarHilo(*(Dir*)list_get(bloques,0));
+	semaforoSignal(listaTransformandos);
 	tareasEnParalelo(1);
 	time_t tiempo=time(0);
 	t_queue* clocks=queue_create();
-	WorkerTransformacion* dir = list_get(bloques,0);
-	imprimirAviso1(archivoLog, "[AVISO] Comenzando transformacion en %s" ,&dir->dir.nombre);
-	imprimirMensaje3(archivoLog,"[CONEXION] Estableciendo conexion con %s (IP: %s | PUERTO: %s)", dir->dir.nombre ,dir->dir.ip,dir->dir.port);
-	Socket socketWorker=socketCrearCliente(dir->dir.ip,dir->dir.port,ID_MASTER);
-	imprimirMensaje1(archivoLog,"[CONEXION] Conexion establecida con %s", dir->dir.nombre);
+	bool continuar=true;
+	imprimirAviso1(archivoLog, "[AVISO] Comenzando transformacion en %s" ,&self->dir.nombre);
+	imprimirMensaje3(archivoLog,"[CONEXION] Estableciendo conexion con %s (IP: %s | PUERTO: %s)", self->dir.nombre ,self->dir.ip,self->dir.port);
+	Socket socketWorker=socketCrearCliente(self->dir.ip,self->dir.port,ID_MASTER);
+	imprimirMensaje1(archivoLog,"[CONEXION] Conexion establecida con %s", self->dir.nombre);
 	mensajeEnviar(socketWorker,TRANSFORMACION,scriptTransformacion,lenTransformacion);
 	int enviados=0,respondidos=0;
 	semaforoWait(metricas.transformaciones);
@@ -201,38 +225,21 @@ void transformaciones(Lista bloques){
 		for(;respondidos<enviados;respondidos++){
 			Mensaje* mensaje = mensajeRecibir(socketWorker);
 			if(mensaje->header.operacion==DESCONEXION){
-				puts("UR DONE");
-				mensajeEnviar(socketYama,DESCONEXION_NODO,&dir->dir,DIRSIZE);
+				imprimirMensaje1(archivoLog,"[ERROR] Nodo %s desconectado durante transformacion",self->dir.nombre);
+				mensajeEnviar(socketYama,DESCONEXION_NODO,&self->dir,DIRSIZE);
 				pthread_detach(pthread_self());
 				return;
 			}
 			//a demas de decir exito o fracaso devuelve el numero de bloque
-			void enviarActualizacion(){
-				char buffer[INTSIZE*2+DIRSIZE];
-				int32_t op=TRANSFORMACION;
-				memcpy(buffer,&op,INTSIZE);
-				memcpy(buffer+INTSIZE,&dir->dir,DIRSIZE);
-				memcpy(buffer+INTSIZE+DIRSIZE,mensaje->datos,INTSIZE);
-				mensajeEnviar(socketYama,mensaje->header.operacion,buffer,sizeof buffer);
-				mensajeDestruir(mensaje);
-				//tareasEnParalelo(-1);
-			}
-			if(mensaje->header.operacion==EXITO){
-			imprimirMensaje2(archivoLog, "[TRANSFORMACION] Operacion realizada con exito en bloque N°%d de %s", (int*)dir->bloque, dir->dir.nombre);
-				enviarActualizacion();
-			}else{
-				semaforoWait(errorBloque);
-				imprimirMensaje1(archivoLog, "[TRANSFORMACION] Operacion fallida en %s", dir->dir.nombre);
-				enviarActualizacion();
-				semaforoWait(recepcionAlternativo);
-				list_addM(bloques,&alternativo,sizeof alternativo);
-				semaforoSignal(errorBloque);
-				//se podría modificar para que se puedan procesar varios errores
-				//en paralelo, pero no vale la pena porque agrega mucho codigo
-				//y se supone que estos errores son casos raros
-				//para hacer eso se tendrian que sacar el semaforo y
-				//enviar el numero de thread en el mensaje, para diferenciar despues
-			}
+			imprimirMensaje3(archivoLog, "[TRANSFORMACION] Operacion %s en bloque N°%d de %s",mensaje->header.operacion==EXITO?"exitosa":"fallida", (int*)(int32_t*)mensaje->datos, self->dir.nombre);
+			char buffer[INTSIZE*2+DIRSIZE];
+			int32_t op=TRANSFORMACION;
+			memcpy(buffer,&op,INTSIZE);
+			memcpy(buffer+INTSIZE,&self->dir,DIRSIZE);
+			memcpy(buffer+INTSIZE+DIRSIZE,mensaje->datos,INTSIZE);
+			mensajeEnviar(socketYama,mensaje->header.operacion,buffer,sizeof buffer);
+			mensajeDestruir(mensaje);
+
 			clock_t* reloj=(clock_t*)queue_pop(clocks);//si llegan desordenados no importa, la suma da lo mismo
 			double dt=transcurrido(*reloj);
 			free(reloj);
@@ -241,13 +248,23 @@ void transformaciones(Lista bloques){
 			metricas.cantTrans++;
 			semaforoSignal(metricas.transformaciones);
 		}
-
-	}while(enviados<bloques->elements_count);
+		semaforoWait(listaTransformandos);
+		while(!queue_is_empty(self->bloquesExtra))
+			list_addM(bloques,queue_pop(self->bloquesExtra),sizeof(WorkerTransformacion));
+		if(enviados==bloques->elements_count){
+			bool aux(HiloTransformacion* hilo){
+				return nodoIguales(hilo->dir,self->dir);
+			}
+			free(list_remove_by_condition(transformandos,(func)aux));
+			continuar=false;
+		}
+		semaforoSignal(listaTransformandos);
+	}while(continuar);
 	mensajeEnviar(socketWorker, EXITO, NULL, 0);
 	socketCerrar(socketWorker);
 	queue_destroy(clocks);
 	tareasEnParalelo(-1);
-	imprimirAviso1(archivoLog, "[AVISO] Transformaciones terminadas en %s", dir->dir.nombre);
+	imprimirAviso1(archivoLog, "[AVISO] Transformaciones terminadas en %s", self->dir.nombre);
 	pthread_detach(pthread_self());
 }
 void reduccionLocal(Mensaje* m){
@@ -382,7 +399,15 @@ void tareasEnParalelo(int dtp){
 double transcurrido(clock_t tiempo){
 	return (double)(time(0)-tiempo);
 }
-
+bool nodoIguales(Dir a,Dir b){
+	return stringIguales(a.ip,b.ip)&&stringIguales(a.port,b.port);//podría comparar solo ip
+}
+HiloTransformacion* buscarHilo(Dir dir){
+	bool aux(HiloTransformacion* hilo){
+		return nodoIguales(hilo->dir,dir);
+	}
+	return list_find(transformandos,(func)aux);
+}
 
 
 /* MAGIA

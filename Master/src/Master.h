@@ -46,25 +46,29 @@ typedef struct{
 	int32_t bytes;
 	char temp[TEMPSIZE];
 } WorkerTransformacion;
-WorkerTransformacion alternativo;
 
 
 //--------------------------------------- Globales -------------------------------------
 
-Semaforo* errorBloque;
-Semaforo* recepcionAlternativo;
+Semaforo* listaTransformandos;
 
 
 String campos[3];
 Configuracion* configuracion;
 ArchivoLog archivoLog;
 Socket socketYama;
-int estadoMaster;
 char* scriptTransformacion;
 int32_t lenTransformacion;
 char* scriptReduccion;
 int32_t lenReduccion;
 char* archivoSalida;
+
+Lista transformandos;
+typedef struct{
+	pthread_t hilo;
+	Dir dir;
+	t_queue* bloquesExtra;
+}HiloTransformacion;
 
 struct{
 	time_t procesoC;
@@ -95,3 +99,5 @@ void almacenado(Mensaje*);
 
 double transcurrido(clock_t);
 void tareasEnParalelo(int);
+HiloTransformacion* buscarHilo(Dir);
+bool nodoIguales(Dir,Dir);
