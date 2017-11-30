@@ -119,7 +119,6 @@ void yamaAtender() {
 						int32_t masterid;
 						memcpy(&masterid,mensaje->datos,INTSIZE);
 						log_info(archivoLog, "[RECEPCION] lista de bloques para master #%d recibida",masterid);
-						printf("%d\n", mensaje->header.tamanio);
 						if(listaSocketsContiene(masterid,&servidor->listaMaster)) //por si el master se desconecto
 							yamaPlanificar(masterid,mensaje->datos+INTSIZE,mensaje->header.tamanio-INTSIZE);
 					}
@@ -263,7 +262,13 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 		void setearClock(Worker* worker){
 			if(worker->disponibilidad>aux->disponibilidad||(worker->disponibilidad==aux->disponibilidad&&worker->tareasRealizadas<aux->tareasRealizadas)){
 				aux=worker;
-				clock=dirToNum(worker->nodo);
+				int i=0;
+				void numerarWorker(Worker* workerI){
+					if(nodoIguales(workerI->nodo,aux->nodo))
+						clock=i;
+					i++;
+				}
+				list_iterate(workers,(func)numerarWorker);
 			}
 		}
 		list_iterate(workers,(func)setearClock);
@@ -610,24 +615,13 @@ void dibujarTablaEstados(){
 			free(bloque);
 	}
 	void dibujarCarga(Worker* worker){
-		printf("N: %d c: %d     ",dirToNum(worker->nodo),worker->carga);
+		printf("%s c: %d     ",worker->nodo.nombre,worker->carga);
 	}
 	list_iterate(tablaUsados,(func)dibujarEntrada);
 	puts("-.-|^|-.-");
 	list_iterate(tablaEstados,(func)dibujarEntrada);
 	list_iterate(workers,(func)dibujarCarga);
 	puts("");
-}
-
-int dirToNum(Dir nodo){
-	int index,i=0;
-	void buscarIp(Worker* worker){
-		if(nodoIguales(worker->nodo,nodo))
-			index=i;
-		i++;
-	}
-	list_iterate(workers,(func)buscarIp);
-	return index;
 }
 
 void darPathTemporal(char** ret,char pre){

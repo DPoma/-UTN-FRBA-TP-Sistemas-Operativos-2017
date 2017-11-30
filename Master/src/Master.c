@@ -231,7 +231,7 @@ void transformaciones(Lista bloques){
 				return;
 			}
 			//a demas de decir exito o fracaso devuelve el numero de bloque
-			imprimirMensaje3(archivoLog, "[TRANSFORMACION] Operacion %s en bloque N°%d de %s",mensaje->header.operacion==EXITO?"exitosa":"fallida", (int*)(int32_t*)mensaje->datos, self->dir.nombre);
+			imprimirMensaje3(archivoLog, "[TRANSFORMACION] Operacion %s en bloque N°%d de %s",mensaje->header.operacion==EXITO?"exitosa":"fallida", *(int*)(int32_t*)mensaje->datos, self->dir.nombre);
 			char buffer[INTSIZE*2+DIRSIZE];
 			int32_t op=TRANSFORMACION;
 			memcpy(buffer,&op,INTSIZE);
@@ -255,7 +255,7 @@ void transformaciones(Lista bloques){
 			bool aux(HiloTransformacion* hilo){
 				return nodoIguales(hilo->dir,self->dir);
 			}
-			free(list_remove_by_condition(transformandos,(func)aux));
+			list_remove_by_condition(transformandos,(func)aux);
 			continuar=false;
 		}
 		semaforoSignal(listaTransformandos);
@@ -265,6 +265,7 @@ void transformaciones(Lista bloques){
 	queue_destroy(clocks);
 	tareasEnParalelo(-1);
 	imprimirAviso1(archivoLog, "[AVISO] Transformaciones terminadas en %s", self->dir.nombre);
+	free(self);
 	pthread_detach(pthread_self());
 }
 void reduccionLocal(Mensaje* m){
