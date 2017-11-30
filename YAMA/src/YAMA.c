@@ -461,9 +461,10 @@ void actualizarEntrada(Entrada* entradaA,int actualizando, Mensaje* mensaje){
 				return nodoIguales(worker->nodo,alternativa.nodo);
 			}
 			aumentarCarga(list_find(workers,(func)buscarWorker),alternativa.job,1);
-		}else
+		}else{
 			abortarJob();
-		return;
+			return;
+		}
 	}
 	bool trabajoTerminado(bool(*cond)(void*)){
 		bool aux(Entrada* entrada){
@@ -493,7 +494,7 @@ void actualizarEntrada(Entrada* entradaA,int actualizando, Mensaje* mensaje){
 			list_destroy(nodos);
 			list_addM(tablaEstados,&reducLocal,sizeof(Entrada));//mutex
 		}
-
+		//if ya hubo reduc local? todo
 	break;case REDUCLOCAL:
 		if(trabajoTerminado((func)mismoJob)){
 			log_info(archivoLog,"[REDUCGLBAL] creando entrada");
@@ -513,7 +514,7 @@ void actualizarEntrada(Entrada* entradaA,int actualizando, Mensaje* mensaje){
 				if(entrada->etapa==TRANSFORMACION&&entrada->job==entradaA->job)
 					cantTemps++;
 			}
-			list_iterate(tablaEstados,(func)contarTransformaciones);
+			list_iterate(tablaUsados,(func)contarTransformaciones);
 			aumentarCarga(workerMenorCarga,entradaA->job,ceil((double)cantTemps/2.0));
 
 
@@ -535,6 +536,9 @@ void actualizarEntrada(Entrada* entradaA,int actualizando, Mensaje* mensaje){
 			free(dato);
 			list_destroy(nodosReducidos);
 			list_addM(tablaEstados,&reducGlobal,sizeof(Entrada));//mutex
+		}
+		else if(trabajoTerminado((func)mismoNodoJob)){
+			//todo
 		}
 	break;case REDUCGLOBAL:{
 		log_info(archivoLog,"[ALMACENADO] creando entrada");
@@ -599,8 +603,8 @@ void dibujarTablaEstados(){
 			}
 			return index;
 		}
-		printf(" %2d | %2d | %1d | %3s | %16s | %20s | %10s |\n",
-				entrada->job,masterToNum(entrada->masterid),dirToNum(entrada->nodo),bloque,
+		printf(" %2d | %2d | %1s | %3s | %16s | %20s | %10s |\n",
+				entrada->job,masterToNum(entrada->masterid),entrada->nodo.nombre,bloque,
 				etapa,entrada->pathTemporal,estado);
 		if(doFree)
 			free(bloque);
@@ -609,7 +613,7 @@ void dibujarTablaEstados(){
 		printf("N: %d c: %d     ",dirToNum(worker->nodo),worker->carga);
 	}
 	list_iterate(tablaUsados,(func)dibujarEntrada);
-	puts("----");
+	puts("-.-|^|-.-");
 	list_iterate(tablaEstados,(func)dibujarEntrada);
 	list_iterate(workers,(func)dibujarCarga);
 	puts("");
