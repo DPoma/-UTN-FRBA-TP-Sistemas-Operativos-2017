@@ -71,7 +71,7 @@ void configurar(){
 	stringCopiar(configuracion->rutaLog, archivoConfigStringDe(archivoConfig, "RUTA_LOG"));
 	if(!stringIguales(configuracion->algoritmoBalanceo,"Clock")&&!stringIguales(configuracion->algoritmoBalanceo,"W-Clock")){
 		imprimirMensaje(archivoLog,"[ERRIR] no se reconoce el algoritmo");
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	configuracion->reconfigurar=false;
 	archivoConfigDestruir(archivoConfig);
@@ -125,7 +125,7 @@ void yamaAtender() {
 						mensajeEnviar(*(Entero*)mensaje->datos,ABORTAR,NULL,0);
 					}else if(mensaje->header.operacion==DESCONEXION){
 						imprimirMensaje(archivoLog,"[ERROR] FileSystem desconectado");
-						abort();
+						exit(EXIT_FAILURE);
 					}else{
 						int32_t masterid;
 						memcpy(&masterid,mensaje->datos,INTSIZE);
@@ -149,7 +149,7 @@ void yamaAtender() {
 						mensajeEnviar(servidor->fileSystem,ENVIAR_BLOQUES,pasoFs,mensaje->header.tamanio+INTSIZE);
 						log_info(archivoLog, "[ENVIO] path %s de master #%d enviado al fileSystem",mensaje->datos,socketI);
 						free(pasoFs);
-					}else if(mensaje->header.operacion==DESCONEXION){
+					}else if(mensaje->header.operacion <= DESCONEXION){
 						log_info(archivoLog,"[RECEPCION] desconexion de master");
 						int jobDesconexion=-1;
 						bool entradasDesconectadas(Entrada* entrada){

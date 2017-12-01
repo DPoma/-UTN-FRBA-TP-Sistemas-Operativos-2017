@@ -70,7 +70,7 @@ void masterRealizarOperacion(Socket unSocket) {
 
 void masterDesconectar(Socket unSocket) {
 	socketCerrar(unSocket);
-	imprimirError(archivoLog, "[ERROR] Master # desconectado"); //todo id master
+	imprimirError(archivoLog, "[ERROR] Un Master se desconecto");
 }
 
 void workerDesconectar(Socket unSocket, String nombre) {
@@ -163,46 +163,51 @@ void configuracionSenial(int senial) {
 		estadoWorker = DESACTIVADO;
 		shutdown(listenerMaster, SHUT_RDWR);
 	}
-	else
+	else {
+		if(salidaTemporal != NULL)
+			remove(salidaTemporal);
 		exit(EXIT_SUCCESS);
+	}
+
 }
 
 //--------------------------------------- Funciones de Transformacion -------------------------------------
 
 void transformacion(Mensaje* mensaje, Socket unSocket) {
-	imprimirMensaje(archivoLog, "[CONEXION] Proceso Master conectado exitosamente");
 	Transformacion* transformacion = memoriaAlocar(sizeof(Transformacion));
 	transformacionObtenerScript(transformacion, mensaje);
-	String pathScript = transformacionCrearScript(transformacion);
+	salidaTemporal = transformacionCrearScript(transformacion);
 	int estado = ACTIVADO;
 	while(estado) {
 		Mensaje* otroMensaje = mensajeRecibir(unSocket);
 		switch(otroMensaje->header.operacion) {
 			case DESCONEXION: masterDesconectar(unSocket); estado = DESACTIVADO; break;
-			case TRANSFORMACION: transformacionProcesarBloque(transformacion, mensaje, otroMensaje, unSocket, pathScript); break;
+			case TRANSFORMACION: transformacionProcesarBloque(transformacion, mensaje, otroMensaje, unSocket, salidaTemporal); break;
 			case EXITO: transformacionFinalizar(transformacion, unSocket, &estado); break;
 		}
 		mensajeDestruir(otroMensaje);
 	}
-	fileLimpiar(pathScript);
-	memoriaLiberar(pathScript);
+	fileLimpiar(salidaTemporal);
+	memoriaLiberar(salidaTemporal);
+	salidaTemporal = NULL;
 	transformacionDestruir(transformacion);
 }
 
 int transformacionEjecutar(Transformacion* transformacion, String pathScript) {
-	String pathBloque = transformacionCrearBloque(transformacion);
+	salidaTemporal = transformacionCrearBloque(transformacion);
 	String pathDestino = string_from_format("%s/%s", configuracion->rutaTemporales, transformacion->nombreResultado);
 	String comando = string_from_format("chmod 0777 %s", pathScript);
 	int resultado = system(comando);
 	memoriaLiberar(comando);
 	if(resultado != ERROR) {
-		comando = string_from_format("cat %s | %s | sort > %s", pathBloque, pathScript, pathDestino);
+		comando = string_from_format("cat %s | %s | sort > %s", salidaTemporal, pathScript, pathDestino);
 		resultado = system(comando);
 		memoriaLiberar(comando);
 	}
-	fileLimpiar(pathBloque);
+	fileLimpiar(salidaTemporal);
 	memoriaLiberar(pathDestino);
-	memoriaLiberar(pathBloque);
+	memoriaLiberar(salidaTemporal);
+	salidaTemporal = NULL;
 	return resultado;
 }
 
@@ -252,6 +257,7 @@ void transformacionObtenerBloque(Transformacion* transformacion, Puntero datos) 
 
 void transformacionProcesarBloque(Transformacion* transformacion, Mensaje* mensaje, Mensaje* otroMensaje, Socket unSocket, String pathScript) {
 	transformacionObtenerBloque(transformacion, otroMensaje->datos);
+	imprimirMensaje1(archivoLog, "[CONEXION] Master #%d conectado exitosamente", (int*)transformacion->idMaster);
 	pid_t pid = fork();
 	if(pid == 0) {
 		int resultado = transformacionEjecutar(transformacion, pathScript);
@@ -288,8 +294,8 @@ String transformacionCrearBloque(Transformacion* transformacion) {
 //--------------------------------------- Funciones de Reduccion Local -------------------------------------
 
 void reduccionLocal(Mensaje* mensaje, Socket unSocket) {
-	imprimirMensaje(archivoLog, "[CONEXION] Proceso Master conectado exitosamente");
 	ReduccionLocal* reduccion = reduccionLocalRecibirDatos(mensaje->datos);
+	imprimirMensaje1(archivoLog, "[CONEXION] Master #%d conectado exitosamente", (int*)reduccion->idMaster);
 	String temporales = reduccionLocalObtenerTemporales(reduccion);
 	int resultado = reduccionLocalEjecutar(reduccion, temporales);
 	reduccionLocalFinalizar(resultado, unSocket, reduccion->idMaster);
@@ -311,18 +317,19 @@ ReduccionLocal* reduccionLocalRecibirDatos(Puntero datos) {
 
 int reduccionLocalEjecutar(ReduccionLocal* reduccion, String temporales) {
 	String archivoReduccion = string_from_format("%s/%s", configuracion->rutaTemporales, reduccion->nombreResultado);
-	String archivoScript = reduccionLocalCrearScript(reduccion);
-	String comando = string_from_format("chmod 0777 %s", archivoScript);
+	salidaTemporal = reduccionLocalCrearScript(reduccion);
+	String comando = string_from_format("chmod 0777 %s", salidaTemporal);
 	int resultado = system(comando);
 	memoriaLiberar(comando);
 	if(resultado != ERROR) {
-		comando = string_from_format("sort -m %s | cat | %s > %s", temporales, archivoScript, archivoReduccion);
+		comando = string_from_format("sort -m %s | cat | %s > %s", temporales, salidaTemporal, archivoReduccion);
 		resultado = system(comando);
 	}
-	fileLimpiar(archivoScript);
+	fileLimpiar(salidaTemporal);
 	memoriaLiberar(comando);
 	memoriaLiberar(archivoReduccion);
-	memoriaLiberar(archivoScript);
+	memoriaLiberar(salidaTemporal);
+	salidaTemporal = NULL;
 	memoriaLiberar(temporales);
 	return resultado;
 }
@@ -379,8 +386,8 @@ String reduccionLocalObtenerTemporales(ReduccionLocal* reduccion) {
 //--------------------------------------- Funciones de Reduccion Global -------------------------------------
 
 void reduccionGlobal(Mensaje* mensaje, Socket unSocket) {
-	imprimirMensaje(archivoLog, "[CONEXION] Proceso Master conectado exitosamente");
 	ReduccionGlobal* reduccion = reduccionGlobalRecibirDatos(mensaje->datos);
+	imprimirMensaje1(archivoLog, "[CONEXION] Master #%d conectado exitosamente", (int*)reduccion->idMaster);
 	imprimirAviso2(archivoLog, "[AVISO] Master #%d: %s es el encargado de la reduccion global", (int*)reduccion->idMaster, configuracion->nombreNodo);
 	int resultado = reduccionGlobalAparearTemporales(reduccion);
 	if(resultado != ERROR)
@@ -405,7 +412,7 @@ ReduccionGlobal* reduccionGlobalRecibirDatos(Puntero datos) {
 }
 
 int reduccionGlobalAparearTemporales(ReduccionGlobal* reduccion) {
-	imprimirMensaje(archivoLog,"[REDUCCION GLOBAL] Realizando apareo de archivos");
+	imprimirMensaje1(archivoLog,"[REDUCCION GLOBAL] Master #%d: Realizando apareo de archivos", (int*)reduccion->idMaster);
 	Lista listaApareados = listaCrear();
 	int resultado = reduccionGlobalAlgoritmoApareo(reduccion, listaApareados);
 	listaDestruirConElementos(listaApareados, (Puntero)memoriaLiberar);
@@ -413,21 +420,22 @@ int reduccionGlobalAparearTemporales(ReduccionGlobal* reduccion) {
 }
 
 int reduccionGlobalEjecutar(ReduccionGlobal* reduccion) {
-	imprimirMensaje(archivoLog,"[REDUCCION GLOBAL] Apareo de archivos finalizado");
-	String archivoScript = reduccionGlobalCrearScript(reduccion);
+	imprimirMensaje1(archivoLog,"[REDUCCION GLOBAL] Master #%d: Apareo de archivos finalizado", (int*)reduccion->idMaster);
+	salidaTemporal = reduccionGlobalCrearScript(reduccion);
 	String archivoSalida = string_from_format("%s/%s", configuracion->rutaTemporales, reduccion->nombreResultado);
-	String comando = string_from_format("chmod 0777 %s", archivoScript);
+	String comando = string_from_format("chmod 0777 %s", salidaTemporal);
 	int resultado = system(comando);
 	memoriaLiberar(comando);
 	if(resultado != ERROR) {
-		comando = string_from_format("sort %s | cat | %s > %s", reduccion->pathApareo, archivoScript, archivoSalida);
+		comando = string_from_format("sort %s | cat | %s > %s", reduccion->pathApareo, salidaTemporal, archivoSalida);
 		resultado = system(comando);
 	}
-	fileLimpiar(archivoScript);
-	//todo fileLimpiar(reduccion->pathApareo);
+	fileLimpiar(salidaTemporal);
+	fileLimpiar(reduccion->pathApareo);
 	memoriaLiberar(comando);
 	memoriaLiberar(archivoSalida);
-	memoriaLiberar(archivoScript);
+	memoriaLiberar(salidaTemporal);
+	salidaTemporal = NULL;
 	return resultado;
 }
 
@@ -647,11 +655,11 @@ String reduccionGlobalCrearScript(ReduccionGlobal* reduccion) {
 //--------------------------------------- Funciones de Almacenado Final -------------------------------------
 
 void almacenadoFinal(Mensaje* mensaje, Socket socketMaster) {
-	imprimirMensaje(archivoLog, "[CONEXION] Proceso Master conectado exitosamente");
 	String pathArchivo = string_from_format("%s/%s", configuracion->rutaTemporales, mensaje->datos);
 	int resultado = almacenadoFinalEjecutar(pathArchivo, mensaje->datos+TEMPSIZE);
 	int idMaster;
 	memcpy(&idMaster, mensaje->datos+mensaje->header.tamanio-sizeof(Entero), sizeof(Entero));
+	imprimirMensaje1(archivoLog, "[CONEXION] Master #%d conectado exitosamente", (int*)idMaster);
 	memoriaLiberar(pathArchivo);
 	almacenadoFinalFinalizar(resultado, socketMaster, idMaster);
 }
@@ -669,7 +677,7 @@ int almacenadoFinalEjecutar(String pathArchivo, String pathYama) {
 int almacenadoFinalEnviarArchivo(String pathArchivo, String pathYama, Socket socketFileSystem) {
 	mensajeEnviar(socketFileSystem, ALMACENAR_PATH, pathYama, stringLongitud(pathYama)+1);
 	Mensaje* unMensaje = mensajeRecibir(socketFileSystem);
-	if(unMensaje->header.operacion == FRACASO || unMensaje->header.operacion == DESCONEXION) {
+	if(unMensaje->header.operacion <= DESCONEXION) {
 		mensajeDestruir(unMensaje);
 		return ERROR;
 	}
@@ -692,7 +700,7 @@ int almacenadoFinalEnviarArchivo(String pathArchivo, String pathYama, Socket soc
 			bloqueWorker->bytesUtilizados = BLOQUE-bytesDisponibles;
 			mensajeEnviar(socketFileSystem, ALMACENAR_BLOQUE, bloqueWorker, sizeof(BloqueWorker));
 			Mensaje* mensaje = mensajeRecibir(socketFileSystem);
-			if(mensaje->header.operacion == ERROR || mensaje->header.operacion == DESCONEXION) {
+			if(mensaje->header.operacion <= DESCONEXION) {
 				estado = ERROR;
 				mensajeDestruir(mensaje);
 				break;
@@ -712,7 +720,7 @@ int almacenadoFinalEnviarArchivo(String pathArchivo, String pathYama, Socket soc
 		bloqueWorker->bytesUtilizados = BLOQUE-bytesDisponibles;
 		mensajeEnviar(socketFileSystem, ALMACENAR_BLOQUE, bloqueWorker, sizeof(BloqueWorker));
 		Mensaje* mensaje = mensajeRecibir(socketFileSystem);
-		if(mensaje->header.operacion == ERROR || mensaje->header.operacion == DESCONEXION)
+		if(mensaje->header.operacion <= DESCONEXION)
 			estado = ERROR;
 		mensajeDestruir(mensaje);
 	}

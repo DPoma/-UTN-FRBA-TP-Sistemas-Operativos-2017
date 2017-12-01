@@ -10,7 +10,7 @@
 int main(int argc, String* argv){
 	if(argc != 5) {
 		imprimirError(archivoLog, "[ERROR] Faltan o sobran argumentos");
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	masterIniciar(argv);
 	masterAtender();
@@ -37,6 +37,7 @@ void masterIniciar(String* argv){
 	void configuracionSenial(int senial){
 		puts("");
 		imprimirMensaje(archivoLog,"[EJECUCION] Proceso Master finalizado");
+		mensajeEnviar(socketYama, DESCONEXION, NULL, NULO);
 		exit(EXIT_SUCCESS);
 	}
 	senialAsignarFuncion(SIGINT, configuracionSenial);
@@ -52,7 +53,7 @@ void masterIniciar(String* argv){
 	void leerArchivo(File archScript,char** script,int* len){
 		if(!archScript){
 			imprimirError(archivoLog, "[ERROR] Archivo de script invalido");
-			abort();
+			exit(EXIT_FAILURE);
 		}
 		fseek(archScript, 0, SEEK_END);
 		long posicion = ftell(archScript);
@@ -76,10 +77,10 @@ void masterAtender(){
 	Mensaje* mensaje=mensajeRecibir(socketYama);
 	if(mensaje->header.operacion==ABORTAR){
 		imprimirError(archivoLog, "[ERROR] El archivo no existe o no esta disponible en YAMA FS");
-		abort();
-	}else if(mensaje->header.operacion==DESCONEXION){
+		exit(EXIT_FAILURE);
+	}else if(mensaje->header.operacion <= DESCONEXION){
 		imprimirError(archivoLog, "[ERROR] YAMA desconectado");
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	imprimirMensaje(archivoLog, "[RECEPCION] Lista de bloques recibida");
 	int i;

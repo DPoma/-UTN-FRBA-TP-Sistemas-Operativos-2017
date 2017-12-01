@@ -105,6 +105,7 @@ int estadoWorker;
 int dataBinBloques;
 int dataBinTamanio;
 Socket socketBuffer;
+String salidaTemporal;
 
 //--------------------------------------- Funciones de Worker -------------------------------------
 
