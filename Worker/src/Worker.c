@@ -177,7 +177,7 @@ void transformacion(Mensaje* mensaje, Socket unSocket) {
 		switch(otroMensaje->header.operacion) {
 			case DESCONEXION: masterDesconectar(unSocket); estado = DESACTIVADO; break;
 			case TRANSFORMACION: transformacionProcesarBloque(transformacion, mensaje, otroMensaje, unSocket, pathScript); break;
-			case EXITO: transformacionFinalizar(unSocket, &estado); break;
+			case EXITO: transformacionFinalizar(transformacion, unSocket, &estado); break;
 		}
 		mensajeDestruir(otroMensaje);
 	}
@@ -203,30 +203,30 @@ int transformacionEjecutar(Transformacion* transformacion, String pathScript) {
 	return resultado;
 }
 
-void transformacionFinalizar(Socket unSocket, int* estado) {
-	imprimirAviso(archivoLog, "[AVISO] Master #(id?): Transformaciones realizadas con exito");
+void transformacionFinalizar(Transformacion* transformacion, Socket unSocket, int* estado) {
+	imprimirAviso1(archivoLog, "[AVISO] Master #%d: Transformaciones realizadas con exito", (int*)transformacion->idMaster);
 	socketCerrar(unSocket);
 	*estado = DESACTIVADO;
 }
 
-void transformacionFinalizarBloque(int resultado, Socket unSocket, Entero numeroBloque) {
+void transformacionFinalizarBloque(int resultado, Socket unSocket, Transformacion* transformacion) {
 	if(resultado != ERROR)
-		transformacionExito(numeroBloque, unSocket);
+		transformacionExito(transformacion, unSocket);
 	else
-		transformacionFracaso(numeroBloque, unSocket);
+		transformacionFracaso(transformacion, unSocket);
 }
 
-void transformacionExito(Entero numeroBloque, Socket unSocket) {
-	int resultado = mensajeEnviar(unSocket, EXITO, &numeroBloque, sizeof(Entero));
+void transformacionExito(Transformacion* transformacion, Socket unSocket) {
+	int resultado = mensajeEnviar(unSocket, EXITO, &transformacion->numeroBloque, sizeof(Entero));
 	if(resultado != ERROR)
-		imprimirMensaje1(archivoLog,"[TRANSFORMACION] Master #(id?): Operacion exitosa en bloque N°%d", (int*)numeroBloque);
+		imprimirMensaje2(archivoLog,"[TRANSFORMACION] Master #%d: Operacion exitosa en bloque N°%d", (int*)transformacion->idMaster, (int*)transformacion->numeroBloque);
 	else
-		imprimirMensaje1(archivoLog,"[TRANSFORMACION] Master #(id?): Operacion fallida en bloque N°%d", (int*)numeroBloque);
+		imprimirMensaje2(archivoLog,"[TRANSFORMACION] Master #%d: Operacion fallida en bloque N°%d",(int*)transformacion->idMaster, (int*)transformacion->numeroBloque);
 }
 
-void transformacionFracaso(Entero numeroBloque, Socket unSocket) {
-	imprimirMensaje1(archivoLog,"[TRANSFORMACION] Master #(id?): Operacion fallida en bloque N°%d", (int*)numeroBloque);
-	mensajeEnviar(unSocket, FRACASO, &numeroBloque, sizeof(Entero));
+void transformacionFracaso(Transformacion* transformacion, Socket unSocket) {
+	imprimirMensaje2(archivoLog,"[TRANSFORMACION] Master #%d: Operacion fallida en bloque N°%d", (int*)transformacion->idMaster, (int*)transformacion->numeroBloque);
+	mensajeEnviar(unSocket, FRACASO, &transformacion->numeroBloque, sizeof(Entero));
 }
 
 void transformacionDestruir(Transformacion* transformacion) {
@@ -243,7 +243,8 @@ void transformacionObtenerScript(Transformacion* transformacion, Mensaje* mensaj
 void transformacionObtenerBloque(Transformacion* transformacion, Puntero datos) {
 	memcpy(&transformacion->numeroBloque, datos, sizeof(Entero));
 	memcpy(&transformacion->bytesUtilizados, datos+sizeof(Entero), sizeof(Entero));
-	memcpy(transformacion->nombreResultado, datos+sizeof(Entero)*2, 12);
+	memcpy(transformacion->nombreResultado, datos+sizeof(Entero)*2, TEMPSIZE);
+	memcpy(&transformacion->idMaster, datos+sizeof(Entero)*2+TEMPSIZE, sizeof(Entero));
 }
 
 void transformacionProcesarBloque(Transformacion* transformacion, Mensaje* mensaje, Mensaje* otroMensaje, Socket unSocket, String pathScript) {
@@ -251,7 +252,7 @@ void transformacionProcesarBloque(Transformacion* transformacion, Mensaje* mensa
 	pid_t pid = fork();
 	if(pid == 0) {
 		int resultado = transformacionEjecutar(transformacion, pathScript);
-		transformacionFinalizarBloque(resultado, unSocket, transformacion->numeroBloque);
+		transformacionFinalizarBloque(resultado, unSocket, transformacion);
 		transformacionDestruir(transformacion);
 		memoriaLiberar(pathScript);
 		mensajeDestruir(mensaje);
@@ -288,8 +289,8 @@ void reduccionLocal(Mensaje* mensaje, Socket unSocket) {
 	ReduccionLocal* reduccion = reduccionLocalRecibirDatos(mensaje->datos);
 	String temporales = reduccionLocalObtenerTemporales(reduccion);
 	int resultado = reduccionLocalEjecutar(reduccion, temporales);
+	reduccionLocalFinalizar(resultado, unSocket, reduccion->idMaster);
 	reduccionLocalDestruir(reduccion);
-	reduccionLocalFinalizar(resultado, unSocket);
 }
 
 ReduccionLocal* reduccionLocalRecibirDatos(Puntero datos) {
@@ -301,6 +302,7 @@ ReduccionLocal* reduccionLocalRecibirDatos(Puntero datos) {
 	reduccion->nombresTemporales = memoriaAlocar(reduccion->cantidadTemporales*TEMPSIZE);
 	memcpy(reduccion->nombresTemporales, datos+INTSIZE*2+reduccion->scriptSize, reduccion->cantidadTemporales*TEMPSIZE);
 	memcpy(reduccion->nombreResultado, datos+INTSIZE*2+reduccion->scriptSize+reduccion->cantidadTemporales*TEMPSIZE, TEMPSIZE);
+	memcpy(&reduccion->idMaster, datos+INTSIZE*2+reduccion->scriptSize+reduccion->cantidadTemporales*TEMPSIZE+TEMPSIZE, sizeof(Entero));
 	return reduccion;
 }
 
@@ -322,11 +324,11 @@ int reduccionLocalEjecutar(ReduccionLocal* reduccion, String temporales) {
 	return resultado;
 }
 
-void reduccionLocalFinalizar(int resultado, Socket unSocket) {
+void reduccionLocalFinalizar(int resultado, Socket unSocket, int idMaster) {
 	if(resultado != ERROR)
-		reduccionLocalExito(unSocket);
+		reduccionLocalExito(unSocket, idMaster);
 	else
-		reduccionLocalFracaso(unSocket);
+		reduccionLocalFracaso(unSocket, idMaster);
 }
 
 void reduccionLocalDestruir(ReduccionLocal* reduccion) {
@@ -335,16 +337,16 @@ void reduccionLocalDestruir(ReduccionLocal* reduccion) {
 	memoriaLiberar(reduccion);
 }
 
-void reduccionLocalExito(Socket unSocket) {
+void reduccionLocalExito(Socket unSocket, int idMaster) {
 	int resultado = mensajeEnviar(unSocket, EXITO, NULL, NULO);
 	if(resultado != ERROR)
-		imprimirAviso(archivoLog,"[AVISO] Master #(id?): Reduccion local realizada con exito");
+		imprimirAviso1(archivoLog,"[AVISO] Master #%d: Reduccion local realizada con exito", (int*)idMaster);
 	else
-		imprimirError(archivoLog,"[ERROR] Master #(id?):Reduccion local fallida");
+		imprimirError1(archivoLog,"[ERROR] Master #%d:Reduccion local fallida", (int*)idMaster);
 }
 
-void reduccionLocalFracaso(Socket unSocket) {
-	imprimirError(archivoLog, "[ERROR] Master #(id?): Reduccion local fallida");
+void reduccionLocalFracaso(Socket unSocket, int idMaster) {
+	imprimirError1(archivoLog, "[ERROR] Master #%d: Reduccion local fallida", (int*)idMaster);
 	mensajeEnviar(unSocket, FRACASO, NULL, NULO);
 }
 
@@ -375,13 +377,13 @@ String reduccionLocalObtenerTemporales(ReduccionLocal* reduccion) {
 
 void reduccionGlobal(Mensaje* mensaje, Socket unSocket) {
 	imprimirMensaje(archivoLog, "[CONEXION] Proceso Master conectado exitosamente");
-	imprimirAviso1(archivoLog, "[AVISO] Master #id: %s es el encargado de la reduccion global", configuracion->nombreNodo);
 	ReduccionGlobal* reduccion = reduccionGlobalRecibirDatos(mensaje->datos);
+	imprimirAviso2(archivoLog, "[AVISO] Master #%d: %s es el encargado de la reduccion global", (int*)reduccion->idMaster, configuracion->nombreNodo);
 	int resultado = reduccionGlobalAparearTemporales(reduccion);
 	if(resultado != ERROR)
 		resultado = reduccionGlobalEjecutar(reduccion);
+	reduccionGlobalFinalizar(resultado, unSocket, reduccion->idMaster);
 	reduccionGlobalDestruir(reduccion);
-	reduccionGlobalFinalizar(resultado, unSocket);
 }
 
 ReduccionGlobal* reduccionGlobalRecibirDatos(Puntero datos) {
@@ -395,6 +397,7 @@ ReduccionGlobal* reduccionGlobalRecibirDatos(Puntero datos) {
 	for(indice = 0; indice < reduccion->cantidadNodos; indice++)
 		reduccion->nodos[indice] = *(Nodo*)(datos+sizeof(Entero)*2+reduccion->scriptSize+sizeof(Nodo)*indice);
 	memcpy(reduccion->nombreResultado, datos+sizeof(Entero)*2+reduccion->scriptSize+sizeof(Nodo)*reduccion->cantidadNodos, TEMPSIZE);
+	memcpy(&reduccion->idMaster, datos+sizeof(Entero)*2+reduccion->scriptSize+sizeof(Nodo)*reduccion->cantidadNodos+TEMPSIZE, sizeof(Entero));
 	return reduccion;
 }
 
@@ -425,11 +428,11 @@ int reduccionGlobalEjecutar(ReduccionGlobal* reduccion) {
 	return resultado;
 }
 
-void reduccionGlobalFinalizar(int resultado, Socket unSocket) {
+void reduccionGlobalFinalizar(int resultado, Socket unSocket, int idMaster) {
 	if(resultado != ERROR)
-		reduccionGlobalExito(unSocket);
+		reduccionGlobalExito(unSocket, idMaster);
 	else
-		reduccionGlobalFracaso(unSocket);
+		reduccionGlobalFracaso(unSocket, idMaster);
 }
 
 void reduccionGlobalDestruir(ReduccionGlobal* reduccion) {
@@ -439,17 +442,17 @@ void reduccionGlobalDestruir(ReduccionGlobal* reduccion) {
 	memoriaLiberar(reduccion);
 }
 
-void reduccionGlobalExito(Socket unSocket) {
+void reduccionGlobalExito(Socket unSocket, int idMaster) {
 	int resultado = mensajeEnviar(unSocket, EXITO, NULL, NULO);
 	if(resultado != ERROR)
-		imprimirAviso(archivoLog,"[AVISO] Master #(id?): Reduccion global realizada con exito");
+		imprimirAviso1(archivoLog,"[AVISO] Master #%d: Reduccion global realizada con exito", (int*)idMaster);
 	else
-		imprimirError(archivoLog,"[ERROR] Master #(id?): Reduccion global fallida");
+		imprimirError1(archivoLog,"[ERROR] Master #%d: Reduccion global fallida", (int*)idMaster);
 }
 
-void reduccionGlobalFracaso(Socket unSocket) {
+void reduccionGlobalFracaso(Socket unSocket, int idMaster) {
 	mensajeEnviar(unSocket, FRACASO, NULL, NULO);
-	imprimirError(archivoLog,"[ERROR] Master #(id?): Reduccion global fallida");
+	imprimirError1(archivoLog,"[ERROR] Master #%d: Reduccion global fallida", (int*)idMaster);
 }
 
 int reduccionGlobalRealizarConexiones(ReduccionGlobal* reduccion, Lista listaApareados) {
@@ -644,8 +647,10 @@ void almacenadoFinal(Mensaje* mensaje, Socket socketMaster) {
 	imprimirMensaje(archivoLog, "[CONEXION] Proceso Master conectado exitosamente");
 	String pathArchivo = string_from_format("%s/%s", configuracion->rutaTemporales, mensaje->datos);
 	int resultado = almacenadoFinalEjecutar(pathArchivo, mensaje->datos+TEMPSIZE);
+	int idMaster;
+	memcpy(&idMaster, mensaje->datos+mensaje->header.tamanio-sizeof(Entero), sizeof(Entero));
 	memoriaLiberar(pathArchivo);
-	almacenadoFinalFinalizar(resultado, socketMaster);
+	almacenadoFinalFinalizar(resultado, socketMaster, idMaster);
 }
 
 int almacenadoFinalEjecutar(String pathArchivo, String pathYama) {
@@ -653,15 +658,19 @@ int almacenadoFinalEjecutar(String pathArchivo, String pathYama) {
 	if(socketFileSystem == ERROR)
 		return ERROR;
 	int resultado = almacenadoFinalEnviarArchivo(pathArchivo, pathYama, socketFileSystem);
-	imprimirMensaje1(archivoLog,"[ALMACENADO FINAL] Guardando archivo en %s", pathYama);
-	Mensaje* mensaje = mensajeRecibir(socketFileSystem);
-	resultado = mensaje->header.operacion;
-	mensajeDestruir(mensaje);
+	if(resultado != ERROR)
+		imprimirMensaje1(archivoLog,"[ALMACENADO FINAL] Guardando archivo en %s", pathYama);
 	return resultado;
 }
 
 int almacenadoFinalEnviarArchivo(String pathArchivo, String pathYama, Socket socketFileSystem) {
 	mensajeEnviar(socketFileSystem, ALMACENAR_PATH, pathYama, stringLongitud(pathYama)+1);
+	Mensaje* unMensaje = mensajeRecibir(socketFileSystem);
+	if(unMensaje->header.operacion == FRACASO || unMensaje->header.operacion == DESCONEXION) {
+		mensajeDestruir(unMensaje);
+		return ERROR;
+	}
+	mensajeDestruir(unMensaje);
 	File file = fileAbrir(pathArchivo, LECTURA);
 	String buffer = stringCrear(BLOQUE+1);
 	BloqueWorker* bloqueWorker = memoriaAlocar(sizeof(BloqueWorker));
@@ -704,7 +713,8 @@ int almacenadoFinalEnviarArchivo(String pathArchivo, String pathYama, Socket soc
 			estado = ERROR;
 		mensajeDestruir(mensaje);
 	}
-	mensajeEnviar(socketFileSystem, ALMACENADO_FINAL, NULL, NULO);
+	if(estado != ERROR)
+		mensajeEnviar(socketFileSystem, ALMACENADO_FINAL, NULL, NULO);
 	memoriaLiberar(bloqueWorker);
 	memoriaLiberar(buffer);
 	fileCerrar(file);
@@ -722,24 +732,24 @@ Socket almacenadoFinalConectarAFileSystem() {
 }
 
 
-void almacenadoFinalFinalizar(int resultado, Socket unSocket) {
-	if(resultado == EXITO)
-		almacenadoFinalExito(unSocket);
+void almacenadoFinalFinalizar(int resultado, Socket unSocket, int idMaster) {
+	if(resultado != ERROR)
+		almacenadoFinalExito(unSocket, idMaster);
 	else
-		almacenadoFinalFracaso(unSocket);
+		almacenadoFinalFracaso(unSocket, idMaster);
 }
 
-void almacenadoFinalExito(Socket unSocket) {
+void almacenadoFinalExito(Socket unSocket, int idMaster) {
 	int resultado = mensajeEnviar(unSocket, EXITO, NULL, NULO);
 	if(resultado != ERROR)
-		imprimirAviso(archivoLog,"[AVISO] Master #(id?): Almacenado final realizado con exito");
+		imprimirAviso1(archivoLog,"[AVISO] Master #%d: Almacenado final realizado con exito", (int*)idMaster);
 	else
-		imprimirError(archivoLog,"[ERROR] Master #(id?): Almacenado final fallido");
+		imprimirError1(archivoLog,"[ERROR] Master #%d: Almacenado final fallido", (int*)idMaster);
 
 }
 
-void almacenadoFinalFracaso(Socket unSocket) {
-	imprimirError(archivoLog,"[ERROR] Master #(id?): Almacenado final fallido");
+void almacenadoFinalFracaso(Socket unSocket, int idMaster) {
+	imprimirError1(archivoLog,"[ERROR] Master #%d: Almacenado final fallido", (int*)idMaster);
 	mensajeEnviar(unSocket, FRACASO, NULL, NULO);
 }
 

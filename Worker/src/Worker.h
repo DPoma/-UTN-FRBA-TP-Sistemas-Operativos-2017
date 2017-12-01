@@ -52,6 +52,7 @@ typedef struct {
 	Entero numeroBloque;
 	Entero bytesUtilizados;
 	char nombreResultado[TEMPSIZE];
+	int idMaster;
 } Transformacion;
 
 typedef struct {
@@ -60,6 +61,7 @@ typedef struct {
 	int cantidadTemporales;
 	String nombresTemporales;
 	char nombreResultado[TEMPSIZE];
+	int idMaster;
 } ReduccionLocal;
 
 typedef struct {
@@ -80,6 +82,7 @@ typedef struct {
 	int cantidadNodos;
 	String pathApareo;
 	char nombreResultado[TEMPSIZE];
+	int idMaster;
 } ReduccionGlobal;
 
 typedef struct __attribute__((packed)) {
@@ -134,14 +137,14 @@ void masterRealizarOperacion(Socket unSocket);
 int transformacionEjecutar(Transformacion* transformacion, String pathScript);
 void transformacion(Mensaje* mensaje, Socket unSocket);
 void transformacionDestruir(Transformacion* transformacion);
-void transformacionExito(Entero numeroBloque, Socket unSocket);
-void transformacionFracaso(Entero numeroBloque, Socket unSocket);
+void transformacionExito(Transformacion* transformacion, Socket unSocket);
+void transformacionFracaso(Transformacion* transformacion, Socket unSocket);
 void transformacionObtenerScript(Transformacion* transformacion, Mensaje* mensaje);
-void transformacionFinalizar(Socket unSocket, int* estado);
+void transformacionFinalizar(Transformacion* transformacion, Socket unSocket, int* estado);
 void transformacionProcesarBloque(Transformacion* transformacion, Mensaje* mensaje, Mensaje* otroMensaje, Socket unSocket, String pathScript);
 String transformacionCrearBloque(Transformacion* transformacion);
 String transformacionCrearScript(Transformacion* transformacion);
-
+void transformacionFinalizarBloque(int resultado, Socket unSocket, Transformacion* transformacion);
 
 //--------------------------------------- Funciones de Reduccion Local -------------------------------------
 
@@ -151,9 +154,9 @@ int reduccionLocalEjecutar(ReduccionLocal* reduccion, String temporales);
 String reduccionLocalCrearScript(ReduccionLocal* reduccion);
 String reduccionLocalObtenerTemporales(ReduccionLocal* reduccion);
 void reduccionLocalDestruir(ReduccionLocal* reduccion);
-void reduccionLocalFinalizar(int resultado, Socket unSocket);
-void reduccionLocalExito(Socket unSocket);
-void reduccionLocalFracaso(Socket unSocket);
+void reduccionLocalFinalizar(int resultado, Socket unSocket, int idMaster);
+void reduccionLocalFracaso(Socket unSocket, int idMaster);
+void reduccionLocalExito(Socket unSocket, int idMaster);
 
 //--------------------------------------- Funciones de Reduccion Global -------------------------------------
 
@@ -165,9 +168,9 @@ int reduccionGlobalAlgoritmoApareo(ReduccionGlobal* reduccion, Lista listaAparea
 String reduccionGlobalCrearScript(ReduccionGlobal* reduccion);
 int reduccionGlobalRealizarConexiones(ReduccionGlobal* reduccion, Lista listaApareados);
 void reduccionGlobalDestruir(ReduccionGlobal* reduccion);
-void reduccionGlobalFinalizar(int resultado, Socket unSocket);
-void reduccionGlobalExito(Socket unSocket);
-void reduccionGlobalFracaso(Socket unSocket);
+void reduccionGlobalFinalizar(int resultado, Socket unSocket, int idMaster);
+void reduccionGlobalFracaso(Socket unSocket, int idMaster);
+void reduccionGlobalExito(Socket unSocket, int idMaster);
 String reduccionGlobalEncargadoPedirLinea(Apareo* apareo);
 Apareo* reduccionGlobalLineaMasCorta(Apareo* unApareo, Apareo* otroApareo);
 void reduccionGlobalDestruirLineaNula(Lista listaApareados);
@@ -179,9 +182,9 @@ int reduccionGlobalEscribirLinea(Apareo* apareo, Lista listaApareados, File arch
 void almacenadoFinal(Mensaje* mensaje, Socket socketMaster);
 int almacenadoFinalEjecutar(String pathArchivo, String pathYama);
 int almacenadoFinalEnviarArchivo(String pathArchivo, String pathYama, Socket socketFileSystem);
-void almacenadoFinalFinalizar(int resultado, Socket unSocket);
-void almacenadoFinalFracaso(Socket unSocket);
-void almacenadoFinalExito(Socket unSocket);
+void almacenadoFinalFinalizar(int resultado, Socket unSocket, int idMaster);
+void almacenadoFinalExito(Socket unSocket, int idMaster);
+void almacenadoFinalFracaso(Socket unSocket, int idMaster);
 Socket almacenadoFinalConectarAFileSystem();
 
 //--------------------------------------- Funciones de DataBin -------------------------------------
