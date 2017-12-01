@@ -427,7 +427,7 @@ int reduccionGlobalEjecutar(ReduccionGlobal* reduccion) {
 	int resultado = system(comando);
 	memoriaLiberar(comando);
 	if(resultado != ERROR) {
-		comando = string_from_format("cat %s | %s > %s", reduccion->pathApareo, salidaTemporal, archivoSalida);
+		comando = string_from_format("sort %s | cat | %s > %s", reduccion->pathApareo, salidaTemporal, archivoSalida);
 		resultado = system(comando);
 	}
 	fileLimpiar(salidaTemporal);
@@ -549,6 +549,12 @@ int reduccionGlobalAlgoritmoApareo(ReduccionGlobal* reduccion, Lista listaAparea
 
 Apareo* reduccionGlobalLineaMasCorta(Apareo* unApareo, Apareo* otroApareo) {
 	int resultado = strcmp(unApareo->linea, otroApareo->linea);
+	static int contador=0;
+	contador++;
+	if(contador==666){
+		printf("[APAREO] Procesando...");
+		contador=0;
+	}
 	if(resultado == NULO)
 		return unApareo;
 	if(resultado < NULO)

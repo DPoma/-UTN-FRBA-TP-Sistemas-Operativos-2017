@@ -398,7 +398,7 @@ void actualizarTablaEstados(Mensaje* mensaje,Socket masterid){
 		int32_t bloque=*((int32_t*)(datos+DIRSIZE));
 		bool buscarEntrada(Entrada* entrada){
 			//printf("%s %s %d == %s %s %d\n",entrada->nodo.ip,entrada->nodo.port,entrada->bloque,nodo.ip,nodo.port,bloque);
-			return nodoIguales(entrada->nodo,nodo)&&entrada->bloque==bloque;
+			return nodoIguales(entrada->nodo,nodo)&&entrada->bloque==bloque&&entrada->masterid==masterid;
 		}
 		entradaA=list_find(tablaEstados,(func)buscarEntrada);
 	}else if(etapa==REDUCLOCAL){

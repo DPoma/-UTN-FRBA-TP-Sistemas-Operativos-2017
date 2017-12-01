@@ -63,7 +63,8 @@ void socketRedireccionar(Socket unSocket) {
 
 void socketSelect(int cantidadSockets, ListaSockets* listaSockets) {
 	int estado = select(cantidadSockets + 1, listaSockets, NULL, NULL, NULL);
-	printf("EL SELECT RETORNO: %d\n", estado);
+	if(estado==-1)
+		puts("error del select");
 	//socketError(estado, "select");
 }
 
@@ -99,7 +100,6 @@ bool socketEsMayor(Socket unSocket, Socket otroSocket) {
 
 void socketError(int estado, String error) {
 	if(estado == ERROR) {
-		puts("La bardeaste");
 		perror(error);
 		exit(EXIT_FAILURE);
 	}
