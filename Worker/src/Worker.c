@@ -34,8 +34,11 @@ void workerAtenderProcesos() {
 
 void workerAceptarMaster() {
 	Socket nuevoSocket = socketAceptar(listenerMaster, ID_MASTER);
-	if(nuevoSocket != ERROR)
+	if(nuevoSocket != ERROR) {
+		int estadoPid;
+		waitpid(WAIT_ANY, &estadoPid, WNOHANG);
 		masterAtenderOperacion(nuevoSocket);
+	}
 }
 
 void masterAtenderOperacion(Socket unSocket) {
