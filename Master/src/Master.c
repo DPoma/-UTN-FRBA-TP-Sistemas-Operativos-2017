@@ -302,7 +302,12 @@ void reduccionLocal(Mensaje* m){
 	imprimirMensaje3(archivoLog,"[CONEXION] Estableciendo conexion con %s (IP: %s | PUERTO: %s)", nodo.nombre ,nodo.ip,nodo.port);
 	Socket sWorker=socketCrearClienteMasterEspecialized(nodo.ip,nodo.port,ID_MASTER, nodo.nombre);
 	if(sWorker==ERROR){
-		mensajeEnviar(socketYama,FRACASO,&nodo,DIRSIZE);
+		free(buffer);
+		char bufferY[DIRSIZE+INTSIZE];
+		int32_t op=REDUCLOCAL;
+		memcpy(bufferY,&op,INTSIZE);
+		memcpy(bufferY+INTSIZE,&nodo,DIRSIZE);
+		mensajeEnviar(socketYama,FRACASO,bufferY,sizeof bufferY);
 		pthread_detach(pthread_self());
 		return;
 	}
@@ -355,7 +360,8 @@ void reduccionGlobal(Mensaje* m){
 	imprimirMensaje3(archivoLog,"[CONEXION] Estableciendo conexion con %s (IP: %s | PUERTO: %s)", nodo.nombre ,nodo.ip,nodo.port);
 	Socket sWorker=socketCrearClienteMasterEspecialized(nodo.ip,nodo.port,ID_MASTER, nodo.nombre);
 	if(sWorker==ERROR){
-		mensajeEnviar(socketYama,FRACASO,NULL,0);
+		int32_t op=REDUCGLOBAL;
+		mensajeEnviar(socketYama,FRACASO,&op,INTSIZE);
 		return;
 	}
 	imprimirMensaje1(archivoLog,"[CONEXION] Conexion establecida con %s", nodo.nombre);
@@ -391,7 +397,8 @@ void almacenado(Mensaje* m){
 	imprimirMensaje3(archivoLog,"[CONEXION] Estableciendo conexion con %s (IP: %s | PUERTO: %s)", nodo.nombre ,nodo.ip,nodo.port);
 	Socket sWorker=socketCrearClienteMasterEspecialized(nodo.ip,nodo.port,ID_MASTER, nodo.nombre);
 	if(sWorker==ERROR){
-		mensajeEnviar(socketYama,FRACASO,NULL,NULO);
+		int32_t op=ALMACENADO;
+		mensajeEnviar(socketYama,FRACASO,&op,INTSIZE);
 		return;
 	}
 	imprimirMensaje1(archivoLog,"[CONEXION] Conexion establecida con %s", nodo.nombre);

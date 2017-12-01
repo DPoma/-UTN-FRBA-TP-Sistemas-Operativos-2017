@@ -18,7 +18,6 @@ int main(void) {
 
 void yamaIniciar() {
 	pantallaLimpiar();
-	estadoYama=ACTIVADO;
 	imprimirMensajeProceso("# PROCESO YAMA");
 	configuracion=malloc(sizeof(Configuracion));
 	configurar();
@@ -95,7 +94,7 @@ void yamaAtender() {
 	servidorControlarMaximoSocket(servidor->fileSystem);
 	servidorControlarMaximoSocket(servidor->listenerMaster);
 
-	while(estadoYama==ACTIVADO){
+	while(true){
 		if(configuracion->reconfigurar)
 			configurar();
 

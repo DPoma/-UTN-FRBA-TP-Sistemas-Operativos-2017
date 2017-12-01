@@ -98,7 +98,6 @@ Lista tablaUsados; //entradas Abortadas, Error, o Terminadas que ya
 
 Configuracion* configuracion; //es un puntero por algun motivo?
 ArchivoLog archivoLog;
-int estadoYama;
 
 int ipToNum(char*);
 
