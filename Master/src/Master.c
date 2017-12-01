@@ -333,7 +333,7 @@ void reduccionLocal(Mensaje* m){
 	metricas.reducLocalSum+=transcurrido(tiempo);
 	metricas.cantRedLoc++;
 	semaforoSignal(metricas.reducLocales);
-	imprimirMensaje1(archivoLog,"[EJECUCION] terminando reduccion local de nodo %s",nodo.nombre);
+	imprimirMensaje1(archivoLog,"[EJECUCION] Reduccion local terminada en %s",nodo.nombre);
 	pthread_detach(pthread_self());
 }
 void reduccionGlobal(Mensaje* m){
@@ -350,7 +350,7 @@ void reduccionGlobal(Mensaje* m){
 	memcpy(buffer+INTSIZE+lenReduccion,&cantDuplas,INTSIZE);//origen
 	memcpy(buffer+INTSIZE*2+lenReduccion,m->datos+DIRSIZE,m->header.tamanio-DIRSIZE);//y destino
 
-	memcpy(buffer+INTSIZE*3+lenReduccion+m->header.tamanio-DIRSIZE,&id,INTSIZE);
+	memcpy(buffer+INTSIZE*2+lenReduccion+m->header.tamanio-DIRSIZE,&id,INTSIZE);
 
 	imprimirMensaje3(archivoLog,"[CONEXION] Estableciendo conexion con %s (IP: %s | PUERTO: %s)", nodo.nombre ,nodo.ip,nodo.port);
 	Socket sWorker=socketCrearClienteMasterEspecialized(nodo.ip,nodo.port,ID_MASTER, nodo.nombre);
@@ -391,7 +391,7 @@ void almacenado(Mensaje* m){
 	imprimirMensaje3(archivoLog,"[CONEXION] Estableciendo conexion con %s (IP: %s | PUERTO: %s)", nodo.nombre ,nodo.ip,nodo.port);
 	Socket sWorker=socketCrearClienteMasterEspecialized(nodo.ip,nodo.port,ID_MASTER, nodo.nombre);
 	if(sWorker==ERROR){
-		mensajeEnviar(socketYama,FRACASO,NULL,0);
+		mensajeEnviar(socketYama,FRACASO,NULL,NULO);
 		return;
 	}
 	imprimirMensaje1(archivoLog,"[CONEXION] Conexion establecida con %s", nodo.nombre);
