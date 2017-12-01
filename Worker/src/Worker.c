@@ -548,23 +548,10 @@ int reduccionGlobalAlgoritmoApareo(ReduccionGlobal* reduccion, Lista listaAparea
 }
 
 Apareo* reduccionGlobalLineaMasCorta(Apareo* unApareo, Apareo* otroApareo) {
-	int longitudLineaMasCorta;
-	if(stringLongitud(unApareo->linea) < stringLongitud(otroApareo->linea))
-		longitudLineaMasCorta = stringLongitud(unApareo->linea);
-	else
-		longitudLineaMasCorta = stringLongitud(otroApareo->linea);
-	int indice;
-	for(indice = 0; indice < longitudLineaMasCorta; indice++)
-		if(unApareo->linea[indice] != otroApareo->linea[indice])
-			break;
-	int acomodarCriterioSort(char c){
-		if(c>='a'&&c<='z')
-			return c+100;
-		if((c>='A'&&c<='Z') || (c>='0'&&c<='9'))
-			return c;
-		return 0;
-	}
-	if(acomodarCriterioSort(unApareo->linea[indice]) < acomodarCriterioSort(otroApareo->linea[indice]))
+	int resultado = strcmp(unApareo->linea, otroApareo->linea);
+	if(resultado == NULO)
+		return unApareo;
+	if(resultado < NULO)
 		return unApareo;
 	else
 		return otroApareo;

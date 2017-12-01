@@ -63,7 +63,8 @@ void socketRedireccionar(Socket unSocket) {
 
 void socketSelect(int cantidadSockets, ListaSockets* listaSockets) {
 	int estado = select(cantidadSockets + 1, listaSockets, NULL, NULL, NULL);
-	socketError(estado, "select");
+	printf("EL SELECT RETORNO: %d\n", estado);
+	//socketError(estado, "select");
 }
 
 int socketRecibir(Socket socketEmisor, Puntero buffer, int tamanioBuffer) {
