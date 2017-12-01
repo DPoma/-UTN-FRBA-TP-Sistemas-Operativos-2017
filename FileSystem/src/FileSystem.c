@@ -357,13 +357,6 @@ BloqueYama yamaConvertirBloque(Bloque* bloque) {
 //--------------------------------------- Funciones de Worker -------------------------------------
 
 
-void workerAvisarAlmacenado(int resultado, Socket unSocket) {
-	if(resultado != ERROR)
-		mensajeEnviar(unSocket, EXITO, NULL, NULO);
-	else
-		mensajeEnviar(unSocket, FRACASO, NULL, NULO);
-}
-
 int workerAlmacenarBloque(Archivo* archivo, Mensaje* mensaje, Entero* numeroBloque, int* resultado, Socket socketWorker) {
 	*resultado = bloqueGuardar(archivo, mensaje->datos+sizeof(Entero), *(Entero*)mensaje->datos, *numeroBloque);
 	if(*resultado == ERROR) {
@@ -395,6 +388,7 @@ int workerAlmacenarArchivo(Archivo* archivo, Socket socketWorker) {
 int workerAlmacenadoFinal(String pathYama, Socket socketWorker) {
 	String rutaDecente = stringTomarDesdePosicion(pathYama, MAX_PREFIJO);
 	if(!rutaValida(rutaDecente)) {
+		mensajeEnviar(socketWorker, FRACASO, NULL, NULO);
 		imprimirError(archivoLog, "[ERROR] La ruta ingresada no es valida");
 		return ERROR;
 	}
@@ -403,11 +397,13 @@ int workerAlmacenadoFinal(String pathYama, Socket socketWorker) {
 	if(directorio == NULL) {
 		memoriaLiberar(rutaDirectorio);
 		memoriaLiberar(rutaDecente);
+		mensajeEnviar(socketWorker, FRACASO, NULL, NULO);
 		imprimirError(archivoLog, "[ERROR] El directorio ingresado no existe");
 		return ERROR;
 	}
 	String nombreArchivo = rutaObtenerUltimoNombre(rutaDecente);
 	if(archivoExiste(directorio->identificador, nombreArchivo)) {
+		mensajeEnviar(socketWorker, FRACASO, NULL, NULO);
 		imprimirError(archivoLog, "[ERROR] Un archivo con ese nombre ya existe en el directorio destino");
 		memoriaLiberar(nombreArchivo);
 		memoriaLiberar(rutaDirectorio);
@@ -415,6 +411,7 @@ int workerAlmacenadoFinal(String pathYama, Socket socketWorker) {
 		return ERROR;
 	}
 	if(directorioExiste(directorio->identificador, nombreArchivo)) {
+		mensajeEnviar(socketWorker, FRACASO, NULL, NULO);
 		imprimirError(archivoLog, "[ERROR] Un directorio con ese nombre ya existe en el directorio destino");
 		memoriaLiberar(nombreArchivo);
 		memoriaLiberar(rutaDirectorio);
@@ -422,6 +419,7 @@ int workerAlmacenadoFinal(String pathYama, Socket socketWorker) {
 		return ERROR;
 	}
 	Archivo* archivo = archivoCrear(nombreArchivo, directorio->identificador, ARCHIVO_TEXTO);
+	mensajeEnviar(socketWorker, OK, NULL, NULO);
 	int estado = workerAlmacenarArchivo(archivo, socketWorker);
 	archivoControlar(archivo, estado, rutaDecente);
 	memoriaLiberar(nombreArchivo);
@@ -447,8 +445,7 @@ void workerAtender(Socket* socketWorker) {
 	Mensaje* mensaje = mensajeRecibir(*socketWorker);
 	String pathYama = string_from_format("%s", mensaje->datos);
 	mensajeDestruir(mensaje);
-	int resultado = workerAlmacenadoFinal(pathYama,*socketWorker);
-	workerAvisarAlmacenado(resultado, *socketWorker);
+	workerAlmacenadoFinal(pathYama,*socketWorker);
 	memoriaLiberar(pathYama);
 	memoriaLiberar(socketWorker);
 }

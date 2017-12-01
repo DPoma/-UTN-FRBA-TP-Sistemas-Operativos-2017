@@ -647,7 +647,8 @@ void almacenadoFinal(Mensaje* mensaje, Socket socketMaster) {
 	imprimirMensaje(archivoLog, "[CONEXION] Proceso Master conectado exitosamente");
 	String pathArchivo = string_from_format("%s/%s", configuracion->rutaTemporales, mensaje->datos);
 	int resultado = almacenadoFinalEjecutar(pathArchivo, mensaje->datos+TEMPSIZE);
-	int idMaster = *(Entero*)mensaje->header.tamanio-sizeof(Entero);
+	int idMaster;
+	memcpy(&idMaster, mensaje->datos+mensaje->header.tamanio-sizeof(Entero), sizeof(Entero));
 	memoriaLiberar(pathArchivo);
 	almacenadoFinalFinalizar(resultado, socketMaster, idMaster);
 }
@@ -657,15 +658,19 @@ int almacenadoFinalEjecutar(String pathArchivo, String pathYama) {
 	if(socketFileSystem == ERROR)
 		return ERROR;
 	int resultado = almacenadoFinalEnviarArchivo(pathArchivo, pathYama, socketFileSystem);
-	imprimirMensaje1(archivoLog,"[ALMACENADO FINAL] Guardando archivo en %s", pathYama);
-	Mensaje* mensaje = mensajeRecibir(socketFileSystem);
-	resultado = mensaje->header.operacion;
-	mensajeDestruir(mensaje);
+	if(resultado != ERROR)
+		imprimirMensaje1(archivoLog,"[ALMACENADO FINAL] Guardando archivo en %s", pathYama);
 	return resultado;
 }
 
 int almacenadoFinalEnviarArchivo(String pathArchivo, String pathYama, Socket socketFileSystem) {
 	mensajeEnviar(socketFileSystem, ALMACENAR_PATH, pathYama, stringLongitud(pathYama)+1);
+	Mensaje* unMensaje = mensajeRecibir(socketFileSystem);
+	if(unMensaje->header.operacion == FRACASO || unMensaje->header.operacion == DESCONEXION) {
+		mensajeDestruir(unMensaje);
+		return ERROR;
+	}
+	mensajeDestruir(unMensaje);
 	File file = fileAbrir(pathArchivo, LECTURA);
 	String buffer = stringCrear(BLOQUE+1);
 	BloqueWorker* bloqueWorker = memoriaAlocar(sizeof(BloqueWorker));
@@ -708,7 +713,8 @@ int almacenadoFinalEnviarArchivo(String pathArchivo, String pathYama, Socket soc
 			estado = ERROR;
 		mensajeDestruir(mensaje);
 	}
-	mensajeEnviar(socketFileSystem, ALMACENADO_FINAL, NULL, NULO);
+	if(estado != ERROR)
+		mensajeEnviar(socketFileSystem, ALMACENADO_FINAL, NULL, NULO);
 	memoriaLiberar(bloqueWorker);
 	memoriaLiberar(buffer);
 	fileCerrar(file);
@@ -727,7 +733,7 @@ Socket almacenadoFinalConectarAFileSystem() {
 
 
 void almacenadoFinalFinalizar(int resultado, Socket unSocket, int idMaster) {
-	if(resultado == EXITO)
+	if(resultado != ERROR)
 		almacenadoFinalExito(unSocket, idMaster);
 	else
 		almacenadoFinalFracaso(unSocket, idMaster);

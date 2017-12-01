@@ -398,9 +398,8 @@ void almacenado(Mensaje* m){
 	int32_t tamanio=INTSIZE+TEMPSIZE+stringLongitud(archivoSalida)+1;
 	void* buffer=malloc(tamanio);
 	memcpy(buffer,m->datos+DIRSIZE,TEMPSIZE);
-	memcpy(buffer+TEMPSIZE,archivoSalida,tamanio-TEMPSIZE-INTSIZE);
-	memcpy(buffer+TEMPSIZE+INTSIZE,&id,INTSIZE);
-
+	memcpy(buffer+TEMPSIZE,archivoSalida,stringLongitud(archivoSalida)+1);
+	memcpy(buffer+TEMPSIZE+stringLongitud(archivoSalida)+1,&id,INTSIZE);
 	mensajeEnviar(sWorker,ALMACENADO,buffer,tamanio);
 	mensajeDestruir(m);free(buffer);
 
