@@ -23,16 +23,21 @@ void yamaIniciar() {
 	configuracion=malloc(sizeof(Configuracion));
 	configurar();
 	archivoLog=archivoLogCrear(configuracion->rutaLog, "YAMA");
-	void sigreconfig(){ //como no maneja variables locales no importa que se vaya de scope
+	void sigreconfig(){
 		configuracion->reconfigurar=true;
 	}
-	signal(SIGUSR1,sigreconfig);
-	void  sigsalir(){
-		puts("");
-		imprimirMensaje(archivoLog, "[EJECUCION] Proceso YAMA finalizado");
-		exit(EXIT_SUCCESS);
-	}
-	signal(SIGINT,sigsalir);
+	struct sigaction sigact;
+	memset(&sigact,0,sizeof(struct sigaction));
+	sigact.sa_handler=&sigreconfig;
+	sigact.sa_flags=SA_RESTART;
+	if(sigaction(SIGUSR1,&sigact,nullptr)<0)
+		puts("GG");
+//	void  sigsalir(){
+//		puts("");
+//		imprimirMensaje(archivoLog, "[EJECUCION] Proceso YAMA finalizado");
+//		exit(EXIT_SUCCESS);
+//	}
+//	signal(SIGINT,sigsalir);
 
 
 	servidor = malloc(sizeof(Servidor));
@@ -371,6 +376,10 @@ void actualizarTablaEstados(Mensaje* mensaje,Socket masterid){
 			return nodoIguales(worker->nodo,*nodo);
 		}
 		Worker* about2die=list_remove_by_condition(workers,(func)buscarWorker);
+		if(!about2die){
+			puts("DUNNO");
+			return;
+		}
 		list_iterate(about2die->cargas,free);
 		free(about2die);
 		return;
