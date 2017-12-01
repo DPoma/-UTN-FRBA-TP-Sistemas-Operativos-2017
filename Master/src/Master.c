@@ -7,7 +7,7 @@
 
 #include "Master.h"
 
-int main(int argc, String* argv) {
+int main(int argc, String* argv){
 	if(argc != 5) {
 		imprimirError(archivoLog, "[ERROR] Faltan o sobran argumentos");
 		abort();
@@ -15,9 +15,8 @@ int main(int argc, String* argv) {
 	masterIniciar(argv);
 	masterAtender();
 	return EXIT_SUCCESS;
-
 }
-void masterIniciar(String* argv) {
+void masterIniciar(String* argv){
 	metricas.procesoC=time(0);
 	metricas.maxParalelo=metricas.paralelo=metricas.fallos=metricas.cantRedLoc=metricas.cantTrans=0;
 	pantallaLimpiar();
@@ -73,7 +72,6 @@ void masterIniciar(String* argv) {
 	imprimirMensaje(archivoLog, "[CONEXION] Conexion establecida con YAMA, enviando solicitud");
 	mensajeEnviar(socketYama,SOLICITUD,argv[3],stringLongitud(argv[3])+1);
 }
-
 void masterAtender(){
 	Mensaje* mensaje=mensajeRecibir(socketYama);
 	if(mensaje->header.operacion==ABORTAR){
@@ -88,8 +86,9 @@ void masterAtender(){
 	bool mismoNodo(Dir a,Dir b){
 		return stringIguales(a.ip,b.ip)&&stringIguales(a.port,b.port);//podría comparar solo ip
 	}
+	id=*(int32_t*)mensaje->datos;
 	Lista listas=list_create();
-	for(i=0;i<mensaje->header.tamanio;i+=DIRSIZE+INTSIZE*2+TEMPSIZE){
+	for(i=INTSIZE;i<mensaje->header.tamanio;i+=DIRSIZE+INTSIZE*2+TEMPSIZE){
 		WorkerTransformacion bloque;
 		memcpy(&bloque.dir,mensaje->datos+i,DIRSIZE);
 		memcpy(&bloque.bloque,mensaje->datos+i+DIRSIZE,INTSIZE);
@@ -224,10 +223,11 @@ void transformaciones(Lista bloques){
 			queue_push(clocks,inicio);
 
 			WorkerTransformacion* wt=list_get(bloques,enviados);
-			char data[INTSIZE*2+TEMPSIZE];
+			char data[INTSIZE*3+TEMPSIZE];
 			memcpy(data,&wt->bloque,INTSIZE);
 			memcpy(data+INTSIZE,&wt->bytes,INTSIZE);
 			memcpy(data+INTSIZE*2,wt->temp,TEMPSIZE);
+			memcpy(data+INTSIZE*2+TEMPSIZE,&id,INTSIZE);
 			mensajeEnviar(socketWorker,TRANSFORMACION,data,sizeof data);
 			imprimirMensaje2(archivoLog,"[TRANSFORMACION] Solicitando bloque N°%d (%s)",(int*)wt->bloque,wt->temp);
 		}
@@ -288,7 +288,7 @@ void reduccionLocal(Mensaje* m){
 	memcpy(&nodo,m->datos,DIRSIZE);
 	imprimirAviso1(archivoLog,"[AVISO] Comenzando reduccion local en %s", nodo.nombre);
 	int32_t cantTemps=(m->header.tamanio-DIRSIZE-TEMPSIZE)/TEMPSIZE;
-	int tamanio=cantTemps*TEMPSIZE+TEMPSIZE+lenReduccion+INTSIZE*2;
+	int tamanio=cantTemps*TEMPSIZE+TEMPSIZE+lenReduccion+INTSIZE*3;
 	void* buffer=malloc(tamanio);
 	memcpy(buffer,&lenReduccion,INTSIZE);//script
 	memcpy(buffer+INTSIZE,scriptReduccion,lenReduccion);
@@ -297,6 +297,7 @@ void reduccionLocal(Mensaje* m){
 	memcpy(buffer+INTSIZE*2+lenReduccion,m->datos+DIRSIZE,cantTemps*TEMPSIZE);
 
 	memcpy(buffer+INTSIZE*2+lenReduccion+cantTemps*TEMPSIZE,m->datos+DIRSIZE+cantTemps*TEMPSIZE,TEMPSIZE);//destino
+	memcpy(buffer+INTSIZE*2+lenReduccion+cantTemps*TEMPSIZE+TEMPSIZE,&id,INTSIZE);
 
 	imprimirMensaje3(archivoLog,"[CONEXION] Estableciendo conexion con %s (IP: %s | PUERTO: %s)", nodo.nombre ,nodo.ip,nodo.port);
 	Socket sWorker=socketCrearClienteMasterEspecialized(nodo.ip,nodo.port,ID_MASTER, nodo.nombre);
@@ -332,7 +333,7 @@ void reduccionLocal(Mensaje* m){
 	metricas.reducLocalSum+=transcurrido(tiempo);
 	metricas.cantRedLoc++;
 	semaforoSignal(metricas.reducLocales);
-	//imprimirMensaje2(archivoLog,"[EJECUCION] terminando reduccion local de nodo %s %s",nodo.ip,nodo.port);
+	imprimirMensaje1(archivoLog,"[EJECUCION] terminando reduccion local de nodo %s",nodo.nombre);
 	pthread_detach(pthread_self());
 }
 void reduccionGlobal(Mensaje* m){
@@ -341,13 +342,15 @@ void reduccionGlobal(Mensaje* m){
 	memcpy(&nodo,m->datos,DIRSIZE);
 	imprimirAviso1(archivoLog,"[AVISO] Comenzando reduccion global en %s", nodo.nombre);
 	int cantDuplas=(m->header.tamanio-DIRSIZE-TEMPSIZE)/(TEMPSIZE+DIRSIZE);
-	int tamanio=(DIRSIZE+TEMPSIZE)*cantDuplas+TEMPSIZE+INTSIZE*2+lenReduccion;
+	int tamanio=(DIRSIZE+TEMPSIZE)*cantDuplas+TEMPSIZE+INTSIZE*3+lenReduccion;
 	void* buffer=malloc(tamanio);
 	memcpy(buffer,&lenReduccion,INTSIZE);//script
 	memcpy(buffer+INTSIZE,scriptReduccion,lenReduccion);
 
 	memcpy(buffer+INTSIZE+lenReduccion,&cantDuplas,INTSIZE);//origen
 	memcpy(buffer+INTSIZE*2+lenReduccion,m->datos+DIRSIZE,m->header.tamanio-DIRSIZE);//y destino
+
+	memcpy(buffer+INTSIZE*3+lenReduccion+m->header.tamanio-DIRSIZE,&id,INTSIZE);
 
 	imprimirMensaje3(archivoLog,"[CONEXION] Estableciendo conexion con %s (IP: %s | PUERTO: %s)", nodo.nombre ,nodo.ip,nodo.port);
 	Socket sWorker=socketCrearClienteMasterEspecialized(nodo.ip,nodo.port,ID_MASTER, nodo.nombre);
@@ -378,9 +381,8 @@ void reduccionGlobal(Mensaje* m){
 	mensajeDestruir(mensaje);
 	socketCerrar(sWorker);
 	metricas.reducGlobal=transcurrido(tiempo);
-	//imprimirMensaje(archivoLog,"[EJECUCION] Reduccion global terminada");
+	imprimirMensaje(archivoLog,"[EJECUCION] Reduccion global terminada");
 }
-
 void almacenado(Mensaje* m){
 	time_t tiempo=time(0);
 	Dir nodo;
@@ -393,10 +395,11 @@ void almacenado(Mensaje* m){
 		return;
 	}
 	imprimirMensaje1(archivoLog,"[CONEXION] Conexion establecida con %s", nodo.nombre);
-	int32_t tamanio=TEMPSIZE+stringLongitud(archivoSalida)+1;
+	int32_t tamanio=INTSIZE+TEMPSIZE+stringLongitud(archivoSalida)+1;
 	void* buffer=malloc(tamanio);
 	memcpy(buffer,m->datos+DIRSIZE,TEMPSIZE);
-	memcpy(buffer+TEMPSIZE,archivoSalida,tamanio-TEMPSIZE);
+	memcpy(buffer+TEMPSIZE,archivoSalida,tamanio-TEMPSIZE-INTSIZE);
+	memcpy(buffer+TEMPSIZE+INTSIZE,&id,INTSIZE);
 
 	mensajeEnviar(sWorker,ALMACENADO,buffer,tamanio);
 	mensajeDestruir(m);free(buffer);
@@ -415,7 +418,7 @@ void almacenado(Mensaje* m){
 	mensajeDestruir(mens);
 	socketCerrar(sWorker);
 	metricas.almacenado=transcurrido(tiempo);
-	//imprimirMensaje(archivoLog,"[EJECUCION] almacenado terminado");
+	imprimirMensaje(archivoLog,"[EJECUCION] almacenado terminado");
 }
 void tareasEnParalelo(int dtp){
 	semaforoWait(metricas.paralelos);

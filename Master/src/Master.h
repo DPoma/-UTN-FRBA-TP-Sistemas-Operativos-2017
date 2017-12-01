@@ -63,6 +63,8 @@ char* scriptReduccion;
 int32_t lenReduccion;
 char* archivoSalida;
 
+int32_t id;
+
 Lista transformandos;
 typedef struct{
 	pthread_t hilo;

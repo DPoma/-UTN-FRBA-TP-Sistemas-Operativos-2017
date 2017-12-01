@@ -337,10 +337,12 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 	}
 
 	int tamanioEslabon=BLOCKSIZE+INTSIZE+TEMPSIZE;//dir,bloque,bytes,temp
-	int32_t tamanioDato=tamanioEslabon*tablaEstadosJob->elements_count;
+	int32_t tamanioDato=tamanioEslabon*tablaEstadosJob->elements_count+INTSIZE;
 	void* dato=stringCrear(tamanioDato);
-	for(i=0;i<tamanioDato;i+=tamanioEslabon){
-		Entrada* entrada=list_get(tablaEstadosJob,i/tamanioEslabon);
+	memcpy(dato,&job,INTSIZE);
+	int j;
+	for(i=INTSIZE,j=0;i<tamanioDato;i+=tamanioEslabon,j++){
+		Entrada* entrada=list_get(tablaEstadosJob,j);
 		memcpy(dato+i,&entrada->nodo,DIRSIZE);
 		memcpy(dato+i+DIRSIZE,&entrada->bloque,INTSIZE);
 		memcpy(dato+i+DIRSIZE+INTSIZE,&entrada->bytes,INTSIZE);
