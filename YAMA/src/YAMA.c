@@ -415,8 +415,8 @@ void actualizarTablaEstados(Mensaje* mensaje,Socket masterid){
 		entradaA=list_find(tablaEstados,(func)buscarEntrada);
 	}
 	if(!entradaA){
-		puts("UR DONE");
-		abort();
+		imprimirMensaje(archivoLog,"[]ignorando actualizacion de job cancelado");
+		return;
 	}
 	actualizarEntrada(entradaA,actualizando,mensaje);
 }
