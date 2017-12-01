@@ -364,10 +364,14 @@ void workerAvisarAlmacenado(int resultado, Socket unSocket) {
 		mensajeEnviar(unSocket, FRACASO, NULL, NULO);
 }
 
-int workerAlmacenarBloque(Archivo* archivo, Mensaje* mensaje, Entero* numeroBloque, int* resultado) {
+int workerAlmacenarBloque(Archivo* archivo, Mensaje* mensaje, Entero* numeroBloque, int* resultado, Socket socketWorker) {
 	*resultado = bloqueGuardar(archivo, mensaje->datos+sizeof(Entero), *(Entero*)mensaje->datos, *numeroBloque);
-	if(*resultado == ERROR)
+	if(*resultado == ERROR) {
+		mensajeEnviar(socketWorker, ERROR, NULL, NULO);
 		return DESACTIVADO;
+	}
+	else
+		mensajeEnviar(socketWorker, OK, NULL, NULO);
 	*numeroBloque = *numeroBloque + 1;
 	return ACTIVADO;
 }
@@ -380,7 +384,7 @@ int workerAlmacenarArchivo(Archivo* archivo, Socket socketWorker) {
 		Mensaje* mensaje = mensajeRecibir(socketWorker);
 		switch(mensaje->header.operacion) {
 			case DESCONEXION: estado = DESACTIVADO; socketCerrar(socketWorker); resultado = ERROR; break;
-			case ALMACENAR_BLOQUE: estado = workerAlmacenarBloque(archivo, mensaje, &numeroBloque, &resultado); break;
+			case ALMACENAR_BLOQUE: estado = workerAlmacenarBloque(archivo, mensaje, &numeroBloque, &resultado, socketWorker); break;
 			case ALMACENADO_FINAL: estado = DESACTIVADO;
 		}
 		mensajeDestruir(mensaje);

@@ -274,7 +274,7 @@ void yamaEnviarBloques(Puntero path);
 
 void workerListener();
 int workerAlmacenarArchivo(Archivo* archivo, Socket socketWorker);
-int workerAlmacenarBloque(Archivo* archivo, Mensaje* mensaje, Entero* numeroBloque, int* resultado);
+int workerAlmacenarBloque(Archivo* archivo, Mensaje* mensaje, Entero* numeroBloque, int* resultado, Socket socketWorker);
 void workerAvisarAlmacenado(int resultado, Socket unSocket);
 void workerAtender(Socket* socketWorker);
 

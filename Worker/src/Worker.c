@@ -650,6 +650,8 @@ void almacenadoFinal(Mensaje* mensaje, Socket socketMaster) {
 
 int almacenadoFinalEjecutar(String pathArchivo, String pathYama) {
 	Socket socketFileSystem =  almacenadoFinalConectarAFileSystem();
+	if(socketFileSystem == ERROR)
+		return ERROR;
 	int resultado = almacenadoFinalEnviarArchivo(pathArchivo, pathYama, socketFileSystem);
 	imprimirMensaje1(archivoLog,"[ALMACENADO FINAL] Guardando archivo en %s", pathYama);
 	Mensaje* mensaje = mensajeRecibir(socketFileSystem);
@@ -677,6 +679,13 @@ int almacenadoFinalEnviarArchivo(String pathArchivo, String pathYama, Socket soc
 		else {
 			bloqueWorker->bytesUtilizados = BLOQUE-bytesDisponibles;
 			mensajeEnviar(socketFileSystem, ALMACENAR_BLOQUE, bloqueWorker, sizeof(BloqueWorker));
+			Mensaje* mensaje = mensajeRecibir(socketFileSystem);
+			if(mensaje->header.operacion == ERROR || mensaje->header.operacion == DESCONEXION) {
+				estado = ERROR;
+				mensajeDestruir(mensaje);
+				break;
+			}
+			mensajeDestruir(mensaje);
 			memoriaLiberar(bloqueWorker);
 			bloqueWorker = memoriaAlocar(sizeof(BloqueWorker));
 			memset(bloqueWorker->datos, '\0', BLOQUE);
@@ -690,6 +699,10 @@ int almacenadoFinalEnviarArchivo(String pathArchivo, String pathYama, Socket soc
 	if(estado != ERROR && !stringEstaVacio(buffer)) {
 		bloqueWorker->bytesUtilizados = BLOQUE-bytesDisponibles;
 		mensajeEnviar(socketFileSystem, ALMACENAR_BLOQUE, bloqueWorker, sizeof(BloqueWorker));
+		Mensaje* mensaje = mensajeRecibir(socketFileSystem);
+		if(mensaje->header.operacion == ERROR || mensaje->header.operacion == DESCONEXION)
+			estado = ERROR;
+		mensajeDestruir(mensaje);
 	}
 	mensajeEnviar(socketFileSystem, ALMACENADO_FINAL, NULL, NULO);
 	memoriaLiberar(bloqueWorker);
@@ -701,7 +714,10 @@ int almacenadoFinalEnviarArchivo(String pathArchivo, String pathYama, Socket soc
 Socket almacenadoFinalConectarAFileSystem() {
 	imprimirMensaje2(archivoLog,"[ALMACENADO FINAL] Conectando a File System (IP:%s | Puerto:%s)", configuracion->ipFileSystem, configuracion->puertoFileSystemWorker);
 	Socket socketFileSystem =socketCrearCliente(configuracion->ipFileSystem, configuracion->puertoFileSystemWorker, ID_WORKER);
-	imprimirMensaje(archivoLog,"[ALMACENADO FINAL] Conexion existosa con File System");
+	if(socketFileSystem != ERROR)
+		imprimirMensaje(archivoLog,"[ALMACENADO FINAL] Conexion existosa con File System");
+	else
+		imprimirError(archivoLog, "[ERROR] No se pudo realizar la conexion con File System");
 	return socketFileSystem;
 }
 
