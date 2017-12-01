@@ -171,7 +171,7 @@ void masterAtender(){
 			goto cierre;
 		case ABORTAR:
 			imprimirAviso(archivoLog,"[AVISO] Abortando proceso");
-			abort();
+			exit(EXIT_FAILURE);
 		}
 	}
 	cierre:
