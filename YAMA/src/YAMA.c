@@ -16,21 +16,23 @@ int main(void) {
 	return EXIT_FAILURE;//nunca se va a leer
 }
 
+static void sigreconfig(int signum){
+	configuracion->reconfigurar=true;
+}
+
 void yamaIniciar() {
 	pantallaLimpiar();
 	imprimirMensajeProceso("# PROCESO YAMA");
 	configuracion=malloc(sizeof(Configuracion));
 	configurar();
 	archivoLog=archivoLogCrear(configuracion->rutaLog, "YAMA");
-	void sigreconfig(){
-		configuracion->reconfigurar=true;
-	}
-	struct sigaction sigact;
-	memset(&sigact,0,sizeof(struct sigaction));
-	sigact.sa_handler=&sigreconfig;
-	sigact.sa_flags=SA_RESTART;
-	if(sigaction(SIGUSR1,&sigact,nullptr)<0)
-		puts("GG");
+
+	struct sigaction sa;
+	sigemptyset(&sa.sa_mask);
+	sa.sa_handler=&sigreconfig;
+	sa.sa_flags=SA_RESTART;
+	if(sigaction(SIGUSR1,&sa,nullptr)<0)
+		puts("ERROR");
 //	void  sigsalir(){
 //		puts("");
 //		imprimirMensaje(archivoLog, "[EJECUCION] Proceso YAMA finalizado");

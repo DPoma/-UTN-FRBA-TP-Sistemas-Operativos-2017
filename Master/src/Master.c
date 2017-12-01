@@ -156,11 +156,11 @@ void masterAtender(){
 			pthread_t hilo;
 			pthread_create(&hilo,NULL,(func)&reduccionLocal,m);
 		}break;
-		case REDUCGLOBAL://{
-//			void list_obliterate(t_list* list){
-//				list_destroy_and_destroy_elements(list,free);
-//			}
-//			list_destroy_and_destroy_elements(listas,(func)list_obliterate);}
+		case REDUCGLOBAL:{
+			void list_obliterate(t_list* list){
+				list_destroy_and_destroy_elements(list,free);
+			}
+			list_destroy_and_destroy_elements(listas,(func)list_obliterate);}
 			reduccionGlobal(m);
 			break;
 		case ALMACENADO:
@@ -268,7 +268,9 @@ void transformaciones(Lista bloques){
 			bool aux(HiloTransformacion* hilo){
 				return nodoIguales(hilo->dir,self->dir);
 			}
-			list_remove_by_condition(transformandos,(func)aux);
+			imprimirAviso1(archivoLog, "[AVISO] Transformaciones terminadas en %s", self->dir.nombre);
+			queue_destroy(self->bloquesExtra);
+			free(list_remove_by_condition(transformandos,(func)aux));
 			continuar=false;
 		}
 		semaforoSignal(listaTransformandos);
@@ -277,8 +279,6 @@ void transformaciones(Lista bloques){
 	socketCerrar(socketWorker);
 	queue_destroy(clocks);
 	tareasEnParalelo(-1);
-	imprimirAviso1(archivoLog, "[AVISO] Transformaciones terminadas en %s", self->dir.nombre);
-	free(self);
 	pthread_detach(pthread_self());
 }
 void reduccionLocal(Mensaje* m){

@@ -98,6 +98,7 @@ bool socketEsMayor(Socket unSocket, Socket otroSocket) {
 
 void socketError(int estado, String error) {
 	if(estado == ERROR) {
+		puts("La bardeaste");
 		perror(error);
 		exit(EXIT_FAILURE);
 	}
