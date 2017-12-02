@@ -534,7 +534,7 @@ int reduccionGlobalAlgoritmoApareo(ReduccionGlobal* reduccion, Lista listaAparea
 						break;
 					apareo = listaPrimerElemento(listaApareados);
 				}
-				reduccionGlobalCompararLineas(listaApareados, apareo);
+				//reduccionGlobalCompararLineas(listaApareados, apareo);
 				resultado = reduccionGlobalEscribirLinea(apareo, listaApareados, archivoResultado);
 				if(resultado == ERROR)
 					break;

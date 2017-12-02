@@ -67,9 +67,9 @@ void configurar(){
 		imprimirMensaje(archivoLog,"[ERRIR] no se reconoce el algoritmo");
 		exit(EXIT_FAILURE);
 	}
-	printf("[CONFIGURACION] retardo: %d\n",configuracion->retardoPlanificacion);
-	printf("[CONFIGURACION] algoritmo: %s\n",configuracion->algoritmoBalanceo);
-	printf("[CONFIGURACION] disponibilidad base: %d\n",configuracion->disponibilidadBase);
+	printf("[CONFIGURACION] Algoritmo de planificacion: %s\n",configuracion->algoritmoBalanceo);
+	printf("[CONFIGURACION] Retardo de planificacion: %d\n",configuracion->retardoPlanificacion);
+	printf("[CONFIGURACION] Disponibilidad base: %d\n",configuracion->disponibilidadBase);
 	configuracion->reconfigurar=false;
 	archivoConfigDestruir(archivoConfig);
 }
@@ -379,8 +379,8 @@ void actualizarTablaEstados(Mensaje* mensaje,Socket masterid){
 			}
 			actualizarEntrada(entradaA,FRACASO,nullptr);
 		}
-		while((entradaA=list_find(tablaUsados,(func)buscarEntrada)))
-			actualizarEntrada(entradaA,FRACASO,nullptr);
+		//while((entradaA=list_find(tablaUsados,(func)buscarEntrada)))
+			//actualizarEntrada(entradaA,FRACASO,nullptr);
 
 		log_info(archivoLog,"eliminando nodo %s",nodo->nombre);
 		bool buscarWorker(Worker* worker){
