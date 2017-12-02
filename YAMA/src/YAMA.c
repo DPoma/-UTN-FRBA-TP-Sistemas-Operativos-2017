@@ -109,7 +109,6 @@ void yamaAtender() {
 		for(socketI = 0; socketI <= maximoSocket; socketI++){
 			if (listaSocketsContiene(socketI, &servidor->listaSelect)){ //se recibio algo
 				//podría disparar el thread aca
-				retardo();
 				if(socketI==servidor->listenerMaster){
 					Socket nuevoSocket;
 					nuevoSocket = socketAceptar(socketI, ID_MASTER);
@@ -231,6 +230,9 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 	}
 	log_info(archivoLog,"[REGISTRO] %d bloques recibidos",bloques->elements_count);
 	log_info(archivoLog,"[REGISTRO] %d bytes recibidos",byteses->elements_count);
+
+	usleep(configuracion->retardoPlanificacion);
+
 	Lista tablaEstadosJob=list_create();
 	job++;//mutex (supongo que las variables globales se comparten entre hilos)
 	for(i=0;i<bloques->elements_count/2;i++){
@@ -281,9 +283,6 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 		}
 		list_iterate(workers,(func)setearClock);
 	}
-	Worker* obtenerWorker(int* pos){
-		return list_get(workers,*pos);
-	}
 	for(i=0;i<bloques->elements_count;i+=2){
 		Worker* workerClock;
 		Bloque* bloque0 = list_get(bloques,i);
@@ -303,9 +302,10 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 			entrada->estado=ENPROCESO;
 		}
 		compararBloque:
-		workerClock=obtenerWorker(&clock);
+		workerClock=list_get(workers,clock);
 		if(nodoIguales(workerClock->nodo,bloque0->nodo)||nodoIguales(workerClock->nodo,bloque1->nodo)){
 			if(workerClock->disponibilidad>0){
+				clock=(clock+1)%workers->elements_count;
 				if(nodoIguales(workerClock->nodo,bloque0->nodo)){
 					asignarBloque(workerClock,bloque0,bloque1);
 					continue;
@@ -329,7 +329,7 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 				}
 				list_iterate(workers,(func)sumarDisponibilidadBase);
 			}
-			Worker* workerAdv=obtenerWorker(&clockAdv);
+			Worker* workerAdv=list_get(workers,clockAdv);
 			if(workerAdv->disponibilidad>0){
 				if(nodoIguales(workerAdv->nodo,bloque0->nodo)){
 					asignarBloque(workerAdv,bloque0,bloque1);
@@ -642,7 +642,7 @@ void dibujarTablaEstados(){
 		printf(AMARILLO"%s c: %d     "BLANCO,worker->nodo.nombre,worker->carga);
 	}
 	list_iterate(tablaUsados,(func)dibujarEntrada);
-	puts("-.-|^|-.-");
+	puts(ROJO"-.-|^|-.-"BLANCO);
 	list_iterate(tablaEstados,(func)dibujarEntrada);
 	list_iterate(workers,(func)dibujarCarga);
 	puts("");
@@ -711,7 +711,6 @@ void liberarCargas(int jobb){
 	}
 	list_iterate(workers,(func)levantarCarga);
 }
-void retardo(){usleep(configuracion->retardoPlanificacion);}
 
 //version mas eficiente, negada y olvidada
 //int64_t darPathTemporal(int64_t ret){ //debería ser != 0

@@ -550,7 +550,7 @@ Apareo* reduccionGlobalLineaMasCorta(Apareo* unApareo, Apareo* otroApareo) {
 	static int contador=0;
 	contador++;
 	if(contador==1000){
-		printf("[APAREO] Procesando...\n");
+		printf("[APAREO] Procesando, linea %d\n",contador);
 		contador=0;
 	}
 	if(resultado == NULO)
