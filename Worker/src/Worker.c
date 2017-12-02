@@ -547,10 +547,11 @@ int reduccionGlobalAlgoritmoApareo(ReduccionGlobal* reduccion, Lista listaAparea
 
 Apareo* reduccionGlobalLineaMasCorta(Apareo* unApareo, Apareo* otroApareo) {
 	int resultado = strcmp(unApareo->linea, otroApareo->linea);
-	static int contador=0;
+	static int contador;
+	static int contador2;
 	contador++;
 	if(contador==1000){
-		printf("[APAREO] Procesando, linea %d\n",contador);
+		printf("[APAREO] Procesando, linea %d\n",contador2+=contador);
 		contador=0;
 	}
 	if(resultado == NULO)

@@ -117,7 +117,7 @@ void socketBindear(Conexion* conexion, Socket unSocket);
 void socketEscuchar(Socket unSocket, int ClientesEnEspera);
 int socketAceptar(Socket unSocket, int idEsperada);
 void socketRedireccionar(Socket unSocket);
-void socketSelect(Socket cantidadSockets, ListaSockets* listaSockets);
+void socketSelect(Socket cantidadSockets, ListaSockets* listaSockets,int);
 int socketRecibir(Socket socketEmisor, Puntero buffer, int tamanioBuffer);
 int socketEnviar(Socket socketReceptor, Puntero mensaje, int tamanioMensaje);
 void socketCerrar(Socket unSocket);

@@ -151,6 +151,7 @@ void masterAtender(){
 					crearHiloTransformacion(bloque);
 				}
 				semaforoSignal(listaTransformandos);
+				mensajeDestruir(m);
 			}
 			break;
 		case REDUCLOCAL:{
@@ -209,7 +210,10 @@ void transformaciones(Lista bloques){
 	imprimirMensaje3(archivoLog,"[CONEXION] Estableciendo conexion con %s (IP: %s | PUERTO: %s)", self->dir.nombre ,self->dir.ip,self->dir.port);
 	Socket socketWorker=socketCrearClienteMasterEspecialized(self->dir.ip,self->dir.port,ID_MASTER, self->dir.nombre);
 	if(socketWorker==ERROR){
-		mensajeEnviar(socketYama,DESCONEXION_NODO,&self->dir,DIRSIZE);
+		char buffer[DIRSIZE+INTSIZE];
+		memcpy(buffer,&self->dir,DIRSIZE);
+		memcpy(buffer+DIRSIZE,&id,INTSIZE);
+		mensajeEnviar(socketYama,DESCONEXION_NODO,buffer,sizeof buffer);
 		pthread_detach(pthread_self());
 		return;
 	}
@@ -239,7 +243,10 @@ void transformaciones(Lista bloques){
 			Mensaje* mensaje = mensajeRecibir(socketWorker);
 			if(mensaje->header.operacion==DESCONEXION){
 				imprimirError1(archivoLog,"[ERROR] %s desconectado durante transformacion",self->dir.nombre);
-				mensajeEnviar(socketYama,DESCONEXION_NODO,&self->dir,DIRSIZE);
+				char buffer[DIRSIZE+INTSIZE];
+				memcpy(buffer,&self->dir,DIRSIZE);
+				memcpy(buffer+DIRSIZE,&id,INTSIZE);
+				mensajeEnviar(socketYama,DESCONEXION_NODO,buffer,sizeof buffer);
 				pthread_detach(pthread_self());
 				return;
 			}
@@ -307,7 +314,10 @@ void reduccionLocal(Mensaje* m){
 	Socket sWorker=socketCrearClienteMasterEspecialized(nodo.ip,nodo.port,ID_MASTER, nodo.nombre);
 	if(sWorker==ERROR){
 		free(buffer);
-		mensajeEnviar(socketYama,DESCONEXION_NODO,&nodo,DIRSIZE);
+		char bufferY[DIRSIZE+INTSIZE];
+		memcpy(bufferY,&nodo,DIRSIZE);
+		memcpy(bufferY+DIRSIZE,&id,INTSIZE);
+		mensajeEnviar(socketYama,DESCONEXION_NODO,bufferY,sizeof bufferY);
 		pthread_detach(pthread_self());
 		return;
 	}

@@ -33,12 +33,12 @@ void yamaIniciar() {
 	sa.sa_flags=SA_RESTART;
 	if(sigaction(SIGUSR1,&sa,nullptr)<0)
 		puts("ERROR");
-//	void  sigsalir(){
-//		puts("");
-//		imprimirMensaje(archivoLog, "[EJECUCION] Proceso YAMA finalizado");
-//		exit(EXIT_SUCCESS);
-//	}
-//	signal(SIGINT,sigsalir);
+	void  sigsalir(){
+		puts("");
+		imprimirMensaje(archivoLog, "[EJECUCION] Proceso YAMA finalizado");
+		exit(EXIT_SUCCESS);
+	}
+	signal(SIGINT,sigsalir);
 
 
 	servidor = malloc(sizeof(Servidor));
@@ -103,7 +103,7 @@ void yamaAtender() {
 		dibujarTablaEstados();
 
 		servidor->listaSelect = servidor->listaMaster;
-		socketSelect(servidor->maximoSocket, &servidor->listaSelect);
+		socketSelect(servidor->maximoSocket, &servidor->listaSelect,0);
 		Socket socketI;
 		Socket maximoSocket = servidor->maximoSocket;
 		for(socketI = 0; socketI <= maximoSocket; socketI++){
@@ -363,11 +363,13 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 
 void actualizarTablaEstados(Mensaje* mensaje,Socket masterid){
 	Entrada* entradaA;
+	log_info(archivoLog,"OPERACION: %d",mensaje->header.operacion);
 	if(mensaje->header.operacion==DESCONEXION_NODO){
 		Dir* nodo=(Dir*)mensaje->datos;
-		log_info(archivoLog,"[CONEXION] Nodo %s desconectado",nodo->nombre);
+		int jobA=*((int32_t*)mensaje->datos+DIRSIZE);
+		log_info(archivoLog,"[CONEXION] Nodo %s desconectado %d",nodo->nombre,jobA);
 		bool buscarEntrada(Entrada* entrada){
-			return nodoIguales(entrada->nodo,*nodo)&&entrada->masterid==masterid;
+			return nodoIguales(entrada->nodo,*nodo)&&entrada->job==jobA;
 		}
 		while((entradaA=list_find(tablaEstados,(func)buscarEntrada))){
 			if(entradaA->etapa==REDUCLOCAL){
@@ -380,12 +382,16 @@ void actualizarTablaEstados(Mensaje* mensaje,Socket masterid){
 			}
 			actualizarEntrada(entradaA,FRACASO,nullptr);
 		}
-		puts(nodo->nombre);
+		while((entradaA=list_find(tablaUsados,(func)buscarEntrada)))
+			actualizarEntrada(entradaA,FRACASO,nullptr);
+
+		log_info(archivoLog,"eliminando nodo %s",nodo->nombre);
 		bool buscarWorker(Worker* worker){
 			return nodoIguales(worker->nodo,*nodo);
 		}
 		Worker* about2die=list_remove_by_condition(workers,(func)buscarWorker);
-		if(!about2die){//no debería pasar nunca pero paso
+		if(!about2die){
+			puts(ROJO"!!!!SE PUDRIO TODO");
 			return;
 		}
 		list_iterate(about2die->cargas,free);
@@ -459,6 +465,29 @@ void actualizarEntrada(Entrada* entradaA,int actualizando, Mensaje* mensaje){
 			liberarCargas(entradaA->job);
 		}
 		if(entradaA->etapa==TRANSFORMACION&&actualizando==FRACASO){
+			bool nodoMuerto=true;
+			void verificarNodoUtil(Entrada* entrada){
+				if(mismoJob(entrada)&&(entrada->estado==ENPROCESO||entrada->estado==EXITO)){
+					nodoMuerto=false;
+				}
+			}
+			list_iterate(tablaEstados,(func)verificarNodoUtil);
+			if(nodoMuerto){
+				bool buscarWorker(Worker* worker){
+					return nodoIguales(worker->nodo,entradaA->nodo);
+				}
+				log_info(archivoLog,"eliminando nodo %s",entradaA->nodo);
+				Worker* about2die=list_remove_by_condition(workers,(func)buscarWorker);
+				if(!about2die){
+					puts(ROJO"!!!!SE PUDRIO TODO");
+					return;
+				}
+				list_iterate(about2die->cargas,free);
+				free(about2die);
+			}
+
+
+
 			if(nodoIguales(entradaA->nodo,entradaA->nodoAlt)){
 				log_info(archivoLog,"[] no hay mas copias para salvar el error");
 				abortarJob();

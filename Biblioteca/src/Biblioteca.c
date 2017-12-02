@@ -61,11 +61,18 @@ void socketRedireccionar(Socket unSocket) {
 	socketError(estado, "setsockopt");
 }
 
-void socketSelect(int cantidadSockets, ListaSockets* listaSockets) {
+void socketSelect(int cantidadSockets, ListaSockets* listaSockets, int retry) {
 	int estado = select(cantidadSockets + 1, listaSockets, NULL, NULL, NULL);
-	if(estado==-1)
-		puts("error del select");
-	//socketError(estado, "select");
+	if(estado==-1){
+		if(retry>10){
+			printf("select no pudo regenerarse");
+			abort();
+		}
+		if(errno==EINTR)
+			socketSelect(cantidadSockets,listaSockets,retry+1);
+		else
+			socketError(estado, "select");
+	}
 }
 
 int socketRecibir(Socket socketEmisor, Puntero buffer, int tamanioBuffer) {
