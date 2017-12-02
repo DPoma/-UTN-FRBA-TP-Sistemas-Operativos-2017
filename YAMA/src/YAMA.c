@@ -148,8 +148,8 @@ void yamaAtender() {
 						mensajeEnviar(servidor->fileSystem,ENVIAR_BLOQUES,pasoFs,mensaje->header.tamanio+INTSIZE);
 						log_info(archivoLog, "[ENVIO] path %s de master #%d enviado al fileSystem",mensaje->datos,socketI);
 						free(pasoFs);
-					}else if(mensaje->header.operacion <= DESCONEXION){
-						log_info(archivoLog,"[RECEPCION] desconexion de master");
+					}else if(mensaje->header.operacion==DESCONEXION){
+						log_info(archivoLog, "[CONEXION] Proceso Master %d se ha desconectado",socketI);
 						int jobDesconexion=-1;
 						bool entradasDesconectadas(Entrada* entrada){
 							if(entrada->masterid==socketI){
@@ -174,7 +174,6 @@ void yamaAtender() {
 						socketCerrar(socketI);
 						if(socketI==servidor->maximoSocket)
 							servidor->maximoSocket--; //no debería romper nada
-						log_info(archivoLog, "[CONEXION] Proceso Master %d se ha desconectado",socketI);
 					}else{
 						actualizarTablaEstados(mensaje,socketI);
 					}
@@ -366,19 +365,27 @@ void actualizarTablaEstados(Mensaje* mensaje,Socket masterid){
 	Entrada* entradaA;
 	if(mensaje->header.operacion==DESCONEXION_NODO){
 		Dir* nodo=(Dir*)mensaje->datos;
-		log_info(archivoLog,"[CONEXION] Nodo %s %s desconectado",nodo->ip,nodo->port);
+		log_info(archivoLog,"[CONEXION] Nodo %s desconectado",nodo->nombre);
 		bool buscarEntrada(Entrada* entrada){
 			return nodoIguales(entrada->nodo,*nodo)&&entrada->masterid==masterid;
 		}
 		while((entradaA=list_find(tablaEstados,(func)buscarEntrada))){
+			if(entradaA->etapa==REDUCLOCAL){
+				log_info(archivoLog,"[TANTEO] reduccion local de tanteo hizo efecto");
+				bool limpiar(Entrada* entrada){
+					return buscarEntrada(entrada)&&entrada->etapa==REDUCLOCAL;
+				}
+				free(list_remove_by_condition(tablaEstados,(func)limpiar));
+				continue;
+			}
 			actualizarEntrada(entradaA,FRACASO,nullptr);
 		}
+		puts(nodo->nombre);
 		bool buscarWorker(Worker* worker){
 			return nodoIguales(worker->nodo,*nodo);
 		}
 		Worker* about2die=list_remove_by_condition(workers,(func)buscarWorker);
-		if(!about2die){
-			puts("DUNNO");
+		if(!about2die){//no debería pasar nunca pero paso
 			return;
 		}
 		list_iterate(about2die->cargas,free);
