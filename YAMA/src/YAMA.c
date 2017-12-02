@@ -16,10 +16,6 @@ int main(void) {
 	return EXIT_FAILURE;//nunca se va a leer
 }
 
-static void sigreconfig(int signum){
-	configuracion->reconfigurar=true;
-}
-
 void yamaIniciar() {
 	pantallaLimpiar();
 	imprimirMensajeProceso("# PROCESO YAMA");
@@ -27,12 +23,10 @@ void yamaIniciar() {
 	configurar();
 	archivoLog=archivoLogCrear(configuracion->rutaLog, "YAMA");
 
-	struct sigaction sa;
-	sigemptyset(&sa.sa_mask);
-	sa.sa_handler=&sigreconfig;
-	sa.sa_flags=SA_RESTART;
-	if(sigaction(SIGUSR1,&sa,nullptr)<0)
-		puts("ERROR");
+	void sigreconfig(){
+		configuracion->reconfigurar=true;
+	}
+	signal(SIGUSR1,sigreconfig);
 	void  sigsalir(){
 		puts("");
 		imprimirMensaje(archivoLog, "[EJECUCION] Proceso YAMA finalizado");
@@ -73,6 +67,9 @@ void configurar(){
 		imprimirMensaje(archivoLog,"[ERRIR] no se reconoce el algoritmo");
 		exit(EXIT_FAILURE);
 	}
+	printf("[CONFIGURACION] retardo: %d\n",configuracion->retardoPlanificacion);
+	printf("[CONFIGURACION] algoritmo: %s\n",configuracion->algoritmoBalanceo);
+	printf("[CONFIGURACION] disponibilidad base: %d\n",configuracion->disponibilidadBase);
 	configuracion->reconfigurar=false;
 	archivoConfigDestruir(archivoConfig);
 }
@@ -669,7 +666,7 @@ void dibujarTablaEstados(){
 		printf(AMARILLO"%s c: %d     "BLANCO,worker->nodo.nombre,worker->carga);
 	}
 	list_iterate(tablaUsados,(func)dibujarEntrada);
-	puts(ROJO"-.-|^|-.-"BLANCO);
+	//puts(ROJO"-.-|^|-.-"BLANCO);
 	list_iterate(tablaEstados,(func)dibujarEntrada);
 	list_iterate(workers,(func)dibujarCarga);
 	puts("");
