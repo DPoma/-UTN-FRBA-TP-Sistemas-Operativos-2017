@@ -23,6 +23,7 @@ void workerIniciar() {
 	configuracionIniciar();
 	mkdir(configuracion->rutaTemporales, 0777);
 	pidPadre = getpid();
+	zombieDetector();
 	estadoWorker = ACTIVADO;
 }
 
@@ -34,11 +35,8 @@ void workerAtenderProcesos() {
 
 void workerAceptarMaster() {
 	Socket nuevoSocket = socketAceptar(listenerMaster, ID_MASTER);
-	if(nuevoSocket != ERROR) {
-		int estadoPid;
-		waitpid(WAIT_ANY, &estadoPid, WNOHANG);
+	if(nuevoSocket != ERROR)
 		masterAtenderOperacion(nuevoSocket);
-	}
 }
 
 void masterAtenderOperacion(Socket unSocket) {
@@ -551,8 +549,8 @@ Apareo* reduccionGlobalLineaMasCorta(Apareo* unApareo, Apareo* otroApareo) {
 	int resultado = strcmp(unApareo->linea, otroApareo->linea);
 	static int contador=0;
 	contador++;
-	if(contador==666){
-		printf("[APAREO] Procesando...");
+	if(contador==1000){
+		printf("[APAREO] Procesando...\n");
 		contador=0;
 	}
 	if(resultado == NULO)
@@ -812,4 +810,23 @@ Bloque getBloque(Entero numeroBloque) {
 	Bloque bloque = bloqueBuscar(numeroBloque);
 	imprimirMensaje2(archivoLog, "[DATABIN] Lectura en el bloque N°%i de %s", (int*)numeroBloque, configuracion->nombreNodo);
 	return bloque;
+}
+
+//--------------------------------------- Funciones Para Zombies -------------------------------------
+
+void zombieLimpiar(int sig) {
+  int saved_errno = errno;
+  while(waitpid((pid_t)(WAIT_ANY), NULO, WNOHANG) > NULO);
+  errno = saved_errno;
+}
+
+void zombieDetector() {
+	struct sigaction sa;
+	sa.sa_handler = &zombieLimpiar;
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags = SA_RESTART | SA_NOCLDSTOP;
+	if (sigaction(SIGCHLD, &sa, NULO) == ERROR) {
+	  perror(NULO);
+	  exit(EXIT_FAILURE);
+	}
 }

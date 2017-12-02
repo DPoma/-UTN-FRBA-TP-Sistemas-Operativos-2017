@@ -196,3 +196,5 @@ Puntero dataBinMapear();
 void dataBinConfigurar();
 Bloque bloqueBuscar(Entero numeroBloque);
 Bloque getBloque(Entero numeroBloque);
+void zombieDetector();
+void zombieLimpiar();
