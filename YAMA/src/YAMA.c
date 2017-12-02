@@ -366,7 +366,7 @@ void actualizarTablaEstados(Mensaje* mensaje,Socket masterid){
 		int jobA=*((int32_t*)mensaje->datos+DIRSIZE);
 		log_info(archivoLog,"[CONEXION] Nodo %s desconectado %d",nodo->nombre,jobA);
 		bool buscarEntrada(Entrada* entrada){
-			return nodoIguales(entrada->nodo,*nodo)&&entrada->job==jobA&&entrada->estado!=FRACASO;
+			return nodoIguales(entrada->nodo,*nodo)&&entrada->job==jobA;
 		}
 		while((entradaA=list_find(tablaEstados,(func)buscarEntrada))){
 			if(entradaA->etapa==REDUCLOCAL){
@@ -379,8 +379,8 @@ void actualizarTablaEstados(Mensaje* mensaje,Socket masterid){
 			}
 			actualizarEntrada(entradaA,FRACASO,nullptr);
 		}
-		//while((entradaA=list_find(tablaUsados,(func)buscarEntrada)))
-			//actualizarEntrada(entradaA,FRACASO,nullptr);
+		while((entradaA=list_find(tablaUsados,(func)buscarEntrada)))
+			actualizarEntrada(entradaA,FRACASO,nullptr);
 
 		log_info(archivoLog,"eliminando nodo %s",nodo->nombre);
 		bool buscarWorker(Worker* worker){
