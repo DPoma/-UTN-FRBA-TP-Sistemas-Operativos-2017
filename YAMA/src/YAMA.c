@@ -448,7 +448,7 @@ void actualizarEntrada(Entrada* entradaA,int actualizando, Mensaje* mensaje){
 			moverAUsados((func)mismoJob);
 			list_iterate(tablaUsados,(func)abortarEntrada);
 			log_info(archivoLog,"[] Abortando master #%d",(int)entradaA->masterid);
-			mensajeEnviar(entradaA->masterid,ABORTAR,nullptr,0);
+			mensajeEnviar(entradaA->masterid,ABORTAR,NULL,0);
 			liberarCargas(entradaA->job);
 		}
 		if(entradaA->etapa==TRANSFORMACION&&actualizando==FRACASO){

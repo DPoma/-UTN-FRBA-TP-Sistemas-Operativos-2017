@@ -173,6 +173,10 @@ void masterAtender(){
 		case ABORTAR:
 			imprimirAviso(archivoLog,"[AVISO] Abortando proceso");
 			exit(EXIT_FAILURE);
+		default:
+			printf(ROJO"OPERACIONYAMA %d %d\n",(int)m->header.operacion,(int)m->header.tamanio);
+			mensajeDestruir(m);
+			m=NULL;
 		}
 	}
 	cierre:
@@ -240,6 +244,7 @@ void transformaciones(Lista bloques){
 				pthread_detach(pthread_self());
 				return;
 			}
+			printf("OPERACION %d\n",(int)mensaje->header.operacion);
 			//a demas de decir exito o fracaso devuelve el numero de bloque
 			if(mensaje->header.operacion==EXITO)
 				imprimirAviso2(archivoLog, "[TRANSFORMACION] Operacion existosa en bloque N°%d de %s", (int*)*(int32_t*)mensaje->datos, self->dir.nombre);
