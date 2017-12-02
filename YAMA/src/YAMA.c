@@ -465,29 +465,6 @@ void actualizarEntrada(Entrada* entradaA,int actualizando, Mensaje* mensaje){
 			liberarCargas(entradaA->job);
 		}
 		if(entradaA->etapa==TRANSFORMACION&&actualizando==FRACASO){
-			bool nodoMuerto=true;
-			void verificarNodoUtil(Entrada* entrada){
-				if(mismoJob(entrada)&&(entrada->estado==ENPROCESO||entrada->estado==EXITO)){
-					nodoMuerto=false;
-				}
-			}
-			list_iterate(tablaEstados,(func)verificarNodoUtil);
-			if(nodoMuerto){
-				bool buscarWorker(Worker* worker){
-					return nodoIguales(worker->nodo,entradaA->nodo);
-				}
-				log_info(archivoLog,"eliminando nodo %s",entradaA->nodo);
-				Worker* about2die=list_remove_by_condition(workers,(func)buscarWorker);
-				if(!about2die){
-					puts(ROJO"!!!!SE PUDRIO TODO");
-					return;
-				}
-				list_iterate(about2die->cargas,free);
-				free(about2die);
-			}
-
-
-
 			if(nodoIguales(entradaA->nodo,entradaA->nodoAlt)){
 				log_info(archivoLog,"[] no hay mas copias para salvar el error");
 				abortarJob();
@@ -516,6 +493,20 @@ void actualizarEntrada(Entrada* entradaA,int actualizando, Mensaje* mensaje){
 				return nodoIguales(worker->nodo,alternativa.nodo);
 			}
 			aumentarCarga(list_find(workers,(func)buscarWorker),alternativa.job,1);
+
+			if(!list_any_satisfy(tablaEstados,(func)mismoNodoJob)){
+				bool buscarWorker(Worker* worker){
+					return nodoIguales(worker->nodo,entradaA->nodo);
+				}
+				log_info(archivoLog,"eliminando nodo %s",entradaA->nodo.nombre);
+				Worker* about2die=list_remove_by_condition(workers,(func)buscarWorker);
+				if(!about2die){
+					puts(ROJO"!!!!SE PUDRIO TODO");
+					return;
+				}
+				list_iterate(about2die->cargas,free);
+				free(about2die);
+			}
 		}else{
 			abortarJob();
 			return;
