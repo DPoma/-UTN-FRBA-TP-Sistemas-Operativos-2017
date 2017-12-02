@@ -199,7 +199,7 @@ int transformacionEjecutar(Transformacion* transformacion, String pathScript) {
 	String comando = string_from_format("chmod 0777 %s", pathScript);
 	int resultado = system(comando);
 	memoriaLiberar(comando);
-	if(resultado != ERROR) {
+	if(resultado == NULO) {
 		comando = string_from_format("cat %s | %s | sort > %s", salidaTemporal, pathScript, pathDestino);
 		resultado = system(comando);
 		memoriaLiberar(comando);
@@ -218,7 +218,7 @@ void transformacionFinalizar(Transformacion* transformacion, Socket unSocket, in
 }
 
 void transformacionFinalizarBloque(int resultado, Socket unSocket, Transformacion* transformacion) {
-	if(resultado != ERROR)
+	if(resultado == NULO)
 		transformacionExito(transformacion, unSocket);
 	else
 		transformacionFracaso(transformacion, unSocket);
@@ -321,7 +321,7 @@ int reduccionLocalEjecutar(ReduccionLocal* reduccion, String temporales) {
 	String comando = string_from_format("chmod 0777 %s", salidaTemporal);
 	int resultado = system(comando);
 	memoriaLiberar(comando);
-	if(resultado != ERROR) {
+	if(resultado == NULO) {
 		comando = string_from_format("sort -m %s | cat | %s > %s", temporales, salidaTemporal, archivoReduccion);
 		resultado = system(comando);
 	}
@@ -335,7 +335,7 @@ int reduccionLocalEjecutar(ReduccionLocal* reduccion, String temporales) {
 }
 
 void reduccionLocalFinalizar(int resultado, Socket unSocket, int idMaster) {
-	if(resultado != ERROR)
+	if(resultado == NULO)
 		reduccionLocalExito(unSocket, idMaster);
 	else
 		reduccionLocalFracaso(unSocket, idMaster);
@@ -426,7 +426,7 @@ int reduccionGlobalEjecutar(ReduccionGlobal* reduccion) {
 	String comando = string_from_format("chmod 0777 %s", salidaTemporal);
 	int resultado = system(comando);
 	memoriaLiberar(comando);
-	if(resultado != ERROR) {
+	if(resultado == NULO) {
 		comando = string_from_format("sort %s | cat | %s > %s", reduccion->pathApareo, salidaTemporal, archivoSalida);
 		resultado = system(comando);
 	}
@@ -440,7 +440,7 @@ int reduccionGlobalEjecutar(ReduccionGlobal* reduccion) {
 }
 
 void reduccionGlobalFinalizar(int resultado, Socket unSocket, int idMaster) {
-	if(resultado != ERROR)
+	if(resultado == NULO)
 		reduccionGlobalExito(unSocket, idMaster);
 	else
 		reduccionGlobalFracaso(unSocket, idMaster);
