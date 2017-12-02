@@ -79,6 +79,7 @@ Lista workers;
 Lista masters;
 
 int job=-1;
+bool flagUsados;
 typedef struct{
 	int job;
 	Socket masterid;

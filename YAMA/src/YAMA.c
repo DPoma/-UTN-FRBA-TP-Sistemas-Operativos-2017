@@ -34,7 +34,7 @@ void yamaIniciar() {
 	}
 	signal(SIGINT,sigsalir);
 
-
+	flagUsados = false;
 	servidor = malloc(sizeof(Servidor));
 	imprimirMensaje2(archivoLog, "[CONEXION] Realizando conexion con File System (IP: %s | Puerto %s)", configuracion->ipFileSystem, configuracion->puertoFileSystem);
 	servidor->fileSystem = socketCrearCliente(configuracion->ipFileSystem, configuracion->puertoFileSystem, ID_YAMA);
@@ -361,12 +361,12 @@ void yamaPlanificar(Socket master, void* listaBloques,int tamanio){
 void actualizarTablaEstados(Mensaje* mensaje,Socket masterid){
 	Entrada* entradaA;
 	log_info(archivoLog,"OPERACION: %d",mensaje->header.operacion);
-	if(mensaje->header.operacion==DESCONEXION_NODO){
+	if(mensaje->header.operacion==DESCONEXION_NODO ){
 		Dir* nodo=(Dir*)mensaje->datos;
 		int jobA=*((int32_t*)mensaje->datos+DIRSIZE);
 		log_info(archivoLog,"[CONEXION] Nodo %s desconectado %d",nodo->nombre,jobA);
 		bool buscarEntrada(Entrada* entrada){
-			return nodoIguales(entrada->nodo,*nodo)&&entrada->job==jobA;
+			return nodoIguales(entrada->nodo,*nodo)&&entrada->job==jobA&&entrada->estado!=FRACASO;
 		}
 		while((entradaA=list_find(tablaEstados,(func)buscarEntrada))){
 			if(entradaA->etapa==REDUCLOCAL){
